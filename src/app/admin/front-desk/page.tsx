@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { repo } from '@/lib/db/repository';
 import { Booking, PhysicalRoom } from '@/types';
 import { issueGuestRoomKey } from '@/lib/rfid';
+import { issuePhysicalKeycard, checkoutPhysicalCard } from '@/lib/rfid/bridge-client';
 import {
   ConciergeBell,
   Search,
@@ -81,6 +82,11 @@ export default function FrontDeskPage() {
         checkInModalBooking.guest_name,
         'Front Desk Reception'
       );
+      // Also trigger Be-Tech hardware USB encoder write if online
+      issuePhysicalKeycard({
+        roomNumber: assignedRoom.room_number,
+        staffUser: 'Front Desk Reception',
+      }).catch(() => {});
     }
 
     setCheckInModalBooking(null);
@@ -117,6 +123,11 @@ export default function FrontDeskPage() {
 
     // 3. Update status to checked_out and mark physical room for cleaning
     repo.updateBookingStatus(checkOutModalBooking.booking_reference, 'checked_out');
+
+    // 4. Automatically clear card authorization on physical Be-Tech encoder if online
+    if (checkOutModalBooking.assigned_room_number) {
+      checkoutPhysicalCard(checkOutModalBooking.assigned_room_number, 'Front Desk Reception').catch(() => {});
+    }
 
     setCheckOutSuccessRef(checkOutModalBooking.booking_reference);
     setCheckOutModalBooking(null);
