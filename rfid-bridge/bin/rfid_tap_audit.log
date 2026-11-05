@@ -1,3 +1,6 @@
 [2026-11-04 21:38:45] Event: TAP_READ_FAIL | Room:  | Card: 0 | Valid:  to  | Staff: FrontDesk | Status: Hardware error code: 1
 [2026-11-05 01:56:24] Event: TAP_READ_FAIL | Room:  | Card: 0 | Valid:  to  | Staff: Admin | Status: Hardware error code: 1
 [2026-11-05 15:39:45] Event: TAP_ACTIVATE_FAIL | Room: 205 | Card: 873370 | Valid: 2611051539 to 2611061100 | Staff: Front Desk | Status: Be-Tech USB Card Encoder not detected. Please plug the Be-Tech card encoder USB cable into this computer and ensure it is powered on.
+[2026-11-05 15:48:26] Event: TAP_READ_FAIL | Room:  | Card: 0 | Valid:  to  | Staff: Front Desk | Status: Be-Tech USB Card Encoder not detected. Please plug the Be-Tech card encoder USB cable into this computer and ensure it is powered on.
+[2026-11-05 15:48:59] Event: TAP_READ_FAIL | Room:  | Card: 0 | Valid:  to  | Staff: Front Desk | Status: Be-Tech USB Card Encoder not detected. Please plug the Be-Tech card encoder USB cable into this computer and ensure it is powered on.
+[2026-11-05 15:49:56] Event: TAP_READ_FAIL | Room:  | Card: 0 | Valid:  to  | Staff: Front Desk | Status: Be-Tech USB Card Encoder not detected. Please plug the Be-Tech card encoder USB cable into this computer and ensure it is powered on.
