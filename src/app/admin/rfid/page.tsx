@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { ReceptionStandeeModal } from '@/components/admin/ReceptionStandeeModal';
 import { RFIDCard, RFIDDevice, RFIDAccessEvent, PhysicalRoom } from '@/types';
 import {
   checkBridgeHealth,
@@ -81,6 +82,7 @@ export default function RFIDAdminPage() {
 
   // Issue guest card modal
   const [isIssuingCard, setIsIssuingCard] = useState(false);
+  const [showStandeeModal, setShowStandeeModal] = useState(false);
   const [issueRoom, setIssueRoom] = useState('101');
   const [issueGuest, setIssueGuest] = useState('');
   const [issueRef, setIssueRef] = useState('');
@@ -2448,6 +2450,7 @@ export default function RFIDAdminPage() {
           </div>
         </div>
       )}
+      <ReceptionStandeeModal isOpen={showStandeeModal} onClose={() => setShowStandeeModal(false)} />
     </div>
   );
 }

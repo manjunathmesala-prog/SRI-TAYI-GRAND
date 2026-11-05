@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { ReceptionStandeeModal } from '@/components/admin/ReceptionStandeeModal';
 import { repo } from '@/lib/db/repository';
 import { Booking, PhysicalRoom } from '@/types';
 import { issueGuestRoomKey } from '@/lib/rfid';
@@ -757,6 +758,7 @@ export default function FrontDeskPage() {
           </div>
         </div>
       )}
+      <ReceptionStandeeModal isOpen={showStandeeModal} onClose={() => setShowStandeeModal(false)} />
     </div>
   );
 }

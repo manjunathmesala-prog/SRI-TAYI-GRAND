@@ -683,6 +683,7 @@ class HotelRepository {
     };
 
     this.rfidCards.unshift(newCard);
+    savePersistedCards(this.rfidCards);
     syncCardToSupabase(newCard);
     this.logRFIDEvent({
       card_uid: cardUid,
@@ -725,6 +726,7 @@ class HotelRepository {
       created_at: new Date().toISOString(),
     };
     this.rfidCards.unshift(newCard);
+    savePersistedCards(this.rfidCards);
     syncCardToSupabase(newCard);
 
     this.logRFIDEvent({
