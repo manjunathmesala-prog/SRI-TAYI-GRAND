@@ -8,3 +8,5 @@
 [2026-11-05 15:54:11] Event: TAP_ACTIVATE_FAIL | Room: 101 | Card: 874250 | Valid: 2611051554 to 2611061100 | Staff: Front Desk | Status: Be-Tech USB Card Encoder not detected. Please plug the Be-Tech card encoder USB cable into this computer and ensure it is powered on.
 [2026-11-05 15:54:16] Event: TAP_ACTIVATE_FAIL | Room: 101 | Card: 874241 | Valid: 2611051554 to 2611061100 | Staff: Front Desk | Status: Be-Tech USB Card Encoder not detected. Please plug the Be-Tech card encoder USB cable into this computer and ensure it is powered on.
 [2026-11-05 20:01:57] Event: TAP_ACTIVATE | Room: 104 | Card: 1000020511 | Valid: 0001010000 to 9912312359 | Staff: Front Desk | Status: SUCCESS
+[2026-11-05 20:08:09] Event: TAP_ACTIVATE | Room: 104 | Card: 1000020512 | Valid: 0001010000 to 9912312359 | Staff: Front Desk | Status: SUCCESS
+[2026-11-05 20:08:13] Event: TAP_DEACTIVATE | Room: 103 | Card: 0 | Valid: 2611052008 to 2611052008 | Staff: Front Desk | Status: SUCCESS

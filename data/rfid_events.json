@@ -1,5 +1,33 @@
 [
   {
+    "card_uid": "BT-RAW-103",
+    "card_type": "guest",
+    "card_label": "GUEST Card",
+    "device_name": "Lock-Room-103",
+    "room_number": "103",
+    "event_type": "access_granted",
+    "action_type": "door_unlock",
+    "holder_name": "Front Desk",
+    "source": "lock_reader",
+    "reason": "[TAP_DEACTIVATE] Staff/Holder: Front Desk | Status: SUCCESS | Valid: 2611052008 - 2611052008",
+    "id": "evt-1793889493931",
+    "occurred_at": "2026-11-05T14:38:13.931Z"
+  },
+  {
+    "card_uid": "BT-57-1000020512",
+    "card_type": "guest",
+    "card_label": "GUEST Card",
+    "device_name": "Lock-Room-104",
+    "room_number": "104",
+    "event_type": "access_granted",
+    "action_type": "door_unlock",
+    "holder_name": "Front Desk",
+    "source": "lock_reader",
+    "reason": "[TAP_ACTIVATE] Staff/Holder: Front Desk | Status: SUCCESS | Valid: 0001010000 - 9912312359",
+    "id": "evt-1793889490415",
+    "occurred_at": "2026-11-05T14:38:10.415Z"
+  },
+  {
     "card_uid": "BT-57-1000049560",
     "card_type": "guest",
     "card_label": "Guest Card (Room 104)",
