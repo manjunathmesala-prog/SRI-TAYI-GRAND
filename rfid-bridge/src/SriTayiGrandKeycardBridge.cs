@@ -397,11 +397,8 @@ namespace SriTayiGrandRfidBridge
         {
             lock (snLock)
             {
-                // Native Be-Tech BIS 5.7 lock standard: seconds elapsed since Jan 1, 2000
-                DateTime baseDate = new DateTime(2000, 1, 1, 0, 0, 0);
-                int timeSN = (int)(DateTime.Now - baseDate).TotalSeconds;
-                int nextSN = timeSN;
-
+                // Strict progression above both Be-Tech timestamp and HMS sequence counter (>= 1000020500)
+                int nextSN = 1000020500;
                 try
                 {
                     string snPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "card_sn_counter.dat");
@@ -411,7 +408,7 @@ namespace SriTayiGrandRfidBridge
                         int parsed;
                         if (int.TryParse(txt, out parsed))
                         {
-                            if (parsed >= nextSN && parsed < 950000000)
+                            if (parsed >= nextSN)
                             {
                                 nextSN = parsed + 1;
                             }
@@ -437,11 +434,11 @@ namespace SriTayiGrandRfidBridge
                 return "{\"success\":false,\"error\":\"roomNumber is required\"}";
             }
 
-            DateTime now = DateTime.Now;
-            if (string.IsNullOrEmpty(beginTime))
-                beginTime = now.ToString("yyMMddHHmm");
-            if (string.IsNullOrEmpty(endTime))
-                endTime = now.AddDays(1).ToString("yyMMdd") + "1100";
+            // Remove valid from and valid until time restrictions (Default: Perpetual / Lifetime validity 2000-2099)
+            if (string.IsNullOrEmpty(beginTime) || beginTime == "unlimited" || beginTime == "none")
+                beginTime = "0001010000";
+            if (string.IsNullOrEmpty(endTime) || endTime == "unlimited" || endTime == "none")
+                endTime = "9912312359";
 
             string strLockID = roomNumber.PadLeft(6, '0');
             string strSuitDoor = "0000"; // Exactly 4 characters for Be-Tech lock firmware
