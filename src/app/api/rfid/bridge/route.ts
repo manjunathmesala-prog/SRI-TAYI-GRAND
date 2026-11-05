@@ -60,7 +60,7 @@ export async function POST(req: Request) {
     // Send command directly to the physical Be-Tech hardware bridge
     try {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 20000);
+      const timeout = setTimeout(() => controller.abort(), 25000);
 
       const targetEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
       const res = await fetch(`${targetHost}${targetEndpoint}`, {

@@ -120,10 +120,10 @@ export async function checkBridgeHealth(): Promise<BridgeHealthStatus> {
 export async function readPhysicalCard(staffUser: string = 'Front Desk'): Promise<RfidCardResult> {
   const host = getSavedBridgeHost();
 
-  // Try direct hardware post
+  // Try direct hardware post (with 25s timeout for physical card encoder)
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
 
     const res = await fetch(`${host}/api/read-card`, {
       method: 'POST',
@@ -206,10 +206,10 @@ export async function issuePhysicalKeycard(params: {
   if (params.checkInDate) payload.beginTime = formatTime(params.checkInDate);
   if (params.checkOutDate) payload.endTime = formatTime(params.checkOutDate);
 
-  // Try direct hardware post
+  // Try direct hardware post (with 25s timeout for physical card write)
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
 
     const res = await fetch(`${host}/api/issue-card`, {
       method: 'POST',
@@ -267,10 +267,10 @@ export async function checkoutPhysicalCard(
 ): Promise<RfidCardResult> {
   const host = getSavedBridgeHost();
 
-  // Try direct hardware post
+  // Try direct hardware post (with 25s timeout for card deactivation)
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 3500);
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
 
     const res = await fetch(`${host}/api/checkout-card`, {
       method: 'POST',

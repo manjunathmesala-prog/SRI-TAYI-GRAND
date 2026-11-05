@@ -171,24 +171,24 @@ namespace SriTayiGrandRfidBridge
             HttpListenerRequest req = context.Request;
             HttpListenerResponse res = context.Response;
 
-            // Enable CORS headers for browser requests from web admin
-            res.AddHeader("Access-Control-Allow-Origin", "*");
-            res.AddHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-            res.AddHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Staff-User");
-            res.ContentType = "application/json; charset=utf-8";
-
-            if (req.HttpMethod == "OPTIONS")
-            {
-                res.StatusCode = 200;
-                res.Close();
-                return;
-            }
-
-            string rawUrl = req.RawUrl.ToLower();
-            string responseJson = "";
-
             try
             {
+                // Enable CORS headers for browser requests from web admin
+                res.AddHeader("Access-Control-Allow-Origin", "*");
+                res.AddHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+                res.AddHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Staff-User");
+                res.ContentType = "application/json; charset=utf-8";
+
+                if (req.HttpMethod == "OPTIONS")
+                {
+                    res.StatusCode = 200;
+                    res.Close();
+                    return;
+                }
+
+                string rawUrl = req.RawUrl.ToLower();
+                string responseJson = "";
+
                 if (rawUrl.StartsWith("/api/status"))
                 {
                     responseJson = "{\"status\":\"ok\",\"service\":\"SriTayiGrand-RFID-Bridge\",\"port\":" + Port + ",\"readerType\":" + ReaderType + "}";
@@ -210,17 +210,17 @@ namespace SriTayiGrandRfidBridge
                     res.StatusCode = 404;
                     responseJson = "{\"error\":\"Not Found\",\"availableEndpoints\":[\"/api/status\",\"/api/read-card\",\"/api/issue-card\",\"/api/checkout-card\"]}";
                 }
+
+                byte[] buf = Encoding.UTF8.GetBytes(responseJson);
+                res.ContentLength64 = buf.Length;
+                res.OutputStream.Write(buf, 0, buf.Length);
+                res.OutputStream.Close();
             }
             catch (Exception ex)
             {
-                res.StatusCode = 500;
-                responseJson = "{\"success\":false,\"error\":\"" + EscapeJson(ex.Message) + "\"}";
+                Log("[CLIENT REQUEST ERROR / DISCONNECT] " + ex.Message);
+                try { res.Close(); } catch {}
             }
-
-            byte[] buf = Encoding.UTF8.GetBytes(responseJson);
-            res.ContentLength64 = buf.Length;
-            res.OutputStream.Write(buf, 0, buf.Length);
-            res.OutputStream.Close();
         }
 
         static string GetErrorMessage(short code)
