@@ -239,7 +239,7 @@ export interface RFIDAccessEvent {
   room_number: string;
   event_type: 'access_granted' | 'access_denied' | 'door_ajar' | 'battery_low';
   reason?: string;
-  source: 'lock_reader' | 'encoder' | 'manual_simulation';
+  source: 'lock_reader' | 'encoder' | 'manual_simulation' | 'gateway';
   occurred_at: string;
 }
 

@@ -23,7 +23,7 @@ export async function POST(req: Request) {
         device_name: 'Central-RFID-IoT-Gateway',
         room_number: 'ALL',
         event_type: 'access_granted',
-        source: 'gateway',
+        source: 'encoder',
         reason: 'Master activation: all 18 room door locks and encoder stations activated and synchronized online',
       });
       return NextResponse.json({ success: true, message: 'All devices activated', devices });
