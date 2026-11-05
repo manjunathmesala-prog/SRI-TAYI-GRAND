@@ -3,7 +3,10 @@ $ErrorActionPreference = "Continue"
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $binDir = Join-Path $scriptDir "bin"
-$exePath = Join-Path $binDir "SriAnanthaKeycardBridge.exe"
+$exePath = Join-Path $binDir "SriTayiGrandKeycardBridge.exe"
+if (-not (Test-Path $exePath)) {
+    $exePath = Join-Path $binDir "SriAnanthaKeycardBridge.exe"
+}
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host " SRI TAYI GRAND - RFID HARDWARE BRIDGE PERMANENT SETUP    " -ForegroundColor Cyan
@@ -18,7 +21,7 @@ if (-not (Test-Path $exePath)) {
 
 # 1. Stop any currently running instance to ensure clean setup
 Write-Host "`n[1/4] Checking and stopping existing bridge processes..." -ForegroundColor Yellow
-Get-Process -Name "SriAnanthaKeycardBridge" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Get-Process -Name "SriTayiGrandKeycardBridge","SriAnanthaKeycardBridge" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
 
 # 2. Layer 1: Windows Registry User Auto-Run (Starts on every boot/login, NO admin required)
 Write-Host "[2/4] Registering Windows Startup Registry (Auto-Run)..." -ForegroundColor Yellow

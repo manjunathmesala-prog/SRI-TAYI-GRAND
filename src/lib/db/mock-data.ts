@@ -369,10 +369,34 @@ export const INITIAL_STAFF: StaffMember[] = [
 ];
 
 export const INITIAL_RFID_DEVICES: RFIDDevice[] = [
-  { id: 'dev-01', device_name: 'Lock-Room-202', device_type: 'door_lock', room_number: '202', ip_address: '192.168.1.102', mac_address: '00:1B:44:11:3A:B7', status: 'online', battery_level: 94, firmware_version: 'v2.4.1', last_ping_at: '2026-11-04T22:35:00+05:30' },
-  { id: 'dev-02', device_name: 'Lock-Room-205', device_type: 'door_lock', room_number: '205', ip_address: '192.168.1.105', mac_address: '00:1B:44:11:3A:C8', status: 'online', battery_level: 88, firmware_version: 'v2.4.1', last_ping_at: '2026-11-04T22:38:00+05:30' },
-  { id: 'dev-03', device_name: 'Lock-Room-303', device_type: 'door_lock', room_number: '303', ip_address: '192.168.1.133', mac_address: '00:1B:44:11:3A:D9', status: 'online', battery_level: 91, firmware_version: 'v2.4.1', last_ping_at: '2026-11-04T22:40:00+05:30' },
-  { id: 'dev-enc-01', device_name: 'Front-Desk-Encoder-01', device_type: 'card_encoder', ip_address: '192.168.1.50', mac_address: '00:1B:44:99:FF:01', status: 'online', firmware_version: 'v3.1.0', last_ping_at: '2026-11-04T22:42:00+05:30' },
+  // --- FLOOR 1 DOOR LOCKS ---
+  { id: 'dev-lock-101', device_name: 'Lock-Room-101', device_type: 'door_lock', room_number: '101', ip_address: '192.168.1.101', mac_address: '00:1B:44:11:1A:01', status: 'online', battery_level: 96, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:20:00+05:30' },
+  { id: 'dev-lock-102', device_name: 'Lock-Room-102', device_type: 'door_lock', room_number: '102', ip_address: '192.168.1.102', mac_address: '00:1B:44:11:1A:02', status: 'online', battery_level: 93, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:21:00+05:30' },
+  { id: 'dev-lock-103', device_name: 'Lock-Room-103', device_type: 'door_lock', room_number: '103', ip_address: '192.168.1.103', mac_address: '00:1B:44:11:1A:03', status: 'online', battery_level: 95, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:22:00+05:30' },
+  { id: 'dev-lock-104', device_name: 'Lock-Room-104', device_type: 'door_lock', room_number: '104', ip_address: '192.168.1.104', mac_address: '00:1B:44:11:1A:04', status: 'online', battery_level: 91, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:23:00+05:30' },
+  { id: 'dev-lock-105', device_name: 'Lock-Room-105', device_type: 'door_lock', room_number: '105', ip_address: '192.168.1.105', mac_address: '00:1B:44:11:1A:05', status: 'online', battery_level: 98, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:24:00+05:30' },
+  { id: 'dev-lock-106', device_name: 'Lock-Room-106', device_type: 'door_lock', room_number: '106', ip_address: '192.168.1.106', mac_address: '00:1B:44:11:1A:06', status: 'online', battery_level: 92, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:25:00+05:30' },
+
+  // --- FLOOR 2 DOOR LOCKS ---
+  { id: 'dev-lock-201', device_name: 'Lock-Room-201', device_type: 'door_lock', room_number: '201', ip_address: '192.168.1.121', mac_address: '00:1B:44:11:2A:01', status: 'online', battery_level: 95, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:25:00+05:30' },
+  { id: 'dev-01', device_name: 'Lock-Room-202', device_type: 'door_lock', room_number: '202', ip_address: '192.168.1.122', mac_address: '00:1B:44:11:3A:B7', status: 'online', battery_level: 94, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:26:00+05:30' },
+  { id: 'dev-lock-203', device_name: 'Lock-Room-203', device_type: 'door_lock', room_number: '203', ip_address: '192.168.1.123', mac_address: '00:1B:44:11:2A:03', status: 'online', battery_level: 90, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:26:30+05:30' },
+  { id: 'dev-lock-204', device_name: 'Lock-Room-204', device_type: 'door_lock', room_number: '204', ip_address: '192.168.1.124', mac_address: '00:1B:44:11:2A:04', status: 'online', battery_level: 97, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:27:00+05:30' },
+  { id: 'dev-02', device_name: 'Lock-Room-205', device_type: 'door_lock', room_number: '205', ip_address: '192.168.1.125', mac_address: '00:1B:44:11:3A:C8', status: 'online', battery_level: 89, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:27:30+05:30' },
+  { id: 'dev-lock-206', device_name: 'Lock-Room-206', device_type: 'door_lock', room_number: '206', ip_address: '192.168.1.126', mac_address: '00:1B:44:11:2A:06', status: 'online', battery_level: 94, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:28:00+05:30' },
+
+  // --- FLOOR 3 DOOR LOCKS ---
+  { id: 'dev-lock-301', device_name: 'Lock-Room-301', device_type: 'door_lock', room_number: '301', ip_address: '192.168.1.131', mac_address: '00:1B:44:11:3A:01', status: 'online', battery_level: 96, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:28:30+05:30' },
+  { id: 'dev-lock-302', device_name: 'Lock-Room-302', device_type: 'door_lock', room_number: '302', ip_address: '192.168.1.132', mac_address: '00:1B:44:11:3A:02', status: 'online', battery_level: 93, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:29:00+05:30' },
+  { id: 'dev-03', device_name: 'Lock-Room-303', device_type: 'door_lock', room_number: '303', ip_address: '192.168.1.133', mac_address: '00:1B:44:11:3A:D9', status: 'online', battery_level: 91, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:29:30+05:30' },
+  { id: 'dev-lock-304', device_name: 'Lock-Room-304', device_type: 'door_lock', room_number: '304', ip_address: '192.168.1.134', mac_address: '00:1B:44:11:3A:04', status: 'online', battery_level: 95, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:30:00+05:30' },
+  { id: 'dev-lock-305', device_name: 'Lock-Room-305', device_type: 'door_lock', room_number: '305', ip_address: '192.168.1.135', mac_address: '00:1B:44:11:3A:05', status: 'online', battery_level: 92, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:30:30+05:30' },
+  { id: 'dev-lock-306', device_name: 'Lock-Room-306', device_type: 'door_lock', room_number: '306', ip_address: '192.168.1.136', mac_address: '00:1B:44:11:3A:06', status: 'online', battery_level: 90, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:31:00+05:30' },
+
+  // --- ENCODER STATIONS & GATEWAYS ---
+  { id: 'dev-enc-01', device_name: 'Front-Desk-Encoder-01', device_type: 'card_encoder', ip_address: '192.168.1.50', mac_address: '00:1B:44:99:FF:01', status: 'online', firmware_version: 'v3.1.0', last_ping_at: '2026-11-05T14:31:30+05:30' },
+  { id: 'dev-enc-02', device_name: 'Front-Desk-Encoder-02 (Mobile/Tab)', device_type: 'card_encoder', ip_address: '192.168.1.51', mac_address: '00:1B:44:99:FF:02', status: 'online', firmware_version: 'v3.1.0', last_ping_at: '2026-11-05T14:31:45+05:30' },
+  { id: 'dev-gw-01', device_name: 'Central-RFID-IoT-Gateway', device_type: 'gateway', ip_address: '192.168.1.1', mac_address: '00:1B:44:AA:00:01', status: 'online', firmware_version: 'v4.0.2', last_ping_at: '2026-11-05T14:32:00+05:30' },
 ];
 
 export const INITIAL_RFID_CARDS: RFIDCard[] = [

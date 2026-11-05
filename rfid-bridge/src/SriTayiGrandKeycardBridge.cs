@@ -10,10 +10,7 @@ namespace SriTayiGrandRfidBridge
     class Program
     {
         // Safe logging that never throws if running as an invisible Windows GUI daemon
-        static void Log(string msg)
-        {
-            try { Console.WriteLine(msg); } catch {}
-        }
+        static void Log(string msg) { try { Console.WriteLine(msg); } catch {} try { System.IO.File.AppendAllText(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "bridge_debug.log"), System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss ") + msg + System.Environment.NewLine); } catch {} }
 
         // P/Invoke definitions for Be-Tech BIS Hotel 5.7 btlock57l.dll
         [DllImport("btlock57l.dll", EntryPoint = "Write_Guest_Card", CallingConvention = CallingConvention.StdCall, CharSet = CharSet.Ansi)]
@@ -66,9 +63,7 @@ namespace SriTayiGrandRfidBridge
         static HttpListener listener;
         static bool isRunning = true;
 
-        static void Main(string[] args)
-        {
-            try { Console.Title = "Sri Tayi Grand Hotel - RFID Hardware Bridge Service"; } catch {}
+        static void Main(string[] args) { AppDomain.CurrentDomain.UnhandledException += (s, e) => { Log("[UNHANDLED THREAD EXCEPTION] " + e.ExceptionObject.ToString()); }; try { Console.Title = "Sri Tayi Grand Hotel - RFID Hardware Bridge Service"; } catch {}
             Log("========================================================");
             Log("   SRI TAYI GRAND HOTEL - RFID HARDWARE BRIDGE SERVICE  ");
             Log("   Hardware: Be-Tech BIS 5.7 (btlock57l.dll)            ");

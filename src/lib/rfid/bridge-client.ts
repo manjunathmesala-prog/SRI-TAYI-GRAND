@@ -1,7 +1,7 @@
 /**
  * Sri Tayi Grand Hotel - Front Desk RFID Hardware Bridge Client
- * Communicates directly with the local Be-Tech BIS 5.7 USB Encoder Service
- * running at http://127.0.0.1:8989
+ * Communicates with the Be-Tech BIS 5.7 USB Encoder Service
+ * either directly at http://127.0.0.1:8989 or via the unified multi-device proxy /api/rfid/bridge
  */
 
 export const RFID_BRIDGE_URL = 'http://127.0.0.1:8989';
@@ -12,6 +12,8 @@ export interface BridgeHealthStatus {
   port?: number;
   readerType?: number;
   error?: string;
+  mode?: 'hardware' | 'active_mesh';
+  devicesCount?: number;
 }
 
 export interface RfidCardResult {
@@ -24,18 +26,28 @@ export interface RfidCardResult {
   endTime?: string;
   message?: string;
   error?: string;
-  source?: 'hardware' | 'emulator';
+  source?: 'hardware';
+}
+
+function getSavedBridgeHost(): string {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('stg_rfid_bridge_url') || RFID_BRIDGE_URL;
+  }
+  return RFID_BRIDGE_URL;
 }
 
 /**
- * Ping the local Be-Tech hardware bridge service
+ * Ping the hardware bridge service across all devices (direct or via multi-device proxy)
  */
 export async function checkBridgeHealth(): Promise<BridgeHealthStatus> {
+  const host = getSavedBridgeHost();
+
+  // 1. Try direct fetch to local/configured host first (works on front-desk PC)
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
+    const timeoutId = setTimeout(() => controller.abort(), 1200);
 
-    const res = await fetch(`${RFID_BRIDGE_URL}/api/status`, {
+    const res = await fetch(`${host}/api/status`, {
       method: 'GET',
       signal: controller.signal,
     });
@@ -44,42 +56,85 @@ export async function checkBridgeHealth(): Promise<BridgeHealthStatus> {
     if (res.ok) {
       const data = await res.json();
       return {
-        isOnline: data.status === 'ok',
-        service: data.service || 'Be-Tech BIS 5.7 Encoder Bridge',
+        isOnline: true,
+        mode: 'hardware',
+        service: data.service || 'Be-Tech BIS 5.7 Encoder Bridge (Hardware Port 1)',
         port: data.port || 1,
         readerType: data.readerType || 4,
       };
     }
-    return { isOnline: false, error: `HTTP ${res.status}` };
+  } catch {
+    // Direct connection failed or cross-device PNA block, fall back to universal API proxy
+  }
+
+  // 2. Query universal proxy /api/rfid/bridge (works on all devices: mobile, tablet, remote PCs)
+  try {
+    const proxyRes = await fetch(`/api/rfid/bridge?host=${encodeURIComponent(host)}`);
+    if (proxyRes.ok) {
+      const data = await proxyRes.json();
+      return {
+        isOnline: data.isOnline,
+        mode: data.mode,
+        service: data.service,
+        port: data.port,
+        readerType: data.readerType,
+        devicesCount: data.devicesCount,
+      };
+    }
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Bridge unreachable';
     return { isOnline: false, error: msg };
   }
+
+  return { isOnline: false, error: 'Bridge unreachable' };
 }
 
 /**
- * Scan a Mifare 1K card placed on the physical Be-Tech USB reader
+ * Scan a Mifare 1K card placed on the physical Be-Tech USB reader or device terminal
  */
 export async function readPhysicalCard(staffUser: string = 'Front Desk'): Promise<RfidCardResult> {
+  const host = getSavedBridgeHost();
+
+  // Try direct hardware post
   try {
-    const res = await fetch(`${RFID_BRIDGE_URL}/api/read-card`, {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+    const res = await fetch(`${host}/api/read-card`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Staff-User': staffUser,
       },
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
 
     const data = await res.json();
     return {
       ...data,
       source: 'hardware',
     };
+  } catch {
+    // Fall back to multi-device proxy
+  }
+
+  try {
+    const res = await fetch('/api/rfid/bridge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        endpoint: '/api/read-card',
+        staffUser,
+        targetHost: host,
+      }),
+    });
+    return await res.json();
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to reach RFID Bridge';
     return {
       success: false,
-      error: `Bridge connection error: ${msg}. Make sure Start_RFID_Bridge.bat is running on this PC.`,
+      error: `Hardware encoder bridge unreachable (${msg}). Please verify the RFID reader is connected.`,
       source: 'hardware',
     };
   }
@@ -90,47 +145,74 @@ export async function readPhysicalCard(staffUser: string = 'Front Desk'): Promis
  */
 export async function issuePhysicalKeycard(params: {
   roomNumber: string;
+  guestName?: string;
   checkInDate?: Date;
   checkOutDate?: Date;
   staffUser?: string;
 }): Promise<RfidCardResult> {
+  const host = getSavedBridgeHost();
+
+  const formatTime = (d: Date) => {
+    const yy = String(d.getFullYear()).slice(-2);
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const dd = String(d.getDate()).padStart(2, '0');
+    const hh = String(d.getHours()).padStart(2, '0');
+    const mi = String(d.getMinutes()).padStart(2, '0');
+    return `${yy}${mm}${dd}${hh}${mi}`;
+  };
+
+  const payload: {
+    roomNumber: string;
+    guestName?: string;
+    staffUser: string;
+    beginTime?: string;
+    endTime?: string;
+  } = {
+    roomNumber: params.roomNumber,
+    guestName: params.guestName || 'Front Desk Guest',
+    staffUser: params.staffUser || 'Front Desk',
+  };
+
+  if (params.checkInDate) payload.beginTime = formatTime(params.checkInDate);
+  if (params.checkOutDate) payload.endTime = formatTime(params.checkOutDate);
+
+  // Try direct hardware post
   try {
-    const formatTime = (d: Date) => {
-      const yy = String(d.getFullYear()).slice(-2);
-      const mm = String(d.getMonth() + 1).padStart(2, '0');
-      const dd = String(d.getDate()).padStart(2, '0');
-      const hh = String(d.getHours()).padStart(2, '0');
-      const mi = String(d.getMinutes()).padStart(2, '0');
-      return `${yy}${mm}${dd}${hh}${mi}`;
-    };
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
 
-    const payload: {
-      roomNumber: string;
-      staffUser: string;
-      beginTime?: string;
-      endTime?: string;
-    } = {
-      roomNumber: params.roomNumber,
-      staffUser: params.staffUser || 'Front Desk',
-    };
-
-    if (params.checkInDate) payload.beginTime = formatTime(params.checkInDate);
-    if (params.checkOutDate) payload.endTime = formatTime(params.checkOutDate);
-
-    const res = await fetch(`${RFID_BRIDGE_URL}/api/issue-card`, {
+    const res = await fetch(`${host}/api/issue-card`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Staff-User': params.staffUser || 'Front Desk',
       },
       body: JSON.stringify(payload),
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
 
     const data = await res.json();
     return {
       ...data,
       source: 'hardware',
     };
+  } catch {
+    // Fall back to multi-device proxy
+  }
+
+  try {
+    const res = await fetch('/api/rfid/bridge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        endpoint: '/api/issue-card',
+        payload,
+        staffUser: params.staffUser || 'Front Desk',
+        targetHost: host,
+      }),
+    });
+    return await res.json();
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Bridge unreachable';
     return {
@@ -148,21 +230,45 @@ export async function checkoutPhysicalCard(
   roomNumber: string,
   staffUser: string = 'Front Desk'
 ): Promise<RfidCardResult> {
+  const host = getSavedBridgeHost();
+
+  // Try direct hardware post
   try {
-    const res = await fetch(`${RFID_BRIDGE_URL}/api/checkout-card`, {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+    const res = await fetch(`${host}/api/checkout-card`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'X-Staff-User': staffUser,
       },
       body: JSON.stringify({ roomNumber, staffUser }),
+      signal: controller.signal,
     });
+    clearTimeout(timeoutId);
 
     const data = await res.json();
     return {
       ...data,
       source: 'hardware',
     };
+  } catch {
+    // Fall back to multi-device proxy
+  }
+
+  try {
+    const res = await fetch('/api/rfid/bridge', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        endpoint: '/api/checkout-card',
+        payload: { roomNumber, staffUser },
+        staffUser,
+        targetHost: host,
+      }),
+    });
+    return await res.json();
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Bridge unreachable';
     return {

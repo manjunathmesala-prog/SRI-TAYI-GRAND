@@ -384,6 +384,25 @@ class HotelRepository {
     this.rfidEvents.unshift(newEvent);
     return newEvent;
   }
+
+  activateAllRFIDDevices(): RFIDDevice[] {
+    const now = new Date().toISOString();
+    this.rfidDevices = this.rfidDevices.map((d) => ({
+      ...d,
+      status: 'online' as const,
+      last_ping_at: now,
+      battery_level: d.battery_level !== undefined ? Math.max(90, d.battery_level) : undefined,
+    }));
+    return [...this.rfidDevices];
+  }
+
+  updateRFIDDeviceStatus(deviceId: string, status: 'online' | 'offline' | 'maintenance'): RFIDDevice | null {
+    const dev = this.rfidDevices.find((d) => d.id === deviceId);
+    if (!dev) return null;
+    dev.status = status;
+    dev.last_ping_at = new Date().toISOString();
+    return { ...dev };
+  }
 }
 
 // Global instance to maintain state across Hot Reloads & Next.js requests
