@@ -80,23 +80,44 @@ namespace SriTayiGrandRfidBridge
             }
             catch {}
 
-            // Start HTTP listener for web admin commands
-            try
+            // Start HTTP listener with resilient prefix registration and retry
+            bool started = false;
+            for (int attempt = 1; attempt <= 3 && !started; attempt++)
             {
-                listener = new HttpListener();
-                listener.Prefixes.Add("http://127.0.0.1:" + ListenPort + "/");
-                listener.Prefixes.Add("http://localhost:" + ListenPort + "/");
-                listener.Start();
-                Log("[INFO] Bridge service is listening on port " + ListenPort);
-                Log("[INFO] Ready for requests from Sri Tayi Grand Admin Portal");
+                try
+                {
+                    listener = new HttpListener();
+                    listener.Prefixes.Add("http://127.0.0.1:" + ListenPort + "/");
+                    try { listener.Prefixes.Add("http://localhost:" + ListenPort + "/"); } catch {}
+                    listener.Start();
+                    started = true;
+                    Log("[INFO] Bridge service is listening on port " + ListenPort);
+                    Log("[INFO] Ready for requests from Sri Tayi Grand Admin Portal");
 
-                Thread listenerThread = new Thread(ListenLoop);
-                listenerThread.IsBackground = true;
-                listenerThread.Start();
-            }
-            catch (Exception ex)
-            {
-                Log("[ERROR] Failed to start HTTP listener: " + ex.Message);
+                    Thread listenerThread = new Thread(ListenLoop);
+                    listenerThread.IsBackground = true;
+                    listenerThread.Start();
+                }
+                catch (Exception ex)
+                {
+                    Log("[WARN] Listener start attempt " + attempt + " failed (" + ex.Message + "). Retrying pure 127.0.0.1...");
+                    try
+                    {
+                        listener = new HttpListener();
+                        listener.Prefixes.Add("http://127.0.0.1:" + ListenPort + "/");
+                        listener.Start();
+                        started = true;
+                        Log("[INFO] Bridge service bound to 127.0.0.1:" + ListenPort);
+                        Thread listenerThread = new Thread(ListenLoop);
+                        listenerThread.IsBackground = true;
+                        listenerThread.Start();
+                    }
+                    catch (Exception ex2)
+                    {
+                        Log("[ERROR] Attempt " + attempt + " failed: " + ex2.Message);
+                        Thread.Sleep(1000);
+                    }
+                }
             }
 
             Log("\nService is running permanently in background.\n");
