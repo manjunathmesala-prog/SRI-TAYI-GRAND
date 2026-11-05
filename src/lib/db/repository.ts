@@ -15,6 +15,8 @@
   OperationalStatus,
   HousekeepingStatus,
   BookingStatus,
+  PaymentStatus,
+  PaymentMethod,
 } from '@/types';
 
 import { syncCardToSupabase, syncEventToSupabase, deleteCardFromSupabase } from './supabase-rfid';
@@ -232,6 +234,15 @@ class HotelRepository {
       booking.checked_out_at = new Date().toISOString();
       if (booking.assigned_room_id) {
         this.updateRoomStatus(booking.assigned_room_id, 'cleaning', 'dirty');
+        const room = this.rooms.find((r) => r.id === booking.assigned_room_id);
+        if (room) {
+          const roomCards = this.rfidCards.filter((c) => (c.assigned_room_number === room.room_number || c.room_number === room.room_number) && c.card_type === 'guest');
+          for (const card of roomCards) {
+            card.status = 'inactive';
+            card.deactivated_at = new Date().toISOString();
+            syncCardToSupabase(card);
+          }
+        }
       }
     } else if (status === 'cancelled') {
       booking.cancelled_at = new Date().toISOString();
@@ -241,6 +252,228 @@ class HotelRepository {
     }
 
     return booking;
+  }
+
+
+  // --- WALK-IN RECEPTION KIOSK METHODS ---
+  createWalkInBooking(params: {
+    categoryId: string;
+    guestName: string;
+    guestPhone: string;
+    guestEmail?: string;
+    idProofType?: string;
+    idProofNumber?: string;
+    numberOfNights?: number;
+    paymentMethod: PaymentMethod;
+    paidAmount?: number;
+    walkInToken: string;
+    specialRequests?: string;
+  }): Booking {
+    const category = this.categories.find((c) => c.id === params.categoryId || c.slug === params.categoryId);
+    const categoryName = category ? category.name : 'Deluxe Room';
+    const nights = Math.max(1, params.numberOfNights || 1);
+    const ratePerNight = category ? category.base_price_per_night : 2000;
+    const subtotal = ratePerNight * nights;
+    const tax = Math.round(subtotal * 0.12);
+    const total = subtotal + tax;
+
+    const today = new Date();
+    const checkInDate = today.toISOString().split('T')[0];
+    const checkOut = new Date(today);
+    checkOut.setDate(checkOut.getDate() + nights);
+    const checkOutDate = checkOut.toISOString().split('T')[0];
+
+    const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '');
+    const randCode = Math.floor(1000 + Math.random() * 9000);
+    const bookingReference = `TG-W-${dateStr}-${randCode}`;
+    const pickupCode = `TG-${randCode}`;
+
+    const isPaidOnline = params.paymentMethod === 'online' || params.paymentMethod === 'upi' || params.paymentMethod === 'card';
+    const paymentStatus: PaymentStatus = isPaidOnline ? 'successful' : 'pay_at_hotel';
+    const paidAmount = isPaidOnline ? total : (params.paidAmount || 0);
+
+    const booking: Booking = {
+      id: `bk-walkin-${Date.now()}`,
+      booking_reference: bookingReference,
+      pickup_code: pickupCode,
+      booking_source: 'walk_in_qr',
+      walk_in_token: params.walkInToken,
+      guest_id: `gst-${Date.now()}`,
+      guest_name: params.guestName,
+      guest_phone: params.guestPhone,
+      guest_email: params.guestEmail || `${params.guestPhone.replace(/\D/g, '')}@guest.sritayigrand.com`,
+      id_proof_type: params.idProofType,
+      id_proof_number: params.idProofNumber,
+      category_id: category ? category.id : params.categoryId,
+      category_name: categoryName,
+      adults_count: 2,
+      children_count: 0,
+      rooms_count: 1,
+      check_in_date: checkInDate,
+      check_out_date: checkOutDate,
+      status: 'confirmed',
+      payment_status: paymentStatus,
+      payment_method: params.paymentMethod,
+      subtotal_amount: subtotal,
+      tax_amount: tax,
+      additional_charges_amount: 0,
+      total_amount: total,
+      paid_amount: paidAmount,
+      special_requests: params.specialRequests,
+      early_check_in_requested: true,
+      late_check_out_requested: false,
+      created_at: new Date().toISOString(),
+    };
+
+    this.bookings.unshift(booking);
+
+    // Update or create Guest record
+    let guest = this.guests.find((g) => g.phone === params.guestPhone);
+    if (guest) {
+      guest.total_stays += 1;
+      if (params.idProofType) guest.id_type = params.idProofType;
+      if (params.idProofNumber) guest.id_number = params.idProofNumber;
+    } else {
+      this.guests.push({
+        id: booking.guest_id,
+        full_name: params.guestName,
+        phone: params.guestPhone,
+        email: booking.guest_email,
+        id_type: params.idProofType,
+        id_number: params.idProofNumber,
+        country: 'India',
+        total_stays: 1,
+        created_at: new Date().toISOString(),
+      });
+    }
+
+    // If paid online, record in financial payment ledger
+    if (isPaidOnline) {
+      this.payments.unshift({
+        id: `pay-${Date.now()}`,
+        payment_reference: `RCP-${Date.now().toString().slice(-6)}`,
+        booking_reference: bookingReference,
+        guest_name: params.guestName,
+        amount: total,
+        currency: 'INR',
+        payment_method: params.paymentMethod,
+        status: 'successful',
+        paid_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      });
+    }
+
+    return booking;
+  }
+
+  assignRoomAndIssueWalkInKey(params: {
+    bookingReference: string;
+    roomNumber: string;
+    staffName: string;
+    cardUid?: string;
+    markPaid?: boolean;
+    paymentMethod?: PaymentMethod;
+  }): {
+    success: boolean;
+    booking?: Booking;
+    room?: PhysicalRoom;
+    card?: RFIDCard;
+    error?: string;
+  } {
+    const booking = this.getBookingByReference(params.bookingReference);
+    if (!booking) {
+      return { success: false, error: 'Booking reference not found' };
+    }
+
+    const room = this.rooms.find((r) => r.room_number === params.roomNumber);
+    if (!room) {
+      return { success: false, error: `Physical Room ${params.roomNumber} does not exist` };
+    }
+
+    if (room.operational_status === 'occupied' && room.current_booking_ref !== booking.booking_reference) {
+      return { success: false, error: `Room ${params.roomNumber} is already occupied by ${room.current_guest_name || 'another guest'}` };
+    }
+
+    // 1. Assign room to booking
+    booking.assigned_room_id = room.id;
+    booking.assigned_room_number = room.room_number;
+    booking.room_assigned_by = params.staffName;
+    booking.status = 'checked_in';
+    booking.checked_in_at = new Date().toISOString();
+
+    // 2. Handle counter payment if marked paid at front desk
+    if (params.markPaid || booking.payment_status === 'pay_at_hotel') {
+      booking.payment_status = 'successful';
+      booking.paid_amount = booking.total_amount;
+      if (params.paymentMethod) booking.payment_method = params.paymentMethod;
+
+      this.payments.unshift({
+        id: `pay-${Date.now()}`,
+        payment_reference: `RCP-${Date.now().toString().slice(-6)}`,
+        booking_reference: booking.booking_reference,
+        guest_name: booking.guest_name,
+        amount: booking.total_amount,
+        currency: 'INR',
+        payment_method: params.paymentMethod || 'cash',
+        status: 'successful',
+        paid_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      });
+    }
+
+    // 3. Update room status to occupied
+    room.operational_status = 'occupied';
+    room.housekeeping_status = 'clean';
+    room.current_booking_ref = booking.booking_reference;
+    room.current_guest_name = booking.guest_name;
+
+    // 4. Calculate checkout time for card expiry (11:00 AM on checkout date)
+    const checkOutDateStr = booking.check_out_date || new Date(Date.now() + 24 * 3600 * 1000).toISOString().split('T')[0];
+    const expiryIso = new Date(`${checkOutDateStr}T11:00:00+05:30`).toISOString();
+
+    // 5. Issue RFID Guest Card
+    const card = this.issueRFIDCard(
+      room.room_number,
+      booking.booking_reference,
+      booking.guest_name,
+      params.staffName,
+      expiryIso
+    );
+
+    if (params.cardUid) {
+      card.card_uid = params.cardUid;
+    }
+
+    booking.keycard_issued_at = new Date().toISOString();
+    booking.keycard_uid = card.card_uid;
+
+    return {
+      success: true,
+      booking,
+      room,
+      card,
+    };
+  }
+
+  getWalkInQueue(): Booking[] {
+    return this.bookings.filter(
+      (b) => b.booking_source === 'walk_in_qr' && (!b.assigned_room_number || b.status !== 'checked_out')
+    );
+  }
+
+  getAvailableCleanRooms(categoryId?: string): PhysicalRoom[] {
+    return this.rooms.filter(
+      (r) =>
+        r.is_active &&
+        r.operational_status === 'available' &&
+        r.housekeeping_status === 'clean' &&
+        (!categoryId || r.category_id === categoryId)
+    );
+  }
+
+  verifyKioskToken(token: string): boolean {
+    if (!token) return false;
+    return token === 'STG_RECEPT_DESK_SEC_7749' || token.startsWith('STG_RECEPT_');
   }
 
   // --- GUESTS ---
@@ -879,7 +1112,7 @@ declare global {
   var __hotelRepo: HotelRepository | undefined;
 }
 
-if (!global.__hotelRepo || typeof (global.__hotelRepo as any).processDoorTap !== 'function' || typeof (global.__hotelRepo as any).extendGuestCardValidity !== 'function' || typeof (global.__hotelRepo as any).purgeAllRFIDCards !== 'function') {
+if (!global.__hotelRepo || typeof (global.__hotelRepo as any).processDoorTap !== 'function' || typeof (global.__hotelRepo as any).extendGuestCardValidity !== 'function' || typeof (global.__hotelRepo as any).purgeAllRFIDCards !== 'function' || typeof (global.__hotelRepo as any).createWalkInBooking !== 'function') {
   global.__hotelRepo = new HotelRepository();
 }
 

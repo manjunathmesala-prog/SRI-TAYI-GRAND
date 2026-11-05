@@ -10,6 +10,7 @@ import {
   BridgeHealthStatus,
   RfidCardResult,
   RFID_BRIDGE_URL,
+  playChimeSound,
 } from '@/lib/rfid/bridge-client';
 import {
   KeyRound,
@@ -325,10 +326,58 @@ export default function RFIDAdminPage() {
   };
 
   // Issue card via modal (Guest Room Key)
+  // Direct physical encode for any room (No time limit / Perpetual)
+  const handleQuickEncodeRoom = async (roomNumber: string, guestName?: string) => {
+    setHardwareBusy(true);
+    setHardwareMessage({ text: `Writing Room ${roomNumber} (No Time Restriction) to Be-Tech USB Reader...`, type: 'info' });
+    try {
+      const result = await issuePhysicalKeycard({
+        roomNumber,
+        guestName: guestName || `Guest ${roomNumber}`,
+        staffUser: 'Front Desk',
+      });
+      if (result.success) {
+        playChimeSound(true);
+        setHardwareMessage({
+          text: `🎉 Success: Keycard for Room ${roomNumber} encoded and activated with UNLIMITED validity! (No time restriction).`,
+          type: 'success',
+        });
+        refreshAllData();
+      } else {
+        playChimeSound(false);
+        setHardwareMessage({
+          text: result.error || `Failed to write keycard for Room ${roomNumber}. Place a card on reader and try again.`,
+          type: 'error',
+        });
+      }
+    } catch (err: unknown) {
+      playChimeSound(false);
+      const msg = err instanceof Error ? err.message : 'Write error';
+      setHardwareMessage({ text: msg, type: 'error' });
+    } finally {
+      setHardwareBusy(false);
+    }
+  };
+
   const handleModalIssueCard = async (e: React.FormEvent) => {
     e.preventDefault();
     setHardwareBusy(true);
     setIssueModalError(null);
+
+    // First encode physical Mifare card on Be-Tech encoder with NO time limit
+    const hwResult = await issuePhysicalKeycard({
+      roomNumber: issueRoom,
+      guestName: issueGuest || `Guest ${issueRoom}`,
+      staffUser: 'Front Desk',
+    });
+
+    if (!hwResult.success) {
+      playChimeSound(false);
+      setIssueModalError(hwResult.error || 'Failed to encode card. Ensure card is on reader.');
+      setHardwareBusy(false);
+      return;
+    }
+    playChimeSound(true);
 
     try {
       const res = await fetch('/api/rfid/cards', {
@@ -422,10 +471,50 @@ export default function RFIDAdminPage() {
     }
   };
 
-  // Toggle Card Status (Activate / Deactivate)
-  const handleToggleCardStatus = async (cardId: string, currentStatus: string) => {
+  // Toggle Card Status (Activate / Deactivate) with Live Physical USB Reader Encoding
+  const handleToggleCardStatus = async (
+    cardId: string,
+    currentStatus: string,
+    roomNumber?: string,
+    guestName?: string
+  ) => {
     const nextStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    setHardwareBusy(true);
+
     try {
+      const targetCard = cards.find((c) => c.id === cardId);
+      const targetRoom = roomNumber || targetCard?.room_number || '104';
+
+      if (nextStatus === 'active') {
+        // 1. Physically write & activate card on Be-Tech USB Reader with no time limit
+        setHardwareMessage({ text: `Writing Room ${targetRoom} activation to Be-Tech USB reader...`, type: 'info' });
+        const hwRes = await issuePhysicalKeycard({
+          roomNumber: targetRoom,
+          guestName: guestName || targetCard?.guest_name || 'Guest',
+          staffUser: 'Front Desk',
+        });
+
+        if (!hwRes.success) {
+          playChimeSound(false);
+          setHardwareMessage({
+            text: `⚠️ Encoder Alert: ${hwRes.error || 'Please place the Mifare card flat on the USB reader, then click Activate.'}`,
+            type: 'error',
+          });
+          setHardwareBusy(false);
+          return;
+        }
+
+        playChimeSound(true);
+      } else {
+        // 2. Physically wipe / deactivate card on Be-Tech USB Reader
+        setHardwareMessage({ text: `Clearing card for Room ${targetRoom} on Be-Tech USB reader...`, type: 'info' });
+        const hwRes = await checkoutPhysicalCard(targetRoom, 'Front Desk');
+        if (hwRes.success) {
+          playChimeSound(true);
+        }
+      }
+
+      // 3. Update database status
       const res = await fetch('/api/rfid/cards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -438,13 +527,18 @@ export default function RFIDAdminPage() {
       const data = await res.json();
       if (data.success) {
         setHardwareMessage({
-          text: `Card status updated: ${data.message}`,
+          text: `🎉 Card for Room ${targetRoom} ${nextStatus === 'active' ? 'ACTIVATED & WRITTEN' : 'DEACTIVATED & WIPED'} on reader and system!`,
           type: nextStatus === 'active' ? 'success' : 'info',
         });
         refreshAllData();
       }
-    } catch {
+    } catch (err: unknown) {
+      playChimeSound(false);
+      const msg = err instanceof Error ? err.message : 'Toggle status error';
+      setHardwareMessage({ text: msg, type: 'error' });
       refreshAllData();
+    } finally {
+      setHardwareBusy(false);
     }
   };
 
@@ -600,6 +694,7 @@ export default function RFIDAdminPage() {
           <button
             onClick={() => {
               setIssueModalError(null);
+
               setIsIssuingCard(true);
             }}
             className="px-4 py-2.5 rounded-xl bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-bold transition-colors flex items-center gap-2 shadow-sm cursor-pointer"
@@ -880,7 +975,7 @@ export default function RFIDAdminPage() {
                         <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end gap-2">
                             <button
-                              onClick={() => handleToggleCardStatus(c.id, c.status)}
+                              onClick={() => handleToggleCardStatus(c.id, c.status, c.room_number, c.guest_name || c.holder_name)}
                               className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors cursor-pointer ${
                                 c.status === 'active'
                                   ? 'bg-rose-50 text-rose-700 hover:bg-rose-100'
@@ -1024,7 +1119,7 @@ export default function RFIDAdminPage() {
                         <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end gap-2">
                             <button
-                              onClick={() => handleToggleCardStatus(c.id, c.status)}
+                              onClick={() => handleToggleCardStatus(c.id, c.status, c.room_number, c.guest_name || c.holder_name)}
                               className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors cursor-pointer ${
                                 c.status === 'active'
                                   ? 'bg-rose-50 text-rose-700 hover:bg-rose-100'
@@ -1434,6 +1529,7 @@ export default function RFIDAdminPage() {
             <button
               onClick={() => {
                 setIssueModalError(null);
+
                 setIsIssuingCard(true);
               }}
               className="px-4 py-2 rounded-xl bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-bold transition-colors flex items-center gap-2 self-start sm:self-auto cursor-pointer"
@@ -1557,8 +1653,19 @@ export default function RFIDAdminPage() {
                       </td>
                       <td className="py-3.5 px-4 text-right">
                         <div className="flex items-center justify-end gap-2">
+                          {c.room_number && (
+                            <button
+                              onClick={() => handleQuickEncodeRoom(c.room_number || c.assigned_room_number || '', c.guest_name)}
+                              disabled={hardwareBusy}
+                              className="px-2.5 py-1 rounded text-xs font-bold bg-[#D8AD56] hover:bg-[#c99b44] text-[#241912] shadow-sm flex items-center gap-1 cursor-pointer transition-all disabled:opacity-50"
+                              title={`Directly encode and write physical Mifare card for Room ${c.room_number} on USB reader (Lifetime/No time limit)`}
+                            >
+                              <Cpu className="w-3 h-3" />
+                              <span>Write Card (No Time Limit)</span>
+                            </button>
+                          )}
                           <button
-                            onClick={() => handleToggleCardStatus(c.id, c.status)}
+                            onClick={() => handleToggleCardStatus(c.id, c.status, c.room_number, c.guest_name || c.holder_name)}
                             className={`px-2.5 py-1 rounded text-xs font-semibold cursor-pointer ${
                               c.status === 'active'
                                 ? 'bg-rose-50 text-rose-700 hover:bg-rose-100'

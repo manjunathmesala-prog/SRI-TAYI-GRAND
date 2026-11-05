@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { repo } from '@/lib/db/repository';
 import { Booking, PhysicalRoom } from '@/types';
 import { issueGuestRoomKey } from '@/lib/rfid';
-import { issuePhysicalKeycard, checkoutPhysicalCard } from '@/lib/rfid/bridge-client';
+import { issuePhysicalKeycard, checkoutPhysicalCard, playChimeSound } from '@/lib/rfid/bridge-client';
 import {
   ConciergeBell,
   Search,
@@ -14,7 +14,10 @@ import {
   User,
   CreditCard,
   KeyRound,
+  RefreshCw,
   Printer,
+  QrCode,
+  Sparkles,
   X,
   Plus,
   AlertCircle,
@@ -37,6 +40,94 @@ export default function FrontDeskPage() {
   const [chargeDescription, setChargeDescription] = useState('Extra Mineral Water & Tea');
   const [settlementMethod, setSettlementMethod] = useState<'cash' | 'upi' | 'card'>('cash');
   const [checkOutSuccessRef, setCheckOutSuccessRef] = useState<string | null>(null);
+
+  // Live Walk-In Reception Queue
+  interface WalkInItem extends Booking {
+    pickup_code?: string;
+  }
+  const [walkInQueue, setWalkInQueue] = useState<WalkInItem[]>([]);
+  const [cleanRoomsList, setCleanRoomsList] = useState<PhysicalRoom[]>([]);
+  const [selectedWalkInRooms, setSelectedWalkInRooms] = useState<Record<string, string>>({});
+  const [isEncodingWalkIn, setIsEncodingWalkIn] = useState<string | null>(null);
+  const [walkInAlert, setWalkInAlert] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [showStandeeModal, setShowStandeeModal] = useState(false);
+
+  useEffect(() => {
+    let prevCount = -1;
+    const fetchQueue = async () => {
+      try {
+        const res = await fetch('/api/admin/walk-ins/queue');
+        if (res.ok) {
+          const data = await res.json();
+          const q: WalkInItem[] = data.queue || [];
+          setWalkInQueue(q);
+          setCleanRoomsList(data.clean_rooms || []);
+
+          setSelectedWalkInRooms((prev) => {
+            const updated = { ...prev };
+            q.forEach((item) => {
+              if (!updated[item.booking_reference] && data.clean_rooms?.length > 0) {
+                const match = data.clean_rooms.find((r: PhysicalRoom) => r.category_id === item.category_id);
+                updated[item.booking_reference] = match ? match.room_number : data.clean_rooms[0].room_number;
+              }
+            });
+            return updated;
+          });
+
+          if (prevCount !== -1 && q.length > prevCount) {
+            playChimeSound(true);
+          }
+          prevCount = q.length;
+        }
+      } catch {
+        // Silent poll error
+      }
+    };
+
+    fetchQueue();
+    const interval = setInterval(fetchQueue, 3000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleAssignAndEncodeWalkIn = async (booking: WalkInItem) => {
+    const roomNumber = selectedWalkInRooms[booking.booking_reference];
+    if (!roomNumber) {
+      setWalkInAlert({ message: 'Please select a clean room number for this walk-in guest.', type: 'error' });
+      return;
+    }
+
+    setIsEncodingWalkIn(booking.booking_reference);
+    setWalkInAlert(null);
+
+    try {
+      const res = await fetch('/api/admin/walk-ins/assign-and-encode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookingReference: booking.booking_reference,
+          roomNumber,
+          staffName: 'Front Desk Receptionist',
+          markPaymentCollected: booking.payment_status === 'pay_at_hotel',
+        }),
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        playChimeSound(true);
+        setWalkInAlert({
+          message: 'Keycard issued for ' + booking.guest_name + '! Room ' + roomNumber + ' is checked in and ready.',
+          type: 'success',
+        });
+        setRefreshKey((k) => k + 1);
+      } else {
+        setWalkInAlert({ message: data.error || 'Failed to encode card and assign room.', type: 'error' });
+      }
+    } catch (err: unknown) {
+      setWalkInAlert({ message: err instanceof Error ? err.message : 'Error processing keycard', type: 'error' });
+    } finally {
+      setIsEncodingWalkIn(null);
+    }
+  };
 
   const bookings = repo.getBookings();
   const rooms = repo.getRooms();
@@ -180,6 +271,170 @@ export default function FrontDeskPage() {
           </button>
         </div>
       )}
+
+      {/* Walk-In Alert Banner */}
+      {walkInAlert && (
+        <div
+          className={'p-4 rounded-xl text-xs flex items-center justify-between ' + (
+            walkInAlert.type === 'success'
+              ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+              : 'bg-red-50 border border-red-200 text-red-800'
+          )}
+        >
+          <div className="flex items-center gap-2">
+            {walkInAlert.type === 'success' ? (
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+            ) : (
+              <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+            )}
+            <span>{walkInAlert.message}</span>
+          </div>
+          <button onClick={() => setWalkInAlert(null)} className="font-bold hover:underline">
+            ✕
+          </button>
+        </div>
+      )}
+
+      {/* LIVE RECEPTION WALK-IN QUEUE PANEL */}
+      <div className="bg-gradient-to-r from-[#241912] via-[#382216] to-[#25150F] rounded-2xl border border-[#D8AD56]/40 p-5 shadow-lg text-white">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-[#D8AD56] text-[#241912] flex items-center justify-center font-bold shadow-md">
+              <QrCode className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="font-serif text-lg font-bold text-white tracking-wide">
+                  Reception QR Walk-In Counter Queue
+                </h2>
+                {walkInQueue.length > 0 ? (
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-400 text-[#241912] animate-pulse">
+                    {walkInQueue.length} Guests Waiting
+                  </span>
+                ) : (
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                    Counter Ready
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-[#EFE3D6]/70">
+                Self-service QR bookings appear here automatically. Select physical room and encode keycard in 1 click.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowStandeeModal(true)}
+              className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-[#D8AD56]/40 text-[#D8AD56] text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              <span>Print Desk Standee QR</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Queue Items List */}
+        {walkInQueue.length === 0 ? (
+          <div className="py-6 text-center text-xs text-[#EFE3D6]/60 flex items-center justify-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-[#D8AD56]" />
+            <span>Reception counter is clear. Any walk-in customer scanning the acrylic desk QR will chime here instantly.</span>
+          </div>
+        ) : (
+          <div className="grid gap-3 pt-4 sm:grid-cols-2">
+            {walkInQueue.map((item) => {
+              const currentSelectedRoom = selectedWalkInRooms[item.booking_reference] || '';
+              const isPaid = item.payment_status === 'successful';
+              const isEncoding = isEncodingWalkIn === item.booking_reference;
+
+              return (
+                <div
+                  key={item.id}
+                  className="rounded-xl bg-white/95 text-[#241912] p-4 border border-[#D8AD56] shadow-md flex flex-col justify-between space-y-3"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-black px-2 py-0.5 rounded-md bg-[#382216] text-[#D8AD56]">
+                            {item.pickup_code || item.booking_reference.slice(-7)}
+                          </span>
+                          <span className="font-serif font-bold text-base text-[#241912]">
+                            {item.guest_name}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#786B61] mt-0.5">
+                          📞 {item.guest_phone} &bull; {item.category_name}
+                        </p>
+                      </div>
+
+                      <span
+                        className={'text-[10px] font-bold px-2.5 py-1 rounded-full ' + (
+                          isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                        )}
+                      >
+                        {isPaid ? ('PAID ₹' + item.total_amount) : ('COLLECT CASH ₹' + item.total_amount)}
+                      </span>
+                    </div>
+
+                    {/* Room Selector */}
+                    <div className="p-2.5 rounded-lg bg-[#FAF7F2] border border-[#EFE3D6] space-y-1">
+                      <label className="text-[10px] font-bold text-[#786B61] uppercase tracking-wider block">
+                        Select Physical Clean Room:
+                      </label>
+                      <select
+                        value={currentSelectedRoom}
+                        onChange={(e) =>
+                          setSelectedWalkInRooms((prev) => ({
+                            ...prev,
+                            [item.booking_reference]: e.target.value,
+                          }))
+                        }
+                        className="w-full p-2 text-xs font-bold rounded-md border border-[#EFE3D6] bg-white text-[#241912]"
+                      >
+                        {cleanRoomsList.length === 0 ? (
+                          <option value="">No clean rooms available</option>
+                        ) : (
+                          cleanRoomsList.map((r) => (
+                            <option key={r.id} value={r.room_number}>
+                              Room {r.room_number} &bull; Floor {r.floor_number} &bull; {r.category_name || 'Standard'} (Clean)
+                            </option>
+                          ))
+                        )}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* 1-Click Encode & Issue CTA */}
+                  <button
+                    type="button"
+                    disabled={isEncoding || !currentSelectedRoom}
+                    onClick={() => handleAssignAndEncodeWalkIn(item)}
+                    className="w-full py-2.5 px-3 rounded-lg bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 cursor-pointer"
+                  >
+                    {isEncoding ? (
+                      <>
+                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#D8AD56]" />
+                        <span>Programming Be-Tech Keycard...</span>
+                      </>
+                    ) : (
+                      <>
+                        <KeyRound className="w-3.5 h-3.5 text-[#D8AD56]" />
+                        <span>
+                          {isPaid
+                            ? ('⚡ 1-Click Encode & Issue Room ' + (currentSelectedRoom || ''))
+                            : ('💵 Collect ₹' + item.total_amount + ' & Issue Room ' + (currentSelectedRoom || ''))}
+                        </span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
       {/* Two Workstations: Expected Arrivals (Left) & In-House Stays (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">

@@ -30,6 +30,17 @@ export type PaymentStatus =
 
 export type PaymentMethod = 'online' | 'cash' | 'upi' | 'card' | 'pay_at_hotel';
 
+export type BookingSource = 'online' | 'walk_in_qr' | 'front_desk_manual';
+
+export interface ReceptionKioskToken {
+  id: string;
+  kiosk_name: string;
+  secret_token: string;
+  is_active: boolean;
+  allow_counter_payment: boolean;
+  created_at: string;
+}
+
 export type HallEnquiryStatus = 
   | 'new' 
   | 'contacted' 
@@ -113,6 +124,7 @@ export interface Booking {
   category_name: string;
   assigned_room_id?: string;
   assigned_room_number?: string;
+  room_number?: string;
   adults_count: number;
   children_count: number;
   rooms_count: number;
@@ -132,6 +144,14 @@ export interface Booking {
   cancelled_at?: string;
   cancellation_reason?: string;
   internal_notes?: string;
+  booking_source?: BookingSource;
+  walk_in_token?: string;
+  pickup_code?: string;
+  room_assigned_by?: string;
+  keycard_issued_at?: string;
+  keycard_uid?: string;
+  id_proof_type?: string;
+  id_proof_number?: string;
   created_at: string;
 }
 
@@ -230,6 +250,7 @@ export interface RFIDCard {
   holder_role?: string;
   staff_id?: string;
   assigned_room_number?: string;
+  room_number?: string;
   booking_reference?: string;
   guest_name?: string;
   status: 'active' | 'inactive' | 'lost' | 'damaged' | 'expired';

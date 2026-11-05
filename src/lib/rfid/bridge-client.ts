@@ -54,6 +54,34 @@ export function formatRfidErrorMessage(code?: number, rawError?: string): string
   return rawError || (code ? `Hardware error code: ${code}` : 'Hardware operation failed');
 }
 
+export function playChimeSound(success: boolean = true): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    if (success) {
+      osc.frequency.setValueAtTime(1760, ctx.currentTime);
+      osc.frequency.setValueAtTime(2349, ctx.currentTime + 0.1);
+      gain.gain.setValueAtTime(0.35, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.28);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.3);
+    } else {
+      osc.frequency.setValueAtTime(440, ctx.currentTime);
+      gain.gain.setValueAtTime(0.3, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.3);
+    }
+  } catch {}
+}
+
 function getSavedBridgeHost(): string {
   if (typeof window !== 'undefined') {
     return localStorage.getItem('stg_rfid_bridge_url') || RFID_BRIDGE_URL;
@@ -203,8 +231,8 @@ export async function issuePhysicalKeycard(params: {
     staffUser: params.staffUser || 'Front Desk',
   };
 
-  if (params.checkInDate) payload.beginTime = formatTime(params.checkInDate);
-  if (params.checkOutDate) payload.endTime = formatTime(params.checkOutDate);
+  payload.beginTime = params.checkInDate ? formatTime(params.checkInDate) : '0001010000';
+  payload.endTime = params.checkOutDate ? formatTime(params.checkOutDate) : '9912312359';
 
   // Try direct hardware post (with 25s timeout for physical card write)
   try {
