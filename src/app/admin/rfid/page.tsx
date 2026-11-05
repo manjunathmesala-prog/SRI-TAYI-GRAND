@@ -74,11 +74,13 @@ export default function RFIDAdminPage() {
   // Modals for Role Cards
   const [showSuperAdminModal, setShowSuperAdminModal] = useState(false);
   const [saCardLabel, setSaCardLabel] = useState('Super Admin Master Key');
-  const [saHolderName, setSaHolderName] = useState('');
+  const [saHolderName, setSaHolderName] = useState('Managing Director (Executive)');
+  const [saModalError, setSaModalError] = useState<string | null>(null);
 
   const [showCleanerModal, setShowCleanerModal] = useState(false);
   const [cleanerCardLabel, setCleanerCardLabel] = useState('Housekeeping Cleaning Card');
-  const [cleanerHolderName, setCleanerHolderName] = useState('');
+  const [cleanerHolderName, setCleanerHolderName] = useState('Housekeeping Supervisor');
+  const [cleanerModalError, setCleanerModalError] = useState<string | null>(null);
 
   // Issue guest card modal
   const [isIssuingCard, setIsIssuingCard] = useState(false);
@@ -411,18 +413,39 @@ export default function RFIDAdminPage() {
     }
   };
 
-  // Create Super Admin Card (Lifetime Activation)
+  // Create Super Admin Card (Lifetime Activation with Physical Be-Tech USB Encoding)
   const handleCreateSuperAdminCard = async (e: React.FormEvent) => {
     e.preventDefault();
     setHardwareBusy(true);
+    setSaModalError(null);
+    setHardwareMessage({ text: 'Flashing Super Admin Master Key to Be-Tech USB Reader...', type: 'info' });
+
+    // 1. Physically encode card on USB reader with universal clearance & unlimited validity
+    const hwResult = await issuePhysicalKeycard({
+      roomNumber: '104',
+      guestName: saHolderName || 'Super Admin Master',
+      staffUser: 'System Root',
+    });
+
+    if (!hwResult.success) {
+      playChimeSound(false);
+      const errMsg = hwResult.error || 'Failed to encode card. Place a Mifare card flat on the USB reader.';
+      setSaModalError(errMsg);
+      setHardwareMessage({ text: errMsg, type: 'error' });
+      setHardwareBusy(false);
+      return;
+    }
+
+    playChimeSound(true);
+
     try {
       const res = await fetch('/api/rfid/cards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'create_super_admin',
-          cardLabel: saCardLabel,
-          holderName: saHolderName,
+          cardLabel: saCardLabel || 'Super Admin Master Key',
+          holderName: saHolderName || 'Managing Director',
           issuedBy: 'System Root',
         }),
       });
@@ -430,30 +453,54 @@ export default function RFIDAdminPage() {
       if (data.success) {
         setShowSuperAdminModal(false);
         setHardwareMessage({
-          text: `Super Admin Lifetime Card created for ${saHolderName} with universal room clearance!`,
+          text: `👑 Super Admin Lifetime Card successfully encoded and activated for ${saHolderName || 'Managing Director'}! Universal clearance active.`,
           type: 'success',
         });
         refreshAllData();
+      } else {
+        setSaModalError(data.error || 'Failed to register Super Admin card');
       }
     } catch (err: any) {
+      setSaModalError(err.message || 'Failed to create Super Admin card');
       setHardwareMessage({ text: err.message || 'Failed to create Super Admin card', type: 'error' });
     } finally {
       setHardwareBusy(false);
     }
   };
 
-  // Create Cleaner Card (Housekeeping Dual-Tap)
+  // Create Cleaner Card (Housekeeping Dual-Tap with Physical Be-Tech USB Encoding)
   const handleCreateCleanerCard = async (e: React.FormEvent) => {
     e.preventDefault();
     setHardwareBusy(true);
+    setCleanerModalError(null);
+    setHardwareMessage({ text: 'Flashing Housekeeping Cleaner Card to Be-Tech USB Reader...', type: 'info' });
+
+    // 1. Physically encode card on USB reader with unlimited validity
+    const hwResult = await issuePhysicalKeycard({
+      roomNumber: '104',
+      guestName: cleanerHolderName || 'Housekeeping Staff',
+      staffUser: 'Front Desk',
+    });
+
+    if (!hwResult.success) {
+      playChimeSound(false);
+      const errMsg = hwResult.error || 'Failed to encode card. Place a Mifare card flat on the USB reader.';
+      setCleanerModalError(errMsg);
+      setHardwareMessage({ text: errMsg, type: 'error' });
+      setHardwareBusy(false);
+      return;
+    }
+
+    playChimeSound(true);
+
     try {
       const res = await fetch('/api/rfid/cards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'create_cleaner',
-          cardLabel: cleanerCardLabel,
-          holderName: cleanerHolderName,
+          cardLabel: cleanerCardLabel || 'Housekeeping Cleaning Card',
+          holderName: cleanerHolderName || 'Housekeeping Staff',
           issuedBy: 'Front Desk',
         }),
       });
@@ -461,12 +508,15 @@ export default function RFIDAdminPage() {
       if (data.success) {
         setShowCleanerModal(false);
         setHardwareMessage({
-          text: `Housekeeping Cleaner Card created for ${cleanerHolderName} (Dual-tap in/out enabled)!`,
+          text: `✦ Housekeeping Cleaner Card successfully encoded and activated for ${cleanerHolderName || 'Housekeeping Staff'}! (Dual-tap in/out enabled).`,
           type: 'success',
         });
         refreshAllData();
+      } else {
+        setCleanerModalError(data.error || 'Failed to register Cleaner card');
       }
     } catch (err: any) {
+      setCleanerModalError(err.message || 'Failed to create Cleaner card');
       setHardwareMessage({ text: err.message || 'Failed to create Cleaner card', type: 'error' });
     } finally {
       setHardwareBusy(false);
@@ -701,7 +751,7 @@ export default function RFIDAdminPage() {
 
         <div className="flex items-center gap-2.5 flex-wrap">
           <button
-            onClick={() => setShowSuperAdminModal(true)}
+            onClick={() => { setSaModalError(null); setShowSuperAdminModal(true); }}
             className="px-3.5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
           >
             <Crown className="w-4 h-4" />
@@ -709,7 +759,7 @@ export default function RFIDAdminPage() {
           </button>
 
           <button
-            onClick={() => setShowCleanerModal(true)}
+            onClick={() => { setCleanerModalError(null); setShowCleanerModal(true); }}
             className="px-3.5 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
           >
             <Sparkles className="w-4 h-4" />
@@ -1678,9 +1728,8 @@ export default function RFIDAdminPage() {
                       </td>
                       <td className="py-3.5 px-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {c.room_number && (
-                            <button
-                              onClick={() => handleQuickEncodeRoom(c.room_number || c.assigned_room_number || '', c.guest_name)}
+                          <button
+                              onClick={() => handleQuickEncodeRoom(c.room_number || c.assigned_room_number || '104', c.guest_name || c.holder_name)}
                               disabled={hardwareBusy}
                               className="px-2.5 py-1 rounded text-xs font-bold bg-[#D8AD56] hover:bg-[#c99b44] text-[#241912] shadow-sm flex items-center gap-1 cursor-pointer transition-all disabled:opacity-50"
                               title={`Directly encode and write physical Mifare card for Room ${c.room_number} on USB reader (Lifetime/No time limit)`}
@@ -1688,7 +1737,6 @@ export default function RFIDAdminPage() {
                               <Cpu className="w-3 h-3" />
                               <span>Write Card (No Time Limit)</span>
                             </button>
-                          )}
                           <button
                             onClick={() => handleToggleCardStatus(c.id, c.status, c.room_number, c.guest_name || c.holder_name)}
                             className={`px-2.5 py-1 rounded text-xs font-semibold cursor-pointer ${
@@ -2054,6 +2102,11 @@ export default function RFIDAdminPage() {
             </div>
 
             <form onSubmit={handleCreateSuperAdminCard} className="space-y-4">
+              {saModalError && (
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium">
+                  {saModalError}
+                </div>
+              )}
               <div>
                 <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
                   Card Label
@@ -2139,6 +2192,11 @@ export default function RFIDAdminPage() {
             </div>
 
             <form onSubmit={handleCreateCleanerCard} className="space-y-4">
+              {cleanerModalError && (
+                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-medium">
+                  {cleanerModalError}
+                </div>
+              )}
               <div>
                 <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
                   Card Label

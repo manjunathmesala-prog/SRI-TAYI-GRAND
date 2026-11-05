@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 export default function StandeeAdminPage() {
-  const [urlMode, setUrlMode] = useState<'network' | 'production' | 'custom'>('network');
+  const [urlMode, setUrlMode] = useState<'production' | 'network' | 'custom'>('production');
   const [customHost, setCustomHost] = useState('');
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [targetUrl, setTargetUrl] = useState<string>('');
@@ -29,7 +29,7 @@ export default function StandeeAdminPage() {
   useEffect(() => {
     let host = 'http://192.168.1.20:3000';
     if (urlMode === 'production') {
-      host = 'https://sritayigrand.com';
+      host = 'https://sri-tayi-grand.vercel.app';
     } else if (urlMode === 'custom' && customHost.trim()) {
       host = customHost.trim();
     }
@@ -110,17 +110,6 @@ export default function StandeeAdminPage() {
           <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
-              onClick={() => setUrlMode('network')}
-              className={`p-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                urlMode === 'network'
-                  ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
-                  : 'bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              📱 Local Wi-Fi (192.168.1.20)
-            </button>
-            <button
-              type="button"
               onClick={() => setUrlMode('production')}
               className={`p-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 urlMode === 'production'
@@ -128,7 +117,18 @@ export default function StandeeAdminPage() {
                   : 'bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100'
               }`}
             >
-              🌐 Live Domain (sritayigrand.com)
+              🌐 Live Vercel App (sri-tayi-grand.vercel.app)
+            </button>
+            <button
+              type="button"
+              onClick={() => setUrlMode('network')}
+              className={`p-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                urlMode === 'network'
+                  ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
+                  : 'bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              📱 Local Wi-Fi (192.168.1.20:3000)
             </button>
             <button
               type="button"

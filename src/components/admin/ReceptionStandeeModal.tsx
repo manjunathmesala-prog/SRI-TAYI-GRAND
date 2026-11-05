@@ -24,7 +24,7 @@ export function ReceptionStandeeModal({
   onClose,
   defaultToken = 'STG_RECEPT_DESK_SEC_7749',
 }: ReceptionStandeeModalProps) {
-  const [urlMode, setUrlMode] = useState<'network' | 'production' | 'custom'>('network');
+  const [urlMode, setUrlMode] = useState<'production' | 'network' | 'custom'>('production');
   const [customHost, setCustomHost] = useState('');
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [targetUrl, setTargetUrl] = useState<string>('');
@@ -35,7 +35,7 @@ export function ReceptionStandeeModal({
   useEffect(() => {
     let host = 'http://192.168.1.20:3000';
     if (urlMode === 'production') {
-      host = 'https://sritayigrand.com';
+      host = 'https://sri-tayi-grand.vercel.app';
     } else if (urlMode === 'custom' && customHost.trim()) {
       host = customHost.trim();
     }
@@ -110,17 +110,6 @@ export function ReceptionStandeeModal({
           <div className="grid grid-cols-3 gap-1.5">
             <button
               type="button"
-              onClick={() => setUrlMode('network')}
-              className={`py-1.5 px-2 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
-                urlMode === 'network'
-                  ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
-                  : 'bg-white border border-[#EFE3D6] text-[#786B61] hover:bg-gray-50'
-              }`}
-            >
-              📱 Local Wi-Fi (Phone)
-            </button>
-            <button
-              type="button"
               onClick={() => setUrlMode('production')}
               className={`py-1.5 px-2 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
                 urlMode === 'production'
@@ -128,7 +117,18 @@ export function ReceptionStandeeModal({
                   : 'bg-white border border-[#EFE3D6] text-[#786B61] hover:bg-gray-50'
               }`}
             >
-              🌐 Production Domain
+              🌐 Live Vercel App
+            </button>
+            <button
+              type="button"
+              onClick={() => setUrlMode('network')}
+              className={`py-1.5 px-2 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
+                urlMode === 'network'
+                  ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
+                  : 'bg-white border border-[#EFE3D6] text-[#786B61] hover:bg-gray-50'
+              }`}
+            >
+              📱 Local Wi-Fi
             </button>
             <button
               type="button"

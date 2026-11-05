@@ -20,7 +20,7 @@ export async function GET(request: Request) {
       if (host) {
         targetUrl = `${host.replace(/\/$/, '')}/walk-in?token=${encodeURIComponent(token)}`;
       } else {
-        targetUrl = `http://192.168.1.20:3000/walk-in?token=${encodeURIComponent(token)}`;
+        targetUrl = `https://sri-tayi-grand.vercel.app/walk-in?token=${encodeURIComponent(token)}`;
       }
     }
 
