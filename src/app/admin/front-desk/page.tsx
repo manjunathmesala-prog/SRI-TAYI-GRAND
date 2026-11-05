@@ -82,9 +82,10 @@ export default function FrontDeskPage() {
         checkInModalBooking.guest_name,
         'Front Desk Reception'
       );
-      // Also trigger Be-Tech hardware USB encoder write if online
+      // Trigger production Be-Tech hardware USB encoder write
       issuePhysicalKeycard({
         roomNumber: assignedRoom.room_number,
+        guestName: checkInModalBooking.guest_name,
         staffUser: 'Front Desk Reception',
       }).catch(() => {});
     }

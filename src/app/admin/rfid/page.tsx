@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { repo } from '@/lib/db/repository';
 import { RFIDCard, RFIDDevice, RFIDAccessEvent } from '@/types';
-import { issueGuestRoomKey, revokeGuestRoomKey, simulateDoorTap } from '@/lib/rfid';
+import { issueGuestRoomKey, revokeGuestRoomKey } from '@/lib/rfid';
 import {
   checkBridgeHealth,
   readPhysicalCard,
@@ -24,7 +24,6 @@ import {
   XCircle,
   Plus,
   RefreshCw,
-  Play,
   X,
   CreditCard,
   Cpu,
@@ -32,15 +31,14 @@ import {
   Check,
   Terminal,
   Settings,
-  Smartphone,
-  Laptop,
   Layers,
   Zap,
+  Download,
 } from 'lucide-react';
 
 export default function RFIDAdminPage() {
   const [refreshKey, setRefreshKey] = useState(0);
-  const [activeTab, setActiveTab] = useState<'hardware' | 'cards' | 'devices' | 'logs' | 'emulator'>('hardware');
+  const [activeTab, setActiveTab] = useState<'hardware' | 'cards' | 'devices' | 'logs'>('hardware');
   const [floorFilter, setFloorFilter] = useState<'all' | 'floor1' | 'floor2' | 'floor3' | 'infrastructure'>('all');
 
   // Live Hardware Bridge State
@@ -70,10 +68,6 @@ export default function RFIDAdminPage() {
   const [issueGuest, setIssueGuest] = useState('P. Sudhakar Reddy');
   const [issueRef, setIssueRef] = useState('STG-20261105-3921');
 
-  // Emulator state
-  const [tapCardUid, setTapCardUid] = useState('E0-04-1A-8B-3C-91');
-  const [tapRoom, setTapRoom] = useState('202');
-  const [tapResult, setTapResult] = useState<any>(null);
 
   const devices = repo.getRFIDDevices();
   const cards = repo.getRFIDCards();
@@ -205,13 +199,10 @@ export default function RFIDAdminPage() {
       });
       setRefreshKey((k) => k + 1);
     } else {
-      // Safe fallback emulator
-      const emulated = await issueGuestRoomKey(hwRoom, `WALKIN-${Date.now().toString().slice(-4)}`, hwGuest, hwStaff);
       setHardwareMessage({
-        text: `Keycard for Room ${hwRoom} activated in active mesh registry (UID: ${emulated.card_uid}).`,
-        type: 'success',
+        text: result.error || 'Physical card encoding failed. Ensure a Mifare 1K card is placed on the Be-Tech reader and the bridge is active.',
+        type: 'error',
       });
-      setRefreshKey((k) => k + 1);
     }
   };
 
@@ -232,8 +223,8 @@ export default function RFIDAdminPage() {
       });
     } else {
       setHardwareMessage({
-        text: `Card for Room ${hwRoom} cleared in registry.`,
-        type: 'info',
+        text: result.error || `Failed to clear physical card for Room ${hwRoom}. Please check reader connection.`,
+        type: 'error',
       });
     }
 
@@ -241,16 +232,30 @@ export default function RFIDAdminPage() {
     setHardwareBusy(false);
   };
 
-  // Issue card via modal
+  // Issue card via modal (Production physical Be-Tech encoder)
   const handleModalIssueCard = async (e: React.FormEvent) => {
     e.preventDefault();
-    await issueGuestRoomKey(issueRoom, issueRef, issueGuest, 'Front Desk');
-    setIsIssuingCard(false);
-    setHardwareMessage({
-      text: `Keycard encoded & issued for Room ${issueRoom} to ${issueGuest}.`,
-      type: 'success',
+    setHardwareBusy(true);
+
+    const result = await issuePhysicalKeycard({
+      roomNumber: issueRoom,
+      guestName: issueGuest,
+      staffUser: 'Front Desk',
     });
-    setRefreshKey((k) => k + 1);
+
+    setHardwareBusy(false);
+
+    if (result.success) {
+      repo.issueRFIDCard(issueRoom, issueRef, issueGuest, 'Front Desk');
+      setIsIssuingCard(false);
+      setHardwareMessage({
+        text: `Success: Keycard for Room ${issueRoom} encoded on physical Be-Tech encoder and issued to ${issueGuest}.`,
+        type: 'success',
+      });
+      setRefreshKey((k) => k + 1);
+    } else {
+      alert(result.error || 'Failed to encode physical card on Be-Tech reader. Ensure card is placed on the encoder.');
+    }
   };
 
   const handleDeactivate = (cardId: string) => {
@@ -258,17 +263,6 @@ export default function RFIDAdminPage() {
     setRefreshKey((k) => k + 1);
   };
 
-  const handleRunTapSimulation = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const res = await fetch('/api/rfid/tap', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ cardUid: tapCardUid, roomNumber: tapRoom }),
-    });
-    const data = await res.json();
-    setTapResult(data);
-    setRefreshKey((k) => k + 1);
-  };
 
   // Filtered devices list
   const filteredDevices = devices.filter((d) => {
@@ -340,20 +334,12 @@ export default function RFIDAdminPage() {
                 className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                   bridgeStatus.isOnline
                     ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
-                    : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                    : 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
                 }`}
               >
                 {bridgeStatus.isOnline
-                  ? bridgeStatus.mode === 'hardware'
-                    ? '🟢 Hardware Online (USB Port 1)'
-                    : '🟢 RFID Active on All Devices'
-                  : 'Bridge Inactive (Safe Fallback)'}
-              </span>
-
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-blue-500/20 text-blue-300 border border-blue-500/40 flex items-center gap-1">
-                <Laptop className="w-3 h-3" />
-                <Smartphone className="w-3 h-3" />
-                <span>Multi-Device Ready</span>
+                  ? '🟢 Hardware Online (USB Port 1)'
+                  : '🔴 Hardware Offline'}
               </span>
             </div>
 
@@ -444,16 +430,6 @@ export default function RFIDAdminPage() {
         >
           Access Tap Stream ({events.length})
         </button>
-        <button
-          onClick={() => setActiveTab('emulator')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
-            activeTab === 'emulator'
-              ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
-              : 'bg-white text-[#786B61] hover:text-[#241912] border border-[#EFE3D6]'
-          }`}
-        >
-          Door Lock Simulator
-        </button>
       </div>
 
       {/* TAB 0: HARDWARE ENCODER STATION */}
@@ -473,15 +449,11 @@ export default function RFIDAdminPage() {
               <div className="flex items-center gap-2">
                 <span
                   className={`w-2.5 h-2.5 rounded-full ${
-                    bridgeStatus.isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+                    bridgeStatus.isOnline ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'
                   }`}
                 />
                 <span className="text-xs font-semibold text-[#241912]">
-                  {bridgeStatus.isOnline
-                    ? bridgeStatus.mode === 'hardware'
-                      ? 'USB Reader Online'
-                      : 'RFID Active on All Devices'
-                    : 'Bridge Inactive (Safe Fallback)'}
+                  {bridgeStatus.isOnline ? 'Be-Tech USB Reader Online' : 'Hardware Offline'}
                 </span>
               </div>
             </div>
@@ -964,93 +936,6 @@ export default function RFIDAdminPage() {
         </div>
       )}
 
-      {/* TAB 4: EMULATOR / SIMULATOR */}
-      {activeTab === 'emulator' && (
-        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-6 sm:p-8 shadow-luxury max-w-2xl mx-auto space-y-6">
-          <div>
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
-              HARDWARE TEST HARNESS · ALL ROOMS READY
-            </span>
-            <h3 className="font-serif text-xl font-bold text-[#241912] mt-0.5">
-              Simulate Door Lock RFID Tap
-            </h3>
-            <p className="text-xs text-[#786B61] mt-1">
-              Test how the locking firmware verifies physical card UIDs against active booking dates and room assignments across all 18 rooms.
-            </p>
-          </div>
-
-          <form onSubmit={handleRunTapSimulation} className="space-y-4">
-            <div>
-              <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
-                Card UID to Tap
-              </label>
-              <select
-                value={tapCardUid}
-                onChange={(e) => setTapCardUid(e.target.value)}
-                className="w-full text-xs font-mono font-medium p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
-              >
-                {cards.map((c) => (
-                  <option key={c.id} value={c.card_uid}>
-                    {c.card_uid} ({c.card_label} - Assigned: Room {c.assigned_room_number || 'None'} - {c.status})
-                  </option>
-                ))}
-                <option value="E0-04-1A-99-99-99">E0-04-1A-99-99-99 (Unregistered / Random UID)</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
-                Physical Room Lock Reader Target
-              </label>
-              <select
-                value={tapRoom}
-                onChange={(e) => setTapRoom(e.target.value)}
-                className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
-              >
-                {rooms.map((r) => (
-                  <option key={r.id} value={r.room_number}>
-                    Lock on Room {r.room_number} (Floor {r.floor_number} - {r.category_name})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full py-3 px-4 rounded-xl bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] text-xs font-bold tracking-wide transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer"
-            >
-              <Play className="w-4 h-4 text-[#D8AD56]" />
-              <span>Tap RFID Card on Room Lock</span>
-            </button>
-          </form>
-
-          {tapResult && (
-            <div
-              className={`p-4 rounded-xl border text-xs space-y-1.5 ${
-                tapResult.accessGranted
-                  ? 'bg-green-50 border-green-200 text-green-900'
-                  : 'bg-red-50 border-red-200 text-red-900'
-              }`}
-            >
-              <div className="flex items-center gap-2 font-bold text-sm">
-                {tapResult.accessGranted ? (
-                  <>
-                    <CheckCircle2 className="w-5 h-5 text-green-600" />
-                    <span>ACCESS GRANTED — LOCK UNLATCHED</span>
-                  </>
-                ) : (
-                  <>
-                    <XCircle className="w-5 h-5 text-red-600" />
-                    <span>ACCESS DENIED — LOCK LOCKED</span>
-                  </>
-                )}
-              </div>
-              <div>Event Reason: {tapResult.event?.reason}</div>
-              <div className="text-[10px] text-gray-500 font-mono">Timestamp: {tapResult.event?.occurred_at}</div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* ISSUE CARD MODAL */}
       {isIssuingCard && (
