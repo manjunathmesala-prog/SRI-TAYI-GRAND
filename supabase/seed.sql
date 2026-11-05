@@ -1,4 +1,4 @@
--- ==============================================================================
+﻿-- ==============================================================================
 -- SRI TAYI GRAND HOTEL - OFFICIAL SEED DATA
 -- Property: Sri Tayi Grand, Kadiri, Andhra Pradesh
 -- ==============================================================================
@@ -10,9 +10,9 @@ INSERT INTO hotel_settings (
 ) VALUES (
     'a0000000-0000-0000-0000-000000000001',
     'SRI TAYI GRAND',
-    'Stay · Host · Celebrate',
-    '4585+F8J, Opp. Girls High School, Bypass Road, Kadiri – 515591, Anantapur District, Andhra Pradesh, India.',
-    'Tadipatri – Pulivendula – Kadiri Road, Revenue Colony, Kadiri',
+    'Stay Â· Host Â· Celebrate',
+    '4585+F8J, Opp. Girls High School, Bypass Road, Kadiri â€“ 515591, Anantapur District, Andhra Pradesh, India.',
+    'Tadipatri â€“ Pulivendula â€“ Kadiri Road, Revenue Colony, Kadiri',
     '084942 23379',
     '+918494223379',
     'contact@sritayigrand.com',
@@ -110,8 +110,8 @@ INSERT INTO room_categories (
     )
 ON CONFLICT (slug) DO NOTHING;
 
--- 5. Physical Rooms Inventory
--- Floor 1
+-- 5. Physical Rooms Inventory (All 25 Rooms across Floors 1, 2, 3)
+-- Floor 1 (Rooms 101 - 109)
 INSERT INTO rooms (room_number, category_id, floor_number, operational_status, housekeeping_status) VALUES
     ('101', 'd0000000-0000-0000-0000-000000000004', 1, 'available', 'clean'),
     ('102', 'd0000000-0000-0000-0000-000000000004', 1, 'available', 'clean'),
@@ -119,21 +119,47 @@ INSERT INTO rooms (room_number, category_id, floor_number, operational_status, h
     ('104', 'd0000000-0000-0000-0000-000000000003', 1, 'available', 'clean'),
     ('105', 'd0000000-0000-0000-0000-000000000002', 1, 'available', 'clean'),
     ('106', 'd0000000-0000-0000-0000-000000000002', 1, 'available', 'clean'),
--- Floor 2
+    ('107', 'd0000000-0000-0000-0000-000000000004', 1, 'available', 'clean'),
+    ('108', 'd0000000-0000-0000-0000-000000000003', 1, 'available', 'clean'),
+    ('109', 'd0000000-0000-0000-0000-000000000002', 1, 'available', 'clean'),
+-- Floor 2 (Rooms 201 - 208)
     ('201', 'd0000000-0000-0000-0000-000000000002', 2, 'available', 'clean'),
     ('202', 'd0000000-0000-0000-0000-000000000002', 2, 'occupied', 'clean'),
     ('203', 'd0000000-0000-0000-0000-000000000003', 2, 'available', 'clean'),
     ('204', 'd0000000-0000-0000-0000-000000000003', 2, 'cleaning', 'dirty'),
     ('205', 'd0000000-0000-0000-0000-000000000001', 2, 'available', 'clean'),
     ('206', 'd0000000-0000-0000-0000-000000000001', 2, 'reserved', 'clean'),
--- Floor 3
+    ('207', 'd0000000-0000-0000-0000-000000000001', 2, 'available', 'clean'),
+    ('208', 'd0000000-0000-0000-0000-000000000002', 2, 'available', 'clean'),
+-- Floor 3 (Rooms 301 - 308)
     ('301', 'd0000000-0000-0000-0000-000000000002', 3, 'available', 'clean'),
     ('302', 'd0000000-0000-0000-0000-000000000002', 3, 'available', 'clean'),
     ('303', 'd0000000-0000-0000-0000-000000000001', 3, 'occupied', 'clean'),
     ('304', 'd0000000-0000-0000-0000-000000000001', 3, 'available', 'clean'),
     ('305', 'd0000000-0000-0000-0000-000000000004', 3, 'available', 'clean'),
-    ('306', 'd0000000-0000-0000-0000-000000000004', 3, 'maintenance', 'dirty')
+    ('306', 'd0000000-0000-0000-0000-000000000004', 3, 'maintenance', 'dirty'),
+    ('307', 'd0000000-0000-0000-0000-000000000003', 3, 'available', 'clean'),
+    ('308', 'd0000000-0000-0000-0000-000000000002', 3, 'available', 'clean')
 ON CONFLICT (room_number) DO NOTHING;
+
+-- 5b. RFID Door Locks (25 Locks for 25 Rooms + Encoders + IoT Gateway)
+INSERT INTO rfid_devices (device_name, device_type, room_id, ip_address, mac_address, status, firmware_version)
+SELECT 
+    'Lock-Room-' || r.room_number,
+    'door_lock',
+    r.id,
+    '192.168.1.' || r.room_number,
+    '00:1B:44:11:' || LPAD(r.floor_number::text, 2, '0') || ':' || LPAD(RIGHT(r.room_number, 2), 2, '0'),
+    'online',
+    'v2.4.1'
+FROM rooms r
+ON CONFLICT DO NOTHING;
+
+INSERT INTO rfid_devices (device_name, device_type, ip_address, mac_address, status, firmware_version) VALUES
+    ('Front-Desk-Encoder-01', 'card_encoder', '192.168.1.50', '00:1B:44:99:FF:01', 'online', 'v3.1.0'),
+    ('Front-Desk-Encoder-02 (Mobile/Tab)', 'card_encoder', '192.168.1.51', '00:1B:44:99:FF:02', 'online', 'v3.1.0'),
+    ('Central-RFID-IoT-Gateway', 'gateway', '192.168.1.1', '00:1B:44:AA:00:01', 'online', 'v4.0.2')
+ON CONFLICT DO NOTHING;
 
 -- 6. Convention Hall
 INSERT INTO convention_halls (
@@ -152,7 +178,7 @@ INSERT INTO convention_halls (
 -- 7. Cancellation Policies
 INSERT INTO cancellation_policies (id, title, hours_before_checkin, refund_percentage, description) VALUES
     ('f0000000-0000-0000-0000-000000000001', 'Free Cancellation (48+ Hours)', 48, 100.00, 'Full 100% refund for cancellations made at least 48 hours before check-in time (14:00).'),
-    ('f0000000-0000-0000-0000-000000000002', 'Moderate Cancellation (24–48 Hours)', 24, 50.00, '50% refund for cancellations made between 24 and 48 hours prior to check-in.'),
+    ('f0000000-0000-0000-0000-000000000002', 'Moderate Cancellation (24â€“48 Hours)', 24, 50.00, '50% refund for cancellations made between 24 and 48 hours prior to check-in.'),
     ('f0000000-0000-0000-0000-000000000003', 'Late Cancellation (< 24 Hours)', 0, 0.00, 'No refund for cancellations made within 24 hours of check-in or no-shows.')
 ON CONFLICT (id) DO NOTHING;
 

@@ -177,29 +177,36 @@ export const INITIAL_ROOM_CATEGORIES: RoomCategory[] = [
 ];
 
 export const INITIAL_PHYSICAL_ROOMS: PhysicalRoom[] = [
-  // Floor 1
+  // --- FLOOR 1 (Rooms 101 - 109) ---
   { id: 'rm-101', room_number: '101', category_id: 'cat-single-04', category_name: 'Single Bed Room', floor_number: 1, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-102', room_number: '102', category_id: 'cat-single-04', category_name: 'Single Bed Room', floor_number: 1, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-103', room_number: '103', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 1, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-104', room_number: '104', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 1, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-105', room_number: '105', category_id: 'cat-double-bed-02', category_name: 'Double Bed Room', floor_number: 1, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-106', room_number: '106', category_id: 'cat-double-bed-02', category_name: 'Double Bed Room', floor_number: 1, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
-  
-  // Floor 2
+  { id: 'rm-107', room_number: '107', category_id: 'cat-single-04', category_name: 'Single Bed Room', floor_number: 1, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
+  { id: 'rm-108', room_number: '108', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 1, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
+  { id: 'rm-109', room_number: '109', category_id: 'cat-double-bed-02', category_name: 'Double Bed Room', floor_number: 1, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
+
+  // --- FLOOR 2 (Rooms 201 - 208) ---
   { id: 'rm-201', room_number: '201', category_id: 'cat-double-bed-02', category_name: 'Double Bed Room', floor_number: 2, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-202', room_number: '202', category_id: 'cat-double-bed-02', category_name: 'Double Bed Room', floor_number: 2, operational_status: 'occupied', housekeeping_status: 'clean', current_booking_ref: 'STG-20261104-8142', current_guest_name: 'K. Venkatesh Rao', is_active: true },
   { id: 'rm-203', room_number: '203', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 2, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-204', room_number: '204', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 2, operational_status: 'cleaning', housekeeping_status: 'dirty', is_active: true },
   { id: 'rm-205', room_number: '205', category_id: 'cat-suite-01', category_name: 'Suite Room', floor_number: 2, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-206', room_number: '206', category_id: 'cat-suite-01', category_name: 'Suite Room', floor_number: 2, operational_status: 'reserved', housekeeping_status: 'clean', current_booking_ref: 'STG-20261105-3921', current_guest_name: 'P. Sudhakar Reddy', is_active: true },
-  
-  // Floor 3
+  { id: 'rm-207', room_number: '207', category_id: 'cat-suite-01', category_name: 'Suite Room', floor_number: 2, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
+  { id: 'rm-208', room_number: '208', category_id: 'cat-double-bed-02', category_name: 'Double Bed Room', floor_number: 2, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
+
+  // --- FLOOR 3 (Rooms 301 - 308) ---
   { id: 'rm-301', room_number: '301', category_id: 'cat-double-bed-02', category_name: 'Double Bed Room', floor_number: 3, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-302', room_number: '302', category_id: 'cat-double-bed-02', category_name: 'Double Bed Room', floor_number: 3, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-303', room_number: '303', category_id: 'cat-suite-01', category_name: 'Suite Room', floor_number: 3, operational_status: 'occupied', housekeeping_status: 'clean', current_booking_ref: 'STG-20261103-1189', current_guest_name: 'Dr. Anand Raman', is_active: true },
   { id: 'rm-304', room_number: '304', category_id: 'cat-suite-01', category_name: 'Suite Room', floor_number: 3, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-305', room_number: '305', category_id: 'cat-single-04', category_name: 'Single Bed Room', floor_number: 3, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-306', room_number: '306', category_id: 'cat-single-04', category_name: 'Single Bed Room', floor_number: 3, operational_status: 'maintenance', housekeeping_status: 'dirty', notes: 'AC sensor replacement in progress', is_active: true },
+  { id: 'rm-307', room_number: '307', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 3, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
+  { id: 'rm-308', room_number: '308', category_id: 'cat-double-bed-02', category_name: 'Double Bed Room', floor_number: 3, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
 ];
 
 export const INITIAL_AMENITIES: AmenityItem[] = [
@@ -376,6 +383,9 @@ export const INITIAL_RFID_DEVICES: RFIDDevice[] = [
   { id: 'dev-lock-104', device_name: 'Lock-Room-104', device_type: 'door_lock', room_number: '104', ip_address: '192.168.1.104', mac_address: '00:1B:44:11:1A:04', status: 'online', battery_level: 91, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:23:00+05:30' },
   { id: 'dev-lock-105', device_name: 'Lock-Room-105', device_type: 'door_lock', room_number: '105', ip_address: '192.168.1.105', mac_address: '00:1B:44:11:1A:05', status: 'online', battery_level: 98, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:24:00+05:30' },
   { id: 'dev-lock-106', device_name: 'Lock-Room-106', device_type: 'door_lock', room_number: '106', ip_address: '192.168.1.106', mac_address: '00:1B:44:11:1A:06', status: 'online', battery_level: 92, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:25:00+05:30' },
+  { id: 'dev-lock-107', device_name: 'Lock-Room-107', device_type: 'door_lock', room_number: '107', ip_address: '192.168.1.107', mac_address: '00:1B:44:11:1A:07', status: 'online', battery_level: 94, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:25:00+05:30' },
+  { id: 'dev-lock-108', device_name: 'Lock-Room-108', device_type: 'door_lock', room_number: '108', ip_address: '192.168.1.108', mac_address: '00:1B:44:11:1A:08', status: 'online', battery_level: 95, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:25:00+05:30' },
+  { id: 'dev-lock-109', device_name: 'Lock-Room-109', device_type: 'door_lock', room_number: '109', ip_address: '192.168.1.109', mac_address: '00:1B:44:11:1A:09', status: 'online', battery_level: 93, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:25:00+05:30' },
 
   // --- FLOOR 2 DOOR LOCKS ---
   { id: 'dev-lock-201', device_name: 'Lock-Room-201', device_type: 'door_lock', room_number: '201', ip_address: '192.168.1.121', mac_address: '00:1B:44:11:2A:01', status: 'online', battery_level: 95, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:25:00+05:30' },
@@ -384,6 +394,8 @@ export const INITIAL_RFID_DEVICES: RFIDDevice[] = [
   { id: 'dev-lock-204', device_name: 'Lock-Room-204', device_type: 'door_lock', room_number: '204', ip_address: '192.168.1.124', mac_address: '00:1B:44:11:2A:04', status: 'online', battery_level: 97, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:27:00+05:30' },
   { id: 'dev-02', device_name: 'Lock-Room-205', device_type: 'door_lock', room_number: '205', ip_address: '192.168.1.125', mac_address: '00:1B:44:11:3A:C8', status: 'online', battery_level: 89, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:27:30+05:30' },
   { id: 'dev-lock-206', device_name: 'Lock-Room-206', device_type: 'door_lock', room_number: '206', ip_address: '192.168.1.126', mac_address: '00:1B:44:11:2A:06', status: 'online', battery_level: 94, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:28:00+05:30' },
+  { id: 'dev-lock-207', device_name: 'Lock-Room-207', device_type: 'door_lock', room_number: '207', ip_address: '192.168.1.127', mac_address: '00:1B:44:11:2A:07', status: 'online', battery_level: 96, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:28:00+05:30' },
+  { id: 'dev-lock-208', device_name: 'Lock-Room-208', device_type: 'door_lock', room_number: '208', ip_address: '192.168.1.128', mac_address: '00:1B:44:11:2A:08', status: 'online', battery_level: 93, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:28:00+05:30' },
 
   // --- FLOOR 3 DOOR LOCKS ---
   { id: 'dev-lock-301', device_name: 'Lock-Room-301', device_type: 'door_lock', room_number: '301', ip_address: '192.168.1.131', mac_address: '00:1B:44:11:3A:01', status: 'online', battery_level: 96, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:28:30+05:30' },
@@ -392,6 +404,8 @@ export const INITIAL_RFID_DEVICES: RFIDDevice[] = [
   { id: 'dev-lock-304', device_name: 'Lock-Room-304', device_type: 'door_lock', room_number: '304', ip_address: '192.168.1.134', mac_address: '00:1B:44:11:3A:04', status: 'online', battery_level: 95, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:30:00+05:30' },
   { id: 'dev-lock-305', device_name: 'Lock-Room-305', device_type: 'door_lock', room_number: '305', ip_address: '192.168.1.135', mac_address: '00:1B:44:11:3A:05', status: 'online', battery_level: 92, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:30:30+05:30' },
   { id: 'dev-lock-306', device_name: 'Lock-Room-306', device_type: 'door_lock', room_number: '306', ip_address: '192.168.1.136', mac_address: '00:1B:44:11:3A:06', status: 'online', battery_level: 90, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:31:00+05:30' },
+  { id: 'dev-lock-307', device_name: 'Lock-Room-307', device_type: 'door_lock', room_number: '307', ip_address: '192.168.1.137', mac_address: '00:1B:44:11:3A:07', status: 'online', battery_level: 94, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:31:00+05:30' },
+  { id: 'dev-lock-308', device_name: 'Lock-Room-308', device_type: 'door_lock', room_number: '308', ip_address: '192.168.1.138', mac_address: '00:1B:44:11:3A:08', status: 'online', battery_level: 92, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:31:00+05:30' },
 
   // --- ENCODER STATIONS & GATEWAYS ---
   { id: 'dev-enc-01', device_name: 'Front-Desk-Encoder-01', device_type: 'card_encoder', ip_address: '192.168.1.50', mac_address: '00:1B:44:99:FF:01', status: 'online', firmware_version: 'v3.1.0', last_ping_at: '2026-11-05T14:31:30+05:30' },
@@ -399,14 +413,8 @@ export const INITIAL_RFID_DEVICES: RFIDDevice[] = [
   { id: 'dev-gw-01', device_name: 'Central-RFID-IoT-Gateway', device_type: 'gateway', ip_address: '192.168.1.1', mac_address: '00:1B:44:AA:00:01', status: 'online', firmware_version: 'v4.0.2', last_ping_at: '2026-11-05T14:32:00+05:30' },
 ];
 
-export const INITIAL_RFID_CARDS: RFIDCard[] = [
-  { id: 'crd-01', card_uid: 'E0-04-1A-8B-3C-91', card_label: 'Guest Card #1024', assigned_room_number: '202', booking_reference: 'STG-20261104-8142', guest_name: 'K. Venkatesh Rao', status: 'active', activated_at: '2026-11-04T14:36:00+05:30', expires_at: '2026-11-06T11:00:00+05:30', issued_by_name: 'B. Lakshmi Devi', created_at: '2026-11-04T14:36:00+05:30' },
-  { id: 'crd-02', card_uid: 'E0-04-1A-8B-7F-22', card_label: 'Guest Card #1025', assigned_room_number: '303', booking_reference: 'STG-20261103-1189', guest_name: 'Dr. Anand Raman', status: 'active', activated_at: '2026-11-03T15:12:00+05:30', expires_at: '2026-11-05T11:00:00+05:30', issued_by_name: 'B. Lakshmi Devi', created_at: '2026-11-03T15:12:00+05:30' },
-  { id: 'crd-03', card_uid: 'E0-04-1A-8B-00-55', card_label: 'Master Housekeeping Card', status: 'active', activated_at: '2026-11-01T08:00:00+05:30', issued_by_name: 'Sri Tayi Grand Admin', created_at: '2026-11-01T08:00:00+05:30' },
-];
+// PRODUCTION READY: No mock or fake cards. Populated dynamically through live issuance.
+export const INITIAL_RFID_CARDS: RFIDCard[] = [];
 
-export const INITIAL_RFID_ACCESS_EVENTS: RFIDAccessEvent[] = [
-  { id: 'evt-01', card_uid: 'E0-04-1A-8B-3C-91', device_name: 'Lock-Room-202', room_number: '202', event_type: 'access_granted', source: 'lock_reader', occurred_at: '2026-11-04T19:45:12+05:30' },
-  { id: 'evt-02', card_uid: 'E0-04-1A-8B-7F-22', device_name: 'Lock-Room-303', room_number: '303', event_type: 'access_granted', source: 'lock_reader', occurred_at: '2026-11-04T21:10:44+05:30' },
-  { id: 'evt-03', card_uid: 'E0-04-1A-99-99-99', device_name: 'Lock-Room-205', room_number: '205', event_type: 'access_denied', reason: 'Unregistered or expired RFID key', source: 'lock_reader', occurred_at: '2026-11-04T21:30:15+05:30' },
-];
+// PRODUCTION READY: No mock or fake access events. Populated live from Be-Tech lock readers & encoder taps.
+export const INITIAL_RFID_ACCESS_EVENTS: RFIDAccessEvent[] = [];

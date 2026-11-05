@@ -6,7 +6,7 @@ Write-Host " SRI TAYI GRAND - UNINSTALL RFID HARDWARE BRIDGE SERVICE   " -Foregr
 Write-Host "==========================================================" -ForegroundColor Yellow
 
 # 1. Stop running process
-Get-Process -Name "SriTayiGrandKeycardBridge","SriAnanthaKeycardBridge" -ErrorAction SilentlyContinue | Stop-Process -Force
+Get-Process -Name "SriTayiGrandKeycardBridge" -ErrorAction SilentlyContinue | Stop-Process -Force
 Write-Host "[1/4] Stopped running RFID bridge processes."
 
 # 2. Remove Registry Auto-Run

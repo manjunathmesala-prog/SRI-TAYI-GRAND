@@ -44,6 +44,27 @@ export default function HousekeepingAdminPage() {
         </div>
       </div>
 
+      {/* RFID Cleaner Card Dual-Tap Automation Banner */}
+      <div className="p-4 rounded-2xl bg-cyan-50 border border-cyan-200 text-xs text-cyan-950 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-cyan-700 text-white flex items-center justify-center shrink-0">
+            <Sparkles className="w-4 h-4" />
+          </div>
+          <div>
+            <strong className="block text-cyan-950">RFID Cleaner Card Dual-Tap Automation Active</strong>
+            <span className="text-cyan-900/80 text-[11px]">
+              Tap 1 (Cleaner enters): automatically moves room to &ldquo;In Progress&rdquo; &bull; Tap 2 / Door Lock (Cleaner exits): automatically moves room to &ldquo;Clean &amp; Available&rdquo;.
+            </span>
+          </div>
+        </div>
+        <a
+          href="/admin/rfid"
+          className="px-3 py-1.5 rounded-lg bg-cyan-700 hover:bg-cyan-800 text-white font-bold text-xs shrink-0 transition-colors"
+        >
+          Manage Cleaning Cards &rarr;
+        </a>
+      </div>
+
       {/* Housekeeping Columns: Dirty, In Progress, Clean */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Column 1: Pending Cleaning (Dirty) */}

@@ -1,14 +1,15 @@
-# Sri Anantha Hotel - RFID Hardware Bridge & SDK Package
+# Sri Tayi Grand - RFID Hardware Bridge & SDK Package
 
-Complete front-desk keycard encoder SDK and web integration package for **Sri Anantha Hotel** (`https://sriananthahotel.com/admin`).
+Complete front-desk keycard encoder SDK and web integration package for **Sri Tayi Grand** (`https://sri-tayi-grand.vercel.app/admin/rfid`).
 
 ---
 
 ## 📦 Package Contents
 
-- **`Start_RFID_Bridge.bat`**: Double-click to launch the hardware service on the laptop.
-- **`bin/`**: Precompiled 32-bit service (`SriAnanthaKeycardBridge.exe`) and all Be-Tech BIS 5.7 vendor DLLs.
-- **`src/`**: Full C# source code and recompile batch script.
+- **`start-rfid-bridge.bat`**: Double-click to launch the hardware service on the laptop.
+- **`install-rfid-service-permanent.bat`**: One-click install to auto-start bridge silently on Windows boot.
+- **`bin/`**: Precompiled 32-bit service (`SriTayiGrandKeycardBridge.exe`) and all Be-Tech BIS 5.7 vendor DLLs.
+- **`src/`**: Full C# source code (`SriTayiGrandKeycardBridge.cs`) and recompile batch script (`build.bat`).
 - **`web-admin-integration/`**: Ready-to-paste Next.js API routes (`route.ts`), client helpers (`rfidClient.ts`), and React UI component (`RfidManager.tsx`).
 - **`docs/`**: Complete technical specification and architectural manual.
 
@@ -16,10 +17,10 @@ Complete front-desk keycard encoder SDK and web integration package for **Sri An
 
 ## 🚀 Quick Start on Front Desk Laptop
 
-1. Connect the USB RFID encoder to the laptop.
-2. Double-click **`Start_RFID_Bridge.bat`** (or the Desktop shortcut).
+1. Connect the Be-Tech USB RFID encoder to the laptop.
+2. Double-click **`start-rfid-bridge.bat`** (or run `install-rfid-service-permanent.bat` for silent auto-start).
 3. The bridge service starts listening on `http://127.0.0.1:8989`.
-4. Open `https://sriananthahotel.com/admin` in Chrome/Edge and manage cards directly.
+4. Open `https://sri-tayi-grand.vercel.app/admin/rfid` (or `http://localhost:3000/admin/rfid`) in Chrome/Edge and manage cards directly.
 
 ---
 
@@ -27,4 +28,4 @@ Complete front-desk keycard encoder SDK and web integration package for **Sri An
 
 Every single card tap on the encoder is recorded:
 1. **Locally:** In `bin\rfid_tap_audit.log`.
-2. **Web Admin Database:** Automatically sent via background POST to `https://sriananthahotel.com/api/admin/rfid-logs`.
+2. **Web Admin Database:** Automatically sent via background POST to `https://sri-tayi-grand.vercel.app/api/admin/rfid-logs` (or local `/api/admin/rfid-logs`).

@@ -290,7 +290,7 @@ namespace SriTayiGrandRfidInstaller
 
         static void StopExistingInstances()
         {
-            string[] procNames = { "SriTayiGrandKeycardBridge", "SriAnanthaKeycardBridge" };
+            string[] procNames = { "SriTayiGrandKeycardBridge" };
             foreach (string name in procNames)
             {
                 try

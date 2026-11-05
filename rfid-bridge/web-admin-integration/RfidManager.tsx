@@ -88,7 +88,7 @@ export default function RfidManager({ activeStaffUser = 'Admin', defaultRoom = '
           </div>
           <div>
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">RFID Keycard Station</h2>
-            <p className="text-xs text-gray-500">Sri Anantha Hotel Front Desk</p>
+            <p className="text-xs text-gray-500">Sri Tayi Grand Front Desk</p>
           </div>
         </div>
 

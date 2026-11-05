@@ -1,5 +1,5 @@
 /**
- * Sri Anantha Hotel - RFID Hardware Bridge Client
+ * Sri Tayi Grand - RFID Hardware Bridge Client
  * Communicates with the local hardware service running on http://127.0.0.1:8989
  */
 
@@ -33,7 +33,7 @@ export async function readCard(staffUsername: string = 'Admin'): Promise<RfidCar
   } catch (err: any) {
     return {
       success: false,
-      error: 'Cannot connect to RFID Bridge. Ensure "Sri Anantha RFID Bridge" is running on this laptop.'
+      error: 'Cannot connect to RFID Bridge. Ensure "Sri Tayi Grand RFID Bridge" is running on this laptop.'
     };
   }
 }

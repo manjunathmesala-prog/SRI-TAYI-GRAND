@@ -1,4 +1,4 @@
-import {
+﻿import {
   RoomCategory,
   PhysicalRoom,
   Booking,
@@ -17,6 +17,7 @@ import {
   BookingStatus,
 } from '@/types';
 
+import { syncCardToSupabase, syncEventToSupabase, deleteCardFromSupabase } from './supabase-rfid';
 import {
   INITIAL_HOTEL_SETTINGS,
   INITIAL_ROOM_CATEGORIES,
@@ -344,45 +345,512 @@ class HotelRepository {
     );
   }
 
+  logRFIDEvent(event: Omit<RFIDAccessEvent, 'id' | 'occurred_at'>): RFIDAccessEvent {
+    const newEvent: RFIDAccessEvent = {
+      ...event,
+      id: 'evt-' + Date.now(),
+      occurred_at: new Date().toISOString(),
+    };
+    this.rfidEvents.unshift(newEvent);
+    syncEventToSupabase(newEvent);
+    return newEvent;
+  }
+
+  issueSuperAdminCard(
+    cardLabel: string = 'Super Admin Master Key',
+    holderName: string = 'Managing Director',
+    issuedBy: string = 'System Root'
+  ): RFIDCard {
+    const randSuffix = Math.floor(100 + Math.random() * 900);
+    const cardUid = `SA-LIFETIME-${randSuffix}`;
+    const newCard: RFIDCard = {
+      id: `crd-sa-${Date.now()}`,
+      card_uid: cardUid,
+      card_label: cardLabel,
+      card_type: 'super_admin',
+      is_lifetime: true,
+      holder_name: holderName,
+      holder_role: 'Super Admin',
+      status: 'active',
+      activated_at: new Date().toISOString(),
+      expires_at: '2099-12-31T23:59:59.000Z',
+      issued_by_name: issuedBy,
+      notes: 'Lifetime Activation - Universal Master Clearance across all rooms and facilities',
+      created_at: new Date().toISOString(),
+    };
+
+    this.rfidCards.unshift(newCard);
+    syncCardToSupabase(newCard);
+    this.logRFIDEvent({
+      card_uid: cardUid,
+      card_type: 'super_admin',
+      card_label: cardLabel,
+      device_name: 'Central-RFID-IoT-Gateway',
+      room_number: 'ALL',
+      event_type: 'access_granted',
+      action_type: 'door_unlock',
+      holder_name: holderName,
+      source: 'encoder',
+      reason: `Super Admin Lifetime Card issued to ${holderName} by ${issuedBy}`,
+    });
+
+    return newCard;
+  }
+
+  issueCleanerCard(
+    cardLabel: string = 'Housekeeping Cleaning Card',
+    holderName: string = 'Housekeeping Staff',
+    issuedBy: string = 'Admin'
+  ): RFIDCard {
+    const randSuffix = Math.floor(100 + Math.random() * 900);
+    const cardUid = `CLN-HK-${randSuffix}`;
+    const newCard: RFIDCard = {
+      id: `crd-cln-${Date.now()}`,
+      card_uid: cardUid,
+      card_label: cardLabel,
+      card_type: 'cleaner',
+      is_lifetime: false,
+      holder_name: holderName,
+      holder_role: 'Housekeeping',
+      status: 'active',
+      activated_at: new Date().toISOString(),
+      issued_by_name: issuedBy,
+      notes: 'Post-checkout turnover cleaning card (dual-tap in-and-out logic)',
+      created_at: new Date().toISOString(),
+    };
+
+    this.rfidCards.unshift(newCard);
+    syncCardToSupabase(newCard);
+    this.logRFIDEvent({
+      card_uid: cardUid,
+      card_type: 'cleaner',
+      card_label: cardLabel,
+      device_name: 'Central-RFID-IoT-Gateway',
+      room_number: 'ALL-CLEANING',
+      event_type: 'access_granted',
+      action_type: 'door_unlock',
+      holder_name: holderName,
+      source: 'encoder',
+      reason: `Cleaner Card issued to ${holderName} by ${issuedBy}`,
+    });
+
+    return newCard;
+  }
+
   issueRFIDCard(
     roomNumber: string,
     bookingRef: string,
     guestName: string,
-    issuedBy: string
+    issuedBy: string = 'Front Desk',
+    expiresAt?: string
   ): RFIDCard {
-    const cardUid = `E0-04-1A-${Math.floor(10 + Math.random() * 89)}-${Math.floor(10 + Math.random() * 89)}-${Math.floor(10 + Math.random() * 89)}`;
+    const cardUid = `BT-57-${Math.floor(1000020000 + Math.random() * 99999)}`;
     const newCard: RFIDCard = {
       id: `crd-${Date.now()}`,
       card_uid: cardUid,
-      card_label: `Guest Card #${Math.floor(1000 + Math.random() * 9000)}`,
+      card_label: `Guest Card (Room ${roomNumber})`,
+      card_type: 'guest',
       assigned_room_number: roomNumber,
       booking_reference: bookingRef,
       guest_name: guestName,
+      holder_name: guestName,
       status: 'active',
       activated_at: new Date().toISOString(),
-      expires_at: new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
+      expires_at: expiresAt || new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
       issued_by_name: issuedBy,
+      notes: `Customer Keycard for Room ${roomNumber} (Stay: ${bookingRef})`,
       created_at: new Date().toISOString(),
     };
     this.rfidCards.unshift(newCard);
+    syncCardToSupabase(newCard);
+
+    this.logRFIDEvent({
+      card_uid: cardUid,
+      card_type: 'guest',
+      card_label: newCard.card_label,
+      device_name: 'Front-Desk-Encoder-01',
+      room_number: roomNumber,
+      event_type: 'access_granted',
+      action_type: 'door_unlock',
+      holder_name: guestName,
+      booking_reference: bookingRef,
+      source: 'encoder',
+      reason: `Customer Keycard encoded & issued to ${guestName} for Room ${roomNumber}`,
+    });
+
     return newCard;
   }
 
-  deactivateRFIDCard(cardId: string): RFIDCard | null {
-    const card = this.rfidCards.find((c) => c.id === cardId);
+  toggleRFIDCardStatus(cardId: string, targetStatus?: 'active' | 'inactive'): RFIDCard | null {
+    const card = this.rfidCards.find((c) => c.id === cardId || c.card_uid === cardId);
     if (!card) return null;
-    card.status = 'inactive';
+
+    const nextStatus = targetStatus || (card.status === 'active' ? 'inactive' : 'active');
+    card.status = nextStatus;
+
+    if (nextStatus === 'inactive') {
+      card.deactivated_at = new Date().toISOString();
+    } else {
+      card.activated_at = new Date().toISOString();
+    }
+
+    this.logRFIDEvent({
+      card_uid: card.card_uid,
+      card_type: card.card_type,
+      card_label: card.card_label,
+      device_name: 'Admin-Dashboard',
+      room_number: card.assigned_room_number || 'N/A',
+      event_type: nextStatus === 'active' ? 'access_granted' : 'access_denied',
+      action_type: nextStatus === 'active' ? 'door_unlock' : 'unauthorized_attempt',
+      holder_name: card.holder_name || card.guest_name,
+      source: 'encoder',
+      reason: `Card ${card.card_uid} (${card.card_type}) ${nextStatus === 'active' ? 'ACTIVATED' : 'DEACTIVATED'} via Admin Dashboard`,
+    });
+
+    syncCardToSupabase(card);
     return card;
   }
 
-  logRFIDEvent(event: Omit<RFIDAccessEvent, 'id' | 'occurred_at'>): RFIDAccessEvent {
-    const newEvent: RFIDAccessEvent = {
-      ...event,
-      id: `evt-${Date.now()}`,
-      occurred_at: new Date().toISOString(),
+  deactivateRFIDCard(cardId: string): RFIDCard | null {
+    return this.toggleRFIDCardStatus(cardId, 'inactive');
+  }
+
+  
+  purgeAllRFIDCards(): void {
+    this.rfidCards = [];
+  }
+
+  purgeAllRFIDEvents(): void {
+    this.rfidEvents = [];
+  }
+
+  deleteRFIDCard(cardId: string): boolean {
+    const idx = this.rfidCards.findIndex((c) => c.id === cardId || c.card_uid === cardId);
+    if (idx === -1) return false;
+    const [removed] = this.rfidCards.splice(idx, 1);
+    if (removed) deleteCardFromSupabase(removed.card_uid);
+    return true;
+  }
+
+  extendGuestCardValidity(
+    cardId: string,
+    hoursToAdd: number = 2,
+    customExpiry?: string,
+    staffUser: string = 'Front Desk'
+  ): RFIDCard | null {
+    const card = this.rfidCards.find((c) => c.id === cardId || c.card_uid === cardId);
+    if (!card) return null;
+
+    let newExpiry: string;
+    if (customExpiry) {
+      newExpiry = new Date(customExpiry).toISOString();
+    } else {
+      const currentExpiryMs = card.expires_at ? new Date(card.expires_at).getTime() : Date.now();
+      const baseMs = Math.max(Date.now(), currentExpiryMs);
+      newExpiry = new Date(baseMs + hoursToAdd * 3600 * 1000).toISOString();
+    }
+
+    card.expires_at = newExpiry;
+    card.status = 'active'; // Reactivate card if it was marked expired
+
+    this.logRFIDEvent({
+      card_uid: card.card_uid,
+      card_type: card.card_type || 'guest',
+      card_label: card.card_label,
+      device_name: 'Admin-Dashboard',
+      room_number: card.assigned_room_number || 'N/A',
+      event_type: 'access_granted',
+      action_type: 'door_unlock',
+      holder_name: card.holder_name || card.guest_name,
+      booking_reference: card.booking_reference,
+      source: 'encoder',
+      reason: `Keycard validity extended by ${hoursToAdd ? `${hoursToAdd} hours` : 'custom time'} until ${new Date(newExpiry).toLocaleString('en-IN')} by ${staffUser}`,
+    });
+
+    syncCardToSupabase(card);
+    return card;
+  }
+
+  processDoorTap(
+    cardUid: string,
+    roomNumber: string,
+    _actionOverride?: string
+  ): {
+    success: boolean;
+    event: RFIDAccessEvent;
+    roomStatus?: OperationalStatus;
+    housekeepingStatus?: HousekeepingStatus;
+    message: string;
+    cardType?: string;
+  } {
+    const card = this.rfidCards.find(
+      (c) => c.card_uid.toLowerCase() === cardUid.toLowerCase()
+    );
+
+    const room = this.rooms.find((r) => r.room_number === roomNumber);
+    const roomCategory = room ? this.categories.find((c) => c.id === room.category_id) : undefined;
+    const roomCatName = roomCategory ? roomCategory.name : 'Standard Room';
+
+    // 1. If Card Not Found or Inactive
+    if (!card || card.status !== 'active') {
+      const isCardFound = !!card;
+      const denialReason = !isCardFound
+        ? `Unregistered card UID: ${cardUid}`
+        : `Card ${card.card_uid} is currently ${card.status.toUpperCase()}`;
+
+      const event = this.logRFIDEvent({
+        card_uid: cardUid,
+        card_type: card?.card_type || 'guest',
+        card_label: card?.card_label || 'Unregistered Card',
+        device_name: `Lock-Room-${roomNumber}`,
+        room_number: roomNumber,
+        event_type: 'access_denied',
+        action_type: 'unauthorized_attempt',
+        holder_name: card?.holder_name || 'Unknown Holder',
+        booking_reference: card?.booking_reference,
+        reason: `Access Denied: ${denialReason}`,
+        source: 'lock_reader',
+      });
+
+      return {
+        success: false,
+        event,
+        message: `Access Denied: ${denialReason}`,
+      };
+    }
+
+    // Update card last tap tracking
+    card.last_tap_room = roomNumber;
+    card.last_tap_at = new Date().toISOString();
+
+    // 2. CASE: SUPER ADMIN CARD (Lifetime Activation, Universal Unlock)
+    if (card.card_type === 'super_admin') {
+      const event = this.logRFIDEvent({
+        card_uid: card.card_uid,
+        card_type: 'super_admin',
+        card_label: card.card_label,
+        device_name: `Lock-Room-${roomNumber}`,
+        room_number: roomNumber,
+        event_type: 'access_granted',
+        action_type: 'door_unlock',
+        holder_name: card.holder_name,
+        reason: `Super Admin Lifetime Override: Master Access Granted to Room ${roomNumber} for ${card.holder_name}`,
+        source: 'lock_reader',
+      });
+
+      return {
+        success: true,
+        event,
+        roomStatus: room?.operational_status,
+        housekeepingStatus: room?.housekeeping_status,
+        cardType: 'super_admin',
+        message: `Super Admin Master Card Unlocked Room ${roomNumber} (Lifetime Clearance)`,
+      };
+    }
+
+    // 3. CASE: CLEANING CARD (Housekeeping In-and-Out Automation)
+    if (card.card_type === 'cleaner') {
+      // Guard: If guest is actively occupying the room
+      if (room && room.operational_status === 'occupied' && room.housekeeping_status !== 'dirty') {
+        const event = this.logRFIDEvent({
+          card_uid: card.card_uid,
+          card_type: 'cleaner',
+          card_label: card.card_label,
+          device_name: `Lock-Room-${roomNumber}`,
+          room_number: roomNumber,
+          event_type: 'access_denied',
+          action_type: 'unauthorized_attempt',
+          holder_name: card.holder_name,
+          reason: `Access Denied: Room ${roomNumber} is occupied by guest (${room.current_guest_name || 'Guest'}). Cleaning access restricted until checkout or housekeeping request.`,
+          source: 'lock_reader',
+        });
+
+        return {
+          success: false,
+          event,
+          roomStatus: room.operational_status,
+          housekeepingStatus: room.housekeeping_status,
+          cardType: 'cleaner',
+          message: `Access Denied: Room ${roomNumber} is currently occupied by guest. Cleaning restricted.`,
+        };
+      }
+
+      // State Machine for Cleaning Card
+      // Tap 1: Cleaner goes inside -> mark housekeeping as in_progress (cleaner inside)
+      if (room && (room.housekeeping_status === 'dirty' || room.operational_status === 'cleaning' && room.housekeeping_status !== 'in_progress')) {
+        this.updateRoomStatus(room.id, 'cleaning', 'in_progress', `Cleaner ${card.holder_name} entered room for turnover sanitization`);
+
+        const event = this.logRFIDEvent({
+          card_uid: card.card_uid,
+          card_type: 'cleaner',
+          card_label: card.card_label,
+          device_name: `Lock-Room-${roomNumber}`,
+          room_number: roomNumber,
+          event_type: 'access_granted',
+          action_type: 'cleaning_started',
+          holder_name: card.holder_name,
+          reason: `Cleaner Entered: Cleaner ${card.holder_name} inside Room ${roomNumber}. Marked: Cleaning In Progress.`,
+          source: 'lock_reader',
+        });
+
+        return {
+          success: true,
+          event,
+          roomStatus: 'cleaning',
+          housekeepingStatus: 'in_progress',
+          cardType: 'cleaner',
+          message: `Cleaner ${card.holder_name} tapped into Room ${roomNumber}. Marked: Cleaning In Progress.`,
+        };
+      }
+
+      // Tap 2: Cleaner leaves & door locks -> mark cleaning completed & room available
+      if (room && room.housekeeping_status === 'in_progress') {
+        this.updateRoomStatus(room.id, 'available', 'clean', `Cleaned & sanitized by ${card.holder_name}. Ready for guest check-in.`);
+
+        const event = this.logRFIDEvent({
+          card_uid: card.card_uid,
+          card_type: 'cleaner',
+          card_label: card.card_label,
+          device_name: `Lock-Room-${roomNumber}`,
+          room_number: roomNumber,
+          event_type: 'access_granted',
+          action_type: 'cleaning_completed',
+          holder_name: card.holder_name,
+          reason: `Cleaning Completed: Cleaner ${card.holder_name} exited & locked door. Room ${roomNumber} is now Clean & Available for check-in.`,
+          source: 'lock_reader',
+        });
+
+        return {
+          success: true,
+          event,
+          roomStatus: 'available',
+          housekeepingStatus: 'clean',
+          cardType: 'cleaner',
+          message: `Cleaning Completed for Room ${roomNumber}! Door locked. Room is now Clean & Available.`,
+        };
+      }
+
+      // Fallback: If room was already clean, allow inspection
+      if (room) {
+        const event = this.logRFIDEvent({
+          card_uid: card.card_uid,
+          card_type: 'cleaner',
+          card_label: card.card_label,
+          device_name: `Lock-Room-${roomNumber}`,
+          room_number: roomNumber,
+          event_type: 'access_granted',
+          action_type: 'door_unlock',
+          holder_name: card.holder_name,
+          reason: `Housekeeping Inspection: Cleaner ${card.holder_name} inspected Room ${roomNumber}.`,
+          source: 'lock_reader',
+        });
+
+        return {
+          success: true,
+          event,
+          roomStatus: room.operational_status,
+          housekeepingStatus: room.housekeeping_status,
+          cardType: 'cleaner',
+          message: `Housekeeping routine inspection unlock for Room ${roomNumber}.`,
+        };
+      }
+    }
+
+    // 4. CASE: CUSTOMER / GUEST CARD
+    if (card.card_type === 'guest') {
+      // Check room assignment
+      if (card.assigned_room_number !== roomNumber) {
+        const event = this.logRFIDEvent({
+          card_uid: card.card_uid,
+          card_type: 'guest',
+          card_label: card.card_label,
+          device_name: `Lock-Room-${roomNumber}`,
+          room_number: roomNumber,
+          event_type: 'access_denied',
+          action_type: 'unauthorized_attempt',
+          holder_name: card.guest_name || card.holder_name,
+          booking_reference: card.booking_reference,
+          reason: `Access Denied: Keycard is assigned to Room ${card.assigned_room_number}, unauthorized for Room ${roomNumber}`,
+          source: 'lock_reader',
+        });
+
+        return {
+          success: false,
+          event,
+          cardType: 'guest',
+          message: `Access Denied: Card is assigned to Room ${card.assigned_room_number}, not Room ${roomNumber}`,
+        };
+      }
+
+      // Check card expiration
+      if (card.expires_at && new Date(card.expires_at).getTime() < Date.now()) {
+        const event = this.logRFIDEvent({
+          card_uid: card.card_uid,
+          card_type: 'guest',
+          card_label: card.card_label,
+          device_name: `Lock-Room-${roomNumber}`,
+          room_number: roomNumber,
+          event_type: 'access_denied',
+          action_type: 'unauthorized_attempt',
+          holder_name: card.guest_name || card.holder_name,
+          booking_reference: card.booking_reference,
+          reason: `Access Denied: Keycard expired at checkout time (${new Date(card.expires_at).toLocaleString('en-IN')})`,
+          source: 'lock_reader',
+        });
+
+        return {
+          success: false,
+          event,
+          cardType: 'guest',
+          message: `Access Denied: Keycard expired at checkout time.`,
+        };
+      }
+
+      // Valid customer keycard unlock
+      if (room && room.operational_status === 'reserved') {
+        this.updateRoomStatus(room.id, 'occupied', 'clean');
+      }
+
+      const event = this.logRFIDEvent({
+        card_uid: card.card_uid,
+        card_type: 'guest',
+        card_label: card.card_label,
+        device_name: `Lock-Room-${roomNumber}`,
+        room_number: roomNumber,
+        event_type: 'access_granted',
+        action_type: 'door_unlock',
+        holder_name: card.guest_name || card.holder_name,
+        booking_reference: card.booking_reference,
+        reason: `Customer Tap: Door unlocked for guest ${card.guest_name || card.holder_name} (Stay: ${card.booking_reference || 'Active'})`,
+        source: 'lock_reader',
+      });
+
+      return {
+        success: true,
+        event,
+        roomStatus: room?.operational_status,
+        housekeepingStatus: room?.housekeeping_status,
+        cardType: 'guest',
+        message: `Customer ${card.guest_name || card.holder_name} tapped and unlocked Room ${roomNumber}.`,
+      };
+    }
+
+    // Fallback unknown card type
+    const event = this.logRFIDEvent({
+      card_uid: card.card_uid,
+      device_name: `Lock-Room-${roomNumber}`,
+      room_number: roomNumber,
+      event_type: 'access_denied',
+      action_type: 'unauthorized_attempt',
+      reason: 'Unrecognized card classification',
+      source: 'lock_reader',
+    });
+
+    return {
+      success: false,
+      event,
+      message: 'Access Denied: Unrecognized card configuration.',
     };
-    this.rfidEvents.unshift(newEvent);
-    return newEvent;
   }
 
   activateAllRFIDDevices(): RFIDDevice[] {
@@ -411,7 +879,8 @@ declare global {
   var __hotelRepo: HotelRepository | undefined;
 }
 
-export const repo = global.__hotelRepo || new HotelRepository();
-if (process.env.NODE_ENV !== 'production') {
-  global.__hotelRepo = repo;
+if (!global.__hotelRepo || typeof (global.__hotelRepo as any).processDoorTap !== 'function' || typeof (global.__hotelRepo as any).extendGuestCardValidity !== 'function' || typeof (global.__hotelRepo as any).purgeAllRFIDCards !== 'function') {
+  global.__hotelRepo = new HotelRepository();
 }
+
+export const repo = global.__hotelRepo;

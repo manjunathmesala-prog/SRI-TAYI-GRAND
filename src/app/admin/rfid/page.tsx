@@ -1,15 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { repo } from '@/lib/db/repository';
-import { RFIDCard, RFIDDevice, RFIDAccessEvent } from '@/types';
-import { issueGuestRoomKey, revokeGuestRoomKey } from '@/lib/rfid';
+import { useState, useEffect, useCallback } from 'react';
+import { RFIDCard, RFIDDevice, RFIDAccessEvent, PhysicalRoom } from '@/types';
 import {
   checkBridgeHealth,
   readPhysicalCard,
   issuePhysicalKeycard,
   checkoutPhysicalCard,
-  formatRfidErrorMessage,
   BridgeHealthStatus,
   RfidCardResult,
   RFID_BRIDGE_URL,
@@ -17,7 +14,6 @@ import {
 import {
   KeyRound,
   Radio,
-  Wifi,
   Battery,
   ShieldCheck,
   AlertTriangle,
@@ -28,19 +24,29 @@ import {
   X,
   CreditCard,
   Cpu,
-  Volume2,
-  Check,
-  Terminal,
   Settings,
-  Layers,
   Zap,
   Download,
+  Sparkles,
+  Crown,
+  Clock,
+  Search,
+  Trash2,
+  DoorOpen,
+  DoorClosed,
+  Calendar,
 } from 'lucide-react';
 
 export default function RFIDAdminPage() {
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [activeTab, setActiveTab] = useState<'hardware' | 'cards' | 'devices' | 'logs'>('hardware');
+  const [activeTab, setActiveTab] = useState<'roles' | 'hardware' | 'cards' | 'devices' | 'logs'>('roles');
   const [floorFilter, setFloorFilter] = useState<'all' | 'floor1' | 'floor2' | 'floor3' | 'infrastructure'>('all');
+
+  // Live Data State (Synced from API)
+  const [cards, setCards] = useState<RFIDCard[]>([]);
+  const [devices, setDevices] = useState<RFIDDevice[]>([]);
+  const [events, setEvents] = useState<RFIDAccessEvent[]>([]);
+  const [rooms, setRooms] = useState<PhysicalRoom[]>([]);
+  const [loadingData, setLoadingData] = useState(true);
 
   // Live Hardware Bridge State
   const [bridgeStatus, setBridgeStatus] = useState<BridgeHealthStatus>({ isOnline: true });
@@ -59,22 +65,45 @@ export default function RFIDAdminPage() {
   const [scannedCard, setScannedCard] = useState<RfidCardResult | null>(null);
 
   // Quick Issue Hardware form
-  const [hwRoom, setHwRoom] = useState('201');
-  const [hwGuest, setHwGuest] = useState('P. Sudhakar Reddy');
-  const [hwStaff, setHwStaff] = useState('Front Desk - Shift A');
+  const [hwRoom, setHwRoom] = useState('101');
+  const [hwGuest, setHwGuest] = useState('');
+  const [hwStaff, setHwStaff] = useState('Front Desk');
 
-  // Issue card modal
+  // Modals for Role Cards
+  const [showSuperAdminModal, setShowSuperAdminModal] = useState(false);
+  const [saCardLabel, setSaCardLabel] = useState('Super Admin Master Key');
+  const [saHolderName, setSaHolderName] = useState('');
+
+  const [showCleanerModal, setShowCleanerModal] = useState(false);
+  const [cleanerCardLabel, setCleanerCardLabel] = useState('Housekeeping Cleaning Card');
+  const [cleanerHolderName, setCleanerHolderName] = useState('');
+
+  // Issue guest card modal
   const [isIssuingCard, setIsIssuingCard] = useState(false);
-  const [issueRoom, setIssueRoom] = useState('205');
-  const [issueGuest, setIssueGuest] = useState('P. Sudhakar Reddy');
-  const [issueRef, setIssueRef] = useState('STG-20261105-3921');
+  const [issueRoom, setIssueRoom] = useState('101');
+  const [issueGuest, setIssueGuest] = useState('');
+  const [issueRef, setIssueRef] = useState('');
   const [issueModalError, setIssueModalError] = useState<string | null>(null);
 
+  // Extend Validity Modal
+  const [extendingCard, setExtendingCard] = useState<RFIDCard | null>(null);
+  const [extendHours, setExtendHours] = useState('2');
+  const [customExpiryDate, setCustomExpiryDate] = useState('');
 
-  const devices = repo.getRFIDDevices();
-  const cards = repo.getRFIDCards();
-  const events = repo.getRFIDEvents();
-  const rooms = repo.getRooms();
+  // Interactive Live Tap Tester / Simulator
+  const [simRoom, setSimRoom] = useState('101');
+  const [simCardUid, setSimCardUid] = useState('');
+  const [simBusy, setSimBusy] = useState(false);
+  const [simResult, setSimResult] = useState<{
+    success: boolean;
+    message: string;
+    event?: RFIDAccessEvent;
+  } | null>(null);
+
+  // Logs Filtering
+  const [logSearchRoom, setLogSearchRoom] = useState('');
+  const [logFilterType, setLogFilterType] = useState<'all' | 'super_admin' | 'cleaner' | 'guest'>('all');
+  const [logFilterStatus, setLogFilterStatus] = useState<'all' | 'access_granted' | 'access_denied'>('all');
 
   // Load saved bridge host on mount
   useEffect(() => {
@@ -83,6 +112,44 @@ export default function RFIDAdminPage() {
       if (saved) setCustomHost(saved);
     }
   }, []);
+
+  // Fetch all cards, devices, events and rooms from server APIs
+  const refreshAllData = useCallback(async () => {
+    try {
+      const [cardsRes, logsRes, devsRes] = await Promise.all([
+        fetch('/api/rfid/cards'),
+        fetch('/api/admin/rfid-logs'),
+        fetch('/api/rfid/devices'),
+      ]);
+
+      if (cardsRes.ok) {
+        const cData = await cardsRes.json();
+        if (cData.cards) setCards(cData.cards);
+        if (cData.rooms) setRooms(cData.rooms);
+      }
+
+      if (logsRes.ok) {
+        const lData = await logsRes.json();
+        if (lData.events) setEvents(lData.events);
+      }
+
+      if (devsRes.ok) {
+        const dData = await devsRes.json();
+        if (dData.devices) setDevices(dData.devices);
+      }
+    } catch (e) {
+      console.error('Failed to load RFID live data:', e);
+    } finally {
+      setLoadingData(false);
+    }
+  }, []);
+
+  // Initial load and periodic refresh
+  useEffect(() => {
+    refreshAllData();
+    const interval = setInterval(refreshAllData, 5000);
+    return () => clearInterval(interval);
+  }, [refreshAllData]);
 
   // Periodically poll bridge status
   useEffect(() => {
@@ -95,6 +162,18 @@ export default function RFIDAdminPage() {
     const interval = setInterval(check, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  // Filtered Cards
+  const superAdminCards = cards.filter((c) => c.card_type === 'super_admin');
+  const cleanerCards = cards.filter((c) => c.card_type === 'cleaner');
+  const guestCards = cards.filter((c) => c.card_type === 'guest' || !c.card_type);
+
+  // Set default simCardUid when cards load
+  useEffect(() => {
+    if (cards.length > 0 && (!simCardUid || !cards.some((c) => c.card_uid === simCardUid))) {
+      setSimCardUid(cards[0].card_uid);
+    }
+  }, [cards, simCardUid]);
 
   // Save host configuration
   const handleSaveHost = (e: React.FormEvent) => {
@@ -121,20 +200,18 @@ export default function RFIDAdminPage() {
       });
       const data = await res.json();
       if (data.success) {
-        repo.activateAllRFIDDevices();
         setHardwareMessage({
-          text: `Success: All ${devices.length} RFID door locks and encoder stations activated and synchronized online!`,
+          text: `Success: All RFID door locks and encoder stations activated and synchronized online!`,
           type: 'success',
         });
-        setRefreshKey((k) => k + 1);
+        refreshAllData();
       }
     } catch {
-      repo.activateAllRFIDDevices();
       setHardwareMessage({
-        text: `All ${devices.length} devices activated in local mesh registry!`,
+        text: `Devices synchronized in local mesh registry!`,
         type: 'success',
       });
-      setRefreshKey((k) => k + 1);
+      refreshAllData();
     } finally {
       setIsActivatingAll(false);
     }
@@ -150,11 +227,10 @@ export default function RFIDAdminPage() {
         body: JSON.stringify({ action: 'update_status', deviceId, status: nextStatus }),
       });
     } catch {}
-    repo.updateRFIDDeviceStatus(deviceId, nextStatus as any);
-    setRefreshKey((k) => k + 1);
+    refreshAllData();
   };
 
-  // 1. Scan physical card on Be-Tech encoder or multi-device reader
+  // 1. Scan physical card on Be-Tech encoder
   const handleScanCard = async () => {
     setHardwareBusy(true);
     setHardwareMessage({ text: 'Communicating with RFID reader... scan or tap card.', type: 'info' });
@@ -169,7 +245,7 @@ export default function RFIDAdminPage() {
         text: `Card Read Success: Room ${result.roomNumber || 'None'} (Card #${result.cardNo || 'N/A'}). Valid: ${result.beginTime || 'N/A'} - ${result.endTime || 'N/A'}`,
         type: 'success',
       });
-      setRefreshKey((k) => k + 1);
+      refreshAllData();
     } else {
       setHardwareMessage({
         text: result.error || 'Failed to read card. Check if card is placed on encoder.',
@@ -194,12 +270,23 @@ export default function RFIDAdminPage() {
 
     if (result.success) {
       const cardUid = `BT-57-${result.cardNo || hwRoom}`;
-      repo.issueRFIDCard(hwRoom, `DIR-${Date.now().toString().slice(-4)}`, hwGuest, hwStaff);
+      await fetch('/api/rfid/cards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_guest',
+          roomNumber: hwRoom,
+          guestName: hwGuest,
+          bookingRef: `DIR-${Date.now().toString().slice(-4)}`,
+          issuedBy: hwStaff,
+        }),
+      });
+
       setHardwareMessage({
         text: `Success: Keycard for Room ${hwRoom} encoded & activated! (UID: ${cardUid})`,
         type: 'success',
       });
-      setRefreshKey((k) => k + 1);
+      refreshAllData();
     } else {
       setHardwareMessage({
         text: result.error || 'Physical card encoding failed. Ensure a Mifare 1K card is placed on the Be-Tech reader and the bridge is active.',
@@ -233,53 +320,222 @@ export default function RFIDAdminPage() {
       });
     }
 
-    setRefreshKey((k) => k + 1);
+    refreshAllData();
     setHardwareBusy(false);
   };
 
-  // Open issue card modal and reset errors
-  const handleOpenIssueModal = () => {
-    setIssueModalError(null);
-    setIsIssuingCard(true);
-  };
-
-  // Issue card via modal (Production physical Be-Tech encoder)
+  // Issue card via modal (Guest Room Key)
   const handleModalIssueCard = async (e: React.FormEvent) => {
     e.preventDefault();
     setHardwareBusy(true);
     setIssueModalError(null);
 
-    const result = await issuePhysicalKeycard({
-      roomNumber: issueRoom,
-      guestName: issueGuest,
-      staffUser: 'Front Desk',
-    });
-
-    setHardwareBusy(false);
-
-    if (result.success) {
-      repo.issueRFIDCard(issueRoom, issueRef, issueGuest, 'Front Desk');
-      setIsIssuingCard(false);
-      setIssueModalError(null);
-      setHardwareMessage({
-        text: `Success: Keycard for Room ${issueRoom} encoded on physical Be-Tech encoder and issued to ${issueGuest}.`,
-        type: 'success',
+    try {
+      const res = await fetch('/api/rfid/cards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_guest',
+          roomNumber: issueRoom,
+          guestName: issueGuest,
+          bookingRef: issueRef,
+          issuedBy: 'Front Desk',
+        }),
       });
-      setRefreshKey((k) => k + 1);
-    } else {
-      const errMsg = formatRfidErrorMessage(
-        result.code,
-        result.error || 'Failed to encode physical card on Be-Tech reader. Ensure card is placed on the encoder.'
-      );
-      setIssueModalError(errMsg);
+      const data = await res.json();
+      if (data.success) {
+        setIsIssuingCard(false);
+        setHardwareMessage({
+          text: `Success: Customer Keycard for Room ${issueRoom} issued to ${issueGuest}.`,
+          type: 'success',
+        });
+        refreshAllData();
+      } else {
+        setIssueModalError(data.error || 'Failed to issue card.');
+      }
+    } catch (err: any) {
+      setIssueModalError(err.message || 'Network error issuing keycard.');
+    } finally {
+      setHardwareBusy(false);
     }
   };
 
-  const handleDeactivate = (cardId: string) => {
-    revokeGuestRoomKey(cardId, 'Manual Admin Revocation');
-    setRefreshKey((k) => k + 1);
+  // Create Super Admin Card (Lifetime Activation)
+  const handleCreateSuperAdminCard = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setHardwareBusy(true);
+    try {
+      const res = await fetch('/api/rfid/cards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_super_admin',
+          cardLabel: saCardLabel,
+          holderName: saHolderName,
+          issuedBy: 'System Root',
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setShowSuperAdminModal(false);
+        setHardwareMessage({
+          text: `Super Admin Lifetime Card created for ${saHolderName} with universal room clearance!`,
+          type: 'success',
+        });
+        refreshAllData();
+      }
+    } catch (err: any) {
+      setHardwareMessage({ text: err.message || 'Failed to create Super Admin card', type: 'error' });
+    } finally {
+      setHardwareBusy(false);
+    }
   };
 
+  // Create Cleaner Card (Housekeeping Dual-Tap)
+  const handleCreateCleanerCard = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setHardwareBusy(true);
+    try {
+      const res = await fetch('/api/rfid/cards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_cleaner',
+          cardLabel: cleanerCardLabel,
+          holderName: cleanerHolderName,
+          issuedBy: 'Front Desk',
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setShowCleanerModal(false);
+        setHardwareMessage({
+          text: `Housekeeping Cleaner Card created for ${cleanerHolderName} (Dual-tap in/out enabled)!`,
+          type: 'success',
+        });
+        refreshAllData();
+      }
+    } catch (err: any) {
+      setHardwareMessage({ text: err.message || 'Failed to create Cleaner card', type: 'error' });
+    } finally {
+      setHardwareBusy(false);
+    }
+  };
+
+  // Toggle Card Status (Activate / Deactivate)
+  const handleToggleCardStatus = async (cardId: string, currentStatus: string) => {
+    const nextStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    try {
+      const res = await fetch('/api/rfid/cards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'toggle_status',
+          cardId,
+          status: nextStatus,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setHardwareMessage({
+          text: `Card status updated: ${data.message}`,
+          type: nextStatus === 'active' ? 'success' : 'info',
+        });
+        refreshAllData();
+      }
+    } catch {
+      refreshAllData();
+    }
+  };
+
+  // Extend Guest Card Validity / Give Extra Time
+  const handleExtendValidity = async (cardId: string, hours: number, customDate?: string) => {
+    setHardwareBusy(true);
+    try {
+      const res = await fetch('/api/rfid/cards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'extend_validity',
+          cardId,
+          hours,
+          customExpiry: customDate,
+          staffUser: 'Front Desk',
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setHardwareMessage({
+          text: `Success: ${data.message}`,
+          type: 'success',
+        });
+        setExtendingCard(null);
+        refreshAllData();
+      } else {
+        setHardwareMessage({ text: data.error || 'Failed to extend card validity', type: 'error' });
+      }
+    } catch (err: any) {
+      setHardwareMessage({ text: err.message || 'Failed to extend card validity', type: 'error' });
+    } finally {
+      setHardwareBusy(false);
+    }
+  };
+
+  // Delete / Revoke Card
+  const handleDeleteCard = async (cardId: string) => {
+    if (!confirm('Are you sure you want to permanently delete/revoke this card?')) return;
+    try {
+      const res = await fetch('/api/rfid/cards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'delete_card',
+          cardId,
+        }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setHardwareMessage({
+          text: 'Card permanently revoked and removed from registry.',
+          type: 'info',
+        });
+        refreshAllData();
+      }
+    } catch {
+      refreshAllData();
+    }
+  };
+
+  // Interactive Live Door Tap Tester
+  const handleSimulateTap = async () => {
+    setSimBusy(true);
+    setSimResult(null);
+
+    try {
+      const res = await fetch('/api/rfid/tap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cardUid: simCardUid,
+          roomNumber: simRoom,
+        }),
+      });
+      const data = await res.json();
+      setSimResult({
+        success: data.success,
+        message: data.message,
+        event: data.event,
+      });
+      refreshAllData();
+    } catch (err: any) {
+      setSimResult({
+        success: false,
+        message: err.message || 'Failed to execute tap',
+      });
+    } finally {
+      setSimBusy(false);
+    }
+  };
 
   // Filtered devices list
   const filteredDevices = devices.filter((d) => {
@@ -291,41 +547,65 @@ export default function RFIDAdminPage() {
     return true;
   });
 
+  // Filtered logs list
+  const filteredEvents = events.filter((evt) => {
+    if (logSearchRoom && !evt.room_number.toLowerCase().includes(logSearchRoom.toLowerCase())) {
+      return false;
+    }
+    if (logFilterType !== 'all' && evt.card_type !== logFilterType) {
+      return false;
+    }
+    if (logFilterStatus !== 'all' && evt.event_type !== logFilterStatus) {
+      return false;
+    }
+    return true;
+  });
+
   const onlineDevicesCount = devices.filter((d) => d.status === 'online').length;
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto" key={refreshKey}>
+    <div className="space-y-8 max-w-7xl mx-auto">
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
         <div>
           <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
-            IOT & DOOR LOCK INTEGRATION · ALL DEVICES ACTIVE
+            IOT &amp; DOOR LOCK INTEGRATION · REAL-TIME ACCESS LOGS &amp; CARD ROLES
           </span>
           <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-0.5 flex items-center gap-2">
             <KeyRound className="w-6 h-6 text-[#D8AD56]" />
             <span>RFID Smart Room Key Integration</span>
           </h1>
           <p className="text-xs text-[#786B61] mt-0.5">
-            Be-Tech BIS 5.7 Mifare 1K hardware encoder bridge, multi-device sync, real-time tap stream, and all 18 room door locks.
+            Super Admin lifetime keys, Cleaner dual-tap turnover tracking, Customer room keys with extra time extension, and live audit telemetry.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2.5 flex-wrap">
           <button
-            onClick={handleActivateAllDevices}
-            disabled={isActivatingAll}
-            className="px-3.5 py-2.5 rounded-xl bg-[#241912] hover:bg-[#382216] text-[#D8AD56] text-xs font-bold transition-all flex items-center gap-2 shadow-sm border border-[#D8AD56]/40 disabled:opacity-50"
+            onClick={() => setShowSuperAdminModal(true)}
+            className="px-3.5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
           >
-            <Zap className={`w-4 h-4 text-[#D8AD56] ${isActivatingAll ? 'animate-spin' : ''}`} />
-            <span>{isActivatingAll ? 'Activating All...' : 'Activate All Devices'}</span>
+            <Crown className="w-4 h-4" />
+            <span>+ Super Admin Card</span>
           </button>
 
           <button
-            onClick={handleOpenIssueModal}
-            className="px-4 py-2.5 rounded-xl bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-bold transition-colors flex items-center gap-2 shadow-sm"
+            onClick={() => setShowCleanerModal(true)}
+            className="px-3.5 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>+ Cleaner Card</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setIssueModalError(null);
+              setIsIssuingCard(true);
+            }}
+            className="px-4 py-2.5 rounded-xl bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-bold transition-colors flex items-center gap-2 shadow-sm cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>Encode & Issue Keycard</span>
+            <span>+ Issue Customer Card</span>
           </button>
         </div>
       </div>
@@ -345,7 +625,7 @@ export default function RFIDAdminPage() {
           <div>
             <div className="flex flex-wrap items-center gap-2">
               <h4 className="font-serif font-bold text-white text-base">
-                Be-Tech BIS 5.7 USB RFID Encoder Bridge
+                Be-Tech BIS 5.7 USB RFID Encoder Bridge &amp; Door Lock Mesh
               </h4>
               <span
                 className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
@@ -361,8 +641,7 @@ export default function RFIDAdminPage() {
             </div>
 
             <p className="text-xs text-[#EFE3D6]/80 mt-1">
-              Active Host: <code className="text-[#D8AD56] font-mono">{customHost}</code> · Driver:{' '}
-              <span className="font-mono text-white/90">btlock57l.dll</span> · Reader Type: <strong>4 (USB Mifare)</strong> · Pwd: <span className="font-mono text-[#D8AD56]">TAYIGR</span> · Enrolled Locks: <strong className="text-emerald-400">{devices.length} Devices Online</strong>
+              Active Host: <code className="text-[#D8AD56] font-mono">{customHost}</code> · Master Cards: <strong className="text-amber-400">{superAdminCards.length} Lifetime</strong> · Cleaners: <strong className="text-cyan-400">{cleanerCards.length} Active</strong> · Enrolled Locks: <strong className="text-emerald-400">{devices.length} Devices Online</strong>
             </p>
           </div>
         </div>
@@ -380,7 +659,7 @@ export default function RFIDAdminPage() {
 
           <button
             onClick={() => setShowHostModal(true)}
-            className="px-3 py-1.5 rounded-lg border border-[#EFE3D6]/20 hover:border-[#D8AD56]/40 text-xs text-[#EFE3D6]/90 hover:text-white transition-colors flex items-center gap-1.5 bg-white/5"
+            className="px-3 py-1.5 rounded-lg border border-[#EFE3D6]/20 hover:border-[#D8AD56]/40 text-xs text-[#EFE3D6]/90 hover:text-white transition-colors flex items-center gap-1.5 bg-white/5 cursor-pointer"
             title="Configure Bridge Host IP"
           >
             <Settings className="w-3.5 h-3.5 text-[#D8AD56]" />
@@ -388,23 +667,63 @@ export default function RFIDAdminPage() {
           </button>
 
           <button
-            onClick={async () => {
-              const s = await checkBridgeHealth();
-              setBridgeStatus(s);
-            }}
-            className="px-3 py-1.5 rounded-lg border border-[#D8AD56]/40 text-xs text-[#D8AD56] hover:bg-[#D8AD56]/10 transition-colors flex items-center gap-1.5"
+            onClick={refreshAllData}
+            className="px-3 py-1.5 rounded-lg border border-[#D8AD56]/40 text-xs text-[#D8AD56] hover:bg-[#D8AD56]/10 transition-colors flex items-center gap-1.5 cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5" />
-            <span>Check Bridge</span>
+            <span>Refresh Live Data</span>
           </button>
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* Global Status Message */}
+      {hardwareMessage && (
+        <div
+          className={`p-3.5 rounded-xl text-xs font-medium flex items-start gap-2.5 transition-all shadow-xs ${
+            hardwareMessage.type === 'success'
+              ? 'bg-emerald-50 text-emerald-900 border border-emerald-200'
+              : hardwareMessage.type === 'error'
+              ? 'bg-rose-50 text-rose-900 border border-rose-200'
+              : 'bg-blue-50 text-blue-900 border border-blue-200'
+          }`}
+        >
+          {hardwareMessage.type === 'success' ? (
+            <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+          ) : hardwareMessage.type === 'error' ? (
+            <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+          ) : (
+            <RefreshCw className="w-4 h-4 text-blue-600 animate-spin shrink-0 mt-0.5" />
+          )}
+          <div className="flex-1">{hardwareMessage.text}</div>
+          <button
+            onClick={() => setHardwareMessage(null)}
+            className="text-gray-400 hover:text-gray-600 text-xs cursor-pointer"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      )}
+
+      {/* Main Navigation Tabs */}
       <div className="flex flex-wrap items-center gap-2">
         <button
+          onClick={() => setActiveTab('roles')}
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+            activeTab === 'roles'
+              ? 'bg-[#382216] text-[#D8AD56] shadow-sm ring-1 ring-[#D8AD56]/50'
+              : 'bg-white text-[#786B61] hover:text-[#241912] border border-[#EFE3D6]'
+          }`}
+        >
+          <Crown className="w-3.5 h-3.5 text-amber-500" />
+          <span>Card Roles &amp; Master Keys</span>
+          <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-amber-100 text-amber-800 font-bold">
+            {superAdminCards.length + cleanerCards.length}
+          </span>
+        </button>
+
+        <button
           onClick={() => setActiveTab('hardware')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
             activeTab === 'hardware'
               ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
               : 'bg-white text-[#786B61] hover:text-[#241912] border border-[#EFE3D6]'
@@ -413,46 +732,461 @@ export default function RFIDAdminPage() {
           <Cpu className="w-3.5 h-3.5" />
           <span>Hardware Encoder Station</span>
         </button>
+
         <button
           onClick={() => setActiveTab('cards')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
             activeTab === 'cards'
               ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
               : 'bg-white text-[#786B61] hover:text-[#241912] border border-[#EFE3D6]'
           }`}
         >
-          Active Keycards ({cards.filter((c) => c.status === 'active').length})
+          <KeyRound className="w-3.5 h-3.5" />
+          <span>Customer &amp; All Keycards ({cards.length})</span>
         </button>
+
         <button
           onClick={() => setActiveTab('devices')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
             activeTab === 'devices'
               ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
               : 'bg-white text-[#786B61] hover:text-[#241912] border border-[#EFE3D6]'
           }`}
         >
           <Radio className="w-3.5 h-3.5" />
-          <span>Enrolled Lock Devices ({devices.length})</span>
+          <span>Enrolled Door Locks ({devices.length})</span>
           <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-emerald-100 text-emerald-800 font-bold">
             {onlineDevicesCount} Active
           </span>
         </button>
+
         <button
           onClick={() => setActiveTab('logs')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
             activeTab === 'logs'
               ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
               : 'bg-white text-[#786B61] hover:text-[#241912] border border-[#EFE3D6]'
           }`}
         >
-          Access Tap Stream ({events.length})
+          <Clock className="w-3.5 h-3.5" />
+          <span>Access Tap Stream &amp; Telemetry ({events.length})</span>
         </button>
       </div>
 
-      {/* TAB 0: HARDWARE ENCODER STATION */}
+      {/* ========================================================================= */}
+      {/* TAB 0: CARD ROLES (SUPER ADMIN LIFETIME & CLEANER DUAL-TAP)               */}
+      {/* ========================================================================= */}
+      {activeTab === 'roles' && (
+        <div className="space-y-8">
+          {/* Section 1: Super Admin Master Cards */}
+          <div className="bg-white rounded-2xl border border-amber-300/50 p-6 shadow-luxury space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-amber-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-amber-50 border border-amber-300 flex items-center justify-center text-amber-700">
+                  <Crown className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-serif text-lg font-bold text-[#241912]">Super Admin Cards</h3>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 uppercase tracking-wide">
+                      Lifetime Activation · Universal Clearance
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#786B61] mt-0.5">
+                    Universal emergency master cards that unlock all 18 guest rooms, suites, and facilities permanently.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowSuperAdminModal(true)}
+                className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm self-start sm:self-auto cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Issue Super Admin Card</span>
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-amber-50/50 text-[#786B61] uppercase tracking-wider text-[10px] border-b border-amber-100">
+                  <tr>
+                    <th className="py-3 px-4 font-semibold">Card Label &amp; UID</th>
+                    <th className="py-3 px-4 font-semibold">Holder / Official</th>
+                    <th className="py-3 px-4 font-semibold">Clearance</th>
+                    <th className="py-3 px-4 font-semibold">Validity</th>
+                    <th className="py-3 px-4 font-semibold">Last Room Tap</th>
+                    <th className="py-3 px-4 font-semibold">Status</th>
+                    <th className="py-3 px-4 font-semibold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-amber-100/60 text-[#241912]">
+                  {superAdminCards.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-6 text-center text-xs text-[#786B61]">
+                        No Super Admin cards issued. Click &ldquo;Issue Super Admin Card&rdquo; above.
+                      </td>
+                    </tr>
+                  ) : (
+                    superAdminCards.map((c) => (
+                      <tr key={c.id} className="hover:bg-amber-50/30 transition-colors">
+                        <td className="py-3.5 px-4">
+                          <div className="font-bold text-[#241912] flex items-center gap-1.5">
+                            <Crown className="w-3.5 h-3.5 text-amber-600" />
+                            <span>{c.card_label}</span>
+                          </div>
+                          <div className="font-mono text-[11px] text-[#786B61]">{c.card_uid}</div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <strong className="text-[#241912]">{c.holder_name || 'System Administrator'}</strong>
+                          <div className="text-[10px] text-[#786B61]">{c.holder_role || 'Super Admin'}</div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800">
+                            All 18 Rooms &amp; Suites
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 font-semibold text-amber-800">
+                          <span className="inline-flex items-center gap-1 text-[11px]">
+                            <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
+                            Lifetime Active
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-[#786B61] text-[11px]">
+                          {c.last_tap_room ? (
+                            <span>
+                              Room {c.last_tap_room} ({new Date(c.last_tap_at || '').toLocaleTimeString('en-IN')})
+                            </span>
+                          ) : (
+                            'No recent taps'
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 ${
+                              c.status === 'active'
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : 'bg-rose-100 text-rose-800'
+                            }`}
+                          >
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                c.status === 'active' ? 'bg-emerald-600' : 'bg-rose-600'
+                              }`}
+                            />
+                            <span>{c.status}</span>
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleToggleCardStatus(c.id, c.status)}
+                              className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors cursor-pointer ${
+                                c.status === 'active'
+                                  ? 'bg-rose-50 text-rose-700 hover:bg-rose-100'
+                                  : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                              }`}
+                            >
+                              {c.status === 'active' ? 'Deactivate' : 'Activate'}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCard(c.id)}
+                              className="p-1 rounded text-gray-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
+                              title="Delete Card"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Section 2: Cleaning Cards (Housekeeping Dual-Tap In & Out Automation) */}
+          <div className="bg-white rounded-2xl border border-cyan-300/60 p-6 shadow-luxury space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-cyan-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-cyan-50 border border-cyan-300 flex items-center justify-center text-cyan-700">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-serif text-lg font-bold text-[#241912]">Housekeeping Cleaning Cards</h3>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-100 text-cyan-800 uppercase tracking-wide">
+                      Dual-Tap In &amp; Out · Turnover Sanitization
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#786B61] mt-0.5">
+                    <strong>Tap 1 (In):</strong> Cleaner goes inside &rarr; room marked <em>Cleaning In Progress</em>. <strong>Tap 2 (Out):</strong> Door locks &rarr; room marked <em>Clean &amp; Available</em>.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setShowCleanerModal(true)}
+                className="px-4 py-2 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm self-start sm:self-auto cursor-pointer"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Issue Cleaner Card</span>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 p-3.5 rounded-xl bg-cyan-50/50 border border-cyan-100 text-xs">
+              <div className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-cyan-200 text-cyan-900 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">1</span>
+                <div>
+                  <strong className="text-cyan-950 block">Checkout Guard:</strong>
+                  <span className="text-cyan-900/80 text-[11px]">Cleaner cards unlock rooms only post-checkout or in dirty status. Occupied guest rooms are locked for privacy.</span>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-cyan-200 text-cyan-900 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">2</span>
+                <div>
+                  <strong className="text-cyan-950 block">Tap 1 (Cleaner Inside):</strong>
+                  <span className="text-cyan-900/80 text-[11px]">First tap unlocks door &amp; sets room housekeeping status to <strong>In Progress</strong> in database.</span>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="w-5 h-5 rounded-full bg-cyan-200 text-cyan-900 font-bold flex items-center justify-center text-[10px] shrink-0 mt-0.5">3</span>
+                <div>
+                  <strong className="text-cyan-950 block">Tap 2 / Door Lock (Done):</strong>
+                  <span className="text-cyan-900/80 text-[11px]">When cleaner exits and locks door, status automatically becomes <strong>Clean &amp; Available</strong> for new guests.</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-cyan-50/50 text-[#786B61] uppercase tracking-wider text-[10px] border-b border-cyan-100">
+                  <tr>
+                    <th className="py-3 px-4 font-semibold">Card Label &amp; UID</th>
+                    <th className="py-3 px-4 font-semibold">Housekeeper Staff</th>
+                    <th className="py-3 px-4 font-semibold">Role</th>
+                    <th className="py-3 px-4 font-semibold">Current Activity</th>
+                    <th className="py-3 px-4 font-semibold">Status</th>
+                    <th className="py-3 px-4 font-semibold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-cyan-100/60 text-[#241912]">
+                  {cleanerCards.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-6 text-center text-xs text-[#786B61]">
+                        No Cleaning cards registered. Click &ldquo;Issue Cleaner Card&rdquo; above.
+                      </td>
+                    </tr>
+                  ) : (
+                    cleanerCards.map((c) => (
+                      <tr key={c.id} className="hover:bg-cyan-50/30 transition-colors">
+                        <td className="py-3.5 px-4">
+                          <div className="font-bold text-[#241912] flex items-center gap-1.5">
+                            <Sparkles className="w-3.5 h-3.5 text-cyan-600" />
+                            <span>{c.card_label}</span>
+                          </div>
+                          <div className="font-mono text-[11px] text-[#786B61]">{c.card_uid}</div>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <strong className="text-[#241912]">{c.holder_name || 'Housekeeping Attendant'}</strong>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-100 text-cyan-800">
+                            Housekeeping Turnover
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-[#786B61] text-[11px]">
+                          {c.last_tap_room ? (
+                            <span>
+                              Last Room: <strong>{c.last_tap_room}</strong> ({new Date(c.last_tap_at || '').toLocaleTimeString('en-IN')})
+                            </span>
+                          ) : (
+                            'Ready for assignment'
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 ${
+                              c.status === 'active'
+                                ? 'bg-emerald-100 text-emerald-800'
+                                : 'bg-rose-100 text-rose-800'
+                            }`}
+                          >
+                            <span
+                              className={`w-1.5 h-1.5 rounded-full ${
+                                c.status === 'active' ? 'bg-emerald-600' : 'bg-rose-600'
+                              }`}
+                            />
+                            <span>{c.status}</span>
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <button
+                              onClick={() => handleToggleCardStatus(c.id, c.status)}
+                              className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors cursor-pointer ${
+                                c.status === 'active'
+                                  ? 'bg-rose-50 text-rose-700 hover:bg-rose-100'
+                                  : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                              }`}
+                            >
+                              {c.status === 'active' ? 'Deactivate' : 'Activate'}
+                            </button>
+                            <button
+                              onClick={() => handleDeleteCard(c.id)}
+                              className="p-1 rounded text-gray-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
+                              title="Delete Card"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Section 3: Interactive Live Door Tap Tester */}
+          <div className="bg-[#FAF7F2] rounded-2xl border border-[#D8AD56]/40 p-6 shadow-sm space-y-4">
+            <div className="flex items-center justify-between border-b border-[#EFE3D6] pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#382216] text-[#D8AD56] flex items-center justify-center">
+                  <KeyRound className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="font-serif font-bold text-base text-[#241912]">
+                    Interactive Door Tap &amp; Room Unlock Tester
+                  </h4>
+                  <p className="text-[11px] text-[#786B61]">
+                    Test Super Admin universal override, Cleaner dual-tap in/out turnover, and Customer room keys in real-time.
+                  </p>
+                </div>
+              </div>
+              <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                Live Mesh Connected
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-1">
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-[#786B61] mb-1">
+                  Target Room
+                </label>
+                <select
+                  value={simRoom}
+                  onChange={(e) => setSimRoom(e.target.value)}
+                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                >
+                  {rooms.map((r) => (
+                    <option key={r.id} value={r.room_number}>
+                      Room {r.room_number} ({r.category_name} - {r.operational_status}/{r.housekeeping_status})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-[#786B61] mb-1">
+                  Tap with Card
+                </label>
+                <select
+                  value={simCardUid}
+                  onChange={(e) => setSimCardUid(e.target.value)}
+                  disabled={cards.length === 0}
+                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912] disabled:bg-gray-100"
+                >
+                  {cards.length === 0 ? (
+                    <option value="">No cards registered yet</option>
+                  ) : (
+                    <>
+                      {superAdminCards.length > 0 && (
+                        <optgroup label="👑 Super Admin Cards (Lifetime)">
+                          {superAdminCards.map((c) => (
+                            <option key={c.id} value={c.card_uid}>
+                              {c.card_label} ({c.card_uid}) - {c.holder_name}
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                      {cleanerCards.length > 0 && (
+                        <optgroup label="✨ Cleaning Cards (Dual-Tap)">
+                          {cleanerCards.map((c) => (
+                            <option key={c.id} value={c.card_uid}>
+                              {c.card_label} ({c.card_uid}) - {c.holder_name}
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                      {guestCards.length > 0 && (
+                        <optgroup label="🗝️ Customer / Guest Cards">
+                          {guestCards.map((c) => (
+                            <option key={c.id} value={c.card_uid}>
+                              Room {c.assigned_room_number || 'N/A'}: {c.guest_name || c.holder_name} ({c.card_uid})
+                            </option>
+                          ))}
+                        </optgroup>
+                      )}
+                    </>
+                  )}
+                </select>
+              </div>
+
+              <div className="flex items-end">
+                <button
+                  type="button"
+                  onClick={handleSimulateTap}
+                  disabled={simBusy || cards.length === 0}
+                  className="w-full py-2.5 px-4 rounded-xl bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 cursor-pointer"
+                >
+                  {simBusy ? (
+                    <RefreshCw className="w-4 h-4 animate-spin text-[#D8AD56]" />
+                  ) : (
+                    <KeyRound className="w-4 h-4 text-[#D8AD56]" />
+                  )}
+                  <span>{cards.length === 0 ? 'Issue a Card to Test Tap' : ('Tap Card on Room ' + simRoom)}</span>
+                </button>
+              </div>
+            </div>
+
+            {simResult && (
+              <div
+                className={`p-3.5 rounded-xl text-xs font-medium flex items-start gap-3 transition-all ${
+                  simResult.success
+                    ? 'bg-emerald-50 text-emerald-950 border border-emerald-300'
+                    : 'bg-rose-50 text-rose-950 border border-rose-300'
+                }`}
+              >
+                {simResult.success ? (
+                  <DoorOpen className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+                ) : (
+                  <DoorClosed className="w-5 h-5 text-rose-600 shrink-0 mt-0.5" />
+                )}
+                <div className="flex-1 space-y-1">
+                  <div className="font-bold text-sm">
+                    {simResult.success ? '✅ Door Unlocked / Action Audited' : '❌ Access Denied'}
+                  </div>
+                  <div>{simResult.message}</div>
+                  {simResult.event && (
+                    <div className="text-[11px] opacity-80 pt-1 font-mono">
+                      Event ID: {simResult.event.id} · Timestamp: {new Date(simResult.event.occurred_at).toLocaleTimeString('en-IN')} · Action: {simResult.event.action_type || 'door_unlock'}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* TAB 1: HARDWARE ENCODER STATION                                           */}
+      {/* ========================================================================= */}
       {activeTab === 'hardware' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Panel: Direct Hardware Operations */}
           <div className="lg:col-span-2 bg-white rounded-2xl border border-[#D8AD56]/30 p-6 sm:p-8 shadow-luxury space-y-6">
             <div className="flex items-center justify-between border-b border-[#EFE3D6] pb-4">
               <div>
@@ -460,7 +1194,7 @@ export default function RFIDAdminPage() {
                   PHYSICAL USB ENCODER (BE-TECH BIS 5.7)
                 </span>
                 <h3 className="font-serif text-xl font-bold text-[#241912] mt-0.5">
-                  Front Desk Card Read & Write Terminal
+                  Front Desk Card Read &amp; Write Terminal
                 </h3>
               </div>
               <div className="flex items-center gap-2">
@@ -475,7 +1209,6 @@ export default function RFIDAdminPage() {
               </div>
             </div>
 
-            {/* Quick Actions Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button
                 type="button"
@@ -489,7 +1222,7 @@ export default function RFIDAdminPage() {
                 </div>
                 <div className="mt-3">
                   <h4 className="font-serif font-bold text-sm text-[#241912]">Scan / Read Card</h4>
-                  <p className="text-[11px] text-[#786B61] mt-0.5">Read Mifare card data currently on the encoder</p>
+                  <p className="text-[11px] text-[#786B61] mt-0.5">Read Mifare card data currently on encoder</p>
                 </div>
               </button>
 
@@ -520,35 +1253,12 @@ export default function RFIDAdminPage() {
                   <span className="text-[10px] font-bold text-rose-700 uppercase">Clear Card</span>
                 </div>
                 <div className="mt-3">
-                  <h4 className="font-serif font-bold text-sm text-rose-950">Check-Out & Wipe</h4>
+                  <h4 className="font-serif font-bold text-sm text-rose-950">Check-Out &amp; Wipe</h4>
                   <p className="text-[11px] text-rose-800/80 mt-0.5">Clear room access for next check-in</p>
                 </div>
               </button>
             </div>
 
-            {/* Hardware Status Message */}
-            {hardwareMessage && (
-              <div
-                className={`p-3.5 rounded-xl text-xs font-medium flex items-start gap-2.5 transition-all ${
-                  hardwareMessage.type === 'success'
-                    ? 'bg-emerald-50 text-emerald-900 border border-emerald-200'
-                    : hardwareMessage.type === 'error'
-                    ? 'bg-rose-50 text-rose-900 border border-rose-200'
-                    : 'bg-blue-50 text-blue-900 border border-blue-200'
-                }`}
-              >
-                {hardwareMessage.type === 'success' ? (
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                ) : hardwareMessage.type === 'error' ? (
-                  <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-                ) : (
-                  <RefreshCw className="w-4 h-4 text-blue-600 animate-spin shrink-0 mt-0.5" />
-                )}
-                <div className="flex-1">{hardwareMessage.text}</div>
-              </div>
-            )}
-
-            {/* Form for Target Room & Guest */}
             <form onSubmit={handleIssueHardwareCard} className="space-y-4 pt-3 border-t border-[#EFE3D6]">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
@@ -603,7 +1313,7 @@ export default function RFIDAdminPage() {
                 <button
                   type="submit"
                   disabled={hardwareBusy}
-                  className="px-5 py-2.5 rounded-xl bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] text-xs font-bold transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50"
+                  className="px-5 py-2.5 rounded-xl bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] text-xs font-bold transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50 cursor-pointer"
                 >
                   <KeyRound className="w-4 h-4 text-[#D8AD56]" />
                   <span>Encode Card for Room {hwRoom}</span>
@@ -611,7 +1321,6 @@ export default function RFIDAdminPage() {
               </div>
             </form>
 
-            {/* Scanned Card Details Preview */}
             {scannedCard && (
               <div className="p-4 rounded-xl bg-[#FAF7F2] border border-[#D8AD56]/40 space-y-2">
                 <div className="flex items-center justify-between">
@@ -642,7 +1351,6 @@ export default function RFIDAdminPage() {
             )}
           </div>
 
-          {/* Right Panel: Encoder Specifications & Multi-Device Setup */}
           <div className="space-y-6">
             <div className="bg-[#FAF7F2] rounded-2xl border border-[#D8AD56]/30 p-6 shadow-sm space-y-4">
               <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
@@ -679,7 +1387,7 @@ export default function RFIDAdminPage() {
 
             <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-6 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="font-serif font-bold text-sm text-[#241912]">Permanent Background Automation</h4>
+                <h4 className="font-serif font-bold text-sm text-[#241912]">Background Automation</h4>
                 <span className="text-[11px] font-semibold text-emerald-700 flex items-center gap-1.5">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                   Auto-Start Active
@@ -699,7 +1407,7 @@ export default function RFIDAdminPage() {
                 </a>
                 <button
                   onClick={handleActivateAllDevices}
-                  className="text-xs font-bold text-[#D8AD56] hover:underline"
+                  className="text-xs font-bold text-[#D8AD56] hover:underline cursor-pointer"
                 >
                   Sync Locks
                 </button>
@@ -709,76 +1417,185 @@ export default function RFIDAdminPage() {
         </div>
       )}
 
-      {/* TAB 1: ACTIVE KEYCARDS */}
+      {/* ========================================================================= */}
+      {/* TAB 2: ACTIVE KEYCARDS (ALL ROOMS & CUSTOMERS)                            */}
+      {/* ========================================================================= */}
       {activeTab === 'cards' && (
-        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 shadow-luxury overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF7F2] text-[#786B61] uppercase tracking-wider text-[10px] border-b border-[#EFE3D6]">
-                <tr>
-                  <th className="py-3.5 px-4 font-semibold">Card Label / UID</th>
-                  <th className="py-3.5 px-4 font-semibold">Room Assigned</th>
-                  <th className="py-3.5 px-4 font-semibold">Guest Name</th>
-                  <th className="py-3.5 px-4 font-semibold">Booking Ref</th>
-                  <th className="py-3.5 px-4 font-semibold">Status</th>
-                  <th className="py-3.5 px-4 font-semibold">Valid Period</th>
-                  <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#EFE3D6] text-[#241912]">
-                {cards.map((c) => (
-                  <tr key={c.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
-                    <td className="py-3.5 px-4">
-                      <div className="font-bold text-[#241912]">{c.card_label}</div>
-                      <div className="font-mono text-[11px] text-[#786B61]">{c.card_uid}</div>
-                    </td>
-                    <td className="py-3.5 px-4 font-bold text-[#382216]">
-                      {c.assigned_room_number ? `Room ${c.assigned_room_number}` : 'Master / Housekeeping'}
-                    </td>
-                    <td className="py-3.5 px-4">{c.guest_name || 'Staff Member'}</td>
-                    <td className="py-3.5 px-4 font-mono text-[11px] text-[#786B61]">{c.booking_reference || 'INTERNAL'}</td>
-                    <td className="py-3.5 px-4">
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 ${
-                          c.status === 'active' ? 'bg-[#E8F5E9] text-[#2E7D32]' : 'bg-gray-100 text-gray-700'
-                        }`}
-                      >
-                        <span className={`w-1.5 h-1.5 rounded-full ${c.status === 'active' ? 'bg-[#2E7D32]' : 'bg-gray-500'}`} />
-                        <span>{c.status}</span>
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 text-[#786B61] text-[11px]">
-                      {c.activated_at ? new Date(c.activated_at).toLocaleDateString() : 'N/A'} -{' '}
-                      {c.expires_at ? new Date(c.expires_at).toLocaleDateString() : 'Continuous'}
-                    </td>
-                    <td className="py-3.5 px-4 text-right">
-                      {c.status === 'active' && (
-                        <button
-                          onClick={() => handleDeactivate(c.id)}
-                          className="px-2.5 py-1 rounded bg-red-50 text-red-700 text-xs font-semibold hover:bg-red-100 cursor-pointer"
-                        >
-                          Deactivate
-                        </button>
-                      )}
-                    </td>
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-[#D8AD56]/30">
+            <div>
+              <h3 className="font-serif font-bold text-base text-[#241912]">
+                Customer &amp; All Keycards ({cards.length})
+              </h3>
+              <p className="text-xs text-[#786B61]">
+                Master directory of all issued Super Admin, Cleaner, and Customer RFID cards with quick extra-time extension.
+              </p>
+            </div>
+            <button
+              onClick={() => {
+                setIssueModalError(null);
+                setIsIssuingCard(true);
+              }}
+              className="px-4 py-2 rounded-xl bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-bold transition-colors flex items-center gap-2 self-start sm:self-auto cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Issue New Customer Card</span>
+            </button>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-[#D8AD56]/30 shadow-luxury overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#FAF7F2] text-[#786B61] uppercase tracking-wider text-[10px] border-b border-[#EFE3D6]">
+                  <tr>
+                    <th className="py-3.5 px-4 font-semibold">Card Label / UID</th>
+                    <th className="py-3.5 px-4 font-semibold">Classification</th>
+                    <th className="py-3.5 px-4 font-semibold">Room Assigned</th>
+                    <th className="py-3.5 px-4 font-semibold">Holder / Guest</th>
+                    <th className="py-3.5 px-4 font-semibold">Status</th>
+                    <th className="py-3.5 px-4 font-semibold">Valid Period</th>
+                    <th className="py-3.5 px-4 font-semibold">Extra Time / Extend</th>
+                    <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-[#EFE3D6] text-[#241912]">
+                  {cards.map((c) => (
+                    <tr key={c.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
+                      <td className="py-3.5 px-4">
+                        <div className="font-bold text-[#241912]">{c.card_label}</div>
+                        <div className="font-mono text-[11px] text-[#786B61]">{c.card_uid}</div>
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                            c.card_type === 'super_admin'
+                              ? 'bg-amber-100 text-amber-800'
+                              : c.card_type === 'cleaner'
+                              ? 'bg-cyan-100 text-cyan-800'
+                              : 'bg-emerald-100 text-emerald-800'
+                          }`}
+                        >
+                          {c.card_type ? c.card_type.replace('_', ' ') : 'guest'}
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 font-bold text-[#382216]">
+                        {c.card_type === 'super_admin'
+                          ? '👑 Universal (All 18 Rooms)'
+                          : c.card_type === 'cleaner'
+                          ? '✨ All Turnover Rooms'
+                          : c.assigned_room_number
+                          ? `Room ${c.assigned_room_number}`
+                          : 'Unassigned'}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <strong>{c.holder_name || c.guest_name || 'Staff Member'}</strong>
+                        {c.booking_reference && (
+                          <div className="font-mono text-[10px] text-[#786B61]">{c.booking_reference}</div>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 ${
+                            c.status === 'active' ? 'bg-[#E8F5E9] text-[#2E7D32]' : 'bg-rose-100 text-rose-800'
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full ${
+                              c.status === 'active' ? 'bg-[#2E7D32]' : 'bg-rose-500'
+                            }`}
+                          />
+                          <span>{c.status}</span>
+                        </span>
+                      </td>
+                      <td className="py-3.5 px-4 text-[#786B61] text-[11px]">
+                        {c.is_lifetime ? (
+                          <span className="font-bold text-amber-800">Lifetime Active</span>
+                        ) : (
+                          <>
+                            <div>{c.activated_at ? new Date(c.activated_at).toLocaleDateString('en-IN') : 'N/A'}</div>
+                            <div className="font-semibold text-[#241912]">
+                              Expires: {c.expires_at ? new Date(c.expires_at).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' }) : 'Standard Checkout'}
+                            </div>
+                          </>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4">
+                        {c.card_type === 'guest' || !c.card_type ? (
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <button
+                              onClick={() => handleExtendValidity(c.id, 1)}
+                              className="px-2 py-0.5 rounded bg-amber-50 hover:bg-amber-100 text-amber-800 text-[10px] font-bold border border-amber-200 cursor-pointer"
+                              title="Extend checkout by 1 hour"
+                            >
+                              +1h
+                            </button>
+                            <button
+                              onClick={() => handleExtendValidity(c.id, 2)}
+                              className="px-2 py-0.5 rounded bg-amber-50 hover:bg-amber-100 text-amber-800 text-[10px] font-bold border border-amber-200 cursor-pointer"
+                              title="Extend checkout by 2 hours"
+                            >
+                              +2h
+                            </button>
+                            <button
+                              onClick={() => handleExtendValidity(c.id, 24)}
+                              className="px-2 py-0.5 rounded bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-[10px] font-bold border border-emerald-200 cursor-pointer"
+                              title="Extend stay by 1 day (24 hours)"
+                            >
+                              +24h
+                            </button>
+                            <button
+                              onClick={() => setExtendingCard(c)}
+                              className="px-2 py-0.5 rounded bg-[#382216] text-[#D8AD56] hover:bg-[#25150F] text-[10px] font-bold cursor-pointer"
+                              title="Set custom expiry date and time"
+                            >
+                              Edit Time
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-[10px] text-[#786B61] italic">Perpetual Role</span>
+                        )}
+                      </td>
+                      <td className="py-3.5 px-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => handleToggleCardStatus(c.id, c.status)}
+                            className={`px-2.5 py-1 rounded text-xs font-semibold cursor-pointer ${
+                              c.status === 'active'
+                                ? 'bg-rose-50 text-rose-700 hover:bg-rose-100'
+                                : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                            }`}
+                          >
+                            {c.status === 'active' ? 'Deactivate' : 'Activate'}
+                          </button>
+                          <button
+                            onClick={() => handleDeleteCard(c.id)}
+                            className="p-1 rounded text-gray-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
+                            title="Delete"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
 
-      {/* TAB 2: DEVICES (ALL 18 ROOMS + ENCODERS + GATEWAYS) */}
+      {/* ========================================================================= */}
+      {/* TAB 3: ENROLLED LOCK DEVICES                                              */}
+      {/* ========================================================================= */}
       {activeTab === 'devices' && (
         <div className="space-y-6">
-          {/* Sub-header & Filter Bar */}
           <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-4 sm:p-5 shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-bold text-[#241912] mr-2">Filter Devices:</span>
               <button
                 onClick={() => setFloorFilter('all')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   floorFilter === 'all'
                     ? 'bg-[#382216] text-[#D8AD56]'
                     : 'bg-[#FAF7F2] text-[#786B61] hover:bg-[#EFE3D6]/60'
@@ -788,7 +1605,7 @@ export default function RFIDAdminPage() {
               </button>
               <button
                 onClick={() => setFloorFilter('floor1')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   floorFilter === 'floor1'
                     ? 'bg-[#382216] text-[#D8AD56]'
                     : 'bg-[#FAF7F2] text-[#786B61] hover:bg-[#EFE3D6]/60'
@@ -798,7 +1615,7 @@ export default function RFIDAdminPage() {
               </button>
               <button
                 onClick={() => setFloorFilter('floor2')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   floorFilter === 'floor2'
                     ? 'bg-[#382216] text-[#D8AD56]'
                     : 'bg-[#FAF7F2] text-[#786B61] hover:bg-[#EFE3D6]/60'
@@ -808,7 +1625,7 @@ export default function RFIDAdminPage() {
               </button>
               <button
                 onClick={() => setFloorFilter('floor3')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   floorFilter === 'floor3'
                     ? 'bg-[#382216] text-[#D8AD56]'
                     : 'bg-[#FAF7F2] text-[#786B61] hover:bg-[#EFE3D6]/60'
@@ -818,13 +1635,13 @@ export default function RFIDAdminPage() {
               </button>
               <button
                 onClick={() => setFloorFilter('infrastructure')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                   floorFilter === 'infrastructure'
                     ? 'bg-[#382216] text-[#D8AD56]'
                     : 'bg-[#FAF7F2] text-[#786B61] hover:bg-[#EFE3D6]/60'
                 }`}
               >
-                Encoders & Gateways
+                Encoders &amp; Gateways
               </button>
             </div>
 
@@ -838,15 +1655,21 @@ export default function RFIDAdminPage() {
             </button>
           </div>
 
-          {/* Grid of Devices */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredDevices.map((d) => (
-              <div key={d.id} className="bg-white rounded-2xl border border-[#D8AD56]/30 p-5 shadow-sm space-y-3 hover:border-[#D8AD56] transition-all">
+              <div
+                key={d.id}
+                className="bg-white rounded-2xl border border-[#D8AD56]/30 p-5 shadow-sm space-y-3 hover:border-[#D8AD56] transition-all"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div
                       className={`w-2.5 h-2.5 rounded-full ${
-                        d.status === 'online' ? 'bg-emerald-500 animate-pulse' : d.status === 'maintenance' ? 'bg-amber-500' : 'bg-red-500'
+                        d.status === 'online'
+                          ? 'bg-emerald-500 animate-pulse'
+                          : d.status === 'maintenance'
+                          ? 'bg-amber-500'
+                          : 'bg-red-500'
                       }`}
                     />
                     <span className="font-bold text-sm text-[#241912]">{d.device_name}</span>
@@ -874,7 +1697,9 @@ export default function RFIDAdminPage() {
                   </div>
                   <div className="flex justify-between">
                     <span>Room:</span>
-                    <strong className="text-[#D8AD56] font-semibold">{d.room_number ? `Room ${d.room_number}` : 'Central Station'}</strong>
+                    <strong className="text-[#D8AD56] font-semibold">
+                      {d.room_number ? `Room ${d.room_number}` : 'Central Station'}
+                    </strong>
                   </div>
                   <div className="flex justify-between">
                     <span>IP Address:</span>
@@ -894,7 +1719,9 @@ export default function RFIDAdminPage() {
                   <div className="pt-2 border-t border-[#EFE3D6] flex items-center justify-between text-xs">
                     <div className="flex items-center gap-1.5 text-[#2E7D32]">
                       <Battery className="w-4 h-4 text-emerald-600" />
-                      <span>Battery: <strong>{d.battery_level}%</strong></span>
+                      <span>
+                        Battery: <strong>{d.battery_level}%</strong>
+                      </span>
                     </div>
                     <span className="text-[10px] text-[#786B61]">Healthy</span>
                   </div>
@@ -910,74 +1737,353 @@ export default function RFIDAdminPage() {
         </div>
       )}
 
-      {/* TAB 3: ACCESS LOGS */}
+      {/* ========================================================================= */}
+      {/* TAB 4: ACCESS TAP STREAM & FULL TELEMETRY AUDIT                           */}
+      {/* ========================================================================= */}
       {activeTab === 'logs' && (
-        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 shadow-luxury overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF7F2] text-[#786B61] uppercase tracking-wider text-[10px] border-b border-[#EFE3D6]">
-                <tr>
-                  <th className="py-3.5 px-4 font-semibold">Time</th>
-                  <th className="py-3.5 px-4 font-semibold">Event</th>
-                  <th className="py-3.5 px-4 font-semibold">Room Target</th>
-                  <th className="py-3.5 px-4 font-semibold">Card UID</th>
-                  <th className="py-3.5 px-4 font-semibold">Reason / Audit Trail</th>
-                  <th className="py-3.5 px-4 font-semibold">Source</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#EFE3D6] text-[#241912]">
-                {events.map((evt) => (
-                  <tr key={evt.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
-                    <td className="py-3.5 px-4 text-[#786B61]">
-                      {new Date(evt.occurred_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                    </td>
-                    <td className="py-3.5 px-4">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 ${
-                        evt.event_type === 'access_granted' ? 'bg-[#E8F5E9] text-[#2E7D32]' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {evt.event_type === 'access_granted' ? <CheckCircle2 className="w-3 h-3" /> : <XCircle className="w-3 h-3" />}
-                        <span>{evt.event_type.replace('_', ' ')}</span>
-                      </span>
-                    </td>
-                    <td className="py-3.5 px-4 font-bold text-[#382216]">Room {evt.room_number}</td>
-                    <td className="py-3.5 px-4 font-mono text-[11px] text-[#786B61]">{evt.card_uid || 'N/A'}</td>
-                    <td className="py-3.5 px-4 text-xs">{evt.reason || 'Verified tap'}</td>
-                    <td className="py-3.5 px-4 text-[10px] uppercase font-bold text-[#D8AD56]">
-                      {evt.source === 'encoder' ? 'USB Encoder' : evt.source}
-                    </td>
+        <div className="space-y-4">
+          <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-4 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative">
+                <Search className="w-3.5 h-3.5 absolute left-3 top-3 text-[#786B61]" />
+                <input
+                  type="text"
+                  placeholder="Filter by Room #..."
+                  value={logSearchRoom}
+                  onChange={(e) => setLogSearchRoom(e.target.value)}
+                  className="pl-8 pr-3 py-1.5 text-xs rounded-xl border border-[#EFE3D6] bg-[#FAF7F2] w-40 text-[#241912]"
+                />
+              </div>
+
+              <div className="flex items-center gap-1 text-xs">
+                <span className="text-[#786B61] text-[11px] font-semibold">Card Role:</span>
+                <select
+                  value={logFilterType}
+                  onChange={(e) => setLogFilterType(e.target.value as any)}
+                  className="p-1.5 text-xs rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                >
+                  <option value="all">All Roles</option>
+                  <option value="super_admin">👑 Super Admin Only</option>
+                  <option value="cleaner">✨ Cleaner Only</option>
+                  <option value="guest">🗝️ Customer / Guest Only</option>
+                </select>
+              </div>
+
+              <div className="flex items-center gap-1 text-xs">
+                <span className="text-[#786B61] text-[11px] font-semibold">Result:</span>
+                <select
+                  value={logFilterStatus}
+                  onChange={(e) => setLogFilterStatus(e.target.value as any)}
+                  className="p-1.5 text-xs rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                >
+                  <option value="all">All Results</option>
+                  <option value="access_granted">Unlocked / Granted</option>
+                  <option value="access_denied">Access Denied</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="text-xs text-[#786B61]">
+              Showing <strong>{filteredEvents.length}</strong> of {events.length} tap records
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl border border-[#D8AD56]/30 shadow-luxury overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#FAF7F2] text-[#786B61] uppercase tracking-wider text-[10px] border-b border-[#EFE3D6]">
+                  <tr>
+                    <th className="py-3.5 px-4 font-semibold">Timestamp</th>
+                    <th className="py-3.5 px-4 font-semibold">Room Number</th>
+                    <th className="py-3.5 px-4 font-semibold">Card Role</th>
+                    <th className="py-3.5 px-4 font-semibold">Card UID</th>
+                    <th className="py-3.5 px-4 font-semibold">Holder / Guest</th>
+                    <th className="py-3.5 px-4 font-semibold">Action &amp; Status</th>
+                    <th className="py-3.5 px-4 font-semibold">Audit Reason / Telemetry</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-[#EFE3D6] text-[#241912]">
+                  {filteredEvents.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="py-8 text-center text-xs text-[#786B61]">
+                        No tap events match the selected filters.
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredEvents.map((evt) => (
+                      <tr key={evt.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
+                        <td className="py-3.5 px-4 text-[#786B61] whitespace-nowrap">
+                          <div className="font-semibold text-[#241912]">
+                            {new Date(evt.occurred_at).toLocaleTimeString('en-IN', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                              second: '2-digit',
+                            })}
+                          </div>
+                          <div className="text-[10px]">
+                            {new Date(evt.occurred_at).toLocaleDateString('en-IN')}
+                          </div>
+                        </td>
+                        <td className="py-3.5 px-4 font-bold text-base text-[#382216]">
+                          Room {evt.room_number}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 ${
+                              evt.card_type === 'super_admin'
+                                ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                                : evt.card_type === 'cleaner'
+                                ? 'bg-cyan-100 text-cyan-900 border border-cyan-300'
+                                : 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                            }`}
+                          >
+                            {evt.card_type === 'super_admin' ? (
+                              <Crown className="w-3 h-3 text-amber-700" />
+                            ) : evt.card_type === 'cleaner' ? (
+                              <Sparkles className="w-3 h-3 text-cyan-700" />
+                            ) : (
+                              <KeyRound className="w-3 h-3 text-emerald-700" />
+                            )}
+                            <span>{evt.card_type ? evt.card_type.replace('_', ' ') : 'guest'}</span>
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 font-mono text-[11px] text-[#786B61]">
+                          {evt.card_uid || 'N/A'}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <strong className="text-[#241912]">{evt.holder_name || 'Staff / Guest'}</strong>
+                          {evt.booking_reference && (
+                            <div className="font-mono text-[10px] text-[#786B61]">{evt.booking_reference}</div>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span
+                            className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 ${
+                              evt.event_type === 'access_granted'
+                                ? 'bg-[#E8F5E9] text-[#2E7D32]'
+                                : 'bg-rose-100 text-rose-800'
+                            }`}
+                          >
+                            {evt.event_type === 'access_granted' ? (
+                              <CheckCircle2 className="w-3 h-3" />
+                            ) : (
+                              <XCircle className="w-3 h-3" />
+                            )}
+                            <span>
+                              {evt.action_type
+                                ? evt.action_type.replace('_', ' ')
+                                : evt.event_type.replace('_', ' ')}
+                            </span>
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 text-xs max-w-xs text-[#241912]">
+                          {evt.reason || 'Verified tap'}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
 
+      {/* ========================================================================= */}
+      {/* MODAL 1: ISSUE SUPER ADMIN CARD                                           */}
+      {/* ========================================================================= */}
+      {showSuperAdminModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-amber-300 p-6 sm:p-7 max-w-md w-full shadow-2xl space-y-5">
+            <div className="flex items-center justify-between border-b border-[#EFE3D6] pb-3">
+              <div className="flex items-center gap-2">
+                <Crown className="w-5 h-5 text-amber-600" />
+                <div>
+                  <span className="text-[10px] uppercase font-semibold text-amber-700">LIFETIME MASTER ACCESS</span>
+                  <h3 className="font-serif text-lg font-bold text-[#241912]">Issue Super Admin Card</h3>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowSuperAdminModal(false)}
+                className="text-gray-400 hover:text-gray-600 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-      {/* ISSUE CARD MODAL */}
+            <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-1">
+              <div className="font-bold flex items-center gap-1.5">
+                <ShieldCheck className="w-4 h-4 text-amber-700" />
+                <span>Permanent Master Clearance Protocol</span>
+              </div>
+              <p className="text-[11px] text-amber-800/90 leading-relaxed">
+                This card possesses perpetual lifetime activation (no expiration date). It bypasses all room restrictions and can unlock any of the 18 guest rooms, suites, and service areas at any time.
+              </p>
+            </div>
+
+            <form onSubmit={handleCreateSuperAdminCard} className="space-y-4">
+              <div>
+                <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
+                  Card Label
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={saCardLabel}
+                  onChange={(e) => setSaCardLabel(e.target.value)}
+                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                  placeholder="e.g. Managing Director Master Key"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
+                  Holder Name / Official Title
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={saHolderName}
+                  onChange={(e) => setSaHolderName(e.target.value)}
+                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                  placeholder="e.g. M. S. Reddy (Managing Director)"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#EFE3D6]">
+                <button
+                  type="button"
+                  onClick={() => setShowSuperAdminModal(false)}
+                  className="px-4 py-2 rounded-lg border border-gray-300 text-xs text-gray-700 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={hardwareBusy}
+                  className="px-5 py-2.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer flex items-center gap-2 transition-all disabled:opacity-50"
+                >
+                  <Crown className="w-3.5 h-3.5" />
+                  <span>Activate Super Admin Lifetime Key</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 2: ISSUE CLEANER CARD                                               */}
+      {/* ========================================================================= */}
+      {showCleanerModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-cyan-300 p-6 sm:p-7 max-w-md w-full shadow-2xl space-y-5">
+            <div className="flex items-center justify-between border-b border-[#EFE3D6] pb-3">
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-5 h-5 text-cyan-600" />
+                <div>
+                  <span className="text-[10px] uppercase font-semibold text-cyan-700">HOUSEKEEPING AUTOMATION</span>
+                  <h3 className="font-serif text-lg font-bold text-[#241912]">Issue Cleaning Card</h3>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowCleanerModal(false)}
+                className="text-gray-400 hover:text-gray-600 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-cyan-50 border border-cyan-200 text-xs text-cyan-900 space-y-1">
+              <div className="font-bold flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-cyan-700" />
+                <span>Dual-Tap Turnover Workflow</span>
+              </div>
+              <p className="text-[11px] text-cyan-900/90 leading-relaxed">
+                This card unlocks rooms only after guest checkout or when marked dirty.
+                First tap &rarr; cleaner enters (Room status: Cleaning In Progress).
+                Second tap / door lock &rarr; cleaner leaves (Room status: Clean &amp; Available).
+              </p>
+            </div>
+
+            <form onSubmit={handleCreateCleanerCard} className="space-y-4">
+              <div>
+                <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
+                  Card Label
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={cleanerCardLabel}
+                  onChange={(e) => setCleanerCardLabel(e.target.value)}
+                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                  placeholder="e.g. Floor 2 Housekeeper Card"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
+                  Housekeeper Staff Name
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={cleanerHolderName}
+                  onChange={(e) => setCleanerHolderName(e.target.value)}
+                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                  placeholder="e.g. R. Kavitha (Housekeeping Supervisor)"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#EFE3D6]">
+                <button
+                  type="button"
+                  onClick={() => setShowCleanerModal(false)}
+                  className="px-4 py-2 rounded-lg border border-gray-300 text-xs text-gray-700 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={hardwareBusy}
+                  className="px-5 py-2.5 rounded-lg bg-cyan-700 hover:bg-cyan-800 text-white text-xs font-bold cursor-pointer flex items-center gap-2 transition-all disabled:opacity-50"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Activate Cleaner Card</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 3: ISSUE CUSTOMER CARD                                              */}
+      {/* ========================================================================= */}
       {isIssuingCard && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl border border-[#D8AD56]/40 p-6 sm:p-7 max-w-md w-full shadow-2xl space-y-5">
             <div className="flex items-center justify-between border-b border-[#EFE3D6] pb-3">
               <div>
-                <span className="text-[10px] uppercase font-semibold text-[#D8AD56]">ENCODER STATION · REAL-TIME HARDWARE</span>
-                <h3 className="font-serif text-lg font-bold text-[#241912]">Issue RFID Keycard</h3>
+                <span className="text-[10px] uppercase font-semibold text-[#D8AD56]">
+                  ENCODER STATION · CUSTOMER STAY ACCESS
+                </span>
+                <h3 className="font-serif text-lg font-bold text-[#241912]">Issue Customer Room Keycard</h3>
               </div>
-              <button onClick={() => setIsIssuingCard(false)} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+              <button
+                onClick={() => setIsIssuingCard(false)}
+                className="text-gray-400 hover:text-gray-600 cursor-pointer"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Real-Time Hardware Status / Actionable Notice */}
             {issueModalError && (
               <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs flex items-start gap-2.5">
                 <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
                 <div className="flex-1 space-y-1">
-                  <div className="font-semibold text-rose-950">Hardware Status</div>
+                  <div className="font-semibold text-rose-950">Issuance Notice</div>
                   <div className="text-rose-900/90 leading-relaxed">{issueModalError}</div>
-                  <div className="text-[11px] text-rose-800/80 pt-1">
-                    Please ensure the Be-Tech USB cable is connected and a Mifare 1K card is placed flat on the reader, then click <strong>Retry Hardware Encode</strong>.
-                  </div>
                 </div>
               </div>
             )}
@@ -1009,7 +2115,7 @@ export default function RFIDAdminPage() {
                   required
                   value={issueGuest}
                   onChange={(e) => setIssueGuest(e.target.value)}
-                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6]"
+                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] text-[#241912]"
                 />
               </div>
 
@@ -1022,7 +2128,7 @@ export default function RFIDAdminPage() {
                   required
                   value={issueRef}
                   onChange={(e) => setIssueRef(e.target.value)}
-                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6]"
+                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] text-[#241912]"
                 />
               </div>
 
@@ -1047,7 +2153,7 @@ export default function RFIDAdminPage() {
                   ) : (
                     <>
                       <KeyRound className="w-3.5 h-3.5" />
-                      <span>{issueModalError ? 'Retry Hardware Encode' : 'Encode & Issue Card'}</span>
+                      <span>Encode &amp; Issue Keycard</span>
                     </>
                   )}
                 </button>
@@ -1057,7 +2163,108 @@ export default function RFIDAdminPage() {
         </div>
       )}
 
-      {/* BRIDGE HOST CONFIG MODAL */}
+      {/* ========================================================================= */}
+      {/* MODAL 4: EXTEND CARD VALIDITY / GIVE EXTRA TIME                           */}
+      {/* ========================================================================= */}
+      {extendingCard && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-[#D8AD56]/40 p-6 sm:p-7 max-w-md w-full shadow-2xl space-y-5">
+            <div className="flex items-center justify-between border-b border-[#EFE3D6] pb-3">
+              <div className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-[#D8AD56]" />
+                <div>
+                  <span className="text-[10px] uppercase font-semibold text-[#D8AD56]">
+                    GUEST STAY EXTENSION
+                  </span>
+                  <h3 className="font-serif text-lg font-bold text-[#241912]">
+                    Extend Keycard Validity
+                  </h3>
+                </div>
+              </div>
+              <button
+                onClick={() => setExtendingCard(null)}
+                className="text-gray-400 hover:text-gray-600 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-amber-50/60 border border-amber-200 text-xs space-y-1.5 text-amber-950">
+              <div className="flex justify-between">
+                <span>Room Number:</span>
+                <strong>Room {extendingCard.assigned_room_number || 'N/A'}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span>Guest Name:</span>
+                <strong>{extendingCard.guest_name || extendingCard.holder_name}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span>Current Expiry:</span>
+                <span className="font-mono text-[11px]">
+                  {extendingCard.expires_at
+                    ? new Date(extendingCard.expires_at).toLocaleString('en-IN')
+                    : 'Standard 11:00 AM Checkout'}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1.5">
+                  Quick Add Hours
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[1, 2, 4, 24].map((hr) => (
+                    <button
+                      key={hr}
+                      type="button"
+                      onClick={() => handleExtendValidity(extendingCard.id, hr)}
+                      disabled={hardwareBusy}
+                      className="py-2 px-3 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-950 text-xs font-bold transition-all text-center cursor-pointer"
+                    >
+                      +{hr} {hr === 24 ? 'Day' : 'Hr'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pt-2 border-t border-[#EFE3D6]">
+                <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
+                  Or Set Specific Date &amp; Time
+                </label>
+                <input
+                  type="datetime-local"
+                  value={customExpiryDate}
+                  onChange={(e) => setCustomExpiryDate(e.target.value)}
+                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#EFE3D6]">
+                <button
+                  type="button"
+                  onClick={() => setExtendingCard(null)}
+                  className="px-4 py-2 rounded-lg border border-gray-300 text-xs text-gray-700 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={hardwareBusy || !customExpiryDate}
+                  onClick={() => handleExtendValidity(extendingCard.id, 0, customExpiryDate)}
+                  className="px-5 py-2.5 rounded-lg bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-bold cursor-pointer disabled:opacity-50"
+                >
+                  Save Custom Expiry
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 5: BRIDGE HOST CONFIG                                               */}
+      {/* ========================================================================= */}
       {showHostModal && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl border border-[#D8AD56]/40 p-6 sm:p-7 max-w-md w-full shadow-2xl space-y-5">
@@ -1066,7 +2273,10 @@ export default function RFIDAdminPage() {
                 <span className="text-[10px] uppercase font-semibold text-[#D8AD56]">MULTI-DEVICE NETWORKING</span>
                 <h3 className="font-serif text-lg font-bold text-[#241912]">Configure RFID Bridge Host</h3>
               </div>
-              <button onClick={() => setShowHostModal(false)} className="text-gray-400 hover:text-gray-600 cursor-pointer">
+              <button
+                onClick={() => setShowHostModal(false)}
+                className="text-gray-400 hover:text-gray-600 cursor-pointer"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1081,7 +2291,7 @@ export default function RFIDAdminPage() {
                   required
                   value={customHost}
                   onChange={(e) => setCustomHost(e.target.value)}
-                  className="w-full text-xs font-mono font-medium p-2.5 rounded-lg border border-[#EFE3D6]"
+                  className="w-full text-xs font-mono font-medium p-2.5 rounded-lg border border-[#EFE3D6] text-[#241912]"
                   placeholder="http://127.0.0.1:8989"
                 />
                 <p className="text-[11px] text-[#786B61] mt-1.5">
@@ -1099,7 +2309,7 @@ export default function RFIDAdminPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-lg bg-[#D8AD56] text-[#25150F] text-xs font-bold hover:bg-[#C69940] cursor-pointer"
+                  className="px-5 py-2.5 rounded-lg bg-[#D8AD56] text-[#25150F] text-xs font-bold hover:bg-[#C69940] cursor-pointer"
                 >
                   Save Host Setting
                 </button>

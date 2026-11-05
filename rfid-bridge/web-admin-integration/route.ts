@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 
 /**
- * Sri Anantha Hotel - RFID Tap & Keycard Audit API
+ * Sri Tayi Grand - RFID Tap & Keycard Audit API
  * Endpoint: POST /api/admin/rfid-logs
  * Receives every card tap, key issue, and check-out event from the hardware bridge
  */

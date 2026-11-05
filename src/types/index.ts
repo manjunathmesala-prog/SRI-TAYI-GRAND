@@ -218,29 +218,63 @@ export interface RFIDDevice {
   last_ping_at: string;
 }
 
+export type RFIDCardType = 'super_admin' | 'cleaner' | 'guest';
+
 export interface RFIDCard {
   id: string;
   card_uid: string;
   card_label: string;
+  card_type: RFIDCardType;
+  is_lifetime?: boolean;
+  holder_name?: string;
+  holder_role?: string;
+  staff_id?: string;
   assigned_room_number?: string;
   booking_reference?: string;
   guest_name?: string;
   status: 'active' | 'inactive' | 'lost' | 'damaged' | 'expired';
   activated_at?: string;
   expires_at?: string;
+  deactivated_at?: string;
+  last_tap_room?: string;
+  last_tap_at?: string;
   issued_by_name?: string;
+  notes?: string;
   created_at: string;
 }
+
+export type RFIDActionType =
+  | 'door_unlock'
+  | 'door_lock'
+  | 'cleaning_started'
+  | 'cleaning_completed'
+  | 'unauthorized_attempt';
 
 export interface RFIDAccessEvent {
   id: string;
   card_uid?: string;
+  card_type?: RFIDCardType;
+  card_label?: string;
   device_name: string;
   room_number: string;
   event_type: 'access_granted' | 'access_denied' | 'door_ajar' | 'battery_low';
+  action_type?: RFIDActionType;
+  holder_name?: string;
+  booking_reference?: string;
   reason?: string;
   source: 'lock_reader' | 'encoder' | 'manual_simulation' | 'gateway';
   occurred_at: string;
+}
+
+export interface CleaningSession {
+  id: string;
+  room_number: string;
+  cleaner_card_id: string;
+  cleaner_name: string;
+  started_at: string;
+  completed_at?: string;
+  duration_minutes?: number;
+  status: 'in_progress' | 'completed' | 'aborted';
 }
 
 export interface StaffMember {

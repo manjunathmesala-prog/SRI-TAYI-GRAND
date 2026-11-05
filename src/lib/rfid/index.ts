@@ -86,25 +86,6 @@ export function revokeGuestRoomKey(cardId: string, reason: string = 'Guest Check
 }
 
 export function simulateDoorTap(cardUid: string, roomNumber: string): RFIDAccessEvent {
-  const activeCards = repo.getRFIDCards();
-  const matchedCard = activeCards.find(
-    (c) => c.card_uid.toLowerCase() === cardUid.toLowerCase() && c.status === 'active'
-  );
-
-  const isValidForRoom = matchedCard && matchedCard.assigned_room_number === roomNumber;
-
-  const event = repo.logRFIDEvent({
-    card_uid: cardUid,
-    device_name: `Lock-Room-${roomNumber}`,
-    room_number: roomNumber,
-    event_type: isValidForRoom ? 'access_granted' : 'access_denied',
-    reason: isValidForRoom
-      ? 'Verified guest active keycard'
-      : matchedCard
-      ? `Keycard not authorized for Room ${roomNumber} (Assigned to Room ${matchedCard.assigned_room_number})`
-      : 'Card UID inactive, expired or unregistered',
-    source: 'encoder',
-  });
-
-  return event;
+  const result = repo.processDoorTap(cardUid, roomNumber);
+  return result.event;
 }

@@ -4,6 +4,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 namespace SriTayiGrandRfidBridge
 {
@@ -177,6 +178,7 @@ namespace SriTayiGrandRfidBridge
                 res.AddHeader("Access-Control-Allow-Origin", "*");
                 res.AddHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
                 res.AddHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Staff-User");
+                res.AddHeader("Access-Control-Allow-Private-Network", "true");
                 res.ContentType = "application/json; charset=utf-8";
 
                 if (req.HttpMethod == "OPTIONS")
@@ -390,6 +392,37 @@ namespace SriTayiGrandRfidBridge
             }
         }
 
+                static readonly object snLock = new object();
+        static int GetNextSequenceNumber()
+        {
+            lock (snLock)
+            {
+                // Native Be-Tech BIS 5.7 lock standard: seconds elapsed since Jan 1, 2000
+                DateTime baseDate = new DateTime(2000, 1, 1, 0, 0, 0);
+                int timeSN = (int)(DateTime.Now - baseDate).TotalSeconds;
+                int nextSN = timeSN;
+
+                try
+                {
+                    string snPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "card_sn_counter.dat");
+                    if (File.Exists(snPath))
+                    {
+                        string txt = File.ReadAllText(snPath).Trim();
+                        int parsed;
+                        if (int.TryParse(txt, out parsed))
+                        {
+                            if (parsed >= nextSN && parsed < 950000000)
+                            {
+                                nextSN = parsed + 1;
+                            }
+                        }
+                    }
+                    File.WriteAllText(snPath, nextSN.ToString());
+                }
+                catch {}
+                return nextSN;
+            }
+        }
         static string HandleIssueCard(HttpListenerRequest req)
         {
             string body = GetRequestBody(req);
@@ -411,11 +444,11 @@ namespace SriTayiGrandRfidBridge
                 endTime = now.AddDays(1).ToString("yyMMdd") + "1100";
 
             string strLockID = roomNumber.PadLeft(6, '0');
-            string strSuitDoor = "000000000000";
-            string strPubDoor = "00000000";
-            int cardNo = (int)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds % 1000000;
-            int guestSN = cardNo;
-            short guestIdx = 10;
+            string strSuitDoor = "0000"; // Exactly 4 characters for Be-Tech lock firmware
+            string strPubDoor = "00000000"; // Exactly 8 characters
+            int guestSN = GetNextSequenceNumber();
+            int cardNo = guestSN;
+            short guestIdx = 1; // 1 = Primary Guest (matches Be-Tech lock database holder_no)
 
             short result = AutoWriteGuestCard(
                 cardNo,
@@ -431,11 +464,13 @@ namespace SriTayiGrandRfidBridge
             if (result == 0)
             {
                 try { Reader_Alarm(Port, ReaderType, 2); } catch {} // 2 Beeps on activation
+                try { Console.Beep(2000, 120); System.Threading.Thread.Sleep(50); Console.Beep(2500, 200); } catch {}
                 RecordTapEvent("TAP_ACTIVATE", roomNumber, cardNo, beginTime, endTime, staffUser, "SUCCESS");
                 return "{\"success\":true,\"code\":0,\"roomNumber\":\"" + roomNumber + "\",\"cardNo\":" + cardNo + ",\"beginTime\":\"" + beginTime + "\",\"endTime\":\"" + endTime + "\",\"message\":\"Card activated successfully\"}";
             }
             else
             {
+                try { Console.Beep(800, 300); } catch {}
                 string errMsg = GetErrorMessage(result);
                 RecordTapEvent("TAP_ACTIVATE_FAIL", roomNumber, cardNo, beginTime, endTime, staffUser, errMsg);
                 return "{\"success\":false,\"code\":" + result + ",\"error\":\"" + errMsg + "\"}";
@@ -450,13 +485,13 @@ namespace SriTayiGrandRfidBridge
             if (string.IsNullOrEmpty(staffUser)) staffUser = "Front Desk";
 
             string strLockID = "000000";
-            string strSuitDoor = "000000000000";
+            string strSuitDoor = "0000";
             string strPubDoor = "00000000";
             string beginTime = DateTime.Now.ToString("yyMMddHHmm");
             string endTime = beginTime;
             int cardNo = 0;
             int guestSN = 1;
-            short guestIdx = 10;
+            short guestIdx = 1;
 
             short result = AutoWriteGuestCard(
                 cardNo,
@@ -498,16 +533,23 @@ namespace SriTayiGrandRfidBridge
             }
             catch {}
 
-            if (!string.IsNullOrEmpty(AdminApiUrl))
+            // Dispatch tap record to local and cloud production admin endpoints
+            List<string> targetUrls = new List<string>();
+            if (!string.IsNullOrEmpty(AdminApiUrl)) targetUrls.Add(AdminApiUrl);
+            string prodVercelUrl = "https://sri-tayi-grand.vercel.app/api/admin/rfid-logs";
+            if (!targetUrls.Contains(prodVercelUrl)) targetUrls.Add(prodVercelUrl);
+
+            foreach (string targetUrl in targetUrls)
             {
+                string destination = targetUrl;
                 ThreadPool.QueueUserWorkItem((o) =>
                 {
                     try
                     {
-                        HttpWebRequest webReq = (HttpWebRequest)WebRequest.Create(AdminApiUrl);
+                        HttpWebRequest webReq = (HttpWebRequest)WebRequest.Create(destination);
                         webReq.Method = "POST";
                         webReq.ContentType = "application/json";
-                        webReq.Timeout = 5000;
+                        webReq.Timeout = 6000;
 
                         string payload = "{" +
                             "\"event_type\":\"" + eventType + "\"," +
@@ -530,7 +572,7 @@ namespace SriTayiGrandRfidBridge
                     }
                     catch (Exception ex)
                     {
-                        Log("[TAP RECORD REMOTE NOTIFY] (Saved locally, remote status: " + ex.Message + ")");
+                        Log("[TAP RECORD NOTIFY -> " + destination + "] (" + ex.Message + ")");
                     }
                 });
             }
