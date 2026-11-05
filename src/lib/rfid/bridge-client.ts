@@ -26,7 +26,32 @@ export interface RfidCardResult {
   endTime?: string;
   message?: string;
   error?: string;
-  source?: 'hardware';
+  source?: 'hardware' | 'active_mesh' | 'registry_fallback';
+}
+
+/**
+ * Human-readable decoding of Be-Tech BIS 5.7 native SDK return codes
+ */
+export function formatRfidErrorMessage(code?: number, rawError?: string): string {
+  if (code === 1 || (rawError && (rawError.includes('code: 1') || rawError.includes('code 1') || rawError.toLowerCase().includes('not detected')))) {
+    return 'Be-Tech USB Card Encoder not detected. Please plug the Be-Tech card encoder USB cable into this computer and ensure it is powered on.';
+  }
+  if (code === 6 || (rawError && (rawError.includes('code: 6') || rawError.includes('code 6') || rawError.toLowerCase().includes('no rfid card') || rawError.toLowerCase().includes('no card')))) {
+    return 'Be-Tech Encoder is connected, but no RFID keycard was detected. Please place a Mifare 1K keycard flat on the encoder surface.';
+  }
+  if (code === 4 || (rawError && (rawError.includes('code: 4') || rawError.includes('password mismatch')))) {
+    return 'Hotel system password mismatch or sector auth failure (Configured System Password: TAYIGR).';
+  }
+  if (code === 5 || (rawError && (rawError.includes('code: 5') || rawError.includes('write-protected')))) {
+    return 'Card write failed. The Mifare card may be damaged, write-protected, or was lifted too quickly.';
+  }
+  if (code === 2 || (rawError && (rawError.includes('code: 2') || rawError.includes('port is busy')))) {
+    return 'Encoder communication port is busy. Please try again in a moment.';
+  }
+  if (code === 7 || (rawError && (rawError.includes('code: 7') || rawError.includes('card type error')))) {
+    return 'Unsupported card type. Please place a Be-Tech Mifare 1K S50 keycard.';
+  }
+  return rawError || (code ? `Hardware error code: ${code}` : 'Hardware operation failed');
 }
 
 function getSavedBridgeHost(): string {
@@ -113,6 +138,7 @@ export async function readPhysicalCard(staffUser: string = 'Front Desk'): Promis
     const data = await res.json();
     return {
       ...data,
+      error: !data.success ? formatRfidErrorMessage(data.code, data.error) : undefined,
       source: 'hardware',
     };
   } catch {
@@ -129,7 +155,11 @@ export async function readPhysicalCard(staffUser: string = 'Front Desk'): Promis
         targetHost: host,
       }),
     });
-    return await res.json();
+    const data = await res.json();
+    return {
+      ...data,
+      error: !data.success ? formatRfidErrorMessage(data.code, data.error) : undefined,
+    };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Failed to reach RFID Bridge';
     return {
@@ -195,6 +225,7 @@ export async function issuePhysicalKeycard(params: {
     const data = await res.json();
     return {
       ...data,
+      error: !data.success ? formatRfidErrorMessage(data.code, data.error) : undefined,
       source: 'hardware',
     };
   } catch {
@@ -212,7 +243,11 @@ export async function issuePhysicalKeycard(params: {
         targetHost: host,
       }),
     });
-    return await res.json();
+    const data = await res.json();
+    return {
+      ...data,
+      error: !data.success ? formatRfidErrorMessage(data.code, data.error) : undefined,
+    };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Bridge unreachable';
     return {
@@ -251,6 +286,7 @@ export async function checkoutPhysicalCard(
     const data = await res.json();
     return {
       ...data,
+      error: !data.success ? formatRfidErrorMessage(data.code, data.error) : undefined,
       source: 'hardware',
     };
   } catch {
@@ -268,7 +304,11 @@ export async function checkoutPhysicalCard(
         targetHost: host,
       }),
     });
-    return await res.json();
+    const data = await res.json();
+    return {
+      ...data,
+      error: !data.success ? formatRfidErrorMessage(data.code, data.error) : undefined,
+    };
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Bridge unreachable';
     return {

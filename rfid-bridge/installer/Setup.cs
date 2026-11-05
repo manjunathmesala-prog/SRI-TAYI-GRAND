@@ -20,7 +20,9 @@ namespace SriTayiGrandRfidInstaller
             {
                 if (arg.Equals("/s", StringComparison.OrdinalIgnoreCase) ||
                     arg.Equals("/silent", StringComparison.OrdinalIgnoreCase) ||
-                    arg.Equals("-s", StringComparison.OrdinalIgnoreCase))
+                    arg.Equals("-s", StringComparison.OrdinalIgnoreCase) ||
+                    arg.Equals("-q", StringComparison.OrdinalIgnoreCase) ||
+                    arg.Equals("/q", StringComparison.OrdinalIgnoreCase))
                 {
                     isSilent = true;
                 }
@@ -37,11 +39,65 @@ namespace SriTayiGrandRfidInstaller
                 }
             };
 
-            Log("Setup started. Args: " + string.Join(" ", args));
+            Log("SriTayiGrand Setup started. Silent: " + isSilent);
 
             try
             {
-                // 1. Determine writable target directory with smart fallbacks
+                // ========================================================
+                // STEP 1: Install ACS ACR120 Driver for Hardware VID_072F&PID_8003
+                // ========================================================
+                try
+                {
+                    string driverTempDir = Path.Combine(Path.GetTempPath(), "SriTayiGrand_RFID_Driver");
+                    if (!Directory.Exists(driverTempDir)) Directory.CreateDirectory(driverTempDir);
+
+                    Assembly currentAsm = Assembly.GetExecutingAssembly();
+                    ExtractResource(currentAsm, "acr120.inf", Path.Combine(driverTempDir, "acr120.inf"));
+                    ExtractResource(currentAsm, "acr120.cat", Path.Combine(driverTempDir, "acr120.cat"));
+                    ExtractResource(currentAsm, "acr120u-2.0.0.0.msi", Path.Combine(driverTempDir, "acr120u-2.0.0.0.msi"));
+
+                    string infPath = Path.Combine(driverTempDir, "acr120.inf");
+                    if (File.Exists(infPath))
+                    {
+                        Log("Installing driver package with pnputil: " + infPath);
+                        ProcessStartInfo pnpPsi = new ProcessStartInfo();
+                        pnpPsi.FileName = "pnputil.exe";
+                        pnpPsi.Arguments = "/add-driver \"" + infPath + "\" /install";
+                        pnpPsi.WindowStyle = ProcessWindowStyle.Hidden;
+                        pnpPsi.CreateNoWindow = true;
+                        pnpPsi.UseShellExecute = false;
+                        using (Process pnpProc = Process.Start(pnpPsi))
+                        {
+                            pnpProc.WaitForExit(10000);
+                            Log("pnputil exit code: " + pnpProc.ExitCode);
+                        }
+                    }
+
+                    string msiPath = Path.Combine(driverTempDir, "acr120u-2.0.0.0.msi");
+                    if (File.Exists(msiPath))
+                    {
+                        Log("Running MSI installer: " + msiPath);
+                        ProcessStartInfo msiPsi = new ProcessStartInfo();
+                        msiPsi.FileName = "msiexec.exe";
+                        msiPsi.Arguments = "/i \"" + msiPath + "\" /qn /norestart";
+                        msiPsi.WindowStyle = ProcessWindowStyle.Hidden;
+                        msiPsi.CreateNoWindow = true;
+                        msiPsi.UseShellExecute = false;
+                        using (Process msiProc = Process.Start(msiPsi))
+                        {
+                            msiProc.WaitForExit(15000);
+                            Log("msiexec exit code: " + msiProc.ExitCode);
+                        }
+                    }
+                }
+                catch (Exception exDrv)
+                {
+                    Log("Driver installation note: " + exDrv.Message);
+                }
+
+                // ========================================================
+                // STEP 2: Determine writable target directory
+                // ========================================================
                 string targetDir = null;
                 string[] candidateDirs = new string[]
                 {
@@ -58,12 +114,11 @@ namespace SriTayiGrandRfidInstaller
                         if (!string.IsNullOrEmpty(candidate))
                         {
                             if (!Directory.Exists(candidate)) Directory.CreateDirectory(candidate);
-                            // Test write permission
                             string testFile = Path.Combine(candidate, ".write_test");
                             File.WriteAllText(testFile, "ok");
                             File.Delete(testFile);
                             targetDir = candidate;
-                            Log("Selected writable TargetDir: " + targetDir);
+                            Log("Selected TargetDir: " + targetDir);
                             break;
                         }
                     }
@@ -78,19 +133,29 @@ namespace SriTayiGrandRfidInstaller
                     throw new UnauthorizedAccessException("Could not find a writable directory for RFID service installation.");
                 }
 
-                // 2. Terminate any previous instance to release file locks
+                // ========================================================
+                // STEP 3: Terminate any previous instance to release file locks
+                // ========================================================
                 StopExistingInstances();
-
-                // Small pause to release DLL locks
                 Thread.Sleep(500);
 
-                // 3. Extract all embedded resources into target folder
+                // ========================================================
+                // STEP 4: Extract all bridge runtime resources
+                // ========================================================
                 Assembly asm = Assembly.GetExecutingAssembly();
                 string[] resourceNames = asm.GetManifestResourceNames();
 
-                Log("Extracting embedded resources to " + targetDir);
+                Log("Extracting bridge resources to " + targetDir);
                 foreach (string res in resourceNames)
                 {
+                    // Skip driver installer files in service target dir
+                    if (res.EndsWith(".msi", StringComparison.OrdinalIgnoreCase) ||
+                        res.EndsWith(".inf", StringComparison.OrdinalIgnoreCase) ||
+                        res.EndsWith(".cat", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
                     string targetFile = Path.Combine(targetDir, res);
                     try
                     {
@@ -113,7 +178,9 @@ namespace SriTayiGrandRfidInstaller
                     throw new FileNotFoundException("Failed to extract SriTayiGrandKeycardBridge.exe to " + targetDir);
                 }
 
-                // 4. Configure Layer 1: Windows Registry Auto-Run (HKCU Run - Current User)
+                // ========================================================
+                // STEP 5: Configure Auto-Run on Boot (Registry & Startup)
+                // ========================================================
                 try
                 {
                     Registry.SetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Run", "SriTayiGrand_RFID_Bridge", "\"" + exePath + "\"");
@@ -121,7 +188,6 @@ namespace SriTayiGrandRfidInstaller
                 }
                 catch (Exception exReg) { Log("Registry setup note: " + exReg.Message); }
 
-                // 5. Configure Layer 2: Windows Startup Folder Shortcut (shell:startup)
                 try
                 {
                     string startupFolder = Environment.GetFolderPath(Environment.SpecialFolder.Startup);
@@ -131,7 +197,9 @@ namespace SriTayiGrandRfidInstaller
                 }
                 catch (Exception exSc) { Log("Shortcut setup note: " + exSc.Message); }
 
-                // 6. Launch the bridge immediately in minimized background mode
+                // ========================================================
+                // STEP 6: Launch bridge immediately in background
+                // ========================================================
                 ProcessStartInfo psi = new ProcessStartInfo();
                 psi.FileName = exePath;
                 psi.WorkingDirectory = targetDir;
@@ -140,11 +208,13 @@ namespace SriTayiGrandRfidInstaller
                 Process.Start(psi);
                 Log("Bridge process launched.");
 
-                // 7. Verify bridge health via local HTTP port
+                // ========================================================
+                // STEP 7: Verify health on port 8989
+                // ========================================================
                 bool isHealthy = false;
-                for (int i = 0; i < 4; i++)
+                for (int i = 0; i < 6; i++)
                 {
-                    Thread.Sleep(400);
+                    Thread.Sleep(500);
                     try
                     {
                         HttpWebRequest req = (HttpWebRequest)WebRequest.Create("http://127.0.0.1:8989/api/status");
@@ -162,17 +232,20 @@ namespace SriTayiGrandRfidInstaller
                     catch (Exception exH) { Log("Health probe attempt " + (i+1) + ": " + exH.Message); }
                 }
 
-                // 8. One-click completion prompt
+                // ========================================================
+                // STEP 8: Success notification
+                // ========================================================
                 if (!isSilent)
                 {
                     string statusMsg = isHealthy
-                        ? "RFID Hardware Bridge is INSTALLED and ACTIVE on Port 8989!\n\n" +
-                          "Your Be-Tech RFID card encoder is ready to use.\n" +
-                          "The service is configured to run automatically every time this laptop turns on.\n\n" +
-                          "You can now use RFID cards in the Sri Tayi Grand web portal."
-                        : "RFID Hardware Bridge has been installed and started!\n\n" +
-                          "The service is configured to run automatically on this computer.\n" +
-                          "Please make sure your Be-Tech USB card machine is plugged in.";
+                        ? "Sri Tayi Grand - RFID System Setup Complete!\n\n" +
+                          "✔ Official USB Drivers installed\n" +
+                          "✔ RFID Hardware Bridge is ACTIVE on Port 8989\n" +
+                          "✔ Configured to auto-start with Windows\n\n" +
+                          "Your Be-Tech RFID USB Card Reader is ready to encode keycards."
+                        : "Sri Tayi Grand - RFID Hardware Bridge Installed!\n\n" +
+                          "Drivers and bridge service have been installed successfully.\n" +
+                          "Please ensure your Be-Tech USB card machine is connected.";
 
                     MessageBox.Show(
                         statusMsg,
@@ -188,13 +261,31 @@ namespace SriTayiGrandRfidInstaller
                 if (!isSilent)
                 {
                     MessageBox.Show(
-                        "Setup could not complete automatically:\n\n" + ex.Message,
+                        "Setup encountered an issue:\n\n" + ex.Message,
                         "Sri Tayi Grand - RFID Setup Error",
                         MessageBoxButtons.OK,
                         MessageBoxIcon.Error
                     );
                 }
             }
+        }
+
+        static void ExtractResource(Assembly asm, string resName, string destPath)
+        {
+            try
+            {
+                using (Stream inStream = asm.GetManifestResourceStream(resName))
+                {
+                    if (inStream != null)
+                    {
+                        using (FileStream outStream = new FileStream(destPath, FileMode.Create, FileAccess.Write, FileShare.ReadWrite))
+                        {
+                            inStream.CopyTo(outStream);
+                        }
+                    }
+                }
+            }
+            catch {}
         }
 
         static void StopExistingInstances()

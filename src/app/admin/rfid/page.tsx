@@ -9,6 +9,7 @@ import {
   readPhysicalCard,
   issuePhysicalKeycard,
   checkoutPhysicalCard,
+  formatRfidErrorMessage,
   BridgeHealthStatus,
   RfidCardResult,
   RFID_BRIDGE_URL,
@@ -67,6 +68,7 @@ export default function RFIDAdminPage() {
   const [issueRoom, setIssueRoom] = useState('205');
   const [issueGuest, setIssueGuest] = useState('P. Sudhakar Reddy');
   const [issueRef, setIssueRef] = useState('STG-20261105-3921');
+  const [issueModalError, setIssueModalError] = useState<string | null>(null);
 
 
   const devices = repo.getRFIDDevices();
@@ -209,7 +211,10 @@ export default function RFIDAdminPage() {
   // 3. Clear/Checkout card
   const handleCheckoutCard = async () => {
     if (!hwRoom) {
-      alert('Please enter or select the room number to checkout.');
+      setHardwareMessage({
+        text: 'Please enter or select the room number to checkout and clear card.',
+        type: 'error',
+      });
       return;
     }
     setHardwareBusy(true);
@@ -232,10 +237,17 @@ export default function RFIDAdminPage() {
     setHardwareBusy(false);
   };
 
+  // Open issue card modal and reset errors
+  const handleOpenIssueModal = () => {
+    setIssueModalError(null);
+    setIsIssuingCard(true);
+  };
+
   // Issue card via modal (Production physical Be-Tech encoder)
   const handleModalIssueCard = async (e: React.FormEvent) => {
     e.preventDefault();
     setHardwareBusy(true);
+    setIssueModalError(null);
 
     const result = await issuePhysicalKeycard({
       roomNumber: issueRoom,
@@ -248,13 +260,18 @@ export default function RFIDAdminPage() {
     if (result.success) {
       repo.issueRFIDCard(issueRoom, issueRef, issueGuest, 'Front Desk');
       setIsIssuingCard(false);
+      setIssueModalError(null);
       setHardwareMessage({
         text: `Success: Keycard for Room ${issueRoom} encoded on physical Be-Tech encoder and issued to ${issueGuest}.`,
         type: 'success',
       });
       setRefreshKey((k) => k + 1);
     } else {
-      alert(result.error || 'Failed to encode physical card on Be-Tech reader. Ensure card is placed on the encoder.');
+      const errMsg = formatRfidErrorMessage(
+        result.code,
+        result.error || 'Failed to encode physical card on Be-Tech reader. Ensure card is placed on the encoder.'
+      );
+      setIssueModalError(errMsg);
     }
   };
 
@@ -304,7 +321,7 @@ export default function RFIDAdminPage() {
           </button>
 
           <button
-            onClick={() => setIsIssuingCard(true)}
+            onClick={handleOpenIssueModal}
             className="px-4 py-2.5 rounded-xl bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-bold transition-colors flex items-center gap-2 shadow-sm"
           >
             <Plus className="w-4 h-4" />
@@ -943,13 +960,27 @@ export default function RFIDAdminPage() {
           <div className="bg-white rounded-2xl border border-[#D8AD56]/40 p-6 sm:p-7 max-w-md w-full shadow-2xl space-y-5">
             <div className="flex items-center justify-between border-b border-[#EFE3D6] pb-3">
               <div>
-                <span className="text-[10px] uppercase font-semibold text-[#D8AD56]">ENCODER STATION</span>
+                <span className="text-[10px] uppercase font-semibold text-[#D8AD56]">ENCODER STATION · REAL-TIME HARDWARE</span>
                 <h3 className="font-serif text-lg font-bold text-[#241912]">Issue RFID Keycard</h3>
               </div>
               <button onClick={() => setIsIssuingCard(false)} className="text-gray-400 hover:text-gray-600 cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
+
+            {/* Real-Time Hardware Status / Actionable Notice */}
+            {issueModalError && (
+              <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-900 text-xs flex items-start gap-2.5">
+                <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                <div className="flex-1 space-y-1">
+                  <div className="font-semibold text-rose-950">Hardware Status</div>
+                  <div className="text-rose-900/90 leading-relaxed">{issueModalError}</div>
+                  <div className="text-[11px] text-rose-800/80 pt-1">
+                    Please ensure the Be-Tech USB cable is connected and a Mifare 1K card is placed flat on the reader, then click <strong>Retry Hardware Encode</strong>.
+                  </div>
+                </div>
+              </div>
+            )}
 
             <form onSubmit={handleModalIssueCard} className="space-y-4">
               <div>
@@ -1005,9 +1036,20 @@ export default function RFIDAdminPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-lg bg-[#D8AD56] text-[#25150F] text-xs font-bold hover:bg-[#C69940] cursor-pointer"
+                  disabled={hardwareBusy}
+                  className="px-5 py-2.5 rounded-lg bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-bold cursor-pointer flex items-center gap-2 transition-all disabled:opacity-50"
                 >
-                  Encode & Issue Card
+                  {hardwareBusy ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Writing to Card...</span>
+                    </>
+                  ) : (
+                    <>
+                      <KeyRound className="w-3.5 h-3.5" />
+                      <span>{issueModalError ? 'Retry Hardware Encode' : 'Encode & Issue Card'}</span>
+                    </>
+                  )}
                 </button>
               </div>
             </form>

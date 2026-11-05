@@ -223,6 +223,120 @@ namespace SriTayiGrandRfidBridge
             res.OutputStream.Close();
         }
 
+        static string GetErrorMessage(short code)
+        {
+            switch (code)
+            {
+                case 0: return "Card operation completed successfully.";
+                case 1: return "Be-Tech USB Card Encoder not detected. Please plug the Be-Tech card encoder USB cable into this computer and ensure it is powered on.";
+                case 2: return "Encoder communication port is busy. Please try again in a moment.";
+                case 3: return "Invalid room number or authorization time format.";
+                case 4: return "Hotel system password mismatch (Configured: TAYIGR) or sector authentication failure.";
+                case 5: return "Failed to write card. The Mifare card may be damaged, write-protected, or was lifted too quickly.";
+                case 6: return "Reader is ready, but no RFID card is placed on it. Please place a Mifare 1K keycard on the reader surface.";
+                case 7: return "Unsupported card type. Please place a Be-Tech Mifare 1K S50 RFID card.";
+                default: return "Hardware return code " + code + " from Be-Tech BIS 5.7 driver.";
+            }
+        }
+
+        struct PortCandidate { public byte Port; public byte ReaderType; public PortCandidate(byte p, byte rt) { Port = p; ReaderType = rt; } }
+        static readonly PortCandidate[] ProbeCandidates = new PortCandidate[]
+        {
+            new PortCandidate(1, 4), // USB Port 1
+            new PortCandidate(0, 4), // USB Port 0 / Auto
+            new PortCandidate(2, 4), // USB Port 2
+            new PortCandidate(1, 0), // Default/Auto 1
+            new PortCandidate(1, 1), // COM1 Serial
+            new PortCandidate(2, 1), // COM2 Serial
+            new PortCandidate(3, 1), // COM3 Serial
+            new PortCandidate(4, 1)  // COM4 Serial
+        };
+
+        // Auto-detect and write to Be-Tech encoder across standard USB & COM ports
+        static short AutoWriteGuestCard(int cardNo, int guestSN, short guestIdx, string strLockID, string strSuitDoor, string strPubDoor, string beginTime, string endTime)
+        {
+            short res = 1;
+            try
+            {
+                res = Write_Guest_Card(Port, ReaderType, SectorNo, HotelPwd, cardNo, guestSN, guestIdx, strLockID, strSuitDoor, strPubDoor, beginTime, endTime);
+            }
+            catch (Exception ex)
+            {
+                Log("[P/INVOKE EXCEPTION WRITE] " + ex.Message);
+                return 1;
+            }
+
+            if (res == 0 || res == 6)
+            {
+                return res;
+            }
+
+            // If Port failed (code 1 = port open fail / no reader), probe common ports
+            if (res == 1)
+            {
+                foreach (PortCandidate cand in ProbeCandidates)
+                {
+                    if (cand.Port == Port && cand.ReaderType == ReaderType) continue;
+                    try
+                    {
+                        short probeRes = Write_Guest_Card(cand.Port, cand.ReaderType, SectorNo, HotelPwd, cardNo, guestSN, guestIdx, strLockID, strSuitDoor, strPubDoor, beginTime, endTime);
+                        if (probeRes == 0 || probeRes == 6)
+                        {
+                            Port = cand.Port;
+                            ReaderType = cand.ReaderType;
+                            Log(string.Format("[AUTO-PORT DETECT] Successfully bound to Be-Tech Encoder on Port={0}, ReaderType={1} (res={2})", cand.Port, cand.ReaderType, probeRes));
+                            return probeRes;
+                        }
+                    }
+                    catch {}
+                }
+            }
+
+            return res;
+        }
+
+        // Auto-detect and read from Be-Tech encoder across standard USB & COM ports
+        static short AutoReadGuestCard(ref int cardNo, ref int guestSN, ref short guestIdx, StringBuilder doorID, StringBuilder suitDoor, StringBuilder pubDoor, StringBuilder beginTime, StringBuilder endTime)
+        {
+            short res = 1;
+            try
+            {
+                res = Read_Guest_Card(Port, ReaderType, SectorNo, HotelPwd, ref cardNo, ref guestSN, ref guestIdx, doorID, suitDoor, pubDoor, beginTime, endTime);
+            }
+            catch (Exception ex)
+            {
+                Log("[P/INVOKE EXCEPTION READ] " + ex.Message);
+                return 1;
+            }
+
+            if (res == 0 || res == 6)
+            {
+                return res;
+            }
+
+            if (res == 1)
+            {
+                foreach (PortCandidate cand in ProbeCandidates)
+                {
+                    if (cand.Port == Port && cand.ReaderType == ReaderType) continue;
+                    try
+                    {
+                        short probeRes = Read_Guest_Card(cand.Port, cand.ReaderType, SectorNo, HotelPwd, ref cardNo, ref guestSN, ref guestIdx, doorID, suitDoor, pubDoor, beginTime, endTime);
+                        if (probeRes == 0 || probeRes == 6)
+                        {
+                            Port = cand.Port;
+                            ReaderType = cand.ReaderType;
+                            Log(string.Format("[AUTO-PORT DETECT] Successfully bound to Be-Tech Encoder on Port={0}, ReaderType={1} (res={2})", cand.Port, cand.ReaderType, probeRes));
+                            return probeRes;
+                        }
+                    }
+                    catch {}
+                }
+            }
+
+            return res;
+        }
+
         static string HandleReadCard(HttpListenerRequest req)
         {
             int cardNo = 0;
@@ -234,11 +348,7 @@ namespace SriTayiGrandRfidBridge
             StringBuilder beginTime = new StringBuilder(20);
             StringBuilder endTime = new StringBuilder(20);
 
-            short result = Read_Guest_Card(
-                Port,
-                ReaderType,
-                SectorNo,
-                HotelPwd,
+            short result = AutoReadGuestCard(
                 ref cardNo,
                 ref guestSN,
                 ref guestIdx,
@@ -253,7 +363,7 @@ namespace SriTayiGrandRfidBridge
 
             if (result == 0)
             {
-                Reader_Alarm(Port, ReaderType, 1); // 1 Beep confirmation
+                try { Reader_Alarm(Port, ReaderType, 1); } catch {} // 1 Beep confirmation
                 string rawDoor = doorID.ToString().Trim();
                 string roomNumber = rawDoor.TrimStart('0');
                 if (string.IsNullOrEmpty(roomNumber)) roomNumber = rawDoor;
@@ -274,7 +384,7 @@ namespace SriTayiGrandRfidBridge
             }
             else
             {
-                string errMsg = (result == 6) ? "No RFID card placed on reader" : "Hardware error code: " + result;
+                string errMsg = GetErrorMessage(result);
                 RecordTapEvent("TAP_READ_FAIL", "", 0, "", "", staffUser, errMsg);
                 return "{\"success\":false,\"code\":" + result + ",\"error\":\"" + errMsg + "\"}";
             }
@@ -307,11 +417,7 @@ namespace SriTayiGrandRfidBridge
             int guestSN = cardNo;
             short guestIdx = 10;
 
-            short result = Write_Guest_Card(
-                Port,
-                ReaderType,
-                SectorNo,
-                HotelPwd,
+            short result = AutoWriteGuestCard(
                 cardNo,
                 guestSN,
                 guestIdx,
@@ -324,13 +430,13 @@ namespace SriTayiGrandRfidBridge
 
             if (result == 0)
             {
-                Reader_Alarm(Port, ReaderType, 2); // 2 Beeps on activation
+                try { Reader_Alarm(Port, ReaderType, 2); } catch {} // 2 Beeps on activation
                 RecordTapEvent("TAP_ACTIVATE", roomNumber, cardNo, beginTime, endTime, staffUser, "SUCCESS");
                 return "{\"success\":true,\"code\":0,\"roomNumber\":\"" + roomNumber + "\",\"cardNo\":" + cardNo + ",\"beginTime\":\"" + beginTime + "\",\"endTime\":\"" + endTime + "\",\"message\":\"Card activated successfully\"}";
             }
             else
             {
-                string errMsg = (result == 6) ? "No RFID card placed on reader" : "Hardware error code: " + result;
+                string errMsg = GetErrorMessage(result);
                 RecordTapEvent("TAP_ACTIVATE_FAIL", roomNumber, cardNo, beginTime, endTime, staffUser, errMsg);
                 return "{\"success\":false,\"code\":" + result + ",\"error\":\"" + errMsg + "\"}";
             }
@@ -352,11 +458,7 @@ namespace SriTayiGrandRfidBridge
             int guestSN = 1;
             short guestIdx = 10;
 
-            short result = Write_Guest_Card(
-                Port,
-                ReaderType,
-                SectorNo,
-                HotelPwd,
+            short result = AutoWriteGuestCard(
                 cardNo,
                 guestSN,
                 guestIdx,
@@ -369,13 +471,13 @@ namespace SriTayiGrandRfidBridge
 
             if (result == 0)
             {
-                Reader_Alarm(Port, ReaderType, 1);
+                try { Reader_Alarm(Port, ReaderType, 1); } catch {}
                 RecordTapEvent("TAP_DEACTIVATE", roomNumber, 0, beginTime, endTime, staffUser, "SUCCESS");
                 return "{\"success\":true,\"code\":0,\"roomNumber\":\"" + roomNumber + "\",\"message\":\"Card cleared/deactivated successfully\"}";
             }
             else
             {
-                string errMsg = (result == 6) ? "No RFID card placed on reader" : "Hardware error code: " + result;
+                string errMsg = GetErrorMessage(result);
                 RecordTapEvent("TAP_DEACTIVATE_FAIL", roomNumber, 0, beginTime, endTime, staffUser, errMsg);
                 return "{\"success\":false,\"code\":" + result + ",\"error\":\"" + errMsg + "\"}";
             }
