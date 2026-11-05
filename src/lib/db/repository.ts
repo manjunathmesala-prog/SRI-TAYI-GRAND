@@ -21,6 +21,12 @@
 
 import { syncCardToSupabase, syncEventToSupabase, deleteCardFromSupabase } from './supabase-rfid';
 import {
+  loadPersistedCards,
+  savePersistedCards,
+  loadPersistedEvents,
+  savePersistedEvents,
+} from './card-storage';
+import {
   INITIAL_HOTEL_SETTINGS,
   INITIAL_ROOM_CATEGORIES,
   INITIAL_PHYSICAL_ROOMS,
@@ -49,8 +55,15 @@ class HotelRepository {
   private payments: PaymentRecord[] = JSON.parse(JSON.stringify(INITIAL_PAYMENTS));
   private staff: StaffMember[] = JSON.parse(JSON.stringify(INITIAL_STAFF));
   private rfidDevices: RFIDDevice[] = JSON.parse(JSON.stringify(INITIAL_RFID_DEVICES));
-  private rfidCards: RFIDCard[] = JSON.parse(JSON.stringify(INITIAL_RFID_CARDS));
-  private rfidEvents: RFIDAccessEvent[] = JSON.parse(JSON.stringify(INITIAL_RFID_ACCESS_EVENTS));
+  private rfidCards: RFIDCard[] = [];
+  private rfidEvents: RFIDAccessEvent[] = [];
+
+  constructor() {
+    const loadedCards = loadPersistedCards();
+    this.rfidCards = loadedCards.length > 0 ? loadedCards : JSON.parse(JSON.stringify(INITIAL_RFID_CARDS));
+    const loadedEvents = loadPersistedEvents();
+    this.rfidEvents = loadedEvents.length > 0 ? loadedEvents : JSON.parse(JSON.stringify(INITIAL_RFID_ACCESS_EVENTS));
+  }
 
   // --- SETTINGS ---
   getSettings(): HotelSettings {
@@ -569,10 +582,25 @@ class HotelRepository {
   }
 
   getRFIDCards(): RFIDCard[] {
+    const persisted = loadPersistedCards();
+    if (persisted.length > 0) {
+      for (const p of persisted) {
+        const existingIdx = this.rfidCards.findIndex((c) => c.id === p.id || c.card_uid === p.card_uid);
+        if (existingIdx === -1) {
+          this.rfidCards.push(p);
+        } else {
+          this.rfidCards[existingIdx] = { ...p, ...this.rfidCards[existingIdx] };
+        }
+      }
+    }
     return [...this.rfidCards];
   }
 
   getRFIDEvents(): RFIDAccessEvent[] {
+    if (this.rfidEvents.length === 0) {
+      const persisted = loadPersistedEvents();
+      if (persisted.length > 0) this.rfidEvents = persisted;
+    }
     return [...this.rfidEvents].sort(
       (a, b) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime()
     );
@@ -585,6 +613,7 @@ class HotelRepository {
       occurred_at: new Date().toISOString(),
     };
     this.rfidEvents.unshift(newEvent);
+    savePersistedEvents(this.rfidEvents);
     syncEventToSupabase(newEvent);
     return newEvent;
   }
@@ -613,6 +642,7 @@ class HotelRepository {
     };
 
     this.rfidCards.unshift(newCard);
+    savePersistedCards(this.rfidCards);
     syncCardToSupabase(newCard);
     this.logRFIDEvent({
       card_uid: cardUid,
@@ -715,7 +745,15 @@ class HotelRepository {
   }
 
   toggleRFIDCardStatus(cardId: string, targetStatus?: 'active' | 'inactive'): RFIDCard | null {
-    const card = this.rfidCards.find((c) => c.id === cardId || c.card_uid === cardId);
+    let card = this.rfidCards.find((c) => c.id === cardId || c.card_uid === cardId);
+    if (!card) {
+      const persisted = loadPersistedCards();
+      const found = persisted.find((c) => c.id === cardId || c.card_uid === cardId);
+      if (found) {
+        this.rfidCards.unshift(found);
+        card = found;
+      }
+    }
     if (!card) return null;
 
     const nextStatus = targetStatus || (card.status === 'active' ? 'inactive' : 'active');
@@ -732,7 +770,7 @@ class HotelRepository {
       card_type: card.card_type,
       card_label: card.card_label,
       device_name: 'Admin-Dashboard',
-      room_number: card.assigned_room_number || 'N/A',
+      room_number: card.assigned_room_number || card.room_number || 'N/A',
       event_type: nextStatus === 'active' ? 'access_granted' : 'access_denied',
       action_type: nextStatus === 'active' ? 'door_unlock' : 'unauthorized_attempt',
       holder_name: card.holder_name || card.guest_name,
@@ -740,6 +778,7 @@ class HotelRepository {
       reason: `Card ${card.card_uid} (${card.card_type}) ${nextStatus === 'active' ? 'ACTIVATED' : 'DEACTIVATED'} via Admin Dashboard`,
     });
 
+    savePersistedCards(this.rfidCards);
     syncCardToSupabase(card);
     return card;
   }
@@ -751,6 +790,7 @@ class HotelRepository {
   
   purgeAllRFIDCards(): void {
     this.rfidCards = [];
+    savePersistedCards(this.rfidCards);
   }
 
   purgeAllRFIDEvents(): void {
@@ -762,6 +802,7 @@ class HotelRepository {
     if (idx === -1) return false;
     const [removed] = this.rfidCards.splice(idx, 1);
     if (removed) deleteCardFromSupabase(removed.card_uid);
+    savePersistedCards(this.rfidCards);
     return true;
   }
 
@@ -800,6 +841,7 @@ class HotelRepository {
       reason: `Keycard validity extended by ${hoursToAdd ? `${hoursToAdd} hours` : 'custom time'} until ${new Date(newExpiry).toLocaleString('en-IN')} by ${staffUser}`,
     });
 
+    savePersistedCards(this.rfidCards);
     syncCardToSupabase(card);
     return card;
   }

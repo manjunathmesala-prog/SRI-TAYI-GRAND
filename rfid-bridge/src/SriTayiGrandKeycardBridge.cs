@@ -230,7 +230,9 @@ namespace SriTayiGrandRfidBridge
             switch (code)
             {
                 case 0: return "Card operation completed successfully.";
-                case 1: return "Be-Tech USB Card Encoder not detected. Please plug the Be-Tech card encoder USB cable into this computer and ensure it is powered on.";
+                case 1:
+                    try { if (Reader_Alarm(Port, ReaderType, 0) == 0) return "Be-Tech USB Reader is ready, but no RFID card is placed on it. Please place a Mifare 1K keycard flat on the reader."; } catch {}
+                    return "No RFID card detected on reader or encoder USB disconnected. Please ensure the Mifare keycard is placed flat on the reader.";
                 case 2: return "Encoder communication port is busy. Please try again in a moment.";
                 case 3: return "Invalid room number or authorization time format.";
                 case 4: return "Hotel system password mismatch (Configured: TAYIGR) or sector authentication failure.";

@@ -151,7 +151,7 @@ export async function readPhysicalCard(staffUser: string = 'Front Desk'): Promis
   // Try direct hardware post (with 25s timeout for physical card encoder)
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25000);
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
 
     const res = await fetch(`${host}/api/read-card`, {
       method: 'POST',
@@ -237,7 +237,7 @@ export async function issuePhysicalKeycard(params: {
   // Try direct hardware post (with 25s timeout for physical card write)
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25000);
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
 
     const res = await fetch(`${host}/api/issue-card`, {
       method: 'POST',
@@ -298,7 +298,7 @@ export async function checkoutPhysicalCard(
   // Try direct hardware post (with 25s timeout for card deactivation)
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 25000);
+    const timeoutId = setTimeout(() => controller.abort(), 4000);
 
     const res = await fetch(`${host}/api/checkout-card`, {
       method: 'POST',

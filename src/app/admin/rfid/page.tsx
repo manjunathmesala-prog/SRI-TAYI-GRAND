@@ -481,40 +481,19 @@ export default function RFIDAdminPage() {
     const nextStatus = currentStatus === 'active' ? 'inactive' : 'active';
     setHardwareBusy(true);
 
+    // 1. Optimistic UI update so buttons and badges respond instantly (< 50ms)
+    setCards((prev) =>
+      prev.map((c) =>
+        c.id === cardId || c.card_uid === cardId ? { ...c, status: nextStatus } : c
+      )
+    );
+
     try {
-      const targetCard = cards.find((c) => c.id === cardId);
-      const targetRoom = roomNumber || targetCard?.room_number || '104';
+      const targetCard = cards.find((c) => c.id === cardId || c.card_uid === cardId);
+      const targetRoom = roomNumber || targetCard?.room_number || targetCard?.assigned_room_number || '104';
+      const targetGuest = guestName || targetCard?.guest_name || targetCard?.holder_name || 'Guest';
 
-      if (nextStatus === 'active') {
-        // 1. Physically write & activate card on Be-Tech USB Reader with no time limit
-        setHardwareMessage({ text: `Writing Room ${targetRoom} activation to Be-Tech USB reader...`, type: 'info' });
-        const hwRes = await issuePhysicalKeycard({
-          roomNumber: targetRoom,
-          guestName: guestName || targetCard?.guest_name || 'Guest',
-          staffUser: 'Front Desk',
-        });
-
-        if (!hwRes.success) {
-          playChimeSound(false);
-          setHardwareMessage({
-            text: `⚠️ Encoder Alert: ${hwRes.error || 'Please place the Mifare card flat on the USB reader, then click Activate.'}`,
-            type: 'error',
-          });
-          setHardwareBusy(false);
-          return;
-        }
-
-        playChimeSound(true);
-      } else {
-        // 2. Physically wipe / deactivate card on Be-Tech USB Reader
-        setHardwareMessage({ text: `Clearing card for Room ${targetRoom} on Be-Tech USB reader...`, type: 'info' });
-        const hwRes = await checkoutPhysicalCard(targetRoom, 'Front Desk');
-        if (hwRes.success) {
-          playChimeSound(true);
-        }
-      }
-
-      // 3. Update database status
+      // 2. Persist status to Hotel Repository database first
       const res = await fetch('/api/rfid/cards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -524,18 +503,62 @@ export default function RFIDAdminPage() {
           status: nextStatus,
         }),
       });
-      const data = await res.json();
-      if (data.success) {
+      const dbData = await res.json();
+      if (!dbData.success) {
+        throw new Error(dbData.error || 'Failed to update card status in system');
+      }
+
+      // 3. Attempt hardware encoder sync (write or wipe Mifare card on Be-Tech USB reader)
+      let hwSynced = false;
+      let hwNote = '';
+
+      if (nextStatus === 'active') {
+        try {
+          const hwRes = await issuePhysicalKeycard({
+            roomNumber: targetRoom,
+            guestName: targetGuest,
+            staffUser: 'Front Desk',
+          });
+          if (hwRes && hwRes.success) {
+            hwSynced = true;
+          } else if (hwRes && hwRes.error) {
+            hwNote = hwRes.error;
+          }
+        } catch {
+          hwNote = 'Be-Tech encoder service offline';
+        }
+      } else {
+        try {
+          const hwRes = await checkoutPhysicalCard(targetRoom, 'Front Desk');
+          if (hwRes && hwRes.success) {
+            hwSynced = true;
+          } else if (hwRes && hwRes.error) {
+            hwNote = hwRes.error;
+          }
+        } catch {
+          hwNote = 'Be-Tech encoder service offline';
+        }
+      }
+
+      // 4. Positive sound and comprehensive feedback
+      playChimeSound(true);
+      if (hwSynced) {
         setHardwareMessage({
-          text: `🎉 Card for Room ${targetRoom} ${nextStatus === 'active' ? 'ACTIVATED & WRITTEN' : 'DEACTIVATED & WIPED'} on reader and system!`,
+          text: `Card for Room ${targetRoom} (${targetGuest}) ${nextStatus === 'active' ? 'ACTIVATED & written' : 'DEACTIVATED & wiped'} on Be-Tech encoder!`,
           type: nextStatus === 'active' ? 'success' : 'info',
         });
-        refreshAllData();
+      } else {
+        setHardwareMessage({
+          text: `Card for Room ${targetRoom} (${targetGuest}) is now ${nextStatus.toUpperCase()} in system.${hwNote ? ' Note: ' + hwNote : ''}`,
+          type: nextStatus === 'active' ? 'success' : 'info',
+        });
       }
+
+      refreshAllData();
     } catch (err: unknown) {
       playChimeSound(false);
       const msg = err instanceof Error ? err.message : 'Toggle status error';
-      setHardwareMessage({ text: msg, type: 'error' });
+      setHardwareMessage({ text: `Status update error: ${msg}`, type: 'error' });
       refreshAllData();
     } finally {
       setHardwareBusy(false);
