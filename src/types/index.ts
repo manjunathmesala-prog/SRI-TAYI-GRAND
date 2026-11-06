@@ -348,7 +348,7 @@ export interface Expense {
   recorded_by: string;
   expense_date: string;
   receipt_ref?: string;
-  status: 'approved' | 'pending' | 'rejected';
+  status?: 'approved' | 'pending' | 'rejected';
   created_at: string;
 }
 
@@ -377,6 +377,81 @@ export interface DailyClosing {
 }
 
 // ==============================================================================
+// CASHBOOK & CASH DRAWER SHIFTS
+// ==============================================================================
+
+export interface CashShift {
+  id: string;
+  shift_number: string;
+  cashier_id: string;
+  cashier_name: string;
+  opened_at: string;
+  closed_at?: string;
+  opening_float: number;
+  closing_cash_counted?: number;
+  expected_closing_cash?: number;
+  discrepancy?: number;
+  notes?: string;
+  status: 'open' | 'closed';
+}
+
+export type CashTransactionCategory =
+  | 'guest_payment'
+  | 'front_desk_advance'
+  | 'petty_cash'
+  | 'vendor_payout'
+  | 'change_replenishment'
+  | 'expense_payout'
+  | 'other';
+
+export interface CashTransaction {
+  id: string;
+  shift_id?: string;
+  type: 'cash_in' | 'cash_out';
+  category: CashTransactionCategory;
+  amount: number;
+  reason: string;
+  booking_reference?: string;
+  receipt_ref?: string;
+  performed_by: string;
+  performed_at: string;
+}
+
+// ==============================================================================
+// MAINTENANCE WORK ORDERS & OUT-OF-ORDER (OOO) BLOCKS
+// ==============================================================================
+
+export type MaintenancePriority = 'low' | 'normal' | 'high' | 'urgent';
+export type MaintenanceStatus = 'reported' | 'in_progress' | 'resolved' | 'cancelled';
+export type MaintenanceCategory =
+  | 'ac_climate'
+  | 'ac_hvac'
+  | 'plumbing_bath'
+  | 'electrical_lighting'
+  | 'smart_lock'
+  | 'tv_wifi'
+  | 'furniture_linen'
+  | 'other';
+
+export interface MaintenanceTicket {
+  id: string;
+  room_number: string;
+  issue_title: string;
+  description: string;
+  category: MaintenanceCategory;
+  priority: MaintenancePriority;
+  status: MaintenanceStatus;
+  reported_by: string;
+  assigned_to?: string;
+  estimated_cost: number;
+  actual_cost?: number;
+  room_blocked: boolean;
+  created_at: string;
+  resolved_at?: string;
+  resolution_notes?: string;
+}
+
+// ==============================================================================
 // REAL-TIME EVENT BUS DEFINITIONS
 // ==============================================================================
 
@@ -392,12 +467,19 @@ export type RealtimeEventType =
   | 'expense_deleted'
   | 'daily_closing' 
   | 'housekeeping_updated' 
-  | 'rfid_event' 
+  | 'rfid_event'
+  | 'cash_shift_opened'
+  | 'cash_shift_closed'
+  | 'cash_transaction_created'
+  | 'maintenance_ticket_created'
+  | 'maintenance_ticket_updated'
+  | 'maintenance_ticket_deleted'
   | 'full_sync';
 
 export interface RealtimeMessage {
   eventId: number;
   eventType: RealtimeEventType;
+  type?: RealtimeEventType;
   payload: any;
   timestamp: string;
   actor?: string;

@@ -71,8 +71,23 @@ export default function HomePage() {
         {/* Hero Left Content: Gold Dash, Title & Tagline */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto">
           <div className="max-w-xl">
-            {/* Gold horizontal accent bar */}
-            <div className="w-12 h-[2px] bg-[#D8AD56] mb-5 sm:mb-6 shadow-[0_0_8px_rgba(216,173,86,0.5)]" />
+            {/* Brand Emblem & Gold horizontal accent bar */}
+            <div className="flex items-center gap-3 mb-5 sm:mb-6">
+              <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#D8AD56]/80 overflow-hidden flex items-center justify-center bg-[#43001F] shadow-lg shrink-0">
+                <Image
+                  src="/images/hotel/tayi-grand-logo.png"
+                  alt="Sri Tayi Grand Hotel Official Emblem"
+                  fill
+                  sizes="44px"
+                  className="object-contain p-1"
+                  priority
+                />
+              </div>
+              <div className="w-12 h-[2px] bg-[#D8AD56] shadow-[0_0_8px_rgba(216,173,86,0.5)]" />
+              <span className="text-xs uppercase tracking-[0.25em] text-[#D8AD56] font-semibold drop-shadow-sm">
+                SRI TAYI GRAND
+              </span>
+            </div>
 
             {/* Title: 2 lines in Cormorant Garamond serif font */}
             <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl font-normal text-white leading-[1.06] tracking-normal drop-shadow-md">
@@ -87,7 +102,7 @@ export default function HomePage() {
 
             {/* Real Starting Price Badge from Sri Tayi Grand */}
             <div className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-[#D8AD56]/40 text-xs text-[#EFE3D6] shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-[#D8AD56] animate-pulse" />
+              <TayiBrandIcon size={16} />
               <span className="font-medium text-white">Rooms from ₹1,800</span>
               <span className="text-[11px] text-[#EFE3D6]/70">• Kadiri, AP</span>
             </div>

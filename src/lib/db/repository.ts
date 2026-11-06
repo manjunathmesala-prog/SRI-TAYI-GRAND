@@ -20,6 +20,10 @@ import {
   StaffRole,
   Expense,
   DailyClosing,
+  CashShift,
+  CashTransaction,
+  MaintenanceTicket,
+  MaintenanceStatus,
   RealtimeEventType,
   RealtimeMessage,
   GoogleReview,
@@ -49,6 +53,9 @@ import {
   INITIAL_EXPENSES,
   INITIAL_DAILY_CLOSINGS,
   INITIAL_REVIEWS,
+  INITIAL_CASH_SHIFTS,
+  INITIAL_CASH_TRANSACTIONS,
+  INITIAL_MAINTENANCE_TICKETS,
 } from './mock-data';
 import { calculateBookingTariff, normalizeCategoryId } from '@/lib/pricing';
 
@@ -70,6 +77,9 @@ export class HotelRepository {
   private expenses: Expense[] = JSON.parse(JSON.stringify(INITIAL_EXPENSES));
   private dailyClosings: DailyClosing[] = JSON.parse(JSON.stringify(INITIAL_DAILY_CLOSINGS));
   private reviews: GoogleReview[] = [...INITIAL_REVIEWS];
+  private cashShifts: CashShift[] = JSON.parse(JSON.stringify(INITIAL_CASH_SHIFTS));
+  private cashTransactions: CashTransaction[] = JSON.parse(JSON.stringify(INITIAL_CASH_TRANSACTIONS));
+  private maintenanceTickets: MaintenanceTicket[] = JSON.parse(JSON.stringify(INITIAL_MAINTENANCE_TICKETS));
 
   // In-Memory Real-Time Event Bus with Reconnection Replay Buffer
   private eventCounter: number = 0;
@@ -141,6 +151,10 @@ export class HotelRepository {
       payments: this.getPayments(),
       expenses: this.getExpenses(),
       dailyClosings: this.getDailyClosings(),
+      cashShifts: this.getCashShifts(),
+      cashTransactions: this.getCashTransactions(),
+      cashBalance: this.getCashBalance(),
+      maintenanceTickets: this.getMaintenanceTickets(),
       rfidCards: this.getRFIDCards(),
       rfidDevices: this.getRFIDDevices(),
       rfidEvents: this.getRFIDEvents().slice(0, 100),
@@ -800,18 +814,39 @@ export class HotelRepository {
     );
   }
 
-  createExpense(data: Omit<Expense, 'id' | 'created_at'>, actor?: string): Expense {
+  createExpense(
+    data: Omit<Expense, 'id' | 'created_at' | 'status'> & { status?: 'approved' | 'pending' | 'rejected' },
+    actor?: string
+  ): Expense {
     if (!data.amount || isNaN(data.amount) || data.amount <= 0) {
       throw new Error(`Expense amount must be a positive number. Received: ${data.amount}`);
     }
     const rand = Math.floor(100 + Math.random() * 900);
     const newExpense: Expense = {
       ...data,
+      status: data.status || 'approved',
       id: `exp-${Date.now()}-${rand}`,
       created_at: new Date().toISOString(),
     };
     this.expenses.unshift(newExpense);
     this.broadcastEvent('expense_created', newExpense, actor);
+
+    // Auto-record cash out transaction in cashbook if paid in cash
+    if (newExpense.payment_method === 'cash') {
+      try {
+        this.recordCashTransaction({
+          type: 'cash_out',
+          category: 'expense_payout',
+          amount: newExpense.amount,
+          reason: `Expense Payout: ${newExpense.title} (${newExpense.category})`,
+          receipt_ref: newExpense.receipt_ref,
+          performed_by: newExpense.recorded_by,
+        }, actor);
+      } catch (e) {
+        // non-blocking if shift not open
+      }
+    }
+
     return newExpense;
   }
 
@@ -874,6 +909,27 @@ export class HotelRepository {
       (c) => c.closing_date === targetDate && c.status === 'closed'
     );
 
+    // Operational statistics for night audit
+    const totalRooms = this.rooms.length;
+    const occupiedRooms = this.rooms.filter((r) => r.operational_status === 'occupied').length;
+    const cleanRooms = this.rooms.filter((r) => r.operational_status === 'available').length;
+    const dirtyRooms = this.rooms.filter((r) => r.operational_status === 'cleaning').length;
+    const maintenanceRooms = this.rooms.filter((r) => r.operational_status === 'maintenance').length;
+    const occupancyRate = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 100) : 0;
+
+    const arrivalsCount = this.bookings.filter(
+      (b) => b.check_in_date === targetDate && b.status !== 'cancelled'
+    ).length;
+    const departuresCount = this.bookings.filter(
+      (b) => b.check_out_date === targetDate && b.status !== 'cancelled'
+    ).length;
+
+    // GST statutory calculations (12% tax slab standard for rooms)
+    const netTaxable = Math.round(totalCollected / 1.12);
+    const totalGst = totalCollected - netTaxable;
+    const cgst = Math.round(totalGst / 2);
+    const sgst = totalGst - cgst;
+
     return {
       closingDate: targetDate,
       totalRevenue: totalCollected,
@@ -888,6 +944,22 @@ export class HotelRepository {
       cashExpenses,
       expectedCashInDrawer,
       isAlreadyClosed,
+      operational: {
+        totalRooms,
+        occupiedRooms,
+        cleanRooms,
+        dirtyRooms,
+        maintenanceRooms,
+        occupancyRate,
+        arrivalsCount,
+        departuresCount,
+      },
+      gst: {
+        netTaxable,
+        cgst,
+        sgst,
+        totalGst,
+      },
     };
   }
 
@@ -938,6 +1010,248 @@ export class HotelRepository {
     this.broadcastEvent('daily_closing', closing, params.closedByName);
 
     return closing;
+  }
+
+  // ==============================================================================
+  // CASHBOOK & CASH DRAWER SHIFTS
+  // ==============================================================================
+
+  getCashShifts(): CashShift[] {
+    return [...this.cashShifts].sort(
+      (a, b) => new Date(b.opened_at).getTime() - new Date(a.opened_at).getTime()
+    );
+  }
+
+  getActiveCashShift(): CashShift | null {
+    return this.cashShifts.find((s) => s.status === 'open') || null;
+  }
+
+  openCashShift(
+    params: {
+      cashierId: string;
+      cashierName: string;
+      openingFloat: number;
+      notes?: string;
+    },
+    actor?: string
+  ): CashShift {
+    const existing = this.getActiveCashShift();
+    if (existing) {
+      throw new Error(`Shift #${existing.shift_number} is currently active. Please close it first.`);
+    }
+
+    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const shiftCount =
+      this.cashShifts.filter((s) => s.opened_at.startsWith(new Date().toISOString().slice(0, 10))).length + 1;
+    const shiftNumber = `SH-${dateStr}-${String(shiftCount).padStart(2, '0')}`;
+
+    const newShift: CashShift = {
+      id: `shift-${Date.now()}`,
+      shift_number: shiftNumber,
+      cashier_id: params.cashierId,
+      cashier_name: params.cashierName,
+      opened_at: new Date().toISOString(),
+      opening_float: Math.max(0, Number(params.openingFloat) || 0),
+      notes: params.notes,
+      status: 'open',
+    };
+
+    this.cashShifts.unshift(newShift);
+    this.broadcastEvent('cash_shift_opened', newShift, actor || params.cashierName);
+    return newShift;
+  }
+
+  closeCashShift(
+    params: {
+      shiftId: string;
+      closingCashCounted: number;
+      notes?: string;
+      closedByName?: string;
+    },
+    actor?: string
+  ): CashShift {
+    const shift = this.cashShifts.find((s) => s.id === params.shiftId);
+    if (!shift) throw new Error('Cash shift not found.');
+    if (shift.status === 'closed') throw new Error('Shift is already closed.');
+
+    const balanceData = this.getCashBalance(shift.id);
+    const expectedClosing = balanceData.currentBalance;
+    const discrepancy = Number(params.closingCashCounted) - expectedClosing;
+
+    shift.status = 'closed';
+    shift.closed_at = new Date().toISOString();
+    shift.closing_cash_counted = Number(params.closingCashCounted);
+    shift.expected_closing_cash = expectedClosing;
+    shift.discrepancy = discrepancy;
+    if (params.notes) {
+      shift.notes = shift.notes ? `${shift.notes} | Close: ${params.notes}` : params.notes;
+    }
+
+    this.broadcastEvent('cash_shift_closed', shift, actor || params.closedByName);
+    return shift;
+  }
+
+  getCashTransactions(shiftId?: string): CashTransaction[] {
+    let list = [...this.cashTransactions];
+    if (shiftId) {
+      list = list.filter((t) => t.shift_id === shiftId);
+    }
+    return list.sort((a, b) => new Date(b.performed_at).getTime() - new Date(a.performed_at).getTime());
+  }
+
+  recordCashTransaction(
+    params: Omit<CashTransaction, 'id' | 'performed_at'>,
+    actor?: string
+  ): CashTransaction {
+    if (!params.amount || params.amount <= 0) {
+      throw new Error('Cash transaction amount must be positive.');
+    }
+
+    const activeShift = this.getActiveCashShift();
+    const newTx: CashTransaction = {
+      ...params,
+      id: `ctx-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
+      shift_id: params.shift_id || activeShift?.id,
+      performed_at: new Date().toISOString(),
+    };
+
+    this.cashTransactions.unshift(newTx);
+    this.broadcastEvent('cash_transaction_created', newTx, actor || params.performed_by);
+    return newTx;
+  }
+
+  getCashBalance(specificShiftId?: string): {
+    activeShift: CashShift | null;
+    openingFloat: number;
+    totalCashIn: number;
+    totalCashOut: number;
+    currentBalance: number;
+  } {
+    const shift = specificShiftId
+      ? this.cashShifts.find((s) => s.id === specificShiftId) || null
+      : this.getActiveCashShift();
+
+    const openingFloat = shift ? shift.opening_float : 0;
+    const txs = shift ? this.cashTransactions.filter((t) => t.shift_id === shift.id) : this.cashTransactions;
+
+    const totalCashIn = txs
+      .filter((t) => t.type === 'cash_in')
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    const totalCashOut = txs
+      .filter((t) => t.type === 'cash_out')
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    const currentBalance = Math.max(0, openingFloat + totalCashIn - totalCashOut);
+
+    return {
+      activeShift: shift,
+      openingFloat,
+      totalCashIn,
+      totalCashOut,
+      currentBalance,
+    };
+  }
+
+  // ==============================================================================
+  // MAINTENANCE WORK ORDERS & OUT-OF-ORDER (OOO) BLOCKS
+  // ==============================================================================
+
+  getMaintenanceTickets(): MaintenanceTicket[] {
+    return [...this.maintenanceTickets].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+  }
+
+  getMaintenanceTicket(id: string): MaintenanceTicket | null {
+    return this.maintenanceTickets.find((t) => t.id === id) || null;
+  }
+
+  createMaintenanceTicket(
+    data: Omit<MaintenanceTicket, 'id' | 'created_at' | 'status'> & { status?: MaintenanceStatus },
+    actor?: string
+  ): MaintenanceTicket {
+    const newTicket: MaintenanceTicket = {
+      ...data,
+      id: `maint-${Date.now()}`,
+      status: data.status || 'reported',
+      created_at: new Date().toISOString(),
+    };
+
+    this.maintenanceTickets.unshift(newTicket);
+
+    if (newTicket.room_blocked) {
+      const room = this.rooms.find((r) => r.room_number === newTicket.room_number);
+      if (room) {
+        room.operational_status = 'maintenance';
+        this.broadcastEvent(
+          'room_assigned',
+          { room_number: room.room_number, operational_status: 'maintenance' },
+          actor
+        );
+      }
+    }
+
+    this.broadcastEvent('maintenance_ticket_created', newTicket, actor);
+    return newTicket;
+  }
+
+  updateMaintenanceTicket(
+    id: string,
+    updates: Partial<Omit<MaintenanceTicket, 'id' | 'created_at'>>,
+    actor?: string
+  ): MaintenanceTicket {
+    const ticket = this.maintenanceTickets.find((t) => t.id === id);
+    if (!ticket) throw new Error('Maintenance ticket not found.');
+
+    const oldStatus = ticket.status;
+    const oldBlocked = ticket.room_blocked;
+
+    Object.assign(ticket, updates);
+
+    if (updates.status === 'resolved' && oldStatus !== 'resolved') {
+      ticket.resolved_at = new Date().toISOString();
+      const room = this.rooms.find((r) => r.room_number === ticket.room_number);
+      if (room && room.operational_status === 'maintenance') {
+        room.operational_status = 'cleaning';
+        room.housekeeping_status = 'dirty';
+        this.broadcastEvent(
+          'housekeeping_updated',
+          { room_number: room.room_number, status: 'dirty', operational_status: 'cleaning' },
+          actor
+        );
+      }
+    } else if (updates.room_blocked !== undefined && updates.room_blocked !== oldBlocked) {
+      const room = this.rooms.find((r) => r.room_number === ticket.room_number);
+      if (room) {
+        if (updates.room_blocked) {
+          room.operational_status = 'maintenance';
+        } else if (room.operational_status === 'maintenance') {
+          room.operational_status = 'available';
+        }
+      }
+    }
+
+    this.broadcastEvent('maintenance_ticket_updated', ticket, actor);
+    return ticket;
+  }
+
+  deleteMaintenanceTicket(id: string, actor?: string): boolean {
+    const index = this.maintenanceTickets.findIndex((t) => t.id === id);
+    if (index === -1) return false;
+    const removed = this.maintenanceTickets.splice(index, 1)[0];
+    if (removed.room_blocked) {
+      const room = this.rooms.find((r) => r.room_number === removed.room_number);
+      if (room && room.operational_status === 'maintenance') {
+        room.operational_status = 'available';
+      }
+    }
+    this.broadcastEvent(
+      'maintenance_ticket_deleted',
+      { id: removed.id, room_number: removed.room_number },
+      actor
+    );
+    return true;
   }
 
   // --- CONVENTION HALL ENQUIRIES ---
@@ -1669,7 +1983,9 @@ if (
   typeof (global.__hotelRepo as any).getExpenses !== 'function' ||
   typeof (global.__hotelRepo as any).getDailyClosings !== 'function' ||
   typeof (global.__hotelRepo as any).getFullState !== 'function' ||
-  typeof (global.__hotelRepo as any).getReviews !== 'function'
+  typeof (global.__hotelRepo as any).getReviews !== 'function' ||
+  typeof (global.__hotelRepo as any).getCashShifts !== 'function' ||
+  typeof (global.__hotelRepo as any).getMaintenanceTickets !== 'function'
 ) {
   global.__hotelRepo = new HotelRepository();
 }

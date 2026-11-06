@@ -24,8 +24,8 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    // Only Accounts, Hotel Manager, or Super Admin can perform Daily Closing
-    const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Accounts']);
+    // Accounts, Hotel Manager, Super Admin, or Front Desk Lead can perform Daily Closing
+    const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Accounts', 'Front Desk', 'Receptionist']);
     if (!auth.authorized) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
     }

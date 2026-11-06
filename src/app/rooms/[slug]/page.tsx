@@ -98,6 +98,7 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-xs text-[#786A5B] mb-8">
+            <TayiBrandIcon size={16} />
             <NextLink href="/" className="hover:text-[#43001F] transition-colors">Home</NextLink>
             <span>/</span>
             <NextLink href="/rooms" className="hover:text-[#43001F] transition-colors">Rooms &amp; Suites</NextLink>
@@ -214,9 +215,12 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
               <div className="bg-white rounded-3xl border border-[#E6D9C5] p-7 sm:p-8 shadow-luxury sticky top-28">
                 {/* Header */}
                 <div className="border-b border-[#E6D9C5]/80 pb-5 mb-5">
-                  <span className="text-[10px] uppercase tracking-[0.2em] font-semibold text-[#43001F] block mb-1">
-                    SELECTED ROOM
-                  </span>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] uppercase tracking-[0.2em] font-semibold text-[#43001F] block">
+                      SELECTED ROOM
+                    </span>
+                    <TayiBrandIcon size={20} />
+                  </div>
                   <h1 className="font-serif text-3xl font-bold text-[#33271D]">
                     {room.name}
                   </h1>

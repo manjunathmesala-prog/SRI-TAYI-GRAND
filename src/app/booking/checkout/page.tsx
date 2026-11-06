@@ -227,9 +227,12 @@ function CheckoutContent() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Page Title */}
       <div className="mb-10 animate-fade-in">
-        <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#43001F] block mb-2">
-          RESERVATION &amp; STAY DETAILS
-        </span>
+        <div className="flex items-center gap-2 mb-2">
+          <TayiBrandIcon size={18} />
+          <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#43001F]">
+            RESERVATION &amp; STAY DETAILS
+          </span>
+        </div>
         <h1 className="font-serif text-3xl sm:text-4xl font-normal text-[#33271D]">
           Guest Details &amp; Confirmation
         </h1>

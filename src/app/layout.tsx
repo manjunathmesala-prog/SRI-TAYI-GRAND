@@ -20,8 +20,11 @@ export const metadata: Metadata = {
   description: 'Experience thoughtful comfort and authentic hospitality at Sri Tayi Grand, Kadiri. Fully AC Deluxe Rooms, Four Bed Family Rooms, Executive Suites, and Grand 800-capacity Convention Hall with ample parking.',
   keywords: 'Sri Tayi Grand, Tayi Grand Hotel, Kadiri Hotel, Hotels in Kadiri, Convention Hall Kadiri, Luxury Hotel Anantapur, Rooms in Kadiri',
   icons: {
-    icon: '/favicon.ico',
-    shortcut: '/favicon.ico',
+    icon: [
+      { url: '/images/hotel/tayi-grand-logo.png', type: 'image/png' },
+      { url: '/favicon.ico' },
+    ],
+    shortcut: '/images/hotel/tayi-grand-logo.png',
     apple: '/images/hotel/tayi-grand-logo.png',
   },
   openGraph: {

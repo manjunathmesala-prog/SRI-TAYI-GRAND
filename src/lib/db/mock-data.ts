@@ -12,15 +12,20 @@ import {
   RFIDCard, 
   RFIDAccessEvent, 
   StaffMember,
-  GoogleReview
+  GoogleReview,
+  Expense,
+  DailyClosing,
+  CashShift,
+  CashTransaction,
+  MaintenanceTicket
 } from '@/types';
 import { INITIAL_GOOGLE_REVIEWS } from '@/lib/reviews-data';
 
 export const INITIAL_HOTEL_SETTINGS: HotelSettings = {
   hotel_name: 'SRI TAYI GRAND',
-  tagline: 'Stay · Host · Celebrate',
-  address: '4585+F8J, Opp. Girls High School, Bypass Road, Kadiri – 515591, Anantapur District, Andhra Pradesh, India.',
-  road: 'Tadipatri – Pulivendula – Kadiri Road, Revenue Colony, Kadiri',
+  tagline: 'Stay Â· Host Â· Celebrate',
+  address: '4585+F8J, Opp. Girls High School, Bypass Road, Kadiri â€“ 515591, Anantapur District, Andhra Pradesh, India.',
+  road: 'Tadipatri â€“ Pulivendula â€“ Kadiri Road, Revenue Colony, Kadiri',
   phone: '084942 23379',
   whatsapp: '+918494223379',
   email: 'contact@sritayigrand.com',
@@ -45,7 +50,7 @@ export const INITIAL_ROOM_CATEGORIES: RoomCategory[] = [
     slug: 'double-room',
     name: 'Double Room',
     short_description: 'Comfortable air-conditioned room with king or twin bedding and ensuite modern bathroom.',
-    full_description: 'Designed for couples, companions, and solo travelers visiting Kadiri. Features individual air conditioning, plush bedding with acoustic headboards, high-speed Wi-Fi, 24/7 hot water, smart TV, and work space. Base tariff includes 2 persons, with provision for 1 additional guest at ₹300.',
+    full_description: 'Designed for couples, companions, and solo travelers visiting Kadiri. Features individual air conditioning, plush bedding with acoustic headboards, high-speed Wi-Fi, 24/7 hot water, smart TV, and work space. Base tariff includes 2 persons, with provision for 1 additional guest at â‚¹300.',
     base_price_per_night: 1800,
     base_tariff_paise: 180000,
     included_occupancy: 2,
@@ -77,7 +82,7 @@ export const INITIAL_ROOM_CATEGORIES: RoomCategory[] = [
     ],
     features: [
       'Included occupancy: 2 persons',
-      'Permits 1 extra person (₹300)',
+      'Permits 1 extra person (â‚¹300)',
       'Plush bedding with acoustic headboard',
       'Attached ensuite modern bathroom',
     ],
@@ -88,7 +93,7 @@ export const INITIAL_ROOM_CATEGORIES: RoomCategory[] = [
     slug: 'four-bed-room',
     name: 'Four Bed Room',
     short_description: 'Generous family accommodation with 4 comfortable beds, air conditioning, and expansive space.',
-    full_description: 'Tailored for traveling families, temple pilgrims, and group companions visiting Kadiri. Offers 4 comfortable beds with premium linens, individual climate control, high-speed Wi-Fi, spacious ensuite bathroom with geyser hot water, and generous luggage storage. Base tariff includes 4 persons, with provision for 1 additional guest at ₹300.',
+    full_description: 'Tailored for traveling families, temple pilgrims, and group companions visiting Kadiri. Offers 4 comfortable beds with premium linens, individual climate control, high-speed Wi-Fi, spacious ensuite bathroom with geyser hot water, and generous luggage storage. Base tariff includes 4 persons, with provision for 1 additional guest at â‚¹300.',
     base_price_per_night: 2800,
     base_tariff_paise: 280000,
     included_occupancy: 4,
@@ -120,7 +125,7 @@ export const INITIAL_ROOM_CATEGORIES: RoomCategory[] = [
     ],
     features: [
       'Included occupancy: 4 persons',
-      'Permits 1 extra person (₹300)',
+      'Permits 1 extra person (â‚¹300)',
       '4 comfortable individual beds',
       'Generous floor plan for families',
     ],
@@ -131,7 +136,7 @@ export const INITIAL_ROOM_CATEGORIES: RoomCategory[] = [
     slug: 'suite-room',
     name: 'Suite Room',
     short_description: 'Spacious luxury with premium comfort, dedicated living lounge, and private balcony.',
-    full_description: 'Our Suite Room offers a perfect blend of space, elegance, and modern amenities for a truly comfortable stay. Features a plush king bed, dedicated living lounge with premium armchairs, attached modern bathroom with hot/cold shower, and private balcony overlooking peaceful surroundings. Base tariff includes 2 persons, with provision for up to 2 additional guests at ₹300 each.',
+    full_description: 'Our Suite Room offers a perfect blend of space, elegance, and modern amenities for a truly comfortable stay. Features a plush king bed, dedicated living lounge with premium armchairs, attached modern bathroom with hot/cold shower, and private balcony overlooking peaceful surroundings. Base tariff includes 2 persons, with provision for up to 2 additional guests at â‚¹300 each.',
     base_price_per_night: 3300,
     base_tariff_paise: 330000,
     included_occupancy: 2,
@@ -167,7 +172,7 @@ export const INITIAL_ROOM_CATEGORIES: RoomCategory[] = [
     ],
     features: [
       'Included occupancy: 2 persons',
-      'Permits up to 2 extra persons (₹300 each)',
+      'Permits up to 2 extra persons (â‚¹300 each)',
       'Spacious living area & private balcony',
       'Premium king bed with executive comfort',
     ],
@@ -420,9 +425,6 @@ export const INITIAL_RFID_CARDS: RFIDCard[] = [];
 // PRODUCTION READY: No mock or fake access events. Populated live from Be-Tech lock readers & encoder taps.
 export const INITIAL_RFID_ACCESS_EVENTS: RFIDAccessEvent[] = [];
 
-
-import { Expense, DailyClosing } from '@/types';
-
 export const INITIAL_EXPENSES: Expense[] = [
   {
     id: 'exp-01',
@@ -492,4 +494,101 @@ export const INITIAL_DAILY_CLOSINGS: DailyClosing[] = [
 ];
 
 export const INITIAL_REVIEWS: GoogleReview[] = INITIAL_GOOGLE_REVIEWS;
+
+export const INITIAL_CASH_SHIFTS: CashShift[] = [
+  {
+    id: 'shift-current',
+    shift_number: 'SH-20261106-01',
+    cashier_id: 'stf-3',
+    cashier_name: 'Bhavani Shankar',
+    opened_at: new Date(Date.now() - 6 * 3600 * 1000).toISOString(),
+    opening_float: 5000,
+    status: 'open',
+    notes: 'Morning shift float handed over with ₹5,000 denomination breakdown.',
+  },
+];
+
+export const INITIAL_CASH_TRANSACTIONS: CashTransaction[] = [
+  {
+    id: 'ctx-01',
+    shift_id: 'shift-current',
+    type: 'cash_in',
+    category: 'guest_payment',
+    amount: 3200,
+    reason: 'Room 204 Walk-In Stay Cash Settlement',
+    booking_reference: 'STG-2026-89120',
+    performed_by: 'Bhavani Shankar',
+    performed_at: new Date(Date.now() - 4 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'ctx-02',
+    shift_id: 'shift-current',
+    type: 'cash_out',
+    category: 'vendor_payout',
+    amount: 850,
+    reason: 'Emergency Reception Stationery & Key Card Sleeves',
+    receipt_ref: 'VND-STAT-09',
+    performed_by: 'Bhavani Shankar',
+    performed_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'ctx-03',
+    shift_id: 'shift-current',
+    type: 'cash_in',
+    category: 'front_desk_advance',
+    amount: 1500,
+    reason: 'Advance deposit for Banquet Booking',
+    booking_reference: 'HALL-2026-041',
+    performed_by: 'Bhavani Shankar',
+    performed_at: new Date(Date.now() - 1 * 3600 * 1000).toISOString(),
+  },
+];
+
+export const INITIAL_MAINTENANCE_TICKETS: MaintenanceTicket[] = [
+  {
+    id: 'maint-101',
+    room_number: '104',
+    issue_title: 'AC Cooling Coil Freezing & Fan Noise',
+    description: 'Split inverter unit compressor vibrating heavily and insufficient airflow in Room 104.',
+    category: 'ac_climate',
+    priority: 'high',
+    status: 'in_progress',
+    reported_by: 'Anjaneyulu (Housekeeper)',
+    assigned_to: 'Srinivasulu M (Maintenance)',
+    estimated_cost: 1800,
+    room_blocked: true,
+    created_at: new Date(Date.now() - 24 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'maint-102',
+    room_number: '208',
+    issue_title: 'Bathroom Mixer Tap Pressure Drop & Gasket Leak',
+    description: 'Shower diverter valve leaking into ceiling trap; needs cartridge replacement.',
+    category: 'plumbing_bath',
+    priority: 'normal',
+    status: 'reported',
+    reported_by: 'Bhavani Shankar',
+    assigned_to: 'Kiran Plumbing Services',
+    estimated_cost: 650,
+    room_blocked: false,
+    created_at: new Date(Date.now() - 8 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'maint-103',
+    room_number: '302',
+    issue_title: 'RFID Smart Lock Battery Low Beep Warning',
+    description: 'Lock battery level dropped below 15%. Replaced with 4x AA lithium cells.',
+    category: 'smart_lock',
+    priority: 'urgent',
+    status: 'resolved',
+    reported_by: 'RFID Bridge Daemon',
+    assigned_to: 'Srinivasulu M (Maintenance)',
+    estimated_cost: 400,
+    actual_cost: 380,
+    room_blocked: false,
+    created_at: new Date(Date.now() - 48 * 3600 * 1000).toISOString(),
+    resolved_at: new Date(Date.now() - 44 * 3600 * 1000).toISOString(),
+    resolution_notes: 'Batteries swapped, door aligned, tested successfully with master card.',
+  },
+];
 

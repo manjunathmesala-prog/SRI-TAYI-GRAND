@@ -74,12 +74,18 @@ export function useRealtimeSync(options: UseRealtimeSyncOptions = {}) {
             sessionStorage.setItem('stg_last_event_id', evtId.toString());
           }
 
-          setLastMessage(data);
+          const msgWithAliases: RealtimeMessage = {
+            ...data,
+            type: data.type || data.eventType || eventType,
+            eventType: data.eventType || data.type || eventType,
+          };
+
+          setLastMessage(msgWithAliases);
 
           // Filtering check
-          if (!filterTypes || filterTypes.includes(data.eventType)) {
+          if (!filterTypes || filterTypes.includes(msgWithAliases.eventType)) {
             if (onEventRef.current) {
-              onEventRef.current(data);
+              onEventRef.current(msgWithAliases);
             }
             if (onRefreshRef.current) {
               onRefreshRef.current();
@@ -104,6 +110,12 @@ export function useRealtimeSync(options: UseRealtimeSyncOptions = {}) {
         'daily_closing',
         'housekeeping_updated',
         'rfid_event',
+        'cash_shift_opened',
+        'cash_shift_closed',
+        'cash_transaction_created',
+        'maintenance_ticket_created',
+        'maintenance_ticket_updated',
+        'maintenance_ticket_deleted',
         'full_sync',
       ];
 
@@ -152,6 +164,7 @@ export function useRealtimeSync(options: UseRealtimeSyncOptions = {}) {
     isConnected: status === 'connected',
     lastEventId,
     lastMessage,
+    lastEvent: lastMessage,
     reconnect: connect,
   };
 }

@@ -25,6 +25,10 @@ import {
   ExternalLink,
   Radio,
   MessageSquareQuote,
+  Wallet,
+  TrendingDown,
+  Lock,
+  Wrench,
 } from 'lucide-react';
 import { useRealtimeSync } from '@/lib/realtime-client';
 
@@ -34,11 +38,36 @@ export function AdminSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [userName, setUserName] = useState('Admin Console');
   const [userRole, setUserRole] = useState('Super Admin');
+  const [cashBalance, setCashBalance] = useState<number | null>(null);
+
+  const fetchCashBalance = async () => {
+    try {
+      const res = await fetch('/api/admin/cashbook', {
+        headers: { 'x-staff-role': 'Super Admin' },
+      });
+      const data = await res.json();
+      if (data.success && typeof data.balance === 'number') {
+        setCashBalance(data.balance);
+      }
+    } catch {}
+  };
 
   // Real-time synchronization connection hook
-  const { status, isConnected } = useRealtimeSync();
+  const { status, isConnected } = useRealtimeSync({
+    onEvent: (event) => {
+      if (
+        event.eventType === 'cash_shift_opened' ||
+        event.eventType === 'cash_shift_closed' ||
+        event.eventType === 'cash_transaction_created' ||
+        event.eventType === 'expense_created'
+      ) {
+        fetchCashBalance();
+      }
+    },
+  });
 
   useEffect(() => {
+    fetchCashBalance();
     if (typeof window !== 'undefined') {
       const storedName = localStorage.getItem('stg_user_name');
       const storedRole = localStorage.getItem('stg_role');
@@ -56,9 +85,13 @@ export function AdminSidebar() {
     { label: 'Dashboard Overview', href: '/admin/dashboard', icon: LayoutDashboard },
     { label: 'Front Desk / Reception', href: '/admin/front-desk', icon: ConciergeBell, highlight: true },
     { label: 'Bookings', href: '/admin/bookings', icon: CalendarCheck },
+    { label: 'Cashbook & Drawer', href: '/admin/cashbook', icon: Wallet, badge: 'Live' },
+    { label: 'Operating Expenses', href: '/admin/expenses', icon: TrendingDown },
+    { label: 'Night Audit & Closing', href: '/admin/daily-closing', icon: Lock },
     { label: 'Room Inventory', href: '/admin/rooms/inventory', icon: BedDouble },
     { label: 'Room Categories', href: '/admin/rooms/categories', icon: Layers },
     { label: 'Housekeeping', href: '/admin/housekeeping', icon: Sparkles },
+    { label: 'Maintenance & OOO', href: '/admin/maintenance', icon: Wrench, badge: 'OOO' },
     { label: 'Guests', href: '/admin/guests', icon: Users },
     { label: 'Payments & Revenue', href: '/admin/payments', icon: CreditCard },
     { label: 'Convention Hall Enquiries', href: '/admin/convention-hall', icon: Building },
@@ -146,7 +179,7 @@ export function AdminSidebar() {
           </div>
 
           {/* Real-time Status Indicator Pill */}
-          <div className="px-4 pt-3 pb-1">
+          <div className="px-4 pt-3 pb-1 space-y-1.5">
             <div
               className={`flex items-center justify-between px-3 py-1.5 rounded-lg text-[10px] font-semibold border ${
                 isConnected
@@ -172,6 +205,20 @@ export function AdminSidebar() {
               </div>
               <Radio className="w-3 h-3 opacity-60" />
             </div>
+
+            {cashBalance !== null && (
+              <NextLink
+                href="/admin/cashbook"
+                className="flex items-center justify-between px-3 py-1.5 rounded-lg text-[10px] font-semibold bg-[#382216]/60 border border-[#D8AD56]/30 text-[#D8AD56] hover:bg-[#382216] transition-colors"
+                title="Front Desk Cash Drawer Balance"
+              >
+                <div className="flex items-center gap-1.5">
+                  <Wallet className="w-3 h-3 text-[#D8AD56]" />
+                  <span>Drawer Balance</span>
+                </div>
+                <span className="font-mono font-bold">₹{cashBalance.toLocaleString('en-IN')}</span>
+              </NextLink>
+            )}
           </div>
 
           {/* Navigation Items */}
