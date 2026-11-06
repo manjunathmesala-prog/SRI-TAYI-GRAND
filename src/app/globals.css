@@ -48,24 +48,6 @@ h1, h2, h3, h4, .font-serif {
   background: #C69940;
 }
 
-/* Custom Pointer Hide only when Custom Luxury Cursor is Active on Fine Pointers */
-@media (pointer: fine) {
-  body.has-custom-cursor,
-  body.has-custom-cursor a,
-  body.has-custom-cursor button,
-  body.has-custom-cursor [role="button"],
-  body.has-custom-cursor [data-cursor-hover] {
-    cursor: none !important;
-  }
-
-  body.has-custom-cursor input[type="text"],
-  body.has-custom-cursor input[type="date"],
-  body.has-custom-cursor input[type="tel"],
-  body.has-custom-cursor input[type="email"],
-  body.has-custom-cursor textarea {
-    cursor: text !important;
-  }
-}
 
 /* Glass & Hospitality Card Utilities */
 .glass-panel {

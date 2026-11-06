@@ -1,7 +1,5 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { ScrollProgress } from '@/components/motion/ScrollProgress';
-import { LuxuryCursor } from '@/components/motion/LuxuryCursor';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://sritayigrand.com'),
@@ -66,8 +64,6 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen flex flex-col bg-[#F8F1E9] text-[#241912] selection:bg-[#D8AD56] selection:text-[#25150F] relative">
-        <ScrollProgress />
-        <LuxuryCursor />
         {children}
       </body>
     </html>
