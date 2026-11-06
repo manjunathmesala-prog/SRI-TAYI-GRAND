@@ -4,7 +4,8 @@ import Image from 'next/image';
 import NextLink from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import HorizonBookingBar from '@/components/anantha/HorizonBookingBar';
+import { BookingWidget } from '@/components/booking/BookingWidget';
+import { AtmosphericGlow } from '@/components/motion/AtmosphericGlow';
 import TayiBrandIcon from '@/components/anantha/TayiBrandIcon';
 import MobileStickyBookingBar from '@/components/anantha/MobileStickyBookingBar';
 import FloatingActionBar from '@/components/anantha/FloatingActionBar';
@@ -42,124 +43,60 @@ export default function HomePage() {
   return (
     <main className="min-h-screen flex flex-col bg-[#F8F3E9] text-[#33271D]">
       {/* Navigation */}
-      <Header transparentInitially={false} />
+      <Header transparentInitially={true} />
 
       {/* =========================================================================
-          HERO SECTION — EXACT ANANTHA HORIZON LUXURY FRAME
+          HERO SECTION — EXACT CLASSIC LUXURY EXTERIOR & EMBEDDED SEARCH ENGINE
           ========================================================================= */}
-      <section id="home" className="relative w-full pt-4 sm:pt-6 pb-16 sm:pb-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Main Hero Media Frame */}
-          <div className="relative w-full rounded-[24px] sm:rounded-[36px] overflow-hidden min-h-[560px] sm:min-h-[640px] lg:min-h-[700px] shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-stone-200/40 flex flex-col justify-between p-5 sm:p-10 lg:p-14">
-            {/* Background Hotel Exterior with Ambient Atmosphere */}
-            <div className="absolute inset-0 z-0 overflow-hidden bg-[#21180F]">
-              <Image
-                src="/images/hotel/hotel-exterior-hero-clean.jpg"
-                alt="Sri Tayi Grand Hotel Exterior Facade"
-                fill
-                priority
-                className="object-cover object-center scale-[1.01] hover:scale-105 transition-transform duration-1000 ease-out"
-                sizes="100vw"
-              />
-              {/* Subtle luxury ambient gradient overlays */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/40" />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/20 to-black/40" />
+      <section className="relative min-h-[620px] sm:min-h-[720px] lg:min-h-[820px] flex flex-col justify-between pt-32 sm:pt-40 pb-10 sm:pb-14 overflow-hidden bg-[#20120B]">
+        {/* Authentic Hotel Exterior Background Image with Ambient Zoom */}
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/hotel/hotel-exterior-hero-clean.jpg"
+            alt="Sri Tayi Grand Hotel Facade"
+            fill
+            priority
+            className="object-cover object-[70%_center] sm:object-center transform scale-100 hover:scale-[1.02] transition-transform duration-1000 ease-out"
+            sizes="100vw"
+          />
+          {/* Subtle atmospheric vignette & blur overlays */}
+          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#20120B] via-transparent to-black/30" />
+        </div>
+
+        {/* Atmospheric Glow Orbs in Hero */}
+        <AtmosphericGlow position="top-right" color="gold" size="lg" className="opacity-40" />
+        <AtmosphericGlow position="bottom-left" color="champagne" size="md" className="opacity-30" />
+
+        {/* Hero Left Content: Gold Dash, Title & Tagline */}
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto">
+          <div className="max-w-xl">
+            {/* Gold horizontal accent bar */}
+            <div className="w-12 h-[2px] bg-[#D8AD56] mb-5 sm:mb-6 shadow-[0_0_8px_rgba(216,173,86,0.5)]" />
+
+            {/* Title: 2 lines in Cormorant Garamond serif font */}
+            <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl font-normal text-white leading-[1.06] tracking-normal drop-shadow-md">
+              Tayi Grand<br />
+              Hotel
+            </h1>
+
+            {/* Subtitle: Stay · Host · Celebrate */}
+            <p className="mt-4 sm:mt-5 text-lg sm:text-xl md:text-2xl text-[#EFE3D6] font-light tracking-wide">
+              Stay · Host · Celebrate
+            </p>
+
+            {/* Real Starting Price Badge from Sri Tayi Grand */}
+            <div className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-[#D8AD56]/40 text-xs text-[#EFE3D6] shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-[#D8AD56] animate-pulse" />
+              <span className="font-medium text-white">Rooms from ₹1,800</span>
+              <span className="text-[11px] text-[#EFE3D6]/70">• Kadiri, AP</span>
             </div>
-
-            {/* Top content area inside hero */}
-            <div className="relative z-10 w-full flex flex-col lg:flex-row items-start justify-between gap-6 sm:gap-8 pt-2">
-              {/* Left Glassmorphism Hero Card */}
-              <div className="backdrop-blur-md bg-black/45 sm:bg-black/40 border border-white/20 rounded-[24px] sm:rounded-[32px] p-6 sm:p-8 lg:p-10 max-w-lg shadow-[0_25px_60px_rgba(0,0,0,0.35)] text-white">
-                <div className="flex items-center gap-2 mb-3">
-                  <TayiBrandIcon size={24} />
-                  <span className="text-[11px] uppercase tracking-[0.25em] text-[#E0C184] font-semibold">
-                    KADIRI • ANDHRA PRADESH
-                  </span>
-                </div>
-
-                <h1 className="text-xl sm:text-3xl lg:text-[34px] font-sans font-bold tracking-tight uppercase leading-[1.25]">
-                  EXPERIENCE{' '}
-                  <span className="font-serif italic capitalize font-normal text-[#E0C184] tracking-normal inline-block text-2xl sm:text-4xl lg:text-[42px] drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
-                    Luxury
-                  </span>
-                  <span className="block mt-1 font-serif tracking-[0.16em] font-bold text-lg sm:text-2xl lg:text-[26px] text-stone-100">
-                    AT SRI TAYI GRAND
-                  </span>
-                </h1>
-
-                <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-stone-200/90 leading-relaxed font-normal">
-                  Experience comfortable AC accommodations, grand banquet celebrations, exceptional hospitality, and peaceful tranquility on Bypass Road, Kadiri.
-                </p>
-
-                {/* Action Buttons */}
-                <div className="mt-5 sm:mt-7 flex flex-wrap items-center gap-3">
-                  <NextLink
-                    href="/rooms"
-                    className="px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] active:scale-[0.98] text-white text-xs sm:text-[13.5px] font-semibold tracking-wide shadow-lg hover:shadow-xl transition-all duration-200 uppercase flex items-center gap-2"
-                  >
-                    <span>Book Your Stay</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </NextLink>
-
-                  <NextLink
-                    href="/rooms"
-                    className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-full bg-white/15 hover:bg-white/25 active:scale-[0.98] backdrop-blur-sm border border-white/30 text-white text-xs sm:text-[13.5px] font-medium flex items-center gap-2 transition-all duration-200"
-                  >
-                    <span>Explore Rooms</span>
-                    <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white text-stone-900 flex items-center justify-center">
-                      <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2.5]" />
-                    </div>
-                  </NextLink>
-                </div>
-
-                {/* Rating Section */}
-                <div className="mt-7 pt-5 border-t border-white/15">
-                  <div className="flex items-center gap-1.5 text-white">
-                    {[...Array(5)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className="w-4 h-4 text-[#e0c184] fill-[#e0c184] stroke-none"
-                      />
-                    ))}
-                  </div>
-                  <p className="mt-1.5 text-[11.5px] text-stone-300 font-medium tracking-wide">
-                    Rated 5 Stars by Guests across Andhra Pradesh • Verified Hospitality
-                  </p>
-                </div>
-              </div>
-
-              {/* Right Glass Trust Badge */}
-              <div className="backdrop-blur-md bg-black/45 border border-white/20 rounded-[24px] p-5 sm:p-6 max-w-xs shadow-xl text-white self-start lg:self-center lg:mt-32">
-                <div className="flex items-center gap-2 text-[#E0C184] text-xs font-semibold tracking-wider uppercase mb-1.5">
-                  <ShieldCheck className="w-4 h-4 text-[#E0C184]" />
-                  <span>Strategic Location</span>
-                </div>
-                <p className="text-xs sm:text-[13px] text-stone-200 font-medium leading-snug">
-                  Minutes from Sri Kadiri Lakshmi Narasimha Swamy Temple &amp; Railway Station with hassle-free parking.
-                </p>
-
-                {/* Feature Chips */}
-                <div className="mt-4 flex flex-wrap items-center gap-1.5">
-                  <span className="px-2.5 py-1 rounded-full bg-white/15 text-[10.5px] font-medium text-stone-100 border border-white/20">
-                    24/7 Front Desk
-                  </span>
-                  <span className="px-2.5 py-1 rounded-full bg-white/15 text-[10.5px] font-medium text-stone-100 border border-white/20">
-                    Secure Parking
-                  </span>
-                  <span className="px-2.5 py-1 rounded-full bg-white/15 text-[10.5px] font-medium text-stone-100 border border-white/20">
-                    800+ Hall
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="h-6 sm:h-8" />
           </div>
+        </div>
 
-          {/* Floating Booking Search Bar (overlapping hero bottom) */}
-          <div className="relative -mt-10 sm:-mt-12 z-30 px-2 sm:px-6">
-            <HorizonBookingBar buttonText="FIND YOUR STAY" />
-          </div>
+        {/* Centered Floating Booking Widget Bar */}
+        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-6">
+          <BookingWidget />
         </div>
       </section>
 
