@@ -55,9 +55,14 @@ function CheckoutContent() {
     coverImage: string;
     nights: number;
     baseRate: number;
+    roomCharges: number;
+    extraPersonsCount: number;
+    extraPersonCharges: number;
     subtotal: number;
+    taxPercentage: number;
     tax: number;
     total: number;
+    tariffSourceDate: string;
   } | null>(null);
 
   useEffect(() => {
@@ -82,9 +87,14 @@ function CheckoutContent() {
               coverImage: match.category.cover_image_url,
               nights: match.nights,
               baseRate: match.pricePerNight,
+              roomCharges: match.roomCharges !== undefined ? match.roomCharges : match.subtotal,
+              extraPersonsCount: match.extraPersonsCount || 0,
+              extraPersonCharges: match.extraPersonCharges || 0,
               subtotal: match.subtotal,
+              taxPercentage: match.taxPercentage || 0,
               tax: match.taxAmount,
               total: match.totalAmount,
+              tariffSourceDate: match.tariffSourceDate || '01-09-2023',
             });
           }
         }
@@ -424,7 +434,7 @@ function CheckoutContent() {
                 <div>
                   <h4 className="font-serif font-medium text-base text-[#241912]">{pricing.categoryName}</h4>
                   <div className="text-xs text-[#786B61] font-light mt-0.5">
-                    {roomsCount} {roomsCount === 1 ? 'Room' : 'Rooms'} • {adults} Guests
+                    {roomsCount} {roomsCount === 1 ? 'Room' : 'Rooms'} â€¢ {adults} Guests
                   </div>
                 </div>
               </div>
@@ -446,15 +456,23 @@ function CheckoutContent() {
             {pricing && (
               <div className="space-y-2 text-xs text-[#786B61] font-light">
                 <div className="flex justify-between">
-                  <span>Stay Charge ({pricing.nights} {pricing.nights === 1 ? 'night' : 'nights'})</span>
-                  <span className="text-[#241912] font-medium">₹{pricing.subtotal.toLocaleString('en-IN')}</span>
+                  <span>Room Charges ({roomsCount} {roomsCount === 1 ? 'room' : 'rooms'} × {pricing.nights} {pricing.nights === 1 ? 'night' : 'nights'})</span>
+                  <span className="text-[#241912] font-medium">₹{pricing.roomCharges.toLocaleString('en-IN')}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>GST (12%)</span>
-                  <span className="text-[#241912] font-medium">₹{pricing.tax.toLocaleString('en-IN')}</span>
-                </div>
+                {pricing.extraPersonsCount > 0 && (
+                  <div className="flex justify-between text-amber-900 bg-amber-50/60 p-2 rounded-lg border border-amber-200/50">
+                    <span>Extra Person ({pricing.extraPersonsCount} additional {pricing.extraPersonsCount === 1 ? 'guest' : 'guests'} × ₹300 × {pricing.nights} {pricing.nights === 1 ? 'night' : 'nights'})</span>
+                    <span className="font-medium">₹{pricing.extraPersonCharges.toLocaleString('en-IN')}</span>
+                  </div>
+                )}
+                {pricing.tax > 0 && (
+                  <div className="flex justify-between">
+                    <span>Configured Tax ({pricing.taxPercentage}%)</span>
+                    <span className="text-[#241912] font-medium">₹{pricing.tax.toLocaleString('en-IN')}</span>
+                  </div>
+                )}
                 <div className="pt-3 border-t border-[#F8F1E9] flex justify-between text-base font-medium text-[#241912]">
-                  <span>Total</span>
+                  <span>Total Payable</span>
                   <span className="font-serif text-lg">₹{pricing.total.toLocaleString('en-IN')}</span>
                 </div>
               </div>

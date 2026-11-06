@@ -24,7 +24,7 @@ export default function RoomsPage() {
               Rooms & Suites
             </h1>
             <p className="mt-4 text-sm sm:text-base text-[#EFE3D6]/80 max-w-lg mx-auto font-light leading-relaxed">
-              Quiet sanctuaries crafted with plush bedding, climate control, and refined hospitality in Kadiri.
+              Quiet sanctuaries crafted with plush bedding, individual climate control, and refined hospitality in Kadiri. Rooms from ₹1,800 (subject to availability).
             </p>
           </div>
         </section>
@@ -82,7 +82,11 @@ export default function RoomsPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <Users className="w-4 h-4 text-[#D8AD56]" />
-                        <span>Up to {room.max_occupancy} Guests</span>
+                        <span>Included: {room.included_occupancy || 2} Persons</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[#D8AD56] font-bold">Extra Person:</span>
+                        <span>₹300 (Max {room.max_occupancy} guests)</span>
                       </div>
                       {room.room_size_sqft && (
                         <div className="flex items-center gap-2">

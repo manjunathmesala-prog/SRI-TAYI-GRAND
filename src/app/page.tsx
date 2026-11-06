@@ -3,6 +3,7 @@ import NextLink from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { BookingWidget } from '@/components/booking/BookingWidget';
+import { TestimonialsSection } from '@/components/testimonials/TestimonialsSection';
 import { repo } from '@/lib/db/repository';
 import { 
   Snowflake, 
@@ -25,7 +26,7 @@ export default function HomePage() {
 
       <main className="flex-grow">
         {/* =========================================================================
-            HERO SECTION — EXACT MATCH TO DESIGN MOCKUP
+            HERO SECTION â€” EXACT MATCH TO DESIGN MOCKUP
             ========================================================================= */}
         <section className="relative min-h-[620px] sm:min-h-[720px] lg:min-h-[820px] flex flex-col justify-between pt-32 sm:pt-40 pb-8 sm:pb-12 overflow-hidden bg-[#25150F]">
           {/* Authentic Hotel Exterior Background Image */}
@@ -59,6 +60,13 @@ export default function HomePage() {
               <p className="mt-4 sm:mt-5 text-lg sm:text-xl md:text-2xl text-[#EFE3D6] font-light tracking-wide">
                 Stay · Host · Celebrate
               </p>
+
+              {/* General Starting Price Badge */}
+              <div className="mt-5 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-[#D8AD56]/40 text-xs text-[#EFE3D6]">
+                <span className="w-2 h-2 rounded-full bg-[#D8AD56]" />
+                <span className="font-medium text-white">Rooms from ₹1,800</span>
+                <span className="text-[11px] text-[#EFE3D6]/70">• Subject to availability</span>
+              </div>
             </div>
           </div>
 
@@ -69,14 +77,14 @@ export default function HomePage() {
         </section>
 
         {/* =========================================================================
-            ROOMS SECTION — "OUR ROOMS — Comfort for Every Stay" (RICH CARDS)
+            ROOMS SECTION â€” "OUR ROOMS â€” Comfort for Every Stay" (RICH CARDS)
             ========================================================================= */}
         <section className="py-20 sm:py-28 bg-[#F8F1E9]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center max-w-2xl mx-auto mb-14">
               <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] font-semibold text-[#D8AD56] mb-2">
                 <span className="w-6 h-[1px] bg-[#D8AD56]" />
-                <span>OUR ROOMS</span>
+                <span>OUR ROOMS • FROM ₹1,800</span>
                 <span className="w-6 h-[1px] bg-[#D8AD56]" />
               </div>
               <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-normal text-[#241912]">
@@ -84,12 +92,12 @@ export default function HomePage() {
               </h2>
               <div className="w-16 h-0.5 bg-[#D8AD56] mx-auto my-3.5" />
               <p className="text-sm text-[#786B61] mt-2">
-                Spacious, fully air-conditioned rooms designed for restful relaxation and ultimate convenience.
+                Spacious, fully air-conditioned rooms designed for restful relaxation and ultimate convenience. Starting from ₹1,800 per night (subject to availability).
               </p>
             </div>
 
-            {/* 4 Rich Room Cards Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* 3 Rich Room Cards Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {categories.map((room) => (
                 <div
                   key={room.id}
@@ -102,10 +110,10 @@ export default function HomePage() {
                       alt={room.name}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                     />
                     <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-[#25150F]/85 backdrop-blur-sm text-[#D8AD56] text-xs font-semibold shadow-md">
-                      ₹ {room.base_price_per_night.toLocaleString('en-IN')}{' '}
+                      â‚¹ {room.base_price_per_night.toLocaleString('en-IN')}{' '}
                       <span className="text-[10px] text-white/75 font-normal">/ night</span>
                     </div>
                   </div>
@@ -120,9 +128,13 @@ export default function HomePage() {
                         {room.short_description}
                       </p>
 
-                      <div className="mt-4 pt-3 border-t border-[#EFE3D6] flex items-center justify-between text-xs text-[#786B61]">
-                        <span>Bed: <strong className="text-[#241912] font-medium">{room.bed_type}</strong></span>
-                        <span>Capacity: <strong className="text-[#241912] font-medium">{room.max_occupancy} Guests</strong></span>
+                      <div className="mt-4 pt-3 border-t border-[#EFE3D6] grid grid-cols-2 gap-2 text-xs text-[#786B61]">
+                        <div>Bed: <strong className="text-[#241912] font-medium block truncate">{room.bed_type}</strong></div>
+                        <div>Included: <strong className="text-[#241912] font-medium block">{room.included_occupancy || 2} Persons</strong></div>
+                      </div>
+                      <div className="mt-2 text-[11px] text-[#8C7A6B]">
+                        <span>Extra Person: <strong className="text-[#241912] font-medium">₹300</strong></span>
+                        <span className="text-[#786B61]/70"> (Max {room.max_occupancy} guests)</span>
                       </div>
                     </div>
 
@@ -160,7 +172,7 @@ export default function HomePage() {
         </section>
 
         {/* =========================================================================
-            CONVENTION HALL BANNER — "Host Your Special Occasions"
+            CONVENTION HALL BANNER â€” "Host Your Special Occasions"
             ========================================================================= */}
         <section className="relative py-24 sm:py-32 bg-[#25150F] text-white overflow-hidden">
           <div className="absolute inset-0 z-0">
@@ -209,7 +221,12 @@ export default function HomePage() {
         </section>
 
         {/* =========================================================================
-            AMENITIES SECTION — "Everything You Need for a Perfect Stay"
+            GUEST EXPERIENCES & TESTIMONIALS SECTION (GOOGLE REVIEWS)
+            ========================================================================= */}
+        <TestimonialsSection />
+
+        {/* =========================================================================
+            AMENITIES SECTION â€” "Everything You Need for a Perfect Stay"
             ========================================================================= */}
         <section className="py-20 sm:py-24 bg-[#FAF7F2]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -285,7 +302,7 @@ export default function HomePage() {
         </section>
 
         {/* =========================================================================
-            EXPERIENCE TAYI GRAND — GALLERY PREVIEW
+            EXPERIENCE TAYI GRAND â€” GALLERY PREVIEW
             ========================================================================= */}
         <section className="py-20 sm:py-24 bg-[#F8F1E9]">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -395,13 +412,13 @@ export default function HomePage() {
                 </h2>
                 <div className="w-12 h-0.5 bg-[#D8AD56] my-3" />
                 <p className="text-xs sm:text-sm text-[#786B61] leading-relaxed font-light">
-                  Located strategically on the Bypass Road opposite Girls High School, Sri Tayi Grand provides seamless road connectivity along the Tadipatri – Pulivendula – Kadiri corridor with hassle-free vehicle parking and quick access to local landmarks.
+                  Located strategically on the Bypass Road opposite Girls High School, Sri Tayi Grand provides seamless road connectivity along the Tadipatri â€“ Pulivendula â€“ Kadiri corridor with hassle-free vehicle parking and quick access to local landmarks.
                 </p>
 
                 <div className="mt-6 space-y-3 text-xs text-[#241912]">
                   <div className="flex items-start gap-2.5">
                     <MapPin className="w-4 h-4 text-[#D8AD56] shrink-0 mt-0.5" />
-                    <span>4585+F8J, Opp. Girls High School, Bypass Road, Kadiri – 515591, AP</span>
+                    <span>4585+F8J, Opp. Girls High School, Bypass Road, Kadiri â€“ 515591, AP</span>
                   </div>
                   <div className="flex items-center gap-2.5">
                     <Phone className="w-4 h-4 text-[#D8AD56] shrink-0" />
@@ -428,7 +445,7 @@ export default function HomePage() {
                   </div>
                   <h4 className="font-serif font-bold text-base text-[#241912]">Google Maps Directions</h4>
                   <p className="text-xs text-[#786B61] mt-1 max-w-sm mx-auto font-light">
-                    Revenue Colony, Tadipatri – Pulivendula – Kadiri Road, Kadiri
+                    Revenue Colony, Tadipatri â€“ Pulivendula â€“ Kadiri Road, Kadiri
                   </p>
                   <a
                     href="https://maps.google.com/?q=Sri+Tayi+Grand+Kadiri"
@@ -445,7 +462,7 @@ export default function HomePage() {
         </section>
 
         {/* =========================================================================
-            FINAL CALL TO ACTION BANNER — SERVICE BELL
+            FINAL CALL TO ACTION BANNER â€” SERVICE BELL
             ========================================================================= */}
         <section className="relative py-20 bg-[#25150F] text-white overflow-hidden">
           <div className="absolute inset-0 z-0">

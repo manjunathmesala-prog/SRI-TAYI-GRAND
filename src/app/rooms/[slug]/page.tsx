@@ -7,6 +7,7 @@ import { useRouter, notFound } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { repo } from '@/lib/db/repository';
+import { calculateBookingTariff, getAuthoritativeTariff } from '@/lib/pricing';
 import {
   Users,
   Bed,
@@ -57,17 +58,21 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
   const [children, setChildren] = useState(0);
   const [roomsCount, setRoomsCount] = useState(1);
 
-  const calculateNights = () => {
-    const d1 = new Date(checkIn);
-    const d2 = new Date(checkOut);
-    const diff = Math.ceil((d2.getTime() - d1.getTime()) / (1000 * 60 * 60 * 24));
-    return Math.max(1, isNaN(diff) ? 1 : diff);
-  };
+  const tariffCalc = calculateBookingTariff({
+    categoryId: room.id,
+    checkIn,
+    checkOut,
+    roomsCount,
+    adultsCount: adults,
+    childrenCount: children,
+    customRatePaise: room.base_tariff_paise,
+    taxPercentage: 0, // No fabricated tax; configured only
+  });
 
-  const nights = calculateNights();
-  const subtotal = room.base_price_per_night * nights * roomsCount;
-  const tax = Math.round(subtotal * 0.12);
-  const total = subtotal + tax;
+  const nights = tariffCalc.billingPeriods;
+  const subtotal = tariffCalc.subtotalRupees;
+  const tax = tariffCalc.taxAmountRupees;
+  const total = tariffCalc.totalRupees;
 
   const handleProceedBooking = (e: React.FormEvent) => {
     e.preventDefault();
@@ -167,14 +172,18 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                     {room.short_description}
                   </p>
 
-                  <div className="flex items-center gap-6 text-xs text-[#241912] mt-4 pt-3 border-t border-[#F8F1E9]">
+                  <div className="flex flex-wrap items-center gap-4 text-xs text-[#241912] mt-4 pt-3 border-t border-[#F8F1E9]">
                     <div className="flex items-center gap-1.5">
                       <Bed className="w-4 h-4 text-[#D8AD56]" />
                       <span>{room.bed_type}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Users className="w-4 h-4 text-[#D8AD56]" />
-                      <span>Up to {room.max_occupancy} Guests</span>
+                      <span>Included: {room.included_occupancy || 2} Persons</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[#D8AD56] font-bold">Extra:</span>
+                      <span>₹300/person (Max {room.max_occupancy})</span>
                     </div>
                     {room.room_size_sqft && (
                       <div className="flex items-center gap-1.5">
@@ -272,22 +281,40 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                   {/* Summary Breakdown */}
                   <div className="pt-4 border-t border-[#F8F1E9] text-xs space-y-2 text-[#786B61] font-light">
                     <div className="flex justify-between">
-                      <span>₹{room.base_price_per_night.toLocaleString('en-IN')} × {nights} {nights === 1 ? 'night' : 'nights'}</span>
-                      <span className="text-[#241912] font-medium">₹{subtotal.toLocaleString('en-IN')}</span>
+                      <span>Room Charges ({roomsCount} {roomsCount === 1 ? 'room' : 'rooms'} × {nights} {nights === 1 ? 'night' : 'nights'})</span>
+                      <span className="text-[#241912] font-medium">₹{tariffCalc.roomChargesRupees.toLocaleString('en-IN')}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>GST (12%)</span>
-                      <span className="text-[#241912] font-medium">₹{tax.toLocaleString('en-IN')}</span>
-                    </div>
+
+                    {tariffCalc.extraPersonsCount > 0 && (
+                      <div className="flex justify-between text-amber-900 bg-amber-50/60 p-2 rounded-lg border border-amber-200/50">
+                        <span>Extra Person Charge ({tariffCalc.extraPersonsCount} additional {tariffCalc.extraPersonsCount === 1 ? 'guest' : 'guests'} × ₹300 × {nights} {nights === 1 ? 'night' : 'nights'})</span>
+                        <span className="font-medium">₹{tariffCalc.extraPersonChargesRupees.toLocaleString('en-IN')}</span>
+                      </div>
+                    )}
+
+                    {tariffCalc.taxAmountRupees > 0 && (
+                      <div className="flex justify-between">
+                        <span>Configured Tax ({tariffCalc.taxPercentage}%)</span>
+                        <span className="text-[#241912] font-medium">₹{tariffCalc.taxAmountRupees.toLocaleString('en-IN')}</span>
+                      </div>
+                    )}
+
+                    {!tariffCalc.isValid && (
+                      <div className="p-2.5 rounded-lg bg-red-50 border border-red-200 text-red-800 text-[11px] leading-tight font-normal">
+                        {tariffCalc.errorMessage}
+                      </div>
+                    )}
+
                     <div className="flex justify-between text-sm font-medium text-[#241912] pt-2 border-t border-[#F8F1E9]">
-                      <span>Total</span>
-                      <span className="font-serif text-base">₹{total.toLocaleString('en-IN')}</span>
+                      <span>Total Payable</span>
+                      <span className="font-serif text-base text-[#241912]">₹{tariffCalc.totalRupees.toLocaleString('en-IN')}</span>
                     </div>
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full py-3.5 px-4 rounded-full bg-[#D8AD56] hover:bg-[#C69940] text-[#20120B] text-xs font-medium uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-goldGlow hover:-translate-y-0.5 flex items-center justify-center gap-2 mt-2"
+                    disabled={!tariffCalc.isValid}
+                    className="w-full py-3.5 px-4 rounded-full bg-[#D8AD56] hover:bg-[#C69940] disabled:bg-gray-300 disabled:cursor-not-allowed text-[#20120B] text-xs font-medium uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-goldGlow hover:-translate-y-0.5 flex items-center justify-center gap-2 mt-2"
                   >
                     <span>Proceed to Reservation</span>
                     <ArrowRight className="w-3.5 h-3.5" />

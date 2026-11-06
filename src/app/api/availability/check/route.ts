@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { searchAvailability } from '@/lib/booking-engine';
 
 export async function POST(request: Request) {

@@ -41,10 +41,17 @@ export async function POST(request: Request) {
     }
 
     // 2. Server-side Availability & Exact Price Calculation
-    const avail = checkCategoryAvailability(categoryId, checkIn, checkOut, Number(roomsCount));
+    const avail = checkCategoryAvailability(
+      categoryId,
+      checkIn,
+      checkOut,
+      Number(roomsCount),
+      Number(adultsCount),
+      Number(childrenCount)
+    );
     if (!avail.isAvailable) {
       return NextResponse.json(
-        { error: 'Selected room category is no longer available for these dates' },
+        { error: 'Selected room category is not available for these dates or exceeds permitted occupancy' },
         { status: 409 }
       );
     }
@@ -58,7 +65,7 @@ export async function POST(request: Request) {
       guest_email: guestEmail.trim().toLowerCase(),
       check_in_date: checkIn,
       check_out_date: checkOut,
-      category_id: categoryId,
+      category_id: avail.category.id,
       category_name: avail.category.name,
       adults_count: Number(adultsCount),
       children_count: Number(childrenCount),
@@ -66,6 +73,9 @@ export async function POST(request: Request) {
       status: isPayAtHotel ? 'confirmed' : 'pending',
       payment_status: isPayAtHotel ? 'pay_at_hotel' : 'pending',
       payment_method: isPayAtHotel ? 'pay_at_hotel' : 'online',
+      room_charges_amount: avail.roomCharges,
+      extra_persons_count: avail.extraPersonsCount,
+      extra_person_charges_amount: avail.extraPersonCharges,
       subtotal_amount: avail.subtotal,
       tax_amount: avail.taxAmount,
       additional_charges_amount: 0,
@@ -74,6 +84,7 @@ export async function POST(request: Request) {
       special_requests: specialRequests,
       early_check_in_requested: Boolean(earlyCheckIn),
       late_check_out_requested: Boolean(lateCheckOut),
+      tariff_source_date: avail.tariffSourceDate,
     });
 
     // 4. If Online Payment, generate Razorpay Order

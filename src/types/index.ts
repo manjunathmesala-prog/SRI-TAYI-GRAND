@@ -66,6 +66,13 @@ export interface RoomCategory {
   short_description: string;
   full_description: string;
   base_price_per_night: number;
+  base_tariff_paise?: number;
+  included_occupancy?: number;
+  max_permitted_occupancy?: number;
+  extra_person_tariff_paise?: number;
+  extra_person_tariff_rupees?: number;
+  air_conditioning?: boolean;
+  tariff_source_date?: string;
   max_adults: number;
   max_children: number;
   max_occupancy: number;
@@ -132,10 +139,14 @@ export interface Booking {
   payment_status: PaymentStatus;
   payment_method: PaymentMethod;
   subtotal_amount: number;
+  room_charges_amount?: number;
+  extra_persons_count?: number;
+  extra_person_charges_amount?: number;
   tax_amount: number;
   additional_charges_amount: number;
   total_amount: number;
   paid_amount: number;
+  tariff_source_date?: string;
   special_requests?: string;
   early_check_in_requested: boolean;
   late_check_out_requested: boolean;
@@ -223,6 +234,10 @@ export interface HotelSettings {
   require_advance_payment: boolean;
   advance_percentage: number;
   hold_timeout_minutes: number;
+  billing_unit?: 'night' | 'day' | '24_hour';
+  extra_person_tariff_paise?: number;
+  tariff_source_date?: string;
+  tariff_source_label?: string;
 }
 
 export interface RFIDDevice {
@@ -387,3 +402,27 @@ export interface RealtimeMessage {
   timestamp: string;
   actor?: string;
 }
+
+// ==============================================================================
+// GOOGLE REVIEWS & TESTIMONIALS DEFINITIONS
+// ==============================================================================
+
+export interface GoogleReview {
+  id: string; // e.g. 'STG-001'
+  hotel_name: string; // 'SRI TAYI GRAND'
+  reviewer_name: string;
+  rating: number; // strictly 5
+  rating_label: string; // '5 stars'
+  review_date_display: string; // e.g. 'a month ago'
+  retrieval_date: string; // '2026-11-06'
+  excerpt: string; // verbatim excerpt <= 20 words (or empty string for rating-only)
+  full_text?: string;
+  is_rating_only: boolean;
+  is_translated?: boolean;
+  source_platform: string; // 'Google' or 'Tripadvisor'
+  source_url: string; // 'https://www.google.com/travel/search?q=sri%20tayi%20grand%20kadiri&ap=ugEHcmV2aWV3cw'
+  is_featured: boolean; // default true for first 6 written reviews
+  is_published: boolean; // default true
+  display_order: number;
+}
+

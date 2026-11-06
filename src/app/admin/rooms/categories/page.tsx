@@ -13,7 +13,7 @@ export default function RoomCategoriesAdminPage() {
   // Form fields
   const [name, setName] = useState('');
   const [shortDesc, setShortDesc] = useState('');
-  const [price, setPrice] = useState(2999);
+  const [price, setPrice] = useState(1800);
   const [bedType, setBedType] = useState('King Bed');
   const [maxOccupancy, setMaxOccupancy] = useState(3);
   const [isActive, setIsActive] = useState(true);
@@ -38,6 +38,7 @@ export default function RoomCategoriesAdminPage() {
       name,
       short_description: shortDesc,
       base_price_per_night: Number(price),
+      base_tariff_paise: Number(price) * 100,
       bed_type: bedType,
       max_occupancy: Number(maxOccupancy),
       is_active: isActive,
@@ -101,10 +102,11 @@ export default function RoomCategoriesAdminPage() {
                   {cat.short_description}
                 </p>
 
-                <div className="mt-4 pt-3 border-t border-[#EFE3D6] grid grid-cols-3 gap-2 text-xs text-[#241912]">
-                  <div>Bed: <strong>{cat.bed_type}</strong></div>
-                  <div>Max Guests: <strong>{cat.max_occupancy}</strong></div>
-                  <div>Inventory: <strong>{cat.total_physical_rooms} Rooms</strong></div>
+                <div className="mt-4 pt-3 border-t border-[#EFE3D6] grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-[#241912]">
+                  <div>Bed: <strong className="block truncate">{cat.bed_type}</strong></div>
+                  <div>Included: <strong className="block">{cat.included_occupancy || 2} Persons</strong></div>
+                  <div>Extra Person: <strong className="block">₹300 (Max {cat.max_occupancy})</strong></div>
+                  <div>Inventory: <strong className="block">{cat.total_physical_rooms} Rooms</strong></div>
                 </div>
               </div>
 
@@ -153,7 +155,7 @@ export default function RoomCategoriesAdminPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
-                    Base Price / Night (₹)
+                    Base Price / Night (â‚¹)
                   </label>
                   <input
                     type="number"

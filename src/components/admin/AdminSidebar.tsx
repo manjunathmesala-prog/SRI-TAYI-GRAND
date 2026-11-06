@@ -23,6 +23,7 @@ import {
   X,
   ExternalLink,
   Radio,
+  MessageSquareQuote,
 } from 'lucide-react';
 import { useRealtimeSync } from '@/lib/realtime-client';
 
@@ -63,6 +64,7 @@ export function AdminSidebar() {
     { label: 'RFID Smart Keys', href: '/admin/rfid', icon: KeyRound, badge: 'Hardware' },
     { label: 'Reports & Analytics', href: '/admin/reports', icon: BarChart3 },
     { label: 'Website CMS', href: '/admin/content', icon: Globe },
+    { label: 'Guest Reviews', href: '/admin/reviews', icon: MessageSquareQuote },
     { label: 'Staff Management', href: '/admin/staff', icon: UserCog },
     { label: 'Hotel Settings', href: '/admin/settings', icon: Settings },
   ];

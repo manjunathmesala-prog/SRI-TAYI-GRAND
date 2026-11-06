@@ -148,7 +148,7 @@ function WalkInContent() {
     return selectedCat.base_price_per_night * n;
   };
 
-  const calculateTax = () => Math.round(calculateSubtotal() * 0.12);
+  const calculateTax = () => 0; // Configured tax only; no fabricated GST percentage
   const calculateTotal = () => calculateSubtotal() + calculateTax();
 
   if (isLoading) {
@@ -201,7 +201,7 @@ function WalkInContent() {
                 </span>
               </div>
               <p className="text-[11px] text-[#D8AD56] font-medium flex items-center gap-1">
-                <span>⚡ Express Self Check-In</span>
+                <span>âš¡ Express Self Check-In</span>
                 <span>&bull;</span>
                 <span className="text-emerald-400 font-semibold">{hotelInfo?.total_clean_rooms || 0} Clean Rooms Ready</span>
               </p>
@@ -295,7 +295,7 @@ function WalkInContent() {
                     <div className="flex items-baseline justify-between">
                       <h4 className="font-serif font-bold text-base text-[#241912]">{cat.name}</h4>
                       <div className="text-right">
-                        <span className="text-lg font-bold text-[#241912]">₹{cat.base_price_per_night}</span>
+                        <span className="text-lg font-bold text-[#241912]">â‚¹{cat.base_price_per_night}</span>
                         <span className="text-[10px] text-[#786B61]">/night</span>
                       </div>
                     </div>
@@ -345,7 +345,7 @@ function WalkInContent() {
                 onClick={() => setSelectedCat(null)}
                 className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 text-sm font-bold cursor-pointer"
               >
-                ✕
+                âœ•
               </button>
             </div>
 
@@ -498,15 +498,17 @@ function WalkInContent() {
               <div className="p-3.5 rounded-xl bg-[#F6EFE6] border border-[#EFE3D6] space-y-1.5">
                 <div className="flex justify-between text-[#786B61]">
                   <span>Room Charge ({nights} {nights === '1' ? 'Night' : 'Nights'})</span>
-                  <span>₹{calculateSubtotal()}</span>
+                  <span>₹{calculateSubtotal().toLocaleString('en-IN')}</span>
                 </div>
-                <div className="flex justify-between text-[#786B61]">
-                  <span>GST (12%)</span>
-                  <span>₹{calculateTax()}</span>
-                </div>
+                {calculateTax() > 0 && (
+                  <div className="flex justify-between text-[#786B61]">
+                    <span>Configured Tax</span>
+                    <span>₹{calculateTax().toLocaleString('en-IN')}</span>
+                  </div>
+                )}
                 <div className="flex justify-between font-bold text-sm text-[#241912] pt-1.5 border-t border-[#EFE3D6]">
                   <span>Total Payable</span>
-                  <span className="text-[#D8AD56]">₹{calculateTotal()}</span>
+                  <span className="text-[#D8AD56]">₹{calculateTotal().toLocaleString('en-IN')}</span>
                 </div>
               </div>
 

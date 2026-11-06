@@ -22,6 +22,7 @@ import {
   DailyClosing,
   RealtimeEventType,
   RealtimeMessage,
+  GoogleReview,
 } from '@/types';
 
 import { syncCardToSupabase, syncEventToSupabase, deleteCardFromSupabase } from './supabase-rfid';
@@ -47,7 +48,9 @@ import {
   INITIAL_RFID_ACCESS_EVENTS,
   INITIAL_EXPENSES,
   INITIAL_DAILY_CLOSINGS,
+  INITIAL_REVIEWS,
 } from './mock-data';
+import { calculateBookingTariff, normalizeCategoryId } from '@/lib/pricing';
 
 // Singleton authoritative repository that persists during server runtime
 export class HotelRepository {
@@ -66,6 +69,7 @@ export class HotelRepository {
   private rfidEvents: RFIDAccessEvent[] = [];
   private expenses: Expense[] = JSON.parse(JSON.stringify(INITIAL_EXPENSES));
   private dailyClosings: DailyClosing[] = JSON.parse(JSON.stringify(INITIAL_DAILY_CLOSINGS));
+  private reviews: GoogleReview[] = [...INITIAL_REVIEWS];
 
   // In-Memory Real-Time Event Bus with Reconnection Replay Buffer
   private eventCounter: number = 0;
@@ -158,7 +162,10 @@ export class HotelRepository {
   // --- ROOM CATEGORIES ---
   getCategories(): RoomCategory[] {
     return this.categories.map((cat) => {
-      const catRooms = this.rooms.filter((r) => r.category_id === cat.id && r.is_active);
+      const normalizedId = normalizeCategoryId(cat.id);
+      const catRooms = this.rooms.filter(
+        (r) => (r.category_id === cat.id || normalizeCategoryId(r.category_id) === normalizedId) && r.is_active
+      );
       const availableRooms = catRooms.filter((r) => r.operational_status === 'available');
       return {
         ...cat,
@@ -168,10 +175,32 @@ export class HotelRepository {
     });
   }
 
-  getCategoryBySlug(slug: string): RoomCategory | undefined {
-    const cat = this.categories.find((c) => c.slug === slug);
+  getCategoryById(id: string): RoomCategory | undefined {
+    const normalizedId = normalizeCategoryId(id);
+    const cat = this.categories.find(
+      (c) => c.id === id || c.id === normalizedId || c.slug === id
+    ) || this.categories.find((c) => normalizeCategoryId(c.id) === normalizedId);
     if (!cat) return undefined;
-    const catRooms = this.rooms.filter((r) => r.category_id === cat.id && r.is_active);
+    const catRooms = this.rooms.filter(
+      (r) => (r.category_id === cat.id || normalizeCategoryId(r.category_id) === normalizedId) && r.is_active
+    );
+    const availableRooms = catRooms.filter((r) => r.operational_status === 'available');
+    return {
+      ...cat,
+      total_physical_rooms: catRooms.length,
+      available_physical_rooms: availableRooms.length,
+    };
+  }
+
+  getCategoryBySlug(slug: string): RoomCategory | undefined {
+    const normalizedId = normalizeCategoryId(slug);
+    const cat = this.categories.find(
+      (c) => c.slug === slug || c.id === normalizedId || c.slug === normalizedId
+    ) || this.categories.find((c) => normalizeCategoryId(c.id) === normalizedId);
+    if (!cat) return undefined;
+    const catRooms = this.rooms.filter(
+      (r) => (r.category_id === cat.id || normalizeCategoryId(r.category_id) === normalizedId) && r.is_active
+    );
     const availableRooms = catRooms.filter((r) => r.operational_status === 'available');
     return {
       ...cat,
@@ -467,10 +496,12 @@ export class HotelRepository {
     specialRequests?: string;
     actor?: string;
   }): Booking {
-    const category = this.categories.find(
-      (c) => c.id === params.categoryId || c.slug === params.categoryId
-    );
-    const categoryName = category ? category.name : 'Deluxe Room';
+    const normalizedId = normalizeCategoryId(params.categoryId);
+    const category =
+      this.categories.find(
+        (c) => c.id === params.categoryId || c.id === normalizedId || c.slug === params.categoryId
+      ) || this.categories[0];
+    const categoryName = category ? category.name : 'Double Room';
 
     // Verify room availability
     const availableRooms = this.getAvailableCleanRooms(category ? category.id : undefined);
@@ -479,16 +510,26 @@ export class HotelRepository {
     }
 
     const nights = Math.max(1, params.numberOfNights || 1);
-    const ratePerNight = category ? category.base_price_per_night : 2000;
-    const subtotal = ratePerNight * nights;
-    const tax = Math.round(subtotal * 0.12);
-    const total = subtotal + tax;
-
     const today = new Date();
     const checkInDate = today.toISOString().split('T')[0];
     const checkOut = new Date(today);
     checkOut.setDate(checkOut.getDate() + nights);
     const checkOutDate = checkOut.toISOString().split('T')[0];
+
+    const tariffCalc = calculateBookingTariff({
+      categoryId: category.id,
+      checkIn: checkInDate,
+      checkOut: checkOutDate,
+      roomsCount: 1,
+      adultsCount: 2,
+      childrenCount: 0,
+      customRatePaise: category.base_tariff_paise,
+      taxPercentage: this.settings.tax_percentage || 0,
+    });
+
+    const subtotal = tariffCalc.subtotalRupees;
+    const tax = tariffCalc.taxAmountRupees;
+    const total = tariffCalc.totalRupees;
 
     const dateStr = today.toISOString().slice(0, 10).replace(/-/g, '');
     const randCode = Math.floor(1000 + Math.random() * 9000);
@@ -524,6 +565,9 @@ export class HotelRepository {
       status: 'confirmed',
       payment_status: paymentStatus,
       payment_method: params.paymentMethod,
+      room_charges_amount: tariffCalc.roomChargesRupees,
+      extra_persons_count: tariffCalc.extraPersonsCount,
+      extra_person_charges_amount: tariffCalc.extraPersonChargesRupees,
       subtotal_amount: subtotal,
       tax_amount: tax,
       additional_charges_amount: 0,
@@ -532,6 +576,7 @@ export class HotelRepository {
       special_requests: params.specialRequests,
       early_check_in_requested: true,
       late_check_out_requested: false,
+      tariff_source_date: tariffCalc.tariffSourceDate,
       created_at: new Date().toISOString(),
     };
 
@@ -688,12 +733,13 @@ export class HotelRepository {
   }
 
   getAvailableCleanRooms(categoryId?: string): PhysicalRoom[] {
+    const normalizedTarget = categoryId ? normalizeCategoryId(categoryId) : undefined;
     return this.rooms.filter(
       (r) =>
         r.is_active &&
         r.operational_status === 'available' &&
         r.housekeeping_status === 'clean' &&
-        (!categoryId || r.category_id === categoryId)
+        (!categoryId || r.category_id === categoryId || normalizeCategoryId(r.category_id) === normalizedTarget)
     );
   }
 
@@ -947,6 +993,59 @@ export class HotelRepository {
   // --- STAFF ---
   getStaff(): StaffMember[] {
     return [...this.staff];
+  }
+
+  // --- GOOGLE REVIEWS & TESTIMONIALS ---
+  getReviews(publishedOnly: boolean = true): GoogleReview[] {
+    const list = publishedOnly
+      ? this.reviews.filter((r) => r.is_published)
+      : this.reviews;
+    return [...list].sort((a, b) => a.display_order - b.display_order);
+  }
+
+  getFeaturedReviews(limit: number = 6): GoogleReview[] {
+    return this.reviews
+      .filter((r) => r.is_published && r.is_featured)
+      .sort((a, b) => a.display_order - b.display_order)
+      .slice(0, limit);
+  }
+
+  getReviewById(id: string): GoogleReview | undefined {
+    return this.reviews.find((r) => r.id === id);
+  }
+
+  toggleReviewPublishStatus(id: string, published: boolean): GoogleReview | null {
+    const review = this.reviews.find((r) => r.id === id);
+    if (!review) return null;
+    review.is_published = published;
+    return { ...review };
+  }
+
+  toggleReviewFeaturedStatus(id: string, featured: boolean): GoogleReview | null {
+    const review = this.reviews.find((r) => r.id === id);
+    if (!review) return null;
+    review.is_featured = featured;
+    return { ...review };
+  }
+
+  importReview(data: Omit<GoogleReview, 'id' | 'retrieval_date'>): GoogleReview {
+    const nextNum = this.reviews.length + 1;
+    const id = `STG-${String(nextNum).padStart(3, '0')}`;
+    const newReview: GoogleReview = {
+      ...data,
+      id,
+      retrieval_date: new Date().toISOString().split('T')[0],
+      display_order: data.display_order ?? nextNum,
+    };
+    this.reviews.push(newReview);
+    return { ...newReview };
+  }
+
+  deleteReview(id: string): boolean {
+    const idx = this.reviews.findIndex((r) => r.id === id);
+    if (idx === -1) return false;
+    this.reviews.splice(idx, 1);
+    return true;
   }
 
   // --- RFID SYSTEM ---
@@ -1569,7 +1668,8 @@ if (
   typeof (global.__hotelRepo as any).subscribeEvents !== 'function' ||
   typeof (global.__hotelRepo as any).getExpenses !== 'function' ||
   typeof (global.__hotelRepo as any).getDailyClosings !== 'function' ||
-  typeof (global.__hotelRepo as any).getFullState !== 'function'
+  typeof (global.__hotelRepo as any).getFullState !== 'function' ||
+  typeof (global.__hotelRepo as any).getReviews !== 'function'
 ) {
   global.__hotelRepo = new HotelRepository();
 }

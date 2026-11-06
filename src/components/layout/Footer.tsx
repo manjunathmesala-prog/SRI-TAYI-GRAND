@@ -19,7 +19,7 @@ export function Footer() {
                   SRI TAYI GRAND
                 </span>
                 <span className="text-[9px] uppercase tracking-[0.3em] text-[#D8AD56]/90 block">
-                  HOTEL & CONVENTIONS • KADIRI
+                  HOTEL & CONVENTIONS â€¢ KADIRI
                 </span>
               </div>
             </div>
@@ -68,6 +68,11 @@ export function Footer() {
                 </NextLink>
               </li>
               <li>
+                <NextLink href="/testimonials" className="hover:text-[#D8AD56] transition-colors">
+                  Guest Reviews
+                </NextLink>
+              </li>
+              <li>
                 <NextLink href="/about" className="hover:text-[#D8AD56] transition-colors">
                   Our Story
                 </NextLink>
@@ -82,23 +87,18 @@ export function Footer() {
             </span>
             <ul className="space-y-3 text-xs text-[#EFE3D6]/75">
               <li>
-                <NextLink href="/rooms/suite-room" className="hover:text-[#D8AD56] transition-colors">
-                  Suite Room
-                </NextLink>
-              </li>
-              <li>
-                <NextLink href="/rooms/double-bed-room" className="hover:text-[#D8AD56] transition-colors">
-                  Double Bed Room
-                </NextLink>
-              </li>
-              <li>
                 <NextLink href="/rooms/double-room" className="hover:text-[#D8AD56] transition-colors">
-                  Double Room (Twin)
+                  Double Room (₹1,800)
                 </NextLink>
               </li>
               <li>
-                <NextLink href="/rooms/single-bed-room" className="hover:text-[#D8AD56] transition-colors">
-                  Single Bed Room
+                <NextLink href="/rooms/four-bed-room" className="hover:text-[#D8AD56] transition-colors">
+                  Four Bed Room (₹2,800)
+                </NextLink>
+              </li>
+              <li>
+                <NextLink href="/rooms/suite-room" className="hover:text-[#D8AD56] transition-colors">
+                  Suite Room (₹3,300)
                 </NextLink>
               </li>
             </ul>
@@ -113,7 +113,7 @@ export function Footer() {
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-[#D8AD56] shrink-0 mt-0.5" />
                 <p className="leading-relaxed">
-                  Bypass Road, Opp. Girls High School, Kadiri – 515591, Andhra Pradesh
+                  Bypass Road, Opp. Girls High School, Kadiri â€“ 515591, Andhra Pradesh
                 </p>
               </div>
 
@@ -136,7 +136,7 @@ export function Footer() {
 
         {/* Quiet Elegance Bottom Bar */}
         <div className="mt-14 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#EFE3D6]/50">
-          <p>© {new Date().getFullYear()} Sri Tayi Grand. All rights reserved.</p>
+          <p>Â© {new Date().getFullYear()} Sri Tayi Grand. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <NextLink href="/policies" className="hover:text-[#D8AD56] transition-colors">
               Policies & Terms

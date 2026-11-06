@@ -4,7 +4,7 @@ import './globals.css';
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://sritayigrand.com'),
   title: 'Sri Tayi Grand | Luxury Stay & Convention Hall in Kadiri, Andhra Pradesh',
-  description: 'Experience thoughtful comfort and grand hospitality at Sri Tayi Grand, Kadiri. Suite Rooms, Double Bed Rooms, Single Bed Rooms, and Grand Convention Hall.',
+  description: 'Experience thoughtful comfort and grand hospitality at Sri Tayi Grand, Kadiri. Double Room, Four Bed Room, Suite Room, and Grand Convention Hall.',
   keywords: 'Sri Tayi Grand, Tayi Grand Hotel, Kadiri Hotel, Hotels in Kadiri, Convention Hall Kadiri, Luxury Hotel Anantapur, Rooms in Kadiri',
   openGraph: {
     title: 'Sri Tayi Grand | Luxury Stay & Convention Hall',
@@ -38,13 +38,13 @@ export default function RootLayout({
     email: 'contact@sritayigrand.com',
     address: {
       '@type': 'PostalAddress',
-      streetAddress: '4585+F8J, Opp. Girls High School, Bypass Road, Tadipatri – Pulivendula – Kadiri Road, Revenue Colony',
+      streetAddress: '4585+F8J, Opp. Girls High School, Bypass Road, Tadipatri â€“ Pulivendula â€“ Kadiri Road, Revenue Colony',
       addressLocality: 'Kadiri',
       addressRegion: 'Andhra Pradesh',
       postalCode: '515591',
       addressCountry: 'IN',
     },
-    priceRange: '₹1,999 - ₹4,999',
+    priceRange: '₹1,800 - ₹3,300',
     amenityFeature: [
       { '@type': 'LocationFeatureSpecification', name: 'Fully Air-Conditioned Rooms', value: true },
       { '@type': 'LocationFeatureSpecification', name: 'Car Parking', value: true },
