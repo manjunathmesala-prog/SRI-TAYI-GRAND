@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import NextLink from 'next/link';
+import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -58,23 +59,17 @@ export function AdminSidebar() {
     { label: 'Room Inventory', href: '/admin/rooms/inventory', icon: BedDouble },
     { label: 'Room Categories', href: '/admin/rooms/categories', icon: Layers },
     { label: 'Housekeeping', href: '/admin/housekeeping', icon: Sparkles },
-    { label: 'Convention Hall', href: '/admin/convention-hall', icon: Building },
     { label: 'Guests', href: '/admin/guests', icon: Users },
-    { label: 'Payments & Ledger', href: '/admin/payments', icon: CreditCard },
-    { label: 'RFID Smart Keys', href: '/admin/rfid', icon: KeyRound, badge: 'Hardware' },
-    { label: 'Reports & Analytics', href: '/admin/reports', icon: BarChart3 },
-    { label: 'Website CMS', href: '/admin/content', icon: Globe },
+    { label: 'Payments & Revenue', href: '/admin/payments', icon: CreditCard },
+    { label: 'Convention Hall Enquiries', href: '/admin/convention-hall', icon: Building },
+    { label: 'RFID Door Keycards', href: '/admin/rfid', icon: KeyRound, badge: 'Hardware' },
     { label: 'Guest Reviews', href: '/admin/reviews', icon: MessageSquareQuote },
-    { label: 'Staff Management', href: '/admin/staff', icon: UserCog },
-    { label: 'Hotel Settings', href: '/admin/settings', icon: Settings },
+    { label: 'Staff & Roles', href: '/admin/staff', icon: UserCog },
+    { label: 'Reports & Analytics', href: '/admin/reports', icon: BarChart3 },
+    { label: 'Settings', href: '/admin/settings', icon: Settings },
   ];
 
-  const handleLogout = async () => {
-    try {
-      await fetch('/api/admin/auth', { method: 'DELETE' });
-    } catch {
-      // Ignored
-    }
+  const handleLogout = () => {
     localStorage.removeItem('stg_token');
     localStorage.removeItem('stg_role');
     localStorage.removeItem('stg_user_name');
@@ -86,8 +81,14 @@ export function AdminSidebar() {
       {/* Mobile Top Header */}
       <div className="lg:hidden bg-[#25150F] text-white px-4 py-3 flex items-center justify-between border-b border-[#D8AD56]/20 fixed top-0 left-0 right-0 z-40">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-[#382216] border border-[#D8AD56] flex items-center justify-center text-[#D8AD56] font-serif font-bold text-xs">
-            TG
+          <div className="relative w-7 h-7 rounded-full border border-[#D8AD56] overflow-hidden bg-[#382216] shrink-0">
+            <Image
+              src="/images/hotel/tayi-grand-logo.jpg"
+              alt="Sri Tayi Grand Logo"
+              fill
+              sizes="28px"
+              className="object-cover"
+            />
           </div>
           <span className="font-serif font-bold text-sm tracking-wide">Sri Tayi Grand Admin</span>
         </div>
@@ -117,8 +118,14 @@ export function AdminSidebar() {
         <div>
           <div className="p-5 border-b border-white/10 flex items-center justify-between">
             <NextLink href="/admin/dashboard" className="flex items-center gap-3 group">
-              <div className="w-9 h-9 rounded-full bg-[#382216] border border-[#D8AD56] flex items-center justify-center text-[#D8AD56] font-serif font-bold text-sm">
-                TG
+              <div className="relative w-9 h-9 rounded-full border border-[#D8AD56] overflow-hidden bg-[#382216] shadow-sm shrink-0">
+                <Image
+                  src="/images/hotel/tayi-grand-logo.jpg"
+                  alt="Sri Tayi Grand Logo"
+                  fill
+                  sizes="36px"
+                  className="object-cover"
+                />
               </div>
               <div>
                 <span className="font-serif font-bold text-base text-white tracking-wide block leading-none">

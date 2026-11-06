@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import NextLink from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { Menu, X, Calendar } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -39,22 +40,28 @@ export function Header({ transparentInitially = true }: HeaderProps) {
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
         isTransparent
-          ? 'bg-gradient-to-b from-black/75 via-black/35 to-transparent py-5 sm:py-6'
-          : 'bg-[#20120B]/95 backdrop-blur-md shadow-2xl py-3.5 sm:py-4 border-b border-[#D8AD56]/20'
+          ? 'bg-gradient-to-b from-black/75 via-black/35 to-transparent py-4 sm:py-6'
+          : 'bg-[#20120B]/95 backdrop-blur-md shadow-2xl py-3 sm:py-4 border-b border-[#D8AD56]/20'
       }`}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
-          {/* Brand Monogram & Name */}
+          {/* Brand Logo & Name */}
           <NextLink
             href="/"
             data-cursor-hover
             className="flex items-center gap-3 sm:gap-3.5 group focus:outline-none"
           >
-            <div className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full border border-[#D8AD56]/80 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-transform duration-300 group-hover:scale-105 group-hover:border-[#D8AD56]">
-              <span className="font-serif font-semibold text-xs sm:text-sm text-[#D8AD56] tracking-widest">
-                TG
-              </span>
+            {/* Real Tayi Grand Official Emblem Logo */}
+            <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#D8AD56]/80 overflow-hidden flex items-center justify-center bg-black/40 backdrop-blur-sm transition-transform duration-300 group-hover:scale-105 group-hover:border-[#D8AD56] shadow-md shrink-0">
+              <Image
+                src="/images/hotel/tayi-grand-logo.jpg"
+                alt="Sri Tayi Grand Hotel Official Emblem"
+                fill
+                sizes="44px"
+                className="object-cover"
+                priority
+              />
             </div>
             <div className="flex flex-col">
               <span className="font-serif text-lg sm:text-2xl font-normal tracking-[0.08em] text-white group-hover:text-[#D8AD56] transition-colors leading-none">

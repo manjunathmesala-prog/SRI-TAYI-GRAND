@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import NextLink from 'next/link';
+import Image from 'next/image';
 import { Lock, Mail, ArrowRight, Key, ShieldCheck } from 'lucide-react';
 
 export default function AdminLoginPage() {
@@ -59,10 +60,17 @@ export default function AdminLoginPage() {
       <div className="absolute inset-0 bg-radial-gradient from-[#382216]/50 via-transparent to-transparent pointer-events-none" />
 
       <div className="w-full max-w-md relative z-10">
-        {/* Brand Card Header */}
+        {/* Brand Card Header with Official Emblem */}
         <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-full bg-[#382216] border-2 border-[#D8AD56] flex items-center justify-center mx-auto mb-3 shadow-lg">
-            <span className="font-serif font-bold text-2xl text-[#D8AD56]">TG</span>
+          <div className="relative w-20 h-20 rounded-full border-2 border-[#D8AD56] overflow-hidden mx-auto mb-3 shadow-xl bg-black/40">
+            <Image
+              src="/images/hotel/tayi-grand-logo.jpg"
+              alt="Sri Tayi Grand Official Logo"
+              fill
+              sizes="80px"
+              className="object-cover"
+              priority
+            />
           </div>
           <h1 className="font-serif text-2xl sm:text-3xl font-bold text-white tracking-wide">
             SRI TAYI GRAND
@@ -78,49 +86,58 @@ export default function AdminLoginPage() {
             <h2 className="font-serif text-xl font-bold text-[#241912] flex items-center justify-between">
               <span>Staff Sign In</span>
               <span className="text-[10px] bg-green-100 text-green-800 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                <ShieldCheck className="w-3 h-3" /> RBAC Protected
+                <ShieldCheck className="w-3 h-3" />
+                Verified Portal
               </span>
             </h2>
-            <p className="text-xs text-[#786B61] mt-1">
-              Multi-user authorized access. All activity is audited in real-time.
+            <p className="text-xs text-[#786B61] mt-1 font-light">
+              Enter your credentials to access Sri Tayi Grand control panel.
             </p>
           </div>
 
           {error && (
-            <div className="p-3 rounded-lg bg-red-50 text-red-700 text-xs border border-red-200">
-              {error}
+            <div className="p-3.5 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs flex items-start gap-2">
+              <span className="font-bold">•</span>
+              <span>{error}</span>
             </div>
           )}
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-[11px] uppercase tracking-wider font-semibold text-[#786B61] mb-1">
-                Staff Email Address
+              <label className="block text-xs font-semibold text-[#241912] uppercase tracking-wider mb-1.5">
+                Staff Email
               </label>
               <div className="relative">
-                <Mail className="w-4 h-4 text-[#786B61] absolute left-3 top-1/2 -translate-y-1/2" />
+                <Mail className="w-4 h-4 text-[#8C7A6B] absolute left-3.5 top-3.5" />
                 <input
                   type="email"
-                  required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full text-xs font-medium pl-9 pr-3 py-3 rounded-xl border border-[#EFE3D6] bg-[#FAF7F2] text-[#241912] focus:border-[#D8AD56] focus:outline-none"
+                  required
+                  placeholder="staff@sritayigrand.com"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#EFE3D6] focus:border-[#D8AD56] focus:ring-1 focus:ring-[#D8AD56] text-sm text-[#241912] outline-none transition-all placeholder:text-[#8C7A6B]/50"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[11px] uppercase tracking-wider font-semibold text-[#786B61] mb-1">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label className="block text-xs font-semibold text-[#241912] uppercase tracking-wider">
+                  Password
+                </label>
+                <span className="text-[10px] text-[#D8AD56] hover:underline cursor-pointer">
+                  Default: GrandHotel@Kadiri2026!
+                </span>
+              </div>
               <div className="relative">
-                <Lock className="w-4 h-4 text-[#786B61] absolute left-3 top-1/2 -translate-y-1/2" />
+                <Lock className="w-4 h-4 text-[#8C7A6B] absolute left-3.5 top-3.5" />
                 <input
                   type="password"
-                  required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full text-xs font-medium pl-9 pr-3 py-3 rounded-xl border border-[#EFE3D6] bg-[#FAF7F2] text-[#241912] focus:border-[#D8AD56] focus:outline-none"
+                  required
+                  placeholder="••••••••••••"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#EFE3D6] focus:border-[#D8AD56] focus:ring-1 focus:ring-[#D8AD56] text-sm text-[#241912] outline-none transition-all"
                 />
               </div>
             </div>
@@ -128,63 +145,62 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 px-4 rounded-xl bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-bold tracking-wider uppercase transition-all shadow-md active:scale-98 flex items-center justify-center gap-2 mt-2"
+              className="w-full py-3 rounded-xl bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-goldGlow hover:-translate-y-0.5 disabled:opacity-50 flex items-center justify-center gap-2"
             >
-              <span>{loading ? 'Authenticating...' : 'Sign In to Workspace'}</span>
+              <span>{loading ? 'Authenticating...' : 'Sign In to Management'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
 
-          {/* Quick Role Switcher for Multi-Session Audit */}
-          <div className="pt-4 border-t border-[#EFE3D6]">
-            <div className="text-[10px] uppercase tracking-wider font-semibold text-[#786B61] mb-2.5 flex items-center gap-1.5">
-              <Key className="w-3.5 h-3.5 text-[#D8AD56]" />
-              <span>Multi-User Session Roles:</span>
+          {/* Quick Role Fill Presets for Ease of Testing */}
+          <div className="pt-4 border-t border-[#FAF7F2]">
+            <div className="text-[11px] font-semibold text-[#8C7A6B] uppercase tracking-wider mb-2 text-center">
+              Quick Role One-Click Switch
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-2 gap-2 text-xs">
               <button
                 type="button"
                 onClick={() => handleDemoRole('admin@sritayigrand.com')}
-                className="p-2 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-[10px] font-semibold text-[#382216] border border-[#EFE3D6] text-left"
+                className="p-2 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-[#241912] text-left border border-[#D8AD56]/20 transition-colors"
               >
-                👑 <strong>Super Admin</strong>
-                <span className="block text-[9px] text-[#786B61]">All permissions</span>
+                <div className="font-bold text-[11px] text-[#382216]">Super Admin</div>
+                <div className="text-[9px] text-[#786B61] truncate">admin@sritayigrand.com</div>
               </button>
               <button
                 type="button"
-                onClick={() => handleDemoRole('frontdesk@sritayigrand.com')}
-                className="p-2 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-[10px] font-semibold text-[#382216] border border-[#EFE3D6] text-left"
+                onClick={() => handleDemoRole('reception@sritayigrand.com')}
+                className="p-2 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-[#241912] text-left border border-[#D8AD56]/20 transition-colors"
               >
-                🛎️ <strong>Front Desk</strong>
-                <span className="block text-[9px] text-[#786B61]">Check-in/out, folios</span>
+                <div className="font-bold text-[11px] text-[#382216]">Receptionist</div>
+                <div className="text-[9px] text-[#786B61] truncate">reception@sritayigrand.com</div>
               </button>
               <button
                 type="button"
                 onClick={() => handleDemoRole('housekeeping@sritayigrand.com')}
-                className="p-2 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-[10px] font-semibold text-[#382216] border border-[#EFE3D6] text-left"
+                className="p-2 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-[#241912] text-left border border-[#D8AD56]/20 transition-colors"
               >
-                🧹 <strong>Housekeeping</strong>
-                <span className="block text-[9px] text-[#786B61]">Turnover sanitization</span>
+                <div className="font-bold text-[11px] text-[#382216]">Housekeeping</div>
+                <div className="text-[9px] text-[#786B61] truncate">housekeeping@sritayigrand.com</div>
               </button>
               <button
                 type="button"
-                onClick={() => handleDemoRole('accounts@sritayigrand.com')}
-                className="p-2 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-[10px] font-semibold text-[#382216] border border-[#EFE3D6] text-left"
+                onClick={() => handleDemoRole('manager@sritayigrand.com')}
+                className="p-2 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-[#241912] text-left border border-[#D8AD56]/20 transition-colors"
               >
-                📊 <strong>Accounts</strong>
-                <span className="block text-[9px] text-[#786B61]">Ledger, Night audit</span>
+                <div className="font-bold text-[11px] text-[#382216]">General Manager</div>
+                <div className="text-[9px] text-[#786B61] truncate">manager@sritayigrand.com</div>
               </button>
             </div>
           </div>
         </div>
 
-        {/* Back to Public Site */}
-        <div className="mt-6 text-center">
+        {/* Back to Guest Website Link */}
+        <div className="text-center mt-6">
           <NextLink
             href="/"
-            className="text-xs text-[#EFE3D6]/70 hover:text-[#D8AD56] transition-colors"
+            className="text-xs text-[#EFE3D6]/70 hover:text-[#D8AD56] transition-colors inline-flex items-center gap-1.5"
           >
-            ← Return to Sri Tayi Grand Public Site
+            <span>← Return to Guest Portal & Reservations</span>
           </NextLink>
         </div>
       </div>

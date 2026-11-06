@@ -6,6 +6,11 @@ export const metadata: Metadata = {
   title: 'Sri Tayi Grand | Luxury Stay & Convention Hall in Kadiri, Andhra Pradesh',
   description: 'Experience thoughtful comfort and grand hospitality at Sri Tayi Grand, Kadiri. Double Room, Four Bed Room, Suite Room, and Grand Convention Hall.',
   keywords: 'Sri Tayi Grand, Tayi Grand Hotel, Kadiri Hotel, Hotels in Kadiri, Convention Hall Kadiri, Luxury Hotel Anantapur, Rooms in Kadiri',
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/images/hotel/tayi-grand-logo.jpg',
+  },
   openGraph: {
     title: 'Sri Tayi Grand | Luxury Stay & Convention Hall',
     description: 'Your Stay. Your Comfort. Your Grand Experience at Sri Tayi Grand, Kadiri.',

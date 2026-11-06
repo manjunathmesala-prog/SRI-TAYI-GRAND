@@ -1,4 +1,5 @@
 import NextLink from 'next/link';
+import Image from 'next/image';
 import { Phone, Mail, MapPin, MessageSquare } from 'lucide-react';
 
 export function Footer() {
@@ -9,10 +10,14 @@ export function Footer() {
           {/* Brand Identity (5 cols) */}
           <div className="lg:col-span-5 space-y-5">
             <div className="flex items-center gap-3.5">
-              <div className="w-10 h-10 rounded-full border border-[#D8AD56]/80 flex items-center justify-center bg-black/40">
-                <span className="font-serif font-semibold text-sm text-[#D8AD56] tracking-widest">
-                  TG
-                </span>
+              <div className="relative w-11 h-11 rounded-full border border-[#D8AD56]/80 overflow-hidden flex items-center justify-center bg-black/40 shadow-sm shrink-0">
+                <Image
+                  src="/images/hotel/tayi-grand-logo.jpg"
+                  alt="Sri Tayi Grand Hotel Official Emblem"
+                  fill
+                  sizes="44px"
+                  className="object-cover"
+                />
               </div>
               <div>
                 <span className="font-serif text-xl tracking-[0.08em] text-white block">
