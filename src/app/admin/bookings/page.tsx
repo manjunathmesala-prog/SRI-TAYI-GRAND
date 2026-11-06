@@ -1,8 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { repo } from '@/lib/db/repository';
-import { Booking, BookingStatus } from '@/types';
+import { useState, useEffect, useCallback } from 'react';
+import { Booking, BookingStatus, PhysicalRoom } from '@/types';
 import {
   CalendarCheck,
   Search,
@@ -15,16 +14,41 @@ import {
   Phone,
   Mail,
   Printer,
+  Radio,
+  RefreshCw,
 } from 'lucide-react';
+import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
 
 export default function BookingsAdminPage() {
-  const [refreshKey, setRefreshKey] = useState(0);
   const [activeTab, setActiveTab] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [rooms, setRooms] = useState<PhysicalRoom[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const bookings = repo.getBookings();
-  const rooms = repo.getRooms();
+  const fetchBookings = useCallback(async () => {
+    try {
+      const data = await adminOperations.fetchFullState();
+      if (data.success) {
+        setBookings(data.bookings || []);
+        setRooms(data.rooms || []);
+      }
+    } catch {
+      // Ignored
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchBookings();
+  }, [fetchBookings]);
+
+  // Real-time synchronization
+  const { isConnected, status } = useRealtimeSync({
+    onRefresh: fetchBookings,
+  });
 
   const filteredBookings = bookings.filter((b) => {
     if (activeTab !== 'all' && b.status !== activeTab) return false;
@@ -39,12 +63,20 @@ export default function BookingsAdminPage() {
     return true;
   });
 
-  const handleUpdateStatus = (bookingRef: string, status: BookingStatus) => {
-    repo.updateBookingStatus(bookingRef, status);
-    if (selectedBooking && selectedBooking.booking_reference === bookingRef) {
-      setSelectedBooking({ ...selectedBooking, status });
+  const handleUpdateStatus = async (bookingRef: string, newStatus: BookingStatus) => {
+    try {
+      await adminOperations.updateBookingStatus({
+        bookingReference: bookingRef,
+        status: newStatus,
+        staffName: 'Reservation Desk',
+      });
+      if (selectedBooking && selectedBooking.booking_reference === bookingRef) {
+        setSelectedBooking({ ...selectedBooking, status: newStatus });
+      }
+      await fetchBookings();
+    } catch (err: any) {
+      alert(err.message || 'Failed to update booking status');
     }
-    setRefreshKey((k) => k + 1);
   };
 
   const tabs = [
@@ -57,13 +89,23 @@ export default function BookingsAdminPage() {
   ];
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto" key={refreshKey}>
+    <div className="space-y-8 max-w-7xl mx-auto">
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
         <div>
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
-            RESERVATION DIRECTORY
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
+              RESERVATION DIRECTORY
+            </span>
+            <span
+              className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                isConnected ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
+              }`}
+            >
+              <Radio className="w-2.5 h-2.5" />
+              {isConnected ? 'Real-Time Sync Active' : `Sync: ${status}`}
+            </span>
+          </div>
           <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-0.5 flex items-center gap-2">
             <CalendarCheck className="w-6 h-6 text-[#D8AD56]" />
             <span>Booking Management</span>
@@ -73,16 +115,25 @@ export default function BookingsAdminPage() {
           </p>
         </div>
 
-        {/* Search */}
-        <div className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 text-[#786B61] absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search reference, guest, or phone..."
-            className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-[#EFE3D6] bg-white text-[#241912] focus:border-[#D8AD56] focus:outline-none shadow-sm"
-          />
+        {/* Search & Refresh */}
+        <div className="flex items-center gap-2">
+          <div className="relative w-full sm:w-72">
+            <Search className="w-4 h-4 text-[#786B61] absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search reference, guest, or phone..."
+              className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-[#EFE3D6] bg-white text-[#241912] focus:border-[#D8AD56] focus:outline-none shadow-sm"
+            />
+          </div>
+
+          <button
+            onClick={fetchBookings}
+            className="p-2.5 rounded-xl bg-white border border-[#EFE3D6] hover:bg-[#FAF7F2] text-[#786B61] text-xs font-semibold flex items-center gap-1.5 shadow-xs"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+          </button>
         </div>
       </div>
 
@@ -184,7 +235,7 @@ export default function BookingsAdminPage() {
                     <td className="py-3.5 px-4 text-right">
                       <button
                         onClick={() => setSelectedBooking(b)}
-                        className="px-2.5 py-1.5 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-xs font-semibold text-[#382216] transition-colors inline-flex items-center gap-1"
+                        className="px-2.5 py-1.5 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-xs font-semibold text-[#382216] transition-colors inline-flex items-center gap-1 cursor-pointer"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         <span>Manage</span>

@@ -1,4 +1,4 @@
-﻿import {
+import {
   RoomCategory,
   PhysicalRoom,
   Booking,
@@ -17,6 +17,11 @@
   BookingStatus,
   PaymentStatus,
   PaymentMethod,
+  StaffRole,
+  Expense,
+  DailyClosing,
+  RealtimeEventType,
+  RealtimeMessage,
 } from '@/types';
 
 import { syncCardToSupabase, syncEventToSupabase, deleteCardFromSupabase } from './supabase-rfid';
@@ -40,10 +45,12 @@ import {
   INITIAL_RFID_DEVICES,
   INITIAL_RFID_CARDS,
   INITIAL_RFID_ACCESS_EVENTS,
+  INITIAL_EXPENSES,
+  INITIAL_DAILY_CLOSINGS,
 } from './mock-data';
 
-// Singleton in-memory state that persists during server runtime
-class HotelRepository {
+// Singleton authoritative repository that persists during server runtime
+export class HotelRepository {
   private settings: HotelSettings = { ...INITIAL_HOTEL_SETTINGS };
   private categories: RoomCategory[] = JSON.parse(JSON.stringify(INITIAL_ROOM_CATEGORIES));
   private rooms: PhysicalRoom[] = JSON.parse(JSON.stringify(INITIAL_PHYSICAL_ROOMS));
@@ -57,12 +64,84 @@ class HotelRepository {
   private rfidDevices: RFIDDevice[] = JSON.parse(JSON.stringify(INITIAL_RFID_DEVICES));
   private rfidCards: RFIDCard[] = [];
   private rfidEvents: RFIDAccessEvent[] = [];
+  private expenses: Expense[] = JSON.parse(JSON.stringify(INITIAL_EXPENSES));
+  private dailyClosings: DailyClosing[] = JSON.parse(JSON.stringify(INITIAL_DAILY_CLOSINGS));
+
+  // In-Memory Real-Time Event Bus with Reconnection Replay Buffer
+  private eventCounter: number = 0;
+  private eventHistory: RealtimeMessage[] = [];
+  private eventListeners: Set<(msg: RealtimeMessage) => void> = new Set();
 
   constructor() {
     const loadedCards = loadPersistedCards();
     this.rfidCards = loadedCards.length > 0 ? loadedCards : JSON.parse(JSON.stringify(INITIAL_RFID_CARDS));
     const loadedEvents = loadPersistedEvents();
     this.rfidEvents = loadedEvents.length > 0 ? loadedEvents : JSON.parse(JSON.stringify(INITIAL_RFID_ACCESS_EVENTS));
+  }
+
+  // ==============================================================================
+  // REAL-TIME EVENT STREAMING & DEDUPLICATION BUS
+  // ==============================================================================
+
+  public broadcastEvent(eventType: RealtimeEventType, payload: any, actor?: string): RealtimeMessage {
+    this.eventCounter += 1;
+    const message: RealtimeMessage = {
+      eventId: this.eventCounter,
+      eventType,
+      payload,
+      timestamp: new Date().toISOString(),
+      actor: actor || 'system',
+    };
+
+    // Store in circular history buffer (last 500 events) for reconnection replay
+    this.eventHistory.push(message);
+    if (this.eventHistory.length > 500) {
+      this.eventHistory.shift();
+    }
+
+    // Dispatch synchronously to all connected SSE clients
+    for (const listener of this.eventListeners) {
+      try {
+        listener(message);
+      } catch (err) {
+        // Suppress disconnected socket errors
+      }
+    }
+
+    return message;
+  }
+
+  public subscribeEvents(callback: (msg: RealtimeMessage) => void): () => void {
+    this.eventListeners.add(callback);
+    return () => {
+      this.eventListeners.delete(callback);
+    };
+  }
+
+  public getEventsSince(lastEventId: number): RealtimeMessage[] {
+    if (!lastEventId || isNaN(lastEventId)) return [];
+    return this.eventHistory.filter((msg) => msg.eventId > lastEventId);
+  }
+
+  public getCurrentEventId(): number {
+    return this.eventCounter;
+  }
+
+  // Authoritative Full Snapshot for initial client hydration across sessions
+  public getFullState() {
+    return {
+      currentEventId: this.eventCounter,
+      rooms: this.getRooms(),
+      categories: this.getCategories(),
+      bookings: this.getBookings(),
+      payments: this.getPayments(),
+      expenses: this.getExpenses(),
+      dailyClosings: this.getDailyClosings(),
+      rfidCards: this.getRFIDCards(),
+      rfidDevices: this.getRFIDDevices(),
+      rfidEvents: this.getRFIDEvents().slice(0, 100),
+      settings: this.getSettings(),
+    };
   }
 
   // --- SETTINGS ---
@@ -72,6 +151,7 @@ class HotelRepository {
 
   updateSettings(partial: Partial<HotelSettings>): HotelSettings {
     this.settings = { ...this.settings, ...partial };
+    this.broadcastEvent('full_sync', { settings: this.settings });
     return this.settings;
   }
 
@@ -104,6 +184,7 @@ class HotelRepository {
     const index = this.categories.findIndex((c) => c.id === id);
     if (index === -1) return null;
     this.categories[index] = { ...this.categories[index], ...updates };
+    this.broadcastEvent('full_sync', { category: this.categories[index] });
     return this.categories[index];
   }
 
@@ -113,6 +194,7 @@ class HotelRepository {
       id: `cat-${Date.now()}`,
     };
     this.categories.push(newCategory);
+    this.broadcastEvent('full_sync', { newCategory });
     return newCategory;
   }
 
@@ -128,7 +210,7 @@ class HotelRepository {
   }
 
   getRoomById(id: string): PhysicalRoom | undefined {
-    return this.rooms.find((r) => r.id === id);
+    return this.rooms.find((r) => r.id === id || r.room_number === id);
   }
 
   createRoom(room: Omit<PhysicalRoom, 'id'>): PhysicalRoom {
@@ -137,6 +219,7 @@ class HotelRepository {
       id: `rm-${Date.now()}`,
     };
     this.rooms.push(newRoom);
+    this.broadcastEvent('full_sync', { newRoom });
     return newRoom;
   }
 
@@ -144,10 +227,12 @@ class HotelRepository {
     id: string,
     operational_status: OperationalStatus,
     housekeeping_status?: HousekeepingStatus,
-    notes?: string
+    notes?: string,
+    actor?: string
   ): PhysicalRoom | null {
-    const index = this.rooms.findIndex((r) => r.id === id);
+    const index = this.rooms.findIndex((r) => r.id === id || r.room_number === id);
     if (index === -1) return null;
+
     this.rooms[index].operational_status = operational_status;
     if (housekeeping_status) {
       this.rooms[index].housekeeping_status = housekeeping_status;
@@ -155,16 +240,75 @@ class HotelRepository {
     if (notes !== undefined) {
       this.rooms[index].notes = notes;
     }
+
+    // Broadcast room / housekeeping change to all sessions
+    this.broadcastEvent(
+      'housekeeping_updated',
+      {
+        roomId: this.rooms[index].id,
+        roomNumber: this.rooms[index].room_number,
+        operational_status: this.rooms[index].operational_status,
+        housekeeping_status: this.rooms[index].housekeeping_status,
+        notes: this.rooms[index].notes,
+      },
+      actor
+    );
+
     return this.rooms[index];
   }
 
-  assignRoomToBooking(roomId: string, bookingRef: string, guestName: string): PhysicalRoom | null {
-    const index = this.rooms.findIndex((r) => r.id === roomId);
-    if (index === -1) return null;
-    this.rooms[index].current_booking_ref = bookingRef;
-    this.rooms[index].current_guest_name = guestName;
-    this.rooms[index].operational_status = 'reserved';
-    return this.rooms[index];
+  // Atomically check availability and assign room with race-condition prevention
+  assignRoomToBooking(
+    roomId: string,
+    bookingRef: string,
+    guestName: string,
+    actor?: string
+  ): PhysicalRoom {
+    const index = this.rooms.findIndex((r) => r.id === roomId || r.room_number === roomId);
+    if (index === -1) {
+      throw new Error(`Room identifier '${roomId}' was not found.`);
+    }
+
+    const room = this.rooms[index];
+
+    // Concurrency Lock: verify room is not occupied or assigned to another active reservation
+    if (room.operational_status === 'occupied' && room.current_booking_ref !== bookingRef) {
+      throw new Error(`Conflict: Room ${room.room_number} is already occupied by ${room.current_guest_name || 'another guest'}.`);
+    }
+
+    if (
+      room.operational_status === 'reserved' &&
+      room.current_booking_ref &&
+      room.current_booking_ref.toLowerCase() !== bookingRef.toLowerCase()
+    ) {
+      throw new Error(`Conflict: Room ${room.room_number} is already reserved for booking ${room.current_booking_ref}.`);
+    }
+
+    // Atomically assign
+    room.current_booking_ref = bookingRef;
+    room.current_guest_name = guestName;
+    room.operational_status = 'reserved';
+
+    // Update booking if exists
+    const booking = this.getBookingByReference(bookingRef);
+    if (booking) {
+      booking.assigned_room_id = room.id;
+      booking.assigned_room_number = room.room_number;
+      booking.room_assigned_by = actor || 'Front Desk';
+    }
+
+    this.broadcastEvent(
+      'room_assigned',
+      {
+        roomId: room.id,
+        roomNumber: room.room_number,
+        bookingRef,
+        guestName,
+      },
+      actor
+    );
+
+    return room;
   }
 
   // --- BOOKINGS ---
@@ -175,21 +319,34 @@ class HotelRepository {
   }
 
   getBookingByReference(reference: string): Booking | undefined {
+    if (!reference) return undefined;
     return this.bookings.find(
       (b) => b.booking_reference.toLowerCase() === reference.toLowerCase()
     );
   }
 
   createBooking(
-    bookingData: Omit<Booking, 'id' | 'booking_reference' | 'created_at'>
+    bookingData: Omit<Booking, 'id' | 'booking_reference' | 'created_at'>,
+    actor?: string
   ): Booking {
+    // Concurrency & Overbooking check: verify capacity in requested category
+    const catRooms = this.rooms.filter((r) => r.category_id === bookingData.category_id && r.is_active);
+    const availableRooms = catRooms.filter((r) => r.operational_status === 'available');
+    const requestedCount = bookingData.rooms_count || 1;
+
+    if (availableRooms.length < requestedCount) {
+      throw new Error(
+        `Overbooking Prevention: Category has only ${availableRooms.length} room(s) available, but ${requestedCount} was requested.`
+      );
+    }
+
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const randCode = Math.floor(1000 + Math.random() * 9000);
     const bookingReference = `STG-${dateStr}-${randCode}`;
 
     const newBooking: Booking = {
       ...bookingData,
-      id: `bk-${Date.now()}`,
+      id: `bk-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       booking_reference: bookingReference,
       created_at: new Date().toISOString(),
     };
@@ -215,14 +372,18 @@ class HotelRepository {
       this.guests.push(guest);
     }
 
-    // If an assigned physical room was specified, reserve it
+    // If an assigned physical room was specified, reserve it atomically
     if (newBooking.assigned_room_id) {
       this.assignRoomToBooking(
         newBooking.assigned_room_id,
         bookingReference,
-        newBooking.guest_name
+        newBooking.guest_name,
+        actor
       );
     }
+
+    // Broadcast new booking in real-time
+    this.broadcastEvent('booking_created', newBooking, actor);
 
     return newBooking;
   }
@@ -230,7 +391,8 @@ class HotelRepository {
   updateBookingStatus(
     bookingReference: string,
     status: BookingStatus,
-    notes?: string
+    notes?: string,
+    actor?: string
   ): Booking | null {
     const booking = this.getBookingByReference(bookingReference);
     if (!booking) return null;
@@ -241,15 +403,20 @@ class HotelRepository {
     if (status === 'checked_in') {
       booking.checked_in_at = new Date().toISOString();
       if (booking.assigned_room_id) {
-        this.updateRoomStatus(booking.assigned_room_id, 'occupied', 'clean');
+        this.updateRoomStatus(booking.assigned_room_id, 'occupied', 'clean', undefined, actor);
       }
+      this.broadcastEvent('check_in', { booking, roomNumber: booking.assigned_room_number }, actor);
     } else if (status === 'checked_out') {
       booking.checked_out_at = new Date().toISOString();
       if (booking.assigned_room_id) {
-        this.updateRoomStatus(booking.assigned_room_id, 'cleaning', 'dirty');
+        this.updateRoomStatus(booking.assigned_room_id, 'cleaning', 'dirty', undefined, actor);
         const room = this.rooms.find((r) => r.id === booking.assigned_room_id);
         if (room) {
-          const roomCards = this.rfidCards.filter((c) => (c.assigned_room_number === room.room_number || c.room_number === room.room_number) && c.card_type === 'guest');
+          const roomCards = this.rfidCards.filter(
+            (c) =>
+              (c.assigned_room_number === room.room_number || c.room_number === room.room_number) &&
+              c.card_type === 'guest'
+          );
           for (const card of roomCards) {
             card.status = 'inactive';
             card.deactivated_at = new Date().toISOString();
@@ -257,16 +424,24 @@ class HotelRepository {
           }
         }
       }
+      this.broadcastEvent('check_out', { booking, roomNumber: booking.assigned_room_number }, actor);
     } else if (status === 'cancelled') {
       booking.cancelled_at = new Date().toISOString();
       if (booking.assigned_room_id) {
-        this.updateRoomStatus(booking.assigned_room_id, 'available', 'clean');
+        const room = this.rooms.find((r) => r.id === booking.assigned_room_id);
+        if (room) {
+          room.operational_status = 'available';
+          room.current_booking_ref = undefined;
+          room.current_guest_name = undefined;
+        }
       }
+      this.broadcastEvent('booking_updated', { booking, status }, actor);
+    } else {
+      this.broadcastEvent('booking_updated', { booking, status }, actor);
     }
 
     return booking;
   }
-
 
   // --- WALK-IN RECEPTION KIOSK METHODS ---
   createWalkInBooking(params: {
@@ -281,9 +456,19 @@ class HotelRepository {
     paidAmount?: number;
     walkInToken: string;
     specialRequests?: string;
+    actor?: string;
   }): Booking {
-    const category = this.categories.find((c) => c.id === params.categoryId || c.slug === params.categoryId);
+    const category = this.categories.find(
+      (c) => c.id === params.categoryId || c.slug === params.categoryId
+    );
     const categoryName = category ? category.name : 'Deluxe Room';
+
+    // Verify room availability
+    const availableRooms = this.getAvailableCleanRooms(category ? category.id : undefined);
+    if (availableRooms.length === 0) {
+      throw new Error(`No clean available rooms found for walk-in booking.`);
+    }
+
     const nights = Math.max(1, params.numberOfNights || 1);
     const ratePerNight = category ? category.base_price_per_night : 2000;
     const subtotal = ratePerNight * nights;
@@ -301,7 +486,10 @@ class HotelRepository {
     const bookingReference = `TG-W-${dateStr}-${randCode}`;
     const pickupCode = `TG-${randCode}`;
 
-    const isPaidOnline = params.paymentMethod === 'online' || params.paymentMethod === 'upi' || params.paymentMethod === 'card';
+    const isPaidOnline =
+      params.paymentMethod === 'online' ||
+      params.paymentMethod === 'upi' ||
+      params.paymentMethod === 'card';
     const paymentStatus: PaymentStatus = isPaidOnline ? 'successful' : 'pay_at_hotel';
     const paidAmount = isPaidOnline ? total : (params.paidAmount || 0);
 
@@ -362,19 +550,21 @@ class HotelRepository {
 
     // If paid online, record in financial payment ledger
     if (isPaidOnline) {
-      this.payments.unshift({
-        id: `pay-${Date.now()}`,
-        payment_reference: `RCP-${Date.now().toString().slice(-6)}`,
-        booking_reference: bookingReference,
-        guest_name: params.guestName,
-        amount: total,
-        currency: 'INR',
-        payment_method: params.paymentMethod,
-        status: 'successful',
-        paid_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-      });
+      this.recordPayment(
+        {
+          booking_reference: bookingReference,
+          guest_name: params.guestName,
+          amount: total,
+          currency: 'INR',
+          payment_method: params.paymentMethod,
+          status: 'successful',
+          paid_at: new Date().toISOString(),
+        },
+        params.actor
+      );
     }
+
+    this.broadcastEvent('walk_in_created', booking, params.actor);
 
     return booking;
   }
@@ -404,7 +594,10 @@ class HotelRepository {
     }
 
     if (room.operational_status === 'occupied' && room.current_booking_ref !== booking.booking_reference) {
-      return { success: false, error: `Room ${params.roomNumber} is already occupied by ${room.current_guest_name || 'another guest'}` };
+      return {
+        success: false,
+        error: `Room ${params.roomNumber} is already occupied by ${room.current_guest_name || 'another guest'}`,
+      };
     }
 
     // 1. Assign room to booking
@@ -420,18 +613,18 @@ class HotelRepository {
       booking.paid_amount = booking.total_amount;
       if (params.paymentMethod) booking.payment_method = params.paymentMethod;
 
-      this.payments.unshift({
-        id: `pay-${Date.now()}`,
-        payment_reference: `RCP-${Date.now().toString().slice(-6)}`,
-        booking_reference: booking.booking_reference,
-        guest_name: booking.guest_name,
-        amount: booking.total_amount,
-        currency: 'INR',
-        payment_method: params.paymentMethod || 'cash',
-        status: 'successful',
-        paid_at: new Date().toISOString(),
-        created_at: new Date().toISOString(),
-      });
+      this.recordPayment(
+        {
+          booking_reference: booking.booking_reference,
+          guest_name: booking.guest_name,
+          amount: booking.total_amount,
+          currency: 'INR',
+          payment_method: params.paymentMethod || 'cash',
+          status: 'successful',
+          paid_at: new Date().toISOString(),
+        },
+        params.staffName
+      );
     }
 
     // 3. Update room status to occupied
@@ -441,7 +634,8 @@ class HotelRepository {
     room.current_guest_name = booking.guest_name;
 
     // 4. Calculate checkout time for card expiry (11:00 AM on checkout date)
-    const checkOutDateStr = booking.check_out_date || new Date(Date.now() + 24 * 3600 * 1000).toISOString().split('T')[0];
+    const checkOutDateStr =
+      booking.check_out_date || new Date(Date.now() + 24 * 3600 * 1000).toISOString().split('T')[0];
     const expiryIso = new Date(`${checkOutDateStr}T11:00:00+05:30`).toISOString();
 
     // 5. Issue RFID Guest Card
@@ -459,6 +653,16 @@ class HotelRepository {
 
     booking.keycard_issued_at = new Date().toISOString();
     booking.keycard_uid = card.card_uid;
+
+    this.broadcastEvent(
+      'check_in',
+      {
+        booking,
+        roomNumber: room.room_number,
+        cardUid: card.card_uid,
+      },
+      params.staffName
+    );
 
     return {
       success: true,
@@ -501,11 +705,14 @@ class HotelRepository {
     );
   }
 
-  recordPayment(record: Omit<PaymentRecord, 'id' | 'payment_reference' | 'created_at'>): PaymentRecord {
+  recordPayment(
+    record: Omit<PaymentRecord, 'id' | 'payment_reference' | 'created_at'>,
+    actor?: string
+  ): PaymentRecord {
     const rand = Math.floor(100 + Math.random() * 900);
     const newPayment: PaymentRecord = {
       ...record,
-      id: `pay-${Date.now()}`,
+      id: `pay-${Date.now()}-${rand}`,
       payment_reference: `PAY-STG-${Date.now().toString().slice(-6)}-${rand}`,
       created_at: new Date().toISOString(),
     };
@@ -520,7 +727,153 @@ class HotelRepository {
       }
     }
 
+    this.broadcastEvent('payment_recorded', { payment: newPayment, booking }, actor);
+
     return newPayment;
+  }
+
+  // ==============================================================================
+  // EXPENSES MANAGEMENT
+  // ==============================================================================
+
+  getExpenses(): Expense[] {
+    return [...this.expenses].sort(
+      (a, b) => new Date(b.expense_date).getTime() - new Date(a.expense_date).getTime()
+    );
+  }
+
+  createExpense(data: Omit<Expense, 'id' | 'created_at'>, actor?: string): Expense {
+    const rand = Math.floor(100 + Math.random() * 900);
+    const newExpense: Expense = {
+      ...data,
+      id: `exp-${Date.now()}-${rand}`,
+      created_at: new Date().toISOString(),
+    };
+    this.expenses.unshift(newExpense);
+    this.broadcastEvent('expense_created', newExpense, actor);
+    return newExpense;
+  }
+
+  deleteExpense(id: string, actor?: string): boolean {
+    const index = this.expenses.findIndex((e) => e.id === id);
+    if (index === -1) return false;
+    const removed = this.expenses.splice(index, 1)[0];
+    this.broadcastEvent('expense_deleted', { id: removed.id, title: removed.title }, actor);
+    return true;
+  }
+
+  // ==============================================================================
+  // DAILY CLOSING / NIGHT AUDIT
+  // ==============================================================================
+
+  getDailyClosings(): DailyClosing[] {
+    return [...this.dailyClosings].sort(
+      (a, b) => new Date(b.closing_date).getTime() - new Date(a.closing_date).getTime()
+    );
+  }
+
+  getTodayClosingSummary(dateStr?: string) {
+    const targetDate = dateStr || new Date().toISOString().split('T')[0];
+
+    // Filter payments received on this date
+    const todayPayments = this.payments.filter((p) => {
+      const pDate = p.paid_at ? p.paid_at.split('T')[0] : p.created_at.split('T')[0];
+      return pDate === targetDate && p.status === 'successful';
+    });
+
+    const cashCollected = todayPayments
+      .filter((p) => p.payment_method === 'cash')
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    const upiCollected = todayPayments
+      .filter((p) => p.payment_method === 'upi')
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    const cardCollected = todayPayments
+      .filter((p) => p.payment_method === 'card')
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    const onlineCollected = todayPayments
+      .filter((p) => p.payment_method === 'online')
+      .reduce((sum, p) => sum + p.amount, 0);
+
+    const totalCollected = cashCollected + upiCollected + cardCollected + onlineCollected;
+
+    // Filter expenses recorded on this date
+    const todayExpenses = this.expenses.filter((e) => e.expense_date === targetDate && e.status !== 'rejected');
+    const totalExpenses = todayExpenses.reduce((sum, e) => sum + e.amount, 0);
+    const cashExpenses = todayExpenses
+      .filter((e) => e.payment_method === 'cash')
+      .reduce((sum, e) => sum + e.amount, 0);
+
+    // Expected cash in drawer = Cash receipts - Cash disbursements
+    const expectedCashInDrawer = Math.max(0, cashCollected - cashExpenses);
+
+    const isAlreadyClosed = this.dailyClosings.some(
+      (c) => c.closing_date === targetDate && c.status === 'closed'
+    );
+
+    return {
+      closingDate: targetDate,
+      totalRevenue: totalCollected,
+      roomRevenue: totalCollected, // Primary hotel operations
+      hallRevenue: 0,
+      otherRevenue: 0,
+      cashCollected,
+      upiCollected,
+      cardCollected,
+      onlineCollected,
+      totalExpenses,
+      cashExpenses,
+      expectedCashInDrawer,
+      isAlreadyClosed,
+    };
+  }
+
+  performDailyClosing(params: {
+    closingDate: string;
+    actualCashCounted: number;
+    notes?: string;
+    closedByName: string;
+    closedByRole: StaffRole;
+  }): DailyClosing {
+    const summary = this.getTodayClosingSummary(params.closingDate);
+    const discrepancy = params.actualCashCounted - summary.expectedCashInDrawer;
+
+    // Remove existing closing for same day if reopening/re-closing
+    const existingIdx = this.dailyClosings.findIndex((c) => c.closing_date === params.closingDate);
+    if (existingIdx !== -1) {
+      this.dailyClosings.splice(existingIdx, 1);
+    }
+
+    const closing: DailyClosing = {
+      id: `close-${params.closingDate.replace(/-/g, '')}`,
+      closing_date: params.closingDate,
+      total_revenue: summary.totalRevenue,
+      room_revenue: summary.roomRevenue,
+      hall_revenue: summary.hallRevenue,
+      other_revenue: summary.otherRevenue,
+      cash_collected: summary.cashCollected,
+      upi_collected: summary.upiCollected,
+      card_collected: summary.cardCollected,
+      online_collected: summary.onlineCollected,
+      total_expenses: summary.totalExpenses,
+      cash_expenses: summary.cashExpenses,
+      expected_cash_in_drawer: summary.expectedCashInDrawer,
+      actual_cash_counted: params.actualCashCounted,
+      discrepancy,
+      notes: params.notes,
+      closed_by_name: params.closedByName,
+      closed_by_role: params.closedByRole,
+      status: 'closed',
+      closed_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+    };
+
+    this.dailyClosings.unshift(closing);
+    this.broadcastEvent('daily_closing', closing, params.closedByName);
+
+    return closing;
   }
 
   // --- CONVENTION HALL ENQUIRIES ---
@@ -543,6 +896,7 @@ class HotelRepository {
       created_at: new Date().toISOString(),
     };
     this.hallEnquiries.unshift(enquiry);
+    this.broadcastEvent('full_sync', { enquiry });
     return enquiry;
   }
 
@@ -559,6 +913,7 @@ class HotelRepository {
     if (admin_notes !== undefined) this.hallEnquiries[index].admin_notes = admin_notes;
     if (quoted_amount !== undefined) this.hallEnquiries[index].quoted_amount = quoted_amount;
     if (advance_amount !== undefined) this.hallEnquiries[index].advance_amount = advance_amount;
+    this.broadcastEvent('full_sync', { enquiry: this.hallEnquiries[index] });
     return this.hallEnquiries[index];
   }
 
@@ -606,7 +961,7 @@ class HotelRepository {
     );
   }
 
-  logRFIDEvent(event: Omit<RFIDAccessEvent, 'id' | 'occurred_at'>): RFIDAccessEvent {
+  logRFIDEvent(event: Omit<RFIDAccessEvent, 'id' | 'occurred_at'>, actor?: string): RFIDAccessEvent {
     const newEvent: RFIDAccessEvent = {
       ...event,
       id: 'evt-' + Date.now(),
@@ -615,6 +970,7 @@ class HotelRepository {
     this.rfidEvents.unshift(newEvent);
     savePersistedEvents(this.rfidEvents);
     syncEventToSupabase(newEvent);
+    this.broadcastEvent('rfid_event', newEvent, actor);
     return newEvent;
   }
 
@@ -644,18 +1000,21 @@ class HotelRepository {
     this.rfidCards.unshift(newCard);
     savePersistedCards(this.rfidCards);
     syncCardToSupabase(newCard);
-    this.logRFIDEvent({
-      card_uid: cardUid,
-      card_type: 'super_admin',
-      card_label: cardLabel,
-      device_name: 'Central-RFID-IoT-Gateway',
-      room_number: 'ALL',
-      event_type: 'access_granted',
-      action_type: 'door_unlock',
-      holder_name: holderName,
-      source: 'encoder',
-      reason: `Super Admin Lifetime Card issued to ${holderName} by ${issuedBy}`,
-    });
+    this.logRFIDEvent(
+      {
+        card_uid: cardUid,
+        card_type: 'super_admin',
+        card_label: cardLabel,
+        device_name: 'Central-RFID-IoT-Gateway',
+        room_number: 'ALL',
+        event_type: 'access_granted',
+        action_type: 'door_unlock',
+        holder_name: holderName,
+        source: 'encoder',
+        reason: `Super Admin Lifetime Card issued to ${holderName} by ${issuedBy}`,
+      },
+      issuedBy
+    );
 
     return newCard;
   }
@@ -685,18 +1044,21 @@ class HotelRepository {
     this.rfidCards.unshift(newCard);
     savePersistedCards(this.rfidCards);
     syncCardToSupabase(newCard);
-    this.logRFIDEvent({
-      card_uid: cardUid,
-      card_type: 'cleaner',
-      card_label: cardLabel,
-      device_name: 'Central-RFID-IoT-Gateway',
-      room_number: 'ALL-CLEANING',
-      event_type: 'access_granted',
-      action_type: 'door_unlock',
-      holder_name: holderName,
-      source: 'encoder',
-      reason: `Cleaner Card issued to ${holderName} by ${issuedBy}`,
-    });
+    this.logRFIDEvent(
+      {
+        card_uid: cardUid,
+        card_type: 'cleaner',
+        card_label: cardLabel,
+        device_name: 'Central-RFID-IoT-Gateway',
+        room_number: 'ALL-CLEANING',
+        event_type: 'access_granted',
+        action_type: 'door_unlock',
+        holder_name: holderName,
+        source: 'encoder',
+        reason: `Cleaner Card issued to ${holderName} by ${issuedBy}`,
+      },
+      issuedBy
+    );
 
     return newCard;
   }
@@ -729,19 +1091,22 @@ class HotelRepository {
     savePersistedCards(this.rfidCards);
     syncCardToSupabase(newCard);
 
-    this.logRFIDEvent({
-      card_uid: cardUid,
-      card_type: 'guest',
-      card_label: newCard.card_label,
-      device_name: 'Front-Desk-Encoder-01',
-      room_number: roomNumber,
-      event_type: 'access_granted',
-      action_type: 'door_unlock',
-      holder_name: guestName,
-      booking_reference: bookingRef,
-      source: 'encoder',
-      reason: `Customer Keycard encoded & issued to ${guestName} for Room ${roomNumber}`,
-    });
+    this.logRFIDEvent(
+      {
+        card_uid: cardUid,
+        card_type: 'guest',
+        card_label: newCard.card_label,
+        device_name: 'Front-Desk-Encoder-01',
+        room_number: roomNumber,
+        event_type: 'access_granted',
+        action_type: 'door_unlock',
+        holder_name: guestName,
+        booking_reference: bookingRef,
+        source: 'encoder',
+        reason: `Customer Keycard encoded & issued to ${guestName} for Room ${roomNumber}`,
+      },
+      issuedBy
+    );
 
     return newCard;
   }
@@ -752,13 +1117,13 @@ class HotelRepository {
       const persisted = loadPersistedCards();
       const found = persisted.find((c) => c.id === cardId || c.card_uid === cardId);
       if (found) {
-        this.rfidCards.unshift(found);
+        this.rfidCards.push(found);
         card = found;
       }
     }
     if (!card) return null;
 
-    const nextStatus = targetStatus || (card.status === 'active' ? 'inactive' : 'active');
+    const nextStatus = targetStatus ? targetStatus : (card.status === 'active' ? 'inactive' : 'active');
     card.status = nextStatus;
 
     if (nextStatus === 'inactive') {
@@ -767,21 +1132,23 @@ class HotelRepository {
       card.activated_at = new Date().toISOString();
     }
 
-    this.logRFIDEvent({
-      card_uid: card.card_uid,
-      card_type: card.card_type,
-      card_label: card.card_label,
-      device_name: 'Admin-Dashboard',
-      room_number: card.assigned_room_number || card.room_number || 'N/A',
-      event_type: nextStatus === 'active' ? 'access_granted' : 'access_denied',
-      action_type: nextStatus === 'active' ? 'door_unlock' : 'unauthorized_attempt',
-      holder_name: card.holder_name || card.guest_name,
-      source: 'encoder',
-      reason: `Card ${card.card_uid} (${card.card_type}) ${nextStatus === 'active' ? 'ACTIVATED' : 'DEACTIVATED'} via Admin Dashboard`,
-    });
-
     savePersistedCards(this.rfidCards);
     syncCardToSupabase(card);
+
+    this.logRFIDEvent({
+      card_uid: card.card_uid,
+      card_type: card.card_type || 'guest',
+      card_label: card.card_label,
+      device_name: 'Admin-Dashboard',
+      room_number: card.assigned_room_number || 'N/A',
+      event_type: nextStatus === 'active' ? 'access_granted' : 'access_denied',
+      action_type: nextStatus === 'active' ? 'door_unlock' : 'door_lock',
+      holder_name: card.holder_name || card.guest_name,
+      booking_reference: card.booking_reference,
+      source: 'encoder',
+      reason: `Keycard manually set to ${nextStatus.toUpperCase()} by System Administrator`,
+    });
+
     return card;
   }
 
@@ -789,23 +1156,29 @@ class HotelRepository {
     return this.toggleRFIDCardStatus(cardId, 'inactive');
   }
 
-  
   purgeAllRFIDCards(): void {
     this.rfidCards = [];
-    savePersistedCards(this.rfidCards);
+    savePersistedCards([]);
   }
 
   purgeAllRFIDEvents(): void {
     this.rfidEvents = [];
+    savePersistedEvents([]);
   }
 
   deleteRFIDCard(cardId: string): boolean {
-    const idx = this.rfidCards.findIndex((c) => c.id === cardId || c.card_uid === cardId);
-    if (idx === -1) return false;
-    const [removed] = this.rfidCards.splice(idx, 1);
-    if (removed) deleteCardFromSupabase(removed.card_uid);
-    savePersistedCards(this.rfidCards);
-    return true;
+    const cardToDelete = this.rfidCards.find((c) => c.id === cardId || c.card_uid === cardId);
+    const initialLen = this.rfidCards.length;
+    this.rfidCards = this.rfidCards.filter((c) => c.id !== cardId && c.card_uid !== cardId);
+
+    if (this.rfidCards.length !== initialLen) {
+      savePersistedCards(this.rfidCards);
+      if (cardToDelete) {
+        deleteCardFromSupabase(cardToDelete.card_uid);
+      }
+      return true;
+    }
+    return false;
   }
 
   extendGuestCardValidity(
@@ -827,21 +1200,24 @@ class HotelRepository {
     }
 
     card.expires_at = newExpiry;
-    card.status = 'active'; // Reactivate card if it was marked expired
+    card.status = 'active';
 
-    this.logRFIDEvent({
-      card_uid: card.card_uid,
-      card_type: card.card_type || 'guest',
-      card_label: card.card_label,
-      device_name: 'Admin-Dashboard',
-      room_number: card.assigned_room_number || 'N/A',
-      event_type: 'access_granted',
-      action_type: 'door_unlock',
-      holder_name: card.holder_name || card.guest_name,
-      booking_reference: card.booking_reference,
-      source: 'encoder',
-      reason: `Keycard validity extended by ${hoursToAdd ? `${hoursToAdd} hours` : 'custom time'} until ${new Date(newExpiry).toLocaleString('en-IN')} by ${staffUser}`,
-    });
+    this.logRFIDEvent(
+      {
+        card_uid: card.card_uid,
+        card_type: card.card_type || 'guest',
+        card_label: card.card_label,
+        device_name: 'Admin-Dashboard',
+        room_number: card.assigned_room_number || 'N/A',
+        event_type: 'access_granted',
+        action_type: 'door_unlock',
+        holder_name: card.holder_name || card.guest_name,
+        booking_reference: card.booking_reference,
+        source: 'encoder',
+        reason: `Keycard validity extended by ${hoursToAdd ? `${hoursToAdd} hours` : 'custom time'} until ${new Date(newExpiry).toLocaleString('en-IN')} by ${staffUser}`,
+      },
+      staffUser
+    );
 
     savePersistedCards(this.rfidCards);
     syncCardToSupabase(card);
@@ -865,43 +1241,71 @@ class HotelRepository {
     );
 
     const room = this.rooms.find((r) => r.room_number === roomNumber);
-    const roomCategory = room ? this.categories.find((c) => c.id === room.category_id) : undefined;
-    const roomCatName = roomCategory ? roomCategory.name : 'Standard Room';
 
-    // 1. If Card Not Found or Inactive
     if (!card || card.status !== 'active') {
-      const isCardFound = !!card;
-      const denialReason = !isCardFound
-        ? `Unregistered card UID: ${cardUid}`
-        : `Card ${card.card_uid} is currently ${card.status.toUpperCase()}`;
-
       const event = this.logRFIDEvent({
         card_uid: cardUid,
-        card_type: card?.card_type || 'guest',
+        card_type: card?.card_type,
         card_label: card?.card_label || 'Unregistered Card',
         device_name: `Lock-Room-${roomNumber}`,
         room_number: roomNumber,
         event_type: 'access_denied',
         action_type: 'unauthorized_attempt',
-        holder_name: card?.holder_name || 'Unknown Holder',
-        booking_reference: card?.booking_reference,
-        reason: `Access Denied: ${denialReason}`,
+        holder_name: card?.holder_name,
+        reason: !card
+          ? 'Unregistered Card UID'
+          : `Card has status '${card.status}' (Access Blocked)`,
         source: 'lock_reader',
       });
 
       return {
         success: false,
         event,
-        message: `Access Denied: ${denialReason}`,
+        roomStatus: room?.operational_status,
+        housekeepingStatus: room?.housekeeping_status,
+        cardType: card?.card_type,
+        message: !card
+          ? 'Access Denied: Unregistered card scanned.'
+          : `Access Denied: Card is ${card.status.toUpperCase()}.`,
       };
     }
 
-    // Update card last tap tracking
-    card.last_tap_room = roomNumber;
-    card.last_tap_at = new Date().toISOString();
+    // Check expiry
+    if (card.expires_at && new Date(card.expires_at).getTime() < Date.now()) {
+      card.status = 'expired';
+      savePersistedCards(this.rfidCards);
+      syncCardToSupabase(card);
 
-    // 2. CASE: SUPER ADMIN CARD (Lifetime Activation, Universal Unlock)
+      const event = this.logRFIDEvent({
+        card_uid: card.card_uid,
+        card_type: card.card_type,
+        card_label: card.card_label,
+        device_name: `Lock-Room-${roomNumber}`,
+        room_number: roomNumber,
+        event_type: 'access_denied',
+        action_type: 'unauthorized_attempt',
+        holder_name: card.holder_name,
+        booking_reference: card.booking_reference,
+        reason: 'Guest checkout time passed. Keycard has expired.',
+        source: 'lock_reader',
+      });
+
+      return {
+        success: false,
+        event,
+        roomStatus: room?.operational_status,
+        housekeepingStatus: room?.housekeeping_status,
+        cardType: card.card_type,
+        message: 'Access Denied: Keycard expired past guest checkout time.',
+      };
+    }
+
+    // 1. SUPER ADMIN MASTER CARD
     if (card.card_type === 'super_admin') {
+      card.last_tap_at = new Date().toISOString();
+      card.last_tap_room = roomNumber;
+      savePersistedCards(this.rfidCards);
+
       const event = this.logRFIDEvent({
         card_uid: card.card_uid,
         card_type: 'super_admin',
@@ -911,7 +1315,7 @@ class HotelRepository {
         event_type: 'access_granted',
         action_type: 'door_unlock',
         holder_name: card.holder_name,
-        reason: `Super Admin Lifetime Override: Master Access Granted to Room ${roomNumber} for ${card.holder_name}`,
+        reason: `Super Admin Master Override: Universal Door Unlock for ${card.holder_name}`,
         source: 'lock_reader',
       });
 
@@ -921,13 +1325,12 @@ class HotelRepository {
         roomStatus: room?.operational_status,
         housekeepingStatus: room?.housekeeping_status,
         cardType: 'super_admin',
-        message: `Super Admin Master Card Unlocked Room ${roomNumber} (Lifetime Clearance)`,
+        message: `Super Admin Master Clearance: Door unlocked for ${card.holder_name}.`,
       };
     }
 
-    // 3. CASE: CLEANING CARD (Housekeeping In-and-Out Automation)
+    // 2. CLEANER CARD (Dual-Tap Automation)
     if (card.card_type === 'cleaner') {
-      // Guard: If guest is actively occupying the room
       if (room && room.operational_status === 'occupied' && room.housekeeping_status !== 'dirty') {
         const event = this.logRFIDEvent({
           card_uid: card.card_uid,
@@ -938,51 +1341,37 @@ class HotelRepository {
           event_type: 'access_denied',
           action_type: 'unauthorized_attempt',
           holder_name: card.holder_name,
-          reason: `Access Denied: Room ${roomNumber} is occupied by guest (${room.current_guest_name || 'Guest'}). Cleaning access restricted until checkout or housekeeping request.`,
+          reason: `Guest Occupied Room: Cleaner cannot enter active guest room without front desk clearance.`,
           source: 'lock_reader',
         });
 
         return {
           success: false,
           event,
-          roomStatus: room.operational_status,
-          housekeepingStatus: room.housekeeping_status,
+          roomStatus: room?.operational_status,
+          housekeepingStatus: room?.housekeeping_status,
           cardType: 'cleaner',
-          message: `Access Denied: Room ${roomNumber} is currently occupied by guest. Cleaning restricted.`,
+          message: `Access Denied: Room ${roomNumber} is occupied by guest. Cleaning tap prohibited.`,
         };
       }
 
-      // State Machine for Cleaning Card
-      // Tap 1: Cleaner goes inside -> mark housekeeping as in_progress (cleaner inside)
-      if (room && (room.housekeeping_status === 'dirty' || room.operational_status === 'cleaning' && room.housekeeping_status !== 'in_progress')) {
-        this.updateRoomStatus(room.id, 'cleaning', 'in_progress', `Cleaner ${card.holder_name} entered room for turnover sanitization`);
+      card.last_tap_at = new Date().toISOString();
+      card.last_tap_room = roomNumber;
+      savePersistedCards(this.rfidCards);
 
-        const event = this.logRFIDEvent({
-          card_uid: card.card_uid,
-          card_type: 'cleaner',
-          card_label: card.card_label,
-          device_name: `Lock-Room-${roomNumber}`,
-          room_number: roomNumber,
-          event_type: 'access_granted',
-          action_type: 'cleaning_started',
-          holder_name: card.holder_name,
-          reason: `Cleaner Entered: Cleaner ${card.holder_name} inside Room ${roomNumber}. Marked: Cleaning In Progress.`,
-          source: 'lock_reader',
-        });
-
-        return {
-          success: true,
-          event,
-          roomStatus: 'cleaning',
-          housekeepingStatus: 'in_progress',
-          cardType: 'cleaner',
-          message: `Cleaner ${card.holder_name} tapped into Room ${roomNumber}. Marked: Cleaning In Progress.`,
-        };
-      }
-
-      // Tap 2: Cleaner leaves & door locks -> mark cleaning completed & room available
       if (room && room.housekeeping_status === 'in_progress') {
-        this.updateRoomStatus(room.id, 'available', 'clean', `Cleaned & sanitized by ${card.holder_name}. Ready for guest check-in.`);
+        // Exit Tap: Turnover Complete -> Room Clean and Available
+        room.housekeeping_status = 'clean';
+        room.operational_status = 'available';
+        room.current_booking_ref = undefined;
+        room.current_guest_name = undefined;
+
+        this.broadcastEvent('housekeeping_updated', {
+          roomId: room.id,
+          roomNumber: room.room_number,
+          operational_status: room.operational_status,
+          housekeeping_status: room.housekeeping_status,
+        });
 
         const event = this.logRFIDEvent({
           card_uid: card.card_uid,
@@ -993,32 +1382,7 @@ class HotelRepository {
           event_type: 'access_granted',
           action_type: 'cleaning_completed',
           holder_name: card.holder_name,
-          reason: `Cleaning Completed: Cleaner ${card.holder_name} exited & locked door. Room ${roomNumber} is now Clean & Available for check-in.`,
-          source: 'lock_reader',
-        });
-
-        return {
-          success: true,
-          event,
-          roomStatus: 'available',
-          housekeepingStatus: 'clean',
-          cardType: 'cleaner',
-          message: `Cleaning Completed for Room ${roomNumber}! Door locked. Room is now Clean & Available.`,
-        };
-      }
-
-      // Fallback: If room was already clean, allow inspection
-      if (room) {
-        const event = this.logRFIDEvent({
-          card_uid: card.card_uid,
-          card_type: 'cleaner',
-          card_label: card.card_label,
-          device_name: `Lock-Room-${roomNumber}`,
-          room_number: roomNumber,
-          event_type: 'access_granted',
-          action_type: 'door_unlock',
-          holder_name: card.holder_name,
-          reason: `Housekeeping Inspection: Cleaner ${card.holder_name} inspected Room ${roomNumber}.`,
+          reason: `Cleaner Exit Tap: Room ${roomNumber} cleaning completed and verified. Operational status set to Available.`,
           source: 'lock_reader',
         });
 
@@ -1028,14 +1392,48 @@ class HotelRepository {
           roomStatus: room.operational_status,
           housekeepingStatus: room.housekeeping_status,
           cardType: 'cleaner',
-          message: `Housekeeping routine inspection unlock for Room ${roomNumber}.`,
+          message: `Cleaner finished: Room ${roomNumber} is now Clean & Available for new guests.`,
         };
       }
+
+      // Entry Tap: Cleaning Started
+      if (room) {
+        room.housekeeping_status = 'in_progress';
+        room.operational_status = 'cleaning';
+
+        this.broadcastEvent('housekeeping_updated', {
+          roomId: room.id,
+          roomNumber: room.room_number,
+          operational_status: room.operational_status,
+          housekeeping_status: room.housekeeping_status,
+        });
+      }
+
+      const event = this.logRFIDEvent({
+        card_uid: card.card_uid,
+        card_type: 'cleaner',
+        card_label: card.card_label,
+        device_name: `Lock-Room-${roomNumber}`,
+        room_number: roomNumber,
+        event_type: 'access_granted',
+        action_type: 'cleaning_started',
+        holder_name: card.holder_name,
+        reason: `Cleaner Entry Tap: Room ${roomNumber} cleaning started. Status set to In Progress.`,
+        source: 'lock_reader',
+      });
+
+      return {
+        success: true,
+        event,
+        roomStatus: room?.operational_status,
+        housekeepingStatus: room?.housekeeping_status,
+        cardType: 'cleaner',
+        message: `Cleaner started: Room ${roomNumber} status moved to In-Progress. Door unlocked.`,
+      };
     }
 
-    // 4. CASE: CUSTOMER / GUEST CARD
+    // 3. GUEST CARD
     if (card.card_type === 'guest') {
-      // Check room assignment
       if (card.assigned_room_number !== roomNumber) {
         const event = this.logRFIDEvent({
           card_uid: card.card_uid,
@@ -1045,47 +1443,34 @@ class HotelRepository {
           room_number: roomNumber,
           event_type: 'access_denied',
           action_type: 'unauthorized_attempt',
-          holder_name: card.guest_name || card.holder_name,
+          holder_name: card.holder_name || card.guest_name,
           booking_reference: card.booking_reference,
-          reason: `Access Denied: Keycard is assigned to Room ${card.assigned_room_number}, unauthorized for Room ${roomNumber}`,
+          reason: `Cross-Room Denial: Keycard assigned to Room ${card.assigned_room_number}, attempted Room ${roomNumber}.`,
           source: 'lock_reader',
         });
 
         return {
           success: false,
           event,
+          roomStatus: room?.operational_status,
+          housekeepingStatus: room?.housekeeping_status,
           cardType: 'guest',
-          message: `Access Denied: Card is assigned to Room ${card.assigned_room_number}, not Room ${roomNumber}`,
+          message: `Access Denied: This keycard belongs to Room ${card.assigned_room_number}, not Room ${roomNumber}.`,
         };
       }
 
-      // Check card expiration
-      if (card.expires_at && new Date(card.expires_at).getTime() < Date.now()) {
-        const event = this.logRFIDEvent({
-          card_uid: card.card_uid,
-          card_type: 'guest',
-          card_label: card.card_label,
-          device_name: `Lock-Room-${roomNumber}`,
-          room_number: roomNumber,
-          event_type: 'access_denied',
-          action_type: 'unauthorized_attempt',
-          holder_name: card.guest_name || card.holder_name,
-          booking_reference: card.booking_reference,
-          reason: `Access Denied: Keycard expired at checkout time (${new Date(card.expires_at).toLocaleString('en-IN')})`,
-          source: 'lock_reader',
-        });
+      card.last_tap_at = new Date().toISOString();
+      card.last_tap_room = roomNumber;
+      savePersistedCards(this.rfidCards);
 
-        return {
-          success: false,
-          event,
-          cardType: 'guest',
-          message: `Access Denied: Keycard expired at checkout time.`,
-        };
-      }
-
-      // Valid customer keycard unlock
       if (room && room.operational_status === 'reserved') {
-        this.updateRoomStatus(room.id, 'occupied', 'clean');
+        room.operational_status = 'occupied';
+        this.broadcastEvent('housekeeping_updated', {
+          roomId: room.id,
+          roomNumber: room.room_number,
+          operational_status: room.operational_status,
+          housekeeping_status: room.housekeeping_status,
+        });
       }
 
       const event = this.logRFIDEvent({
@@ -1112,7 +1497,7 @@ class HotelRepository {
       };
     }
 
-    // Fallback unknown card type
+    // Fallback unknown card
     const event = this.logRFIDEvent({
       card_uid: card.card_uid,
       device_name: `Lock-Room-${roomNumber}`,
@@ -1138,14 +1523,19 @@ class HotelRepository {
       last_ping_at: now,
       battery_level: d.battery_level !== undefined ? Math.max(90, d.battery_level) : undefined,
     }));
+    this.broadcastEvent('full_sync', { rfidDevices: this.rfidDevices });
     return [...this.rfidDevices];
   }
 
-  updateRFIDDeviceStatus(deviceId: string, status: 'online' | 'offline' | 'maintenance'): RFIDDevice | null {
+  updateRFIDDeviceStatus(
+    deviceId: string,
+    status: 'online' | 'offline' | 'maintenance'
+  ): RFIDDevice | null {
     const dev = this.rfidDevices.find((d) => d.id === deviceId);
     if (!dev) return null;
     dev.status = status;
     dev.last_ping_at = new Date().toISOString();
+    this.broadcastEvent('full_sync', { updatedDevice: dev });
     return { ...dev };
   }
 }
@@ -1156,7 +1546,13 @@ declare global {
   var __hotelRepo: HotelRepository | undefined;
 }
 
-if (!global.__hotelRepo || typeof (global.__hotelRepo as any).processDoorTap !== 'function' || typeof (global.__hotelRepo as any).extendGuestCardValidity !== 'function' || typeof (global.__hotelRepo as any).purgeAllRFIDCards !== 'function' || typeof (global.__hotelRepo as any).createWalkInBooking !== 'function') {
+if (
+  !global.__hotelRepo ||
+  typeof (global.__hotelRepo as any).subscribeEvents !== 'function' ||
+  typeof (global.__hotelRepo as any).getExpenses !== 'function' ||
+  typeof (global.__hotelRepo as any).getDailyClosings !== 'function' ||
+  typeof (global.__hotelRepo as any).getFullState !== 'function'
+) {
   global.__hotelRepo = new HotelRepository();
 }
 

@@ -307,3 +307,83 @@ export interface StaffMember {
   is_active: boolean;
   last_login?: string;
 }
+
+
+// ==============================================================================
+// EXPENSES & NIGHT AUDIT / DAILY CLOSING
+// ==============================================================================
+
+export type ExpenseCategory = 
+  | 'laundry' 
+  | 'maintenance' 
+  | 'fnb_supplies' 
+  | 'utilities' 
+  | 'staff_welfare' 
+  | 'repairs' 
+  | 'marketing' 
+  | 'other';
+
+export interface Expense {
+  id: string;
+  category: ExpenseCategory;
+  title: string;
+  description?: string;
+  amount: number;
+  payment_method: PaymentMethod;
+  recorded_by: string;
+  expense_date: string;
+  receipt_ref?: string;
+  status: 'approved' | 'pending' | 'rejected';
+  created_at: string;
+}
+
+export interface DailyClosing {
+  id: string;
+  closing_date: string;
+  total_revenue: number;
+  room_revenue: number;
+  hall_revenue: number;
+  other_revenue: number;
+  cash_collected: number;
+  upi_collected: number;
+  card_collected: number;
+  online_collected: number;
+  total_expenses: number;
+  cash_expenses: number;
+  expected_cash_in_drawer: number;
+  actual_cash_counted: number;
+  discrepancy: number;
+  notes?: string;
+  closed_by_name: string;
+  closed_by_role: StaffRole;
+  status: 'closed' | 'reopened';
+  closed_at: string;
+  created_at: string;
+}
+
+// ==============================================================================
+// REAL-TIME EVENT BUS DEFINITIONS
+// ==============================================================================
+
+export type RealtimeEventType = 
+  | 'booking_created' 
+  | 'booking_updated' 
+  | 'walk_in_created'
+  | 'room_assigned' 
+  | 'check_in' 
+  | 'check_out' 
+  | 'payment_recorded' 
+  | 'expense_created' 
+  | 'expense_deleted'
+  | 'daily_closing' 
+  | 'housekeeping_updated' 
+  | 'rfid_event' 
+  | 'full_sync';
+
+export interface RealtimeMessage {
+  eventId: number;
+  eventType: RealtimeEventType;
+  payload: any;
+  timestamp: string;
+  actor?: string;
+}

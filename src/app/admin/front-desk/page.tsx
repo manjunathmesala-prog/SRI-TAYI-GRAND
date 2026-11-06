@@ -1,11 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ReceptionStandeeModal } from '@/components/admin/ReceptionStandeeModal';
-import { repo } from '@/lib/db/repository';
 import { Booking, PhysicalRoom } from '@/types';
-import { issueGuestRoomKey } from '@/lib/rfid';
 import { issuePhysicalKeycard, checkoutPhysicalCard, playChimeSound } from '@/lib/rfid/bridge-client';
+import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
 import {
   ConciergeBell,
   Search,
@@ -22,11 +21,14 @@ import {
   X,
   Plus,
   AlertCircle,
+  Radio,
 } from 'lucide-react';
 
 export default function FrontDeskPage() {
-  const [refreshKey, setRefreshKey] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [rooms, setRooms] = useState<PhysicalRoom[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Modals state
   const [checkInModalBooking, setCheckInModalBooking] = useState<Booking | null>(null);
@@ -53,42 +55,58 @@ export default function FrontDeskPage() {
   const [walkInAlert, setWalkInAlert] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [showStandeeModal, setShowStandeeModal] = useState(false);
 
-  useEffect(() => {
-    let prevCount = -1;
-    const fetchQueue = async () => {
-      try {
-        const res = await fetch('/api/admin/walk-ins/queue');
-        if (res.ok) {
-          const data = await res.json();
-          const q: WalkInItem[] = data.queue || [];
-          setWalkInQueue(q);
-          setCleanRoomsList(data.clean_rooms || []);
-
-          setSelectedWalkInRooms((prev) => {
-            const updated = { ...prev };
-            q.forEach((item) => {
-              if (!updated[item.booking_reference] && data.clean_rooms?.length > 0) {
-                const match = data.clean_rooms.find((r: PhysicalRoom) => r.category_id === item.category_id);
-                updated[item.booking_reference] = match ? match.room_number : data.clean_rooms[0].room_number;
-              }
-            });
-            return updated;
-          });
-
-          if (prevCount !== -1 && q.length > prevCount) {
-            playChimeSound(true);
-          }
-          prevCount = q.length;
-        }
-      } catch {
-        // Silent poll error
+  // Fetch authoritative state from backend repository
+  const fetchLiveState = useCallback(async () => {
+    try {
+      const data = await adminOperations.fetchFullState();
+      if (data.success) {
+        setBookings(data.bookings || []);
+        setRooms(data.rooms || []);
       }
-    };
-
-    fetchQueue();
-    const interval = setInterval(fetchQueue, 3000);
-    return () => clearInterval(interval);
+    } catch {
+      // Ignored
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
+
+  const fetchWalkInQueue = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/walk-ins/queue');
+      if (res.ok) {
+        const data = await res.json();
+        const q: WalkInItem[] = data.queue || [];
+        setWalkInQueue(q);
+        setCleanRoomsList(data.clean_rooms || []);
+
+        setSelectedWalkInRooms((prev) => {
+          const updated = { ...prev };
+          q.forEach((item) => {
+            if (!updated[item.booking_reference] && data.clean_rooms?.length > 0) {
+              const match = data.clean_rooms.find((r: PhysicalRoom) => r.category_id === item.category_id);
+              updated[item.booking_reference] = match ? match.room_number : data.clean_rooms[0].room_number;
+            }
+          });
+          return updated;
+        });
+      }
+    } catch {
+      // Ignored
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchLiveState();
+    fetchWalkInQueue();
+  }, [fetchLiveState, fetchWalkInQueue]);
+
+  // Real-time synchronization subscription: re-hydrates automatically on any domain event
+  const { isConnected, status } = useRealtimeSync({
+    onRefresh: () => {
+      fetchLiveState();
+      fetchWalkInQueue();
+    },
+  });
 
   const handleAssignAndEncodeWalkIn = async (booking: WalkInItem) => {
     const roomNumber = selectedWalkInRooms[booking.booking_reference];
@@ -119,7 +137,8 @@ export default function FrontDeskPage() {
           message: 'Keycard issued for ' + booking.guest_name + '! Room ' + roomNumber + ' is checked in and ready.',
           type: 'success',
         });
-        setRefreshKey((k) => k + 1);
+        await fetchLiveState();
+        await fetchWalkInQueue();
       } else {
         setWalkInAlert({ message: data.error || 'Failed to encode card and assign room.', type: 'error' });
       }
@@ -130,22 +149,21 @@ export default function FrontDeskPage() {
     }
   };
 
-  const bookings = repo.getBookings();
-  const rooms = repo.getRooms();
-
   // Filter lists
   const pendingArrivals = bookings.filter(
-    (b) => (b.status === 'confirmed' || b.status === 'pending') &&
-           (b.guest_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            b.booking_reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            b.guest_phone.includes(searchQuery))
+    (b) =>
+      (b.status === 'confirmed' || b.status === 'pending') &&
+      (b.guest_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        b.booking_reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        b.guest_phone.includes(searchQuery))
   );
 
   const activeStays = bookings.filter(
-    (b) => b.status === 'checked_in' &&
-           (b.guest_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            b.booking_reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (b.assigned_room_number && b.assigned_room_number.includes(searchQuery)))
+    (b) =>
+      b.status === 'checked_in' &&
+      (b.guest_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        b.booking_reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (b.assigned_room_number && b.assigned_room_number.includes(searchQuery)))
   );
 
   // Available clean rooms for check-in assignment
@@ -153,7 +171,7 @@ export default function FrontDeskPage() {
     (r) => r.operational_status === 'available' && r.housekeeping_status === 'clean'
   );
 
-  // Execute Check-In
+  // Execute Authoritative Check-In
   const handleConfirmCheckIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!checkInModalBooking || !selectedRoomId) return;
@@ -161,81 +179,80 @@ export default function FrontDeskPage() {
     const assignedRoom = rooms.find((r) => r.id === selectedRoomId);
     if (!assignedRoom) return;
 
-    // 1. Assign room and update booking status to checked_in
-    checkInModalBooking.assigned_room_id = assignedRoom.id;
-    checkInModalBooking.assigned_room_number = assignedRoom.room_number;
-    repo.updateBookingStatus(checkInModalBooking.booking_reference, 'checked_in');
-
-    // 2. Issue RFID Key if selected
-    if (issueRfid) {
-      await issueGuestRoomKey(
-        assignedRoom.room_number,
-        checkInModalBooking.booking_reference,
-        checkInModalBooking.guest_name,
-        'Front Desk Reception'
-      );
-      // Trigger production Be-Tech hardware USB encoder write
-      issuePhysicalKeycard({
+    try {
+      await adminOperations.checkIn({
+        bookingReference: checkInModalBooking.booking_reference,
+        roomId: assignedRoom.id,
         roomNumber: assignedRoom.room_number,
-        guestName: checkInModalBooking.guest_name,
-        staffUser: 'Front Desk Reception',
-      }).catch(() => {});
-    }
+        issueRfid,
+        staffName: 'Front Desk Reception',
+      });
 
-    setCheckInModalBooking(null);
-    setSelectedRoomId('');
-    setRefreshKey((k) => k + 1);
+      if (issueRfid) {
+        issuePhysicalKeycard({
+          roomNumber: assignedRoom.room_number,
+          guestName: checkInModalBooking.guest_name,
+          staffUser: 'Front Desk Reception',
+        }).catch(() => {});
+      }
+
+      setCheckInModalBooking(null);
+      setSelectedRoomId('');
+      await fetchLiveState();
+      await fetchWalkInQueue();
+    } catch (err: any) {
+      alert(err.message || 'Check-in failed');
+    }
   };
 
-  // Execute Check-Out
-  const handleConfirmCheckOut = (e: React.FormEvent) => {
+  // Execute Authoritative Check-Out
+  const handleConfirmCheckOut = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!checkOutModalBooking) return;
 
-    // 1. Record additional charges if any
-    if (additionalCharges > 0) {
-      checkOutModalBooking.additional_charges_amount += additionalCharges;
-      checkOutModalBooking.total_amount += additionalCharges;
-    }
-
-    // 2. Settle payment
-    const pendingBalance = checkOutModalBooking.total_amount - checkOutModalBooking.paid_amount;
-    if (pendingBalance > 0) {
-      repo.recordPayment({
-        booking_reference: checkOutModalBooking.booking_reference,
-        guest_name: checkOutModalBooking.guest_name,
-        amount: pendingBalance,
-        currency: 'INR',
-        payment_method: settlementMethod,
-        status: 'successful',
-        paid_at: new Date().toISOString(),
+    try {
+      await adminOperations.checkOut({
+        bookingReference: checkOutModalBooking.booking_reference,
+        additionalCharges,
+        chargeDescription,
+        settlementMethod,
+        staffName: 'Front Desk Reception',
       });
-      checkOutModalBooking.paid_amount = checkOutModalBooking.total_amount;
-      checkOutModalBooking.payment_status = 'successful';
+
+      if (checkOutModalBooking.assigned_room_number) {
+        checkoutPhysicalCard(checkOutModalBooking.assigned_room_number, 'Front Desk Reception').catch(() => {});
+      }
+
+      setCheckOutSuccessRef(checkOutModalBooking.booking_reference);
+      setCheckOutModalBooking(null);
+      setAdditionalCharges(0);
+      await fetchLiveState();
+      await fetchWalkInQueue();
+    } catch (err: any) {
+      alert(err.message || 'Check-out failed');
     }
-
-    // 3. Update status to checked_out and mark physical room for cleaning
-    repo.updateBookingStatus(checkOutModalBooking.booking_reference, 'checked_out');
-
-    // 4. Automatically clear card authorization on physical Be-Tech encoder if online
-    if (checkOutModalBooking.assigned_room_number) {
-      checkoutPhysicalCard(checkOutModalBooking.assigned_room_number, 'Front Desk Reception').catch(() => {});
-    }
-
-    setCheckOutSuccessRef(checkOutModalBooking.booking_reference);
-    setCheckOutModalBooking(null);
-    setAdditionalCharges(0);
-    setRefreshKey((k) => k + 1);
   };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto" key={refreshKey}>
+    <div className="space-y-8 max-w-7xl mx-auto">
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
         <div>
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
-            OPERATIONAL WORKFLOW
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
+              OPERATIONAL WORKFLOW
+            </span>
+            <span
+              className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                isConnected
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-amber-100 text-amber-800'
+              }`}
+            >
+              <Radio className="w-2.5 h-2.5" />
+              {isConnected ? 'Real-Time Sync Active' : `Sync: ${status}`}
+            </span>
+          </div>
           <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-0.5 flex items-center gap-2">
             <ConciergeBell className="w-6 h-6 text-[#D8AD56]" />
             <span>Front Desk & Reception</span>
@@ -340,7 +357,7 @@ export default function FrontDeskPage() {
         {walkInQueue.length === 0 ? (
           <div className="py-6 text-center text-xs text-[#EFE3D6]/60 flex items-center justify-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-[#D8AD56]" />
-            <span>Reception counter is clear. Any walk-in customer scanning the acrylic desk QR will chime here instantly.</span>
+            <span>Reception counter is clear. Any walk-in customer scanning the acrylic desk QR will appear here instantly.</span>
           </div>
         ) : (
           <div className="grid gap-3 pt-4 sm:grid-cols-2">

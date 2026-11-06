@@ -418,3 +418,74 @@ export const INITIAL_RFID_CARDS: RFIDCard[] = [];
 
 // PRODUCTION READY: No mock or fake access events. Populated live from Be-Tech lock readers & encoder taps.
 export const INITIAL_RFID_ACCESS_EVENTS: RFIDAccessEvent[] = [];
+
+
+import { Expense, DailyClosing } from '@/types';
+
+export const INITIAL_EXPENSES: Expense[] = [
+  {
+    id: 'exp-01',
+    category: 'laundry',
+    title: 'Linen & Duvet Dry Cleaning Batch #44',
+    description: 'Bedsheets, pillowcases, and bath towels sanitized by Kadiri Steam Laundry',
+    amount: 3200,
+    payment_method: 'cash',
+    recorded_by: 'Nagaraju K (Housekeeping Supervisor)',
+    expense_date: '2026-11-05',
+    receipt_ref: 'KSL-INV-8821',
+    status: 'approved',
+    created_at: '2026-11-05T10:30:00+05:30',
+  },
+  {
+    id: 'exp-02',
+    category: 'fnb_supplies',
+    title: 'Complimentary Welcome Beverage Supplies',
+    description: 'Mineral water crates, green tea bags, sugar sachets, and electric kettle kits',
+    amount: 1850,
+    payment_method: 'upi',
+    recorded_by: 'Bhavani Shankar (Front Desk Lead)',
+    expense_date: '2026-11-05',
+    receipt_ref: 'UPI-TXN-902341',
+    status: 'approved',
+    created_at: '2026-11-05T11:45:00+05:30',
+  },
+  {
+    id: 'exp-03',
+    category: 'maintenance',
+    title: 'HVAC Air Filter Replacement - 2nd Floor',
+    description: 'Replacement of air filters for Rooms 201-208 corridor units',
+    amount: 2400,
+    payment_method: 'cash',
+    recorded_by: 'Srinivasulu M (Maintenance)',
+    expense_date: '2026-11-05',
+    receipt_ref: 'VND-FILT-491',
+    status: 'approved',
+    created_at: '2026-11-05T14:15:00+05:30',
+  },
+];
+
+export const INITIAL_DAILY_CLOSINGS: DailyClosing[] = [
+  {
+    id: 'close-20261104',
+    closing_date: '2026-11-04',
+    total_revenue: 38400,
+    room_revenue: 38400,
+    hall_revenue: 0,
+    other_revenue: 0,
+    cash_collected: 12000,
+    upi_collected: 14400,
+    card_collected: 4000,
+    online_collected: 8000,
+    total_expenses: 4200,
+    cash_expenses: 3200,
+    expected_cash_in_drawer: 8800,
+    actual_cash_counted: 8800,
+    discrepancy: 0,
+    notes: 'Night register closed on time. All physical drawers audited and matched without discrepancy.',
+    closed_by_name: 'Lakshmi Narayana',
+    closed_by_role: 'Accounts',
+    status: 'closed',
+    closed_at: '2026-11-04T23:45:00+05:30',
+    created_at: '2026-11-04T23:45:00+05:30',
+  },
+];

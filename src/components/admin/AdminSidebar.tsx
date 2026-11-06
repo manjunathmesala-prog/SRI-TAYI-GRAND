@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import NextLink from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
@@ -22,12 +22,28 @@ import {
   Menu,
   X,
   ExternalLink,
+  Radio,
 } from 'lucide-react';
+import { useRealtimeSync } from '@/lib/realtime-client';
 
 export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [userName, setUserName] = useState('Admin Console');
+  const [userRole, setUserRole] = useState('Super Admin');
+
+  // Real-time synchronization connection hook
+  const { status, isConnected } = useRealtimeSync();
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedName = localStorage.getItem('stg_user_name');
+      const storedRole = localStorage.getItem('stg_role');
+      if (storedName) setUserName(storedName);
+      if (storedRole) setUserRole(storedRole);
+    }
+  }, []);
 
   // If on login page, don't show admin sidebar
   if (pathname === '/admin/login') {
@@ -51,8 +67,15 @@ export function AdminSidebar() {
     { label: 'Hotel Settings', href: '/admin/settings', icon: Settings },
   ];
 
-  const handleLogout = () => {
-    // In production, clear auth session cookies
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/auth', { method: 'DELETE' });
+    } catch {
+      // Ignored
+    }
+    localStorage.removeItem('stg_token');
+    localStorage.removeItem('stg_role');
+    localStorage.removeItem('stg_user_name');
     router.push('/admin/login');
   };
 
@@ -66,12 +89,20 @@ export function AdminSidebar() {
           </div>
           <span className="font-serif font-bold text-sm tracking-wide">Sri Tayi Grand Admin</span>
         </div>
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="p-1.5 rounded text-[#D8AD56] hover:bg-white/10"
-        >
-          {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        <div className="flex items-center gap-3">
+          <span
+            className={`w-2 h-2 rounded-full ${
+              isConnected ? 'bg-green-500 animate-pulse' : 'bg-amber-500'
+            }`}
+            title={`Real-Time Sync: ${status}`}
+          />
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="p-1.5 rounded text-[#D8AD56] hover:bg-white/10"
+          >
+            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Main Sidebar */}
@@ -105,10 +136,40 @@ export function AdminSidebar() {
             </button>
           </div>
 
+          {/* Real-time Status Indicator Pill */}
+          <div className="px-4 pt-3 pb-1">
+            <div
+              className={`flex items-center justify-between px-3 py-1.5 rounded-lg text-[10px] font-semibold border ${
+                isConnected
+                  ? 'bg-green-950/40 text-green-300 border-green-800/60'
+                  : status === 'reconnecting'
+                  ? 'bg-amber-950/40 text-amber-300 border-amber-800/60'
+                  : 'bg-red-950/40 text-red-300 border-red-800/60'
+              }`}
+            >
+              <div className="flex items-center gap-1.5">
+                <span
+                  className={`w-2 h-2 rounded-full ${
+                    isConnected ? 'bg-green-400 animate-pulse' : 'bg-amber-400'
+                  }`}
+                />
+                <span>
+                  {isConnected
+                    ? 'Real-Time Sync Active'
+                    : status === 'reconnecting'
+                    ? 'Reconnecting Stream...'
+                    : 'Sync Connecting...'}
+                </span>
+              </div>
+              <Radio className="w-3 h-3 opacity-60" />
+            </div>
+          </div>
+
           {/* Navigation Items */}
-          <nav className="p-3 space-y-1 max-h-[calc(100vh-160px)] overflow-y-auto">
+          <nav className="p-3 space-y-1 max-h-[calc(100vh-220px)] overflow-y-auto">
             {menuItems.map((item) => {
-              const isActive = pathname === item.href || (item.href !== '/admin/dashboard' && pathname.startsWith(item.href));
+              const isActive =
+                pathname === item.href || (item.href !== '/admin/dashboard' && pathname.startsWith(item.href));
               const Icon = item.icon;
               return (
                 <NextLink
@@ -157,11 +218,13 @@ export function AdminSidebar() {
           <div className="flex items-center justify-between pt-1">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-full bg-[#382216] border border-[#D8AD56]/50 flex items-center justify-center text-[11px] font-bold text-[#D8AD56]">
-                AD
+                {userName.slice(0, 2).toUpperCase()}
               </div>
-              <div>
-                <span className="text-xs font-semibold text-white block leading-tight">Admin Console</span>
-                <span className="text-[10px] text-[#D8AD56]">Super Admin</span>
+              <div className="truncate max-w-[120px]">
+                <span className="text-xs font-semibold text-white block leading-tight truncate">
+                  {userName}
+                </span>
+                <span className="text-[10px] text-[#D8AD56] block truncate">{userRole}</span>
               </div>
             </div>
 

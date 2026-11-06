@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import NextLink from 'next/link';
-import { Lock, Mail, ArrowRight, ShieldCheck, Key } from 'lucide-react';
+import { Lock, Mail, ArrowRight, Key, ShieldCheck } from 'lucide-react';
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -12,26 +12,45 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
+  const performLogin = async (staffEmail: string, staffPass: string) => {
     setLoading(true);
     setError(null);
 
-    // Validate login
-    setTimeout(() => {
-      if (email && password) {
-        router.push('/admin/dashboard');
-      } else {
-        setError('Please enter a valid staff email and password.');
-        setLoading(false);
+    try {
+      const res = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: staffEmail, password: staffPass }),
+      });
+
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Invalid credentials');
       }
-    }, 400);
+
+      // Store session token in localStorage for easy header attachment
+      if (data.session) {
+        localStorage.setItem('stg_token', data.session.token);
+        localStorage.setItem('stg_role', data.session.role);
+        localStorage.setItem('stg_user_name', data.session.name);
+      }
+
+      router.push('/admin/dashboard');
+    } catch (err: any) {
+      setError(err.message || 'Login failed. Please verify credentials.');
+      setLoading(false);
+    }
+  };
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    performLogin(email, password);
   };
 
   const handleDemoRole = (roleEmail: string) => {
     setEmail(roleEmail);
     setPassword('GrandHotel@Kadiri2026!');
-    router.push('/admin/dashboard');
+    performLogin(roleEmail, 'GrandHotel@Kadiri2026!');
   };
 
   return (
@@ -56,11 +75,14 @@ export default function AdminLoginPage() {
         {/* Login Form Container */}
         <div className="bg-white rounded-3xl border border-[#D8AD56]/40 p-8 shadow-2xl space-y-6">
           <div>
-            <h2 className="font-serif text-xl font-bold text-[#241912]">
-              Staff Sign In
+            <h2 className="font-serif text-xl font-bold text-[#241912] flex items-center justify-between">
+              <span>Staff Sign In</span>
+              <span className="text-[10px] bg-green-100 text-green-800 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                <ShieldCheck className="w-3 h-3" /> RBAC Protected
+              </span>
             </h2>
             <p className="text-xs text-[#786B61] mt-1">
-              Authorized personnel only. Access is monitored and audited.
+              Multi-user authorized access. All activity is audited in real-time.
             </p>
           </div>
 
@@ -113,33 +135,44 @@ export default function AdminLoginPage() {
             </button>
           </form>
 
-          {/* Quick Demo Switcher for Evaluation */}
+          {/* Quick Role Switcher for Multi-Session Audit */}
           <div className="pt-4 border-t border-[#EFE3D6]">
             <div className="text-[10px] uppercase tracking-wider font-semibold text-[#786B61] mb-2.5 flex items-center gap-1.5">
               <Key className="w-3.5 h-3.5 text-[#D8AD56]" />
-              <span>Instant Role Access (Evaluation Mode):</span>
+              <span>Multi-User Session Roles:</span>
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
                 onClick={() => handleDemoRole('admin@sritayigrand.com')}
-                className="p-2 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-[10px] font-semibold text-[#382216] border border-[#EFE3D6] text-center"
+                className="p-2 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-[10px] font-semibold text-[#382216] border border-[#EFE3D6] text-left"
               >
-                Super Admin
+                👑 <strong>Super Admin</strong>
+                <span className="block text-[9px] text-[#786B61]">All permissions</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleDemoRole('frontdesk@sritayigrand.com')}
-                className="p-2 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-[10px] font-semibold text-[#382216] border border-[#EFE3D6] text-center"
+                className="p-2 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-[10px] font-semibold text-[#382216] border border-[#EFE3D6] text-left"
               >
-                Front Desk
+                🛎️ <strong>Front Desk</strong>
+                <span className="block text-[9px] text-[#786B61]">Check-in/out, folios</span>
               </button>
               <button
                 type="button"
                 onClick={() => handleDemoRole('housekeeping@sritayigrand.com')}
-                className="p-2 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-[10px] font-semibold text-[#382216] border border-[#EFE3D6] text-center"
+                className="p-2 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-[10px] font-semibold text-[#382216] border border-[#EFE3D6] text-left"
               >
-                Housekeeping
+                🧹 <strong>Housekeeping</strong>
+                <span className="block text-[9px] text-[#786B61]">Turnover sanitization</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDemoRole('accounts@sritayigrand.com')}
+                className="p-2 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-[10px] font-semibold text-[#382216] border border-[#EFE3D6] text-left"
+              >
+                📊 <strong>Accounts</strong>
+                <span className="block text-[9px] text-[#786B61]">Ledger, Night audit</span>
               </button>
             </div>
           </div>
