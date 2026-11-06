@@ -11,17 +11,17 @@ export interface TayiBrandIconProps {
 
 /**
  * Sri Tayi Grand Official Emblem Icon
- * Renders the authentic laurel wreath and gold monogram PNG on royal burgundy (#43001F)
+ * Renders the authentic laurel wreath and gold monogram transparent PNG
  */
 export default function TayiBrandIcon({
-  className = 'w-5 h-5 inline-block',
+  className = 'inline-block',
   size = 20,
   alt = 'Sri Tayi Grand Emblem',
   style,
 }: TayiBrandIconProps) {
   return (
     <span
-      className={`relative inline-flex items-center justify-center shrink-0 rounded-full overflow-hidden border border-[#D8AD56]/80 bg-[#43001F] shadow-xs align-middle ${className}`}
+      className={`relative inline-flex items-center justify-center shrink-0 align-middle ${className}`}
       style={{ width: size, height: size, ...style }}
       aria-hidden="true"
     >
@@ -30,7 +30,7 @@ export default function TayiBrandIcon({
         alt={alt}
         width={size}
         height={size}
-        className="w-full h-full object-contain p-[1px]"
+        className="w-full h-full object-contain drop-shadow-[0_1px_2px_rgba(46,0,21,0.25)]"
         priority
       />
     </span>

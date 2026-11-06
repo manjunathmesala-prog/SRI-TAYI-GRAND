@@ -120,13 +120,13 @@ export function Header({ transparentInitially = false }: HeaderProps) {
             className="flex flex-col items-center justify-center group focus:outline-none"
           >
             <div className="flex items-center gap-2.5 sm:gap-3">
-              <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#D8AD56]/80 overflow-hidden flex items-center justify-center bg-[#43001F] shadow-sm transition-transform duration-300 group-hover:scale-105 shrink-0">
+              <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0">
                 <Image
                   src="/images/hotel/tayi-grand-logo.png"
                   alt="Sri Tayi Grand Hotel Official Emblem"
                   fill
-                  sizes="44px"
-                  className="object-contain p-0.5"
+                  sizes="48px"
+                  className="object-contain drop-shadow-[0_2px_4px_rgba(46,0,21,0.25)]"
                   priority
                 />
               </div>

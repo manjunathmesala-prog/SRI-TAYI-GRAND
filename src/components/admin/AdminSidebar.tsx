@@ -125,13 +125,13 @@ export function AdminSidebar() {
       {/* Mobile Top Header */}
       <div className="lg:hidden bg-[#25150F] text-white px-4 py-3 flex items-center justify-between border-b border-[#D8AD56]/20 fixed top-0 left-0 right-0 z-40">
         <div className="flex items-center gap-2">
-          <div className="relative w-7 h-7 rounded-full border border-[#D8AD56] overflow-hidden bg-[#43001F] shrink-0">
+          <div className="relative w-8 h-8 flex items-center justify-center shrink-0">
             <Image
               src="/images/hotel/tayi-grand-logo.png"
               alt="Sri Tayi Grand Logo"
               fill
-              sizes="28px"
-              className="object-contain p-0.5"
+              sizes="32px"
+              className="object-contain drop-shadow-sm"
             />
           </div>
           <span className="font-serif font-bold text-sm tracking-wide">Sri Tayi Grand Admin</span>
@@ -162,13 +162,13 @@ export function AdminSidebar() {
         <div>
           <div className="p-5 border-b border-white/10 flex items-center justify-between">
             <NextLink href="/admin/dashboard" className="flex items-center gap-3 group">
-              <div className="relative w-9 h-9 rounded-full border border-[#D8AD56] overflow-hidden bg-[#43001F] shadow-sm shrink-0">
+              <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
                 <Image
                   src="/images/hotel/tayi-grand-logo.png"
                   alt="Sri Tayi Grand Logo"
                   fill
-                  sizes="36px"
-                  className="object-contain p-0.5"
+                  sizes="40px"
+                  className="object-contain drop-shadow-sm"
                 />
               </div>
               <div>

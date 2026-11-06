@@ -23,13 +23,13 @@ export function Footer() {
           <div className="lg:col-span-4 flex flex-col space-y-4">
             <NextLink href="/" className="inline-block focus:outline-none">
               <div className="flex flex-col items-start space-y-2">
-                <div className="relative w-12 h-12 rounded-full border border-[#D8AD56]/80 overflow-hidden flex items-center justify-center bg-[#43001F] shadow-sm shrink-0">
+                <div className="relative w-14 h-14 flex items-center justify-center shrink-0">
                   <Image
                     src="/images/hotel/tayi-grand-logo.png"
                     alt="Sri Tayi Grand Official Emblem"
                     fill
-                    sizes="48px"
-                    className="object-contain p-0.5"
+                    sizes="56px"
+                    className="object-contain drop-shadow-md"
                   />
                 </div>
                 <div className="tracking-[0.22em] text-xl font-serif text-[#B18A4A] uppercase font-semibold">
