@@ -15,14 +15,13 @@ interface ScrollRevealProps extends HTMLMotionProps<'div'> {
   distance?: number;
 }
 
-// B7. Non-negotiable base curve: cubic-bezier(0.22, 1, 0.36, 1)
-const baseCurve = [0.22, 1, 0.36, 1] as const;
+const luxuryEase = [0.16, 1, 0.3, 1] as const;
 
 export function ScrollReveal({
   children,
   preset = 'fade-up',
   delay = 0,
-  duration = 0.7,
+  duration = 0.75,
   className = '',
   once = true,
   distance = 32,
@@ -66,11 +65,11 @@ export function ScrollReveal({
     <motion.div
       initial={getInitial()}
       whileInView={getAnimate()}
-      viewport={{ once, margin: '-40px' }}
+      viewport={{ once, margin: '-50px' }}
       transition={{
         duration,
         delay,
-        ease: baseCurve,
+        ease: luxuryEase,
       }}
       className={className}
       {...props}
@@ -85,7 +84,7 @@ const staggerContainerVariants: Variants = {
   visible: (custom: { stagger?: number; delayChildren?: number } = {}) => ({
     opacity: 1,
     transition: {
-      staggerChildren: custom.stagger ?? 0.1,
+      staggerChildren: custom.stagger ?? 0.12,
       delayChildren: custom.delayChildren ?? 0.05,
     },
   }),
@@ -93,7 +92,7 @@ const staggerContainerVariants: Variants = {
 
 export function StaggerContainer({
   children,
-  stagger = 0.1,
+  stagger = 0.12,
   delayChildren = 0.05,
   className = '',
   once = true,
@@ -121,14 +120,14 @@ export function StaggerContainer({
 }
 
 const staggerItemVariants: Variants = {
-  hidden: { opacity: 0, y: 32, scale: 0.98 },
+  hidden: { opacity: 0, y: 24, scale: 0.98 },
   visible: {
     opacity: 1,
     y: 0,
     scale: 1,
     transition: {
       duration: 0.65,
-      ease: baseCurve,
+      ease: [0.16, 1, 0.3, 1],
     },
   },
 };

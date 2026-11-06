@@ -1,21 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-manrope: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-playfair: 'Playfair Display', Georgia, serif;
+  --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 5rem;
+  scroll-padding-top: 5.5rem;
   overflow-x: hidden;
 }
 
 body {
-  font-family: var(--font-manrope);
+  font-family: var(--font-inter);
   color: #241912;
   background-color: #F8F1E9;
   -webkit-font-smoothing: antialiased;
@@ -24,19 +25,11 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Typography Rules: No orphaned words, balance headings */
-h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-manrope);
-  text-wrap: balance;
-  font-weight: 600;
-  letter-spacing: -0.015em;
+h1, h2, h3, h4, .font-serif {
+  font-family: var(--font-playfair);
 }
 
-p {
-  text-wrap: pretty;
-}
-
-/* Custom Gold Scrollbar */
+/* Custom Luxury Gold Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -55,164 +48,17 @@ p {
   background: #C69940;
 }
 
-/* Accessible Global Focus States */
-a:focus-visible,
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: none;
-  box-shadow: 0 0 0 2px #F8F1E9, 0 0 0 4px #D8AD56;
-}
 
-/* B1. Named Text Styles System */
-@layer utilities {
-  .heading-1 {
-    font-size: 3.75rem; /* 60px */
-    line-height: 3.75rem;
-    font-weight: 600;
-  }
-  .heading-2 {
-    font-size: 3rem; /* 48px */
-    line-height: 3rem;
-    font-weight: 600;
-  }
-  .heading-3 {
-    font-size: 2.25rem; /* 36px */
-    line-height: 2.5rem; /* 40px */
-    font-weight: 600;
-  }
-  .heading-4 {
-    font-size: 1.875rem; /* 30px */
-    line-height: 2.25rem; /* 36px */
-    font-weight: 600;
-  }
-  .heading-5 {
-    font-size: 1.5rem; /* 24px */
-    line-height: 2rem; /* 32px */
-    font-weight: 600;
-  }
-  .heading-6 {
-    font-size: 1.25rem; /* 20px */
-    line-height: 1.75rem; /* 28px */
-    font-weight: 600;
-  }
-
-  .title-1 {
-    font-size: 1.25rem; /* 20px */
-    line-height: 1.75rem; /* 28px */
-    font-weight: 500;
-  }
-  .title-2 {
-    font-size: 1.125rem; /* 18px */
-    line-height: 1.75rem; /* 28px */
-    font-weight: 500;
-  }
-  .title-3 {
-    font-size: 1rem; /* 16px */
-    line-height: 1.5rem; /* 24px */
-    font-weight: 500;
-  }
-  .title-4 {
-    font-size: 0.875rem; /* 14px */
-    line-height: 1.25rem; /* 20px */
-    font-weight: 500;
-  }
-  .title-5 {
-    font-size: 0.75rem; /* 12px */
-    line-height: 1rem; /* 16px */
-    font-weight: 500;
-  }
-
-  .body-1 {
-    font-size: 1rem; /* 16px */
-    line-height: 1.5rem; /* 24px */
-    font-weight: 600;
-  }
-  .body-2 {
-    font-size: 1rem; /* 16px */
-    line-height: 1.5rem; /* 24px */
-    font-weight: 500;
-  }
-  .body-3 {
-    font-size: 1rem; /* 16px */
-    line-height: 1.5rem; /* 24px */
-    font-weight: 400;
-  }
-  .body-4 {
-    font-size: 0.875rem; /* 14px */
-    line-height: 1.25rem; /* 20px */
-    font-weight: 600;
-  }
-  .body-5 {
-    font-size: 0.875rem; /* 14px */
-    line-height: 1.25rem; /* 20px */
-    font-weight: 500;
-  }
-  .body-6 {
-    font-size: 0.875rem; /* 14px */
-    line-height: 1.25rem; /* 20px */
-    font-weight: 400;
-  }
-
-  .button-lg {
-    font-size: 1.125rem; /* 18px */
-    line-height: 1.75rem; /* 28px */
-    font-weight: 600;
-  }
-  .button-md {
-    font-size: 1rem; /* 16px */
-    line-height: 1.5rem; /* 24px */
-    font-weight: 600;
-  }
-  .button-sm {
-    font-size: 0.875rem; /* 14px */
-    line-height: 1.25rem; /* 20px */
-    font-weight: 600;
-  }
-  .button-xsm {
-    font-size: 0.75rem; /* 12px */
-    line-height: 1rem; /* 16px */
-    font-weight: 600;
-  }
-
-  .caption-1 {
-    font-size: 0.875rem; /* 14px */
-    line-height: 1.25rem; /* 20px */
-    font-weight: 500;
-  }
-  .caption-2 {
-    font-size: 0.875rem; /* 14px */
-    line-height: 1.25rem; /* 20px */
-    font-weight: 400;
-  }
-  .caption-3 {
-    font-size: 0.75rem; /* 12px */
-    line-height: 1rem; /* 16px */
-    font-weight: 600;
-  }
-  .caption-4 {
-    font-size: 0.75rem; /* 12px */
-    line-height: 1rem; /* 16px */
-    font-weight: 500;
-  }
-  .caption-5 {
-    font-size: 0.75rem; /* 12px */
-    line-height: 1rem; /* 16px */
-    font-weight: 400;
-  }
-}
-
-/* Glass & Card Surfaces with Flat Colors (B4) */
+/* Glass & Hospitality Card Utilities */
 .glass-panel {
-  background-color: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(216, 173, 86, 0.25);
 }
 
 .glass-dark {
-  background-color: rgba(32, 18, 11, 0.94);
+  background: rgba(32, 18, 11, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(216, 173, 86, 0.25);
@@ -222,15 +68,69 @@ textarea:focus-visible {
   border: 1px solid #D8AD56;
 }
 
-/* B7. Base Curve Transition Helper */
-.transition-luxury {
-  transition-property: transform, opacity;
-  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-  transition-duration: 500ms;
+.gold-gradient-text {
+  background: linear-gradient(135deg, #D8AD56 0%, #FAF7F2 60%, #C69940 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.transition-color-luxury {
-  transition-property: color, background-color, border-color;
-  transition-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-  transition-duration: 300ms;
+/* Subtle Shimmer Animation for Gold Elements */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-badge {
+  background: linear-gradient(
+    90deg,
+    rgba(216, 173, 86, 0.15) 0%,
+    rgba(216, 173, 86, 0.35) 50%,
+    rgba(216, 173, 86, 0.15) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 4s infinite linear;
+}
+
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 7s ease-in-out infinite;
+}
+
+/* Touch and Mobile Snap Ergonomics */
+.mobile-snap-carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.mobile-snap-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-snap-item {
+  scroll-snap-align: center;
+  flex-shrink: 0;
+}
+
+/* Hardware Acceleration */
+.gpu-layer {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
 }

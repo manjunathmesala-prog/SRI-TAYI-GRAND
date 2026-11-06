@@ -56,17 +56,18 @@ export function BookingWidget({
 
   return (
     <div
-      className={`bg-white rounded-2xl md:rounded-full shadow-2xl border border-[#D8AD56]/30 p-2 md:p-2.5 text-[#241912] transition-shadow duration-300 hover:shadow-luxuryHover ${className}`}
+      className={`bg-white/95 backdrop-blur-xl rounded-2xl md:rounded-full shadow-2xl border border-[#D8AD56]/25 p-2 md:p-2.5 text-[#241912] transition-shadow duration-300 hover:shadow-[0_20px_50px_rgba(56,34,22,0.18)] ${className}`}
     >
       <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-stretch md:items-center">
-        {/* Check in (No hyphens per B1 copy rules) */}
+        {/* Check-In */}
         <div
-          className="relative flex-1 flex items-center gap-3 px-4 py-2.5 hover:bg-[#FAF7F2] rounded-lg md:rounded-full transition-colors cursor-pointer group"
+          data-cursor-hover
+          className="relative flex-1 flex items-center gap-3.5 px-5 py-3 hover:bg-[#FAF7F2] rounded-xl md:rounded-full transition-colors cursor-pointer group"
         >
           <Calendar className="w-4 h-4 text-[#D8AD56] shrink-0" strokeWidth={1.75} />
           <div className="flex-1 min-w-0">
-            <span className="block caption-4 uppercase tracking-[0.2em] font-semibold text-[#786B61]">
-              Check in
+            <span className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8C7A6B]">
+              Check-In
             </span>
             <input
               type="date"
@@ -80,50 +81,52 @@ export function BookingWidget({
                   setCheckOut(formatDate(nextDay));
                 }
               }}
-              className="body-5 font-medium text-[#241912] bg-transparent focus:outline-none w-full cursor-pointer"
+              className="text-xs sm:text-sm font-medium text-[#241912] bg-transparent focus:outline-none w-full cursor-pointer"
               placeholder="Select date"
             />
           </div>
         </div>
 
-        {/* Divider */}
+        {/* Delicate Divider */}
         <div className="hidden md:block w-[1px] h-8 bg-[#EFE3D6]" />
 
-        {/* Check out (No hyphens per B1 copy rules) */}
+        {/* Check-Out */}
         <div
-          className="relative flex-1 flex items-center gap-3 px-4 py-2.5 hover:bg-[#FAF7F2] rounded-lg md:rounded-full transition-colors cursor-pointer group"
+          data-cursor-hover
+          className="relative flex-1 flex items-center gap-3.5 px-5 py-3 hover:bg-[#FAF7F2] rounded-xl md:rounded-full transition-colors cursor-pointer group"
         >
           <Calendar className="w-4 h-4 text-[#D8AD56] shrink-0" strokeWidth={1.75} />
           <div className="flex-1 min-w-0">
-            <span className="block caption-4 uppercase tracking-[0.2em] font-semibold text-[#786B61]">
-              Check out
+            <span className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8C7A6B]">
+              Check-Out
             </span>
             <input
               type="date"
               value={checkOut}
               min={checkIn || formatDate(today)}
               onChange={(e) => setCheckOut(e.target.value)}
-              className="body-5 font-medium text-[#241912] bg-transparent focus:outline-none w-full cursor-pointer"
+              className="text-xs sm:text-sm font-medium text-[#241912] bg-transparent focus:outline-none w-full cursor-pointer"
               placeholder="Select date"
             />
           </div>
         </div>
 
-        {/* Divider */}
+        {/* Delicate Divider */}
         <div className="hidden md:block w-[1px] h-8 bg-[#EFE3D6]" />
 
         {/* Guests Popover */}
         <div className="relative flex-1">
           <div
+            data-cursor-hover
             onClick={() => setGuestDropdownOpen(!guestDropdownOpen)}
-            className="flex items-center gap-3 px-4 py-2.5 hover:bg-[#FAF7F2] rounded-lg md:rounded-full transition-colors cursor-pointer group"
+            className="flex items-center gap-3.5 px-5 py-3 hover:bg-[#FAF7F2] rounded-xl md:rounded-full transition-colors cursor-pointer group"
           >
             <User className="w-4 h-4 text-[#D8AD56] shrink-0" strokeWidth={1.75} />
             <div className="flex-1 min-w-0">
-              <span className="block caption-4 uppercase tracking-[0.2em] font-semibold text-[#786B61]">
-                Guests and rooms
+              <span className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8C7A6B]">
+                Guests & Rooms
               </span>
-              <span className="block body-5 font-medium text-[#241912] truncate">
+              <span className="block text-xs sm:text-sm font-medium text-[#241912] truncate">
                 {totalGuests} {totalGuests === 1 ? 'Guest' : 'Guests'} • {rooms} {rooms === 1 ? 'Room' : 'Rooms'}
               </span>
             </div>
@@ -131,12 +134,12 @@ export function BookingWidget({
 
           {/* Guest Count Popover */}
           {guestDropdownOpen && (
-            <div className="absolute top-full mt-3 left-0 right-0 md:left-auto md:w-72 bg-white border border-[#D8AD56]/30 rounded-2xl shadow-2xl p-5 z-50 space-y-4 animate-in fade-in duration-150">
+            <div className="absolute top-full mt-3 left-0 right-0 md:left-auto md:w-72 bg-white border border-[#D8AD56]/30 rounded-2xl shadow-2xl p-5 z-50 space-y-4 animate-in fade-in zoom-in-95 duration-150">
               {/* Adults */}
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="body-5 font-medium text-[#241912]">Adults</div>
-                  <div className="caption-5 text-[#786B61]">Age 12 and above</div>
+                  <div className="text-xs font-medium text-[#241912]">Adults</div>
+                  <div className="text-[10px] text-[#786B61]">Age 12+</div>
                 </div>
                 <div className="flex items-center gap-3">
                   <button
@@ -147,7 +150,7 @@ export function BookingWidget({
                   >
                     <Minus className="w-3 h-3" />
                   </button>
-                  <span className="body-4 font-semibold w-5 text-center">{adults}</span>
+                  <span className="text-xs font-semibold w-5 text-center">{adults}</span>
                   <button
                     type="button"
                     onClick={() => setAdults(Math.min(8, adults + 1))}
@@ -161,8 +164,8 @@ export function BookingWidget({
               {/* Children */}
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="body-5 font-medium text-[#241912]">Children</div>
-                  <div className="caption-5 text-[#786B61]">Age 0 to 11</div>
+                  <div className="text-xs font-medium text-[#241912]">Children</div>
+                  <div className="text-[10px] text-[#786B61]">Age 0–11</div>
                 </div>
                 <div className="flex items-center gap-3">
                   <button
@@ -173,7 +176,7 @@ export function BookingWidget({
                   >
                     <Minus className="w-3 h-3" />
                   </button>
-                  <span className="body-4 font-semibold w-5 text-center">{children}</span>
+                  <span className="text-xs font-semibold w-5 text-center">{children}</span>
                   <button
                     type="button"
                     onClick={() => setChildren(Math.min(4, children + 1))}
@@ -187,8 +190,8 @@ export function BookingWidget({
               {/* Rooms */}
               <div className="flex items-center justify-between pt-3 border-t border-[#EFE3D6]/70">
                 <div>
-                  <div className="body-5 font-medium text-[#241912]">Rooms</div>
-                  <div className="caption-5 text-[#786B61]">Rooms needed</div>
+                  <div className="text-xs font-medium text-[#241912]">Rooms</div>
+                  <div className="text-[10px] text-[#786B61]">Rooms needed</div>
                 </div>
                 <div className="flex items-center gap-3">
                   <button
@@ -199,7 +202,7 @@ export function BookingWidget({
                   >
                     <Minus className="w-3 h-3" />
                   </button>
-                  <span className="body-4 font-semibold w-5 text-center">{rooms}</span>
+                  <span className="text-xs font-semibold w-5 text-center">{rooms}</span>
                   <button
                     type="button"
                     onClick={() => setRooms(Math.min(5, rooms + 1))}
@@ -213,22 +216,23 @@ export function BookingWidget({
               <button
                 type="button"
                 onClick={() => setGuestDropdownOpen(false)}
-                className="w-full mt-2 py-2 button-xsm rounded-lg bg-[#D8AD56] text-[#241912] hover:bg-[#C69940] transition-colors focus-visible:ring-2 focus-visible:ring-[#D8AD56]"
+                className="w-full mt-2 py-2 text-xs font-medium uppercase tracking-wider rounded-xl bg-[#D8AD56] text-[#20120B] hover:bg-[#C69940] transition-colors"
               >
-                Apply selection
+                Done
               </button>
             </div>
           )}
         </div>
 
-        {/* Primary Action Button (Sentence case, B1 button-sm token, B2 8px vertical padding) */}
+        {/* Action Button */}
         <div className="mt-2 md:mt-0 md:ml-2">
           <button
             type="submit"
-            className="w-full md:w-auto py-2.5 px-6 rounded-lg md:rounded-full bg-[#D8AD56] hover:bg-[#C69940] text-[#241912] button-sm flex items-center justify-center gap-2 transition-all duration-300 shadow-md hover:shadow-goldGlow hover:-translate-y-0.5 active:scale-[0.98] whitespace-nowrap focus-visible:ring-2 focus-visible:ring-[#D8AD56]"
+            data-cursor-hover
+            className="w-full md:w-auto py-3.5 px-7 rounded-xl md:rounded-full bg-[#D8AD56] hover:bg-[#C69940] text-[#20120B] text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 shadow-md hover:shadow-goldGlow hover:-translate-y-0.5 active:translate-y-0 whitespace-nowrap"
           >
-            <span>Check availability</span>
-            <ArrowRight className="w-4 h-4" />
+            <span>Check Availability</span>
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       </form>

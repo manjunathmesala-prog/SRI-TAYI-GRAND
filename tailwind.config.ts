@@ -12,8 +12,6 @@ const config: Config = {
         hotel: {
           espresso: "#382216",
           chocolate: "#25150F",
-          darkBg: "#20120B",
-          darkBase: "#131209",
           gold: "#D8AD56",
           goldHover: "#C69940",
           goldBorder: "#E5CF9F",
@@ -29,11 +27,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        sans: ["var(--font-manrope)", "Manrope", "system-ui", "-apple-system", "sans-serif"],
-        heading: ["var(--font-manrope)", "Manrope", "system-ui", "-apple-system", "sans-serif"],
-      },
-      transitionTimingFunction: {
-        luxury: "cubic-bezier(0.22, 1, 0.36, 1)",
+        serif: ["var(--font-playfair)", "Playfair Display", "Georgia", "serif"],
+        sans: ["var(--font-inter)", "Inter", "system-ui", "-apple-system", "sans-serif"],
       },
       boxShadow: {
         luxury: "0 10px 30px -5px rgba(56, 34, 22, 0.08), 0 4px 6px -2px rgba(56, 34, 22, 0.04)",
