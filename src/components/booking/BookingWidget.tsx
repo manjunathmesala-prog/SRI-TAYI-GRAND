@@ -56,11 +56,14 @@ export function BookingWidget({
 
   return (
     <div
-      className={`bg-white/95 backdrop-blur-xl rounded-2xl md:rounded-full shadow-2xl border border-[#D8AD56]/25 p-2 md:p-2.5 text-[#241912] ${className}`}
+      className={`bg-white/95 backdrop-blur-xl rounded-2xl md:rounded-full shadow-2xl border border-[#D8AD56]/25 p-2 md:p-2.5 text-[#241912] transition-shadow duration-300 hover:shadow-[0_20px_50px_rgba(56,34,22,0.18)] ${className}`}
     >
       <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-stretch md:items-center">
         {/* Check-In */}
-        <div className="relative flex-1 flex items-center gap-3.5 px-5 py-3 hover:bg-[#FAF7F2] rounded-xl md:rounded-full transition-colors cursor-pointer group">
+        <div
+          data-cursor-hover
+          className="relative flex-1 flex items-center gap-3.5 px-5 py-3 hover:bg-[#FAF7F2] rounded-xl md:rounded-full transition-colors cursor-pointer group"
+        >
           <Calendar className="w-4 h-4 text-[#D8AD56] shrink-0" strokeWidth={1.75} />
           <div className="flex-1 min-w-0">
             <span className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8C7A6B]">
@@ -88,7 +91,10 @@ export function BookingWidget({
         <div className="hidden md:block w-[1px] h-8 bg-[#EFE3D6]" />
 
         {/* Check-Out */}
-        <div className="relative flex-1 flex items-center gap-3.5 px-5 py-3 hover:bg-[#FAF7F2] rounded-xl md:rounded-full transition-colors cursor-pointer group">
+        <div
+          data-cursor-hover
+          className="relative flex-1 flex items-center gap-3.5 px-5 py-3 hover:bg-[#FAF7F2] rounded-xl md:rounded-full transition-colors cursor-pointer group"
+        >
           <Calendar className="w-4 h-4 text-[#D8AD56] shrink-0" strokeWidth={1.75} />
           <div className="flex-1 min-w-0">
             <span className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8C7A6B]">
@@ -111,6 +117,7 @@ export function BookingWidget({
         {/* Guests Popover */}
         <div className="relative flex-1">
           <div
+            data-cursor-hover
             onClick={() => setGuestDropdownOpen(!guestDropdownOpen)}
             className="flex items-center gap-3.5 px-5 py-3 hover:bg-[#FAF7F2] rounded-xl md:rounded-full transition-colors cursor-pointer group"
           >
@@ -221,7 +228,8 @@ export function BookingWidget({
         <div className="mt-2 md:mt-0 md:ml-2">
           <button
             type="submit"
-            className="w-full md:w-auto py-3.5 px-7 rounded-xl md:rounded-full bg-[#D8AD56] hover:bg-[#C69940] text-[#20120B] text-xs font-medium uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 shadow-md hover:shadow-goldGlow hover:-translate-y-0.5 active:translate-y-0 whitespace-nowrap"
+            data-cursor-hover
+            className="w-full md:w-auto py-3.5 px-7 rounded-xl md:rounded-full bg-[#D8AD56] hover:bg-[#C69940] text-[#20120B] text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 shadow-md hover:shadow-goldGlow hover:-translate-y-0.5 active:translate-y-0 whitespace-nowrap"
           >
             <span>Check Availability</span>
             <ArrowRight className="w-3.5 h-3.5" />

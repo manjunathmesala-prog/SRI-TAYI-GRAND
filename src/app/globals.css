@@ -9,19 +9,27 @@
   --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5.5rem;
+  overflow-x: hidden;
+}
+
 body {
   font-family: var(--font-inter);
   color: #241912;
   background-color: #F8F1E9;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  text-rendering: optimizeLegibility;
 }
 
 h1, h2, h3, h4, .font-serif {
   font-family: var(--font-playfair);
 }
 
-/* Custom Scrollbar */
+/* Custom Luxury Gold Scrollbar */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -40,10 +48,37 @@ h1, h2, h3, h4, .font-serif {
   background: #C69940;
 }
 
+/* Custom Pointer Hide only when Custom Luxury Cursor is Active on Fine Pointers */
+@media (pointer: fine) {
+  body.has-custom-cursor,
+  body.has-custom-cursor a,
+  body.has-custom-cursor button,
+  body.has-custom-cursor [role="button"],
+  body.has-custom-cursor [data-cursor-hover] {
+    cursor: none !important;
+  }
+
+  body.has-custom-cursor input[type="text"],
+  body.has-custom-cursor input[type="date"],
+  body.has-custom-cursor input[type="tel"],
+  body.has-custom-cursor input[type="email"],
+  body.has-custom-cursor textarea {
+    cursor: text !important;
+  }
+}
+
 /* Glass & Hospitality Card Utilities */
 .glass-panel {
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(216, 173, 86, 0.25);
+}
+
+.glass-dark {
+  background: rgba(32, 18, 11, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(216, 173, 86, 0.25);
 }
 
@@ -52,7 +87,68 @@ h1, h2, h3, h4, .font-serif {
 }
 
 .gold-gradient-text {
-  background: linear-gradient(135deg, #D8AD56 0%, #EFE3D6 100%);
+  background: linear-gradient(135deg, #D8AD56 0%, #FAF7F2 60%, #C69940 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* Subtle Shimmer Animation for Gold Elements */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.shimmer-badge {
+  background: linear-gradient(
+    90deg,
+    rgba(216, 173, 86, 0.15) 0%,
+    rgba(216, 173, 86, 0.35) 50%,
+    rgba(216, 173, 86, 0.15) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 4s infinite linear;
+}
+
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.85;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 7s ease-in-out infinite;
+}
+
+/* Touch and Mobile Snap Ergonomics */
+.mobile-snap-carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+
+.mobile-snap-carousel::-webkit-scrollbar {
+  display: none;
+}
+
+.mobile-snap-item {
+  scroll-snap-align: center;
+  flex-shrink: 0;
+}
+
+/* Hardware Acceleration */
+.gpu-layer {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
 }
