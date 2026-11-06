@@ -23,7 +23,7 @@ export default function MobileStickyBookingBar() {
   if (!isVisible) return null;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#21180F]/95 backdrop-blur-xl border-t border-[#8D672F]/40 shadow-[0_-8px_25px_rgba(0,0,0,0.5)] px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] transition-all animate-fadeIn">
+    <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#21180F]/95 backdrop-blur-xl border-t border-[#43001F]/60 shadow-[0_-8px_25px_rgba(0,0,0,0.5)] px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] transition-all animate-fadeIn">
       <div className="flex items-center justify-between gap-3 max-w-md mx-auto">
         <div className="flex flex-col min-w-0">
           <div className="flex items-center gap-1.5">
@@ -39,7 +39,7 @@ export default function MobileStickyBookingBar() {
 
         <Link
           href="/rooms"
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] text-white text-xs font-serif font-bold tracking-wider transition-all shadow-lg active:scale-95 shrink-0 border border-[#D8AD56]/40"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-serif font-bold tracking-wider transition-all shadow-lg active:scale-95 shrink-0 border border-[#D8AD56]/40"
         >
           <Calendar className="w-3.5 h-3.5 text-[#D8AD56]" />
           <span>Book Stay</span>

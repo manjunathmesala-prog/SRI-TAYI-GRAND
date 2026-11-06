@@ -78,11 +78,11 @@ export function Header({ transparentInitially = false }: HeaderProps) {
 
   const brandTitleColor = isTransparent
     ? 'text-white group-hover:text-[#D8AD56]'
-    : 'text-[#33271D] group-hover:text-[#8D672F]';
+    : 'text-[#33271D] group-hover:text-[#43001F]';
 
   const brandSubtitleColor = isTransparent
     ? 'text-[#D8AD56]/90'
-    : 'text-[#8D672F]';
+    : 'text-[#43001F]';
 
   return (
     <header className={headerContainerClass}>
@@ -104,7 +104,7 @@ export function Header({ transparentInitially = false }: HeaderProps) {
                 {isActive && (
                   <span
                     className={`absolute bottom-0 left-0 right-0 h-[2px] rounded-full ${
-                      isTransparent ? 'bg-[#D8AD56]' : 'bg-[#B18A4A]'
+                      isTransparent ? 'bg-[#D8AD56]' : 'bg-[#43001F]'
                     }`}
                   />
                 )}
@@ -120,13 +120,13 @@ export function Header({ transparentInitially = false }: HeaderProps) {
             className="flex flex-col items-center justify-center group focus:outline-none"
           >
             <div className="flex items-center gap-2.5 sm:gap-3">
-              <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#D8AD56]/80 overflow-hidden flex items-center justify-center bg-black/40 shadow-sm transition-transform duration-300 group-hover:scale-105 shrink-0">
+              <div className="relative w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#D8AD56]/80 overflow-hidden flex items-center justify-center bg-[#43001F] shadow-sm transition-transform duration-300 group-hover:scale-105 shrink-0">
                 <Image
-                  src="/images/hotel/tayi-grand-logo.jpg"
+                  src="/images/hotel/tayi-grand-logo.png"
                   alt="Sri Tayi Grand Hotel Official Emblem"
                   fill
                   sizes="44px"
-                  className="object-cover"
+                  className="object-contain p-0.5"
                   priority
                 />
               </div>
@@ -159,7 +159,7 @@ export function Header({ transparentInitially = false }: HeaderProps) {
                   {isActive && (
                     <span
                       className={`absolute bottom-0 left-0 right-0 h-[2px] rounded-full ${
-                        isTransparent ? 'bg-[#D8AD56]' : 'bg-[#B18A4A]'
+                        isTransparent ? 'bg-[#D8AD56]' : 'bg-[#43001F]'
                       }`}
                     />
                   )}
@@ -173,7 +173,7 @@ export function Header({ transparentInitially = false }: HeaderProps) {
             className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-[12.5px] uppercase tracking-[0.14em] font-medium shadow-md transition-all duration-300 group hover:scale-105 active:scale-[0.98] ${
               isTransparent
                 ? 'bg-[#D8AD56] hover:bg-[#C69940] text-[#20120B]'
-                : 'bg-[#8D672F] hover:bg-[#6D4E21] text-white'
+                : 'bg-[#43001F] hover:bg-[#2E0015] text-white'
             }`}
           >
             <span>Book Your Stay</span>
@@ -188,7 +188,7 @@ export function Header({ transparentInitially = false }: HeaderProps) {
             className={`px-4 py-2 rounded-full text-[11px] uppercase tracking-wider font-medium shadow-sm transition-all active:scale-95 ${
               isTransparent
                 ? 'bg-[#D8AD56] hover:bg-[#C69940] text-[#20120B]'
-                : 'bg-[#8D672F] hover:bg-[#6D4E21] text-white'
+                : 'bg-[#43001F] hover:bg-[#2E0015] text-white'
             }`}
           >
             Book
@@ -232,7 +232,7 @@ export function Header({ transparentInitially = false }: HeaderProps) {
                   className={`text-[14px] tracking-wider min-h-[46px] py-3 border-b flex items-center justify-between transition-colors ${
                     isTransparent
                       ? `border-white/10 ${pathname === link.href ? 'text-[#D8AD56] font-bold pl-1' : 'text-white/80 hover:text-[#D8AD56]'}`
-                      : `border-[#E6D9C5]/50 ${pathname === link.href ? 'text-[#8D672F] font-bold pl-1' : 'text-[#33271D] hover:text-[#8D672F]'}`
+                      : `border-[#E6D9C5]/50 ${pathname === link.href ? 'text-[#43001F] font-bold pl-1' : 'text-[#33271D] hover:text-[#43001F]'}`
                   }`}
                 >
                   <span>{link.label}</span>
@@ -251,7 +251,7 @@ export function Header({ transparentInitially = false }: HeaderProps) {
                     : 'bg-[#F0E6D8] border border-[#E6D9C5] text-[#33271D] active:bg-[#E6D9C5]'
                 }`}
               >
-                <Phone className={`w-3.5 h-3.5 ${isTransparent ? 'text-[#D8AD56]' : 'text-[#8D672F]'}`} />
+                <Phone className={`w-3.5 h-3.5 ${isTransparent ? 'text-[#D8AD56]' : 'text-[#43001F]'}`} />
                 <span>Call Hotel</span>
               </a>
               <a
@@ -264,7 +264,7 @@ export function Header({ transparentInitially = false }: HeaderProps) {
                     : 'bg-[#F0E6D8] border border-[#E6D9C5] text-[#33271D] active:bg-[#E6D9C5]'
                 }`}
               >
-                <MapPin className={`w-3.5 h-3.5 ${isTransparent ? 'text-[#D8AD56]' : 'text-[#8D672F]'}`} />
+                <MapPin className={`w-3.5 h-3.5 ${isTransparent ? 'text-[#D8AD56]' : 'text-[#43001F]'}`} />
                 <span>Directions</span>
               </a>
             </div>

@@ -98,14 +98,14 @@ export default function RoomsPage() {
                     priority={index === 0}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="absolute top-4 left-4 bg-[#F8F3E9]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-semibold text-[#8D672F] tracking-wider uppercase border border-[#E6D9C5] shadow-xs">
+                  <div className="absolute top-4 left-4 bg-[#F8F3E9]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-semibold text-[#43001F] tracking-wider uppercase border border-[#E6D9C5] shadow-xs">
                     ₹ {room.base_price_per_night.toLocaleString('en-IN')} / night
                   </div>
                 </div>
 
                 {/* Content Block */}
                 <div className="w-full lg:w-1/2 flex flex-col justify-center space-y-4 px-2 sm:px-4">
-                  <span className="text-[11px] tracking-[0.2em] font-semibold uppercase text-[#8D672F] flex items-center gap-1.5">
+                  <span className="text-[11px] tracking-[0.2em] font-semibold uppercase text-[#43001F] flex items-center gap-1.5">
                     <TayiBrandIcon size={14} />
                     <span>LUXURY STAY • KADIRI</span>
                   </span>
@@ -125,13 +125,13 @@ export default function RoomsPage() {
                         key={idx}
                         className="flex items-center gap-2.5 p-2.5 rounded-xl bg-[#F8F3E9]/70 border border-[#E6D9C5]/70 text-xs font-medium text-[#33271D] truncate"
                       >
-                        <ShieldCheck className="w-4 h-4 text-[#8D672F] shrink-0" />
+                        <ShieldCheck className="w-4 h-4 text-[#43001F] shrink-0" />
                         <span className="truncate">{feat}</span>
                       </div>
                     ))}
                   </div>
 
-                  <div className="text-xs text-[#8D672F] font-semibold pt-1">
+                  <div className="text-xs text-[#43001F] font-semibold pt-1">
                     Extra Person: ₹300 <span className="text-[#786A5B] font-light">(Max {room.max_occupancy} guests)</span>
                   </div>
 
@@ -139,7 +139,7 @@ export default function RoomsPage() {
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-3">
                     <NextLink
                       href={`/rooms/${room.slug}`}
-                      className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-7 py-3 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] active:scale-[0.98] text-white text-xs uppercase tracking-[0.14em] font-semibold shadow-md hover:shadow-lg transition-all duration-200 group/btn"
+                      className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-7 py-3 rounded-full bg-[#43001F] hover:bg-[#2E0015] active:scale-[0.98] text-white text-xs uppercase tracking-[0.14em] font-semibold shadow-md hover:shadow-lg transition-all duration-200 group/btn"
                     >
                       <span>Book Now</span>
                       <span className="text-amber-200/80 font-normal">·</span>
@@ -151,7 +151,7 @@ export default function RoomsPage() {
 
                     <NextLink
                       href={`/rooms/${room.slug}`}
-                      className="inline-flex items-center justify-center gap-1.5 px-6 py-3 rounded-full border border-[#8D672F]/30 hover:border-[#8D672F] bg-[#FAF6EE]/80 hover:bg-[#F3EAD9] active:scale-[0.98] text-[#8D672F] hover:text-[#6D4E21] text-xs uppercase tracking-[0.14em] font-semibold transition-all duration-200 group/det"
+                      className="inline-flex items-center justify-center gap-1.5 px-6 py-3 rounded-full border border-[#43001F]/30 hover:border-[#43001F] bg-[#FAF6EE]/80 hover:bg-[#F3EAD9] active:scale-[0.98] text-[#43001F] hover:text-[#2E0015] text-xs uppercase tracking-[0.14em] font-semibold transition-all duration-200 group/det"
                     >
                       <span>View Details</span>
                       <ArrowRight className="w-3.5 h-3.5 group-hover/det:translate-x-0.5 transition-transform" />
@@ -168,7 +168,7 @@ export default function RoomsPage() {
       <section className="w-full py-16 bg-[#F2E8D8]/60 border-y border-[#E6D9C5]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-10">
-            <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#8D672F] block mb-1">
+            <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#43001F] block mb-1">
               COMFORTS
             </span>
             <h2 className="text-2xl sm:text-3xl font-serif text-[#33271D]">
@@ -191,7 +191,7 @@ export default function RoomsPage() {
                   key={idx}
                   className="bg-white p-5 rounded-2xl border border-[#E6D9C5] shadow-xs flex flex-col items-center justify-center space-y-2.5 luxury-card-hover"
                 >
-                  <div className="w-12 h-12 rounded-xl bg-[#F8F3E9] text-[#8D672F] flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-xl bg-[#F8F3E9] text-[#43001F] flex items-center justify-center">
                     <Icon className="w-6 h-6 stroke-[1.75]" />
                   </div>
                   <span className="text-xs font-semibold text-[#33271D]">{item.label}</span>

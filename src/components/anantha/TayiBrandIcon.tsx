@@ -11,7 +11,7 @@ export interface TayiBrandIconProps {
 
 /**
  * Sri Tayi Grand Official Emblem Icon
- * Renders the authentic circular laurel wreath and 3D gold monogram
+ * Renders the authentic laurel wreath and gold monogram PNG on royal burgundy (#43001F)
  */
 export default function TayiBrandIcon({
   className = 'w-5 h-5 inline-block',
@@ -21,16 +21,16 @@ export default function TayiBrandIcon({
 }: TayiBrandIconProps) {
   return (
     <span
-      className={`relative inline-flex items-center justify-center shrink-0 rounded-full overflow-hidden border border-[#D8AD56]/80 bg-black/40 shadow-xs align-middle ${className}`}
+      className={`relative inline-flex items-center justify-center shrink-0 rounded-full overflow-hidden border border-[#D8AD56]/80 bg-[#43001F] shadow-xs align-middle ${className}`}
       style={{ width: size, height: size, ...style }}
       aria-hidden="true"
     >
       <Image
-        src="/images/hotel/tayi-grand-logo.jpg"
+        src="/images/hotel/tayi-grand-logo.png"
         alt={alt}
         width={size}
         height={size}
-        className="w-full h-full object-cover"
+        className="w-full h-full object-contain p-[1px]"
         priority
       />
     </span>

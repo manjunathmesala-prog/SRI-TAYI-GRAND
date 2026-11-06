@@ -132,7 +132,7 @@ export default function ConventionHallPage() {
             {/* Venue Inclusions (7 cols) */}
             <div className="lg:col-span-7 space-y-8 reveal-on-scroll">
               <div>
-                <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#8D672F] block mb-2">
+                <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#43001F] block mb-2">
                   THE VENUE
                 </span>
                 <h2 className="font-serif text-3xl sm:text-4xl font-normal text-[#33271D]">
@@ -156,7 +156,7 @@ export default function ConventionHallPage() {
                   'Ample secure vehicle parking with surveillance',
                 ].map((item, idx) => (
                   <div key={idx} className="flex items-start gap-2.5 p-3.5 rounded-xl bg-white border border-[#E6D9C5] shadow-xs">
-                    <Check className="w-4 h-4 text-[#8D672F] shrink-0 mt-0.5" />
+                    <Check className="w-4 h-4 text-[#43001F] shrink-0 mt-0.5" />
                     <span className="font-medium">{item}</span>
                   </div>
                 ))}
@@ -172,7 +172,7 @@ export default function ConventionHallPage() {
                 </div>
                 <a
                   href="tel:08494223379"
-                  className="px-5 py-2.5 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] text-white text-xs font-semibold uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all"
+                  className="px-5 py-2.5 rounded-full bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-semibold uppercase tracking-wider flex items-center gap-2 shadow-sm transition-all"
                 >
                   <Phone className="w-3.5 h-3.5" />
                   <span>084942 23379</span>
@@ -184,7 +184,7 @@ export default function ConventionHallPage() {
             <div className="lg:col-span-5 reveal-scale">
               <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E6D9C5] shadow-luxury">
                 <div className="border-b border-[#E6D9C5]/80 pb-4 mb-6">
-                  <span className="text-[10px] uppercase tracking-[0.25em] font-semibold text-[#8D672F] block">
+                  <span className="text-[10px] uppercase tracking-[0.25em] font-semibold text-[#43001F] block">
                     RESERVATIONS
                   </span>
                   <h3 className="font-serif text-2xl font-bold text-[#33271D]">
@@ -204,7 +204,7 @@ export default function ConventionHallPage() {
                     <p className="text-xs text-[#786A5B]">
                       Thank you, <strong className="text-[#33271D]">{name}</strong>. Your enquiry reference is:
                     </p>
-                    <div className="text-sm font-mono font-bold text-[#8D672F] bg-white px-3 py-1.5 rounded-lg border border-[#E6D9C5] inline-block">
+                    <div className="text-sm font-mono font-bold text-[#43001F] bg-white px-3 py-1.5 rounded-lg border border-[#E6D9C5] inline-block">
                       {submittedRef}
                     </div>
                     <p className="text-[11px] text-[#786A5B]/80 pt-2">
@@ -229,7 +229,7 @@ export default function ConventionHallPage() {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="e.g. Ramesh Kumar"
-                        className="w-full px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:border-[#8D672F] focus:outline-none"
+                        className="w-full px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:border-[#43001F] focus:outline-none"
                       />
                     </div>
 
@@ -244,7 +244,7 @@ export default function ConventionHallPage() {
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
                           placeholder="10-digit Mobile"
-                          className="w-full px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:border-[#8D672F] focus:outline-none"
+                          className="w-full px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:border-[#43001F] focus:outline-none"
                         />
                       </div>
                       <div>
@@ -256,7 +256,7 @@ export default function ConventionHallPage() {
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           placeholder="name@email.com"
-                          className="w-full px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:border-[#8D672F] focus:outline-none"
+                          className="w-full px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:border-[#43001F] focus:outline-none"
                         />
                       </div>
                     </div>
@@ -269,7 +269,7 @@ export default function ConventionHallPage() {
                         <select
                           value={eventType}
                           onChange={(e) => setEventType(e.target.value)}
-                          className="w-full px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:border-[#8D672F] focus:outline-none"
+                          className="w-full px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:border-[#43001F] focus:outline-none"
                         >
                           <option value="Wedding Reception">Wedding Reception</option>
                           <option value="Engagement Ceremony">Engagement Ceremony</option>
@@ -287,7 +287,7 @@ export default function ConventionHallPage() {
                           value={expectedGuests}
                           onChange={(e) => setExpectedGuests(e.target.value)}
                           placeholder="e.g. 400"
-                          className="w-full px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:border-[#8D672F] focus:outline-none"
+                          className="w-full px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:border-[#43001F] focus:outline-none"
                         />
                       </div>
                     </div>
@@ -301,7 +301,7 @@ export default function ConventionHallPage() {
                         required
                         value={eventDate}
                         onChange={(e) => setEventDate(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:border-[#8D672F] focus:outline-none"
+                        className="w-full px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:border-[#43001F] focus:outline-none"
                       />
                     </div>
 
@@ -314,14 +314,14 @@ export default function ConventionHallPage() {
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         placeholder="Stage decoration, dining requirements, catering preferences..."
-                        className="w-full px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:border-[#8D672F] focus:outline-none"
+                        className="w-full px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:border-[#43001F] focus:outline-none"
                       />
                     </div>
 
                     <button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full py-3.5 px-6 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] active:scale-[0.98] text-white text-xs uppercase tracking-[0.16em] font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 group disabled:opacity-50"
+                      className="w-full py-3.5 px-6 rounded-full bg-[#43001F] hover:bg-[#2E0015] active:scale-[0.98] text-white text-xs uppercase tracking-[0.16em] font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 group disabled:opacity-50"
                     >
                       <span>{isSubmitting ? 'Submitting...' : 'Submit Proposal Request'}</span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

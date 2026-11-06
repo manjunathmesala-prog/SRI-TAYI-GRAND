@@ -169,7 +169,7 @@ function CheckoutContent() {
             contact: guestPhone,
           },
           theme: {
-            color: '#8D672F',
+            color: '#43001F',
           },
           handler: async function (response: any) {
             const verifyRes = await fetch('/api/bookings/verify', {
@@ -227,7 +227,7 @@ function CheckoutContent() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Page Title */}
       <div className="mb-10 animate-fade-in">
-        <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#8D672F] block mb-2">
+        <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#43001F] block mb-2">
           RESERVATION &amp; STAY DETAILS
         </span>
         <h1 className="font-serif text-3xl sm:text-4xl font-normal text-[#33271D]">
@@ -248,7 +248,7 @@ function CheckoutContent() {
           {/* Guest Information */}
           <div className="bg-white rounded-3xl border border-[#E6D9C5] p-7 sm:p-8 shadow-luxury">
             <h2 className="font-serif text-xl font-bold text-[#33271D] mb-5 flex items-center gap-2.5">
-              <User className="w-4 h-4 text-[#8D672F]" />
+              <User className="w-4 h-4 text-[#43001F]" />
               <span>Primary Guest Details</span>
             </h2>
 
@@ -263,7 +263,7 @@ function CheckoutContent() {
                   value={guestName}
                   onChange={(e) => setGuestName(e.target.value)}
                   placeholder="As per Government ID"
-                  className="w-full text-xs font-medium p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#8D672F]"
+                  className="w-full text-xs font-medium p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#43001F]"
                 />
               </div>
 
@@ -277,7 +277,7 @@ function CheckoutContent() {
                   value={guestPhone}
                   onChange={(e) => setGuestPhone(e.target.value)}
                   placeholder="For confirmation SMS & WhatsApp"
-                  className="w-full text-xs font-medium p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#8D672F]"
+                  className="w-full text-xs font-medium p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#43001F]"
                 />
               </div>
 
@@ -291,7 +291,7 @@ function CheckoutContent() {
                   value={guestEmail}
                   onChange={(e) => setGuestEmail(e.target.value)}
                   placeholder="For receipt & digital key access"
-                  className="w-full text-xs font-medium p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#8D672F]"
+                  className="w-full text-xs font-medium p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#43001F]"
                 />
               </div>
 
@@ -304,7 +304,7 @@ function CheckoutContent() {
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
                   placeholder="e.g. Bengaluru / Hyderabad / Kadiri"
-                  className="w-full text-xs font-medium p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#8D672F]"
+                  className="w-full text-xs font-medium p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#43001F]"
                 />
               </div>
 
@@ -316,7 +316,7 @@ function CheckoutContent() {
                   type="text"
                   value={state}
                   onChange={(e) => setState(e.target.value)}
-                  className="w-full text-xs font-medium p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#8D672F]"
+                  className="w-full text-xs font-medium p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#43001F]"
                 />
               </div>
             </div>
@@ -325,7 +325,7 @@ function CheckoutContent() {
           {/* Preferences */}
           <div className="bg-white rounded-3xl border border-[#E6D9C5] p-7 sm:p-8 shadow-luxury">
             <h2 className="font-serif text-xl font-bold text-[#33271D] mb-4 flex items-center gap-2.5">
-              <Building className="w-4 h-4 text-[#8D672F]" />
+              <Building className="w-4 h-4 text-[#43001F]" />
               <span>Stay Preferences (Optional)</span>
             </h2>
 
@@ -335,7 +335,7 @@ function CheckoutContent() {
                   type="checkbox"
                   checked={earlyCheckIn}
                   onChange={(e) => setEarlyCheckIn(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#8D672F] focus:ring-[#8D672F]"
+                  className="w-4 h-4 rounded text-[#43001F] focus:ring-[#43001F]"
                 />
                 <span className="font-light">Early Check-in request (Before 12:00 PM)</span>
               </label>
@@ -345,7 +345,7 @@ function CheckoutContent() {
                   type="checkbox"
                   checked={lateCheckOut}
                   onChange={(e) => setLateCheckOut(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#8D672F] focus:ring-[#8D672F]"
+                  className="w-4 h-4 rounded text-[#43001F] focus:ring-[#43001F]"
                 />
                 <span className="font-light">Late Check-out request (After 11:00 AM)</span>
               </label>
@@ -360,7 +360,7 @@ function CheckoutContent() {
                 value={specialRequests}
                 onChange={(e) => setSpecialRequests(e.target.value)}
                 placeholder="Quiet floor, travel details, or extra bedding..."
-                className="w-full text-xs font-medium p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#8D672F]"
+                className="w-full text-xs font-medium p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#43001F]"
               />
             </div>
           </div>
@@ -368,7 +368,7 @@ function CheckoutContent() {
           {/* Payment Method */}
           <div className="bg-white rounded-3xl border border-[#E6D9C5] p-7 sm:p-8 shadow-luxury">
             <h2 className="font-serif text-xl font-bold text-[#33271D] mb-4 flex items-center gap-2.5">
-              <CreditCard className="w-4 h-4 text-[#8D672F]" />
+              <CreditCard className="w-4 h-4 text-[#43001F]" />
               <span>Payment Option</span>
             </h2>
 
@@ -376,8 +376,8 @@ function CheckoutContent() {
               <label
                 className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${
                   paymentMethod === 'pay_at_hotel'
-                    ? 'border-[#8D672F] bg-[#FAF6EE] shadow-sm ring-1 ring-[#8D672F]/30'
-                    : 'border-[#E6D9C5] hover:border-[#8D672F]/50 bg-white'
+                    ? 'border-[#43001F] bg-[#FAF6EE] shadow-sm ring-1 ring-[#43001F]/30'
+                    : 'border-[#E6D9C5] hover:border-[#43001F]/50 bg-white'
                 }`}
               >
                 <input
@@ -386,7 +386,7 @@ function CheckoutContent() {
                   value="pay_at_hotel"
                   checked={paymentMethod === 'pay_at_hotel'}
                   onChange={() => setPaymentMethod('pay_at_hotel')}
-                  className="mt-1 text-[#8D672F] focus:ring-[#8D672F]"
+                  className="mt-1 text-[#43001F] focus:ring-[#43001F]"
                 />
                 <div>
                   <div className="font-bold text-xs text-[#33271D]">Pay upon Arrival</div>
@@ -399,8 +399,8 @@ function CheckoutContent() {
               <label
                 className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${
                   paymentMethod === 'online'
-                    ? 'border-[#8D672F] bg-[#FAF6EE] shadow-sm ring-1 ring-[#8D672F]/30'
-                    : 'border-[#E6D9C5] hover:border-[#8D672F]/50 bg-white'
+                    ? 'border-[#43001F] bg-[#FAF6EE] shadow-sm ring-1 ring-[#43001F]/30'
+                    : 'border-[#E6D9C5] hover:border-[#43001F]/50 bg-white'
                 }`}
               >
                 <input
@@ -409,7 +409,7 @@ function CheckoutContent() {
                   value="online"
                   checked={paymentMethod === 'online'}
                   onChange={() => setPaymentMethod('online')}
-                  className="mt-1 text-[#8D672F] focus:ring-[#8D672F]"
+                  className="mt-1 text-[#43001F] focus:ring-[#43001F]"
                 />
                 <div>
                   <div className="font-bold text-xs text-[#33271D]">Pay Online Now</div>
@@ -470,20 +470,20 @@ function CheckoutContent() {
                 )}
                 <div className="pt-3 border-t border-[#E6D9C5]/80 flex justify-between text-base font-bold text-[#33271D]">
                   <span>Total Payable</span>
-                  <span className="font-serif text-xl text-[#8D672F]">₹{pricing.total.toLocaleString('en-IN')}</span>
+                  <span className="font-serif text-xl text-[#43001F]">₹{pricing.total.toLocaleString('en-IN')}</span>
                 </div>
               </div>
             )}
 
             <div className="flex items-center gap-2 text-xs text-[#786A5B] font-light">
-              <Lock className="w-3.5 h-3.5 text-[#8D672F]" />
+              <Lock className="w-3.5 h-3.5 text-[#43001F]" />
               <span>Instant confirmation &amp; 256-bit encrypted checkout</span>
             </div>
 
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3.5 px-6 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] disabled:opacity-50 text-white text-xs font-semibold uppercase tracking-[0.16em] transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+              className="w-full py-3.5 px-6 rounded-full bg-[#43001F] hover:bg-[#2E0015] disabled:opacity-50 text-white text-xs font-semibold uppercase tracking-[0.16em] transition-all duration-300 shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
             >
               {isSubmitting ? (
                 <span>Confirming...</span>

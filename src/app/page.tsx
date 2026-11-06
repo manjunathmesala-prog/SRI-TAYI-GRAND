@@ -105,7 +105,7 @@ export default function HomePage() {
           ========================================================================= */}
       <section id="rooms" className="relative z-10 w-full py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center space-y-2 mb-12 reveal-on-scroll">
-          <div className="flex items-center justify-center gap-2 text-[#8D672F]">
+          <div className="flex items-center justify-center gap-2 text-[#43001F]">
             <TayiBrandIcon size={18} />
             <span className="text-xs uppercase tracking-[0.25em] font-semibold">STAY • FROM ₹1,800</span>
             <TayiBrandIcon size={18} />
@@ -134,13 +134,13 @@ export default function HomePage() {
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
-                  <div className="absolute top-3 left-3 bg-[#F8F3E9]/95 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-semibold text-[#8D672F] border border-[#E6D9C5] shadow-xs">
+                  <div className="absolute top-3 left-3 bg-[#F8F3E9]/95 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-semibold text-[#43001F] border border-[#E6D9C5] shadow-xs">
                     ₹ {room.base_price_per_night.toLocaleString('en-IN')} / night
                   </div>
                 </div>
 
                 <div className="p-5 space-y-2.5">
-                  <h3 className="text-xl font-serif text-[#33271D] group-hover:text-[#8D672F] transition-colors">
+                  <h3 className="text-xl font-serif text-[#33271D] group-hover:text-[#43001F] transition-colors">
                     {room.name}
                   </h3>
                   <p className="text-xs text-[#786A5B] line-clamp-2 leading-relaxed">
@@ -149,16 +149,16 @@ export default function HomePage() {
 
                   <div className="pt-2 border-t border-[#E6D9C5]/60 grid grid-cols-2 gap-2 text-xs text-[#786A5B]">
                     <div className="flex items-center gap-1.5">
-                      <Bed className="w-3.5 h-3.5 text-[#8D672F]" />
+                      <Bed className="w-3.5 h-3.5 text-[#43001F]" />
                       <span className="truncate">{room.bed_type}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <Users className="w-3.5 h-3.5 text-[#8D672F]" />
+                      <Users className="w-3.5 h-3.5 text-[#43001F]" />
                       <span>{room.included_occupancy || 2} Persons</span>
                     </div>
                   </div>
 
-                  <div className="text-[11px] text-[#8D672F] font-medium">
+                  <div className="text-[11px] text-[#43001F] font-medium">
                     Extra Person: ₹300 <span className="text-[#786A5B]/70 font-normal">(Max {room.max_occupancy} guests)</span>
                   </div>
                 </div>
@@ -167,7 +167,7 @@ export default function HomePage() {
               <div className="p-5 pt-0 space-y-2.5 border-t border-[#E6D9C5]/60 pt-3.5">
                 <NextLink
                   href={`/rooms/${room.slug}`}
-                  className="w-full py-2.5 px-4 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] active:scale-[0.98] text-white text-xs uppercase tracking-[0.14em] font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 group/btn"
+                  className="w-full py-2.5 px-4 rounded-full bg-[#43001F] hover:bg-[#2E0015] active:scale-[0.98] text-white text-xs uppercase tracking-[0.14em] font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 group/btn"
                 >
                   <span>Book Now</span>
                   <span className="text-amber-200/70 font-normal">·</span>
@@ -180,7 +180,7 @@ export default function HomePage() {
                 <div className="text-center">
                   <NextLink
                     href={`/rooms/${room.slug}`}
-                    className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.14em] font-semibold text-[#8D672F] hover:text-[#5E3F17] transition-colors py-1 group/det"
+                    className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.14em] font-semibold text-[#43001F] hover:text-[#2E0015] transition-colors py-1 group/det"
                   >
                     <span>View Room Details</span>
                     <ArrowRight className="w-3 h-3 group-hover/det:translate-x-1 transition-transform" />
@@ -194,7 +194,7 @@ export default function HomePage() {
         <div className="text-center mt-12">
           <NextLink
             href="/rooms"
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] text-white text-xs uppercase tracking-[0.18em] font-semibold shadow-md transition-all hover:scale-105 active:scale-95"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#43001F] hover:bg-[#2E0015] text-white text-xs uppercase tracking-[0.18em] font-semibold shadow-md transition-all hover:scale-105 active:scale-95"
           >
             <span>Explore All Rooms & Suites</span>
             <ArrowRight className="w-4 h-4" />
@@ -208,7 +208,7 @@ export default function HomePage() {
       <section className="w-full py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[#E6D9C5]/80">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           <div className="lg:col-span-5 space-y-5 reveal-on-scroll">
-            <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#8D672F] inline-flex items-center gap-2">
+            <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#43001F] inline-flex items-center gap-2">
               <TayiBrandIcon size={18} />
               EVENTS &amp; CONVENTION
             </span>
@@ -221,11 +221,11 @@ export default function HomePage() {
 
             <div className="grid grid-cols-2 gap-3 pt-2">
               <div className="p-3 bg-white rounded-xl border border-[#E6D9C5] shadow-xs">
-                <div className="text-xs font-bold text-[#8D672F]">Up to 800 Guests</div>
+                <div className="text-xs font-bold text-[#43001F]">Up to 800 Guests</div>
                 <span className="text-[11px] text-[#786A5B] block mt-0.5">Spacious Seating</span>
               </div>
               <div className="p-3 bg-white rounded-xl border border-[#E6D9C5] shadow-xs">
-                <div className="text-xs font-bold text-[#8D672F]">Dedicated Dining</div>
+                <div className="text-xs font-bold text-[#43001F]">Dedicated Dining</div>
                 <span className="text-[11px] text-[#786A5B] block mt-0.5">Modern Kitchen Area</span>
               </div>
             </div>
@@ -233,7 +233,7 @@ export default function HomePage() {
             <div className="pt-2 flex flex-wrap items-center gap-3">
               <NextLink
                 href="/convention-hall"
-                className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] text-white text-xs uppercase tracking-[0.16em] font-semibold shadow-md transition-all hover:translate-x-1"
+                className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-[#43001F] hover:bg-[#2E0015] text-white text-xs uppercase tracking-[0.16em] font-semibold shadow-md transition-all hover:translate-x-1"
               >
                 <span>Enquire &amp; Book Convention Hall</span>
                 <ArrowRight className="w-4 h-4" />
@@ -243,7 +243,7 @@ export default function HomePage() {
                 href="tel:08494223379"
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-white hover:bg-[#FAF6EE] text-[#33271D] border border-[#E6D9C5] text-xs uppercase tracking-[0.14em] font-semibold shadow-sm transition-all"
               >
-                <Phone className="w-3.5 h-3.5 text-[#8D672F]" />
+                <Phone className="w-3.5 h-3.5 text-[#43001F]" />
                 <span>084942 23379</span>
               </a>
             </div>
@@ -279,7 +279,7 @@ export default function HomePage() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center space-y-3 mb-12 sm:mb-16 reveal-on-scroll">
-            <span className="text-xs uppercase tracking-[0.28em] font-semibold text-[#8D672F] inline-flex items-center justify-center gap-2">
+            <span className="text-xs uppercase tracking-[0.28em] font-semibold text-[#43001F] inline-flex items-center justify-center gap-2">
               <TayiBrandIcon size={18} />
               FACILITIES &amp; COMFORTS
               <TayiBrandIcon size={18} />
@@ -332,7 +332,7 @@ export default function HomePage() {
                   key={idx}
                   className="group bg-white rounded-2xl sm:rounded-[22px] p-5 sm:p-6 border border-[#E8DEC9] shadow-[0_4px_24px_-4px_rgba(66,43,25,0.05)] luxury-card-hover transition-all duration-300 flex flex-col items-center justify-between text-center min-h-[190px] sm:min-h-[220px]"
                 >
-                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#F8F3E9] border border-[#E6D9C5]/70 flex items-center justify-center text-[#8D672F] group-hover:scale-110 group-hover:bg-[#8D672F] group-hover:text-white transition-all duration-300 mb-4 shadow-[0_2px_8px_-2px_rgba(66,43,25,0.06)]">
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#F8F3E9] border border-[#E6D9C5]/70 flex items-center justify-center text-[#43001F] group-hover:scale-110 group-hover:bg-[#43001F] group-hover:text-white transition-all duration-300 mb-4 shadow-[0_2px_8px_-2px_rgba(66,43,25,0.06)]">
                     <Icon className="w-6 h-6 sm:w-7 sm:h-7 stroke-[1.6]" />
                   </div>
                   <div className="flex-1 flex flex-col justify-center">
@@ -351,7 +351,7 @@ export default function HomePage() {
           <div className="text-center mt-10">
             <NextLink
               href="/amenities"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#8D672F] hover:text-[#5E3F17] transition-colors group"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#43001F] hover:text-[#2E0015] transition-colors group"
             >
               <span>View all verified hotel amenities &amp; services</span>
               <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
@@ -367,7 +367,7 @@ export default function HomePage() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 reveal-on-scroll gap-4">
             <div>
-              <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] font-semibold text-[#8D672F] mb-2">
+              <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] font-semibold text-[#43001F] mb-2">
                 <TayiBrandIcon size={18} />
                 <span>PHOTO GALLERY</span>
               </div>
@@ -381,7 +381,7 @@ export default function HomePage() {
 
             <NextLink
               href="/gallery"
-              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] text-white text-xs uppercase tracking-[0.14em] font-semibold shadow-md transition-all self-start sm:self-auto hover:-translate-y-0.5"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#43001F] hover:bg-[#2E0015] text-white text-xs uppercase tracking-[0.14em] font-semibold shadow-md transition-all self-start sm:self-auto hover:-translate-y-0.5"
             >
               <span>View Full Gallery</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -450,7 +450,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             <div className="lg:col-span-6 space-y-5 reveal-on-scroll">
-              <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#8D672F] inline-flex items-center gap-2">
+              <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#43001F] inline-flex items-center gap-2">
                 <TayiBrandIcon size={18} />
                 LOCATION &amp; PROXIMITY
               </span>
@@ -464,15 +464,15 @@ export default function HomePage() {
               {/* Transit & Landmark Distances */}
               <div className="grid grid-cols-3 gap-3 pt-2 text-center reveal-stagger">
                 <div className="p-3 bg-white rounded-xl border border-[#E6D9C5] luxury-card-hover shadow-xs">
-                  <div className="text-xs font-bold text-[#8D672F]">1.5 km (4 min)</div>
+                  <div className="text-xs font-bold text-[#43001F]">1.5 km (4 min)</div>
                   <span className="text-[11px] font-semibold text-[#33271D] block mt-1">Kadiri Temple</span>
                 </div>
                 <div className="p-3 bg-white rounded-xl border border-[#E6D9C5] luxury-card-hover shadow-xs">
-                  <div className="text-xs font-bold text-[#8D672F]">2.0 km (5 min)</div>
+                  <div className="text-xs font-bold text-[#43001F]">2.0 km (5 min)</div>
                   <span className="text-[11px] font-semibold text-[#33271D] block mt-1">Railway Station</span>
                 </div>
                 <div className="p-3 bg-white rounded-xl border border-[#E6D9C5] luxury-card-hover shadow-xs">
-                  <div className="text-xs font-bold text-[#8D672F]">Direct Access</div>
+                  <div className="text-xs font-bold text-[#43001F]">Direct Access</div>
                   <span className="text-[11px] font-semibold text-[#33271D] block mt-1">Bypass Road</span>
                 </div>
               </div>
@@ -482,7 +482,7 @@ export default function HomePage() {
                   href="https://maps.google.com/?q=Sri+Tayi+Grand+Kadiri"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] text-white text-xs uppercase tracking-[0.16em] font-semibold shadow-md transition-all hover:translate-x-1"
+                  className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-[#43001F] hover:bg-[#2E0015] text-white text-xs uppercase tracking-[0.16em] font-semibold shadow-md transition-all hover:translate-x-1"
                 >
                   <span>Get Directions</span>
                   <ArrowRight className="w-4 h-4" />
@@ -491,7 +491,7 @@ export default function HomePage() {
                   href="/contact"
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white hover:bg-[#FAF6EE] text-[#33271D] border border-[#E6D9C5] text-xs uppercase tracking-[0.16em] font-semibold shadow-sm transition-all"
                 >
-                  <MapPin className="w-4 h-4 text-[#8D672F]" />
+                  <MapPin className="w-4 h-4 text-[#43001F]" />
                   <span>Contact &amp; Map</span>
                 </NextLink>
               </div>
@@ -499,7 +499,7 @@ export default function HomePage() {
 
             <div className="lg:col-span-6 reveal-scale">
               <div className="relative h-72 sm:h-96 rounded-3xl overflow-hidden border border-[#E6D9C5] shadow-luxury bg-white flex flex-col items-center justify-center p-6 text-center group">
-                <div className="w-14 h-14 rounded-full bg-[#F8F3E9] text-[#8D672F] border border-[#E6D9C5] flex items-center justify-center mx-auto mb-3 shadow-xs">
+                <div className="w-14 h-14 rounded-full bg-[#F8F3E9] text-[#43001F] border border-[#E6D9C5] flex items-center justify-center mx-auto mb-3 shadow-xs">
                   <MapPin className="w-7 h-7" />
                 </div>
                 <h4 className="font-serif font-bold text-lg text-[#33271D]">
@@ -513,7 +513,7 @@ export default function HomePage() {
                     href="https://maps.google.com/?q=Sri+Tayi+Grand+Kadiri"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#8D672F] text-white text-xs uppercase tracking-[0.14em] font-semibold shadow-md hover:bg-[#6D4E21] transition-all"
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#43001F] text-white text-xs uppercase tracking-[0.14em] font-semibold shadow-md hover:bg-[#2E0015] transition-all"
                   >
                     <span>Open in Google Maps</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -558,7 +558,7 @@ export default function HomePage() {
             <div className="mt-6 flex flex-wrap items-center gap-4">
               <NextLink
                 href="/rooms"
-                className="px-7 py-3.5 rounded-full bg-[#8D672F] text-white text-xs uppercase tracking-[0.16em] font-semibold hover:bg-[#6D4E21] transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 hover:translate-x-1"
+                className="px-7 py-3.5 rounded-full bg-[#43001F] text-white text-xs uppercase tracking-[0.16em] font-semibold hover:bg-[#2E0015] transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 hover:translate-x-1"
               >
                 <Calendar className="w-4 h-4" />
                 <span>Book Now</span>

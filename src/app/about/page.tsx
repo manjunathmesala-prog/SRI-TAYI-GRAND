@@ -69,7 +69,7 @@ export default function AboutPage() {
 
           {/* Story (6 cols) */}
           <div className="lg:col-span-6 space-y-6 reveal-on-scroll">
-            <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#8D672F] block">
+            <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#43001F] block">
               THE TAYI GRAND PHILOSOPHY
             </span>
             <h2 className="font-serif text-3xl sm:text-4xl font-normal text-[#33271D] leading-tight">
@@ -84,19 +84,19 @@ export default function AboutPage() {
 
             <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-[#33271D]">
               <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-[#E6D9C5] shadow-xs">
-                <Check className="w-4 h-4 text-[#8D672F] shrink-0" />
+                <Check className="w-4 h-4 text-[#43001F] shrink-0" />
                 <span className="font-medium">Climate-controlled AC rooms</span>
               </div>
               <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-[#E6D9C5] shadow-xs">
-                <Check className="w-4 h-4 text-[#8D672F] shrink-0" />
+                <Check className="w-4 h-4 text-[#43001F] shrink-0" />
                 <span className="font-medium">Grand Hall for 800 guests</span>
               </div>
               <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-[#E6D9C5] shadow-xs">
-                <Check className="w-4 h-4 text-[#8D672F] shrink-0" />
+                <Check className="w-4 h-4 text-[#43001F] shrink-0" />
                 <span className="font-medium">Secure on-site parking bays</span>
               </div>
               <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-[#E6D9C5] shadow-xs">
-                <Check className="w-4 h-4 text-[#8D672F] shrink-0" />
+                <Check className="w-4 h-4 text-[#43001F] shrink-0" />
                 <span className="font-medium">24-hour concierge assistance</span>
               </div>
             </div>
@@ -149,7 +149,7 @@ export default function AboutPage() {
         <div className="text-center pt-8">
           <NextLink
             href="/rooms"
-            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] text-white text-xs uppercase tracking-[0.16em] font-semibold shadow-md transition-all hover:scale-105 active:scale-95"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#43001F] hover:bg-[#2E0015] text-white text-xs uppercase tracking-[0.16em] font-semibold shadow-md transition-all hover:scale-105 active:scale-95"
           >
             <span>Plan Your Stay Today</span>
             <ArrowRight className="w-4 h-4" />

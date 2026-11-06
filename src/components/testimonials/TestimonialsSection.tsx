@@ -104,7 +104,7 @@ export function TestimonialsSection() {
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6 reveal-on-scroll">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] font-semibold text-[#8D672F] mb-2">
+            <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] font-semibold text-[#43001F] mb-2">
               <TayiBrandIcon size={16} />
               <span>GUEST REVIEWS &amp; EXPERIENCES</span>
             </div>
@@ -114,7 +114,7 @@ export function TestimonialsSection() {
             >
               The Trust of Our Guests
             </h2>
-            <div className="w-16 h-0.5 bg-[#8D672F] my-3.5" />
+            <div className="w-16 h-0.5 bg-[#43001F] my-3.5" />
             <p className="text-sm text-[#786A5B] font-light">
               Authentic verified five-star ratings and experiences from Google Reviews.
             </p>
@@ -123,7 +123,7 @@ export function TestimonialsSection() {
                 href={GOOGLE_REVIEWS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#8D672F] hover:text-[#6D4E21] transition-colors group"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#43001F] hover:text-[#2E0015] transition-colors group"
               >
                 <span>Read all verified reviews on Google</span>
                 <ExternalLink className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
@@ -143,8 +143,8 @@ export function TestimonialsSection() {
                     aria-label={`Go to review slide ${idx + 1}`}
                     className={`h-2 rounded-full transition-all duration-300 ${
                       idx === currentIndex
-                        ? 'w-6 bg-[#8D672F]'
-                        : 'w-2 bg-[#8D672F]/30 hover:bg-[#8D672F]/60'
+                        ? 'w-6 bg-[#43001F]'
+                        : 'w-2 bg-[#43001F]/30 hover:bg-[#43001F]/60'
                     }`}
                   />
                 ))}
@@ -155,9 +155,9 @@ export function TestimonialsSection() {
                 onClick={handlePrev}
                 disabled={currentIndex === 0}
                 aria-label="Previous testimonials"
-                className="w-10 h-10 rounded-full border border-[#E6D9C5] bg-white text-[#33271D] flex items-center justify-center hover:bg-[#FAF6EE] hover:border-[#8D672F] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                className="w-10 h-10 rounded-full border border-[#E6D9C5] bg-white text-[#33271D] flex items-center justify-center hover:bg-[#FAF6EE] hover:border-[#43001F] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
               >
-                <ChevronLeft className="w-5 h-5 text-[#8D672F]" />
+                <ChevronLeft className="w-5 h-5 text-[#43001F]" />
               </button>
 
               <button
@@ -165,9 +165,9 @@ export function TestimonialsSection() {
                 onClick={handleNext}
                 disabled={currentIndex >= maxIndex}
                 aria-label="Next testimonials"
-                className="w-10 h-10 rounded-full border border-[#E6D9C5] bg-white text-[#33271D] flex items-center justify-center hover:bg-[#FAF6EE] hover:border-[#8D672F] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                className="w-10 h-10 rounded-full border border-[#E6D9C5] bg-white text-[#33271D] flex items-center justify-center hover:bg-[#FAF6EE] hover:border-[#43001F] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
               >
-                <ChevronRight className="w-5 h-5 text-[#8D672F]" />
+                <ChevronRight className="w-5 h-5 text-[#43001F]" />
               </button>
             </div>
           )}
@@ -219,7 +219,7 @@ export function TestimonialsSection() {
                               />
                             ))}
                           </div>
-                          <Quote className="w-6 h-6 text-[#8D672F]/30 group-hover:text-[#8D672F] transition-colors" />
+                          <Quote className="w-6 h-6 text-[#43001F]/30 group-hover:text-[#43001F] transition-colors" />
                         </div>
 
                         {/* Review Text */}
@@ -230,7 +230,7 @@ export function TestimonialsSection() {
 
                       {/* Reviewer Meta */}
                       <div className="flex items-center gap-3 pt-5 mt-5 border-t border-[#E6D9C5]/60">
-                        <div className="w-10 h-10 rounded-full bg-[#FAF6EE] text-[#8D672F] border border-[#E6D9C5] flex items-center justify-center font-serif font-bold text-xs shrink-0 shadow-xs">
+                        <div className="w-10 h-10 rounded-full bg-[#FAF6EE] text-[#43001F] border border-[#E6D9C5] flex items-center justify-center font-serif font-bold text-xs shrink-0 shadow-xs">
                           {initials}
                         </div>
                         <div className="min-w-0">
@@ -259,7 +259,7 @@ export function TestimonialsSection() {
             className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-white hover:bg-[#FAF6EE] text-[#33271D] border border-[#E6D9C5] text-xs uppercase tracking-[0.16em] font-semibold shadow-sm transition-all hover:-translate-y-0.5"
           >
             <span>View All Guest Reviews</span>
-            <ArrowRight className="w-3.5 h-3.5 text-[#8D672F]" />
+            <ArrowRight className="w-3.5 h-3.5 text-[#43001F]" />
           </NextLink>
         </div>
       </div>

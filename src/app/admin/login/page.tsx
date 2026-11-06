@@ -62,13 +62,13 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md relative z-10">
         {/* Brand Card Header with Official Emblem */}
         <div className="text-center mb-8">
-          <div className="relative w-20 h-20 rounded-full border-2 border-[#D8AD56] overflow-hidden mx-auto mb-3 shadow-xl bg-black/40">
+          <div className="relative w-20 h-20 rounded-full border-2 border-[#D8AD56] overflow-hidden mx-auto mb-3 shadow-xl bg-[#43001F]">
             <Image
-              src="/images/hotel/tayi-grand-logo.jpg"
+              src="/images/hotel/tayi-grand-logo.png"
               alt="Sri Tayi Grand Official Logo"
               fill
               sizes="80px"
-              className="object-cover"
+              className="object-contain p-1"
               priority
             />
           </div>

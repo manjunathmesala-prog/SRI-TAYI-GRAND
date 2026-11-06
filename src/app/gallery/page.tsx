@@ -84,7 +84,7 @@ export default function GalleryPage() {
               onClick={() => setActiveCategory(cat.key)}
               className={`px-5 py-2.5 rounded-full text-xs uppercase tracking-wider transition-all duration-200 cursor-pointer ${
                 activeCategory === cat.key
-                  ? 'bg-[#8D672F] text-white font-semibold shadow-md'
+                  ? 'bg-[#43001F] text-white font-semibold shadow-md'
                   : 'bg-white text-[#786A5B] hover:text-[#33271D] border border-[#E6D9C5] hover:bg-[#FAF6EE]'
               }`}
             >

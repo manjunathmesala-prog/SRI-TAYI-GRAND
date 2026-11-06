@@ -3,7 +3,7 @@ import './globals.css';
 import ScrollReveal from '@/components/anantha/ScrollReveal';
 
 export const viewport: Viewport = {
-  themeColor: '#8D672F',
+  themeColor: '#43001F',
   colorScheme: 'light',
   width: 'device-width',
   initialScale: 1,
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   icons: {
     icon: '/favicon.ico',
     shortcut: '/favicon.ico',
-    apple: '/images/hotel/tayi-grand-logo.jpg',
+    apple: '/images/hotel/tayi-grand-logo.png',
   },
   openGraph: {
     title: 'Sri Tayi Grand | Luxury Stay & Grand Convention Hall',

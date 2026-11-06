@@ -23,13 +23,13 @@ export function Footer() {
           <div className="lg:col-span-4 flex flex-col space-y-4">
             <NextLink href="/" className="inline-block focus:outline-none">
               <div className="flex flex-col items-start space-y-2">
-                <div className="relative w-12 h-12 rounded-full border border-[#D8AD56]/80 overflow-hidden flex items-center justify-center bg-black/40 shadow-sm shrink-0">
+                <div className="relative w-12 h-12 rounded-full border border-[#D8AD56]/80 overflow-hidden flex items-center justify-center bg-[#43001F] shadow-sm shrink-0">
                   <Image
-                    src="/images/hotel/tayi-grand-logo.jpg"
+                    src="/images/hotel/tayi-grand-logo.png"
                     alt="Sri Tayi Grand Official Emblem"
                     fill
                     sizes="48px"
-                    className="object-cover"
+                    className="object-contain p-0.5"
                   />
                 </div>
                 <div className="tracking-[0.22em] text-xl font-serif text-[#B18A4A] uppercase font-semibold">
@@ -46,7 +46,7 @@ export function Footer() {
             <div className="pt-2 flex items-center gap-2.5 flex-wrap">
               <NextLink
                 href="/admin"
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#2D2218] hover:bg-[#8D672F] text-[#E6D9C5] hover:text-white border border-[#B18A4A]/40 hover:border-[#B18A4A] text-xs font-semibold tracking-wide transition-all duration-200 shadow-sm group"
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#2D2218] hover:bg-[#43001F] text-[#E6D9C5] hover:text-white border border-[#B18A4A]/40 hover:border-[#B18A4A] text-xs font-semibold tracking-wide transition-all duration-200 shadow-sm group"
               >
                 <ShieldCheck className="w-4 h-4 text-[#B18A4A] group-hover:text-white transition-colors" />
                 <span>Admin Panel</span>

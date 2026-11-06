@@ -141,7 +141,7 @@ export default function TestimonialsPage() {
             onClick={() => setActiveTab('all')}
             className={`px-5 py-2.5 rounded-full text-xs uppercase tracking-wider font-semibold transition-all cursor-pointer ${
               activeTab === 'all'
-                ? 'bg-[#8D672F] text-white shadow-md'
+                ? 'bg-[#43001F] text-white shadow-md'
                 : 'bg-white text-[#786A5B] border border-[#E6D9C5] hover:bg-[#FAF6EE]'
             }`}
           >
@@ -151,7 +151,7 @@ export default function TestimonialsPage() {
             onClick={() => setActiveTab('written')}
             className={`px-5 py-2.5 rounded-full text-xs uppercase tracking-wider font-semibold transition-all cursor-pointer ${
               activeTab === 'written'
-                ? 'bg-[#8D672F] text-white shadow-md'
+                ? 'bg-[#43001F] text-white shadow-md'
                 : 'bg-white text-[#786A5B] border border-[#E6D9C5] hover:bg-[#FAF6EE]'
             }`}
           >
@@ -161,7 +161,7 @@ export default function TestimonialsPage() {
             onClick={() => setActiveTab('rating_only')}
             className={`px-5 py-2.5 rounded-full text-xs uppercase tracking-wider font-semibold transition-all cursor-pointer ${
               activeTab === 'rating_only'
-                ? 'bg-[#8D672F] text-white shadow-md'
+                ? 'bg-[#43001F] text-white shadow-md'
                 : 'bg-white text-[#786A5B] border border-[#E6D9C5] hover:bg-[#FAF6EE]'
             }`}
           >
@@ -192,7 +192,7 @@ export default function TestimonialsPage() {
                         />
                       ))}
                     </div>
-                    <Quote className="w-6 h-6 text-[#8D672F]/30 group-hover:text-[#8D672F] transition-colors" />
+                    <Quote className="w-6 h-6 text-[#43001F]/30 group-hover:text-[#43001F] transition-colors" />
                   </div>
 
                   <p className="text-xs sm:text-sm text-[#786A5B] font-light leading-relaxed line-clamp-4 italic">
@@ -201,7 +201,7 @@ export default function TestimonialsPage() {
                 </div>
 
                 <div className="flex items-center gap-3 pt-5 mt-5 border-t border-[#E6D9C5]/60">
-                  <div className="w-10 h-10 rounded-full bg-[#FAF6EE] text-[#8D672F] border border-[#E6D9C5] flex items-center justify-center font-serif font-bold text-xs shrink-0 shadow-xs">
+                  <div className="w-10 h-10 rounded-full bg-[#FAF6EE] text-[#43001F] border border-[#E6D9C5] flex items-center justify-center font-serif font-bold text-xs shrink-0 shadow-xs">
                     {initials}
                   </div>
                   <div className="min-w-0">

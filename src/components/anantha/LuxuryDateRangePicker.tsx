@@ -202,7 +202,7 @@ export default function LuxuryDateRangePicker({
           }}
           className={`px-3 py-2 rounded-xl transition-all cursor-pointer border ${
             isOpen && activeField === 'checkIn'
-              ? 'bg-[#FAF6EE] border-[#8D672F] shadow-sm ring-1 ring-[#8D672F]/40'
+              ? 'bg-[#FAF6EE] border-[#43001F] shadow-sm ring-1 ring-[#43001F]/40'
               : 'bg-[#F8F3E9]/50 hover:bg-[#F2E8D8]/50 border-transparent hover:border-[#E6D9C5]'
           }`}
         >
@@ -210,12 +210,12 @@ export default function LuxuryDateRangePicker({
             <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-[#786A5B] font-semibold">
               Check-In
             </span>
-            <span className="text-[10px] text-[#8D672F] font-medium hidden sm:inline">
+            <span className="text-[10px] text-[#43001F] font-medium hidden sm:inline">
               {checkInFormatted.weekday}
             </span>
           </div>
           <div className="flex items-center gap-2 mt-0.5">
-            <CalendarIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8D672F] shrink-0" />
+            <CalendarIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#43001F] shrink-0" />
             <div className="text-xs sm:text-sm font-semibold text-[#33271D] truncate">
               {checkInFormatted.day} {checkInFormatted.monthShort} {checkInFormatted.year}
             </div>
@@ -230,7 +230,7 @@ export default function LuxuryDateRangePicker({
           }}
           className={`px-3 py-2 rounded-xl transition-all cursor-pointer border ${
             isOpen && activeField === 'checkOut'
-              ? 'bg-[#FAF6EE] border-[#8D672F] shadow-sm ring-1 ring-[#8D672F]/40'
+              ? 'bg-[#FAF6EE] border-[#43001F] shadow-sm ring-1 ring-[#43001F]/40'
               : 'bg-[#F8F3E9]/50 hover:bg-[#F2E8D8]/50 border-transparent hover:border-[#E6D9C5]'
           }`}
         >
@@ -238,12 +238,12 @@ export default function LuxuryDateRangePicker({
             <span className="text-[10px] sm:text-[11px] uppercase tracking-wider text-[#786A5B] font-semibold">
               Check-Out
             </span>
-            <span className="text-[10px] text-[#8D672F] font-medium hidden sm:inline">
+            <span className="text-[10px] text-[#43001F] font-medium hidden sm:inline">
               {checkOutFormatted.weekday}
             </span>
           </div>
           <div className="flex items-center gap-2 mt-0.5">
-            <CalendarIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#8D672F] shrink-0" />
+            <CalendarIcon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#43001F] shrink-0" />
             <div className="text-xs sm:text-sm font-semibold text-[#33271D] truncate">
               {checkOutFormatted.day} {checkOutFormatted.monthShort} {checkOutFormatted.year}
             </div>
@@ -268,13 +268,13 @@ export default function LuxuryDateRangePicker({
             {/* Top Bar: Active Step Indicator */}
             <div className="flex items-center justify-between pb-3.5 border-b border-[#E6D9C5]/60 mb-4">
               <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 rounded-full bg-[#8D672F] animate-pulse" />
+                <span className="w-2 h-2 rounded-full bg-[#43001F] animate-pulse" />
                 <span className="text-xs font-semibold text-[#33271D]">
                   {activeField === 'checkIn' ? 'Select Check-In Date' : 'Select Check-Out Date'}
                 </span>
               </div>
               <div className="flex items-center space-x-2">
-                <span className="text-[11px] font-semibold text-[#8D672F] bg-[#FAF6EE] px-2 py-0.5 rounded-full border border-[#8D672F]/20">
+                <span className="text-[11px] font-semibold text-[#43001F] bg-[#FAF6EE] px-2 py-0.5 rounded-full border border-[#43001F]/20">
                   {numNights} {numNights === 1 ? 'Night' : 'Nights'}
                 </span>
                 <button
@@ -321,7 +321,7 @@ export default function LuxuryDateRangePicker({
                 <div
                   key={d}
                   className={`text-[10px] font-semibold tracking-wider py-1 ${
-                    i === 0 || i === 6 ? 'text-[#8D672F]' : 'text-[#786A5B]'
+                    i === 0 || i === 6 ? 'text-[#43001F]' : 'text-[#786A5B]'
                   }`}
                 >
                   {d}
@@ -371,9 +371,9 @@ export default function LuxuryDateRangePicker({
                 if (isDisabled) {
                   btnClass = 'text-stone-300 cursor-not-allowed hover:bg-transparent';
                 } else if (isCheckIn || isCheckOut) {
-                  btnClass = 'bg-[#8D672F] text-white font-bold shadow-md scale-105';
+                  btnClass = 'bg-[#43001F] text-white font-bold shadow-md scale-105';
                 } else if (inRange || isHoverRange) {
-                  btnClass = 'bg-[#FAF6EE] text-[#8D672F] font-semibold';
+                  btnClass = 'bg-[#FAF6EE] text-[#43001F] font-semibold';
                 }
 
                 if (inRange || isHoverRange) {
@@ -398,7 +398,7 @@ export default function LuxuryDateRangePicker({
                     >
                       <span>{dayNum}</span>
                       {isToday && !isCheckIn && !isCheckOut && (
-                        <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[#8D672F]" />
+                        <span className="absolute bottom-1 w-1 h-1 rounded-full bg-[#43001F]" />
                       )}
                     </button>
                   </div>
@@ -412,21 +412,21 @@ export default function LuxuryDateRangePicker({
                 <button
                   type="button"
                   onClick={() => applyPreset(1)}
-                  className="px-2.5 py-1 rounded-lg bg-[#FAF6EE] hover:bg-[#F2E8D8] text-[#8D672F] font-medium text-[11px] transition-colors"
+                  className="px-2.5 py-1 rounded-lg bg-[#FAF6EE] hover:bg-[#F2E8D8] text-[#43001F] font-medium text-[11px] transition-colors"
                 >
                   1 Night
                 </button>
                 <button
                   type="button"
                   onClick={() => applyPreset(2)}
-                  className="px-2.5 py-1 rounded-lg bg-[#FAF6EE] hover:bg-[#F2E8D8] text-[#8D672F] font-medium text-[11px] transition-colors"
+                  className="px-2.5 py-1 rounded-lg bg-[#FAF6EE] hover:bg-[#F2E8D8] text-[#43001F] font-medium text-[11px] transition-colors"
                 >
                   2 Nights
                 </button>
                 <button
                   type="button"
                   onClick={applyThisWeekend}
-                  className="px-2.5 py-1 rounded-lg bg-[#FAF6EE] hover:bg-[#F2E8D8] text-[#8D672F] font-medium text-[11px] transition-colors"
+                  className="px-2.5 py-1 rounded-lg bg-[#FAF6EE] hover:bg-[#F2E8D8] text-[#43001F] font-medium text-[11px] transition-colors"
                 >
                   Weekend
                 </button>
@@ -435,7 +435,7 @@ export default function LuxuryDateRangePicker({
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="px-3.5 py-1 rounded-lg bg-[#8D672F] hover:bg-[#6D4E21] text-white font-semibold text-xs shadow-sm transition-all"
+                className="px-3.5 py-1 rounded-lg bg-[#43001F] hover:bg-[#2E0015] text-white font-semibold text-xs shadow-sm transition-all"
               >
                 Done
               </button>
@@ -527,19 +527,19 @@ export function LuxurySingleDatePicker({
         onClick={() => setIsOpen(!isOpen)}
         className={`w-full p-2.5 rounded-xl border transition-all cursor-pointer flex items-center justify-between ${
           isOpen
-            ? 'border-[#8D672F] bg-[#FAF6EE] ring-1 ring-[#8D672F]/30'
+            ? 'border-[#43001F] bg-[#FAF6EE] ring-1 ring-[#43001F]/30'
             : 'border-[#E6D9C5] bg-[#F8F3E9]/40 hover:bg-[#F2E8D8]/50'
         }`}
       >
         <div className="flex items-center gap-2">
-          <CalendarIcon className="w-4 h-4 text-[#8D672F] shrink-0" />
+          <CalendarIcon className="w-4 h-4 text-[#43001F] shrink-0" />
           <span className="text-xs sm:text-sm font-medium text-[#33271D]">
             {formatted
               ? `${formatted.weekday}, ${formatted.day} ${formatted.monthShort} ${formatted.year}`
               : placeholder}
           </span>
         </div>
-        <span className="text-[10px] text-[#8D672F] font-semibold uppercase tracking-wider">
+        <span className="text-[10px] text-[#43001F] font-semibold uppercase tracking-wider">
           Change
         </span>
       </div>
@@ -615,13 +615,13 @@ export function LuxurySingleDatePicker({
                         isDisabled
                           ? 'text-stone-300 cursor-not-allowed'
                           : isSelected
-                          ? 'bg-[#8D672F] text-white font-bold shadow-md'
+                          ? 'bg-[#43001F] text-white font-bold shadow-md'
                           : 'text-[#33271D] hover:bg-[#FAF6EE]'
                       }`}
                     >
                       <span>{dayNum}</span>
                       {isToday && !isSelected && (
-                        <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-[#8D672F]" />
+                        <span className="absolute bottom-0.5 w-1 h-1 rounded-full bg-[#43001F]" />
                       )}
                     </button>
                   </div>

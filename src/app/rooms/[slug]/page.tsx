@@ -98,9 +98,9 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Breadcrumb */}
           <nav className="flex items-center gap-2 text-xs text-[#786A5B] mb-8">
-            <NextLink href="/" className="hover:text-[#8D672F] transition-colors">Home</NextLink>
+            <NextLink href="/" className="hover:text-[#43001F] transition-colors">Home</NextLink>
             <span>/</span>
-            <NextLink href="/rooms" className="hover:text-[#8D672F] transition-colors">Rooms &amp; Suites</NextLink>
+            <NextLink href="/rooms" className="hover:text-[#43001F] transition-colors">Rooms &amp; Suites</NextLink>
             <span>/</span>
             <span className="text-[#33271D] font-semibold">{room.name}</span>
           </nav>
@@ -151,7 +151,7 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                       key={i}
                       onClick={() => setActiveImageIdx(i)}
                       className={`relative aspect-[4/3] rounded-xl overflow-hidden border-2 transition-all cursor-pointer ${
-                        activeImageIdx === i ? 'border-[#8D672F] scale-102 shadow-sm' : 'border-transparent opacity-60 hover:opacity-100'
+                        activeImageIdx === i ? 'border-[#43001F] scale-102 shadow-sm' : 'border-transparent opacity-60 hover:opacity-100'
                       }`}
                     >
                       <Image src={img} alt={`Thumbnail ${i + 1}`} fill className="object-cover" />
@@ -178,7 +178,7 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs text-[#33271D]">
                     {(room.amenities || []).map((amenity, i) => (
                       <div key={i} className="flex items-center gap-2.5 p-3 rounded-xl bg-[#FAF6EE] border border-[#E6D9C5]">
-                        <Check className="w-4 h-4 text-[#8D672F] shrink-0" />
+                        <Check className="w-4 h-4 text-[#43001F] shrink-0" />
                         <span>{amenity}</span>
                       </div>
                     ))}
@@ -191,14 +191,14 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-[#786A5B]">
                     <div className="flex items-start gap-2">
-                      <Clock className="w-4 h-4 text-[#8D672F] shrink-0 mt-0.5" />
+                      <Clock className="w-4 h-4 text-[#43001F] shrink-0 mt-0.5" />
                       <div>
                         <strong className="text-[#33271D] block">Check-in / Check-out:</strong>
                         Check-in 12:00 PM • Check-out 11:00 AM
                       </div>
                     </div>
                     <div className="flex items-start gap-2">
-                      <ShieldCheck className="w-4 h-4 text-[#8D672F] shrink-0 mt-0.5" />
+                      <ShieldCheck className="w-4 h-4 text-[#43001F] shrink-0 mt-0.5" />
                       <div>
                         <strong className="text-[#33271D] block">Govt. ID Requirement:</strong>
                         Valid photo ID required for all adult guests at check-in.
@@ -214,7 +214,7 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
               <div className="bg-white rounded-3xl border border-[#E6D9C5] p-7 sm:p-8 shadow-luxury sticky top-28">
                 {/* Header */}
                 <div className="border-b border-[#E6D9C5]/80 pb-5 mb-5">
-                  <span className="text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8D672F] block mb-1">
+                  <span className="text-[10px] uppercase tracking-[0.2em] font-semibold text-[#43001F] block mb-1">
                     SELECTED ROOM
                   </span>
                   <h1 className="font-serif text-3xl font-bold text-[#33271D]">
@@ -226,16 +226,16 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
 
                   <div className="flex flex-wrap items-center gap-3 text-xs text-[#33271D] mt-4 pt-3 border-t border-[#E6D9C5]/60">
                     <div className="flex items-center gap-1.5">
-                      <Bed className="w-4 h-4 text-[#8D672F]" />
+                      <Bed className="w-4 h-4 text-[#43001F]" />
                       <span>{room.bed_type}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
-                      <Users className="w-4 h-4 text-[#8D672F]" />
+                      <Users className="w-4 h-4 text-[#43001F]" />
                       <span>Included: {room.included_occupancy || 2} Persons</span>
                     </div>
                     {room.room_size_sqft && (
                       <div className="flex items-center gap-1.5">
-                        <Maximize2 className="w-3.5 h-3.5 text-[#8D672F]" />
+                        <Maximize2 className="w-3.5 h-3.5 text-[#43001F]" />
                         <span>{room.room_size_sqft} sq.ft</span>
                       </div>
                     )}
@@ -250,7 +250,7 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                     </span>
                     <span className="text-xs text-[#786A5B] ml-1 font-light">/ night</span>
                   </div>
-                  <span className="text-xs text-[#8D672F] font-semibold">Includes Free Wi-Fi</span>
+                  <span className="text-xs text-[#43001F] font-semibold">Includes Free Wi-Fi</span>
                 </div>
 
                 {/* Reservation Form */}
@@ -273,7 +273,7 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                           }
                         }}
                         required
-                        className="w-full text-xs font-semibold p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#8D672F]"
+                        className="w-full text-xs font-semibold p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#43001F]"
                       />
                     </div>
 
@@ -287,7 +287,7 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                         min={checkIn}
                         onChange={(e) => setCheckOut(e.target.value)}
                         required
-                        className="w-full text-xs font-semibold p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#8D672F]"
+                        className="w-full text-xs font-semibold p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#43001F]"
                       />
                     </div>
                   </div>
@@ -300,7 +300,7 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                       <select
                         value={roomsCount}
                         onChange={(e) => setRoomsCount(Number(e.target.value))}
-                        className="w-full text-xs font-semibold p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#8D672F]"
+                        className="w-full text-xs font-semibold p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#43001F]"
                       >
                         {[1, 2, 3, 4, 5].map((n) => (
                           <option key={n} value={n}>{n} {n === 1 ? 'Room' : 'Rooms'}</option>
@@ -315,7 +315,7 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                       <select
                         value={adults}
                         onChange={(e) => setAdults(Number(e.target.value))}
-                        className="w-full text-xs font-semibold p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#8D672F]"
+                        className="w-full text-xs font-semibold p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#43001F]"
                       >
                         {Array.from({ length: room.max_adults || 4 }, (_, i) => i + 1).map((n) => (
                           <option key={n} value={n}>{n} {n === 1 ? 'Adult' : 'Adults'}</option>
@@ -330,7 +330,7 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                       <select
                         value={children}
                         onChange={(e) => setChildren(Number(e.target.value))}
-                        className="w-full text-xs font-semibold p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#8D672F]"
+                        className="w-full text-xs font-semibold p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#43001F]"
                       >
                         {[0, 1, 2, 3].map((n) => (
                           <option key={n} value={n}>{n} {n === 1 ? 'Child' : 'Children'}</option>
@@ -347,13 +347,13 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                     </div>
                     <div className="pt-2 border-t border-[#E6D9C5]/80 flex justify-between text-sm font-serif font-bold text-[#33271D]">
                       <span>Estimated Total</span>
-                      <span className="text-[#8D672F]">₹{total.toLocaleString('en-IN')}</span>
+                      <span className="text-[#43001F]">₹{total.toLocaleString('en-IN')}</span>
                     </div>
                   </div>
 
                   <button
                     type="submit"
-                    className="w-full py-3.5 px-6 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] active:scale-[0.98] text-white text-xs uppercase tracking-[0.16em] font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 group cursor-pointer"
+                    className="w-full py-3.5 px-6 rounded-full bg-[#43001F] hover:bg-[#2E0015] active:scale-[0.98] text-white text-xs uppercase tracking-[0.16em] font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 group cursor-pointer"
                   >
                     <span>Reserve Room</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -363,7 +363,7 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                 <div className="mt-4 text-center">
                   <a
                     href="tel:08494223379"
-                    className="text-xs text-[#8D672F] hover:underline"
+                    className="text-xs text-[#43001F] hover:underline"
                   >
                     Questions? Call Front Desk: 084942 23379
                   </a>
@@ -390,13 +390,13 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-700"
                     />
-                    <div className="absolute top-3 left-3 bg-[#F8F3E9]/95 px-3 py-1 rounded-full text-[10px] font-semibold text-[#8D672F] border border-[#E6D9C5]">
+                    <div className="absolute top-3 left-3 bg-[#F8F3E9]/95 px-3 py-1 rounded-full text-[10px] font-semibold text-[#43001F] border border-[#E6D9C5]">
                       ₹ {other.base_price_per_night.toLocaleString('en-IN')} / night
                     </div>
                   </div>
 
                   <div className="p-5 space-y-2">
-                    <h3 className="text-lg font-serif font-bold text-[#33271D] group-hover:text-[#8D672F] transition-colors">
+                    <h3 className="text-lg font-serif font-bold text-[#33271D] group-hover:text-[#43001F] transition-colors">
                       {other.name}
                     </h3>
                     <p className="text-xs text-[#786A5B] line-clamp-2">
@@ -405,7 +405,7 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                     <div className="pt-3">
                       <NextLink
                         href={`/rooms/${other.slug}`}
-                        className="inline-flex items-center gap-1.5 text-xs uppercase tracking-wider font-semibold text-[#8D672F] hover:text-[#6D4E21]"
+                        className="inline-flex items-center gap-1.5 text-xs uppercase tracking-wider font-semibold text-[#43001F] hover:text-[#2E0015]"
                       >
                         <span>View Room</span>
                         <ArrowRight className="w-3.5 h-3.5" />

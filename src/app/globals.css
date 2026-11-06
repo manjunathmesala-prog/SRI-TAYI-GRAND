@@ -8,7 +8,11 @@
   --background-ivory: #F8F3E9;
   --warm-cream: #F2E8D8;
   --champagne-gold: #B18A4A;
-  --dark-gold: #8D672F;
+  --secondary: #43001F;
+  --secondary-hover: #2E0015;
+  --logo-burgundy: #43001F;
+  --logo-burgundy-hover: #2E0015;
+  --dark-gold: #B18A4A;
   --deep-brown: #422B19;
   --primary-text: #33271D;
   --secondary-text: #786A5B;
@@ -122,7 +126,7 @@ input[type="date"]::-webkit-clear-button {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #8D672F;
+  background: #43001F;
 }
 
 /* ==========================================================================

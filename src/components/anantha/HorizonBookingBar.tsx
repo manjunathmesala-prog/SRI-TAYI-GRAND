@@ -99,7 +99,7 @@ export default function HorizonBookingBar({
               Guests & Rooms
             </label>
             <div className="flex items-center gap-2 mt-1">
-              <Users className="w-4 h-4 text-[#8D672F] shrink-0" />
+              <Users className="w-4 h-4 text-[#43001F] shrink-0" />
               <span className="text-xs sm:text-sm font-semibold text-[#33271D] truncate">
                 {totalGuests} {totalGuests === 1 ? 'Guest' : 'Guests'} · {numRooms} {numRooms === 1 ? 'Room' : 'Rooms'}
               </span>
@@ -168,7 +168,7 @@ export default function HorizonBookingBar({
                 <button
                   type="button"
                   onClick={() => setGuestPickerOpen(false)}
-                  className="px-3 py-1 bg-[#8D672F] text-white rounded-lg text-xs font-semibold hover:bg-[#6D4E21]"
+                  className="px-3 py-1 bg-[#43001F] text-white rounded-lg text-xs font-semibold hover:bg-[#2E0015]"
                 >
                   Done
                 </button>
@@ -181,7 +181,7 @@ export default function HorizonBookingBar({
         <div className="lg:col-span-3">
           <button
             type="submit"
-            className="w-full py-3.5 px-5 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] active:scale-[0.98] text-white text-xs uppercase tracking-[0.16em] font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 group"
+            className="w-full py-3.5 px-5 rounded-full bg-[#43001F] hover:bg-[#2E0015] active:scale-[0.98] text-white text-xs uppercase tracking-[0.16em] font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 group"
           >
             <span>{buttonText}</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

@@ -90,7 +90,7 @@ export default function AmenitiesPage() {
                 className="bg-white rounded-2xl border border-[#E6D9C5] p-6 sm:p-7 shadow-luxury luxury-card-hover transition-all duration-300 flex flex-col justify-between"
               >
                 <div>
-                  <div className="w-13 h-13 rounded-2xl bg-[#F8F3E9] text-[#8D672F] border border-[#E6D9C5]/80 flex items-center justify-center mb-5">
+                  <div className="w-13 h-13 rounded-2xl bg-[#F8F3E9] text-[#43001F] border border-[#E6D9C5]/80 flex items-center justify-center mb-5">
                     <IconComponent className="w-6 h-6 stroke-[1.6]" />
                   </div>
                   <h2 className="font-serif text-lg font-bold text-[#33271D]">
@@ -108,7 +108,7 @@ export default function AmenitiesPage() {
         {/* In-Room Luxury Comfort Showcase */}
         <div className="mt-20 pt-16 border-t border-[#E6D9C5]">
           <div className="text-center max-w-xl mx-auto mb-12">
-            <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#8D672F] block mb-2">
+            <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#43001F] block mb-2">
               IN-ROOM ELEGANCE
             </span>
             <h2 className="font-serif text-3xl font-normal text-[#33271D]">
@@ -169,7 +169,7 @@ export default function AmenitiesPage() {
           <div className="text-center mt-12">
             <NextLink
               href="/rooms"
-              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] text-white text-xs uppercase tracking-[0.16em] font-semibold shadow-md transition-all hover:scale-105 active:scale-95"
+              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#43001F] hover:bg-[#2E0015] text-white text-xs uppercase tracking-[0.16em] font-semibold shadow-md transition-all hover:scale-105 active:scale-95"
             >
               <span>Book Your Room Now</span>
               <ArrowRight className="w-4 h-4" />
