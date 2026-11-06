@@ -511,7 +511,7 @@ export default function FrontDeskPage() {
                         const match = availableRooms.find((r) => r.category_id === b.category_id);
                         setSelectedRoomId(match ? match.id : (availableRooms[0]?.id || ''));
                       }}
-                      className="px-3.5 py-1.5 rounded-lg bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm"
+                      className="px-3.5 py-1.5 rounded-lg bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm"
                     >
                       <ConciergeBell className="w-3.5 h-3.5" />
                       <span>Check In Guest</span>
@@ -658,7 +658,7 @@ export default function FrontDeskPage() {
                 <button
                   type="submit"
                   disabled={!selectedRoomId}
-                  className="px-5 py-2 rounded-lg bg-[#D8AD56] text-[#25150F] text-xs font-bold hover:bg-[#C69940] disabled:opacity-50"
+                  className="px-5 py-2 rounded-lg bg-[#43001F] text-white text-xs font-bold hover:bg-[#2E0015] disabled:opacity-50"
                 >
                   Confirm Check-in
                 </button>
@@ -766,7 +766,7 @@ export default function FrontDeskPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-lg bg-[#D8AD56] text-[#25150F] text-xs font-bold hover:bg-[#C69940]"
+                  className="px-5 py-2 rounded-lg bg-[#43001F] text-white text-xs font-bold hover:bg-[#2E0015]"
                 >
                   Complete Checkout & Settle
                 </button>

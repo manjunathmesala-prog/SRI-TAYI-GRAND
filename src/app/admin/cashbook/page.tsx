@@ -270,7 +270,7 @@ export default function AdminCashbookPage() {
             <>
               <button
                 onClick={() => setIsAddTxModalOpen(true)}
-                className="px-4 py-2 rounded-xl bg-[#D8AD56] hover:bg-[#c69940] text-[#241912] text-xs font-bold flex items-center gap-1.5 shadow-md transition-colors"
+                className="px-4 py-2 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Record Cash Flow</span>
@@ -289,7 +289,7 @@ export default function AdminCashbookPage() {
           ) : (
             <button
               onClick={() => setIsOpenShiftModalOpen(true)}
-              className="px-4 py-2 rounded-xl bg-[#D8AD56] hover:bg-[#c69940] text-[#241912] text-xs font-bold flex items-center gap-1.5 shadow-md transition-colors"
+              className="px-4 py-2 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-colors"
             >
               <Unlock className="w-3.5 h-3.5" />
               <span>Open New Cash Shift</span>
@@ -597,7 +597,7 @@ export default function AdminCashbookPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 rounded-xl bg-[#D8AD56] hover:bg-[#c69940] text-[#241912] font-bold shadow-md"
+                  className="px-5 py-2 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white font-bold shadow-md"
                 >
                   {submitting ? 'Opening...' : 'Confirm & Open Shift'}
                 </button>
@@ -835,7 +835,7 @@ export default function AdminCashbookPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 rounded-xl bg-[#D8AD56] hover:bg-[#c69940] text-[#241912] font-bold shadow-md"
+                  className="px-5 py-2 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white font-bold shadow-md"
                 >
                   {submitting ? 'Recording...' : 'Record Transaction'}
                 </button>

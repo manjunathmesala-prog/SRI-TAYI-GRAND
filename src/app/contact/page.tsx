@@ -7,6 +7,7 @@ import { Footer } from '@/components/layout/Footer';
 import MobileStickyBookingBar from '@/components/anantha/MobileStickyBookingBar';
 import FloatingActionBar from '@/components/anantha/FloatingActionBar';
 import TayiBrandIcon from '@/components/anantha/TayiBrandIcon';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import { 
   Phone, 
   Mail, 
@@ -238,19 +239,17 @@ export default function ContactPage() {
                   </div>
 
                   <div>
-                    <label className="block font-semibold text-[#33271D] uppercase tracking-wider text-[11px] mb-1">
-                      Subject
-                    </label>
-                    <select
+                    <LuxurySelect
+                      label="Subject"
                       value={subject}
-                      onChange={(e) => setSubject(e.target.value)}
-                      className="w-full px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:border-[#43001F] focus:outline-none"
-                    >
-                      <option value="Room Booking">Room Booking Enquiry</option>
-                      <option value="Convention Hall">Convention Hall Enquiry</option>
-                      <option value="Group Stay">Group Stay & Functions</option>
-                      <option value="General Information">General Feedback / Inquiry</option>
-                    </select>
+                      onChange={(val) => setSubject(String(val))}
+                      options={[
+                        { value: 'Room Booking', label: 'Room Booking Enquiry' },
+                        { value: 'Convention Hall', label: 'Convention Hall Enquiry' },
+                        { value: 'Group Stay', label: 'Group Stay & Functions' },
+                        { value: 'General Information', label: 'General Feedback / Inquiry' },
+                      ]}
+                    />
                   </div>
 
                   <div>

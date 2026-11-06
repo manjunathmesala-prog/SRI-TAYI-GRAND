@@ -29,6 +29,11 @@ import {
   TrendingDown,
   Lock,
   Wrench,
+  Calculator,
+  UserCheck,
+  ShieldCheck,
+  CalendarRange,
+  TrendingUp,
 } from 'lucide-react';
 import { useRealtimeSync } from '@/lib/realtime-client';
 
@@ -84,10 +89,14 @@ export function AdminSidebar() {
   const menuItems = [
     { label: 'Dashboard Overview', href: '/admin/dashboard', icon: LayoutDashboard },
     { label: 'Front Desk / Reception', href: '/admin/front-desk', icon: ConciergeBell, highlight: true },
+    { label: 'Room Tape Chart', href: '/admin/rooms/board', icon: CalendarRange, badge: 'Matrix' },
     { label: 'Bookings', href: '/admin/bookings', icon: CalendarCheck },
+    { label: 'OTA Channel Manager', href: '/admin/channels', icon: Globe, badge: '2-Way' },
+    { label: 'Dynamic Pricing', href: '/admin/pricing', icon: TrendingUp, badge: 'Yield' },
     { label: 'Cashbook & Drawer', href: '/admin/cashbook', icon: Wallet, badge: 'Live' },
     { label: 'Operating Expenses', href: '/admin/expenses', icon: TrendingDown },
     { label: 'Night Audit & Closing', href: '/admin/daily-closing', icon: Lock },
+    { label: 'General Ledger ERP', href: '/admin/accounting', icon: Calculator, badge: 'GL' },
     { label: 'Room Inventory', href: '/admin/rooms/inventory', icon: BedDouble },
     { label: 'Room Categories', href: '/admin/rooms/categories', icon: Layers },
     { label: 'Housekeeping', href: '/admin/housekeeping', icon: Sparkles },
@@ -97,7 +106,9 @@ export function AdminSidebar() {
     { label: 'Convention Hall Enquiries', href: '/admin/convention-hall', icon: Building },
     { label: 'RFID Door Keycards', href: '/admin/rfid', icon: KeyRound, badge: 'Hardware' },
     { label: 'Guest Reviews', href: '/admin/reviews', icon: MessageSquareQuote },
+    { label: 'Staff Attendance', href: '/admin/staff/attendance', icon: UserCheck, badge: 'Roster' },
     { label: 'Staff & Roles', href: '/admin/staff', icon: UserCog },
+    { label: 'System Audit Logs', href: '/admin/audit-logs', icon: ShieldCheck, badge: 'Audit' },
     { label: 'Reports & Analytics', href: '/admin/reports', icon: BarChart3 },
     { label: 'Settings', href: '/admin/settings', icon: Settings },
   ];

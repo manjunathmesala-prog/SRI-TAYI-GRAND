@@ -8,6 +8,8 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { AvailabilityResult } from '@/lib/booking-engine';
 import { Bed, User, ArrowRight, RefreshCw, XCircle } from 'lucide-react';
+import { LuxuryDatePicker } from '@/components/ui/LuxuryDatePicker';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 
 function AvailabilityContent() {
   const router = useRouter();
@@ -87,66 +89,52 @@ function AvailabilityContent() {
       {/* Sleek Search Criteria Filter */}
       <div className="bg-white rounded-2xl border border-[#D8AD56]/25 p-5 sm:p-6 shadow-luxury mb-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
-          <div>
-            <label className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8C7A6B] mb-1.5">
-              Check-in
-            </label>
-            <input
-              type="date"
-              value={checkIn}
-              min={formatDate(today)}
-              onChange={(e) => setCheckIn(e.target.value)}
-              className="w-full text-xs font-medium p-2.5 rounded-xl border border-[#EFE3D6] bg-[#FAF7F2] text-[#241912] focus:outline-none focus:border-[#D8AD56]"
-            />
-          </div>
+          <LuxuryDatePicker
+            label="Check-in"
+            value={checkIn}
+            minDate={formatDate(today)}
+            onChange={(val) => {
+              setCheckIn(val);
+              if (val && checkOut && new Date(val) >= new Date(checkOut)) {
+                const nextDay = new Date(val);
+                nextDay.setDate(nextDay.getDate() + 1);
+                setCheckOut(formatDate(nextDay));
+              }
+            }}
+          />
 
-          <div>
-            <label className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8C7A6B] mb-1.5">
-              Check-out
-            </label>
-            <input
-              type="date"
-              value={checkOut}
-              min={checkIn}
-              onChange={(e) => setCheckOut(e.target.value)}
-              className="w-full text-xs font-medium p-2.5 rounded-xl border border-[#EFE3D6] bg-[#FAF7F2] text-[#241912] focus:outline-none focus:border-[#D8AD56]"
-            />
-          </div>
+          <LuxuryDatePicker
+            label="Check-out"
+            value={checkOut}
+            minDate={checkIn || formatDate(today)}
+            rangeStart={checkIn}
+            onChange={(val) => setCheckOut(val)}
+          />
 
-          <div>
-            <label className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8C7A6B] mb-1.5">
-              Adults
-            </label>
-            <select
-              value={adults}
-              onChange={(e) => setAdults(Number(e.target.value))}
-              className="w-full text-xs font-medium p-2.5 rounded-xl border border-[#EFE3D6] bg-[#FAF7F2] text-[#241912] focus:outline-none focus:border-[#D8AD56]"
-            >
-              {[1, 2, 3, 4, 5, 6].map((num) => (
-                <option key={num} value={num}>{num} {num === 1 ? 'Adult' : 'Adults'}</option>
-              ))}
-            </select>
-          </div>
+          <LuxurySelect
+            label="Adults"
+            value={adults}
+            onChange={(val) => setAdults(Number(val))}
+            options={[1, 2, 3, 4, 5, 6].map((num) => ({
+              value: num,
+              label: `${num} ${num === 1 ? 'Adult' : 'Adults'}`,
+            }))}
+          />
 
-          <div>
-            <label className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8C7A6B] mb-1.5">
-              Children
-            </label>
-            <select
-              value={children}
-              onChange={(e) => setChildren(Number(e.target.value))}
-              className="w-full text-xs font-medium p-2.5 rounded-xl border border-[#EFE3D6] bg-[#FAF7F2] text-[#241912] focus:outline-none focus:border-[#D8AD56]"
-            >
-              {[0, 1, 2, 3].map((num) => (
-                <option key={num} value={num}>{num} {num === 1 ? 'Child' : 'Children'}</option>
-              ))}
-            </select>
-          </div>
+          <LuxurySelect
+            label="Children"
+            value={children}
+            onChange={(val) => setChildren(Number(val))}
+            options={[0, 1, 2, 3].map((num) => ({
+              value: num,
+              label: `${num} ${num === 1 ? 'Child' : 'Children'}`,
+            }))}
+          />
 
           <div>
             <button
               onClick={fetchAvailability}
-              className="w-full py-3 px-4 rounded-xl bg-[#D8AD56] hover:bg-[#C69940] text-[#20120B] text-xs font-medium uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 shadow-sm"
+              className="w-full py-3 px-4 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-semibold uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 shadow-sm cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
               <span>Update Search</span>
@@ -268,7 +256,7 @@ function AvailabilityContent() {
                     <button
                       onClick={() => handleProceed(result)}
                       disabled={!result.isAvailable}
-                      className="w-full py-3.5 px-4 rounded-full bg-[#D8AD56] hover:bg-[#C69940] disabled:bg-gray-300 disabled:cursor-not-allowed text-[#20120B] text-xs font-medium uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 shadow-sm hover:shadow-goldGlow hover:-translate-y-0.5"
+                      className="w-full py-3.5 px-4 rounded-full bg-[#43001F] hover:bg-[#2E0015] disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-xs font-medium uppercase tracking-wider transition-all duration-300 flex items-center justify-center gap-2 shadow-sm hover:shadow-lg hover:-translate-y-0.5 border border-[#D8AD56]/40"
                     >
                       <span>{result.isAvailable ? 'Reserve Suite' : 'Unavailable'}</span>
                       <ArrowRight className="w-3.5 h-3.5" />

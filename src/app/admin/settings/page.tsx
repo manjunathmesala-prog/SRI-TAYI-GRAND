@@ -129,7 +129,7 @@ export default function SettingsAdminPage() {
         <div className="pt-4 border-t border-[#EFE3D6] flex justify-end">
           <button
             type="submit"
-            className="px-6 py-3 rounded-xl bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-bold tracking-wide transition-colors flex items-center gap-2 shadow-sm"
+            className="px-6 py-3 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold tracking-wide transition-colors flex items-center gap-2 shadow-sm"
           >
             <Save className="w-4 h-4" />
             <span>Update Global Settings</span>

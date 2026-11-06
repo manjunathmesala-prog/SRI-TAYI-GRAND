@@ -19,7 +19,7 @@ export default function NotFound() {
           </p>
           <NextLink
             href="/"
-            className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-semibold tracking-wider uppercase transition-colors shadow-luxury"
+            className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-semibold tracking-wider uppercase transition-colors shadow-luxury"
           >
             Return to Home
           </NextLink>

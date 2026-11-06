@@ -17,7 +17,15 @@ import {
   DailyClosing,
   CashShift,
   CashTransaction,
-  MaintenanceTicket
+  MaintenanceTicket,
+  OtaChannel,
+  ChannelSyncLog,
+  RoomChannelMapping,
+  PricingRule,
+  GLAccount,
+  JournalEntry,
+  AuditLogEntry,
+  StaffAttendance
 } from '@/types';
 import { INITIAL_GOOGLE_REVIEWS } from '@/lib/reviews-data';
 
@@ -589,6 +597,258 @@ export const INITIAL_MAINTENANCE_TICKETS: MaintenanceTicket[] = [
     created_at: new Date(Date.now() - 48 * 3600 * 1000).toISOString(),
     resolved_at: new Date(Date.now() - 44 * 3600 * 1000).toISOString(),
     resolution_notes: 'Batteries swapped, door aligned, tested successfully with master card.',
+  },
+];
+
+// ==============================================================================
+// TIER-2 SEED DATA: OTA CHANNELS, SYNC LOGS & PRICING RULES
+// ==============================================================================
+
+export const INITIAL_OTA_CHANNELS: OtaChannel[] = [
+  {
+    id: 'makemytrip',
+    name: 'MakeMyTrip',
+    category: 'ota',
+    logoText: 'MMT',
+    badgeBg: 'bg-red-500/20',
+    badgeTextColor: 'text-red-400',
+    isConnected: true,
+    rateMultiplier: 1.15,
+    lastSyncAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+    syncStatus: 'synced',
+  },
+  {
+    id: 'goibibo',
+    name: 'Goibibo',
+    category: 'ota',
+    logoText: 'GOI',
+    badgeBg: 'bg-orange-500/20',
+    badgeTextColor: 'text-orange-400',
+    isConnected: true,
+    rateMultiplier: 1.15,
+    lastSyncAt: new Date(Date.now() - 18 * 60 * 1000).toISOString(),
+    syncStatus: 'synced',
+  },
+  {
+    id: 'booking_com',
+    name: 'Booking.com',
+    category: 'ota',
+    logoText: 'B.',
+    badgeBg: 'bg-blue-600/20',
+    badgeTextColor: 'text-blue-400',
+    isConnected: true,
+    rateMultiplier: 1.15,
+    lastSyncAt: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
+    syncStatus: 'synced',
+  },
+  {
+    id: 'agoda',
+    name: 'Agoda International',
+    category: 'ota',
+    logoText: 'AGO',
+    badgeBg: 'bg-emerald-500/20',
+    badgeTextColor: 'text-emerald-400',
+    isConnected: true,
+    rateMultiplier: 1.15,
+    lastSyncAt: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
+    syncStatus: 'synced',
+  },
+  {
+    id: 'expedia',
+    name: 'Expedia Group',
+    category: 'ota',
+    logoText: 'EXP',
+    badgeBg: 'bg-amber-500/20',
+    badgeTextColor: 'text-amber-400',
+    isConnected: false,
+    rateMultiplier: 1.15,
+    syncStatus: 'idle',
+  },
+];
+
+export const INITIAL_CHANNEL_SYNC_LOGS: ChannelSyncLog[] = [
+  {
+    id: 'synclog-01',
+    channelId: 'makemytrip',
+    channelName: 'MakeMyTrip & Goibibo',
+    syncType: 'full_inventory',
+    status: 'success',
+    message: '25 physical rooms mapped, rate parity buffer applied (+15%).',
+    roomsUpdatedCount: 25,
+    ratesUpdatedCount: 6,
+    timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
+  },
+  {
+    id: 'synclog-02',
+    channelId: 'booking_com',
+    channelName: 'Booking.com',
+    syncType: 'rates_only',
+    status: 'success',
+    message: 'Live ARI (Availability, Rates & Inventory) push verified.',
+    roomsUpdatedCount: 25,
+    ratesUpdatedCount: 6,
+    timestamp: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
+  },
+];
+
+export const INITIAL_PRICING_RULES: PricingRule[] = [
+  {
+    id: 'rule-weekend',
+    name: 'Weekend Dynamic Surge',
+    description: 'Automatic 15% weekend uplift on Friday & Saturday night stays',
+    rule_type: 'weekend_surge',
+    adjustment_type: 'percentage',
+    adjustment_value: 15,
+    applies_to_categories: ['all'],
+    days_of_week: [5, 6],
+    is_active: true,
+    created_at: new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'rule-brahmotsavam',
+    name: 'Kadiri Sri Lakshmi Narasimha Swamy Brahmotsavam Surge',
+    description: '30% pilgrimage peak season adjustment during annual temple chariot festival',
+    rule_type: 'festival_surge',
+    adjustment_type: 'percentage',
+    adjustment_value: 30,
+    applies_to_categories: ['all'],
+    start_date: '2026-03-01',
+    end_date: '2026-03-15',
+    is_active: true,
+    created_at: new Date(Date.now() - 15 * 24 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'rule-extra-adult',
+    name: 'Extra Adult Rollaway Bed Surcharge',
+    description: 'Fixed ₹500 charge per additional guest per night',
+    rule_type: 'extra_bed',
+    adjustment_type: 'fixed_amount',
+    adjustment_value: 500,
+    applies_to_categories: ['all'],
+    is_active: true,
+    created_at: new Date(Date.now() - 20 * 24 * 3600 * 1000).toISOString(),
+  },
+];
+
+// ==============================================================================
+// TIER-3 SEED DATA: CHART OF ACCOUNTS, JOURNALS, AUDIT LOGS, ATTENDANCE
+// ==============================================================================
+
+export const INITIAL_GL_ACCOUNTS: GLAccount[] = [
+  { code: '1010', name: 'Cash in Front Desk Drawer', category: 'asset', balance: 5000, currency: 'INR', is_active: true },
+  { code: '1020', name: 'HDFC Current Bank Account', category: 'asset', balance: 342500, currency: 'INR', is_active: true },
+  { code: '1030', name: 'Razorpay Online Settlement Clearing', category: 'asset', balance: 18400, currency: 'INR', is_active: true },
+  { code: '1040', name: 'Guest Accounts Receivable', category: 'asset', balance: 4200, currency: 'INR', is_active: true },
+  { code: '2010', name: 'GST Output SGST (6%) Payable', category: 'liability', balance: 2150, currency: 'INR', is_active: true },
+  { code: '2020', name: 'GST Output CGST (6%) Payable', category: 'liability', balance: 2150, currency: 'INR', is_active: true },
+  { code: '2030', name: 'Advance Guest Deposits / Overpayments', category: 'liability', balance: 8000, currency: 'INR', is_active: true },
+  { code: '3010', name: 'Hotel Owner Equity & Capital', category: 'equity', balance: 357800, currency: 'INR', is_active: true },
+  { code: '4010', name: 'Room Accommodation Revenue', category: 'revenue', balance: 64800, currency: 'INR', is_active: true },
+  { code: '4020', name: 'Convention Hall & Banquet Revenue', category: 'revenue', balance: 25000, currency: 'INR', is_active: true },
+  { code: '5010', name: 'Linen & Laundry Operational Expense', category: 'expense', balance: 4200, currency: 'INR', is_active: true },
+  { code: '5020', name: 'Diesel Generator & Power Utilities', category: 'expense', balance: 6800, currency: 'INR', is_active: true },
+  { code: '5030', name: 'Property Maintenance & AC Repairs', category: 'expense', balance: 2330, currency: 'INR', is_active: true },
+  { code: '5040', name: 'Staff Welfare & Front Desk Operations', category: 'expense', balance: 1800, currency: 'INR', is_active: true },
+];
+
+export const INITIAL_JOURNAL_ENTRIES: JournalEntry[] = [
+  {
+    id: 'je-001',
+    entry_number: 'JE-2026-0001',
+    date: '2026-11-04',
+    reference: 'SHIFT-20261104',
+    description: 'Daily cash collections and room revenue recognition',
+    lines: [
+      { accountCode: '1010', accountName: 'Cash in Front Desk Drawer', debit: 12000, credit: 0, description: 'Cash collected at desk' },
+      { accountCode: '1020', accountName: 'HDFC Current Bank Account', debit: 18400, credit: 0, description: 'UPI & card collections' },
+      { accountCode: '1030', accountName: 'Razorpay Online Settlement Clearing', debit: 8000, credit: 0, description: 'Online website bookings' },
+      { accountCode: '4010', accountName: 'Room Accommodation Revenue', debit: 0, credit: 34286, description: 'Net room tariff' },
+      { accountCode: '2010', accountName: 'GST Output SGST (6%) Payable', debit: 0, credit: 2057, description: 'SGST 6%' },
+      { accountCode: '2020', accountName: 'GST Output CGST (6%) Payable', debit: 0, credit: 2057, description: 'CGST 6%' },
+    ],
+    total_debit: 38400,
+    total_credit: 38400,
+    is_balanced: true,
+    is_posted: true,
+    created_by: 'Lakshmi Narayana (Accounts)',
+    created_at: '2026-11-04T23:55:00+05:30',
+  },
+];
+
+export const INITIAL_AUDIT_LOGS: AuditLogEntry[] = [
+  {
+    id: 'log-001',
+    timestamp: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
+    userId: 'stf-001',
+    userName: 'Raghavendra Rao',
+    userRole: 'Front Desk',
+    action: 'CHECK_IN_GUEST',
+    entityType: 'booking',
+    entityId: 'BK-102',
+    details: 'Guest checked in to Room 102. Physical RFID keycard issued.',
+  },
+  {
+    id: 'log-002',
+    timestamp: new Date(Date.now() - 5 * 3600 * 1000).toISOString(),
+    userId: 'stf-002',
+    userName: 'Lakshmi Narayana',
+    userRole: 'Accounts',
+    action: 'DAILY_CLOSING_LOCK',
+    entityType: 'accounting',
+    entityId: 'close-20261104',
+    details: 'Daily closing register audited and locked. Drawer balanced without discrepancy.',
+  },
+  {
+    id: 'log-003',
+    timestamp: new Date(Date.now() - 12 * 3600 * 1000).toISOString(),
+    userId: 'stf-admin',
+    userName: 'Super Admin',
+    userRole: 'Super Admin',
+    action: 'PRICING_RULE_ACTIVATED',
+    entityType: 'pricing',
+    entityId: 'rule-weekend',
+    details: 'Weekend Dynamic Surge rule activated across all room inventory.',
+  },
+];
+
+export const INITIAL_STAFF_ATTENDANCE: StaffAttendance[] = [
+  {
+    id: 'att-001',
+    staff_id: 'stf-001',
+    staff_name: 'Raghavendra Rao',
+    role: 'Front Desk',
+    date: new Date().toISOString().split('T')[0],
+    shift: 'morning',
+    clock_in: new Date(Date.now() - 4 * 3600 * 1000).toISOString(),
+    status: 'present',
+    work_hours: 4,
+    notes: 'Morning reception duty on time',
+    created_at: new Date(Date.now() - 4 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'att-002',
+    staff_id: 'stf-002',
+    staff_name: 'Lakshmi Narayana',
+    role: 'Accounts',
+    date: new Date().toISOString().split('T')[0],
+    shift: 'general',
+    clock_in: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
+    status: 'present',
+    work_hours: 3,
+    created_at: new Date(Date.now() - 3 * 3600 * 1000).toISOString(),
+  },
+  {
+    id: 'att-003',
+    staff_id: 'stf-003',
+    staff_name: 'Suresh Kumar',
+    role: 'Housekeeping',
+    date: new Date().toISOString().split('T')[0],
+    shift: 'morning',
+    clock_in: new Date(Date.now() - 5 * 3600 * 1000).toISOString(),
+    status: 'present',
+    work_hours: 5,
+    notes: 'Floor 1 & 2 morning turnover',
+    created_at: new Date(Date.now() - 5 * 3600 * 1000).toISOString(),
   },
 ];
 

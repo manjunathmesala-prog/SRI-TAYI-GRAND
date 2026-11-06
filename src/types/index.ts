@@ -468,12 +468,22 @@ export type RealtimeEventType =
   | 'daily_closing' 
   | 'housekeeping_updated' 
   | 'rfid_event'
+  | 'rfid_scan'
+  | 'room_status_changed'
   | 'cash_shift_opened'
   | 'cash_shift_closed'
   | 'cash_transaction_created'
   | 'maintenance_ticket_created'
   | 'maintenance_ticket_updated'
   | 'maintenance_ticket_deleted'
+  | 'channel_synced'
+  | 'channel_updated'
+  | 'pricing_rule_created'
+  | 'pricing_rule_updated'
+  | 'pricing_rule_deleted'
+  | 'journal_entry_created'
+  | 'audit_log_created'
+  | 'attendance_recorded'
   | 'full_sync';
 
 export interface RealtimeMessage {
@@ -506,5 +516,162 @@ export interface GoogleReview {
   is_featured: boolean; // default true for first 6 written reviews
   is_published: boolean; // default true
   display_order: number;
+}
+
+// ==============================================================================
+// TIER-2: OTA CHANNEL MANAGER & DISTRIBUTION
+// ==============================================================================
+
+export interface OtaChannel {
+  id: string; // 'makemytrip' | 'goibibo' | 'booking_com' | 'agoda'
+  name: string;
+  category: 'ota' | 'metasearch' | 'direct';
+  logoText: string;
+  badgeBg: string;
+  badgeTextColor: string;
+  isConnected: boolean;
+  rateMultiplier: number; // e.g. 1.15 (+15% to cover OTA commission)
+  lastSyncAt?: string;
+  syncStatus: 'idle' | 'syncing' | 'synced' | 'error';
+  lastError?: string;
+}
+
+export interface ChannelSyncLog {
+  id: string;
+  channelId: string;
+  channelName: string;
+  syncType: 'full_inventory' | 'rates_only' | 'reservation_push' | 'heartbeat';
+  status: 'success' | 'warning' | 'failed';
+  message: string;
+  roomsUpdatedCount: number;
+  ratesUpdatedCount: number;
+  timestamp: string;
+}
+
+export interface RoomChannelMapping {
+  id: string;
+  category_id: string;
+  category_name: string;
+  channelId: string;
+  channelName: string;
+  otaRoomCode: string;
+  otaRatePlanCode: string;
+  isSyncEnabled: boolean;
+  baseRate: number;
+  channelRate: number;
+  updatedAt: string;
+}
+
+// ==============================================================================
+// TIER-2: DYNAMIC TARIFF & PRICING RULES
+// ==============================================================================
+
+export type PricingRuleType = 'weekend_surge' | 'seasonal_surge' | 'festival_surge' | 'special_discount' | 'extra_bed';
+
+export interface PricingRule {
+  id: string;
+  name: string;
+  description: string;
+  rule_type: PricingRuleType;
+  adjustment_type: 'percentage' | 'fixed_amount';
+  adjustment_value: number; // e.g. +15 for 15% or +500 for fixed ₹500
+  applies_to_categories: string[]; // ['all'] or array of category_ids
+  start_date?: string; // YYYY-MM-DD
+  end_date?: string; // YYYY-MM-DD
+  days_of_week?: number[]; // [5, 6] for Fri, Sat
+  is_active: boolean;
+  created_at: string;
+}
+
+// ==============================================================================
+// TIER-3: GENERAL LEDGER DOUBLE-ENTRY ACCOUNTING
+// ==============================================================================
+
+export type AccountCategory = 'asset' | 'liability' | 'equity' | 'revenue' | 'expense';
+
+export interface GLAccount {
+  code: string; // e.g. '1010'
+  name: string;
+  category: AccountCategory;
+  description?: string;
+  balance: number;
+  currency: string;
+  is_active: boolean;
+}
+
+export interface JournalLine {
+  accountCode: string;
+  accountName: string;
+  debit: number;
+  credit: number;
+  description?: string;
+}
+
+export interface JournalEntry {
+  id: string;
+  entry_number: string; // e.g. 'JE-2026-0001'
+  date: string; // YYYY-MM-DD
+  reference: string; // e.g. Booking ref, Shift id, or Invoice
+  description: string;
+  lines: JournalLine[];
+  total_debit: number;
+  total_credit: number;
+  is_balanced: boolean;
+  is_posted: boolean;
+  created_by: string;
+  created_at: string;
+}
+
+// ==============================================================================
+// TIER-3: IMMUTABLE AUDIT LOGS
+// ==============================================================================
+
+export type AuditActionCategory =
+  | 'booking'
+  | 'payment'
+  | 'cashbook'
+  | 'room'
+  | 'pricing'
+  | 'channel'
+  | 'maintenance'
+  | 'accounting'
+  | 'security'
+  | 'staff';
+
+export interface AuditLogEntry {
+  id: string;
+  timestamp: string;
+  userId: string;
+  userName: string;
+  userRole: string;
+  action: string;
+  entityType: AuditActionCategory;
+  entityId: string;
+  details: string;
+  previousValue?: any;
+  newValue?: any;
+  ipAddress?: string;
+}
+
+// ==============================================================================
+// TIER-3: STAFF ATTENDANCE & SHIFT ROSTER
+// ==============================================================================
+
+export type ShiftType = 'morning' | 'evening' | 'night' | 'general';
+export type AttendanceStatus = 'present' | 'late' | 'half_day' | 'absent' | 'on_duty';
+
+export interface StaffAttendance {
+  id: string;
+  staff_id: string;
+  staff_name: string;
+  role: StaffRole;
+  date: string; // YYYY-MM-DD
+  shift: ShiftType;
+  clock_in?: string; // ISO
+  clock_out?: string; // ISO
+  status: AttendanceStatus;
+  work_hours?: number;
+  notes?: string;
+  created_at: string;
 }
 

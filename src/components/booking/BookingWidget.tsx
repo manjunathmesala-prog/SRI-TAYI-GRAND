@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Calendar, User, ArrowRight, Minus, Plus } from 'lucide-react';
+import { LuxuryDatePicker } from '@/components/ui/LuxuryDatePicker';
 
 interface BookingWidgetProps {
   initialCheckIn?: string;
@@ -60,55 +61,66 @@ export function BookingWidget({
     >
       <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-stretch md:items-center">
         {/* Check-In */}
-        <div
-          data-cursor-hover
-          className="relative flex-1 flex items-center gap-3.5 px-5 py-3 hover:bg-[#FAF7F2] rounded-xl md:rounded-full transition-colors cursor-pointer group"
-        >
-          <Calendar className="w-4 h-4 text-[#D8AD56] shrink-0" strokeWidth={1.75} />
-          <div className="flex-1 min-w-0">
-            <span className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8C7A6B]">
-              Check-In
-            </span>
-            <input
-              type="date"
-              value={checkIn}
-              min={formatDate(today)}
-              onChange={(e) => {
-                setCheckIn(e.target.value);
-                if (checkOut && new Date(e.target.value) >= new Date(checkOut)) {
-                  const nextDay = new Date(e.target.value);
-                  nextDay.setDate(nextDay.getDate() + 1);
-                  setCheckOut(formatDate(nextDay));
-                }
-              }}
-              className="text-xs sm:text-sm font-medium text-[#241912] bg-transparent focus:outline-none w-full cursor-pointer"
-              placeholder="Select date"
-            />
-          </div>
+        <div className="relative flex-1">
+          <LuxuryDatePicker
+            value={checkIn}
+            minDate={formatDate(today)}
+            onChange={(val) => {
+              setCheckIn(val);
+              if (val && checkOut && new Date(val) >= new Date(checkOut)) {
+                const nextDay = new Date(val);
+                nextDay.setDate(nextDay.getDate() + 1);
+                setCheckOut(formatDate(nextDay));
+              }
+            }}
+            customTrigger={(formattedDisplay, open) => (
+              <div
+                data-cursor-hover
+                onClick={open}
+                className="relative flex-1 flex items-center gap-3.5 px-5 py-3 hover:bg-[#FAF7F2] rounded-xl md:rounded-full transition-colors cursor-pointer group"
+              >
+                <Calendar className="w-4 h-4 text-[#D8AD56] shrink-0" strokeWidth={1.75} />
+                <div className="flex-1 min-w-0">
+                  <span className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8C7A6B]">
+                    Check-In
+                  </span>
+                  <span className="block text-xs sm:text-sm font-medium text-[#241912] truncate">
+                    {formattedDisplay || 'Select date'}
+                  </span>
+                </div>
+              </div>
+            )}
+          />
         </div>
 
         {/* Delicate Divider */}
         <div className="hidden md:block w-[1px] h-8 bg-[#EFE3D6]" />
 
         {/* Check-Out */}
-        <div
-          data-cursor-hover
-          className="relative flex-1 flex items-center gap-3.5 px-5 py-3 hover:bg-[#FAF7F2] rounded-xl md:rounded-full transition-colors cursor-pointer group"
-        >
-          <Calendar className="w-4 h-4 text-[#D8AD56] shrink-0" strokeWidth={1.75} />
-          <div className="flex-1 min-w-0">
-            <span className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8C7A6B]">
-              Check-Out
-            </span>
-            <input
-              type="date"
-              value={checkOut}
-              min={checkIn || formatDate(today)}
-              onChange={(e) => setCheckOut(e.target.value)}
-              className="text-xs sm:text-sm font-medium text-[#241912] bg-transparent focus:outline-none w-full cursor-pointer"
-              placeholder="Select date"
-            />
-          </div>
+        <div className="relative flex-1">
+          <LuxuryDatePicker
+            value={checkOut}
+            minDate={checkIn || formatDate(today)}
+            rangeStart={checkIn}
+            onChange={(val) => setCheckOut(val)}
+            customTrigger={(formattedDisplay, open) => (
+              <div
+                data-cursor-hover
+                onClick={open}
+                className="relative flex-1 flex items-center gap-3.5 px-5 py-3 hover:bg-[#FAF7F2] rounded-xl md:rounded-full transition-colors cursor-pointer group"
+              >
+                <Calendar className="w-4 h-4 text-[#D8AD56] shrink-0" strokeWidth={1.75} />
+                <div className="flex-1 min-w-0">
+                  <span className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8C7A6B]">
+                    Check-Out
+                  </span>
+                  <span className="block text-xs sm:text-sm font-medium text-[#241912] truncate">
+                    {formattedDisplay || 'Select date'}
+                  </span>
+                </div>
+              </div>
+            )}
+          />
         </div>
 
         {/* Delicate Divider */}
@@ -216,7 +228,7 @@ export function BookingWidget({
               <button
                 type="button"
                 onClick={() => setGuestDropdownOpen(false)}
-                className="w-full mt-2 py-2 text-xs font-medium uppercase tracking-wider rounded-xl bg-[#D8AD56] text-[#20120B] hover:bg-[#C69940] transition-colors"
+                className="w-full mt-2 py-2 text-xs font-medium uppercase tracking-wider rounded-xl bg-[#43001F] text-white hover:bg-[#2E0015] transition-colors cursor-pointer"
               >
                 Done
               </button>
@@ -229,7 +241,7 @@ export function BookingWidget({
           <button
             type="submit"
             data-cursor-hover
-            className="w-full md:w-auto py-3.5 px-7 rounded-xl md:rounded-full bg-[#D8AD56] hover:bg-[#C69940] text-[#20120B] text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 shadow-md hover:shadow-goldGlow hover:-translate-y-0.5 active:translate-y-0 whitespace-nowrap"
+            className="w-full md:w-auto py-3.5 px-7 rounded-xl md:rounded-full bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 whitespace-nowrap cursor-pointer border border-[#D8AD56]/40"
           >
             <span>Check Availability</span>
             <ArrowRight className="w-3.5 h-3.5" />

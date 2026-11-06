@@ -228,7 +228,7 @@ export default function PaymentsAdminPage() {
 
           <button
             onClick={() => setShowPaymentModal(true)}
-            className="px-3.5 py-2.5 rounded-xl bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
+            className="px-3.5 py-2.5 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
           >
             <Plus className="w-3.5 h-3.5" />
             <span>+ Record Collection</span>
@@ -509,7 +509,7 @@ export default function PaymentsAdminPage() {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 rounded-lg bg-[#D8AD56] text-[#25150F] text-xs font-bold hover:bg-[#C69940]"
+                  className="px-5 py-2 rounded-lg bg-[#43001F] text-white text-xs font-bold hover:bg-[#2E0015]"
                 >
                   {submitting ? 'Recording...' : 'Commit Payment'}
                 </button>

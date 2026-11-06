@@ -37,7 +37,7 @@ export function MobileStickyBookingBar() {
               <div className="flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#D8AD56] animate-pulse" />
                 <span className="font-serif text-sm font-semibold text-white tracking-wide truncate">
-                  Tayi Grand Hotel
+                  Sri Tayi Grand
                 </span>
               </div>
               <span className="text-[11px] text-[#D8AD56] font-medium tracking-tight">
@@ -47,7 +47,7 @@ export function MobileStickyBookingBar() {
 
             <NextLink
               href="/rooms"
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#D8AD56] hover:bg-[#C69940] text-[#20120B] text-xs font-semibold tracking-wider transition-colors shadow-luxury active:scale-95 shrink-0"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-semibold tracking-wider transition-colors shadow-luxury active:scale-95 shrink-0 border border-[#D8AD56]/40"
             >
               <Calendar className="w-3.5 h-3.5" />
               <span>Book Stay</span>

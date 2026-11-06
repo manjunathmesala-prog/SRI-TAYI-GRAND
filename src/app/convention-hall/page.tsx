@@ -7,6 +7,8 @@ import { Footer } from '@/components/layout/Footer';
 import MobileStickyBookingBar from '@/components/anantha/MobileStickyBookingBar';
 import FloatingActionBar from '@/components/anantha/FloatingActionBar';
 import TayiBrandIcon from '@/components/anantha/TayiBrandIcon';
+import { LuxuryDatePicker } from '@/components/ui/LuxuryDatePicker';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import { 
   Users, 
   Car, 
@@ -263,23 +265,21 @@ export default function ConventionHallPage() {
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block font-semibold text-[#33271D] uppercase tracking-wider text-[11px] mb-1">
-                          Event Type
-                        </label>
-                        <select
+                        <LuxurySelect
+                          label="Event Type"
                           value={eventType}
-                          onChange={(e) => setEventType(e.target.value)}
-                          className="w-full px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:border-[#43001F] focus:outline-none"
-                        >
-                          <option value="Wedding Reception">Wedding Reception</option>
-                          <option value="Engagement Ceremony">Engagement Ceremony</option>
-                          <option value="Birthday Celebration">Birthday Celebration</option>
-                          <option value="Corporate Meeting">Corporate Meeting</option>
-                          <option value="Cultural / Community Event">Cultural Event</option>
-                        </select>
+                          onChange={(val) => setEventType(String(val))}
+                          options={[
+                            { value: 'Wedding Reception', label: 'Wedding Reception' },
+                            { value: 'Engagement Ceremony', label: 'Engagement Ceremony' },
+                            { value: 'Birthday Celebration', label: 'Birthday Celebration' },
+                            { value: 'Corporate Meeting', label: 'Corporate Meeting' },
+                            { value: 'Cultural / Community Event', label: 'Cultural Event' },
+                          ]}
+                        />
                       </div>
                       <div>
-                        <label className="block font-semibold text-[#33271D] uppercase tracking-wider text-[11px] mb-1">
+                        <label className="block font-semibold text-[#33271D] uppercase tracking-wider text-[11px] mb-1.5">
                           Expected Guests
                         </label>
                         <input
@@ -287,21 +287,18 @@ export default function ConventionHallPage() {
                           value={expectedGuests}
                           onChange={(e) => setExpectedGuests(e.target.value)}
                           placeholder="e.g. 400"
-                          className="w-full px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:border-[#43001F] focus:outline-none"
+                          className="w-full text-xs font-semibold p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:border-[#43001F] focus:outline-none"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block font-semibold text-[#33271D] uppercase tracking-wider text-[11px] mb-1">
-                        Preferred Date *
-                      </label>
-                      <input
-                        type="date"
-                        required
+                      <LuxuryDatePicker
+                        label="Preferred Date *"
                         value={eventDate}
-                        onChange={(e) => setEventDate(e.target.value)}
-                        className="w-full px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:border-[#43001F] focus:outline-none"
+                        minDate={new Date().toISOString().split('T')[0]}
+                        onChange={(val) => setEventDate(val)}
+                        placeholder="Select event date"
                       />
                     </div>
 

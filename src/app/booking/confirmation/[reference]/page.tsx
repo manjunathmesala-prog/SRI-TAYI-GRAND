@@ -141,7 +141,7 @@ export default function ConfirmationPage({ params }: ConfirmationPageProps) {
 
                 <NextLink
                   href="/"
-                  className="px-6 py-2.5 rounded-full bg-[#D8AD56] hover:bg-[#C69940] text-[#20120B] text-xs font-medium uppercase tracking-wider transition-all duration-300 shadow-sm hover:shadow-goldGlow flex items-center gap-1.5"
+                  className="px-6 py-2.5 rounded-full bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-medium uppercase tracking-wider transition-all duration-300 shadow-sm hover:shadow-lg flex items-center gap-1.5"
                 >
                   <span>Return Home</span>
                   <ArrowRight className="w-3.5 h-3.5" />

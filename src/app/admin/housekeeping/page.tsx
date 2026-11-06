@@ -192,7 +192,7 @@ export default function HousekeepingAdminPage() {
                     <button
                       disabled={isUpdating === r.id}
                       onClick={() => updateStatus(r.id, 'clean')}
-                      className="w-full py-1.5 rounded-lg bg-[#D8AD56] text-[#25150F] text-xs font-bold hover:bg-[#C69940] disabled:opacity-50 cursor-pointer"
+                      className="w-full py-1.5 rounded-lg bg-[#43001F] text-white text-xs font-bold hover:bg-[#2E0015] disabled:opacity-50 cursor-pointer"
                     >
                       {isUpdating === r.id ? 'Updating...' : 'Mark Clean & Ready'}
                     </button>

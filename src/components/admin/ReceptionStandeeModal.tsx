@@ -224,7 +224,7 @@ export function ReceptionStandeeModal({
           <a
             href={downloadPngUrl}
             download="sri_tayi_grand_reception_qr.png"
-            className="py-3 px-3 rounded-xl bg-[#D8AD56] hover:bg-[#c69940] text-[#241912] font-bold flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer text-center"
+            className="py-3 px-3 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white font-bold flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer text-center"
           >
             <Download className="w-4 h-4" />
             <span>Download QR (PNG)</span>

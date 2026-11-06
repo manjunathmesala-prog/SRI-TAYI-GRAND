@@ -95,15 +95,51 @@ button, a, input, select, textarea {
   overscroll-behavior-x: contain;
 }
 
+/* Luxury styling for native select dropdowns */
+select {
+  color-scheme: light;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23B18A4A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-position: right 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1rem 1rem;
+  padding-right: 2.25rem !important;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  cursor: pointer;
+}
+
+select:focus {
+  outline: none;
+  border-color: #43001F;
+}
+
+select option {
+  background-color: #FAF6EE;
+  color: #33271D;
+  padding: 8px 12px;
+}
+
+select option:checked {
+  background-color: #43001F;
+  color: #FFFFFF;
+}
+
 /* Luxury styling for native date inputs */
+input[type="date"] {
+  color-scheme: light;
+  cursor: pointer;
+}
+
 input[type="date"]::-webkit-calendar-picker-indicator {
   cursor: pointer;
-  opacity: 0.6;
-  transition: opacity 0.2s ease;
-  filter: invert(45%) sepia(50%) saturate(600%) hue-rotate(5deg) brightness(80%) contrast(85%);
+  opacity: 0.7;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  filter: invert(50%) sepia(40%) saturate(600%) hue-rotate(5deg) brightness(85%) contrast(85%);
 }
 input[type="date"]::-webkit-calendar-picker-indicator:hover {
   opacity: 1;
+  transform: scale(1.1);
 }
 input[type="date"]::-webkit-inner-spin-button,
 input[type="date"]::-webkit-clear-button {

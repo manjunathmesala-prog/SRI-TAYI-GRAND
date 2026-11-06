@@ -172,7 +172,7 @@ export function Header({ transparentInitially = false }: HeaderProps) {
             href="/rooms"
             className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-[12.5px] uppercase tracking-[0.14em] font-medium shadow-md transition-all duration-300 group hover:scale-105 active:scale-[0.98] ${
               isTransparent
-                ? 'bg-[#D8AD56] hover:bg-[#C69940] text-[#20120B]'
+                ? 'bg-[#43001F] hover:bg-[#2E0015] text-white border border-[#D8AD56]/40'
                 : 'bg-[#43001F] hover:bg-[#2E0015] text-white'
             }`}
           >
@@ -187,7 +187,7 @@ export function Header({ transparentInitially = false }: HeaderProps) {
             href="/rooms"
             className={`px-4 py-2 rounded-full text-[11px] uppercase tracking-wider font-medium shadow-sm transition-all active:scale-95 ${
               isTransparent
-                ? 'bg-[#D8AD56] hover:bg-[#C69940] text-[#20120B]'
+                ? 'bg-[#43001F] hover:bg-[#2E0015] text-white border border-[#D8AD56]/40'
                 : 'bg-[#43001F] hover:bg-[#2E0015] text-white'
             }`}
           >

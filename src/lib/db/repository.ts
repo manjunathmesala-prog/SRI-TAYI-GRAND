@@ -27,6 +27,17 @@ import {
   RealtimeEventType,
   RealtimeMessage,
   GoogleReview,
+  OtaChannel,
+  ChannelSyncLog,
+  RoomChannelMapping,
+  PricingRule,
+  GLAccount,
+  JournalEntry,
+  JournalLine,
+  AuditLogEntry,
+  AuditActionCategory,
+  StaffAttendance,
+  ShiftType,
 } from '@/types';
 
 import { syncCardToSupabase, syncEventToSupabase, deleteCardFromSupabase } from './supabase-rfid';
@@ -56,6 +67,13 @@ import {
   INITIAL_CASH_SHIFTS,
   INITIAL_CASH_TRANSACTIONS,
   INITIAL_MAINTENANCE_TICKETS,
+  INITIAL_OTA_CHANNELS,
+  INITIAL_CHANNEL_SYNC_LOGS,
+  INITIAL_PRICING_RULES,
+  INITIAL_GL_ACCOUNTS,
+  INITIAL_JOURNAL_ENTRIES,
+  INITIAL_AUDIT_LOGS,
+  INITIAL_STAFF_ATTENDANCE,
 } from './mock-data';
 import { calculateBookingTariff, normalizeCategoryId } from '@/lib/pricing';
 
@@ -80,6 +98,13 @@ export class HotelRepository {
   private cashShifts: CashShift[] = JSON.parse(JSON.stringify(INITIAL_CASH_SHIFTS));
   private cashTransactions: CashTransaction[] = JSON.parse(JSON.stringify(INITIAL_CASH_TRANSACTIONS));
   private maintenanceTickets: MaintenanceTicket[] = JSON.parse(JSON.stringify(INITIAL_MAINTENANCE_TICKETS));
+  private otaChannels: OtaChannel[] = JSON.parse(JSON.stringify(INITIAL_OTA_CHANNELS));
+  private channelSyncLogs: ChannelSyncLog[] = JSON.parse(JSON.stringify(INITIAL_CHANNEL_SYNC_LOGS));
+  private pricingRules: PricingRule[] = JSON.parse(JSON.stringify(INITIAL_PRICING_RULES));
+  private glAccounts: GLAccount[] = JSON.parse(JSON.stringify(INITIAL_GL_ACCOUNTS));
+  private journalEntries: JournalEntry[] = JSON.parse(JSON.stringify(INITIAL_JOURNAL_ENTRIES));
+  private auditLogs: AuditLogEntry[] = JSON.parse(JSON.stringify(INITIAL_AUDIT_LOGS));
+  private staffAttendance: StaffAttendance[] = JSON.parse(JSON.stringify(INITIAL_STAFF_ATTENDANCE));
 
   // In-Memory Real-Time Event Bus with Reconnection Replay Buffer
   private eventCounter: number = 0;
@@ -158,6 +183,13 @@ export class HotelRepository {
       rfidCards: this.getRFIDCards(),
       rfidDevices: this.getRFIDDevices(),
       rfidEvents: this.getRFIDEvents().slice(0, 100),
+      otaChannels: this.getChannels(),
+      channelSyncLogs: this.getChannelSyncLogs(),
+      pricingRules: this.getPricingRules(),
+      glAccounts: this.getChartOfAccounts(),
+      journalEntries: this.getJournalEntries(),
+      auditLogs: this.getAuditLogs(),
+      staffAttendance: this.getStaffAttendance(),
       settings: this.getSettings(),
     };
   }
@@ -1252,6 +1284,392 @@ export class HotelRepository {
       actor
     );
     return true;
+  }
+
+  // ==============================================================================
+  // TIER-2: OTA CHANNELS & DISTRIBUTION
+  // ==============================================================================
+
+  getChannels(): OtaChannel[] {
+    return [...this.otaChannels];
+  }
+
+  getChannel(id: string): OtaChannel | undefined {
+    return this.otaChannels.find((c) => c.id === id);
+  }
+
+  updateChannel(id: string, updates: Partial<OtaChannel>, actor?: string): OtaChannel {
+    const ch = this.otaChannels.find((c) => c.id === id);
+    if (!ch) throw new Error('Channel not found.');
+    Object.assign(ch, updates);
+    this.broadcastEvent('channel_updated', ch, actor);
+    this.recordAuditLog({
+      action: 'UPDATE_CHANNEL',
+      entityType: 'channel',
+      entityId: id,
+      details: `Updated channel ${ch.name}. Connected: ${ch.isConnected}, Multiplier: ${ch.rateMultiplier}`,
+      userName: actor || 'Admin',
+    });
+    return ch;
+  }
+
+  syncChannel(id: string, actor?: string): { success: boolean; log: ChannelSyncLog } {
+    const ch = this.otaChannels.find((c) => c.id === id);
+    if (!ch) throw new Error('Channel not found.');
+    ch.lastSyncAt = new Date().toISOString();
+    ch.syncStatus = 'synced';
+
+    const log: ChannelSyncLog = {
+      id: `synclog-${Date.now()}`,
+      channelId: ch.id,
+      channelName: ch.name,
+      syncType: 'full_inventory',
+      status: 'success',
+      message: `2-way live ARI sync completed for ${ch.name}. Rates updated with ${Math.round((ch.rateMultiplier - 1) * 100)}% markup.`,
+      roomsUpdatedCount: this.rooms.length,
+      ratesUpdatedCount: this.categories.length,
+      timestamp: new Date().toISOString(),
+    };
+    this.channelSyncLogs.unshift(log);
+    this.broadcastEvent('channel_synced', { channel: ch, log }, actor);
+    return { success: true, log };
+  }
+
+  getChannelSyncLogs(): ChannelSyncLog[] {
+    return [...this.channelSyncLogs];
+  }
+
+  addChannelSyncLog(log: ChannelSyncLog, actor?: string): ChannelSyncLog {
+    this.channelSyncLogs.unshift(log);
+    this.broadcastEvent('channel_synced', { log }, actor);
+    return log;
+  }
+
+  // ==============================================================================
+  // TIER-2: DYNAMIC PRICING RULES
+  // ==============================================================================
+
+  getPricingRules(): PricingRule[] {
+    return [...this.pricingRules];
+  }
+
+  getPricingRule(id: string): PricingRule | undefined {
+    return this.pricingRules.find((r) => r.id === id);
+  }
+
+  createPricingRule(data: Omit<PricingRule, 'id' | 'created_at'>, actor?: string): PricingRule {
+    const newRule: PricingRule = {
+      ...data,
+      id: `rule-${Date.now()}`,
+      created_at: new Date().toISOString(),
+    };
+    this.pricingRules.unshift(newRule);
+    this.broadcastEvent('pricing_rule_created', newRule, actor);
+    this.recordAuditLog({
+      action: 'CREATE_PRICING_RULE',
+      entityType: 'pricing',
+      entityId: newRule.id,
+      details: `Created pricing rule ${newRule.name} (${newRule.adjustment_value}${newRule.adjustment_type === 'percentage' ? '%' : ' INR'})`,
+      userName: actor || 'Admin',
+    });
+    return newRule;
+  }
+
+  updatePricingRule(id: string, updates: Partial<PricingRule>, actor?: string): PricingRule {
+    const rule = this.pricingRules.find((r) => r.id === id);
+    if (!rule) throw new Error('Pricing rule not found.');
+    Object.assign(rule, updates);
+    this.broadcastEvent('pricing_rule_updated', rule, actor);
+    this.recordAuditLog({
+      action: 'UPDATE_PRICING_RULE',
+      entityType: 'pricing',
+      entityId: id,
+      details: `Updated pricing rule ${rule.name}. Active: ${rule.is_active}`,
+      userName: actor || 'Admin',
+    });
+    return rule;
+  }
+
+  deletePricingRule(id: string, actor?: string): boolean {
+    const idx = this.pricingRules.findIndex((r) => r.id === id);
+    if (idx === -1) return false;
+    const removed = this.pricingRules.splice(idx, 1)[0];
+    this.broadcastEvent('pricing_rule_deleted', { id: removed.id }, actor);
+    this.recordAuditLog({
+      action: 'DELETE_PRICING_RULE',
+      entityType: 'pricing',
+      entityId: id,
+      details: `Deleted pricing rule ${removed.name}`,
+      userName: actor || 'Admin',
+    });
+    return true;
+  }
+
+  calculateEffectiveRate(
+    categoryId: string,
+    dateStr?: string
+  ): { baseRate: number; effectiveRate: number; appliedRules: string[] } {
+    const cat = this.categories.find((c) => c.id === categoryId);
+    const baseRate = cat ? cat.base_price_per_night : 2000;
+    let rate = baseRate;
+    const appliedRules: string[] = [];
+
+    const targetDate = dateStr ? new Date(dateStr) : new Date();
+    const dayOfWeek = targetDate.getDay();
+    const targetDateIso = targetDate.toISOString().split('T')[0];
+
+    for (const rule of this.pricingRules) {
+      if (!rule.is_active) continue;
+      if (!rule.applies_to_categories.includes('all') && !rule.applies_to_categories.includes(categoryId)) continue;
+
+      let ruleMatches = false;
+      if (rule.days_of_week && rule.days_of_week.includes(dayOfWeek)) {
+        ruleMatches = true;
+      }
+      if (rule.start_date && rule.end_date && targetDateIso >= rule.start_date && targetDateIso <= rule.end_date) {
+        ruleMatches = true;
+      }
+
+      if (ruleMatches) {
+        appliedRules.push(rule.name);
+        if (rule.adjustment_type === 'percentage') {
+          rate = Math.round(rate * (1 + rule.adjustment_value / 100));
+        } else {
+          rate += rule.adjustment_value;
+        }
+      }
+    }
+
+    return { baseRate, effectiveRate: rate, appliedRules };
+  }
+
+  // ==============================================================================
+  // TIER-3: GENERAL LEDGER DOUBLE-ENTRY ACCOUNTING
+  // ==============================================================================
+
+  getChartOfAccounts(): GLAccount[] {
+    return [...this.glAccounts];
+  }
+
+  getJournalEntries(): JournalEntry[] {
+    return [...this.journalEntries].sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+  }
+
+  createJournalEntry(
+    data: Omit<JournalEntry, 'id' | 'entry_number' | 'created_at' | 'is_balanced'>,
+    actor?: string
+  ): JournalEntry {
+    const totalDebit = data.lines.reduce((sum, l) => sum + (Number(l.debit) || 0), 0);
+    const totalCredit = data.lines.reduce((sum, l) => sum + (Number(l.credit) || 0), 0);
+    const isBalanced = Math.abs(totalDebit - totalCredit) < 0.01;
+
+    if (!isBalanced) {
+      throw new Error(`Double-entry out of balance: Total Debit (₹${totalDebit}) must equal Total Credit (₹${totalCredit}).`);
+    }
+
+    const nextNumber = `JE-${new Date().getFullYear()}-${String(this.journalEntries.length + 1).padStart(4, '0')}`;
+    const newEntry: JournalEntry = {
+      ...data,
+      id: `je-${Date.now()}`,
+      entry_number: nextNumber,
+      total_debit: totalDebit,
+      total_credit: totalCredit,
+      is_balanced: true,
+      created_at: new Date().toISOString(),
+    };
+
+    for (const line of newEntry.lines) {
+      const acc = this.glAccounts.find((a) => a.code === line.accountCode);
+      if (acc) {
+        if (acc.category === 'asset' || acc.category === 'expense') {
+          acc.balance += line.debit - line.credit;
+        } else {
+          acc.balance += line.credit - line.debit;
+        }
+      }
+    }
+
+    this.journalEntries.unshift(newEntry);
+    this.broadcastEvent('journal_entry_created', newEntry, actor);
+    this.recordAuditLog({
+      action: 'CREATE_JOURNAL_ENTRY',
+      entityType: 'accounting',
+      entityId: newEntry.id,
+      details: `Posted Journal Entry ${nextNumber}: ₹${totalDebit} (${newEntry.description})`,
+      userName: actor || 'Accounts Auditor',
+    });
+    return newEntry;
+  }
+
+  getPnL(): {
+    revenueTotal: number;
+    expenseTotal: number;
+    netProfit: number;
+    revenueAccounts: Array<{ code: string; name: string; amount: number }>;
+    expenseAccounts: Array<{ code: string; name: string; amount: number }>;
+  } {
+    const revAccounts = this.glAccounts
+      .filter((a) => a.category === 'revenue')
+      .map((a) => ({ code: a.code, name: a.name, amount: Math.max(0, a.balance) }));
+    const expAccounts = this.glAccounts
+      .filter((a) => a.category === 'expense')
+      .map((a) => ({ code: a.code, name: a.name, amount: Math.max(0, a.balance) }));
+
+    const revenueTotal = revAccounts.reduce((sum, a) => sum + a.amount, 0);
+    const expenseTotal = expAccounts.reduce((sum, a) => sum + a.amount, 0);
+
+    return {
+      revenueTotal,
+      expenseTotal,
+      netProfit: revenueTotal - expenseTotal,
+      revenueAccounts: revAccounts,
+      expenseAccounts: expAccounts,
+    };
+  }
+
+  getBalanceSheet(): {
+    assetsTotal: number;
+    liabilitiesTotal: number;
+    equityTotal: number;
+    isBalanced: boolean;
+    assets: Array<{ code: string; name: string; amount: number }>;
+    liabilities: Array<{ code: string; name: string; amount: number }>;
+    equity: Array<{ code: string; name: string; amount: number }>;
+  } {
+    const assets = this.glAccounts
+      .filter((a) => a.category === 'asset')
+      .map((a) => ({ code: a.code, name: a.name, amount: Math.max(0, a.balance) }));
+    const liabilities = this.glAccounts
+      .filter((a) => a.category === 'liability')
+      .map((a) => ({ code: a.code, name: a.name, amount: Math.max(0, a.balance) }));
+    const equity = this.glAccounts
+      .filter((a) => a.category === 'equity')
+      .map((a) => ({ code: a.code, name: a.name, amount: Math.max(0, a.balance) }));
+
+    const assetsTotal = assets.reduce((sum, a) => sum + a.amount, 0);
+    const liabilitiesTotal = liabilities.reduce((sum, a) => sum + a.amount, 0);
+    const equityTotal = equity.reduce((sum, a) => sum + a.amount, 0);
+
+    return {
+      assetsTotal,
+      liabilitiesTotal,
+      equityTotal,
+      isBalanced: Math.abs(assetsTotal - (liabilitiesTotal + equityTotal)) < 1,
+      assets,
+      liabilities,
+      equity,
+    };
+  }
+
+  // ==============================================================================
+  // TIER-3: IMMUTABLE AUDIT LOGS
+  // ==============================================================================
+
+  getAuditLogs(category?: AuditActionCategory): AuditLogEntry[] {
+    if (category) {
+      return this.auditLogs.filter((l) => l.entityType === category);
+    }
+    return [...this.auditLogs].sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+  }
+
+  recordAuditLog(params: {
+    action: string;
+    entityType: AuditActionCategory;
+    entityId: string;
+    details: string;
+    userName?: string;
+    userRole?: string;
+    userId?: string;
+    previousValue?: any;
+    newValue?: any;
+  }): AuditLogEntry {
+    const entry: AuditLogEntry = {
+      id: `log-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
+      timestamp: new Date().toISOString(),
+      userId: params.userId || 'stf-sys',
+      userName: params.userName || 'System Lead',
+      userRole: params.userRole || 'Admin',
+      action: params.action,
+      entityType: params.entityType,
+      entityId: params.entityId,
+      details: params.details,
+      previousValue: params.previousValue,
+      newValue: params.newValue,
+    };
+    this.auditLogs.unshift(entry);
+    this.broadcastEvent('audit_log_created', entry, entry.userName);
+    return entry;
+  }
+
+  // ==============================================================================
+  // TIER-3: STAFF ATTENDANCE
+  // ==============================================================================
+
+  getStaffAttendance(dateStr?: string): StaffAttendance[] {
+    const targetDate = dateStr || new Date().toISOString().split('T')[0];
+    return this.staffAttendance.filter((a) => a.date === targetDate);
+  }
+
+  clockInStaff(params: { staffId: string; shift?: ShiftType; notes?: string }, actor?: string): StaffAttendance {
+    const staff = this.staff.find((s) => s.id === params.staffId);
+    if (!staff) throw new Error('Staff member not found.');
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    const existing = this.staffAttendance.find(
+      (a) => a.staff_id === params.staffId && a.date === todayStr
+    );
+    if (existing && existing.clock_in && !existing.clock_out) {
+      throw new Error(`${staff.full_name} is already clocked in today.`);
+    }
+
+    const attendance: StaffAttendance = {
+      id: `att-${Date.now()}`,
+      staff_id: staff.id,
+      staff_name: staff.full_name,
+      role: staff.role,
+      date: todayStr,
+      shift: params.shift || 'general',
+      clock_in: new Date().toISOString(),
+      status: 'present',
+      notes: params.notes,
+      created_at: new Date().toISOString(),
+    };
+    this.staffAttendance.unshift(attendance);
+    this.broadcastEvent('attendance_recorded', attendance, actor);
+    this.recordAuditLog({
+      action: 'STAFF_CLOCK_IN',
+      entityType: 'staff',
+      entityId: attendance.id,
+      details: `${staff.full_name} (${staff.role}) clocked in for ${attendance.shift} shift`,
+      userName: actor || staff.full_name,
+    });
+    return attendance;
+  }
+
+  clockOutStaff(attendanceId: string, actor?: string): StaffAttendance {
+    const record = this.staffAttendance.find((a) => a.id === attendanceId);
+    if (!record) throw new Error('Attendance record not found.');
+    if (record.clock_out) throw new Error('Staff member is already clocked out.');
+
+    const clockOutTime = new Date().toISOString();
+    record.clock_out = clockOutTime;
+    if (record.clock_in) {
+      const diffMs = new Date(clockOutTime).getTime() - new Date(record.clock_in).getTime();
+      record.work_hours = Math.round((diffMs / (3600 * 1000)) * 10) / 10;
+    }
+    this.broadcastEvent('attendance_recorded', record, actor);
+    this.recordAuditLog({
+      action: 'STAFF_CLOCK_OUT',
+      entityType: 'staff',
+      entityId: record.id,
+      details: `${record.staff_name} clocked out after ${record.work_hours || 0} hours`,
+      userName: actor || record.staff_name,
+    });
+    return record;
   }
 
   // --- CONVENTION HALL ENQUIRIES ---

@@ -262,7 +262,7 @@ export default function AdminDailyClosingPage() {
             {existingClosingForDate && (
               <button
                 onClick={() => setSelectedClosing(existingClosingForDate)}
-                className="px-4 py-2.5 rounded-xl bg-[#D8AD56] hover:bg-[#c99f49] text-[#241912] text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-md transition-colors"
+                className="px-4 py-2.5 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 shadow-md transition-colors"
               >
                 <Printer className="w-4 h-4" />
                 <span>View / Print Certificate</span>

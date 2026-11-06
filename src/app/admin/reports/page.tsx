@@ -178,7 +178,7 @@ export default function ReportsAdminPage() {
 
           <button
             onClick={handleExportCSV}
-            className="px-4 py-2.5 rounded-xl bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-bold transition-colors flex items-center gap-2 shadow-sm cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold transition-colors flex items-center gap-2 shadow-sm cursor-pointer"
           >
             <Download className="w-4 h-4" />
             <span>Export Bookings CSV</span>
@@ -342,7 +342,7 @@ export default function ReportsAdminPage() {
               <button
                 type="submit"
                 disabled={isSubmittingClosing}
-                className="w-full py-3.5 px-4 rounded-xl bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-bold uppercase tracking-wider transition-all shadow-lg active:scale-98 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
+                className="w-full py-3.5 px-4 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold uppercase tracking-wider transition-all shadow-lg active:scale-98 disabled:opacity-50 cursor-pointer flex items-center justify-center gap-2"
               >
                 <Lock className="w-4 h-4" />
                 <span>{isSubmittingClosing ? 'Auditing & Closing...' : 'Execute Night Audit & Close Day'}</span>

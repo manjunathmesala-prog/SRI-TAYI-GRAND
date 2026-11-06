@@ -9,6 +9,8 @@ import { Footer } from '@/components/layout/Footer';
 import MobileStickyBookingBar from '@/components/anantha/MobileStickyBookingBar';
 import FloatingActionBar from '@/components/anantha/FloatingActionBar';
 import TayiBrandIcon from '@/components/anantha/TayiBrandIcon';
+import { LuxuryDatePicker } from '@/components/ui/LuxuryDatePicker';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import { repo } from '@/lib/db/repository';
 import { calculateBookingTariff } from '@/lib/pricing';
 import {
@@ -260,87 +262,61 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                 {/* Reservation Form */}
                 <form onSubmit={handleProceedBooking} className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#786A5B] mb-1.5">
-                        Check-in
-                      </label>
-                      <input
-                        type="date"
-                        value={checkIn}
-                        min={formatDate(today)}
-                        onChange={(e) => {
-                          setCheckIn(e.target.value);
-                          if (new Date(e.target.value) >= new Date(checkOut)) {
-                            const next = new Date(e.target.value);
-                            next.setDate(next.getDate() + 1);
-                            setCheckOut(formatDate(next));
-                          }
-                        }}
-                        required
-                        className="w-full text-xs font-semibold p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#43001F]"
-                      />
-                    </div>
+                    <LuxuryDatePicker
+                      label="Check-in"
+                      value={checkIn}
+                      minDate={formatDate(today)}
+                      onChange={(val) => {
+                        setCheckIn(val);
+                        if (val && checkOut && new Date(val) >= new Date(checkOut)) {
+                          const next = new Date(val);
+                          next.setDate(next.getDate() + 1);
+                          setCheckOut(formatDate(next));
+                        }
+                      }}
+                    />
 
-                    <div>
-                      <label className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#786A5B] mb-1.5">
-                        Check-out
-                      </label>
-                      <input
-                        type="date"
-                        value={checkOut}
-                        min={checkIn}
-                        onChange={(e) => setCheckOut(e.target.value)}
-                        required
-                        className="w-full text-xs font-semibold p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#43001F]"
-                      />
-                    </div>
+                    <LuxuryDatePicker
+                      label="Check-out"
+                      value={checkOut}
+                      minDate={checkIn || formatDate(today)}
+                      rangeStart={checkIn}
+                      onChange={(val) => setCheckOut(val)}
+                      align="right"
+                    />
                   </div>
 
                   <div className="grid grid-cols-3 gap-3">
-                    <div>
-                      <label className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#786A5B] mb-1.5">
-                        Rooms
-                      </label>
-                      <select
-                        value={roomsCount}
-                        onChange={(e) => setRoomsCount(Number(e.target.value))}
-                        className="w-full text-xs font-semibold p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#43001F]"
-                      >
-                        {[1, 2, 3, 4, 5].map((n) => (
-                          <option key={n} value={n}>{n} {n === 1 ? 'Room' : 'Rooms'}</option>
-                        ))}
-                      </select>
-                    </div>
+                    <LuxurySelect
+                      label="Rooms"
+                      value={roomsCount}
+                      onChange={(val) => setRoomsCount(Number(val))}
+                      options={[1, 2, 3, 4, 5].map((n) => ({
+                        value: n,
+                        label: `${n} ${n === 1 ? 'Room' : 'Rooms'}`,
+                      }))}
+                    />
 
-                    <div>
-                      <label className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#786A5B] mb-1.5">
-                        Adults
-                      </label>
-                      <select
-                        value={adults}
-                        onChange={(e) => setAdults(Number(e.target.value))}
-                        className="w-full text-xs font-semibold p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#43001F]"
-                      >
-                        {Array.from({ length: room.max_adults || 4 }, (_, i) => i + 1).map((n) => (
-                          <option key={n} value={n}>{n} {n === 1 ? 'Adult' : 'Adults'}</option>
-                        ))}
-                      </select>
-                    </div>
+                    <LuxurySelect
+                      label="Adults"
+                      value={adults}
+                      onChange={(val) => setAdults(Number(val))}
+                      options={Array.from({ length: room.max_adults || 4 }, (_, i) => i + 1).map((n) => ({
+                        value: n,
+                        label: `${n} ${n === 1 ? 'Adult' : 'Adults'}`,
+                      }))}
+                    />
 
-                    <div>
-                      <label className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#786A5B] mb-1.5">
-                        Children
-                      </label>
-                      <select
-                        value={children}
-                        onChange={(e) => setChildren(Number(e.target.value))}
-                        className="w-full text-xs font-semibold p-3 rounded-xl border border-[#E6D9C5] bg-[#FAF6EE] text-[#33271D] focus:outline-none focus:border-[#43001F]"
-                      >
-                        {[0, 1, 2, 3].map((n) => (
-                          <option key={n} value={n}>{n} {n === 1 ? 'Child' : 'Children'}</option>
-                        ))}
-                      </select>
-                    </div>
+                    <LuxurySelect
+                      label="Children"
+                      value={children}
+                      onChange={(val) => setChildren(Number(val))}
+                      options={[0, 1, 2, 3].map((n) => ({
+                        value: n,
+                        label: `${n} ${n === 1 ? 'Child' : 'Children'}`,
+                      }))}
+                      align="right"
+                    />
                   </div>
 
                   {/* Price Breakdown */}

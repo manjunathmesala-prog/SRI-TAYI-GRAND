@@ -25,6 +25,7 @@ import {
   Calendar,
   Lock,
 } from 'lucide-react';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 
 interface CategoryItem {
   id: string;
@@ -316,7 +317,7 @@ function WalkInContent() {
                     type="button"
                     disabled={!cat.is_available_now}
                     onClick={() => setSelectedCat(cat)}
-                    className="w-full py-2.5 px-3 rounded-xl bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50 cursor-pointer"
+                    className="w-full py-2.5 px-3 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50 cursor-pointer"
                   >
                     <span>{cat.is_available_now ? 'Select for Immediate Check-In' : 'Currently Fully Booked'}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -430,16 +431,17 @@ function WalkInContent() {
                 <div className="grid grid-cols-2 gap-2">
                   <div className="space-y-1">
                     <label className="text-[11px] font-semibold text-[#786B61]">ID Proof Type</label>
-                    <select
+                    <LuxurySelect
                       value={idType}
-                      onChange={(e) => setIdType(e.target.value)}
-                      className="w-full p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-xs text-[#241912] outline-none"
-                    >
-                      <option value="aadhaar">Aadhaar Card</option>
-                      <option value="driving_license">Driving License</option>
-                      <option value="passport">Passport</option>
-                      <option value="voter_id">Voter ID</option>
-                    </select>
+                      onChange={(val) => setIdType(String(val))}
+                      buttonClassName="p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-xs text-[#241912]"
+                      options={[
+                        { value: 'aadhaar', label: 'Aadhaar Card' },
+                        { value: 'driving_license', label: 'Driving License' },
+                        { value: 'passport', label: 'Passport' },
+                        { value: 'voter_id', label: 'Voter ID' }
+                      ]}
+                    />
                   </div>
                   <div className="space-y-1">
                     <label className="text-[11px] font-semibold text-[#786B61]">ID Number (Optional)</label>
@@ -516,7 +518,7 @@ function WalkInContent() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3.5 px-4 rounded-xl bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer disabled:opacity-50"
+                className="w-full py-3.5 px-4 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white font-bold text-sm transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer disabled:opacity-50"
               >
                 {isSubmitting ? (
                   <>

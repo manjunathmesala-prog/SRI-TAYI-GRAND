@@ -145,7 +145,7 @@ export default function AdminLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-goldGlow hover:-translate-y-0.5 disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 flex items-center justify-center gap-2"
             >
               <span>{loading ? 'Authenticating...' : 'Sign In to Management'}</span>
               <ArrowRight className="w-4 h-4" />
