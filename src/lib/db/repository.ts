@@ -271,6 +271,18 @@ export class HotelRepository {
 
     const room = this.rooms[index];
 
+    // Authoritative Booking Verification & Stale Data Prevention
+    const booking = this.getBookingByReference(bookingRef);
+    if (!booking) {
+      throw new Error(`Booking '${bookingRef}' was not found.`);
+    }
+    if (booking.status === 'checked_out') {
+      throw new Error(`Cannot assign room: Booking '${bookingRef}' has already checked out.`);
+    }
+    if (booking.status === 'cancelled') {
+      throw new Error(`Cannot assign room: Booking '${bookingRef}' has been cancelled.`);
+    }
+
     // Concurrency Lock: verify room is not occupied or assigned to another active reservation
     if (room.operational_status === 'occupied' && room.current_booking_ref !== bookingRef) {
       throw new Error(`Conflict: Room ${room.room_number} is already occupied by ${room.current_guest_name || 'another guest'}.`);
@@ -289,13 +301,10 @@ export class HotelRepository {
     room.current_guest_name = guestName;
     room.operational_status = 'reserved';
 
-    // Update booking if exists
-    const booking = this.getBookingByReference(bookingRef);
-    if (booking) {
-      booking.assigned_room_id = room.id;
-      booking.assigned_room_number = room.room_number;
-      booking.room_assigned_by = actor || 'Front Desk';
-    }
+    // Update booking
+    booking.assigned_room_id = room.id;
+    booking.assigned_room_number = room.room_number;
+    booking.room_assigned_by = actor || 'Front Desk';
 
     this.broadcastEvent(
       'room_assigned',
@@ -709,6 +718,9 @@ export class HotelRepository {
     record: Omit<PaymentRecord, 'id' | 'payment_reference' | 'created_at'>,
     actor?: string
   ): PaymentRecord {
+    if (!record.amount || isNaN(record.amount) || record.amount <= 0) {
+      throw new Error(`Payment amount must be a positive number. Received: ${record.amount}`);
+    }
     const rand = Math.floor(100 + Math.random() * 900);
     const newPayment: PaymentRecord = {
       ...record,
@@ -743,6 +755,9 @@ export class HotelRepository {
   }
 
   createExpense(data: Omit<Expense, 'id' | 'created_at'>, actor?: string): Expense {
+    if (!data.amount || isNaN(data.amount) || data.amount <= 0) {
+      throw new Error(`Expense amount must be a positive number. Received: ${data.amount}`);
+    }
     const rand = Math.floor(100 + Math.random() * 900);
     const newExpense: Expense = {
       ...data,
@@ -837,6 +852,9 @@ export class HotelRepository {
     closedByName: string;
     closedByRole: StaffRole;
   }): DailyClosing {
+    if (params.actualCashCounted < 0 || isNaN(params.actualCashCounted)) {
+      throw new Error(`Actual cash counted cannot be negative or invalid: ${params.actualCashCounted}`);
+    }
     const summary = this.getTodayClosingSummary(params.closingDate);
     const discrepancy = params.actualCashCounted - summary.expectedCashInDrawer;
 

@@ -44,6 +44,26 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ success: false, error: `Booking ${bookingReference} not found` }, { status: 404 });
         }
 
+        // Stale Data Guard: Validate current booking state
+        if (booking.status === 'checked_in') {
+          return NextResponse.json(
+            { success: false, error: `Booking ${bookingReference} is already checked in.` },
+            { status: 409 }
+          );
+        }
+        if (booking.status === 'checked_out') {
+          return NextResponse.json(
+            { success: false, error: `Cannot check in: Booking ${bookingReference} has already checked out.` },
+            { status: 409 }
+          );
+        }
+        if (booking.status === 'cancelled') {
+          return NextResponse.json(
+            { success: false, error: `Cannot check in: Booking ${bookingReference} was cancelled.` },
+            { status: 409 }
+          );
+        }
+
         const staffName = auth.session?.name || body.staffName || 'Front Desk';
 
         // If specific room selected, assign it
@@ -93,6 +113,20 @@ export async function POST(req: NextRequest) {
         const booking = repo.getBookingByReference(bookingReference);
         if (!booking) {
           return NextResponse.json({ success: false, error: `Booking ${bookingReference} not found` }, { status: 404 });
+        }
+
+        // Stale Data Guard: Check-out requires active checked_in status
+        if (booking.status === 'checked_out') {
+          return NextResponse.json(
+            { success: false, error: `Booking ${bookingReference} has already checked out.` },
+            { status: 409 }
+          );
+        }
+        if (booking.status !== 'checked_in') {
+          return NextResponse.json(
+            { success: false, error: `Cannot check out: Booking ${bookingReference} is not checked in (current status: ${booking.status}).` },
+            { status: 409 }
+          );
         }
 
         const staffName = auth.session?.name || body.staffName || 'Front Desk';
@@ -149,9 +183,26 @@ export async function POST(req: NextRequest) {
           );
         }
 
+        const booking = repo.getBookingByReference(bookingReference);
+        if (!booking) {
+          return NextResponse.json({ success: false, error: `Booking ${bookingReference} not found` }, { status: 404 });
+        }
+        if (booking.status === 'checked_out') {
+          return NextResponse.json(
+            { success: false, error: `Cannot assign room: Booking ${bookingReference} has already checked out.` },
+            { status: 409 }
+          );
+        }
+        if (booking.status === 'cancelled') {
+          return NextResponse.json(
+            { success: false, error: `Cannot assign room: Booking ${bookingReference} was cancelled.` },
+            { status: 409 }
+          );
+        }
+
         const staffName = auth.session?.name || body.staffName || 'Front Desk';
         try {
-          const room = repo.assignRoomToBooking(roomId, bookingReference, guestName || 'Guest', staffName);
+          const room = repo.assignRoomToBooking(roomId, bookingReference, guestName || booking.guest_name || 'Guest', staffName);
           return NextResponse.json({
             success: true,
             message: `Room ${room.room_number} assigned to booking ${bookingReference}.`,
@@ -174,6 +225,24 @@ export async function POST(req: NextRequest) {
             { success: false, error: 'roomId and housekeepingStatus are required' },
             { status: 400 }
           );
+        }
+
+        const validHkStatuses: HousekeepingStatus[] = ['clean', 'dirty', 'inspected', 'in_progress'];
+        if (!validHkStatuses.includes(housekeepingStatus as HousekeepingStatus)) {
+          return NextResponse.json(
+            { success: false, error: `Invalid housekeepingStatus: '${housekeepingStatus}'. Allowed: ${validHkStatuses.join(', ')}` },
+            { status: 400 }
+          );
+        }
+
+        if (operationalStatus) {
+          const validOpStatuses: OperationalStatus[] = ['available', 'occupied', 'reserved', 'maintenance', 'cleaning'];
+          if (!validOpStatuses.includes(operationalStatus as OperationalStatus)) {
+            return NextResponse.json(
+              { success: false, error: `Invalid operationalStatus: '${operationalStatus}'. Allowed: ${validOpStatuses.join(', ')}` },
+              { status: 400 }
+            );
+          }
         }
 
         const room = repo.getRoomById(roomId);
@@ -221,6 +290,14 @@ export async function POST(req: NextRequest) {
           );
         }
 
+        const validBookingStatuses: BookingStatus[] = ['pending', 'confirmed', 'checked_in', 'checked_out', 'cancelled'];
+        if (!validBookingStatuses.includes(status as BookingStatus)) {
+          return NextResponse.json(
+            { success: false, error: `Invalid booking status: '${status}'. Allowed: ${validBookingStatuses.join(', ')}` },
+            { status: 400 }
+          );
+        }
+
         const staffName = auth.session?.name || body.staffName || 'Staff';
         const updated = repo.updateBookingStatus(bookingReference, status as BookingStatus, notes, staffName);
         if (!updated) {
@@ -241,18 +318,23 @@ export async function POST(req: NextRequest) {
         }
 
         const { bookingReference, guestName, amount, paymentMethod } = body;
-        if (!bookingReference || !amount) {
+        if (!bookingReference || amount === undefined || isNaN(Number(amount)) || Number(amount) <= 0) {
           return NextResponse.json(
-            { success: false, error: 'bookingReference and amount are required' },
+            { success: false, error: 'Valid bookingReference and positive numeric amount are required' },
             { status: 400 }
           );
+        }
+
+        const booking = repo.getBookingByReference(bookingReference);
+        if (!booking) {
+          return NextResponse.json({ success: false, error: `Booking ${bookingReference} not found` }, { status: 404 });
         }
 
         const staffName = auth.session?.name || body.staffName || 'Accounts';
         const payment = repo.recordPayment(
           {
             booking_reference: bookingReference,
-            guest_name: guestName || 'Valued Guest',
+            guest_name: guestName || booking.guest_name || 'Valued Guest',
             amount: Number(amount),
             currency: 'INR',
             payment_method: (paymentMethod as PaymentMethod) || 'cash',

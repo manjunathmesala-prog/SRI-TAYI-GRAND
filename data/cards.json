@@ -1,5 +1,55 @@
 [
   {
+    "id": "crd-1793950475580",
+    "card_uid": "BT-57-1000081778",
+    "card_label": "Guest Card (Room 101)",
+    "card_type": "guest",
+    "assigned_room_number": "101",
+    "booking_reference": "STG-20261106-6226",
+    "guest_name": "K. Seshadri Naidu (Online)",
+    "holder_name": "K. Seshadri Naidu (Online)",
+    "status": "active",
+    "activated_at": "2026-11-06T07:34:35.580Z",
+    "expires_at": "2026-11-08T05:30:00.000Z",
+    "issued_by_name": "B. Lakshmi Devi",
+    "notes": "Customer Keycard for Room 101 (Stay: STG-20261106-6226)",
+    "created_at": "2026-11-06T07:34:35.580Z"
+  },
+  {
+    "id": "crd-1793949896278",
+    "card_uid": "BT-57-1000102781",
+    "card_label": "Guest Card (Room 102)",
+    "card_type": "guest",
+    "assigned_room_number": "102",
+    "booking_reference": "STG-20261106-5865",
+    "guest_name": "K. Seshadri Naidu (Online)",
+    "holder_name": "K. Seshadri Naidu (Online)",
+    "status": "inactive",
+    "activated_at": "2026-11-06T07:24:56.278Z",
+    "expires_at": "2026-11-08T05:30:00.000Z",
+    "issued_by_name": "B. Lakshmi Devi",
+    "notes": "Customer Keycard for Room 102 (Stay: STG-20261106-5865)",
+    "created_at": "2026-11-06T07:24:56.278Z",
+    "deactivated_at": "2026-11-06T07:24:56.463Z"
+  },
+  {
+    "id": "crd-1793949565977",
+    "card_uid": "BT-57-1000091537",
+    "card_label": "Guest Card (Room 101)",
+    "card_type": "guest",
+    "assigned_room_number": "101",
+    "booking_reference": "STG-20261106-7695",
+    "guest_name": "K. Seshadri Naidu (Online)",
+    "holder_name": "K. Seshadri Naidu (Online)",
+    "status": "inactive",
+    "activated_at": "2026-11-06T07:19:25.977Z",
+    "expires_at": "2026-11-08T05:30:00.000Z",
+    "issued_by_name": "B. Lakshmi Devi",
+    "notes": "Customer Keycard for Room 101 (Stay: STG-20261106-7695)",
+    "created_at": "2026-11-06T07:19:25.977Z",
+    "deactivated_at": "2026-11-06T07:19:26.176Z"
+  },
+  {
     "id": "crd-1793948148985",
     "card_uid": "BT-57-1000067643",
     "card_label": "Guest Card (Room 102)",
@@ -8,12 +58,13 @@
     "booking_reference": "STG-20261106-7648",
     "guest_name": "K. Seshadri Naidu (Online)",
     "holder_name": "K. Seshadri Naidu (Online)",
-    "status": "active",
+    "status": "inactive",
     "activated_at": "2026-11-06T06:55:48.985Z",
     "expires_at": "2026-11-08T05:30:00.000Z",
     "issued_by_name": "B. Lakshmi Devi",
     "notes": "Customer Keycard for Room 102 (Stay: STG-20261106-7648)",
-    "created_at": "2026-11-06T06:55:48.985Z"
+    "created_at": "2026-11-06T06:55:48.985Z",
+    "deactivated_at": "2026-11-06T07:24:56.463Z"
   },
   {
     "id": "crd-1793948051223",
@@ -30,7 +81,7 @@
     "issued_by_name": "B. Lakshmi Devi",
     "notes": "Customer Keycard for Room 101 (Stay: STG-20261106-3217)",
     "created_at": "2026-11-06T06:54:11.223Z",
-    "deactivated_at": "2026-11-06T06:54:11.246Z"
+    "deactivated_at": "2026-11-06T07:19:26.176Z"
   },
   {
     "id": "crd-1793947787117",
@@ -41,12 +92,13 @@
     "booking_reference": "TG-W-20261106-4368",
     "guest_name": "V. Ramanjaneyulu (Walk-In)",
     "holder_name": "V. Ramanjaneyulu (Walk-In)",
-    "status": "active",
+    "status": "inactive",
     "activated_at": "2026-11-06T06:49:47.117Z",
     "expires_at": "2026-11-07T05:30:00.000Z",
     "issued_by_name": "B. Lakshmi Devi",
     "notes": "Customer Keycard for Room 102 (Stay: TG-W-20261106-4368)",
-    "created_at": "2026-11-06T06:49:47.117Z"
+    "created_at": "2026-11-06T06:49:47.117Z",
+    "deactivated_at": "2026-11-06T07:24:56.464Z"
   },
   {
     "id": "crd-1793947717717",
@@ -63,7 +115,7 @@
     "issued_by_name": "B. Lakshmi Devi",
     "notes": "Customer Keycard for Room 101 (Stay: TG-W-20261106-9083)",
     "created_at": "2026-11-06T06:48:37.717Z",
-    "deactivated_at": "2026-11-06T06:54:11.246Z"
+    "deactivated_at": "2026-11-06T07:19:26.176Z"
   },
   {
     "id": "crd-sa-1793887646213",

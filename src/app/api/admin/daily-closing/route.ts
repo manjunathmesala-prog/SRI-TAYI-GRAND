@@ -34,9 +34,9 @@ export async function POST(req: NextRequest) {
     const { closingDate, actualCashCounted, notes } = body;
 
     const targetDate = closingDate || new Date().toISOString().split('T')[0];
-    if (actualCashCounted === undefined || isNaN(Number(actualCashCounted))) {
+    if (actualCashCounted === undefined || isNaN(Number(actualCashCounted)) || Number(actualCashCounted) < 0) {
       return NextResponse.json(
-        { success: false, error: 'actualCashCounted is required and must be a number.' },
+        { success: false, error: 'actualCashCounted is required and must be a non-negative number.' },
         { status: 400 }
       );
     }
