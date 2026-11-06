@@ -1,624 +1,651 @@
+import React from 'react';
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import NextLink from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { BookingWidget } from '@/components/booking/BookingWidget';
+import HorizonBookingBar from '@/components/anantha/HorizonBookingBar';
+import TayiBrandIcon from '@/components/anantha/TayiBrandIcon';
+import MobileStickyBookingBar from '@/components/anantha/MobileStickyBookingBar';
+import FloatingActionBar from '@/components/anantha/FloatingActionBar';
 import { TestimonialsSection } from '@/components/testimonials/TestimonialsSection';
 import { repo } from '@/lib/db/repository';
 import {
-  ScrollReveal,
-  StaggerContainer,
-  StaggerItem,
-} from '@/components/motion/ScrollReveal';
-import { AtmosphericGlow } from '@/components/motion/AtmosphericGlow';
-import { MobileStickyBookingBar } from '@/components/motion/MobileStickyBookingBar';
-import {
-  Snowflake,
+  Wind,
+  Building,
   Car,
-  Users,
   Wifi,
-  Bell,
+  Clock,
+  Sparkles,
   ArrowRight,
+  ArrowUpRight,
   MapPin,
   Phone,
   Calendar,
-  Sparkles,
+  Star,
+  ShieldCheck,
+  CheckCircle2,
+  Bed,
+  Users,
 } from 'lucide-react';
+
+export const dynamic = 'force-dynamic';
+
+export const metadata: Metadata = {
+  title: 'Sri Tayi Grand | Luxury AC Rooms & Convention Hall in Kadiri',
+  description: 'Book comfortable AC rooms & luxury suites at Sri Tayi Grand, Kadiri. Located on Bypass Road opposite Girls High School, minutes from Sri Kadiri Lakshmi Narasimha Swamy Temple & Railway Station. 24/7 front desk, ample parking, free Wi-Fi & instant room booking.',
+};
 
 export default function HomePage() {
   const categories = repo.getCategories();
 
   return (
-    <div className="flex flex-col min-h-screen relative overflow-x-hidden">
-      <Header transparentInitially={true} />
+    <main className="min-h-screen flex flex-col bg-[#F8F3E9] text-[#33271D]">
+      {/* Navigation */}
+      <Header transparentInitially={false} />
 
-      <main className="flex-grow">
-        {/* =========================================================================
-            HERO SECTION — EXACT LUXURY MATCH WITH SEMANTIC SCROLL & BLURS
-            ========================================================================= */}
-        <section className="relative min-h-[620px] sm:min-h-[720px] lg:min-h-[820px] flex flex-col justify-between pt-32 sm:pt-40 pb-10 sm:pb-14 overflow-hidden bg-[#20120B]">
-          {/* Authentic Hotel Exterior Background Image with Ambient Zoom */}
-          <div className="absolute inset-0 z-0">
-            <Image
-              src="/images/hotel/hotel-exterior-hero-clean.jpg"
-              alt="Sri Tayi Grand Hotel Facade"
-              fill
-              priority
-              className="object-cover object-[70%_center] sm:object-center transform scale-100 hover:scale-[1.02] transition-transform duration-1000 ease-out"
-              sizes="100vw"
-            />
-            {/* Subtle atmospheric vignette & blur overlays */}
-            <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#20120B] via-transparent to-black/30" />
-          </div>
+      {/* =========================================================================
+          HERO SECTION — EXACT ANANTHA HORIZON LUXURY FRAME
+          ========================================================================= */}
+      <section id="home" className="relative w-full pt-4 sm:pt-6 pb-16 sm:pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Main Hero Media Frame */}
+          <div className="relative w-full rounded-[24px] sm:rounded-[36px] overflow-hidden min-h-[560px] sm:min-h-[640px] lg:min-h-[700px] shadow-[0_20px_50px_rgba(0,0,0,0.12)] border border-stone-200/40 flex flex-col justify-between p-5 sm:p-10 lg:p-14">
+            {/* Background Hotel Exterior with Ambient Atmosphere */}
+            <div className="absolute inset-0 z-0 overflow-hidden bg-[#21180F]">
+              <Image
+                src="/images/hotel/hotel-exterior-hero-clean.jpg"
+                alt="Sri Tayi Grand Hotel Exterior Facade"
+                fill
+                priority
+                className="object-cover object-center scale-[1.01] hover:scale-105 transition-transform duration-1000 ease-out"
+                sizes="100vw"
+              />
+              {/* Subtle luxury ambient gradient overlays */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-black/40" />
+              <div className="absolute inset-0 bg-gradient-to-r from-black/55 via-black/20 to-black/40" />
+            </div>
 
-          {/* Atmospheric Glow Orbs in Hero */}
-          <AtmosphericGlow position="top-right" color="gold" size="lg" className="opacity-40" />
-          <AtmosphericGlow position="bottom-left" color="champagne" size="md" className="opacity-30" />
-
-          {/* Hero Left Content: Gold Dash, Title & Tagline with Semantic Stagger */}
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto">
-            <ScrollReveal preset="fade-up" duration={0.9} distance={40} className="max-w-xl">
-              {/* Gold horizontal accent bar */}
-              <div className="w-12 h-[2px] bg-[#D8AD56] mb-5 sm:mb-6 shadow-[0_0_8px_rgba(216,173,86,0.5)]" />
-
-              {/* Title: 2 lines in serif font */}
-              <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl font-normal text-white leading-[1.06] tracking-normal drop-shadow-md">
-                Tayi Grand<br />
-                Hotel
-              </h1>
-
-              {/* Subtitle: Stay · Host · Celebrate */}
-              <p className="mt-4 sm:mt-5 text-lg sm:text-xl md:text-2xl text-[#EFE3D6] font-light tracking-wide">
-                Stay · Host · Celebrate
-              </p>
-
-              {/* General Starting Price Badge with Soft Shimmer */}
-              <div className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-[#D8AD56]/40 text-xs text-[#EFE3D6] shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-[#D8AD56] animate-pulse" />
-                <span className="font-medium text-white">Rooms from ₹1,800</span>
-                <span className="text-[11px] text-[#EFE3D6]/70">• Kadiri, AP</span>
-              </div>
-            </ScrollReveal>
-          </div>
-
-          {/* Centered Floating Booking Widget Bar */}
-          <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-6">
-            <ScrollReveal preset="fade-up" delay={0.2} duration={0.85} distance={30}>
-              <BookingWidget />
-            </ScrollReveal>
-          </div>
-        </section>
-
-        {/* =========================================================================
-            ROOMS SECTION — "OUR ROOMS — Comfort for Every Stay" (RICH CARDS)
-            ========================================================================= */}
-        <section className="relative py-20 sm:py-28 bg-[#F8F1E9] overflow-hidden">
-          {/* Subtle Ambient Glow */}
-          <AtmosphericGlow position="center" color="gold" size="lg" className="opacity-25" />
-
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <ScrollReveal preset="fade-up" className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
-              <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] font-semibold text-[#D8AD56] mb-2">
-                <span className="w-6 h-[1px] bg-[#D8AD56]" />
-                <span>OUR ROOMS • FROM ₹1,800</span>
-                <span className="w-6 h-[1px] bg-[#D8AD56]" />
-              </div>
-              <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-normal text-[#241912]">
-                Comfort for Every Stay
-              </h2>
-              <div className="w-16 h-0.5 bg-[#D8AD56] mx-auto my-3.5 shadow-sm" />
-              <p className="text-xs sm:text-sm text-[#786B61] mt-2 leading-relaxed">
-                Spacious, fully air-conditioned rooms designed for restful relaxation and ultimate convenience. Starting from ₹1,800 per night (subject to availability).
-              </p>
-            </ScrollReveal>
-
-            {/* Room Cards: Horizontal Snap Carousel on Mobile, Responsive Grid on Desktop */}
-            <StaggerContainer
-              stagger={0.14}
-              className="flex md:grid md:grid-cols-2 lg:grid-cols-3 gap-5 md:gap-6 overflow-x-auto md:overflow-visible pb-4 md:pb-0 snap-x snap-mandatory -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
-            >
-              {categories.map((room) => (
-                <StaggerItem
-                  key={room.id}
-                  className="min-w-[82vw] sm:min-w-[320px] md:min-w-0 snap-center flex flex-col"
-                >
-                  <div
-                    data-cursor-hover
-                    className="bg-white rounded-2xl overflow-hidden border border-[#D8AD56]/25 shadow-luxury hover:shadow-luxuryHover hover:-translate-y-1.5 transition-all duration-300 flex flex-col h-full group"
-                  >
-                    {/* Room Cover Photo with Price Badge */}
-                    <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#382216]/10">
-                      <Image
-                        src={room.cover_image_url}
-                        alt={room.name}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                        sizes="(max-width: 768px) 85vw, (max-width: 1200px) 50vw, 33vw"
-                      />
-                      <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-[#25150F]/85 backdrop-blur-md text-[#D8AD56] text-xs font-semibold shadow-md border border-[#D8AD56]/30">
-                        ₹ {room.base_price_per_night.toLocaleString('en-IN')}{' '}
-                        <span className="text-[10px] text-white/75 font-normal">/ night</span>
-                      </div>
-                    </div>
-
-                    {/* Room Details Body */}
-                    <div className="p-5 flex-1 flex flex-col justify-between">
-                      <div>
-                        <h3 className="font-serif text-lg font-bold text-[#241912] group-hover:text-[#D8AD56] transition-colors">
-                          {room.name}
-                        </h3>
-                        <p className="text-xs text-[#786B61] mt-1.5 line-clamp-2 leading-relaxed font-light">
-                          {room.short_description}
-                        </p>
-
-                        <div className="mt-4 pt-3 border-t border-[#EFE3D6] grid grid-cols-2 gap-2 text-xs text-[#786B61]">
-                          <div>Bed: <strong className="text-[#241912] font-medium block truncate">{room.bed_type}</strong></div>
-                          <div>Included: <strong className="text-[#241912] font-medium block">{room.included_occupancy || 2} Persons</strong></div>
-                        </div>
-                        <div className="mt-2 text-[11px] text-[#8C7A6B]">
-                          <span>Extra Person: <strong className="text-[#241912] font-medium">₹300</strong></span>
-                          <span className="text-[#786B61]/70"> (Max {room.max_occupancy} guests)</span>
-                        </div>
-                      </div>
-
-                      <div className="mt-5 pt-3 border-t border-[#FAF7F2] flex items-center justify-between gap-2">
-                        <NextLink
-                          href={`/rooms/${room.slug}`}
-                          data-cursor-hover
-                          className="text-xs font-semibold text-[#382216] hover:text-[#D8AD56] transition-colors flex items-center gap-1 group/link"
-                        >
-                          <span>Details</span>
-                          <ArrowRight className="w-3.5 h-3.5 group-hover/link:translate-x-1 transition-transform" />
-                        </NextLink>
-
-                        <NextLink
-                          href={`/rooms/${room.slug}`}
-                          data-cursor-hover
-                          className="px-4 py-2 rounded-lg bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-semibold transition-all duration-300 shadow-sm hover:shadow-goldGlow active:scale-95"
-                        >
-                          Book Now
-                        </NextLink>
-                      </div>
-                    </div>
-                  </div>
-                </StaggerItem>
-              ))}
-            </StaggerContainer>
-
-            {/* Bottom link with smooth reveal */}
-            <ScrollReveal preset="fade-up" delay={0.2} className="text-center mt-12">
-              <NextLink
-                href="/rooms"
-                data-cursor-hover
-                className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#382216] hover:text-[#D8AD56] transition-colors group"
-              >
-                <span>View all room configurations & live availability</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </NextLink>
-            </ScrollReveal>
-          </div>
-        </section>
-
-        {/* =========================================================================
-            CONVENTION HALL BANNER — "Host Your Special Occasions"
-            ========================================================================= */}
-        <section className="relative py-24 sm:py-32 bg-[#20120B] text-white overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <Image
-              src="/images/hotel/convention-hall-wide.jpg"
-              alt="Sri Tayi Grand Convention Hall"
-              fill
-              className="object-cover opacity-35 object-center transform scale-100 hover:scale-105 transition-transform duration-1000 ease-out"
-              sizes="100vw"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#20120B] via-[#20120B]/85 to-transparent" />
-          </div>
-
-          <AtmosphericGlow position="top-right" color="gold" size="lg" className="opacity-30" />
-
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <ScrollReveal preset="fade-up" duration={0.85} className="max-w-xl">
-              <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] font-semibold text-[#D8AD56] mb-3">
-                <span className="w-6 h-[1px] bg-[#D8AD56]" />
-                <span>CONVENTION HALL</span>
-              </div>
-              <h2 className="font-serif text-3xl sm:text-5xl font-normal leading-tight text-white">
-                Host Your <br />
-                <span className="text-[#D8AD56]">Special Occasions</span>
-              </h2>
-              <div className="w-16 h-0.5 bg-[#D8AD56] my-4 shadow-sm" />
-              <p className="text-xs sm:text-sm text-[#EFE3D6]/90 leading-relaxed font-light">
-                A spacious and elegant air-conditioned venue with royal chandelier lighting, grand stage, dedicated dining facilities, and ample parking. Ideal for weddings, receptions, and corporate conferences in Kadiri.
-              </p>
-
-              <div className="mt-8 flex flex-wrap items-center gap-4">
-                <NextLink
-                  href="/convention-hall"
-                  data-cursor-hover
-                  className="px-6 py-3 rounded-xl bg-[#D8AD56] text-[#25150F] text-xs sm:text-sm font-semibold hover:bg-[#C69940] transition-all duration-300 shadow-luxury hover:shadow-goldGlow hover:-translate-y-0.5 flex items-center gap-2"
-                >
-                  <span>Book the Hall</span>
-                  <ArrowRight className="w-4 h-4" />
-                </NextLink>
-                <a
-                  href="tel:08494223379"
-                  data-cursor-hover
-                  className="px-5 py-3 rounded-xl border border-white/30 text-white text-xs sm:text-sm font-medium hover:bg-white/10 hover:border-white/50 transition-colors"
-                >
-                  Direct Inquiry: 084942 23379
-                </a>
-              </div>
-            </ScrollReveal>
-          </div>
-        </section>
-
-        {/* =========================================================================
-            GUEST EXPERIENCES & TESTIMONIALS SECTION (GOOGLE REVIEWS)
-            ========================================================================= */}
-        <ScrollReveal preset="fade-up" duration={0.8} once={true}>
-          <TestimonialsSection />
-        </ScrollReveal>
-
-        {/* =========================================================================
-            AMENITIES SECTION — "Everything You Need for a Perfect Stay"
-            ========================================================================= */}
-        <section className="relative py-20 sm:py-24 bg-[#FAF7F2] overflow-hidden">
-          <AtmosphericGlow position="bottom-left" color="champagne" size="lg" className="opacity-40" />
-
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <ScrollReveal preset="fade-up" className="text-center max-w-2xl mx-auto mb-14">
-              <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] font-semibold text-[#D8AD56] mb-2">
-                <span className="w-6 h-[1px] bg-[#D8AD56]" />
-                <span>AMENITIES</span>
-                <span className="w-6 h-[1px] bg-[#D8AD56]" />
-              </div>
-              <h2 className="font-serif text-3xl sm:text-4xl font-normal text-[#241912]">
-                Everything You Need <br />
-                for a Perfect Stay
-              </h2>
-              <div className="w-16 h-0.5 bg-[#D8AD56] mx-auto my-3.5 shadow-sm" />
-              <p className="text-xs sm:text-sm text-[#786B61]">
-                Thoughtful facilities designed to make your stay effortless, comfortable, and secure.
-              </p>
-            </ScrollReveal>
-
-            {/* Pill cards with Stagger Entrance and Micro-Lift Hover */}
-            <StaggerContainer
-              stagger={0.08}
-              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5 sm:gap-4"
-            >
-              <StaggerItem>
-                <div
-                  data-cursor-hover
-                  className="bg-white rounded-2xl border border-[#D8AD56]/20 p-5 sm:p-6 text-center shadow-sm hover:shadow-luxury hover:border-[#D8AD56]/60 hover:-translate-y-1.5 transition-all duration-300 flex flex-col items-center justify-center group h-full"
-                >
-                  <div className="w-12 h-12 rounded-full bg-[#FAF7F2] text-[#D8AD56] flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-[#D8AD56]/10 transition-transform duration-300">
-                    <Snowflake className="w-6 h-6" strokeWidth={1.75} />
-                  </div>
-                  <h4 className="text-xs font-semibold text-[#241912]">Fully AC Rooms</h4>
-                  <p className="text-[11px] text-[#786B61] mt-1 font-light">Individual climate control</p>
+            {/* Top content area inside hero */}
+            <div className="relative z-10 w-full flex flex-col lg:flex-row items-start justify-between gap-6 sm:gap-8 pt-2">
+              {/* Left Glassmorphism Hero Card */}
+              <div className="backdrop-blur-md bg-black/45 sm:bg-black/40 border border-white/20 rounded-[24px] sm:rounded-[32px] p-6 sm:p-8 lg:p-10 max-w-lg shadow-[0_25px_60px_rgba(0,0,0,0.35)] text-white">
+                <div className="flex items-center gap-2 mb-3">
+                  <TayiBrandIcon size={24} />
+                  <span className="text-[11px] uppercase tracking-[0.25em] text-[#E0C184] font-semibold">
+                    KADIRI • ANDHRA PRADESH
+                  </span>
                 </div>
-              </StaggerItem>
 
-              <StaggerItem>
-                <div
-                  data-cursor-hover
-                  className="bg-white rounded-2xl border border-[#D8AD56]/20 p-5 sm:p-6 text-center shadow-sm hover:shadow-luxury hover:border-[#D8AD56]/60 hover:-translate-y-1.5 transition-all duration-300 flex flex-col items-center justify-center group h-full"
-                >
-                  <div className="w-12 h-12 rounded-full bg-[#FAF7F2] text-[#D8AD56] flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-[#D8AD56]/10 transition-transform duration-300">
-                    <Car className="w-6 h-6" strokeWidth={1.75} />
-                  </div>
-                  <h4 className="text-xs font-semibold text-[#241912]">Car Parking</h4>
-                  <p className="text-[11px] text-[#786B61] mt-1 font-light">Secure on-site parking</p>
-                </div>
-              </StaggerItem>
+                <h1 className="text-xl sm:text-3xl lg:text-[34px] font-sans font-bold tracking-tight uppercase leading-[1.25]">
+                  EXPERIENCE{' '}
+                  <span className="font-serif italic capitalize font-normal text-[#E0C184] tracking-normal inline-block text-2xl sm:text-4xl lg:text-[42px] drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]">
+                    Luxury
+                  </span>
+                  <span className="block mt-1 font-serif tracking-[0.16em] font-bold text-lg sm:text-2xl lg:text-[26px] text-stone-100">
+                    AT SRI TAYI GRAND
+                  </span>
+                </h1>
 
-              <StaggerItem>
-                <div
-                  data-cursor-hover
-                  className="bg-white rounded-2xl border border-[#D8AD56]/20 p-5 sm:p-6 text-center shadow-sm hover:shadow-luxury hover:border-[#D8AD56]/60 hover:-translate-y-1.5 transition-all duration-300 flex flex-col items-center justify-center group h-full"
-                >
-                  <div className="w-12 h-12 rounded-full bg-[#FAF7F2] text-[#D8AD56] flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-[#D8AD56]/10 transition-transform duration-300">
-                    <Users className="w-6 h-6" strokeWidth={1.75} />
-                  </div>
-                  <h4 className="text-xs font-semibold text-[#241912]">Convention Hall</h4>
-                  <p className="text-[11px] text-[#786B61] mt-1 font-light">Up to 800 guests capacity</p>
-                </div>
-              </StaggerItem>
-
-              <StaggerItem>
-                <div
-                  data-cursor-hover
-                  className="bg-white rounded-2xl border border-[#D8AD56]/20 p-5 sm:p-6 text-center shadow-sm hover:shadow-luxury hover:border-[#D8AD56]/60 hover:-translate-y-1.5 transition-all duration-300 flex flex-col items-center justify-center group h-full"
-                >
-                  <div className="w-12 h-12 rounded-full bg-[#FAF7F2] text-[#D8AD56] flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-[#D8AD56]/10 transition-transform duration-300">
-                    <Wifi className="w-6 h-6" strokeWidth={1.75} />
-                  </div>
-                  <h4 className="text-xs font-semibold text-[#241912]">High-Speed Wi-Fi</h4>
-                  <p className="text-[11px] text-[#786B61] mt-1 font-light">Complimentary internet access</p>
-                </div>
-              </StaggerItem>
-
-              <StaggerItem className="col-span-2 sm:col-span-1">
-                <div
-                  data-cursor-hover
-                  className="bg-white rounded-2xl border border-[#D8AD56]/20 p-5 sm:p-6 text-center shadow-sm hover:shadow-luxury hover:border-[#D8AD56]/60 hover:-translate-y-1.5 transition-all duration-300 flex flex-col items-center justify-center group h-full"
-                >
-                  <div className="w-12 h-12 rounded-full bg-[#FAF7F2] text-[#D8AD56] flex items-center justify-center mb-3 group-hover:scale-110 group-hover:bg-[#D8AD56]/10 transition-transform duration-300">
-                    <Bell className="w-6 h-6" strokeWidth={1.75} />
-                  </div>
-                  <h4 className="text-xs font-semibold text-[#241912]">Room Service</h4>
-                  <p className="text-[11px] text-[#786B61] mt-1 font-light">Attentive stay assistance</p>
-                </div>
-              </StaggerItem>
-            </StaggerContainer>
-
-            <ScrollReveal preset="fade-up" delay={0.2} className="mt-8 text-center">
-              <NextLink
-                href="/amenities"
-                data-cursor-hover
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#D8AD56] hover:text-[#C69940] transition-colors group"
-              >
-                <span>View all verified facilities</span>
-                <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-              </NextLink>
-            </ScrollReveal>
-          </div>
-        </section>
-
-        {/* =========================================================================
-            EXPERIENCE TAYI GRAND — GALLERY PREVIEW
-            ========================================================================= */}
-        <section className="relative py-20 sm:py-24 bg-[#F8F1E9] overflow-hidden">
-          <AtmosphericGlow position="top-right" color="gold" size="md" className="opacity-30" />
-
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <ScrollReveal preset="fade-up" className="flex flex-col sm:flex-row sm:items-end justify-between mb-12">
-              <div>
-                <div className="inline-block text-xs uppercase tracking-[0.25em] font-semibold text-[#D8AD56] mb-2">
-                  GALLERY
-                </div>
-                <h2 className="font-serif text-3xl sm:text-4xl font-normal text-[#241912]">
-                  Experience Tayi Grand
-                </h2>
-                <p className="text-xs sm:text-sm text-[#786B61] mt-1 font-light">
-                  A glimpse of our authentic rooms, grand convention hall, and guest spaces.
-                </p>
-              </div>
-
-              <NextLink
-                href="/gallery"
-                data-cursor-hover
-                className="mt-4 sm:mt-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#D8AD56] text-[#25150F] text-xs font-semibold hover:bg-[#C69940] transition-all duration-300 shadow-sm hover:shadow-goldGlow hover:-translate-y-0.5"
-              >
-                <span>View Full Gallery</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </NextLink>
-            </ScrollReveal>
-
-            {/* Visual Highlights Grid with Stagger Entrance and Smooth Zoom */}
-            <StaggerContainer
-              stagger={0.1}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6"
-            >
-              <StaggerItem>
-                <div
-                  data-cursor-hover
-                  className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-luxury group border border-[#D8AD56]/20 bg-[#20120B]"
-                >
-                  <Image
-                    src="/images/hotel/hotel-exterior-night-enhanced.png"
-                    alt="Sri Tayi Grand Night Architecture"
-                    fill
-                    className="object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent flex items-end p-5">
-                    <div>
-                      <span className="text-[10px] uppercase tracking-wider text-[#D8AD56] font-semibold block mb-0.5">Architecture</span>
-                      <span className="text-sm font-serif font-medium text-white tracking-wide">Illuminated Facade</span>
-                    </div>
-                  </div>
-                </div>
-              </StaggerItem>
-
-              <StaggerItem>
-                <div
-                  data-cursor-hover
-                  className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-luxury group border border-[#D8AD56]/20 bg-[#20120B]"
-                >
-                  <Image
-                    src="/images/hotel/reception-desk-photo-enhanced.png"
-                    alt="Front Desk & Reception Concierge"
-                    fill
-                    className="object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent flex items-end p-5">
-                    <div>
-                      <span className="text-[10px] uppercase tracking-wider text-[#D8AD56] font-semibold block mb-0.5">Hospitality</span>
-                      <span className="text-sm font-serif font-medium text-white tracking-wide">Welcome Concierge</span>
-                    </div>
-                  </div>
-                </div>
-              </StaggerItem>
-
-              <StaggerItem>
-                <div
-                  data-cursor-hover
-                  className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-luxury group border border-[#D8AD56]/20 bg-[#20120B]"
-                >
-                  <Image
-                    src="/images/hotel/room-suite-bed-photo-enhanced.png"
-                    alt="Executive Master Suite Bed"
-                    fill
-                    className="object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent flex items-end p-5">
-                    <div>
-                      <span className="text-[10px] uppercase tracking-wider text-[#D8AD56] font-semibold block mb-0.5">Suites</span>
-                      <span className="text-sm font-serif font-medium text-white tracking-wide">Plush Master Bedding</span>
-                    </div>
-                  </div>
-                </div>
-              </StaggerItem>
-
-              <StaggerItem>
-                <div
-                  data-cursor-hover
-                  className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-luxury group border border-[#D8AD56]/20 bg-[#20120B]"
-                >
-                  <Image
-                    src="/images/hotel/suite-seating-photo-enhanced.png"
-                    alt="Suite Private Seating Lounge"
-                    fill
-                    className="object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
-                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent flex items-end p-5">
-                    <div>
-                      <span className="text-[10px] uppercase tracking-wider text-[#D8AD56] font-semibold block mb-0.5">Living Lounge</span>
-                      <span className="text-sm font-serif font-medium text-white tracking-wide">Private Suite Living</span>
-                    </div>
-                  </div>
-                </div>
-              </StaggerItem>
-            </StaggerContainer>
-          </div>
-        </section>
-
-        {/* =========================================================================
-            LOCATION & ACCESSIBILITY SECTION
-            ========================================================================= */}
-        <section className="py-16 sm:py-20 bg-white border-y border-[#D8AD56]/20 overflow-hidden">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-              <ScrollReveal preset="slide-right" duration={0.8}>
-                <div className="inline-block text-xs uppercase tracking-[0.25em] font-semibold text-[#D8AD56] mb-2">
-                  ACCESSIBILITY
-                </div>
-                <h2 className="font-serif text-2xl sm:text-3xl font-normal text-[#241912]">
-                  Conveniently Situated in Kadiri
-                </h2>
-                <div className="w-12 h-0.5 bg-[#D8AD56] my-3 shadow-sm" />
-                <p className="text-xs sm:text-sm text-[#786B61] leading-relaxed font-light">
-                  Located strategically on the Bypass Road opposite Girls High School, Sri Tayi Grand provides seamless road connectivity along the Tadipatri – Pulivendula – Kadiri corridor with hassle-free vehicle parking and quick access to local landmarks.
+                <p className="mt-3 sm:mt-4 text-xs sm:text-sm text-stone-200/90 leading-relaxed font-normal">
+                  Experience comfortable AC accommodations, grand banquet celebrations, exceptional hospitality, and peaceful tranquility on Bypass Road, Kadiri.
                 </p>
 
-                <div className="mt-6 space-y-3 text-xs text-[#241912]">
-                  <div className="flex items-start gap-2.5">
-                    <MapPin className="w-4 h-4 text-[#D8AD56] shrink-0 mt-0.5" />
-                    <span>4585+F8J, Opp. Girls High School, Bypass Road, Kadiri – 515591, AP</span>
-                  </div>
-                  <div className="flex items-center gap-2.5">
-                    <Phone className="w-4 h-4 text-[#D8AD56] shrink-0" />
-                    <span>084942 23379 (24/7 Front Desk)</span>
-                  </div>
-                </div>
-
-                <div className="mt-6">
+                {/* Action Buttons */}
+                <div className="mt-5 sm:mt-7 flex flex-wrap items-center gap-3">
                   <NextLink
-                    href="/contact"
-                    data-cursor-hover
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#382216] text-[#EFE3D6] text-xs font-semibold hover:bg-[#20120B] transition-all duration-300 hover:shadow-luxury hover:-translate-y-0.5"
+                    href="/rooms"
+                    className="px-5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] active:scale-[0.98] text-white text-xs sm:text-[13.5px] font-semibold tracking-wide shadow-lg hover:shadow-xl transition-all duration-200 uppercase flex items-center gap-2"
                   >
-                    <span>View Map & Driving Directions</span>
+                    <span>Book Your Stay</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </NextLink>
-                </div>
-              </ScrollReveal>
 
-              {/* Map Card */}
-              <ScrollReveal preset="slide-left" duration={0.8}>
-                <div
-                  data-cursor-hover
-                  className="relative aspect-[16/9] rounded-2xl overflow-hidden border border-[#D8AD56]/30 shadow-luxury bg-[#FAF7F2] flex items-center justify-center p-6 text-center hover:shadow-luxuryHover transition-shadow duration-300"
-                >
-                  <div>
-                    <div className="w-12 h-12 rounded-full bg-[#382216] text-[#D8AD56] flex items-center justify-center mx-auto mb-3 shadow-sm">
-                      <MapPin className="w-6 h-6" />
+                  <NextLink
+                    href="/rooms"
+                    className="px-4 sm:px-5 py-2.5 sm:py-3 rounded-full bg-white/15 hover:bg-white/25 active:scale-[0.98] backdrop-blur-sm border border-white/30 text-white text-xs sm:text-[13.5px] font-medium flex items-center gap-2 transition-all duration-200"
+                  >
+                    <span>Explore Rooms</span>
+                    <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-white text-stone-900 flex items-center justify-center">
+                      <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5 stroke-[2.5]" />
                     </div>
-                    <h4 className="font-serif font-bold text-base text-[#241912]">Google Maps Directions</h4>
-                    <p className="text-xs text-[#786B61] mt-1 max-w-sm mx-auto font-light">
-                      Revenue Colony, Tadipatri – Pulivendula – Kadiri Road, Kadiri
-                    </p>
-                    <a
-                      href="https://maps.google.com/?q=Sri+Tayi+Grand+Kadiri"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      data-cursor-hover
-                      className="mt-4 inline-block px-5 py-2 rounded-xl bg-[#D8AD56] text-[#20120B] text-xs font-semibold hover:bg-[#C69940] transition-all duration-300 shadow-sm hover:shadow-goldGlow hover:-translate-y-0.5"
-                    >
-                      Open in Google Maps
-                    </a>
+                  </NextLink>
+                </div>
+
+                {/* Rating Section */}
+                <div className="mt-7 pt-5 border-t border-white/15">
+                  <div className="flex items-center gap-1.5 text-white">
+                    {[...Array(5)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className="w-4 h-4 text-[#e0c184] fill-[#e0c184] stroke-none"
+                      />
+                    ))}
+                  </div>
+                  <p className="mt-1.5 text-[11.5px] text-stone-300 font-medium tracking-wide">
+                    Rated 5 Stars by Guests across Andhra Pradesh • Verified Hospitality
+                  </p>
+                </div>
+              </div>
+
+              {/* Right Glass Trust Badge */}
+              <div className="backdrop-blur-md bg-black/45 border border-white/20 rounded-[24px] p-5 sm:p-6 max-w-xs shadow-xl text-white self-start lg:self-center lg:mt-32">
+                <div className="flex items-center gap-2 text-[#E0C184] text-xs font-semibold tracking-wider uppercase mb-1.5">
+                  <ShieldCheck className="w-4 h-4 text-[#E0C184]" />
+                  <span>Strategic Location</span>
+                </div>
+                <p className="text-xs sm:text-[13px] text-stone-200 font-medium leading-snug">
+                  Minutes from Sri Kadiri Lakshmi Narasimha Swamy Temple &amp; Railway Station with hassle-free parking.
+                </p>
+
+                {/* Feature Chips */}
+                <div className="mt-4 flex flex-wrap items-center gap-1.5">
+                  <span className="px-2.5 py-1 rounded-full bg-white/15 text-[10.5px] font-medium text-stone-100 border border-white/20">
+                    24/7 Front Desk
+                  </span>
+                  <span className="px-2.5 py-1 rounded-full bg-white/15 text-[10.5px] font-medium text-stone-100 border border-white/20">
+                    Secure Parking
+                  </span>
+                  <span className="px-2.5 py-1 rounded-full bg-white/15 text-[10.5px] font-medium text-stone-100 border border-white/20">
+                    800+ Hall
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="h-6 sm:h-8" />
+          </div>
+
+          {/* Floating Booking Search Bar (overlapping hero bottom) */}
+          <div className="relative -mt-10 sm:-mt-12 z-30 px-2 sm:px-6">
+            <HorizonBookingBar buttonText="FIND YOUR STAY" />
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          SECTION: ROOMS FOR EVERY JOURNEY (COMFORT FOR EVERY STAY)
+          ========================================================================= */}
+      <section id="rooms" className="relative z-10 w-full py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <div className="text-center space-y-2 mb-12 reveal-on-scroll">
+          <div className="flex items-center justify-center gap-2 text-[#8D672F]">
+            <TayiBrandIcon size={18} />
+            <span className="text-xs uppercase tracking-[0.25em] font-semibold">STAY • FROM ₹1,800</span>
+            <TayiBrandIcon size={18} />
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-serif text-[#33271D]">
+            Rooms for Every Journey
+          </h2>
+          <p className="text-sm text-[#786A5B] max-w-md mx-auto">
+            Spacious, fully air-conditioned rooms designed for restful comfort and privacy.
+          </p>
+        </div>
+
+        {/* Room Cards Grid - Symmetrically Balanced */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 reveal-stagger">
+          {categories.map((room) => (
+            <div
+              key={room.id}
+              className="bg-white rounded-2xl overflow-hidden border border-[#E6D9C5] shadow-luxury group flex flex-col justify-between luxury-card-hover transition-all duration-300 hover:shadow-luxury-lg"
+            >
+              <div>
+                <div className="relative h-56 w-full overflow-hidden bg-[#21180F]/10">
+                  <Image
+                    src={room.cover_image_url}
+                    alt={room.name}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  />
+                  <div className="absolute top-3 left-3 bg-[#F8F3E9]/95 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-semibold text-[#8D672F] border border-[#E6D9C5] shadow-xs">
+                    ₹ {room.base_price_per_night.toLocaleString('en-IN')} / night
                   </div>
                 </div>
-              </ScrollReveal>
+
+                <div className="p-5 space-y-2.5">
+                  <h3 className="text-xl font-serif text-[#33271D] group-hover:text-[#8D672F] transition-colors">
+                    {room.name}
+                  </h3>
+                  <p className="text-xs text-[#786A5B] line-clamp-2 leading-relaxed">
+                    {room.short_description}
+                  </p>
+
+                  <div className="pt-2 border-t border-[#E6D9C5]/60 grid grid-cols-2 gap-2 text-xs text-[#786A5B]">
+                    <div className="flex items-center gap-1.5">
+                      <Bed className="w-3.5 h-3.5 text-[#8D672F]" />
+                      <span className="truncate">{room.bed_type}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5 text-[#8D672F]" />
+                      <span>{room.included_occupancy || 2} Persons</span>
+                    </div>
+                  </div>
+
+                  <div className="text-[11px] text-[#8D672F] font-medium">
+                    Extra Person: ₹300 <span className="text-[#786A5B]/70 font-normal">(Max {room.max_occupancy} guests)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-5 pt-0 space-y-2.5 border-t border-[#E6D9C5]/60 pt-3.5">
+                <NextLink
+                  href={`/rooms/${room.slug}`}
+                  className="w-full py-2.5 px-4 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] active:scale-[0.98] text-white text-xs uppercase tracking-[0.14em] font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 group/btn"
+                >
+                  <span>Book Now</span>
+                  <span className="text-amber-200/70 font-normal">·</span>
+                  <span className="font-sans font-bold text-sm tracking-tight tabular-nums">
+                    ₹{room.base_price_per_night.toLocaleString('en-IN')}
+                  </span>
+                  <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-1 transition-transform ml-0.5" />
+                </NextLink>
+
+                <div className="text-center">
+                  <NextLink
+                    href={`/rooms/${room.slug}`}
+                    className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.14em] font-semibold text-[#8D672F] hover:text-[#5E3F17] transition-colors py-1 group/det"
+                  >
+                    <span>View Room Details</span>
+                    <ArrowRight className="w-3 h-3 group-hover/det:translate-x-1 transition-transform" />
+                  </NextLink>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="text-center mt-12">
+          <NextLink
+            href="/rooms"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] text-white text-xs uppercase tracking-[0.18em] font-semibold shadow-md transition-all hover:scale-105 active:scale-95"
+          >
+            <span>Explore All Rooms & Suites</span>
+            <ArrowRight className="w-4 h-4" />
+          </NextLink>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          SECTION: CONVENTION HALL FOR EVERY OCCASION
+          ========================================================================= */}
+      <section className="w-full py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto border-t border-[#E6D9C5]/80">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+          <div className="lg:col-span-5 space-y-5 reveal-on-scroll">
+            <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#8D672F] inline-flex items-center gap-2">
+              <TayiBrandIcon size={18} />
+              EVENTS &amp; CONVENTION
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-serif text-[#33271D] leading-tight">
+              Convention Hall for Every Occasion
+            </h2>
+            <p className="text-sm text-[#786A5B] leading-relaxed">
+              A grand air-conditioned venue with royal chandelier lighting, acoustic design, grand stage, dedicated dining facilities, and ample parking on Bypass Road, Kadiri. Accommodates up to 800 guests for weddings, grand receptions, and celebrations.
+            </p>
+
+            <div className="grid grid-cols-2 gap-3 pt-2">
+              <div className="p-3 bg-white rounded-xl border border-[#E6D9C5] shadow-xs">
+                <div className="text-xs font-bold text-[#8D672F]">Up to 800 Guests</div>
+                <span className="text-[11px] text-[#786A5B] block mt-0.5">Spacious Seating</span>
+              </div>
+              <div className="p-3 bg-white rounded-xl border border-[#E6D9C5] shadow-xs">
+                <div className="text-xs font-bold text-[#8D672F]">Dedicated Dining</div>
+                <span className="text-[11px] text-[#786A5B] block mt-0.5">Modern Kitchen Area</span>
+              </div>
+            </div>
+
+            <div className="pt-2 flex flex-wrap items-center gap-3">
+              <NextLink
+                href="/convention-hall"
+                className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] text-white text-xs uppercase tracking-[0.16em] font-semibold shadow-md transition-all hover:translate-x-1"
+              >
+                <span>Enquire &amp; Book Convention Hall</span>
+                <ArrowRight className="w-4 h-4" />
+              </NextLink>
+
+              <a
+                href="tel:08494223379"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-full bg-white hover:bg-[#FAF6EE] text-[#33271D] border border-[#E6D9C5] text-xs uppercase tracking-[0.14em] font-semibold shadow-sm transition-all"
+              >
+                <Phone className="w-3.5 h-3.5 text-[#8D672F]" />
+                <span>084942 23379</span>
+              </a>
             </div>
           </div>
-        </section>
 
-        {/* =========================================================================
-            FINAL CALL TO ACTION BANNER — SERVICE BELL
-            ========================================================================= */}
-        <section className="relative py-20 bg-[#20120B] text-white overflow-hidden">
-          <div className="absolute inset-0 z-0">
-            <Image
-              src="/images/hotel/bell-cta-banner.jpg"
-              alt="Sri Tayi Grand Service Bell"
-              fill
-              className="object-cover opacity-50 object-center transform scale-100 hover:scale-105 transition-transform duration-1000 ease-out"
-              sizes="100vw"
-            />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#20120B] via-[#20120B]/85 to-transparent" />
+          <div className="lg:col-span-7 reveal-scale">
+            <div className="relative h-72 sm:h-96 lg:h-[440px] rounded-3xl overflow-hidden shadow-luxury border border-[#E6D9C5] group bg-[#21180F]">
+              <Image
+                src="/images/hotel/convention-hall-wide.jpg"
+                alt="Grand Convention Hall Banquet at Sri Tayi Grand Kadiri"
+                fill
+                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                sizes="(max-width: 1024px) 100vw, 60vw"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          SECTION: FACILITIES & COMFORTS (EVERYTHING YOU NEED, ELEVATED)
+          ========================================================================= */}
+      <section className="relative w-full py-20 sm:py-28 bg-[#F8F3E9] overflow-hidden border-t border-[#E6D9C5]">
+        {/* Large Faint Serif Background Watermark: COMFORT */}
+        <div 
+          aria-hidden="true" 
+          className="absolute inset-x-0 top-1/2 -translate-y-[45%] flex items-center justify-center pointer-events-none select-none z-0 overflow-hidden"
+        >
+          <span className="text-[130px] sm:text-[190px] md:text-[230px] lg:text-[270px] font-serif font-bold text-[#E6D9C5]/40 tracking-[0.18em] leading-none uppercase">
+            COMFORT
+          </span>
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center space-y-3 mb-12 sm:mb-16 reveal-on-scroll">
+            <span className="text-xs uppercase tracking-[0.28em] font-semibold text-[#8D672F] inline-flex items-center justify-center gap-2">
+              <TayiBrandIcon size={18} />
+              FACILITIES &amp; COMFORTS
+              <TayiBrandIcon size={18} />
+            </span>
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-serif text-[#33271D] font-normal tracking-tight">
+              Everything You Need, Elevated
+            </h2>
+            <p className="text-xs sm:text-sm text-[#786A5B] font-serif max-w-xl mx-auto leading-relaxed">
+              Every convenience has been carefully considered to ensure effortless tranquility throughout your time with us.
+            </p>
           </div>
 
-          <AtmosphericGlow position="top-right" color="gold" size="lg" className="opacity-30" />
+          {/* 6 Elevated Facility Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-5 reveal-stagger">
+            {[
+              {
+                label: 'Fully AC Rooms',
+                subtitle: 'Individual precision climate control',
+                icon: Wind,
+              },
+              {
+                label: 'Convention Hall',
+                subtitle: '800-capacity grand celebration venue',
+                icon: Building,
+              },
+              {
+                label: 'Car Parking',
+                subtitle: 'Ample secure on-premises parking bays',
+                icon: Car,
+              },
+              {
+                label: 'High-Speed Wi-Fi',
+                subtitle: 'Seamless wireless internet connection',
+                icon: Wifi,
+              },
+              {
+                label: '24/7 Hot Water',
+                subtitle: 'Continuous geyser supply in all rooms',
+                icon: Sparkles,
+              },
+              {
+                label: '24/7 Front Desk',
+                subtitle: 'Continuous dedicated reception & assistance',
+                icon: Clock,
+              },
+            ].map((fac, idx) => {
+              const Icon = fac.icon;
+              return (
+                <div
+                  key={idx}
+                  className="group bg-white rounded-2xl sm:rounded-[22px] p-5 sm:p-6 border border-[#E8DEC9] shadow-[0_4px_24px_-4px_rgba(66,43,25,0.05)] luxury-card-hover transition-all duration-300 flex flex-col items-center justify-between text-center min-h-[190px] sm:min-h-[220px]"
+                >
+                  <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#F8F3E9] border border-[#E6D9C5]/70 flex items-center justify-center text-[#8D672F] group-hover:scale-110 group-hover:bg-[#8D672F] group-hover:text-white transition-all duration-300 mb-4 shadow-[0_2px_8px_-2px_rgba(66,43,25,0.06)]">
+                    <Icon className="w-6 h-6 sm:w-7 sm:h-7 stroke-[1.6]" />
+                  </div>
+                  <div className="flex-1 flex flex-col justify-center">
+                    <h3 className="text-xs sm:text-sm font-serif font-bold text-[#33271D] tracking-tight mb-1">
+                      {fac.label}
+                    </h3>
+                    <p className="text-[10px] sm:text-[11px] text-[#786A5B] font-serif leading-tight">
+                      {fac.subtitle}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
 
-          <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <ScrollReveal preset="fade-up" duration={0.8} className="max-w-xl">
-              <div className="text-xs uppercase tracking-[0.2em] font-semibold text-[#D8AD56] mb-2 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#D8AD56]" />
-                <span>Tayi Grand Hotel</span>
+          <div className="text-center mt-10">
+            <NextLink
+              href="/amenities"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#8D672F] hover:text-[#5E3F17] transition-colors group"
+            >
+              <span>View all verified hotel amenities &amp; services</span>
+              <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+            </NextLink>
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          SECTION: EXPERIENCE TAYI GRAND — GALLERY PREVIEW
+          ========================================================================= */}
+      <section className="relative py-20 sm:py-24 bg-[#FAF5EB] border-t border-[#E6D9C5] overflow-hidden">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 reveal-on-scroll gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] font-semibold text-[#8D672F] mb-2">
+                <TayiBrandIcon size={18} />
+                <span>PHOTO GALLERY</span>
               </div>
-              <h2 className="font-serif text-3xl sm:text-4xl font-normal leading-tight text-white">
-                Plan Your Stay <br />
-                at Tayi Grand Hotel
+              <h2 className="font-serif text-3xl sm:text-4xl font-normal text-[#33271D]">
+                Experience Tayi Grand
               </h2>
-              <div className="w-12 h-0.5 bg-[#D8AD56] my-3 shadow-sm" />
-              <p className="mt-3 text-xs sm:text-sm text-[#EFE3D6]/90 font-light leading-relaxed">
-                Premium rooms, modern amenities, and a warm hospitality experience awaits you at Sri Tayi Grand.
+              <p className="text-xs sm:text-sm text-[#786A5B] mt-1 font-light">
+                A glimpse of our authentic rooms, grand convention hall, and hospitality spaces.
+              </p>
+            </div>
+
+            <NextLink
+              href="/gallery"
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] text-white text-xs uppercase tracking-[0.14em] font-semibold shadow-md transition-all self-start sm:self-auto hover:-translate-y-0.5"
+            >
+              <span>View Full Gallery</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </NextLink>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 reveal-stagger">
+            {[
+              {
+                src: '/images/hotel/hotel-exterior-night-enhanced.png',
+                category: 'Architecture',
+                title: 'Illuminated Facade',
+              },
+              {
+                src: '/images/hotel/reception-desk-photo-enhanced.png',
+                category: 'Hospitality',
+                title: 'Welcome Concierge',
+              },
+              {
+                src: '/images/hotel/room-suite-bed-photo-enhanced.png',
+                category: 'Suites',
+                title: 'Plush Master Bedding',
+              },
+              {
+                src: '/images/hotel/suite-seating-photo-enhanced.png',
+                category: 'Living Lounge',
+                title: 'Private Suite Living',
+              },
+            ].map((item, idx) => (
+              <div
+                key={idx}
+                className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-luxury group border border-[#E6D9C5] bg-[#21180F] luxury-card-hover"
+              >
+                <Image
+                  src={item.src}
+                  alt={item.title}
+                  fill
+                  className="object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent flex items-end p-5">
+                  <div>
+                    <span className="text-[10px] uppercase tracking-wider text-[#D8AD56] font-semibold block mb-0.5">
+                      {item.category}
+                    </span>
+                    <span className="text-sm font-serif font-medium text-white tracking-wide">
+                      {item.title}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          SECTION: GUEST TESTIMONIALS (GOOGLE REVIEWS)
+          ========================================================================= */}
+      <TestimonialsSection />
+
+      {/* =========================================================================
+          SECTION: LOCATION & ACCESSIBILITY
+          ========================================================================= */}
+      <section className="w-full py-16 sm:py-24 bg-[#F2E8D8]/50 border-t border-[#E6D9C5]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div className="lg:col-span-6 space-y-5 reveal-on-scroll">
+              <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#8D672F] inline-flex items-center gap-2">
+                <TayiBrandIcon size={18} />
+                LOCATION &amp; PROXIMITY
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-serif text-[#33271D]">
+                Convenient Location in Kadiri
+              </h2>
+              <p className="text-sm text-[#786A5B] leading-relaxed">
+                Located on Bypass Road opposite Girls High School, Kadiri 515591 (Tadipatri – Pulivendula corridor). Enjoy effortless access, secure on-site parking, and proximity to major religious and transit landmarks.
               </p>
 
-              <div className="mt-6 flex items-center gap-4">
-                <NextLink
-                  href="/rooms"
-                  data-cursor-hover
-                  className="px-6 py-3 rounded-xl bg-[#D8AD56] text-[#25150F] text-xs sm:text-sm font-semibold hover:bg-[#C69940] transition-all duration-300 shadow-luxury hover:shadow-goldGlow hover:-translate-y-0.5 flex items-center gap-2"
-                >
-                  <Calendar className="w-4 h-4" />
-                  <span>Book Now</span>
-                  <ArrowRight className="w-4 h-4" />
-                </NextLink>
-                <a
-                  href="tel:08494223379"
-                  data-cursor-hover
-                  className="text-xs text-[#EFE3D6] hover:text-[#D8AD56] underline transition-colors"
-                >
-                  Call 084942 23379
-                </a>
+              {/* Transit & Landmark Distances */}
+              <div className="grid grid-cols-3 gap-3 pt-2 text-center reveal-stagger">
+                <div className="p-3 bg-white rounded-xl border border-[#E6D9C5] luxury-card-hover shadow-xs">
+                  <div className="text-xs font-bold text-[#8D672F]">1.5 km (4 min)</div>
+                  <span className="text-[11px] font-semibold text-[#33271D] block mt-1">Kadiri Temple</span>
+                </div>
+                <div className="p-3 bg-white rounded-xl border border-[#E6D9C5] luxury-card-hover shadow-xs">
+                  <div className="text-xs font-bold text-[#8D672F]">2.0 km (5 min)</div>
+                  <span className="text-[11px] font-semibold text-[#33271D] block mt-1">Railway Station</span>
+                </div>
+                <div className="p-3 bg-white rounded-xl border border-[#E6D9C5] luxury-card-hover shadow-xs">
+                  <div className="text-xs font-bold text-[#8D672F]">Direct Access</div>
+                  <span className="text-[11px] font-semibold text-[#33271D] block mt-1">Bypass Road</span>
+                </div>
               </div>
-            </ScrollReveal>
+
+              <div className="pt-2 flex flex-wrap items-center gap-3">
+                <a
+                  href="https://maps.google.com/?q=Sri+Tayi+Grand+Kadiri"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-[#8D672F] hover:bg-[#6D4E21] text-white text-xs uppercase tracking-[0.16em] font-semibold shadow-md transition-all hover:translate-x-1"
+                >
+                  <span>Get Directions</span>
+                  <ArrowRight className="w-4 h-4" />
+                </a>
+                <NextLink
+                  href="/contact"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white hover:bg-[#FAF6EE] text-[#33271D] border border-[#E6D9C5] text-xs uppercase tracking-[0.16em] font-semibold shadow-sm transition-all"
+                >
+                  <MapPin className="w-4 h-4 text-[#8D672F]" />
+                  <span>Contact &amp; Map</span>
+                </NextLink>
+              </div>
+            </div>
+
+            <div className="lg:col-span-6 reveal-scale">
+              <div className="relative h-72 sm:h-96 rounded-3xl overflow-hidden border border-[#E6D9C5] shadow-luxury bg-white flex flex-col items-center justify-center p-6 text-center group">
+                <div className="w-14 h-14 rounded-full bg-[#F8F3E9] text-[#8D672F] border border-[#E6D9C5] flex items-center justify-center mx-auto mb-3 shadow-xs">
+                  <MapPin className="w-7 h-7" />
+                </div>
+                <h4 className="font-serif font-bold text-lg text-[#33271D]">
+                  Sri Tayi Grand Hotel Kadiri
+                </h4>
+                <p className="text-xs text-[#786A5B] mt-1.5 max-w-sm mx-auto leading-relaxed">
+                  4585+F8J, Opp. Girls High School, Bypass Road, Tadipatri – Pulivendula – Kadiri Road, Revenue Colony, Kadiri, Andhra Pradesh 515591
+                </p>
+                <div className="mt-5 flex items-center gap-3">
+                  <a
+                    href="https://maps.google.com/?q=Sri+Tayi+Grand+Kadiri"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#8D672F] text-white text-xs uppercase tracking-[0.14em] font-semibold shadow-md hover:bg-[#6D4E21] transition-all"
+                  >
+                    <span>Open in Google Maps</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
+
+      {/* =========================================================================
+          SECTION: FINAL CALL TO ACTION BANNER
+          ========================================================================= */}
+      <section className="relative py-20 bg-[#21180F] text-white overflow-hidden border-t border-[#3a2c1f]">
+        <div className="absolute inset-0 z-0">
+          <Image
+            src="/images/hotel/bell-cta-banner.jpg"
+            alt="Sri Tayi Grand Service Bell"
+            fill
+            className="object-cover opacity-35 object-center transform scale-100 hover:scale-105 transition-transform duration-1000 ease-out"
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#21180F] via-[#21180F]/85 to-transparent" />
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-xl reveal-on-scroll">
+            <div className="text-xs uppercase tracking-[0.2em] font-semibold text-[#D8AD56] mb-2 flex items-center gap-1.5">
+              <TayiBrandIcon size={18} />
+              <span>Sri Tayi Grand Hotel</span>
+            </div>
+            <h2 className="font-serif text-3xl sm:text-4xl font-normal leading-tight text-white">
+              Plan Your Stay <br />
+              at Sri Tayi Grand
+            </h2>
+            <div className="w-12 h-0.5 bg-[#D8AD56] my-3 shadow-sm" />
+            <p className="mt-3 text-xs sm:text-sm text-[#EFE3D6]/90 font-light leading-relaxed">
+              Premium air-conditioned rooms, modern amenities, and warm Indian hospitality awaits you in Kadiri.
+            </p>
+
+            <div className="mt-6 flex flex-wrap items-center gap-4">
+              <NextLink
+                href="/rooms"
+                className="px-7 py-3.5 rounded-full bg-[#8D672F] text-white text-xs uppercase tracking-[0.16em] font-semibold hover:bg-[#6D4E21] transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2 hover:translate-x-1"
+              >
+                <Calendar className="w-4 h-4" />
+                <span>Book Now</span>
+                <ArrowRight className="w-4 h-4" />
+              </NextLink>
+              <a
+                href="tel:08494223379"
+                className="text-xs text-[#EFE3D6] hover:text-[#D8AD56] underline transition-colors"
+              >
+                Call Front Desk: 084942 23379
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Floating Bottom Sticky Bar for Mobile Screens */}
       <MobileStickyBookingBar />
 
+      {/* Floating Action Bar for Desktops / Tablets */}
+      <FloatingActionBar />
+
+      {/* Footer */}
       <Footer />
-    </div>
+    </main>
   );
 }

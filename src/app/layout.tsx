@@ -1,10 +1,23 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import ScrollReveal from '@/components/anantha/ScrollReveal';
+
+export const viewport: Viewport = {
+  themeColor: '#8D672F',
+  colorScheme: 'light',
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover',
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://sritayigrand.com'),
-  title: 'Sri Tayi Grand | Luxury Stay & Convention Hall in Kadiri, Andhra Pradesh',
-  description: 'Experience thoughtful comfort and grand hospitality at Sri Tayi Grand, Kadiri. Double Room, Four Bed Room, Suite Room, and Grand Convention Hall.',
+  title: {
+    default: 'Sri Tayi Grand | Luxury Stay & Grand Convention Hall in Kadiri',
+    template: '%s | Sri Tayi Grand Hotel Kadiri',
+  },
+  description: 'Experience thoughtful comfort and authentic hospitality at Sri Tayi Grand, Kadiri. Fully AC Deluxe Rooms, Four Bed Family Rooms, Executive Suites, and Grand 800-capacity Convention Hall with ample parking.',
   keywords: 'Sri Tayi Grand, Tayi Grand Hotel, Kadiri Hotel, Hotels in Kadiri, Convention Hall Kadiri, Luxury Hotel Anantapur, Rooms in Kadiri',
   icons: {
     icon: '/favicon.ico',
@@ -12,13 +25,13 @@ export const metadata: Metadata = {
     apple: '/images/hotel/tayi-grand-logo.jpg',
   },
   openGraph: {
-    title: 'Sri Tayi Grand | Luxury Stay & Convention Hall',
-    description: 'Your Stay. Your Comfort. Your Grand Experience at Sri Tayi Grand, Kadiri.',
+    title: 'Sri Tayi Grand | Luxury Stay & Grand Convention Hall',
+    description: 'Thoughtful comfort, authentic hospitality, and modern convenience on Bypass Road, Kadiri.',
     url: 'https://sritayigrand.com',
     siteName: 'SRI TAYI GRAND',
     images: [
       {
-        url: '/images/hotel/hotel-exterior-hero.jpg',
+        url: '/images/hotel/hotel-exterior-hero-clean.jpg',
         width: 1200,
         height: 630,
         alt: 'Sri Tayi Grand Hotel Kadiri Exterior',
@@ -38,7 +51,7 @@ export default function RootLayout({
     '@context': 'https://schema.org',
     '@type': 'Hotel',
     name: 'SRI TAYI GRAND',
-    image: 'https://sritayigrand.com/images/hotel/hotel-exterior-hero.jpg',
+    image: 'https://sritayigrand.com/images/hotel/hotel-exterior-hero-clean.jpg',
     telephone: '084942 23379',
     email: 'contact@sritayigrand.com',
     address: {
@@ -68,7 +81,8 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(hotelStructuredData) }}
         />
       </head>
-      <body className="min-h-screen flex flex-col bg-[#F8F1E9] text-[#241912] selection:bg-[#D8AD56] selection:text-[#25150F] relative">
+      <body className="min-h-screen flex flex-col bg-[#F8F3E9] text-[#33271D] selection:bg-[#B18A4A] selection:text-white relative">
+        <ScrollReveal />
         {children}
       </body>
     </html>

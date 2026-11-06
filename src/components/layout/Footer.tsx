@@ -1,160 +1,207 @@
+'use client';
+
+import React from 'react';
 import NextLink from 'next/link';
 import Image from 'next/image';
-import { Phone, Mail, MapPin, MessageSquare } from 'lucide-react';
+import { ArrowUp, MapPin, Mail, Phone, ShieldCheck } from 'lucide-react';
 
 export function Footer() {
+  const scrollToTop = () => {
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
   return (
-    <footer className="bg-[#1C1009] text-[#EFE3D6] border-t border-[#D8AD56]/20 relative z-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-12">
-          {/* Brand Identity (5 cols) */}
-          <div className="lg:col-span-5 space-y-5">
-            <div className="flex items-center gap-3.5">
-              <div className="relative w-11 h-11 rounded-full border border-[#D8AD56]/80 overflow-hidden flex items-center justify-center bg-black/40 shadow-sm shrink-0">
-                <Image
-                  src="/images/hotel/tayi-grand-logo.jpg"
-                  alt="Sri Tayi Grand Hotel Official Emblem"
-                  fill
-                  sizes="44px"
-                  className="object-cover"
-                />
-              </div>
-              <div>
-                <span className="font-serif text-xl tracking-[0.08em] text-white block">
+    <footer className="w-full bg-[#21180F] text-[#F8F3E9] pt-16 sm:pt-20 pb-28 sm:pb-12 safe-area-bottom border-t border-[#3a2c1f]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Main Footer Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-14 border-b border-[#3a2c1f]/80">
+          
+          {/* Column 1: Brand (4 cols) */}
+          <div className="lg:col-span-4 flex flex-col space-y-4">
+            <NextLink href="/" className="inline-block focus:outline-none">
+              <div className="flex flex-col items-start space-y-2">
+                <div className="relative w-12 h-12 rounded-full border border-[#D8AD56]/80 overflow-hidden flex items-center justify-center bg-black/40 shadow-sm shrink-0">
+                  <Image
+                    src="/images/hotel/tayi-grand-logo.jpg"
+                    alt="Sri Tayi Grand Official Emblem"
+                    fill
+                    sizes="48px"
+                    className="object-cover"
+                  />
+                </div>
+                <div className="tracking-[0.22em] text-xl font-serif text-[#B18A4A] uppercase font-semibold">
                   SRI TAYI GRAND
-                </span>
-                <span className="text-[9px] uppercase tracking-[0.3em] text-[#D8AD56]/90 block">
-                  HOTEL & CONVENTIONS • KADIRI
-                </span>
+                </div>
+                <div className="tracking-[0.3em] text-[10px] text-[#E6D9C5]/80 uppercase -mt-1 font-medium">
+                  HOTEL • KADIRI
+                </div>
               </div>
-            </div>
-
-            <p className="text-xs sm:text-sm text-[#EFE3D6]/70 leading-relaxed max-w-sm font-light">
-              A refined haven of comfort and celebration in Kadiri, Andhra Pradesh. Offering serene suites, thoughtful hospitality, and a magnificent convention hall.
+            </NextLink>
+            <p className="text-sm text-[#E6D9C5]/70 leading-relaxed max-w-sm pt-2 font-serif italic">
+              A sanctuary of comfort, heartfelt hospitality and modern convenience on Bypass Road, Kadiri.
             </p>
-
-            <div className="pt-2 flex items-center gap-3">
-              <a
-                href="https://wa.me/918494223379"
-                target="_blank"
-                rel="noopener noreferrer"
-                data-cursor-hover
-                className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-[#D8AD56]/30 text-xs text-[#EFE3D6] transition-colors"
+            <div className="pt-2 flex items-center gap-2.5 flex-wrap">
+              <NextLink
+                href="/admin"
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#2D2218] hover:bg-[#8D672F] text-[#E6D9C5] hover:text-white border border-[#B18A4A]/40 hover:border-[#B18A4A] text-xs font-semibold tracking-wide transition-all duration-200 shadow-sm group"
               >
-                <MessageSquare className="w-3.5 h-3.5 text-[#25D366]" />
-                <span>Concierge via WhatsApp</span>
-              </a>
+                <ShieldCheck className="w-4 h-4 text-[#B18A4A] group-hover:text-white transition-colors" />
+                <span>Admin Panel</span>
+                <span className="text-[10px] text-[#B18A4A] group-hover:text-white/80 font-normal transition-transform group-hover:translate-x-0.5">→</span>
+              </NextLink>
             </div>
           </div>
 
-          {/* Curated Navigation (2 cols) */}
+          {/* Column 2: Quick Links (2.5 cols) */}
           <div className="lg:col-span-2">
-            <span className="text-[11px] uppercase tracking-[0.2em] font-semibold text-[#D8AD56] block mb-4">
-              Explore
-            </span>
-            <ul className="space-y-3 text-xs text-[#EFE3D6]/75">
+            <h4 className="text-xs uppercase tracking-[0.2em] font-medium text-[#B18A4A] mb-5">
+              Quick Links
+            </h4>
+            <ul className="space-y-3 text-sm text-[#E6D9C5]/80">
               <li>
-                <NextLink href="/rooms" data-cursor-hover className="hover:text-[#D8AD56] transition-colors">
+                <NextLink href="/" className="hover:text-[#B18A4A] transition-colors">
+                  Home
+                </NextLink>
+              </li>
+              <li>
+                <NextLink href="/rooms" className="hover:text-[#B18A4A] transition-colors">
                   Rooms & Suites
                 </NextLink>
               </li>
               <li>
-                <NextLink href="/convention-hall" data-cursor-hover className="hover:text-[#D8AD56] transition-colors">
+                <NextLink href="/convention-hall" className="hover:text-[#B18A4A] transition-colors">
                   Convention Hall
                 </NextLink>
               </li>
               <li>
-                <NextLink href="/amenities" data-cursor-hover className="hover:text-[#D8AD56] transition-colors">
-                  Amenities
+                <NextLink href="/amenities" className="hover:text-[#B18A4A] transition-colors">
+                  Facilities & Amenities
                 </NextLink>
               </li>
               <li>
-                <NextLink href="/gallery" data-cursor-hover className="hover:text-[#D8AD56] transition-colors">
+                <NextLink href="/gallery" className="hover:text-[#B18A4A] transition-colors">
                   Photo Gallery
                 </NextLink>
               </li>
               <li>
-                <NextLink href="/testimonials" data-cursor-hover className="hover:text-[#D8AD56] transition-colors">
+                <NextLink href="/about" className="hover:text-[#B18A4A] transition-colors">
+                  About Hotel
+                </NextLink>
+              </li>
+              <li>
+                <NextLink href="/testimonials" className="hover:text-[#B18A4A] transition-colors">
                   Guest Reviews
                 </NextLink>
               </li>
               <li>
-                <NextLink href="/about" data-cursor-hover className="hover:text-[#D8AD56] transition-colors">
-                  Our Story
+                <NextLink href="/contact" className="hover:text-[#B18A4A] transition-colors">
+                  Contact Us
                 </NextLink>
               </li>
             </ul>
           </div>
 
-          {/* Accommodations (2 cols) */}
-          <div className="lg:col-span-2">
-            <span className="text-[11px] uppercase tracking-[0.2em] font-semibold text-[#D8AD56] block mb-4">
-              Suites
-            </span>
-            <ul className="space-y-3 text-xs text-[#EFE3D6]/75">
-              <li>
-                <NextLink href="/rooms/double-room" data-cursor-hover className="hover:text-[#D8AD56] transition-colors">
-                  Double Room (₹1,800)
-                </NextLink>
-              </li>
-              <li>
-                <NextLink href="/rooms/four-bed-room" data-cursor-hover className="hover:text-[#D8AD56] transition-colors">
-                  Four Bed Room (₹2,800)
-                </NextLink>
-              </li>
-              <li>
-                <NextLink href="/rooms/suite-room" data-cursor-hover className="hover:text-[#D8AD56] transition-colors">
-                  Suite Room (₹3,300)
-                </NextLink>
-              </li>
-            </ul>
-          </div>
-
-          {/* Concierge & Location (3 cols) */}
+          {/* Column 3: Our Rooms & Venue (2.5 cols) */}
           <div className="lg:col-span-3">
-            <span className="text-[11px] uppercase tracking-[0.2em] font-semibold text-[#D8AD56] block mb-4">
-              Sanctuary
-            </span>
-            <div className="space-y-3 text-xs text-[#EFE3D6]/75">
-              <div className="flex items-start gap-2.5">
-                <MapPin className="w-4 h-4 text-[#D8AD56] shrink-0 mt-0.5" />
-                <p className="leading-relaxed">
-                  Bypass Road, Opp. Girls High School, Kadiri – 515591, Andhra Pradesh
-                </p>
-              </div>
+            <h4 className="text-xs uppercase tracking-[0.2em] font-medium text-[#B18A4A] mb-5">
+              Rooms & Venue
+            </h4>
+            <ul className="space-y-3 text-sm text-[#E6D9C5]/80">
+              <li>
+                <NextLink href="/rooms/suite-room" className="hover:text-[#B18A4A] transition-colors">
+                  Executive Suite Room
+                </NextLink>
+              </li>
+              <li>
+                <NextLink href="/rooms/four-bed-room" className="hover:text-[#B18A4A] transition-colors">
+                  Deluxe Four Bed Room
+                </NextLink>
+              </li>
+              <li>
+                <NextLink href="/rooms/double-room" className="hover:text-[#B18A4A] transition-colors">
+                  Deluxe Double Room
+                </NextLink>
+              </li>
+              <li>
+                <NextLink href="/convention-hall" className="hover:text-[#B18A4A] transition-colors">
+                  Grand Convention Hall (800 Guests)
+                </NextLink>
+              </li>
+              <li>
+                <NextLink href="/amenities" className="hover:text-[#B18A4A] transition-colors">
+                  Car Parking & Wi-Fi
+                </NextLink>
+              </li>
+            </ul>
+          </div>
 
-              <div className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-[#D8AD56] shrink-0" />
-                <a href="tel:08494223379" data-cursor-hover className="hover:text-[#D8AD56] transition-colors">
-                  084942 23379
+          {/* Column 4: Contact Us (3 cols) */}
+          <div className="lg:col-span-3">
+            <h4 className="text-xs uppercase tracking-[0.2em] font-medium text-[#B18A4A] mb-5">
+              Contact Us
+            </h4>
+            <div className="space-y-3.5 text-sm text-[#E6D9C5]/80">
+              <div className="flex items-start gap-2.5">
+                <MapPin className="w-4 h-4 text-[#B18A4A] shrink-0 mt-1" />
+                <a
+                  href="https://maps.google.com/?q=Sri+Tayi+Grand+Kadiri"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="leading-snug hover:text-[#B18A4A] transition-colors"
+                >
+                  Opp. Girls High School, Bypass Road, Tadipatri – Pulivendula – Kadiri Road, Kadiri – 515591, AP
                 </a>
               </div>
 
               <div className="flex items-center gap-2.5">
-                <Mail className="w-4 h-4 text-[#D8AD56] shrink-0" />
-                <a href="mailto:contact@sritayigrand.com" data-cursor-hover className="hover:text-[#D8AD56] transition-colors">
+                <Phone className="w-4 h-4 text-[#B18A4A] shrink-0" />
+                <a
+                  href="tel:08494223379"
+                  className="hover:text-[#B18A4A] transition-colors"
+                >
+                  084942 23379 (24/7 Front Desk)
+                </a>
+              </div>
+
+              <div className="flex items-center gap-2.5">
+                <Mail className="w-4 h-4 text-[#B18A4A] shrink-0" />
+                <a
+                  href="mailto:contact@sritayigrand.com"
+                  className="hover:text-[#B18A4A] transition-colors"
+                >
                   contact@sritayigrand.com
                 </a>
               </div>
+
+              <div className="pt-2 text-xs text-[#E6D9C5]/60 font-light">
+                Check-in: 12:00 PM • Check-out: 11:00 AM
+              </div>
             </div>
+          </div>
+
+        </div>
+
+        {/* Bottom Strip */}
+        <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-[#E6D9C5]/60 gap-4">
+          <p>© {new Date().getFullYear()} Sri Tayi Grand Hotel. All rights reserved.</p>
+          
+          <div className="flex items-center gap-6">
+            <NextLink href="/policies" className="hover:text-[#B18A4A] transition-colors">
+              Hotel Policies
+            </NextLink>
+            <button
+              onClick={scrollToTop}
+              className="inline-flex items-center gap-1.5 text-[#B18A4A] hover:text-white transition-colors"
+            >
+              <span>Back to Top</span>
+              <ArrowUp className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="mt-14 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#EFE3D6]/50">
-          <p>© {new Date().getFullYear()} Sri Tayi Grand. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <NextLink href="/policies" data-cursor-hover className="hover:text-[#D8AD56] transition-colors">
-              Policies & Terms
-            </NextLink>
-            <NextLink href="/contact" data-cursor-hover className="hover:text-[#D8AD56] transition-colors">
-              Directions
-            </NextLink>
-            <NextLink href="/admin/login" data-cursor-hover className="text-[#D8AD56]/70 hover:text-[#D8AD56] transition-colors">
-              Staff Portal
-            </NextLink>
-          </div>
-        </div>
       </div>
     </footer>
   );
