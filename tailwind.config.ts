@@ -27,7 +27,8 @@ const config: Config = {
         },
       },
       fontFamily: {
-        serif: ["var(--font-playfair)", "Playfair Display", "Georgia", "serif"],
+        serif: ["var(--font-cormorant)", "Cormorant Garamond", "Georgia", "serif"],
+        cormorant: ["var(--font-cormorant)", "Cormorant Garamond", "Georgia", "serif"],
         sans: ["var(--font-inter)", "Inter", "system-ui", "-apple-system", "sans-serif"],
       },
       boxShadow: {
