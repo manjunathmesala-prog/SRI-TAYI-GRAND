@@ -311,41 +311,69 @@ export default function HomePage() {
               </NextLink>
             </div>
 
-            {/* 3 Featured Shots Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="relative aspect-[16/10] rounded-2xl overflow-hidden shadow-luxury group">
+            {/* Enhanced Visual Highlights Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-luxury group border border-[#D8AD56]/20 bg-[#20120B]">
                 <Image
-                  src="/images/hotel/hotel-exterior-hero.jpg"
-                  alt="Hotel Exterior Dusk"
+                  src="/images/hotel/hotel-exterior-night-enhanced.png"
+                  alt="Sri Tayi Grand Night Architecture"
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent flex items-end p-5">
-                  <span className="text-xs font-medium text-white tracking-wide">Hotel Architecture & Grounds</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-5">
+                  <div>
+                    <span className="text-[10px] uppercase tracking-wider text-[#D8AD56] font-semibold block mb-0.5">Architecture</span>
+                    <span className="text-sm font-serif font-medium text-white tracking-wide">Illuminated Facade</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="relative aspect-[16/10] rounded-2xl overflow-hidden shadow-luxury group">
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-luxury group border border-[#D8AD56]/20 bg-[#20120B]">
                 <Image
-                  src="/images/hotel/reception-desk.jpg"
-                  alt="Reception Counter"
+                  src="/images/hotel/reception-desk-photo-enhanced.png"
+                  alt="Front Desk & Reception Concierge"
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent flex items-end p-5">
-                  <span className="text-xs font-medium text-white tracking-wide">Front Desk & Welcome Reception</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-5">
+                  <div>
+                    <span className="text-[10px] uppercase tracking-wider text-[#D8AD56] font-semibold block mb-0.5">Hospitality</span>
+                    <span className="text-sm font-serif font-medium text-white tracking-wide">Welcome Concierge</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="relative aspect-[16/10] rounded-2xl overflow-hidden shadow-luxury group">
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-luxury group border border-[#D8AD56]/20 bg-[#20120B]">
                 <Image
-                  src="/images/hotel/lobby-lounge.jpg"
-                  alt="Lobby Lounge"
+                  src="/images/hotel/room-suite-bed-photo-enhanced.png"
+                  alt="Executive Master Suite Bed"
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent flex items-end p-5">
-                  <span className="text-xs font-medium text-white tracking-wide">Guest Lobby Lounge</span>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-5">
+                  <div>
+                    <span className="text-[10px] uppercase tracking-wider text-[#D8AD56] font-semibold block mb-0.5">Suites</span>
+                    <span className="text-sm font-serif font-medium text-white tracking-wide">Plush Master Bedding</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-luxury group border border-[#D8AD56]/20 bg-[#20120B]">
+                <Image
+                  src="/images/hotel/suite-seating-photo-enhanced.png"
+                  alt="Suite Private Seating Lounge"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-5">
+                  <div>
+                    <span className="text-[10px] uppercase tracking-wider text-[#D8AD56] font-semibold block mb-0.5">Living Lounge</span>
+                    <span className="text-sm font-serif font-medium text-white tracking-wide">Private Suite Living</span>
+                  </div>
                 </div>
               </div>
             </div>

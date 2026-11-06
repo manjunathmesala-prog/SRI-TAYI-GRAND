@@ -1,5 +1,21 @@
 [
   {
+    "id": "crd-1793956060565",
+    "card_uid": "BT-57-1000090889",
+    "card_label": "Guest Card (Room 102)",
+    "card_type": "guest",
+    "assigned_room_number": "102",
+    "booking_reference": "STG-20261106-3714",
+    "guest_name": "K. Seshadri Naidu (Online)",
+    "holder_name": "K. Seshadri Naidu (Online)",
+    "status": "active",
+    "activated_at": "2026-11-06T09:07:40.565Z",
+    "expires_at": "2026-11-08T05:30:00.000Z",
+    "issued_by_name": "B. Lakshmi Devi",
+    "notes": "Customer Keycard for Room 102 (Stay: STG-20261106-3714)",
+    "created_at": "2026-11-06T09:07:40.565Z"
+  },
+  {
     "id": "crd-1793950475580",
     "card_uid": "BT-57-1000081778",
     "card_label": "Guest Card (Room 101)",
@@ -8,12 +24,13 @@
     "booking_reference": "STG-20261106-6226",
     "guest_name": "K. Seshadri Naidu (Online)",
     "holder_name": "K. Seshadri Naidu (Online)",
-    "status": "active",
+    "status": "inactive",
     "activated_at": "2026-11-06T07:34:35.580Z",
     "expires_at": "2026-11-08T05:30:00.000Z",
     "issued_by_name": "B. Lakshmi Devi",
     "notes": "Customer Keycard for Room 101 (Stay: STG-20261106-6226)",
-    "created_at": "2026-11-06T07:34:35.580Z"
+    "created_at": "2026-11-06T07:34:35.580Z",
+    "deactivated_at": "2026-11-06T07:34:35.769Z"
   },
   {
     "id": "crd-1793949896278",
@@ -47,7 +64,7 @@
     "issued_by_name": "B. Lakshmi Devi",
     "notes": "Customer Keycard for Room 101 (Stay: STG-20261106-7695)",
     "created_at": "2026-11-06T07:19:25.977Z",
-    "deactivated_at": "2026-11-06T07:19:26.176Z"
+    "deactivated_at": "2026-11-06T07:34:35.769Z"
   },
   {
     "id": "crd-1793948148985",
@@ -81,7 +98,7 @@
     "issued_by_name": "B. Lakshmi Devi",
     "notes": "Customer Keycard for Room 101 (Stay: STG-20261106-3217)",
     "created_at": "2026-11-06T06:54:11.223Z",
-    "deactivated_at": "2026-11-06T07:19:26.176Z"
+    "deactivated_at": "2026-11-06T07:34:35.769Z"
   },
   {
     "id": "crd-1793947787117",
@@ -115,7 +132,7 @@
     "issued_by_name": "B. Lakshmi Devi",
     "notes": "Customer Keycard for Room 101 (Stay: TG-W-20261106-9083)",
     "created_at": "2026-11-06T06:48:37.717Z",
-    "deactivated_at": "2026-11-06T07:19:26.176Z"
+    "deactivated_at": "2026-11-06T07:34:35.769Z"
   },
   {
     "id": "crd-sa-1793887646213",

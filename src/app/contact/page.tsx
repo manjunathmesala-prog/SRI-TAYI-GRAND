@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { 
@@ -114,6 +115,23 @@ export default function ContactPage() {
                         contact@sritayigrand.com
                       </a>
                     </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Physical Reception Desk Photo */}
+              <div className="relative aspect-[16/10] rounded-2xl overflow-hidden shadow-luxury border border-[#D8AD56]/25 group bg-[#20120B]">
+                <Image
+                  src="/images/hotel/reception-desk-photo-enhanced.png"
+                  alt="Front Desk Concierge at Sri Tayi Grand"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  sizes="(max-width: 1024px) 100vw, 40vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-5">
+                  <div>
+                    <span className="text-[10px] uppercase tracking-wider text-[#D8AD56] font-semibold block mb-0.5">Concierge Desk</span>
+                    <span className="text-sm font-serif font-medium text-white tracking-wide">24/7 Reception & Guest Welcome</span>
                   </div>
                 </div>
               </div>

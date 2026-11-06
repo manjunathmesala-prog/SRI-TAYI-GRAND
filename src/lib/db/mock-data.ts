@@ -46,14 +46,14 @@ export const INITIAL_ROOM_CATEGORIES: RoomCategory[] = [
     max_occupancy: 4,
     bed_type: 'King Bed',
     room_size_sqft: 380,
-    cover_image_url: '/images/hotel/room-suite-large.jpg',
+    cover_image_url: '/images/hotel/room-suite-bed-photo-enhanced.png',
     gallery_images: [
-      '/images/hotel/room-suite-large.jpg',
-      '/images/hotel/suite-living.jpg',
-      '/images/hotel/suite-bathroom.jpg',
-      '/images/hotel/suite-balcony-view.jpg',
+      '/images/hotel/room-suite-bed-photo-enhanced.png',
+      '/images/hotel/suite-seating-photo-enhanced.png',
+      '/images/hotel/room-headboard-detail-photo-enhanced.png',
+      '/images/hotel/room-corner-photo-enhanced.png',
       '/images/hotel/suite-balcony-seating.jpg',
-      '/images/hotel/suite-bedside.jpg',
+      '/images/hotel/suite-bathroom.jpg',
     ],
     amenities: [
       'Fully AC',
@@ -87,10 +87,11 @@ export const INITIAL_ROOM_CATEGORIES: RoomCategory[] = [
     max_occupancy: 3,
     bed_type: 'King Bed',
     room_size_sqft: 260,
-    cover_image_url: '/images/hotel/room-double-bed-large.jpg',
+    cover_image_url: '/images/hotel/room-double-bed-photo-enhanced.png',
     gallery_images: [
-      '/images/hotel/room-double-bed-large.jpg',
-      '/images/hotel/room-double-bed-thumb.jpg',
+      '/images/hotel/room-double-bed-photo-enhanced.png',
+      '/images/hotel/room-headboard-detail-photo-enhanced.png',
+      '/images/hotel/room-corner-photo-enhanced.png',
       '/images/hotel/suite-bathroom.jpg',
     ],
     amenities: [
@@ -121,10 +122,11 @@ export const INITIAL_ROOM_CATEGORIES: RoomCategory[] = [
     max_occupancy: 2,
     bed_type: 'Twin Beds (Two Singles)',
     room_size_sqft: 240,
-    cover_image_url: '/images/hotel/room-double-large.jpg',
+    cover_image_url: '/images/hotel/room-twin-render-enhanced.png',
     gallery_images: [
-      '/images/hotel/room-double-large.jpg',
-      '/images/hotel/room-double-thumb.jpg',
+      '/images/hotel/room-twin-render-enhanced.png',
+      '/images/hotel/room-corner-photo-enhanced.png',
+      '/images/hotel/room-headboard-detail-photo-enhanced.png',
       '/images/hotel/suite-bathroom.jpg',
     ],
     amenities: [
@@ -154,10 +156,10 @@ export const INITIAL_ROOM_CATEGORIES: RoomCategory[] = [
     max_occupancy: 1,
     bed_type: 'Single Bed',
     room_size_sqft: 180,
-    cover_image_url: '/images/hotel/room-single-large.jpg',
+    cover_image_url: '/images/hotel/room-corner-photo-enhanced.png',
     gallery_images: [
-      '/images/hotel/room-single-large.jpg',
-      '/images/hotel/room-single-thumb.jpg',
+      '/images/hotel/room-corner-photo-enhanced.png',
+      '/images/hotel/room-headboard-detail-photo-enhanced.png',
       '/images/hotel/suite-bathroom.jpg',
     ],
     amenities: [
@@ -221,16 +223,18 @@ export const INITIAL_AMENITIES: AmenityItem[] = [
 ];
 
 export const INITIAL_GALLERY_IMAGES: GalleryItem[] = [
-  { id: 'gal-1', title: 'Hotel Building Exterior Dusk View', category: 'exterior', image_url: '/images/hotel/hotel-exterior-hero.jpg', display_order: 1 },
-  { id: 'gal-2', title: 'Suite Room Luxury Living', category: 'rooms', image_url: '/images/hotel/room-suite-large.jpg', display_order: 2 },
-  { id: 'gal-3', title: 'Grand Convention Hall', category: 'convention_hall', image_url: '/images/hotel/convention-hall-wide.jpg', display_order: 3 },
-  { id: 'gal-4', title: 'Reception & Front Desk', category: 'reception', image_url: '/images/hotel/reception-desk.jpg', display_order: 4 },
-  { id: 'gal-5', title: 'Double Bed Room', category: 'rooms', image_url: '/images/hotel/room-double-bed-large.jpg', display_order: 5 },
-  { id: 'gal-6', title: 'Lobby Lounge & Seating', category: 'reception', image_url: '/images/hotel/lobby-lounge.jpg', display_order: 6 },
-  { id: 'gal-7', title: 'Double Room (Twin Beds)', category: 'rooms', image_url: '/images/hotel/room-double-large.jpg', display_order: 7 },
-  { id: 'gal-8', title: 'Single Bed Room', category: 'rooms', image_url: '/images/hotel/room-single-large.jpg', display_order: 8 },
-  { id: 'gal-9', title: 'Suite Balcony Lounge', category: 'rooms', image_url: '/images/hotel/suite-balcony-seating.jpg', display_order: 9 },
-  { id: 'gal-10', title: 'Hotel Building Night Architecture', category: 'exterior', image_url: '/images/hotel/hotel-building-night.jpg', display_order: 10 },
+  { id: 'gal-1', title: 'Illuminated Facade Architecture (Night View)', category: 'exterior', image_url: '/images/hotel/hotel-exterior-night-enhanced.png', display_order: 1 },
+  { id: 'gal-2', title: 'Grand Executive Suite Master Bed', category: 'rooms', image_url: '/images/hotel/room-suite-bed-photo-enhanced.png', display_order: 2 },
+  { id: 'gal-3', title: 'Front Desk & Reception Concierge', category: 'reception', image_url: '/images/hotel/reception-desk-photo-enhanced.png', display_order: 3 },
+  { id: 'gal-4', title: 'Grand Convention Hall', category: 'convention_hall', image_url: '/images/hotel/convention-hall-wide.jpg', display_order: 4 },
+  { id: 'gal-5', title: 'Double Bed Room with Ambient Headboard', category: 'rooms', image_url: '/images/hotel/room-double-bed-photo-enhanced.png', display_order: 5 },
+  { id: 'gal-6', title: 'Reception Lobby & Architectural Lounge', category: 'reception', image_url: '/images/hotel/reception-render-enhanced.png', display_order: 6 },
+  { id: 'gal-7', title: 'Executive Suite Private Seating Lounge', category: 'rooms', image_url: '/images/hotel/suite-seating-photo-enhanced.png', display_order: 7 },
+  { id: 'gal-8', title: 'Twin Bed Companion Room', category: 'rooms', image_url: '/images/hotel/room-twin-render-enhanced.png', display_order: 8 },
+  { id: 'gal-9', title: 'Luxury Guest Room Work & Dressing Corner', category: 'rooms', image_url: '/images/hotel/room-corner-photo-enhanced.png', display_order: 9 },
+  { id: 'gal-10', title: 'Acoustic Headboard & Ambient Lighting Detail', category: 'rooms', image_url: '/images/hotel/room-headboard-detail-photo-enhanced.png', display_order: 10 },
+  { id: 'gal-11', title: 'Hotel Building Exterior Dusk Perspective', category: 'exterior', image_url: '/images/hotel/hotel-exterior-hero.jpg', display_order: 11 },
+  { id: 'gal-12', title: 'Suite Balcony View & Seating', category: 'rooms', image_url: '/images/hotel/suite-balcony-seating.jpg', display_order: 12 },
 ];
 
 export const INITIAL_BOOKINGS: Booking[] = [

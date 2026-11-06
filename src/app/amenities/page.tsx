@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import NextLink from 'next/link';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
@@ -78,6 +79,59 @@ export default function AmenitiesPage() {
                 </div>
               );
             })}
+          </div>
+
+          {/* In-Room Luxury Comfort Showcase */}
+          <div className="mt-20">
+            <div className="text-center max-w-xl mx-auto mb-10">
+              <span className="text-[10px] uppercase tracking-[0.25em] font-semibold text-[#D8AD56] block mb-2">
+                In-Room Elegance
+              </span>
+              <h2 className="font-serif text-2xl sm:text-3xl font-medium text-[#241912]">
+                Crafted for Restful Stays
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="relative aspect-[16/11] rounded-2xl overflow-hidden shadow-luxury border border-[#D8AD56]/20 group bg-[#20120B]">
+                <Image
+                  src="/images/hotel/room-suite-bed-photo-enhanced.png"
+                  alt="Plush King Bedding"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-5">
+                  <span className="text-xs font-serif text-white tracking-wide">Plush King Bedding & Climate Control</span>
+                </div>
+              </div>
+
+              <div className="relative aspect-[16/11] rounded-2xl overflow-hidden shadow-luxury border border-[#D8AD56]/20 group bg-[#20120B]">
+                <Image
+                  src="/images/hotel/suite-seating-photo-enhanced.png"
+                  alt="Private Living Armchairs"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-5">
+                  <span className="text-xs font-serif text-white tracking-wide">Private Living Lounge & Seating</span>
+                </div>
+              </div>
+
+              <div className="relative aspect-[16/11] rounded-2xl overflow-hidden shadow-luxury border border-[#D8AD56]/20 group bg-[#20120B]">
+                <Image
+                  src="/images/hotel/room-headboard-detail-photo-enhanced.png"
+                  alt="Acoustic Wood Headboard"
+                  fill
+                  className="object-cover group-hover:scale-105 transition-transform duration-700"
+                  sizes="(max-width: 768px) 100vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-5">
+                  <span className="text-xs font-serif text-white tracking-wide">Acoustic Wood Paneling & Reading Lamps</span>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Understated Closing Invitation */}

@@ -27,15 +27,20 @@ export default function AboutPage() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Narrative & Visual Split */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-20">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center mb-16">
             {/* Visual (6 cols) */}
-            <div className="lg:col-span-6 relative aspect-[4/3] rounded-3xl overflow-hidden shadow-luxury border border-[#D8AD56]/25">
+            <div className="lg:col-span-6 relative aspect-[4/3] rounded-3xl overflow-hidden shadow-luxury border border-[#D8AD56]/25 group">
               <Image
-                src="/images/hotel/hotel-exterior-hero.jpg"
-                alt="Sri Tayi Grand Facade"
+                src="/images/hotel/hotel-exterior-night-enhanced.png"
+                alt="Sri Tayi Grand Illuminated Night Facade"
                 fill
-                className="object-cover"
+                priority
+                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                sizes="(max-width: 1024px) 100vw, 50vw"
               />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-6">
+                <span className="text-xs font-serif text-[#D8AD56] tracking-wide">Grand Entrance & Night Architecture</span>
+              </div>
             </div>
 
             {/* Story (6 cols) */}
@@ -70,6 +75,48 @@ export default function AboutPage() {
                   <Check className="w-4 h-4 text-[#D8AD56]" />
                   <span>24-hour concierge assistance</span>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Authentic Spaces Trio Gallery */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-20">
+            <div className="relative aspect-[16/10] rounded-2xl overflow-hidden shadow-luxury group border border-[#D8AD56]/20 bg-[#20120B]">
+              <Image
+                src="/images/hotel/reception-desk-photo-enhanced.png"
+                alt="Reception & Concierge Desk"
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-5">
+                <span className="text-xs font-serif text-white tracking-wide">24/7 Front Desk Concierge</span>
+              </div>
+            </div>
+
+            <div className="relative aspect-[16/10] rounded-2xl overflow-hidden shadow-luxury group border border-[#D8AD56]/20 bg-[#20120B]">
+              <Image
+                src="/images/hotel/room-suite-bed-photo-enhanced.png"
+                alt="Executive Suite Bedding"
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-5">
+                <span className="text-xs font-serif text-white tracking-wide">Pristine Restful Suites</span>
+              </div>
+            </div>
+
+            <div className="relative aspect-[16/10] rounded-2xl overflow-hidden shadow-luxury group border border-[#D8AD56]/20 bg-[#20120B]">
+              <Image
+                src="/images/hotel/suite-seating-photo-enhanced.png"
+                alt="Private Suite Living"
+                fill
+                className="object-cover group-hover:scale-105 transition-transform duration-700"
+                sizes="(max-width: 768px) 100vw, 33vw"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-5">
+                <span className="text-xs font-serif text-white tracking-wide">Refined Living Lounges</span>
               </div>
             </div>
           </div>
