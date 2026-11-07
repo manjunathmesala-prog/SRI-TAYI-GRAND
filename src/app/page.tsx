@@ -81,9 +81,9 @@ export default function HomePage() {
             Sri Tayi Grand
           </h1>
 
-          {/* Subtitle: Stay · Host · Celebrate */}
-          <p className="mt-3 sm:mt-4 text-sm sm:text-lg md:text-xl text-[#F2E8D8]/90 font-serif italic tracking-wider drop-shadow-md">
-            Stay · Host · Celebrate
+          {/* Subtitle: A UNIT OF SRI TAYI GROUP */}
+          <p className="mt-2.5 sm:mt-3.5 text-xs sm:text-sm md:text-base text-[#F2E8D8]/90 font-serif uppercase tracking-[0.18em] sm:tracking-[0.24em] drop-shadow-md">
+            A UNIT OF SRI TAYI GROUP
           </p>
         </div>
 

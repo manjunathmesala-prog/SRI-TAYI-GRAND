@@ -31,7 +31,7 @@ import { INITIAL_GOOGLE_REVIEWS } from '@/lib/reviews-data';
 
 export const INITIAL_HOTEL_SETTINGS: HotelSettings = {
   hotel_name: 'SRI TAYI GRAND',
-  tagline: 'Stay Â· Host Â· Celebrate',
+  tagline: 'A UNIT OF SRI TAYI GROUP',
   address: '4585+F8J, Opp. Girls High School, Bypass Road, Kadiri â€“ 515591, Anantapur District, Andhra Pradesh, India.',
   road: 'Tadipatri â€“ Pulivendula â€“ Kadiri Road, Revenue Colony, Kadiri',
   phone: '084942 23379',
