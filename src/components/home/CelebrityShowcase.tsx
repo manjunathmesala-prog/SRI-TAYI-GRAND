@@ -2,7 +2,7 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, X, Maximize2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Maximize2, Sparkles, MoveHorizontal } from 'lucide-react';
 import TayiBrandIcon from '@/components/anantha/TayiBrandIcon';
 
 interface CelebrityPhoto {
@@ -10,9 +10,7 @@ interface CelebrityPhoto {
   src: string;
   alt: string;
   caption: string;
-  orientation: 'portrait' | 'landscape';
-  width: number;
-  height: number;
+  category?: string;
 }
 
 const CELEBRITY_PHOTOS: CelebrityPhoto[] = [
@@ -21,110 +19,293 @@ const CELEBRITY_PHOTOS: CelebrityPhoto[] = [
     src: '/images/celebrity/celebrity-guest-1.jpg',
     alt: 'Distinguished guest welcomed at Sri Tayi Grand Hotel',
     caption: 'Warm reception with our esteemed guest at Sri Tayi Grand',
-    orientation: 'portrait',
-    width: 960,
-    height: 1280,
+    category: 'Honoured Guest',
   },
   {
     id: 2,
     src: '/images/celebrity/celebrity-guest-2.jpg',
     alt: 'Celebrity guest posing in front of Sri Tayi Grand',
     caption: 'Honoured arrival at the hotel entrance',
-    orientation: 'portrait',
-    width: 720,
-    height: 1280,
+    category: 'Celebrated Arrival',
   },
   {
     id: 3,
     src: '/images/celebrity/celebrity-guest-3.jpg',
     alt: 'Memorable hospitality moment with guest at Sri Tayi Grand',
     caption: 'Cherished memories of gracious hospitality',
-    orientation: 'portrait',
-    width: 720,
-    height: 1280,
+    category: 'Cherished Moments',
   },
   {
     id: 4,
     src: '/images/celebrity/celebrity-guest-4.jpg',
     alt: 'Celebrity guest with Sri Tayi Grand team and hosts',
     caption: 'Moments of celebration with our hotel team',
-    orientation: 'landscape',
-    width: 1040,
-    height: 780,
+    category: 'Hotel Hosts',
   },
   {
     id: 5,
     src: '/images/celebrity/celebrity-guest-5.jpg',
     alt: 'Guest experience and stay at Sri Tayi Grand Kadiri',
     caption: 'Celebrating authentic South Indian hospitality',
-    orientation: 'landscape',
-    width: 1040,
-    height: 780,
+    category: 'Hospitality',
   },
   {
     id: 6,
     src: '/images/celebrity/celebrity-guest-6.jpg',
     alt: 'Distinguished gathering at Sri Tayi Grand Hotel',
     caption: 'Gatherings of distinction and memorable stays',
-    orientation: 'landscape',
-    width: 1280,
-    height: 720,
+    category: 'Distinguished Stay',
   },
   {
     id: 7,
     src: '/images/celebrity/celebrity-guest-7.jpg',
     alt: 'Special visitor interaction at Sri Tayi Grand',
     caption: 'Welcoming cultural icons to Kadiri corridor',
-    orientation: 'landscape',
-    width: 1206,
-    height: 690,
+    category: 'Cultural Icons',
   },
   {
     id: 8,
     src: '/images/celebrity/celebrity-guest-8.jpg',
     alt: 'Cherished moments with guest at Sri Tayi Grand',
     caption: 'Lasting friendships and unforgettable visits',
-    orientation: 'landscape',
-    width: 1024,
-    height: 682,
+    category: 'Memorable Visits',
   },
 ];
 
+// Ring size: 12 slots around 360 degrees for smooth circular continuity (step = 30 deg)
+const SLOTS_COUNT = 12;
+const STEP_ANGLE = 360 / SLOTS_COUNT; // 30 degrees
+
 export function CelebrityShowcase() {
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(true);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const hubRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  // 3D Geometry configuration based on viewport
+  const [dimensions, setDimensions] = useState({
+    radius: 480,
+    perspective: 1250,
+    cardWidth: 260,
+    cardHeight: 350,
+  });
+
+  const [activeIndex, setActiveIndex] = useState(0);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
-  // Check scroll position to enable/disable controls and update progress bar
-  const updateScrollState = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
+  // Animation & physics state refs (direct DOM manipulation for butter-smooth 60-120fps)
+  const currentRotationRef = useRef<number>(0);
+  const targetRotationRef = useRef<number>(0);
+  const velocityRef = useRef<number>(0);
+  const isPointerDownRef = useRef<boolean>(false);
+  const isDraggingRef = useRef<boolean>(false);
+  const isHoveredRef = useRef<boolean>(false);
+  const pointerStartRef = useRef<{ x: number; y: number; time: number }>({ x: 0, y: 0, time: 0 });
+  const pointerLastRef = useRef<{ x: number; time: number }>({ x: 0, time: 0 });
 
-    const { scrollLeft, scrollWidth, clientWidth } = el;
-    setCanScrollLeft(scrollLeft > 10);
-    setCanScrollRight(scrollLeft + clientWidth < scrollWidth - 10);
-
-    const maxScroll = scrollWidth - clientWidth;
-    if (maxScroll > 0) {
-      setScrollProgress(Math.min(100, Math.max(0, (scrollLeft / maxScroll) * 100)));
+  // Responsive dimensions setup
+  useEffect(() => {
+    function handleResize() {
+      const width = window.innerWidth;
+      if (width < 640) {
+        setDimensions({
+          radius: 280,
+          perspective: 650,
+          cardWidth: 190,
+          cardHeight: 260,
+        });
+      } else if (width < 1024) {
+        setDimensions({
+          radius: 380,
+          perspective: 950,
+          cardWidth: 230,
+          cardHeight: 310,
+        });
+      } else {
+        setDimensions({
+          radius: 490,
+          perspective: 1300,
+          cardWidth: 270,
+          cardHeight: 360,
+        });
+      }
     }
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  // Update card visibility, 3D depth lighting & current focal index
+  const updateCardsPresentation = useCallback(
+    (rotation: number) => {
+      let minDistance = Infinity;
+      let closestSlot = 0;
+
+      for (let i = 0; i < SLOTS_COUNT; i++) {
+        const cardEl = cardRefs.current[i];
+        if (!cardEl) continue;
+
+        let relAngle = (i * STEP_ANGLE + rotation) % 360;
+        if (relAngle > 180) relAngle -= 360;
+        if (relAngle < -180) relAngle += 360;
+
+        const absAngle = Math.abs(relAngle);
+        if (absAngle < minDistance) {
+          minDistance = absAngle;
+          closestSlot = i;
+        }
+
+        // Only cards facing the camera (within 85 degrees of center) are visible
+        // Cards around the back are hidden for crisp depth and performance
+        const isVisible = absAngle <= 86;
+        cardEl.style.visibility = isVisible ? 'visible' : 'hidden';
+
+        if (isVisible) {
+          const cosA = Math.cos((relAngle * Math.PI) / 180);
+          // Realistic photographic falloff: cards on the sides gently fade and darken
+          const brightness = Math.max(0.65, Math.min(1, 0.6 + 0.4 * cosA));
+          const opacity = Math.max(0.35, Math.min(1, cosA * 1.15));
+          cardEl.style.filter = `brightness(${brightness.toFixed(2)})`;
+          cardEl.style.opacity = `${opacity.toFixed(2)}`;
+        }
+      }
+
+      const activePhotoIdx = closestSlot % CELEBRITY_PHOTOS.length;
+      setActiveIndex(activePhotoIdx);
+    },
+    []
+  );
+
+  // Main 60fps RequestAnimationFrame loop
   useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
+    let animationFrameId: number;
 
-    updateScrollState();
-    el.addEventListener('scroll', updateScrollState, { passive: true });
-    window.addEventListener('resize', updateScrollState);
+    const loop = () => {
+      // Autoplay drift when idle
+      if (!isPointerDownRef.current && !isHoveredRef.current) {
+        if (Math.abs(velocityRef.current) > 0.005) {
+          targetRotationRef.current += velocityRef.current;
+          velocityRef.current *= 0.93; // momentum decay friction
+        } else {
+          // Slow continuous gentle float (Studio Gallery signature motion)
+          targetRotationRef.current += 0.035;
+        }
+      }
 
-    return () => {
-      el.removeEventListener('scroll', updateScrollState);
-      window.removeEventListener('resize', updateScrollState);
+      // Smooth spring interpolation toward target rotation
+      const diff = targetRotationRef.current - currentRotationRef.current;
+      if (Math.abs(diff) > 0.001) {
+        currentRotationRef.current += diff * 0.12;
+      }
+
+      // Direct DOM update on the 3D hub
+      if (hubRef.current) {
+        hubRef.current.style.transform = `translateZ(${dimensions.radius}px) rotateY(${currentRotationRef.current}deg)`;
+      }
+
+      updateCardsPresentation(currentRotationRef.current);
+      animationFrameId = requestAnimationFrame(loop);
     };
-  }, [updateScrollState]);
+
+    animationFrameId = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [dimensions.radius, updateCardsPresentation]);
+
+  // Pointer drag event handlers
+  const handlePointerDown = (e: React.PointerEvent) => {
+    isPointerDownRef.current = true;
+    isDraggingRef.current = false;
+    velocityRef.current = 0;
+
+    pointerStartRef.current = {
+      x: e.clientX,
+      y: e.clientY,
+      time: e.timeStamp,
+    };
+    pointerLastRef.current = {
+      x: e.clientX,
+      time: e.timeStamp,
+    };
+
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {
+      // Ignored if capture unsupported
+    }
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (!isPointerDownRef.current) return;
+
+    const deltaX = e.clientX - pointerStartRef.current.x;
+    const deltaY = e.clientY - pointerStartRef.current.y;
+
+    if (!isDraggingRef.current) {
+      if (Math.abs(deltaX) > 6 && Math.abs(deltaX) > Math.abs(deltaY)) {
+        isDraggingRef.current = true;
+        setIsDragging(true);
+      } else {
+        return;
+      }
+    }
+
+    const moveStep = e.clientX - pointerLastRef.current.x;
+    const timeDelta = Math.max(1, e.timeStamp - pointerLastRef.current.time);
+
+    // Degree per pixel based on radius
+    const degPerPx = 180 / (Math.PI * dimensions.radius);
+    const angleDelta = -moveStep * degPerPx * 1.15;
+
+    targetRotationRef.current += angleDelta;
+    currentRotationRef.current += angleDelta;
+
+    // Smoothed velocity computation for inertia
+    const instVelocity = angleDelta / (timeDelta / 16.667);
+    velocityRef.current = velocityRef.current * 0.4 + instVelocity * 0.6;
+
+    pointerLastRef.current = {
+      x: e.clientX,
+      time: e.timeStamp,
+    };
+  };
+
+  const handlePointerUp = (e: React.PointerEvent) => {
+    if (!isPointerDownRef.current) return;
+    isPointerDownRef.current = false;
+
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {
+      // Ignored
+    }
+
+    setTimeout(() => {
+      isDraggingRef.current = false;
+      setIsDragging(false);
+    }, 50);
+  };
+
+  // Wheel / trackpad rotation
+  const handleWheel = (e: React.WheelEvent) => {
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
+      e.preventDefault();
+      const degPerPx = 180 / (Math.PI * dimensions.radius);
+      targetRotationRef.current += e.deltaX * degPerPx * 0.6;
+    }
+  };
+
+  // Step button navigation (Left / Right)
+  const handleStep = (direction: 'left' | 'right') => {
+    const delta = direction === 'left' ? STEP_ANGLE : -STEP_ANGLE;
+    targetRotationRef.current += delta;
+  };
+
+  // Card click: open modal only if it wasn't a drag gesture
+  const handleCardClick = (photoIndex: number) => {
+    if (isDraggingRef.current) return;
+    setLightboxIndex(photoIndex);
+  };
 
   // Keyboard navigation for lightbox
   useEffect(() => {
@@ -154,22 +335,13 @@ export function CelebrityShowcase() {
     };
   }, [lightboxIndex]);
 
-  const handleScroll = (direction: 'left' | 'right') => {
-    const el = scrollRef.current;
-    if (!el) return;
-
-    const scrollAmount = direction === 'left' ? -420 : 420;
-    el.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-  };
-
   return (
-    <section className="w-full py-16 sm:py-24 bg-[#FAF5EB] border-t border-[#E6D9C5] relative overflow-hidden">
-      {/* Background ambient luxury glow */}
-      <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-96 h-96 bg-[#D8AD56]/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-96 h-96 bg-[#43001F]/5 rounded-full blur-3xl pointer-events-none" />
+    <section className="w-full py-16 sm:py-24 bg-[#FAF5EB] border-t border-[#E6D9C5] relative overflow-hidden select-none">
+      {/* Ambient background glow matching Studio Gallery luxury */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-r from-[#D8AD56]/10 via-[#43001F]/5 to-[#D8AD56]/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Header: Title, Subtitle, and Desktop Navigation Controls */}
+        {/* Header: Title, Subtitle, and Studio Gallery Nav Buttons */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 gap-6">
           <div className="max-w-2xl text-left">
             <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#43001F] inline-flex items-center gap-2 mb-3">
@@ -184,23 +356,21 @@ export function CelebrityShowcase() {
             </p>
           </div>
 
-          {/* Navigation Arrows (Desktop / Tablet) */}
+          {/* Stepper Navigation Buttons (Desktop) */}
           <div className="hidden sm:flex items-center gap-3 shrink-0">
             <button
               type="button"
-              onClick={() => handleScroll('left')}
-              disabled={!canScrollLeft}
-              aria-label="Scroll left"
-              className="w-12 h-12 rounded-full border border-[#E6D9C5] bg-white/90 hover:bg-[#43001F] text-[#43001F] hover:text-white disabled:opacity-30 disabled:pointer-events-none shadow-xs transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-95"
+              onClick={() => handleStep('left')}
+              aria-label="Rotate previous"
+              className="w-12 h-12 rounded-full border border-[#E6D9C5] bg-white/90 hover:bg-[#43001F] text-[#43001F] hover:text-white shadow-xs transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-95"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
             <button
               type="button"
-              onClick={() => handleScroll('right')}
-              disabled={!canScrollRight}
-              aria-label="Scroll right"
-              className="w-12 h-12 rounded-full border border-[#E6D9C5] bg-white/90 hover:bg-[#43001F] text-[#43001F] hover:text-white disabled:opacity-30 disabled:pointer-events-none shadow-xs transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-95"
+              onClick={() => handleStep('right')}
+              aria-label="Rotate next"
+              className="w-12 h-12 rounded-full border border-[#E6D9C5] bg-white/90 hover:bg-[#43001F] text-[#43001F] hover:text-white shadow-xs transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-95"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -208,52 +378,88 @@ export function CelebrityShowcase() {
         </div>
       </div>
 
-      {/* Full-width Scrollable Gallery Track */}
-      <div className="w-full relative">
+      {/* =========================================================================
+          3D STUDIO GALLERY CYLINDER VIEWPORT
+          ========================================================================= */}
+      <div
+        ref={containerRef}
+        onWheel={handleWheel}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        onMouseEnter={() => {
+          isHoveredRef.current = true;
+        }}
+        onMouseLeave={() => {
+          isHoveredRef.current = false;
+        }}
+        style={{
+          perspective: `${dimensions.perspective}px`,
+          perspectiveOrigin: '50% 50%',
+        }}
+        className={`relative w-full h-[420px] sm:h-[480px] md:h-[530px] overflow-hidden touch-none select-none ${
+          isDragging ? 'cursor-grabbing' : 'cursor-grab'
+        }`}
+      >
+        {/* Center 3D Hub */}
         <div
-          ref={scrollRef}
-          className="flex gap-5 sm:gap-6 overflow-x-auto no-scrollbar touch-scroll snap-x snap-mandatory py-4 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto scroll-smooth"
+          ref={hubRef}
+          style={{
+            transformStyle: 'preserve-3d',
+            willChange: 'transform',
+          }}
+          className="absolute left-1/2 top-1/2 w-0 h-0"
         >
-          {CELEBRITY_PHOTOS.map((photo, index) => {
-            const isLandscape = photo.orientation === 'landscape';
+          {Array.from({ length: SLOTS_COUNT }).map((_, slotIndex) => {
+            const photoIndex = slotIndex % CELEBRITY_PHOTOS.length;
+            const photo = CELEBRITY_PHOTOS[photoIndex];
+            const slotAngle = slotIndex * STEP_ANGLE;
 
             return (
               <div
-                key={photo.id}
-                onClick={() => setLightboxIndex(index)}
-                className={`group relative shrink-0 snap-start cursor-pointer rounded-3xl sm:rounded-[32px] overflow-hidden border border-[#E6D9C5] bg-[#21180F] shadow-[0_12px_36px_-12px_rgba(51,39,29,0.14)] hover:shadow-[0_20px_48px_-10px_rgba(67,0,31,0.25)] hover:border-[#B18A4A] transition-all duration-500 transform hover:-translate-y-1 h-[380px] sm:h-[460px] md:h-[480px] ${
-                  isLandscape
-                    ? 'w-[320px] sm:w-[480px] md:w-[540px] max-w-[85vw]'
-                    : 'w-[260px] sm:w-[320px] md:w-[340px] max-w-[78vw]'
-                }`}
+                key={slotIndex}
+                ref={(el) => {
+                  cardRefs.current[slotIndex] = el;
+                }}
+                onClick={() => handleCardClick(photoIndex)}
+                style={{
+                  position: 'absolute',
+                  left: -dimensions.cardWidth / 2,
+                  top: -dimensions.cardHeight / 2,
+                  width: dimensions.cardWidth,
+                  height: dimensions.cardHeight,
+                  transform: `rotateY(${slotAngle}deg) translateZ(-${dimensions.radius}px)`,
+                  backfaceVisibility: 'hidden',
+                  WebkitBackfaceVisibility: 'hidden',
+                  borderRadius: '20px',
+                  willChange: 'transform, opacity, filter',
+                }}
+                className="group relative cursor-pointer overflow-hidden border border-[#E6D9C5] bg-[#1C140E] shadow-[0_16px_40px_-10px_rgba(51,39,29,0.18)] hover:border-[#D8AD56] transition-colors duration-300"
               >
                 {/* Image */}
                 <Image
                   src={photo.src}
                   alt={photo.alt}
                   fill
-                  sizes={
-                    isLandscape
-                      ? '(max-width: 640px) 85vw, (max-width: 1024px) 500px, 540px'
-                      : '(max-width: 640px) 78vw, (max-width: 1024px) 320px, 340px'
-                  }
-                  className="object-cover object-center group-hover:scale-[1.04] transition-transform duration-700 ease-out"
+                  sizes="(max-width: 640px) 200px, 300px"
+                  className="object-cover object-center pointer-events-none group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
 
-                {/* Subtle vignette gradient & hover expand button */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-300" />
+                {/* Studio Gallery Vignette & Shading */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
 
-                {/* Top-right subtle zoom icon badge */}
-                <div className="absolute top-4 right-4 w-9 h-9 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-100 scale-75">
-                  <Maximize2 className="w-4 h-4" />
+                {/* Top-right subtle zoom pill */}
+                <div className="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-sm pointer-events-none">
+                  <Maximize2 className="w-3.5 h-3.5" />
                 </div>
 
-                {/* Bottom caption bar */}
-                <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 text-white flex flex-col justify-end">
-                  <span className="text-[10px] sm:text-[11px] uppercase tracking-[0.2em] font-semibold text-[#D8AD56] mb-1">
-                    Sri Tayi Grand Guest
+                {/* Bottom Card Caption */}
+                <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 text-white pointer-events-none">
+                  <span className="text-[10px] uppercase tracking-[0.2em] font-semibold text-[#D8AD56] block mb-1">
+                    {photo.category || 'Sri Tayi Grand'}
                   </span>
-                  <p className="text-sm sm:text-base font-serif font-normal text-white/95 line-clamp-2 leading-snug">
+                  <p className="text-xs sm:text-sm font-serif font-normal text-white/95 line-clamp-2 leading-snug">
                     {photo.caption}
                   </p>
                 </div>
@@ -263,25 +469,50 @@ export function CelebrityShowcase() {
         </div>
       </div>
 
-      {/* Bottom Progress Track & Mobile Scroll Hint */}
+      {/* =========================================================================
+          BOTTOM CONTROLS & INTERACTION HINT
+          ========================================================================= */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-        <div className="flex items-center justify-between sm:justify-center gap-4">
-          {/* Scroll progress bar */}
-          <div className="w-36 sm:w-48 h-1 bg-[#E6D9C5] rounded-full overflow-hidden">
-            <div
-              className="h-full bg-[#43001F] rounded-full transition-all duration-200"
-              style={{ width: `${Math.max(12, scrollProgress)}%` }}
-            />
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          {/* Interactive Hint */}
+          <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-[#786A5B] font-medium">
+            <MoveHorizontal className="w-4 h-4 text-[#D8AD56] animate-pulse" />
+            <span>Click &amp; Drag or Swipe to spin 3D gallery</span>
           </div>
 
-          {/* Mobile Swipe Indicator */}
-          <span className="sm:hidden text-[11px] uppercase tracking-wider text-[#786A5B] font-medium">
-            Swipe to explore →
-          </span>
+          {/* Active Photo Pill Indicator */}
+          <div className="flex items-center gap-2">
+            {CELEBRITY_PHOTOS.map((p, idx) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => {
+                  // Rotate cylinder so this photo moves to front center
+                  const targetSlot = idx;
+                  targetRotationRef.current = -targetSlot * STEP_ANGLE;
+                }}
+                aria-label={`Jump to guest photo ${idx + 1}`}
+                className={`transition-all duration-300 rounded-full cursor-pointer ${
+                  activeIndex === idx
+                    ? 'w-7 h-2 bg-[#43001F] shadow-xs'
+                    : 'w-2 h-2 bg-[#E6D9C5] hover:bg-[#D8AD56]'
+                }`}
+              />
+            ))}
+          </div>
+
+          {/* Quick Counter */}
+          <div className="hidden sm:block text-xs uppercase tracking-[0.18em] font-semibold text-[#786A5B]">
+            <span className="text-[#43001F] font-bold">{activeIndex + 1}</span>
+            <span className="mx-1 text-[#E6D9C5]">/</span>
+            <span>{CELEBRITY_PHOTOS.length} Moments</span>
+          </div>
         </div>
       </div>
 
-      {/* Fullscreen Interactive Lightbox Modal */}
+      {/* =========================================================================
+          FULLSCREEN LIGHTBOX MODAL (WITH BLUR & KEYBOARD SUPPORT)
+          ========================================================================= */}
       {lightboxIndex !== null && (
         <div
           role="dialog"
@@ -292,7 +523,7 @@ export function CelebrityShowcase() {
           <div className="flex items-center justify-between text-white max-w-6xl mx-auto w-full z-10 pt-2">
             <div className="flex items-center gap-3">
               <span className="text-xs uppercase tracking-[0.2em] text-[#D8AD56] font-medium">
-                Distinguished Guest
+                {CELEBRITY_PHOTOS[lightboxIndex].category || 'Distinguished Guest'}
               </span>
               <span className="text-xs text-white/50">|</span>
               <span className="text-xs text-white/70">
