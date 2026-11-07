@@ -76,11 +76,11 @@ export default function ConventionHallPage() {
       <section className="relative min-h-[60vh] flex flex-col justify-end pb-16 pt-32 overflow-hidden bg-[#21180F]">
         <div className="absolute inset-0 z-0">
           <Image
-            src="/images/hotel/convention-hall-wide.jpg"
+            src="/images/hotel/convention-hall-grand-stage.jpg"
             alt="Sri Tayi Grand Convention Hall Kadiri"
             fill
             priority
-            className="object-cover opacity-45 object-center"
+            className="object-cover opacity-50 object-center"
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-[#21180F] via-[#21180F]/60 to-black/30" />
@@ -143,6 +143,26 @@ export default function ConventionHallPage() {
                 <p className="mt-3 text-sm text-[#786A5B] leading-relaxed font-light">
                   Designed to transform weddings, receptions, and distinguished gatherings into timeless memories. Featuring high ceilings, chandelier illumination, an expansive elevated stage, and dedicated dining halls.
                 </p>
+              </div>
+
+              {/* Authentic Stage & Hall Photo Showcase */}
+              <div className="relative h-72 sm:h-96 rounded-3xl overflow-hidden border border-[#E6D9C5] shadow-luxury group bg-[#21180F]">
+                <Image
+                  src="/images/hotel/convention-hall-grand-stage.jpg"
+                  alt="Sri Tayi Grand Convention Hall & Celebration Stage"
+                  fill
+                  className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                  sizes="(max-width: 1024px) 100vw, 60vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute bottom-4 left-4 right-4 sm:bottom-5 sm:left-5 text-white pointer-events-none">
+                  <span className="text-[10px] uppercase tracking-[0.2em] font-semibold text-[#D8AD56] block mb-0.5">
+                    Authentic Grand Stage &amp; Banquet Seating
+                  </span>
+                  <p className="text-sm font-serif font-medium text-white/95">
+                    Central AC · Royal Chandeliers · 800 Guest Capacity
+                  </p>
+                </div>
               </div>
 
               {/* Refined Features */}

@@ -236,7 +236,7 @@ export const INITIAL_GALLERY_IMAGES: GalleryItem[] = [
   { id: 'gal-1', title: 'Illuminated Facade Architecture (Night View)', category: 'exterior', image_url: '/images/hotel/hotel-exterior-night-enhanced.png', display_order: 1 },
   { id: 'gal-2', title: 'Grand Executive Suite Master Bed', category: 'rooms', image_url: '/images/hotel/room-suite-bed-photo-enhanced.png', display_order: 2 },
   { id: 'gal-3', title: 'Front Desk & Reception Concierge', category: 'reception', image_url: '/images/hotel/reception-desk-photo-enhanced.png', display_order: 3 },
-  { id: 'gal-4', title: 'Grand Convention Hall', category: 'convention_hall', image_url: '/images/hotel/convention-hall-wide.jpg', display_order: 4 },
+  { id: 'gal-4', title: 'Grand Convention Hall & Celebration Stage', category: 'convention_hall', image_url: '/images/hotel/convention-hall-grand-stage.jpg', display_order: 4 },
   { id: 'gal-5', title: 'Double Bed Room with Ambient Headboard', category: 'rooms', image_url: '/images/hotel/room-double-bed-photo-enhanced.png', display_order: 5 },
   { id: 'gal-6', title: 'Reception Lobby & Architectural Lounge', category: 'reception', image_url: '/images/hotel/reception-render-enhanced.png', display_order: 6 },
   { id: 'gal-7', title: 'Executive Suite Private Seating Lounge', category: 'rooms', image_url: '/images/hotel/suite-seating-photo-enhanced.png', display_order: 7 },

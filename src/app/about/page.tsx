@@ -133,8 +133,8 @@ export default function AboutPage() {
 
           <div className="relative aspect-[16/10] rounded-2xl overflow-hidden shadow-luxury border border-[#E6D9C5] bg-[#21180F] luxury-card-hover">
             <Image
-              src="/images/hotel/convention-hall-wide.jpg"
-              alt="Grand Convention Banquet Hall"
+              src="/images/hotel/convention-hall-grand-stage.jpg"
+              alt="Grand Convention Banquet Hall & Celebration Stage"
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-700"
               sizes="(max-width: 768px) 100vw, 33vw"
