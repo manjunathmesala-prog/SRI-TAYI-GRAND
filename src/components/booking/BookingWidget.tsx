@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Calendar, User, ArrowRight, Minus, Plus } from 'lucide-react';
-import { LuxuryDatePicker } from '@/components/ui/LuxuryDatePicker';
+import { Users, ArrowRight, Minus, Plus } from 'lucide-react';
+import LuxuryDateRangePicker from '@/components/anantha/LuxuryDateRangePicker';
 
 interface BookingWidgetProps {
   initialCheckIn?: string;
@@ -11,162 +11,195 @@ interface BookingWidgetProps {
   initialAdults?: number;
   initialChildren?: number;
   initialRooms?: number;
+  buttonText?: string;
   className?: string;
+  onSearch?: (params: {
+    checkInDate: string;
+    checkOutDate: string;
+    numRooms: number;
+    numAdults: number;
+    numChildren: number;
+  }) => void;
 }
 
 export function BookingWidget({
   initialCheckIn,
   initialCheckOut,
-  initialAdults = 1,
+  initialAdults = 2,
   initialChildren = 0,
   initialRooms = 1,
+  buttonText = 'FIND YOUR STAY',
   className = '',
+  onSearch,
 }: BookingWidgetProps) {
   const router = useRouter();
 
-  const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(tomorrow.getDate() + 1);
+  const getTodayStr = () => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
 
-  const formatDate = (d: Date) => d.toISOString().split('T')[0];
+  const getDefaultOutStr = () => {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
 
-  const [checkIn, setCheckIn] = useState(initialCheckIn || '');
-  const [checkOut, setCheckOut] = useState(initialCheckOut || '');
+  const [checkIn, setCheckIn] = useState(initialCheckIn || getTodayStr());
+  const [checkOut, setCheckOut] = useState(initialCheckOut || getDefaultOutStr());
   const [adults, setAdults] = useState(initialAdults);
   const [children, setChildren] = useState(initialChildren);
   const [rooms, setRooms] = useState(initialRooms);
   const [guestDropdownOpen, setGuestDropdownOpen] = useState(false);
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const effectiveCheckIn = checkIn || formatDate(today);
-    const effectiveCheckOut = checkOut || formatDate(tomorrow);
-
-    const query = new URLSearchParams({
-      checkIn: effectiveCheckIn,
-      checkOut: effectiveCheckOut,
-      adults: adults.toString(),
-      children: children.toString(),
-      rooms: rooms.toString(),
-    });
-
-    router.push(`/availability?${query.toString()}`);
-  };
+  const guestContainerRef = useRef<HTMLDivElement>(null);
 
   const totalGuests = adults + children;
 
+  // Close guest dropdown on click outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        guestContainerRef.current &&
+        !guestContainerRef.current.contains(event.target as Node)
+      ) {
+        setGuestDropdownOpen(false);
+      }
+    }
+    if (guestDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [guestDropdownOpen]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    let validCheckIn = checkIn || getTodayStr();
+    let validCheckOut = checkOut;
+    if (!validCheckOut || validCheckOut <= validCheckIn) {
+      const inD = new Date(validCheckIn);
+      inD.setDate(inD.getDate() + 1);
+      const y = inD.getFullYear();
+      const m = String(inD.getMonth() + 1).padStart(2, '0');
+      const d = String(inD.getDate()).padStart(2, '0');
+      validCheckOut = `${y}-${m}-${d}`;
+    }
+
+    if (onSearch) {
+      onSearch({
+        checkInDate: validCheckIn,
+        checkOutDate: validCheckOut,
+        numRooms: rooms,
+        numAdults: adults,
+        numChildren: children,
+      });
+    } else {
+      const query = new URLSearchParams({
+        checkIn: validCheckIn,
+        checkOut: validCheckOut,
+        adults: adults.toString(),
+        children: children.toString(),
+        rooms: rooms.toString(),
+        roomsCount: rooms.toString(),
+      });
+      router.push(`/availability?${query.toString()}`);
+    }
+  };
+
   return (
-    <div
-      className={`bg-white/95 backdrop-blur-xl rounded-2xl md:rounded-full shadow-2xl border border-[#D8AD56]/25 p-2 md:p-2.5 text-[#241912] transition-shadow duration-300 hover:shadow-[0_20px_50px_rgba(56,34,22,0.18)] ${className}`}
-    >
-      <form onSubmit={handleSearch} className="flex flex-col md:flex-row items-stretch md:items-center">
-        {/* Check-In */}
-        <div className="relative flex-1">
-          <LuxuryDatePicker
-            value={checkIn}
-            minDate={formatDate(today)}
-            onChange={(val) => {
-              setCheckIn(val);
-              if (val && checkOut && new Date(val) >= new Date(checkOut)) {
-                const nextDay = new Date(val);
-                nextDay.setDate(nextDay.getDate() + 1);
-                setCheckOut(formatDate(nextDay));
-              }
+    <div className={`w-full max-w-4xl mx-auto ${className}`}>
+      <form
+        onSubmit={handleSearch}
+        className="bg-white rounded-3xl shadow-[0_12px_40px_rgba(40,25,12,0.12)] border border-[#E6D9C5] p-3 sm:p-4 grid grid-cols-1 lg:grid-cols-12 gap-2.5 sm:gap-3 items-center text-left relative z-20"
+      >
+        {/* Row 1: Check-In & Check-Out (2 columns) */}
+        <div className="lg:col-span-6 relative z-30">
+          <LuxuryDateRangePicker
+            checkInDate={checkIn}
+            checkOutDate={checkOut}
+            onChange={(inDate, outDate) => {
+              setCheckIn(inDate);
+              setCheckOut(outDate);
             }}
-            customTrigger={(formattedDisplay, open) => (
-              <div
-                data-cursor-hover
-                onClick={open}
-                className="relative flex-1 flex items-center gap-3.5 px-5 py-3 hover:bg-[#FAF7F2] rounded-xl md:rounded-full transition-colors cursor-pointer group"
-              >
-                <Calendar className="w-4 h-4 text-[#D8AD56] shrink-0" strokeWidth={1.75} />
-                <div className="flex-1 min-w-0">
-                  <span className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8C7A6B]">
-                    Check-In
-                  </span>
-                  <span className="block text-xs sm:text-sm font-medium text-[#241912] truncate">
-                    {formattedDisplay || 'Select date'}
-                  </span>
-                </div>
-              </div>
-            )}
           />
         </div>
 
-        {/* Delicate Divider */}
-        <div className="hidden md:block w-[1px] h-8 bg-[#EFE3D6]" />
-
-        {/* Check-Out */}
-        <div className="relative flex-1">
-          <LuxuryDatePicker
-            value={checkOut}
-            minDate={checkIn || formatDate(today)}
-            rangeStart={checkIn}
-            onChange={(val) => setCheckOut(val)}
-            customTrigger={(formattedDisplay, open) => (
-              <div
-                data-cursor-hover
-                onClick={open}
-                className="relative flex-1 flex items-center gap-3.5 px-5 py-3 hover:bg-[#FAF7F2] rounded-xl md:rounded-full transition-colors cursor-pointer group"
-              >
-                <Calendar className="w-4 h-4 text-[#D8AD56] shrink-0" strokeWidth={1.75} />
-                <div className="flex-1 min-w-0">
-                  <span className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8C7A6B]">
-                    Check-Out
-                  </span>
-                  <span className="block text-xs sm:text-sm font-medium text-[#241912] truncate">
-                    {formattedDisplay || 'Select date'}
-                  </span>
-                </div>
-              </div>
-            )}
-          />
-        </div>
-
-        {/* Delicate Divider */}
-        <div className="hidden md:block w-[1px] h-8 bg-[#EFE3D6]" />
-
-        {/* Guests Popover */}
-        <div className="relative flex-1">
-          <div
-            data-cursor-hover
-            onClick={() => setGuestDropdownOpen(!guestDropdownOpen)}
-            className="flex items-center gap-3.5 px-5 py-3 hover:bg-[#FAF7F2] rounded-xl md:rounded-full transition-colors cursor-pointer group"
-          >
-            <User className="w-4 h-4 text-[#D8AD56] shrink-0" strokeWidth={1.75} />
-            <div className="flex-1 min-w-0">
-              <span className="block text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8C7A6B]">
-                Guests & Rooms
-              </span>
-              <span className="block text-xs sm:text-sm font-medium text-[#241912] truncate">
-                {totalGuests} {totalGuests === 1 ? 'Guest' : 'Guests'} • {rooms} {rooms === 1 ? 'Room' : 'Rooms'}
+        {/* Row 2: Guests & Rooms */}
+        <div
+          ref={guestContainerRef}
+          className="lg:col-span-3 relative px-3 py-2.5 bg-[#FAF6EE] hover:bg-[#F2E8D8]/50 rounded-2xl transition-all border border-[#E6D9C5]/80 hover:border-[#8D672F]/50 cursor-pointer"
+        >
+          <div onClick={() => setGuestDropdownOpen(!guestDropdownOpen)}>
+            <label className="text-[10px] sm:text-[11px] uppercase tracking-wider text-[#786A5B] font-semibold block cursor-pointer">
+              GUESTS & ROOMS
+            </label>
+            <div className="flex items-center gap-2 mt-1">
+              <Users className="w-4 h-4 text-[#8D672F] shrink-0" strokeWidth={1.75} />
+              <span className="text-xs sm:text-sm font-semibold text-[#33271D] truncate">
+                {totalGuests} {totalGuests === 1 ? 'Guest' : 'Guests'} · {rooms} {rooms === 1 ? 'Room' : 'Rooms'}
               </span>
             </div>
           </div>
 
           {/* Guest Count Popover */}
           {guestDropdownOpen && (
-            <div className="absolute top-full mt-3 left-0 right-0 md:left-auto md:w-72 bg-white border border-[#D8AD56]/30 rounded-2xl shadow-2xl p-5 z-50 space-y-4 animate-in fade-in zoom-in-95 duration-150">
-              {/* Adults */}
+            <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-2xl shadow-[0_20px_50px_rgba(40,25,12,0.22)] border border-[#E6D9C5] p-4 z-50 space-y-3 min-w-[260px] animate-in fade-in zoom-in-95 duration-150">
+              {/* Rooms */}
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-xs font-medium text-[#241912]">Adults</div>
-                  <div className="text-[10px] text-[#786B61]">Age 12+</div>
+                  <div className="text-xs font-semibold text-[#33271D]">Rooms</div>
+                  <div className="text-[10px] text-[#786A5B]">Number of rooms</div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setRooms(Math.max(1, rooms - 1))}
+                    disabled={rooms <= 1}
+                    className="w-7 h-7 rounded-full border border-[#E6D9C5] flex items-center justify-center text-[#33271D] hover:bg-[#FAF6EE] disabled:opacity-30 transition-colors cursor-pointer"
+                  >
+                    <Minus className="w-3 h-3" />
+                  </button>
+                  <span className="text-xs font-bold w-4 text-center text-[#33271D]">{rooms}</span>
+                  <button
+                    type="button"
+                    onClick={() => setRooms(Math.min(5, rooms + 1))}
+                    disabled={rooms >= 5}
+                    className="w-7 h-7 rounded-full border border-[#E6D9C5] flex items-center justify-center text-[#33271D] hover:bg-[#FAF6EE] disabled:opacity-30 transition-colors cursor-pointer"
+                  >
+                    <Plus className="w-3 h-3" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Adults */}
+              <div className="flex items-center justify-between pt-2.5 border-t border-[#E6D9C5]/60">
+                <div>
+                  <div className="text-xs font-semibold text-[#33271D]">Adults</div>
+                  <div className="text-[10px] text-[#786A5B]">Ages 12+</div>
+                </div>
+                <div className="flex items-center gap-2.5">
                   <button
                     type="button"
                     onClick={() => setAdults(Math.max(1, adults - 1))}
                     disabled={adults <= 1}
-                    className="w-7 h-7 rounded-full border border-[#D8AD56]/40 flex items-center justify-center text-[#241912] hover:bg-[#FAF7F2] disabled:opacity-30 transition-colors"
+                    className="w-7 h-7 rounded-full border border-[#E6D9C5] flex items-center justify-center text-[#33271D] hover:bg-[#FAF6EE] disabled:opacity-30 transition-colors cursor-pointer"
                   >
                     <Minus className="w-3 h-3" />
                   </button>
-                  <span className="text-xs font-semibold w-5 text-center">{adults}</span>
+                  <span className="text-xs font-bold w-4 text-center text-[#33271D]">{adults}</span>
                   <button
                     type="button"
-                    onClick={() => setAdults(Math.min(8, adults + 1))}
-                    className="w-7 h-7 rounded-full border border-[#D8AD56]/40 flex items-center justify-center text-[#241912] hover:bg-[#FAF7F2] transition-colors"
+                    onClick={() => setAdults(Math.min(10, adults + 1))}
+                    disabled={adults >= 10}
+                    className="w-7 h-7 rounded-full border border-[#E6D9C5] flex items-center justify-center text-[#33271D] hover:bg-[#FAF6EE] disabled:opacity-30 transition-colors cursor-pointer"
                   >
                     <Plus className="w-3 h-3" />
                   </button>
@@ -174,77 +207,54 @@ export function BookingWidget({
               </div>
 
               {/* Children */}
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between pt-2.5 border-t border-[#E6D9C5]/60">
                 <div>
-                  <div className="text-xs font-medium text-[#241912]">Children</div>
-                  <div className="text-[10px] text-[#786B61]">Age 0–11</div>
+                  <div className="text-xs font-semibold text-[#33271D]">Children</div>
+                  <div className="text-[10px] text-[#786A5B]">Ages 0–11</div>
                 </div>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
                   <button
                     type="button"
                     onClick={() => setChildren(Math.max(0, children - 1))}
                     disabled={children <= 0}
-                    className="w-7 h-7 rounded-full border border-[#D8AD56]/40 flex items-center justify-center text-[#241912] hover:bg-[#FAF7F2] disabled:opacity-30 transition-colors"
+                    className="w-7 h-7 rounded-full border border-[#E6D9C5] flex items-center justify-center text-[#33271D] hover:bg-[#FAF6EE] disabled:opacity-30 transition-colors cursor-pointer"
                   >
                     <Minus className="w-3 h-3" />
                   </button>
-                  <span className="text-xs font-semibold w-5 text-center">{children}</span>
+                  <span className="text-xs font-bold w-4 text-center text-[#33271D]">{children}</span>
                   <button
                     type="button"
-                    onClick={() => setChildren(Math.min(4, children + 1))}
-                    className="w-7 h-7 rounded-full border border-[#D8AD56]/40 flex items-center justify-center text-[#241912] hover:bg-[#FAF7F2] transition-colors"
+                    onClick={() => setChildren(Math.min(6, children + 1))}
+                    disabled={children >= 6}
+                    className="w-7 h-7 rounded-full border border-[#E6D9C5] flex items-center justify-center text-[#33271D] hover:bg-[#FAF6EE] disabled:opacity-30 transition-colors cursor-pointer"
                   >
                     <Plus className="w-3 h-3" />
                   </button>
                 </div>
               </div>
 
-              {/* Rooms */}
-              <div className="flex items-center justify-between pt-3 border-t border-[#EFE3D6]/70">
-                <div>
-                  <div className="text-xs font-medium text-[#241912]">Rooms</div>
-                  <div className="text-[10px] text-[#786B61]">Rooms needed</div>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setRooms(Math.max(1, rooms - 1))}
-                    disabled={rooms <= 1}
-                    className="w-7 h-7 rounded-full border border-[#D8AD56]/40 flex items-center justify-center text-[#241912] hover:bg-[#FAF7F2] disabled:opacity-30 transition-colors"
-                  >
-                    <Minus className="w-3 h-3" />
-                  </button>
-                  <span className="text-xs font-semibold w-5 text-center">{rooms}</span>
-                  <button
-                    type="button"
-                    onClick={() => setRooms(Math.min(5, rooms + 1))}
-                    className="w-7 h-7 rounded-full border border-[#D8AD56]/40 flex items-center justify-center text-[#241912] hover:bg-[#FAF7F2] transition-colors"
-                  >
-                    <Plus className="w-3 h-3" />
-                  </button>
-                </div>
+              {/* Close */}
+              <div className="pt-2 border-t border-[#E6D9C5]/60 text-right">
+                <button
+                  type="button"
+                  onClick={() => setGuestDropdownOpen(false)}
+                  className="w-full py-2 bg-[#8D672F] text-white rounded-xl text-xs font-semibold uppercase tracking-wider hover:bg-[#745322] transition-colors cursor-pointer"
+                >
+                  Done
+                </button>
               </div>
-
-              <button
-                type="button"
-                onClick={() => setGuestDropdownOpen(false)}
-                className="w-full mt-2 py-2 text-xs font-medium uppercase tracking-wider rounded-xl bg-[#43001F] text-white hover:bg-[#2E0015] transition-colors cursor-pointer"
-              >
-                Done
-              </button>
             </div>
           )}
         </div>
 
-        {/* Action Button */}
-        <div className="mt-2 md:mt-0 md:ml-2">
+        {/* Row 3: Action Button */}
+        <div className="lg:col-span-3">
           <button
             type="submit"
-            data-cursor-hover
-            className="w-full md:w-auto py-3.5 px-7 rounded-xl md:rounded-full bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-semibold uppercase tracking-wider flex items-center justify-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 active:translate-y-0 whitespace-nowrap cursor-pointer border border-[#D8AD56]/40"
+            className="w-full py-3.5 sm:py-4 px-6 rounded-2xl bg-[#8D672F] hover:bg-[#745322] active:scale-[0.99] text-white text-xs sm:text-sm uppercase tracking-[0.14em] font-bold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 group cursor-pointer"
           >
-            <span>Check Availability</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <span>{buttonText}</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
       </form>

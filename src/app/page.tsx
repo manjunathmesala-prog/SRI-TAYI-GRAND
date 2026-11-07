@@ -93,7 +93,7 @@ export default function HomePage() {
         </div>
 
         {/* Centered Floating Booking Widget Bar */}
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-6">
+        <div className="relative z-30 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-6">
           <BookingWidget />
         </div>
       </section>
@@ -124,7 +124,11 @@ export default function HomePage() {
               className="bg-white rounded-2xl overflow-hidden border border-[#E6D9C5] shadow-luxury group flex flex-col justify-between luxury-card-hover transition-all duration-300 hover:shadow-luxury-lg"
             >
               <div>
-                <div className="relative h-56 w-full overflow-hidden bg-[#21180F]/10">
+                <NextLink
+                  href={`/rooms/${room.slug}`}
+                  className="relative h-56 w-full overflow-hidden bg-[#21180F]/10 block cursor-pointer"
+                  title={`View details for ${room.name}`}
+                >
                   <Image
                     src={room.cover_image_url}
                     alt={room.name}
@@ -135,12 +139,14 @@ export default function HomePage() {
                   <div className="absolute top-3 left-3 bg-[#F8F3E9]/95 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-semibold text-[#43001F] border border-[#E6D9C5] shadow-xs">
                     ₹ {room.base_price_per_night.toLocaleString('en-IN')} / night
                   </div>
-                </div>
+                </NextLink>
 
                 <div className="p-5 space-y-2.5">
-                  <h3 className="text-xl font-serif text-[#33271D] group-hover:text-[#43001F] transition-colors">
-                    {room.name}
-                  </h3>
+                  <NextLink href={`/rooms/${room.slug}`} className="block">
+                    <h3 className="text-xl font-serif text-[#33271D] group-hover:text-[#43001F] transition-colors cursor-pointer">
+                      {room.name}
+                    </h3>
+                  </NextLink>
                   <p className="text-xs text-[#786A5B] line-clamp-2 leading-relaxed">
                     {room.short_description}
                   </p>
@@ -218,14 +224,20 @@ export default function HomePage() {
             </p>
 
             <div className="grid grid-cols-2 gap-3 pt-2">
-              <div className="p-3 bg-white rounded-xl border border-[#E6D9C5] shadow-xs">
-                <div className="text-xs font-bold text-[#43001F]">Up to 800 Guests</div>
+              <NextLink
+                href="/convention-hall"
+                className="p-3 bg-white rounded-xl border border-[#E6D9C5] shadow-xs hover:border-[#43001F]/40 hover:shadow-sm transition-all block group"
+              >
+                <div className="text-xs font-bold text-[#43001F] group-hover:translate-x-0.5 transition-transform">Up to 800 Guests</div>
                 <span className="text-[11px] text-[#786A5B] block mt-0.5">Spacious Seating</span>
-              </div>
-              <div className="p-3 bg-white rounded-xl border border-[#E6D9C5] shadow-xs">
-                <div className="text-xs font-bold text-[#43001F]">Dedicated Dining</div>
+              </NextLink>
+              <NextLink
+                href="/convention-hall"
+                className="p-3 bg-white rounded-xl border border-[#E6D9C5] shadow-xs hover:border-[#43001F]/40 hover:shadow-sm transition-all block group"
+              >
+                <div className="text-xs font-bold text-[#43001F] group-hover:translate-x-0.5 transition-transform">Dedicated Dining</div>
                 <span className="text-[11px] text-[#786A5B] block mt-0.5">Modern Kitchen Area</span>
-              </div>
+              </NextLink>
             </div>
 
             <div className="pt-2 flex flex-wrap items-center gap-3">
@@ -248,7 +260,11 @@ export default function HomePage() {
           </div>
 
           <div className="lg:col-span-7 reveal-scale">
-            <div className="relative h-80 sm:h-[420px] lg:h-[480px] rounded-3xl overflow-hidden shadow-luxury border border-[#E6D9C5] group bg-[#21180F]">
+            <NextLink
+              href="/convention-hall"
+              className="relative h-80 sm:h-[420px] lg:h-[480px] rounded-3xl overflow-hidden shadow-luxury border border-[#E6D9C5] group bg-[#21180F] block cursor-pointer"
+              title="Explore Grand Convention Hall"
+            >
               <Image
                 src="/images/hotel/convention-hall-grand-stage.jpg"
                 alt="Grand Convention Hall & Celebration Stage at Sri Tayi Grand Kadiri"
@@ -257,7 +273,7 @@ export default function HomePage() {
                 className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
                 sizes="(max-width: 1024px) 100vw, 60vw"
               />
-            </div>
+            </NextLink>
           </div>
         </div>
       </section>
@@ -298,51 +314,58 @@ export default function HomePage() {
                 label: 'Fully AC Rooms',
                 subtitle: 'Individual precision climate control',
                 icon: Wind,
+                href: '/rooms',
               },
               {
                 label: 'Convention Hall',
                 subtitle: '800-capacity grand celebration venue',
                 icon: Building,
+                href: '/convention-hall',
               },
               {
                 label: 'Car Parking',
                 subtitle: 'Ample secure on-premises parking bays',
                 icon: Car,
+                href: '/amenities',
               },
               {
                 label: 'High-Speed Wi-Fi',
                 subtitle: 'Seamless wireless internet connection',
                 icon: Wifi,
+                href: '/amenities',
               },
               {
                 label: '24/7 Hot Water',
                 subtitle: 'Continuous geyser supply in all rooms',
                 icon: Sparkles,
+                href: '/amenities',
               },
               {
                 label: '24/7 Front Desk',
                 subtitle: 'Continuous dedicated reception & assistance',
                 icon: Clock,
+                href: '/contact',
               },
             ].map((fac, idx) => {
               const Icon = fac.icon;
               return (
-                <div
+                <NextLink
                   key={idx}
-                  className="group bg-white rounded-2xl sm:rounded-[22px] p-5 sm:p-6 border border-[#E8DEC9] shadow-[0_4px_24px_-4px_rgba(66,43,25,0.05)] luxury-card-hover transition-all duration-300 flex flex-col items-center justify-between text-center min-h-[190px] sm:min-h-[220px]"
+                  href={fac.href}
+                  className="group bg-white rounded-2xl sm:rounded-[22px] p-5 sm:p-6 border border-[#E8DEC9] shadow-[0_4px_24px_-4px_rgba(66,43,25,0.05)] luxury-card-hover transition-all duration-300 flex flex-col items-center justify-between text-center min-h-[190px] sm:min-h-[220px] hover:border-[#43001F]/40 cursor-pointer"
                 >
                   <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-[#F8F3E9] border border-[#E6D9C5]/70 flex items-center justify-center text-[#43001F] group-hover:scale-110 group-hover:bg-[#43001F] group-hover:text-white transition-all duration-300 mb-4 shadow-[0_2px_8px_-2px_rgba(66,43,25,0.06)]">
                     <Icon className="w-6 h-6 sm:w-7 sm:h-7 stroke-[1.6]" />
                   </div>
                   <div className="flex-1 flex flex-col justify-center">
-                    <h3 className="text-xs sm:text-sm font-serif font-bold text-[#33271D] tracking-tight mb-1">
+                    <h3 className="text-xs sm:text-sm font-serif font-bold text-[#33271D] group-hover:text-[#43001F] tracking-tight mb-1 transition-colors">
                       {fac.label}
                     </h3>
                     <p className="text-[10px] sm:text-[11px] text-[#786A5B] font-serif leading-tight">
                       {fac.subtitle}
                     </p>
                   </div>
-                </div>
+                </NextLink>
               );
             })}
           </div>
@@ -410,9 +433,11 @@ export default function HomePage() {
                 title: 'Private Suite Living',
               },
             ].map((item, idx) => (
-              <div
+              <NextLink
                 key={idx}
-                className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-luxury group border border-[#E6D9C5] bg-[#21180F] luxury-card-hover"
+                href="/gallery"
+                title={`View ${item.title} in Photo Gallery`}
+                className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-luxury group border border-[#E6D9C5] bg-[#21180F] luxury-card-hover block cursor-pointer"
               >
                 <Image
                   src={item.src}
@@ -421,7 +446,7 @@ export default function HomePage() {
                   className="object-cover group-hover:scale-108 transition-transform duration-700 ease-out"
                   sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                 />
-              </div>
+              </NextLink>
             ))}
           </div>
         </div>
@@ -457,18 +482,36 @@ export default function HomePage() {
 
               {/* Transit & Landmark Distances */}
               <div className="grid grid-cols-3 gap-3 pt-2 text-center reveal-stagger">
-                <div className="p-3 bg-white rounded-xl border border-[#E6D9C5] luxury-card-hover shadow-xs">
-                  <div className="text-xs font-bold text-[#43001F]">1.5 km (4 min)</div>
+                <a
+                  href="https://maps.google.com/?q=Sri+Kadiri+Lakshmi+Narasimha+Swamy+Temple+Kadiri"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-white rounded-xl border border-[#E6D9C5] luxury-card-hover shadow-xs block group hover:border-[#43001F]/50 transition-all cursor-pointer"
+                  title="View Kadiri Lakshmi Narasimha Swamy Temple on Google Maps"
+                >
+                  <div className="text-xs font-bold text-[#43001F] group-hover:scale-105 transition-transform">1.5 km (4 min)</div>
                   <span className="text-[11px] font-semibold text-[#33271D] block mt-1">Kadiri Temple</span>
-                </div>
-                <div className="p-3 bg-white rounded-xl border border-[#E6D9C5] luxury-card-hover shadow-xs">
-                  <div className="text-xs font-bold text-[#43001F]">2.0 km (5 min)</div>
+                </a>
+                <a
+                  href="https://maps.google.com/?q=Kadiri+Railway+Station+Kadiri"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-white rounded-xl border border-[#E6D9C5] luxury-card-hover shadow-xs block group hover:border-[#43001F]/50 transition-all cursor-pointer"
+                  title="View Kadiri Railway Station on Google Maps"
+                >
+                  <div className="text-xs font-bold text-[#43001F] group-hover:scale-105 transition-transform">2.0 km (5 min)</div>
                   <span className="text-[11px] font-semibold text-[#33271D] block mt-1">Railway Station</span>
-                </div>
-                <div className="p-3 bg-white rounded-xl border border-[#E6D9C5] luxury-card-hover shadow-xs">
-                  <div className="text-xs font-bold text-[#43001F]">Direct Access</div>
+                </a>
+                <a
+                  href="https://maps.google.com/?q=Sri+Tayi+Grand+Kadiri"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-white rounded-xl border border-[#E6D9C5] luxury-card-hover shadow-xs block group hover:border-[#43001F]/50 transition-all cursor-pointer"
+                  title="View Bypass Road location on Google Maps"
+                >
+                  <div className="text-xs font-bold text-[#43001F] group-hover:scale-105 transition-transform">Direct Access</div>
                   <span className="text-[11px] font-semibold text-[#33271D] block mt-1">Bypass Road</span>
-                </div>
+                </a>
               </div>
 
               <div className="pt-2 flex flex-wrap items-center gap-3">
@@ -492,28 +535,31 @@ export default function HomePage() {
             </div>
 
             <div className="lg:col-span-6 reveal-scale">
-              <div className="relative h-72 sm:h-96 rounded-3xl overflow-hidden border border-[#E6D9C5] shadow-luxury bg-white flex flex-col items-center justify-center p-6 text-center group">
-                <div className="w-14 h-14 rounded-full bg-[#F8F3E9] text-[#43001F] border border-[#E6D9C5] flex items-center justify-center mx-auto mb-3 shadow-xs">
+              <a
+                href="https://maps.google.com/?q=Sri+Tayi+Grand+Kadiri"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="relative h-72 sm:h-96 rounded-3xl overflow-hidden border border-[#E6D9C5] shadow-luxury bg-white flex flex-col items-center justify-center p-6 text-center group block cursor-pointer hover:border-[#43001F]/40 transition-all"
+                title="Open Sri Tayi Grand Hotel in Google Maps"
+              >
+                <div className="w-14 h-14 rounded-full bg-[#F8F3E9] text-[#43001F] border border-[#E6D9C5] flex items-center justify-center mx-auto mb-3 shadow-xs group-hover:scale-110 group-hover:bg-[#43001F] group-hover:text-white transition-all duration-300">
                   <MapPin className="w-7 h-7" />
                 </div>
-                <h4 className="font-serif font-bold text-lg text-[#33271D]">
+                <h4 className="font-serif font-bold text-lg text-[#33271D] group-hover:text-[#43001F] transition-colors">
                   Sri Tayi Grand Hotel Kadiri
                 </h4>
                 <p className="text-xs text-[#786A5B] mt-1.5 max-w-sm mx-auto leading-relaxed">
                   4585+F8J, Opp. Girls High School, Bypass Road, Tadipatri – Pulivendula – Kadiri Road, Revenue Colony, Kadiri, Andhra Pradesh 515591
                 </p>
                 <div className="mt-5 flex items-center gap-3">
-                  <a
-                    href="https://maps.google.com/?q=Sri+Tayi+Grand+Kadiri"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#43001F] text-white text-xs uppercase tracking-[0.14em] font-semibold shadow-md hover:bg-[#2E0015] transition-all"
+                  <span
+                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-[#43001F] text-white text-xs uppercase tracking-[0.14em] font-semibold shadow-md group-hover:bg-[#2E0015] transition-all"
                   >
                     <span>Open in Google Maps</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </a>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                  </span>
                 </div>
-              </div>
+              </a>
             </div>
           </div>
         </div>

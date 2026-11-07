@@ -331,13 +331,13 @@ export function CelebrityShowcase() {
             </p>
           </div>
 
-          {/* Stepper Navigation Buttons (Desktop) */}
-          <div className="hidden sm:flex items-center gap-3 shrink-0">
+          {/* Stepper Navigation Buttons */}
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <button
               type="button"
               onClick={() => handleStep('left')}
               aria-label="Rotate previous"
-              className="w-12 h-12 rounded-full border border-[#E6D9C5] bg-white/90 hover:bg-[#43001F] text-[#43001F] hover:text-white shadow-xs transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-95"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-[#E6D9C5] bg-white/90 hover:bg-[#43001F] text-[#43001F] hover:text-white shadow-xs transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-95"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -345,7 +345,7 @@ export function CelebrityShowcase() {
               type="button"
               onClick={() => handleStep('right')}
               aria-label="Rotate next"
-              className="w-12 h-12 rounded-full border border-[#E6D9C5] bg-white/90 hover:bg-[#43001F] text-[#43001F] hover:text-white shadow-xs transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-95"
+              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-[#E6D9C5] bg-white/90 hover:bg-[#43001F] text-[#43001F] hover:text-white shadow-xs transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-95"
             >
               <ChevronRight className="w-5 h-5" />
             </button>

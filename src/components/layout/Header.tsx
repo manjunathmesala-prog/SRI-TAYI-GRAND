@@ -116,11 +116,11 @@ export function Header({ transparentInitially = false }: HeaderProps) {
           {/* Center Brand Identity (framed gracefully by the architectural curve dip) */}
           <NextLink
             href="/"
-            className="absolute left-1/2 top-[50%] -translate-x-1/2 -translate-y-[44%] z-20 flex flex-col items-center group focus:outline-none"
+            className="absolute left-1/2 top-[48%] -translate-x-1/2 -translate-y-1/2 z-20 flex flex-col items-center group focus:outline-none"
             aria-label="Sri Tayi Grand Hotel — Return to Home"
           >
-            <div className="relative w-[115px] sm:w-[130px] h-[78px] sm:h-[84px] transition-transform duration-300 group-hover:scale-105 flex flex-col items-center justify-center">
-              <div className="relative w-9 h-9 sm:w-10 sm:h-10 mb-0.5">
+            <div className="relative transition-transform duration-300 group-hover:scale-105 flex flex-col items-center justify-center">
+              <div className="relative w-6 h-6 sm:w-7 sm:h-7 mb-1">
                 <Image
                   src="/images/hotel/tayi-grand-logo.png"
                   alt="Sri Tayi Grand Official Emblem"
@@ -129,11 +129,8 @@ export function Header({ transparentInitially = false }: HeaderProps) {
                   className="object-contain"
                 />
               </div>
-              <span className="font-serif text-[13px] sm:text-[14.5px] font-bold tracking-[0.2em] text-[#2b241c] uppercase leading-none text-center">
+              <span className="font-serif text-[10px] sm:text-[11.5px] font-semibold tracking-[0.22em] text-[#2b241c] uppercase leading-none text-center whitespace-nowrap">
                 Sri Tayi Grand
-              </span>
-              <span className="text-[7.5px] sm:text-[8.5px] tracking-[0.28em] font-medium text-[#9b7a3e] uppercase leading-none mt-1 text-center">
-                HOTEL &bull; KADIRI
               </span>
             </div>
           </NextLink>

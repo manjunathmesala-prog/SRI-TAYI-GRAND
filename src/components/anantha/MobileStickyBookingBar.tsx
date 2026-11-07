@@ -25,7 +25,7 @@ export default function MobileStickyBookingBar() {
   return (
     <div className="fixed bottom-0 left-0 right-0 z-40 md:hidden bg-[#21180F]/95 backdrop-blur-xl border-t border-[#43001F]/60 shadow-[0_-8px_25px_rgba(0,0,0,0.5)] px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] transition-all animate-fadeIn">
       <div className="flex items-center justify-between gap-3 max-w-md mx-auto">
-        <div className="flex flex-col min-w-0">
+        <Link href="/rooms" className="flex flex-col min-w-0 cursor-pointer">
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="font-serif text-sm font-bold text-white tracking-wide truncate">
@@ -35,7 +35,7 @@ export default function MobileStickyBookingBar() {
           <span className="text-[11px] text-[#D8AD56] font-medium tracking-tight">
             From ₹1,800 <span className="text-white/60 font-light">/ night</span>
           </span>
-        </div>
+        </Link>
 
         <Link
           href="/rooms"

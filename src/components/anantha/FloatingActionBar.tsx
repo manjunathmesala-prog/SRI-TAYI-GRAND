@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import NextLink from 'next/link';
 import { Phone, MessageCircle, ArrowRight, ChevronUp, MapPin } from 'lucide-react';
 import TayiBrandIcon from './TayiBrandIcon';
 
@@ -40,7 +41,11 @@ export default function FloatingActionBar() {
       <div className="bg-[#21180F]/95 backdrop-blur-xl border border-[#B18A4A]/40 rounded-full px-3 sm:px-5 py-2 sm:py-2.5 shadow-[0_16px_50px_rgba(0,0,0,0.45)] text-white flex items-center justify-between gap-2 sm:gap-3">
         
         {/* Left: Brand Identity & Live Rate */}
-        <div className="flex items-center gap-3 pl-1 pr-3 border-r border-white/10 shrink-0">
+        <NextLink
+          href="/rooms"
+          className="flex items-center gap-3 pl-1 pr-3 border-r border-white/10 shrink-0 hover:opacity-90 transition-opacity cursor-pointer"
+          title="View Rooms & Book Stay"
+        >
           <TayiBrandIcon size={28} />
           <div className="text-left leading-tight">
             <div className="flex items-center gap-1.5">
@@ -54,7 +59,7 @@ export default function FloatingActionBar() {
               Rooms from <strong className="font-bold text-white tabular-nums">₹1,800</strong> / night
             </p>
           </div>
-        </div>
+        </NextLink>
 
         {/* Center: High-Intent Communication Channels */}
         <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
