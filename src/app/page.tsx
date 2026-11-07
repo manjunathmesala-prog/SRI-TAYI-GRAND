@@ -11,6 +11,7 @@ import MobileStickyBookingBar from '@/components/anantha/MobileStickyBookingBar'
 import FloatingActionBar from '@/components/anantha/FloatingActionBar';
 import { TestimonialsSection } from '@/components/testimonials/TestimonialsSection';
 import { CelebrityShowcase } from '@/components/home/CelebrityShowcase';
+import { HeroVideoBackground } from '@/components/home/HeroVideoBackground';
 import { repo } from '@/lib/db/repository';
 import {
   Wind,
@@ -50,20 +51,8 @@ export default function HomePage() {
           HERO SECTION — EXACT CLASSIC LUXURY EXTERIOR & EMBEDDED SEARCH ENGINE
           ========================================================================= */}
       <section className="relative min-h-[620px] sm:min-h-[700px] lg:min-h-[780px] flex flex-col justify-between pt-12 sm:pt-16 lg:pt-20 pb-10 sm:pb-14 overflow-hidden bg-[#20120B]">
-        {/* Authentic Hotel Exterior Background Image with Ambient Zoom */}
-        <div className="absolute inset-0 z-0">
-          <Image
-            src="/images/hotel/hotel-exterior-hero-clean.jpg"
-            alt="Sri Tayi Grand Hotel Facade"
-            fill
-            priority
-            className="object-cover object-[70%_center] sm:object-center transform scale-100 hover:scale-[1.02] transition-transform duration-1000 ease-out"
-            sizes="100vw"
-          />
-          {/* Subtle atmospheric vignette & blur overlays */}
-          <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/35 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#20120B] via-transparent to-black/30" />
-        </div>
+        {/* Authentic Hotel Cinematic Background Video with Poster Fallback */}
+        <HeroVideoBackground />
 
         {/* Atmospheric Glow Orbs in Hero */}
         <AtmosphericGlow position="top-right" color="gold" size="lg" className="opacity-40" />
