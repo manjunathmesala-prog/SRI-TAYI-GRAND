@@ -48,7 +48,7 @@ export default function HomePage() {
       {/* =========================================================================
           HERO SECTION — EXACT CLASSIC LUXURY EXTERIOR & EMBEDDED SEARCH ENGINE
           ========================================================================= */}
-      <section className="relative min-h-[620px] sm:min-h-[720px] lg:min-h-[820px] flex flex-col justify-between pt-32 sm:pt-40 pb-10 sm:pb-14 overflow-hidden bg-[#20120B]">
+      <section className="relative min-h-[620px] sm:min-h-[700px] lg:min-h-[780px] flex flex-col justify-between pt-12 sm:pt-16 lg:pt-20 pb-10 sm:pb-14 overflow-hidden bg-[#20120B]">
         {/* Authentic Hotel Exterior Background Image with Ambient Zoom */}
         <div className="absolute inset-0 z-0">
           <Image

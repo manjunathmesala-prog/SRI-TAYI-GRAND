@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Menu, X, ArrowRight, Phone, MapPin, Calendar } from 'lucide-react';
+import { Menu, X, ArrowRight, Phone, MapPin } from 'lucide-react';
 
 interface HeaderProps {
   transparentInitially?: boolean;
@@ -12,17 +12,7 @@ interface HeaderProps {
 
 export function Header({ transparentInitially = false }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 30);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -47,229 +37,206 @@ export function Header({ transparentInitially = false }: HeaderProps) {
     { label: 'CONTACT', href: '/contact' },
   ];
 
-  const allLinks = [
+  const allNavLinks = [
     { label: 'HOME', href: '/' },
-    { label: 'ROOMS & SUITES', href: '/rooms' },
+    { label: 'ABOUT HOTEL', href: '/about' },
+    { label: 'SUITES & ROOMS', href: '/rooms' },
     { label: 'CONVENTION HALL', href: '/convention-hall' },
     { label: 'FACILITIES & AMENITIES', href: '/amenities' },
     { label: 'PHOTO GALLERY', href: '/gallery' },
-    { label: 'ABOUT HOTEL', href: '/about' },
     { label: 'GUEST REVIEWS', href: '/testimonials' },
     { label: 'CONTACT & LOCATION', href: '/contact' },
   ];
 
-  const isTransparent = transparentInitially && !isScrolled;
-
-  const headerContainerClass = transparentInitially
-    ? `fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isTransparent
-          ? 'bg-gradient-to-b from-black/85 via-black/45 to-transparent border-b border-white/10 shadow-none py-1 sm:py-2'
-          : 'bg-[#F8F3E9]/95 backdrop-blur-md border-b border-[#E6D9C5]/80 shadow-[0_2px_12px_rgba(66,43,25,0.06)] py-0'
-      }`
-    : 'w-full bg-[#F8F3E9]/95 backdrop-blur-md sticky top-0 z-50 transition-all duration-300 border-b border-[#E6D9C5]/80 shadow-[0_2px_12px_rgba(66,43,25,0.04)]';
-
-  const linkTextColor = isTransparent
-    ? 'text-white/80 hover:text-white'
-    : 'text-[#786A5B] hover:text-[#33271D]';
-
-  const activeLinkTextColor = isTransparent
-    ? 'text-[#D8AD56] font-semibold'
-    : 'text-[#33271D] font-semibold';
-
-  const brandTitleColor = isTransparent
-    ? 'text-white group-hover:text-[#D8AD56]'
-    : 'text-[#33271D] group-hover:text-[#43001F]';
-
-  const brandSubtitleColor = isTransparent
-    ? 'text-[#D8AD56]/90'
-    : 'text-[#43001F]';
-
   return (
-    <header className={headerContainerClass}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 sm:h-24 flex items-center justify-between">
-        
-        {/* Left Desktop Links */}
-        <nav className="hidden lg:flex items-center space-x-7 xl:space-x-8">
-          {leftNavLinks.map((link) => {
-            const isActive = pathname === link.href;
-            return (
-              <NextLink
-                key={link.label}
-                href={link.href}
-                className={`text-[13px] tracking-[0.16em] uppercase font-medium transition-colors duration-200 relative py-1 ${
-                  isActive ? activeLinkTextColor : linkTextColor
-                }`}
-              >
-                {link.label}
-                {isActive && (
-                  <span
-                    className={`absolute bottom-0 left-0 right-0 h-[2px] rounded-full ${
-                      isTransparent ? 'bg-[#D8AD56]' : 'bg-[#43001F]'
-                    }`}
-                  />
-                )}
-              </NextLink>
-            );
-          })}
-        </nav>
-
-        {/* Center Brand Identity (Sri Tayi Grand Official Emblem + Wordmark) */}
-        <div className="flex-shrink-0 flex items-center justify-center">
-          <NextLink
-            href="/"
-            className="flex flex-col items-center justify-center group focus:outline-none"
+    <header className="sticky top-0 z-50 w-full select-none">
+      {/* Container with architectural curved SVG parchment background */}
+      <div className="relative w-full h-[106px] sm:h-[110px]">
+        {/* SVG background creating the exact architectural curve dip framing the logo */}
+        <div className="absolute inset-0 w-full h-full pointer-events-none overflow-hidden drop-shadow-[0_5px_12px_rgba(28,24,20,0.12)]">
+          <svg
+            viewBox="0 0 1440 106"
+            preserveAspectRatio="none"
+            className="w-full h-full"
+            aria-hidden="true"
           >
-            <div className="flex items-center gap-2.5 sm:gap-3">
-              <div className="relative w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center transition-transform duration-300 group-hover:scale-105 shrink-0">
-                <Image
-                  src="/images/hotel/tayi-grand-logo.png"
-                  alt="Sri Tayi Grand Hotel Official Emblem"
-                  fill
-                  sizes="48px"
-                  className="object-contain drop-shadow-[0_2px_4px_rgba(46,0,21,0.25)]"
-                  priority
-                />
-              </div>
-              <div className="flex flex-col items-start leading-none">
-                <span className={`font-serif text-lg sm:text-2xl font-bold tracking-[0.1em] transition-colors uppercase ${brandTitleColor}`}>
-                  Sri Tayi Grand
-                </span>
-                <span className={`text-[9px] sm:text-[10px] tracking-[0.25em] uppercase font-medium mt-0.5 ${brandSubtitleColor}`}>
-                  Hotel • Kadiri
-                </span>
-              </div>
-            </div>
-          </NextLink>
+            {/* Parchment background fill */}
+            <path
+              d="M0,0 L1440,0 L1440,78 L1094,78 C960,78 855,106 720,106 C585,106 480,78 346,78 L0,78 Z"
+              fill="#FAF5EB"
+            />
+            {/* Subtle architectural gold accent outline along the bottom curve */}
+            <path
+              d="M0,78 L346,78 C480,78 585,106 720,106 C855,106 960,78 1094,78 L1440,78"
+              fill="none"
+              stroke="#E2D5BE"
+              strokeWidth="1.2"
+              opacity="0.8"
+            />
+          </svg>
         </div>
 
-        {/* Right Desktop Links & CTA */}
-        <div className="hidden lg:flex items-center space-x-7 xl:space-x-8">
-          <nav className="flex items-center space-x-6 xl:space-x-7">
-            {rightNavLinks.map((link) => {
+        {/* Header content bar */}
+        <div className="relative z-10 w-full h-[78px] max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-10 flex items-center justify-between">
+          
+          {/* Mobile hamburger menu button */}
+          <div className="flex lg:hidden items-center">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 rounded-lg text-[#3a3126] hover:text-[#9b7a3e] hover:bg-black/5 transition-colors focus:outline-none"
+              aria-label="Toggle navigation menu"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+
+          {/* Desktop Left Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-7 xl:gap-9">
+            {leftNavLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
                 <NextLink
                   key={link.label}
                   href={link.href}
-                  className={`text-[13px] tracking-[0.16em] uppercase font-medium transition-colors duration-200 relative py-1 ${
-                    isActive ? activeLinkTextColor : linkTextColor
+                  className={`font-serif text-[11.8px] xl:text-[12.8px] tracking-[0.16em] uppercase font-medium transition-colors relative py-1 ${
+                    isActive
+                      ? 'text-[#2b241c] font-semibold'
+                      : 'text-[#483e33] hover:text-[#9b7a3e]'
                   }`}
                 >
                   {link.label}
                   {isActive && (
-                    <span
-                      className={`absolute bottom-0 left-0 right-0 h-[2px] rounded-full ${
-                        isTransparent ? 'bg-[#D8AD56]' : 'bg-[#43001F]'
-                      }`}
-                    />
+                    <span className="absolute -bottom-[5px] left-1/2 -translate-x-1/2 w-6 h-[1.5px] bg-[#9b7a3e] rounded-full" />
                   )}
                 </NextLink>
               );
             })}
           </nav>
 
+          {/* Center Brand Identity (framed gracefully by the architectural curve dip) */}
           <NextLink
-            href="/rooms"
-            className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-[12.5px] uppercase tracking-[0.14em] font-medium shadow-md transition-all duration-300 group hover:scale-105 active:scale-[0.98] ${
-              isTransparent
-                ? 'bg-[#43001F] hover:bg-[#2E0015] text-white border border-[#D8AD56]/40'
-                : 'bg-[#43001F] hover:bg-[#2E0015] text-white'
-            }`}
+            href="/"
+            className="absolute left-1/2 top-[50%] -translate-x-1/2 -translate-y-[44%] z-20 flex flex-col items-center group focus:outline-none"
+            aria-label="Sri Tayi Grand Hotel — Return to Home"
           >
-            <span>Book Your Stay</span>
-            <ArrowRight className="w-3.5 h-3.5 transition-transform duration-300 group-hover:translate-x-1" />
+            <div className="relative w-[115px] sm:w-[130px] h-[78px] sm:h-[84px] transition-transform duration-300 group-hover:scale-105 flex flex-col items-center justify-center">
+              <div className="relative w-9 h-9 sm:w-10 sm:h-10 mb-0.5">
+                <Image
+                  src="/images/hotel/tayi-grand-logo.png"
+                  alt="Sri Tayi Grand Official Emblem"
+                  fill
+                  priority
+                  className="object-contain"
+                />
+              </div>
+              <span className="font-serif text-[13px] sm:text-[14.5px] font-bold tracking-[0.2em] text-[#2b241c] uppercase leading-none text-center">
+                Sri Tayi Grand
+              </span>
+              <span className="text-[7.5px] sm:text-[8.5px] tracking-[0.28em] font-medium text-[#9b7a3e] uppercase leading-none mt-1 text-center">
+                HOTEL &bull; KADIRI
+              </span>
+            </div>
           </NextLink>
-        </div>
 
-        {/* Mobile menu button */}
-        <div className="flex lg:hidden items-center space-x-3">
-          <NextLink
-            href="/rooms"
-            className={`px-4 py-2 rounded-full text-[11px] uppercase tracking-wider font-medium shadow-sm transition-all active:scale-95 ${
-              isTransparent
-                ? 'bg-[#43001F] hover:bg-[#2E0015] text-white border border-[#D8AD56]/40'
-                : 'bg-[#43001F] hover:bg-[#2E0015] text-white'
-            }`}
-          >
-            Book
-          </NextLink>
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className={`min-w-[44px] min-h-[44px] flex items-center justify-center rounded-xl transition-colors ${
-              isTransparent
-                ? 'text-white hover:bg-white/10 active:bg-white/20'
-                : 'text-[#33271D] hover:bg-black/5 active:bg-black/10'
-            }`}
-            aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-            aria-expanded={mobileMenuOpen}
-          >
-            {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          {/* Desktop Right Navigation Links + CTA Button */}
+          <div className="hidden lg:flex items-center gap-6 xl:gap-8">
+            <nav className="flex items-center gap-6 xl:gap-8">
+              {rightNavLinks.map((link) => {
+                const isActive = pathname === link.href;
+                return (
+                  <NextLink
+                    key={link.label}
+                    href={link.href}
+                    className={`font-serif text-[11.8px] xl:text-[12.8px] tracking-[0.16em] uppercase font-medium transition-colors relative py-1 ${
+                      isActive
+                        ? 'text-[#2b241c] font-semibold'
+                        : 'text-[#483e33] hover:text-[#9b7a3e]'
+                    }`}
+                  >
+                    {link.label}
+                    {isActive && (
+                      <span className="absolute -bottom-[5px] left-1/2 -translate-x-1/2 w-6 h-[1.5px] bg-[#9b7a3e] rounded-full" />
+                    )}
+                  </NextLink>
+                );
+              })}
+            </nav>
+
+            {/* Book Your Stay Button */}
+            <NextLink
+              href="/rooms"
+              className="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 rounded-[3.5px] bg-gradient-to-b from-[#9d7a3d] to-[#89672d] hover:from-[#89672d] hover:to-[#765723] text-[#FFFDF9] font-serif text-[11px] sm:text-[11.8px] tracking-[0.15em] uppercase font-semibold shadow-[0_2px_6px_rgba(137,103,45,0.25)] whitespace-nowrap active:scale-[0.98] transition-all ml-1 group"
+            >
+              <span>BOOK YOUR STAY</span>
+              <ArrowRight className="w-3.5 h-3.5 text-[#FFFDF9] group-hover:translate-x-1 transition-transform" strokeWidth={2.2} />
+            </NextLink>
+          </div>
+
+          {/* Mobile Right CTA (compact on small screens) */}
+          <div className="flex lg:hidden items-center">
+            <NextLink
+              href="/rooms"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[3.5px] bg-[#9b7a3e] text-white font-serif text-[10.5px] tracking-wider uppercase font-semibold shadow-sm active:scale-95"
+            >
+              <span>BOOK</span>
+              <ArrowRight className="w-3 h-3" />
+            </NextLink>
+          </div>
         </div>
       </div>
 
-      {/* Mobile Drawer & Backdrop */}
+      {/* Mobile Animated Luxury Drawer */}
       {mobileMenuOpen && (
-        <>
-          <div
-            className="fixed inset-0 top-20 sm:top-24 bg-black/60 backdrop-blur-xs z-40 lg:hidden transition-opacity"
-            onClick={() => setMobileMenuOpen(false)}
-            aria-hidden="true"
-          />
-          <div
-            className={`relative z-50 lg:hidden px-6 py-6 space-y-5 shadow-2xl animate-fade-in-down max-h-[calc(100vh-5rem)] overflow-y-auto ${
-              isTransparent
-                ? 'bg-[#20120B]/98 text-white border-b border-[#D8AD56]/30'
-                : 'bg-[#F8F3E9] text-[#33271D] border-b border-[#E6D9C5]'
-            }`}
-          >
-            <div className="flex flex-col space-y-1">
-              {allLinks.map((link) => (
-                <NextLink
-                  key={link.label}
-                  href={link.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`text-[14px] tracking-wider min-h-[46px] py-3 border-b flex items-center justify-between transition-colors ${
-                    isTransparent
-                      ? `border-white/10 ${pathname === link.href ? 'text-[#D8AD56] font-bold pl-1' : 'text-white/80 hover:text-[#D8AD56]'}`
-                      : `border-[#E6D9C5]/50 ${pathname === link.href ? 'text-[#43001F] font-bold pl-1' : 'text-[#33271D] hover:text-[#43001F]'}`
-                  }`}
-                >
-                  <span>{link.label}</span>
-                  <ArrowRight className="w-4 h-4 opacity-40" />
-                </NextLink>
-              ))}
-            </div>
+        <div className="lg:hidden bg-[#FAF5EB] border-b border-[#e2d5be] px-6 py-6 shadow-2xl animate-in slide-in-from-top-2">
+          <div className="flex flex-col space-y-3.5">
+            {allNavLinks.map((link) => (
+              <NextLink
+                key={link.label}
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="font-serif text-[13px] tracking-[0.16em] uppercase font-medium text-[#383129] hover:text-[#9b7a3e] py-2 border-b border-stone-200/60 flex items-center justify-between"
+              >
+                <span>{link.label}</span>
+                <span className="text-xs text-[#9b7a3e]">&rsaquo;</span>
+              </NextLink>
+            ))}
+          </div>
 
-            {/* Quick Mobile Contact Actions */}
-            <div className="grid grid-cols-2 gap-3 pt-2">
+          <div className="pt-5 flex flex-col gap-3">
+            <NextLink
+              href="/rooms"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full py-3 rounded-[4px] bg-gradient-to-b from-[#9d7a3d] to-[#89672d] text-[#FFFDF9] font-serif text-xs font-semibold tracking-[0.16em] uppercase shadow-md flex items-center justify-center gap-2"
+            >
+              <span>BOOK YOUR STAY</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </NextLink>
+
+            {/* Quick Actions (Call / Directions) */}
+            <div className="grid grid-cols-2 gap-2 pt-1">
               <a
                 href="tel:08494223379"
-                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-semibold ${
-                  isTransparent
-                    ? 'bg-white/10 border border-white/20 text-white active:bg-white/20'
-                    : 'bg-[#F0E6D8] border border-[#E6D9C5] text-[#33271D] active:bg-[#E6D9C5]'
-                }`}
+                className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-[3.5px] bg-[#F2E8D8] border border-[#E2D5BE] text-[#33271D] text-xs font-semibold hover:bg-[#EAE0CD]"
               >
-                <Phone className={`w-3.5 h-3.5 ${isTransparent ? 'text-[#D8AD56]' : 'text-[#43001F]'}`} />
+                <Phone className="w-3.5 h-3.5 text-[#9b7a3e]" />
                 <span>Call Hotel</span>
               </a>
               <a
                 href="https://maps.google.com/?q=Sri+Tayi+Grand+Kadiri"
                 target="_blank"
                 rel="noopener noreferrer"
-                className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-semibold ${
-                  isTransparent
-                    ? 'bg-white/10 border border-white/20 text-white active:bg-white/20'
-                    : 'bg-[#F0E6D8] border border-[#E6D9C5] text-[#33271D] active:bg-[#E6D9C5]'
-                }`}
+                className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-[3.5px] bg-[#F2E8D8] border border-[#E2D5BE] text-[#33271D] text-xs font-semibold hover:bg-[#EAE0CD]"
               >
-                <MapPin className={`w-3.5 h-3.5 ${isTransparent ? 'text-[#D8AD56]' : 'text-[#43001F]'}`} />
+                <MapPin className="w-3.5 h-3.5 text-[#9b7a3e]" />
                 <span>Directions</span>
               </a>
             </div>
+
+            <p className="text-center font-serif text-[10.5px] tracking-widest text-[#8a7b6a] uppercase mt-2">
+              Sri Tayi Grand &bull; Kadiri, Andhra Pradesh
+            </p>
           </div>
-        </>
+        </div>
       )}
     </header>
   );
