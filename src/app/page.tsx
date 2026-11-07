@@ -10,6 +10,7 @@ import TayiBrandIcon from '@/components/anantha/TayiBrandIcon';
 import MobileStickyBookingBar from '@/components/anantha/MobileStickyBookingBar';
 import FloatingActionBar from '@/components/anantha/FloatingActionBar';
 import { TestimonialsSection } from '@/components/testimonials/TestimonialsSection';
+import { CelebrityShowcase } from '@/components/home/CelebrityShowcase';
 import { repo } from '@/lib/db/repository';
 import {
   Wind,
@@ -452,6 +453,11 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* =========================================================================
+          SECTION: CELEBRATED GUESTS & DISTINGUISHED MOMENTS
+          ========================================================================= */}
+      <CelebrityShowcase />
 
       {/* =========================================================================
           SECTION: GUEST TESTIMONIALS (GOOGLE REVIEWS)
