@@ -94,6 +94,11 @@ export default function HomePage() {
       </section>
 
       {/* =========================================================================
+          SECTION: CELEBRATED GUESTS & DISTINGUISHED MOMENTS
+          ========================================================================= */}
+      <CelebrityShowcase />
+
+      {/* =========================================================================
           SECTION: ROOMS FOR EVERY JOURNEY (COMFORT FOR EVERY STAY)
           ========================================================================= */}
       <section id="rooms" className="relative z-10 w-full py-16 sm:py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
@@ -446,11 +451,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* =========================================================================
-          SECTION: CELEBRATED GUESTS & DISTINGUISHED MOMENTS
-          ========================================================================= */}
-      <CelebrityShowcase />
 
       {/* =========================================================================
           SECTION: GUEST TESTIMONIALS (GOOGLE REVIEWS)
