@@ -58,38 +58,33 @@ export default function HomePage() {
         <AtmosphericGlow position="top-right" color="gold" size="lg" className="opacity-40" />
         <AtmosphericGlow position="bottom-left" color="champagne" size="md" className="opacity-30" />
 
-        {/* Hero Left Content: Gold Dash, Title & Tagline */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto">
-          <div className="max-w-xl">
-            {/* Brand Emblem & Gold horizontal accent bar (Logo kept on mobile, gold SRI TAYI GRAND hidden on mobile) */}
-            <div className="flex items-center gap-3 mb-4 sm:mb-6">
-              <div className="relative w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center shrink-0">
-                <Image
-                  src="/images/hotel/tayi-grand-logo.png"
-                  alt="Sri Tayi Grand Hotel Official Emblem"
-                  fill
-                  sizes="48px"
-                  className="object-contain drop-shadow-lg"
-                  priority
-                />
-              </div>
-              <div className="hidden sm:block w-12 h-[2px] bg-[#D8AD56] shadow-[0_0_8px_rgba(216,173,86,0.5)]" />
-              <span className="hidden sm:inline text-xs uppercase tracking-[0.25em] text-[#D8AD56] font-semibold drop-shadow-sm">
-                SRI TAYI GRAND
-              </span>
+        {/* Hero Middle Content: Highlighting TAYI GRAND with Premium Font */}
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto text-center flex flex-col items-center">
+          {/* Brand Emblem & Gold Accent */}
+          <div className="inline-flex items-center justify-center gap-3 mb-3 sm:mb-4">
+            <div className="w-8 sm:w-14 h-[1px] bg-gradient-to-r from-transparent to-[#D8AD56]" />
+            <div className="relative w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center shrink-0">
+              <Image
+                src="/images/hotel/tayi-grand-logo.png"
+                alt="Sri Tayi Grand Official Emblem"
+                fill
+                sizes="32px"
+                className="object-contain drop-shadow-md"
+                priority
+              />
             </div>
-
-            {/* Title: 2 lines in Cormorant Garamond serif font */}
-            <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl font-normal text-white leading-[1.08] tracking-normal drop-shadow-md">
-              Tayi Grand<br />
-              Hotel
-            </h1>
-
-            {/* Subtitle: Stay · Host · Celebrate */}
-            <p className="mt-3 sm:mt-5 text-base sm:text-xl md:text-2xl text-[#EFE3D6] font-light tracking-wide">
-              Stay · Host · Celebrate
-            </p>
+            <div className="w-8 sm:w-14 h-[1px] bg-gradient-to-l from-transparent to-[#D8AD56]" />
           </div>
+
+          {/* Highlighted Title: TAYI GRAND with Premium Serif Font (HOTEL removed) */}
+          <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl lg:text-[80px] font-normal text-white uppercase tracking-[0.1em] sm:tracking-[0.14em] leading-none drop-shadow-[0_4px_30px_rgba(0,0,0,0.7)] select-none">
+            Tayi Grand
+          </h1>
+
+          {/* Subtitle: Stay · Host · Celebrate */}
+          <p className="mt-3 sm:mt-4 text-sm sm:text-lg md:text-xl text-[#F2E8D8]/90 font-serif italic tracking-wider drop-shadow-md">
+            Stay · Host · Celebrate
+          </p>
         </div>
 
         {/* Centered Floating Booking Widget Bar */}
