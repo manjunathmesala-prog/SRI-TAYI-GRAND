@@ -53,21 +53,22 @@ const CELEBRITY_PHOTOS: CelebrityPhoto[] = [
   },
 ];
 
-// Ring size: 12 slots around 360 degrees for smooth circular continuity (step = 30 deg)
-const SLOTS_COUNT = 12;
-const STEP_ANGLE = 360 / SLOTS_COUNT; // 30 degrees
+// 14 slots around 360 degrees matching Framer Studio Gallery formula exactly:
+// k = 2 * atan((tileWidth + gap) / (2 * radius)), slots = round(2*PI/k) = 14, step = 360/14 = 25.714°
+const SLOTS_COUNT = 14;
+const STEP_ANGLE = 360 / SLOTS_COUNT; // 25.714285714285715 degrees
 
 export function CelebrityShowcase() {
   const containerRef = useRef<HTMLDivElement>(null);
   const hubRef = useRef<HTMLDivElement>(null);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // 3D Geometry configuration based on viewport
+  // Exact 3D Geometry derived from Framer Studio Gallery specifications
   const [dimensions, setDimensions] = useState({
-    radius: 480,
-    perspective: 1250,
-    cardWidth: 260,
-    cardHeight: 350,
+    radius: 530,
+    perspective: 1325,
+    cardWidth: 221.6,
+    cardHeight: 277,
   });
 
   const [activeIndex, setActiveIndex] = useState(0);
@@ -84,31 +85,31 @@ export function CelebrityShowcase() {
   const pointerStartRef = useRef<{ x: number; y: number; time: number }>({ x: 0, y: 0, time: 0 });
   const pointerLastRef = useRef<{ x: number; time: number }>({ x: 0, time: 0 });
 
-  // Responsive dimensions setup
+  // Responsive dimensions matching Framer geometry ratios
   useEffect(() => {
     function handleResize() {
       const width = window.innerWidth;
       if (width < 640) {
-        setDimensions({
-          radius: 280,
-          perspective: 650,
-          cardWidth: 190,
-          cardHeight: 260,
-        });
+        // Mobile
+        const radius = 330;
+        const cardHeight = 185;
+        const cardWidth = cardHeight * 0.8; // 148px (4:5 aspect)
+        const perspective = 2.5 * radius; // 825px
+        setDimensions({ radius, perspective, cardWidth, cardHeight });
       } else if (width < 1024) {
-        setDimensions({
-          radius: 380,
-          perspective: 950,
-          cardWidth: 230,
-          cardHeight: 310,
-        });
+        // Tablet
+        const radius = 440;
+        const cardHeight = 230;
+        const cardWidth = cardHeight * 0.8; // 184px (4:5 aspect)
+        const perspective = 2.5 * radius; // 1100px
+        setDimensions({ radius, perspective, cardWidth, cardHeight });
       } else {
-        setDimensions({
-          radius: 490,
-          perspective: 1300,
-          cardWidth: 270,
-          cardHeight: 360,
-        });
+        // Desktop (Exact Framer Studio Gallery numbers: height 277, width 221.6, radius 530, perspective 1325)
+        const radius = 530;
+        const cardHeight = 277;
+        const cardWidth = 221.6;
+        const perspective = 1325;
+        setDimensions({ radius, perspective, cardWidth, cardHeight });
       }
     }
 
@@ -117,7 +118,7 @@ export function CelebrityShowcase() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Update card visibility, 3D depth lighting & current focal index
+  // Update card visibility matching Framer cutoff: Se = 100 degrees
   const updateCardsPresentation = useCallback(
     (rotation: number) => {
       let minDistance = Infinity;
@@ -137,17 +138,10 @@ export function CelebrityShowcase() {
           closestSlot = i;
         }
 
-        // Only cards facing the camera (within 86 degrees of center) are visible
-        const isVisible = absAngle <= 86;
+        // Visible within 100 degrees of viewer (Framer exact Se = 100)
+        // No dimming or opacity falloff, 100% bright photography
+        const isVisible = absAngle <= 100;
         cardEl.style.visibility = isVisible ? 'visible' : 'hidden';
-
-        if (isVisible) {
-          const cosA = Math.cos((relAngle * Math.PI) / 180);
-          const brightness = Math.max(0.65, Math.min(1, 0.6 + 0.4 * cosA));
-          const opacity = Math.max(0.35, Math.min(1, cosA * 1.15));
-          cardEl.style.filter = `brightness(${brightness.toFixed(2)})`;
-          cardEl.style.opacity = `${opacity.toFixed(2)}`;
-        }
       }
 
       const activePhotoIdx = closestSlot % CELEBRITY_PHOTOS.length;
@@ -161,13 +155,13 @@ export function CelebrityShowcase() {
     let animationFrameId: number;
 
     const loop = () => {
-      // Autoplay drift when idle
+      // Autoplay drift / inertia decay
       if (!isPointerDownRef.current && !isHoveredRef.current) {
-        if (Math.abs(velocityRef.current) > 0.005) {
+        if (Math.abs(velocityRef.current) > 0.002) {
           targetRotationRef.current += velocityRef.current;
-          velocityRef.current *= 0.93; // momentum decay friction
+          velocityRef.current *= 0.94; // Framer exact inertia decay friction
         } else {
-          // Slow continuous gentle float (Studio Gallery signature motion)
+          // Slow continuous gentle float (Studio Gallery signature float)
           targetRotationRef.current += 0.035;
         }
       }
@@ -191,6 +185,29 @@ export function CelebrityShowcase() {
     return () => cancelAnimationFrame(animationFrameId);
   }, [dimensions.radius, updateCardsPresentation]);
 
+  // Page scroll synchronization (Framer signature: scrolling page rotates the cylinder)
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+
+    const handleScroll = () => {
+      if (isHoveredRef.current || isPointerDownRef.current) return;
+      const currentScrollY = window.scrollY;
+      const scrollDiff = currentScrollY - lastScrollY;
+      lastScrollY = currentScrollY;
+
+      if (containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          const degPerPx = 180 / (Math.PI * dimensions.radius);
+          targetRotationRef.current += scrollDiff * degPerPx * 0.45;
+        }
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [dimensions.radius]);
+
   // Pointer drag event handlers
   const handlePointerDown = (e: React.PointerEvent) => {
     isPointerDownRef.current = true;
@@ -208,7 +225,7 @@ export function CelebrityShowcase() {
     };
 
     try {
-      e.currentTarget.setPointerCapture(e.pointerId);
+      (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
     } catch {
       // Ignored if capture unsupported
     }
@@ -221,7 +238,7 @@ export function CelebrityShowcase() {
     const deltaY = e.clientY - pointerStartRef.current.y;
 
     if (!isDraggingRef.current) {
-      if (Math.abs(deltaX) > 6 && Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (Math.abs(deltaX) > 5 && Math.abs(deltaX) > Math.abs(deltaY)) {
         isDraggingRef.current = true;
         setIsDragging(true);
       } else {
@@ -232,16 +249,15 @@ export function CelebrityShowcase() {
     const moveStep = e.clientX - pointerLastRef.current.x;
     const timeDelta = Math.max(1, e.timeStamp - pointerLastRef.current.time);
 
-    // Degree per pixel based on radius
+    // Degree per pixel based on cylinder radius
     const degPerPx = 180 / (Math.PI * dimensions.radius);
-    const angleDelta = -moveStep * degPerPx * 1.15;
+    const angleDelta = -moveStep * degPerPx * 1.1;
 
     targetRotationRef.current += angleDelta;
-    currentRotationRef.current += angleDelta;
 
     // Smoothed velocity computation for inertia
     const instVelocity = angleDelta / (timeDelta / 16.667);
-    velocityRef.current = velocityRef.current * 0.4 + instVelocity * 0.6;
+    velocityRef.current = velocityRef.current * 0.45 + instVelocity * 0.55;
 
     pointerLastRef.current = {
       x: e.clientX,
@@ -254,7 +270,7 @@ export function CelebrityShowcase() {
     isPointerDownRef.current = false;
 
     try {
-      e.currentTarget.releasePointerCapture(e.pointerId);
+      (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
     } catch {
       // Ignored
     }
@@ -262,15 +278,15 @@ export function CelebrityShowcase() {
     setTimeout(() => {
       isDraggingRef.current = false;
       setIsDragging(false);
-    }, 50);
+    }, 60);
   };
 
-  // Wheel / trackpad rotation
+  // Wheel / trackpad horizontal rotation
   const handleWheel = (e: React.WheelEvent) => {
     if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) {
       e.preventDefault();
       const degPerPx = 180 / (Math.PI * dimensions.radius);
-      targetRotationRef.current += e.deltaX * degPerPx * 0.6;
+      targetRotationRef.current += e.deltaX * degPerPx * 0.7;
     }
   };
 
@@ -315,13 +331,13 @@ export function CelebrityShowcase() {
   }, [lightboxIndex]);
 
   return (
-    <section className="w-full py-16 sm:py-24 bg-[#FAF5EB] border-t border-[#E6D9C5] relative overflow-hidden select-none">
+    <section className="w-full py-14 sm:py-20 bg-[#FAF5EB] border-t border-[#E6D9C5] relative overflow-hidden select-none">
       {/* Ambient background glow */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-r from-[#D8AD56]/10 via-[#43001F]/5 to-[#D8AD56]/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-r from-[#D8AD56]/10 via-[#8D672F]/5 to-[#D8AD56]/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header: Clean Title, Subtitle, and Stepper Nav Buttons */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-6 sm:mb-10 gap-6">
           <div className="max-w-2xl text-left">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif text-[#33271D] font-normal tracking-tight leading-[1.15]">
               Celebrated Guests at Sri Tayi Grand
@@ -337,7 +353,7 @@ export function CelebrityShowcase() {
               type="button"
               onClick={() => handleStep('left')}
               aria-label="Rotate previous"
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-[#E6D9C5] bg-white/90 hover:bg-[#43001F] text-[#43001F] hover:text-white shadow-xs transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-95"
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#E6D9C5] bg-white/90 hover:bg-[#8D672F] text-[#8D672F] hover:text-white shadow-xs transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-95"
             >
               <ChevronLeft className="w-5 h-5" />
             </button>
@@ -345,7 +361,7 @@ export function CelebrityShowcase() {
               type="button"
               onClick={() => handleStep('right')}
               aria-label="Rotate next"
-              className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border border-[#E6D9C5] bg-white/90 hover:bg-[#43001F] text-[#43001F] hover:text-white shadow-xs transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-95"
+              className="w-10 h-10 sm:w-11 sm:h-11 rounded-full border border-[#E6D9C5] bg-white/90 hover:bg-[#8D672F] text-[#8D672F] hover:text-white shadow-xs transition-all duration-300 flex items-center justify-center cursor-pointer active:scale-95"
             >
               <ChevronRight className="w-5 h-5" />
             </button>
@@ -354,7 +370,7 @@ export function CelebrityShowcase() {
       </div>
 
       {/* =========================================================================
-          3D STUDIO GALLERY CYLINDER VIEWPORT — CLEAN PLAIN IMAGES
+          3D STUDIO GALLERY CYLINDER VIEWPORT — EXACT 100% VISUAL & SPACING
           ========================================================================= */}
       <div
         ref={containerRef}
@@ -373,7 +389,7 @@ export function CelebrityShowcase() {
           perspective: `${dimensions.perspective}px`,
           perspectiveOrigin: '50% 50%',
         }}
-        className={`relative w-full h-[420px] sm:h-[480px] md:h-[530px] overflow-hidden touch-none select-none ${
+        className={`relative w-full h-[380px] sm:h-[440px] md:h-[480px] overflow-hidden touch-pan-y select-none ${
           isDragging ? 'cursor-grabbing' : 'cursor-grab'
         }`}
       >
@@ -407,18 +423,24 @@ export function CelebrityShowcase() {
                   transform: `rotateY(${slotAngle}deg) translateZ(-${dimensions.radius}px)`,
                   backfaceVisibility: 'hidden',
                   WebkitBackfaceVisibility: 'hidden',
-                  borderRadius: '20px',
-                  willChange: 'transform, opacity, filter',
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  background: 'rgba(0, 0, 0, 0.04)',
+                  cursor: 'pointer',
+                  boxShadow: '0 12px 32px -4px rgba(40, 25, 15, 0.16), 0 4px 12px rgba(0, 0, 0, 0.06)',
+                  willChange: 'transform',
                 }}
-                className="group relative cursor-pointer overflow-hidden border border-[#E6D9C5] bg-[#1C140E] shadow-[0_16px_40px_-10px_rgba(51,39,29,0.18)] hover:border-[#D8AD56] transition-colors duration-300"
+                className="group relative select-none transition-shadow duration-300 hover:shadow-2xl"
               >
-                {/* Pure Plain Image */}
+                {/* Pure Clean Photography */}
                 <Image
                   src={photo.src}
                   alt={photo.alt}
                   fill
-                  sizes="(max-width: 640px) 200px, 300px"
-                  className="object-cover object-center pointer-events-none group-hover:scale-105 transition-transform duration-700 ease-out"
+                  sizes="(max-width: 640px) 160px, (max-width: 1024px) 200px, 240px"
+                  className="object-cover object-center pointer-events-none select-none transition-transform duration-500 ease-out group-hover:scale-105"
+                  draggable={false}
+                  priority={slotIndex < 8}
                 />
               </div>
             );
@@ -429,21 +451,20 @@ export function CelebrityShowcase() {
       {/* =========================================================================
           BOTTOM MINIMAL INDICATOR DOTS
           ========================================================================= */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 sm:mt-6">
         <div className="flex items-center justify-center gap-2">
           {CELEBRITY_PHOTOS.map((p, idx) => (
             <button
               key={p.id}
               type="button"
               onClick={() => {
-                const targetSlot = idx;
-                targetRotationRef.current = -targetSlot * STEP_ANGLE;
+                targetRotationRef.current = -idx * STEP_ANGLE;
               }}
               aria-label={`Jump to photo ${idx + 1}`}
               className={`transition-all duration-300 rounded-full cursor-pointer ${
                 activeIndex === idx
-                  ? 'w-7 h-2 bg-[#43001F] shadow-xs'
-                  : 'w-2 h-2 bg-[#E6D9C5] hover:bg-[#D8AD56]'
+                  ? 'w-7 h-2 bg-[#8D672F] shadow-xs'
+                  : 'w-2 h-2 bg-[#E6D9C5] hover:bg-[#8D672F]/60'
               }`}
             />
           ))}
@@ -493,7 +514,7 @@ export function CelebrityShowcase() {
                   prev !== null ? (prev === 0 ? CELEBRITY_PHOTOS.length - 1 : prev - 1) : null
                 );
               }}
-              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/60 hover:bg-[#43001F] text-white flex items-center justify-center border border-white/20 transition-all cursor-pointer backdrop-blur-sm shadow-xl active:scale-95"
+              className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/60 hover:bg-[#8D672F] text-white flex items-center justify-center border border-white/20 transition-all cursor-pointer backdrop-blur-sm shadow-xl active:scale-95"
               aria-label="Previous image"
             >
               <ChevronLeft className="w-6 h-6" />
@@ -508,7 +529,7 @@ export function CelebrityShowcase() {
                   prev !== null ? (prev === CELEBRITY_PHOTOS.length - 1 ? 0 : prev + 1) : null
                 );
               }}
-              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/60 hover:bg-[#43001F] text-white flex items-center justify-center border border-white/20 transition-all cursor-pointer backdrop-blur-sm shadow-xl active:scale-95"
+              className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-11 h-11 sm:w-13 sm:h-13 rounded-full bg-black/60 hover:bg-[#8D672F] text-white flex items-center justify-center border border-white/20 transition-all cursor-pointer backdrop-blur-sm shadow-xl active:scale-95"
               aria-label="Next image"
             >
               <ChevronRight className="w-6 h-6" />
