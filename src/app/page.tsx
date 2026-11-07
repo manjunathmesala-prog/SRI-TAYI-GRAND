@@ -76,9 +76,9 @@ export default function HomePage() {
             <div className="w-8 sm:w-14 h-[1px] bg-gradient-to-l from-transparent to-[#D8AD56]" />
           </div>
 
-          {/* Highlighted Title: TAYI GRAND with Premium Serif Font (HOTEL removed) */}
-          <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl lg:text-[80px] font-normal text-white uppercase tracking-[0.1em] sm:tracking-[0.14em] leading-none drop-shadow-[0_4px_30px_rgba(0,0,0,0.7)] select-none">
-            Tayi Grand
+          {/* Highlighted Title: SRI TAYI GRAND with Premium Serif Font */}
+          <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-normal text-white uppercase tracking-[0.08em] sm:tracking-[0.14em] leading-none drop-shadow-[0_4px_30px_rgba(0,0,0,0.7)] select-none whitespace-nowrap">
+            Sri Tayi Grand
           </h1>
 
           {/* Subtitle: Stay · Host · Celebrate */}
