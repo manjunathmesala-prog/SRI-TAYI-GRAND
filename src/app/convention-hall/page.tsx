@@ -154,15 +154,6 @@ export default function ConventionHallPage() {
                   className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
                   sizes="(max-width: 1024px) 100vw, 60vw"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
-                <div className="absolute bottom-4 left-4 right-4 sm:bottom-5 sm:left-5 text-white pointer-events-none">
-                  <span className="text-[10px] uppercase tracking-[0.2em] font-semibold text-[#D8AD56] block mb-0.5">
-                    Authentic Grand Stage &amp; Banquet Seating
-                  </span>
-                  <p className="text-sm font-serif font-medium text-white/95">
-                    Central AC · Royal Chandeliers · 800 Guest Capacity
-                  </p>
-                </div>
               </div>
 
               {/* Refined Features */}

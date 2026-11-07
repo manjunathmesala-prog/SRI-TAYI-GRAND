@@ -113,9 +113,6 @@ export default function AboutPage() {
               className="object-cover group-hover:scale-105 transition-transform duration-700"
               sizes="(max-width: 768px) 100vw, 33vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-5">
-              <span className="text-xs font-serif text-white tracking-wide">24/7 Front Desk Concierge</span>
-            </div>
           </div>
 
           <div className="relative aspect-[16/10] rounded-2xl overflow-hidden shadow-luxury border border-[#E6D9C5] bg-[#21180F] luxury-card-hover">
@@ -126,9 +123,6 @@ export default function AboutPage() {
               className="object-cover group-hover:scale-105 transition-transform duration-700"
               sizes="(max-width: 768px) 100vw, 33vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-5">
-              <span className="text-xs font-serif text-white tracking-wide">Executive Master Bedding</span>
-            </div>
           </div>
 
           <div className="relative aspect-[16/10] rounded-2xl overflow-hidden shadow-luxury border border-[#E6D9C5] bg-[#21180F] luxury-card-hover">
@@ -139,9 +133,6 @@ export default function AboutPage() {
               className="object-cover group-hover:scale-105 transition-transform duration-700"
               sizes="(max-width: 768px) 100vw, 33vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-5">
-              <span className="text-xs font-serif text-white tracking-wide">Grand Convention Venue (800 Guests)</span>
-            </div>
           </div>
         </div>
 

@@ -2,15 +2,12 @@
 
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { ChevronLeft, ChevronRight, X, Maximize2, Sparkles, MoveHorizontal } from 'lucide-react';
-import TayiBrandIcon from '@/components/anantha/TayiBrandIcon';
+import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 interface CelebrityPhoto {
   id: number;
   src: string;
   alt: string;
-  caption: string;
-  category?: string;
 }
 
 const CELEBRITY_PHOTOS: CelebrityPhoto[] = [
@@ -18,57 +15,41 @@ const CELEBRITY_PHOTOS: CelebrityPhoto[] = [
     id: 1,
     src: '/images/celebrity/celebrity-guest-1.jpg',
     alt: 'Distinguished guest welcomed at Sri Tayi Grand Hotel',
-    caption: 'Warm reception with our esteemed guest at Sri Tayi Grand',
-    category: 'Honoured Guest',
   },
   {
     id: 2,
     src: '/images/celebrity/celebrity-guest-2.jpg',
-    alt: 'Celebrity guest posing in front of Sri Tayi Grand',
-    caption: 'Honoured arrival at the hotel entrance',
-    category: 'Celebrated Arrival',
+    alt: 'Celebrity guest at Sri Tayi Grand facade',
   },
   {
     id: 3,
     src: '/images/celebrity/celebrity-guest-3.jpg',
     alt: 'Memorable hospitality moment with guest at Sri Tayi Grand',
-    caption: 'Cherished memories of gracious hospitality',
-    category: 'Cherished Moments',
   },
   {
     id: 4,
     src: '/images/celebrity/celebrity-guest-4.jpg',
-    alt: 'Celebrity guest with Sri Tayi Grand team and hosts',
-    caption: 'Moments of celebration with our hotel team',
-    category: 'Hotel Hosts',
+    alt: 'Celebrity guest with Sri Tayi Grand hosts',
   },
   {
     id: 5,
     src: '/images/celebrity/celebrity-guest-5.jpg',
     alt: 'Guest experience and stay at Sri Tayi Grand Kadiri',
-    caption: 'Celebrating authentic South Indian hospitality',
-    category: 'Hospitality',
   },
   {
     id: 6,
     src: '/images/celebrity/celebrity-guest-6.jpg',
     alt: 'Distinguished gathering at Sri Tayi Grand Hotel',
-    caption: 'Gatherings of distinction and memorable stays',
-    category: 'Distinguished Stay',
   },
   {
     id: 7,
     src: '/images/celebrity/celebrity-guest-7.jpg',
     alt: 'Special visitor interaction at Sri Tayi Grand',
-    caption: 'Welcoming cultural icons to Kadiri corridor',
-    category: 'Cultural Icons',
   },
   {
     id: 8,
     src: '/images/celebrity/celebrity-guest-8.jpg',
     alt: 'Cherished moments with guest at Sri Tayi Grand',
-    caption: 'Lasting friendships and unforgettable visits',
-    category: 'Memorable Visits',
   },
 ];
 
@@ -156,14 +137,12 @@ export function CelebrityShowcase() {
           closestSlot = i;
         }
 
-        // Only cards facing the camera (within 85 degrees of center) are visible
-        // Cards around the back are hidden for crisp depth and performance
+        // Only cards facing the camera (within 86 degrees of center) are visible
         const isVisible = absAngle <= 86;
         cardEl.style.visibility = isVisible ? 'visible' : 'hidden';
 
         if (isVisible) {
           const cosA = Math.cos((relAngle * Math.PI) / 180);
-          // Realistic photographic falloff: cards on the sides gently fade and darken
           const brightness = Math.max(0.65, Math.min(1, 0.6 + 0.4 * cosA));
           const opacity = Math.max(0.35, Math.min(1, cosA * 1.15));
           cardEl.style.filter = `brightness(${brightness.toFixed(2)})`;
@@ -337,17 +316,13 @@ export function CelebrityShowcase() {
 
   return (
     <section className="w-full py-16 sm:py-24 bg-[#FAF5EB] border-t border-[#E6D9C5] relative overflow-hidden select-none">
-      {/* Ambient background glow matching Studio Gallery luxury */}
+      {/* Ambient background glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-r from-[#D8AD56]/10 via-[#43001F]/5 to-[#D8AD56]/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Header: Title, Subtitle, and Studio Gallery Nav Buttons */}
+        {/* Header: Clean Title, Subtitle, and Stepper Nav Buttons */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 gap-6">
           <div className="max-w-2xl text-left">
-            <span className="text-xs uppercase tracking-[0.25em] font-semibold text-[#43001F] inline-flex items-center gap-2 mb-3">
-              <TayiBrandIcon size={18} />
-              DISTINGUISHED MOMENTS
-            </span>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-serif text-[#33271D] font-normal tracking-tight leading-[1.15]">
               Celebrated Guests at Sri Tayi Grand
             </h2>
@@ -379,7 +354,7 @@ export function CelebrityShowcase() {
       </div>
 
       {/* =========================================================================
-          3D STUDIO GALLERY CYLINDER VIEWPORT
+          3D STUDIO GALLERY CYLINDER VIEWPORT — CLEAN PLAIN IMAGES
           ========================================================================= */}
       <div
         ref={containerRef}
@@ -437,7 +412,7 @@ export function CelebrityShowcase() {
                 }}
                 className="group relative cursor-pointer overflow-hidden border border-[#E6D9C5] bg-[#1C140E] shadow-[0_16px_40px_-10px_rgba(51,39,29,0.18)] hover:border-[#D8AD56] transition-colors duration-300"
               >
-                {/* Image */}
+                {/* Pure Plain Image */}
                 <Image
                   src={photo.src}
                   alt={photo.alt}
@@ -445,24 +420,6 @@ export function CelebrityShowcase() {
                   sizes="(max-width: 640px) 200px, 300px"
                   className="object-cover object-center pointer-events-none group-hover:scale-105 transition-transform duration-700 ease-out"
                 />
-
-                {/* Studio Gallery Vignette & Shading */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent pointer-events-none" />
-
-                {/* Top-right subtle zoom pill */}
-                <div className="absolute top-3.5 right-3.5 w-8 h-8 rounded-full bg-black/40 backdrop-blur-md border border-white/20 text-white/90 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-sm pointer-events-none">
-                  <Maximize2 className="w-3.5 h-3.5" />
-                </div>
-
-                {/* Bottom Card Caption */}
-                <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5 text-white pointer-events-none">
-                  <span className="text-[10px] uppercase tracking-[0.2em] font-semibold text-[#D8AD56] block mb-1">
-                    {photo.category || 'Sri Tayi Grand'}
-                  </span>
-                  <p className="text-xs sm:text-sm font-serif font-normal text-white/95 line-clamp-2 leading-snug">
-                    {photo.caption}
-                  </p>
-                </div>
               </div>
             );
           })}
@@ -470,48 +427,31 @@ export function CelebrityShowcase() {
       </div>
 
       {/* =========================================================================
-          BOTTOM CONTROLS & INTERACTION HINT
+          BOTTOM MINIMAL INDICATOR DOTS
           ========================================================================= */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          {/* Interactive Hint */}
-          <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-[#786A5B] font-medium">
-            <MoveHorizontal className="w-4 h-4 text-[#D8AD56] animate-pulse" />
-            <span>Click &amp; Drag or Swipe to spin 3D gallery</span>
-          </div>
-
-          {/* Active Photo Pill Indicator */}
-          <div className="flex items-center gap-2">
-            {CELEBRITY_PHOTOS.map((p, idx) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => {
-                  // Rotate cylinder so this photo moves to front center
-                  const targetSlot = idx;
-                  targetRotationRef.current = -targetSlot * STEP_ANGLE;
-                }}
-                aria-label={`Jump to guest photo ${idx + 1}`}
-                className={`transition-all duration-300 rounded-full cursor-pointer ${
-                  activeIndex === idx
-                    ? 'w-7 h-2 bg-[#43001F] shadow-xs'
-                    : 'w-2 h-2 bg-[#E6D9C5] hover:bg-[#D8AD56]'
-                }`}
-              />
-            ))}
-          </div>
-
-          {/* Quick Counter */}
-          <div className="hidden sm:block text-xs uppercase tracking-[0.18em] font-semibold text-[#786A5B]">
-            <span className="text-[#43001F] font-bold">{activeIndex + 1}</span>
-            <span className="mx-1 text-[#E6D9C5]">/</span>
-            <span>{CELEBRITY_PHOTOS.length} Moments</span>
-          </div>
+        <div className="flex items-center justify-center gap-2">
+          {CELEBRITY_PHOTOS.map((p, idx) => (
+            <button
+              key={p.id}
+              type="button"
+              onClick={() => {
+                const targetSlot = idx;
+                targetRotationRef.current = -targetSlot * STEP_ANGLE;
+              }}
+              aria-label={`Jump to photo ${idx + 1}`}
+              className={`transition-all duration-300 rounded-full cursor-pointer ${
+                activeIndex === idx
+                  ? 'w-7 h-2 bg-[#43001F] shadow-xs'
+                  : 'w-2 h-2 bg-[#E6D9C5] hover:bg-[#D8AD56]'
+              }`}
+            />
+          ))}
         </div>
       </div>
 
       {/* =========================================================================
-          FULLSCREEN LIGHTBOX MODAL (WITH BLUR & KEYBOARD SUPPORT)
+          FULLSCREEN LIGHTBOX MODAL (PURE CLEAN IMAGE VIEW)
           ========================================================================= */}
       {lightboxIndex !== null && (
         <div
@@ -520,17 +460,7 @@ export function CelebrityShowcase() {
           className="fixed inset-0 z-50 bg-black/92 backdrop-blur-md flex flex-col justify-between p-4 sm:p-8 animate-fadeIn select-none"
         >
           {/* Modal Top Bar */}
-          <div className="flex items-center justify-between text-white max-w-6xl mx-auto w-full z-10 pt-2">
-            <div className="flex items-center gap-3">
-              <span className="text-xs uppercase tracking-[0.2em] text-[#D8AD56] font-medium">
-                {CELEBRITY_PHOTOS[lightboxIndex].category || 'Distinguished Guest'}
-              </span>
-              <span className="text-xs text-white/50">|</span>
-              <span className="text-xs text-white/70">
-                {lightboxIndex + 1} of {CELEBRITY_PHOTOS.length}
-              </span>
-            </div>
-
+          <div className="flex items-center justify-end text-white max-w-6xl mx-auto w-full z-10 pt-2">
             <button
               type="button"
               onClick={() => setLightboxIndex(null)}
@@ -543,7 +473,7 @@ export function CelebrityShowcase() {
 
           {/* Modal Center Image */}
           <div className="relative flex-1 flex items-center justify-center my-4 max-w-5xl mx-auto w-full">
-            <div className="relative w-full h-[65vh] sm:h-[75vh] flex items-center justify-center">
+            <div className="relative w-full h-[75vh] sm:h-[82vh] flex items-center justify-center">
               <Image
                 src={CELEBRITY_PHOTOS[lightboxIndex].src}
                 alt={CELEBRITY_PHOTOS[lightboxIndex].alt}
@@ -583,16 +513,6 @@ export function CelebrityShowcase() {
             >
               <ChevronRight className="w-6 h-6" />
             </button>
-          </div>
-
-          {/* Modal Bottom Caption */}
-          <div className="max-w-2xl mx-auto w-full text-center pb-2">
-            <p className="text-white/90 font-serif text-base sm:text-lg">
-              {CELEBRITY_PHOTOS[lightboxIndex].caption}
-            </p>
-            <span className="text-[11px] text-white/50 block mt-1 tracking-wider uppercase">
-              Sri Tayi Grand · Kadiri
-            </span>
           </div>
         </div>
       )}
