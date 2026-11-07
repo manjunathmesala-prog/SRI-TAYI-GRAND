@@ -4,12 +4,12 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import NextLink from 'next/link';
 import Image from 'next/image';
-import { Lock, Mail, ArrowRight, Key, ShieldCheck } from 'lucide-react';
+import { Lock, Mail, ArrowRight, ShieldCheck } from 'lucide-react';
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('admin@sritayigrand.com');
-  const [password, setPassword] = useState('GrandHotel@Kadiri2026!');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -46,12 +46,6 @@ export default function AdminLoginPage() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     performLogin(email, password);
-  };
-
-  const handleDemoRole = (roleEmail: string) => {
-    setEmail(roleEmail);
-    setPassword('GrandHotel@Kadiri2026!');
-    performLogin(roleEmail, 'GrandHotel@Kadiri2026!');
   };
 
   return (
@@ -121,14 +115,9 @@ export default function AdminLoginPage() {
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="block text-xs font-semibold text-[#241912] uppercase tracking-wider">
-                  Password
-                </label>
-                <span className="text-[10px] text-[#D8AD56] hover:underline cursor-pointer">
-                  Default: GrandHotel@Kadiri2026!
-                </span>
-              </div>
+              <label className="block text-xs font-semibold text-[#241912] uppercase tracking-wider mb-1.5">
+                Password
+              </label>
               <div className="relative">
                 <Lock className="w-4 h-4 text-[#8C7A6B] absolute left-3.5 top-3.5" />
                 <input
@@ -151,47 +140,6 @@ export default function AdminLoginPage() {
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>
-
-          {/* Quick Role Fill Presets for Ease of Testing */}
-          <div className="pt-4 border-t border-[#FAF7F2]">
-            <div className="text-[11px] font-semibold text-[#8C7A6B] uppercase tracking-wider mb-2 text-center">
-              Quick Role One-Click Switch
-            </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              <button
-                type="button"
-                onClick={() => handleDemoRole('admin@sritayigrand.com')}
-                className="p-2 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-[#241912] text-left border border-[#D8AD56]/20 transition-colors"
-              >
-                <div className="font-bold text-[11px] text-[#382216]">Super Admin</div>
-                <div className="text-[9px] text-[#786B61] truncate">admin@sritayigrand.com</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemoRole('reception@sritayigrand.com')}
-                className="p-2 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-[#241912] text-left border border-[#D8AD56]/20 transition-colors"
-              >
-                <div className="font-bold text-[11px] text-[#382216]">Receptionist</div>
-                <div className="text-[9px] text-[#786B61] truncate">reception@sritayigrand.com</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemoRole('housekeeping@sritayigrand.com')}
-                className="p-2 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-[#241912] text-left border border-[#D8AD56]/20 transition-colors"
-              >
-                <div className="font-bold text-[11px] text-[#382216]">Housekeeping</div>
-                <div className="text-[9px] text-[#786B61] truncate">housekeeping@sritayigrand.com</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDemoRole('manager@sritayigrand.com')}
-                className="p-2 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-[#241912] text-left border border-[#D8AD56]/20 transition-colors"
-              >
-                <div className="font-bold text-[11px] text-[#382216]">General Manager</div>
-                <div className="text-[9px] text-[#786B61] truncate">manager@sritayigrand.com</div>
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* Back to Guest Website Link */}
