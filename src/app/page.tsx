@@ -50,7 +50,7 @@ export default function HomePage() {
       {/* =========================================================================
           HERO SECTION — EXACT CLASSIC LUXURY EXTERIOR & EMBEDDED SEARCH ENGINE
           ========================================================================= */}
-      <section className="relative min-h-[620px] sm:min-h-[700px] lg:min-h-[780px] flex flex-col justify-between pt-12 sm:pt-16 lg:pt-20 pb-10 sm:pb-14 overflow-hidden bg-[#20120B]">
+      <section className="relative -mt-[106px] sm:-mt-[110px] min-h-[640px] sm:min-h-[720px] lg:min-h-[820px] flex flex-col justify-between pt-28 sm:pt-36 lg:pt-40 pb-10 sm:pb-14 overflow-hidden bg-[#20120B]">
         {/* Authentic Hotel Cinematic Background Video with Poster Fallback */}
         <HeroVideoBackground />
 
@@ -61,8 +61,8 @@ export default function HomePage() {
         {/* Hero Left Content: Gold Dash, Title & Tagline */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full my-auto">
           <div className="max-w-xl">
-            {/* Brand Emblem & Gold horizontal accent bar */}
-            <div className="flex items-center gap-3 mb-5 sm:mb-6">
+            {/* Brand Emblem & Gold horizontal accent bar (Logo kept on mobile, gold SRI TAYI GRAND hidden on mobile) */}
+            <div className="flex items-center gap-3 mb-4 sm:mb-6">
               <div className="relative w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center shrink-0">
                 <Image
                   src="/images/hotel/tayi-grand-logo.png"
@@ -73,29 +73,22 @@ export default function HomePage() {
                   priority
                 />
               </div>
-              <div className="w-12 h-[2px] bg-[#D8AD56] shadow-[0_0_8px_rgba(216,173,86,0.5)]" />
-              <span className="text-xs uppercase tracking-[0.25em] text-[#D8AD56] font-semibold drop-shadow-sm">
+              <div className="hidden sm:block w-12 h-[2px] bg-[#D8AD56] shadow-[0_0_8px_rgba(216,173,86,0.5)]" />
+              <span className="hidden sm:inline text-xs uppercase tracking-[0.25em] text-[#D8AD56] font-semibold drop-shadow-sm">
                 SRI TAYI GRAND
               </span>
             </div>
 
             {/* Title: 2 lines in Cormorant Garamond serif font */}
-            <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl font-normal text-white leading-[1.06] tracking-normal drop-shadow-md">
+            <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl font-normal text-white leading-[1.08] tracking-normal drop-shadow-md">
               Tayi Grand<br />
               Hotel
             </h1>
 
             {/* Subtitle: Stay · Host · Celebrate */}
-            <p className="mt-4 sm:mt-5 text-lg sm:text-xl md:text-2xl text-[#EFE3D6] font-light tracking-wide">
+            <p className="mt-3 sm:mt-5 text-base sm:text-xl md:text-2xl text-[#EFE3D6] font-light tracking-wide">
               Stay · Host · Celebrate
             </p>
-
-            {/* Real Starting Price Badge from Sri Tayi Grand */}
-            <div className="mt-5 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-md border border-[#D8AD56]/40 text-xs text-[#EFE3D6] shadow-sm">
-              <TayiBrandIcon size={16} />
-              <span className="font-medium text-white">Rooms from ₹1,800</span>
-              <span className="text-[11px] text-[#EFE3D6]/70">• Kadiri, AP</span>
-            </div>
           </div>
         </div>
 
