@@ -12,33 +12,17 @@ import {
   CheckCircle2,
   Copy,
   ArrowLeft,
-  KeyRound,
-  ShieldCheck,
   RefreshCw,
 } from 'lucide-react';
 
 export default function StandeeAdminPage() {
-  const [urlMode, setUrlMode] = useState<'production' | 'network' | 'custom'>('production');
-  const [customHost, setCustomHost] = useState('');
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
-  const [targetUrl, setTargetUrl] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const defaultToken = 'STG_RECEPT_DESK_SEC_7749';
+  const targetUrl = `https://sri-tayi-grand.vercel.app/walk-in?token=${encodeURIComponent(defaultToken)}`;
 
   useEffect(() => {
-    let host = 'http://192.168.1.20:3000';
-    if (urlMode === 'production') {
-      host = 'https://sri-tayi-grand.vercel.app';
-    } else if (urlMode === 'custom' && customHost.trim()) {
-      host = customHost.trim();
-    }
-    const computed = `${host.replace(/\/$/, '')}/walk-in?token=${encodeURIComponent(defaultToken)}`;
-    setTargetUrl(computed);
-  }, [urlMode, customHost]);
-
-  useEffect(() => {
-    if (!targetUrl) return;
     let isCancelled = false;
 
     async function loadQR() {
@@ -104,63 +88,17 @@ export default function StandeeAdminPage() {
           </p>
         </div>
 
-        {/* Destination Host Selector */}
-        <div className="p-4 rounded-2xl bg-white border border-[#EFE3D6] shadow-sm space-y-3">
-          <label className="text-xs font-bold text-[#241912] block">Select Destination Host for QR Scan:</label>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => setUrlMode('production')}
-              className={`p-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                urlMode === 'production'
-                  ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
-                  : 'bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              Live Vercel App (sri-tayi-grand.vercel.app)
-            </button>
-            <button
-              type="button"
-              onClick={() => setUrlMode('network')}
-              className={`p-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                urlMode === 'network'
-                  ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
-                  : 'bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              Local Wi-Fi (192.168.1.20:3000)
-            </button>
-            <button
-              type="button"
-              onClick={() => setUrlMode('custom')}
-              className={`p-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                urlMode === 'custom'
-                  ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
-                  : 'bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              Custom Host URL
-            </button>
-          </div>
-
-          {urlMode === 'custom' && (
-            <input
-              type="text"
-              placeholder="e.g. http://192.168.1.50:3000 or https://myhotel.com"
-              value={customHost}
-              onChange={(e) => setCustomHost(e.target.value)}
-              className="w-full p-2.5 rounded-xl border border-[#EFE3D6] text-xs text-[#241912]"
-            />
-          )}
-
-          <div className="flex items-center justify-between text-[11px] text-[#786B61] pt-1 border-t border-[#EFE3D6]">
-            <span className="font-mono truncate max-w-md">{targetUrl}</span>
+        {/* Destination Host Display */}
+        <div className="p-4 rounded-2xl bg-white border border-[#EFE3D6] shadow-sm space-y-2">
+          <label className="text-xs font-bold text-[#241912] block">QR Code Destination Link:</label>
+          <div className="flex items-center justify-between text-xs bg-[#FAF7F2] px-3.5 py-2.5 rounded-xl border border-[#EFE3D6]">
+            <span className="font-mono text-xs text-[#241912] truncate max-w-md">{targetUrl}</span>
             <button
               type="button"
               onClick={handleCopyUrl}
-              className="text-[#D8AD56] hover:underline font-bold flex items-center gap-1 cursor-pointer shrink-0 ml-2"
+              className="text-[#D8AD56] hover:text-[#b58e3e] font-bold text-xs flex items-center gap-1 shrink-0 ml-3 cursor-pointer transition-colors"
             >
-              {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-[#D8AD56]" />}
               <span>{copied ? 'Copied Link' : 'Copy Link'}</span>
             </button>
           </div>

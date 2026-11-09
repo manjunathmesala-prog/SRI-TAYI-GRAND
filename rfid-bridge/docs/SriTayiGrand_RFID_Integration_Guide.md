@@ -1,6 +1,6 @@
 # Sri Tayi Grand - RFID Door Lock & Web Admin Integration Specification
 
-> **Target Platform:** `https://sri-tayi-grand.vercel.app/admin/rfid`  
+> **Target Platform:** `https://sritayigrand.com/admin/rfid`  
 > **Lock Hardware:** Be-Tech Electronic Locks (BIS Hotel v5.7 / Mifare 1K)  
 > **Native Driver:** `btlock57L.dll` / `btlock57.dll` (Win32 x86 StdCall)  
 > **Audience:** Full-Stack Web Developer & Hardware Integrator  
@@ -84,7 +84,7 @@ All 25 rooms across 3 floors at Sri Tayi Grand:
 
 ---
 
-## 4. Web Admin Integration Code (`sri-tayi-grand.vercel.app`)
+## 4. Web Admin Integration Code (`sritayigrand.com`)
 
 ### File 1: Backend API Route (`app/api/admin/rfid-logs/route.ts`)
 Creates an audit log of every tap in the database:
@@ -246,7 +246,7 @@ namespace HotelRfidBridge
         public static byte ReaderType = 4;
         public static byte SectorNo = 0;
         public static string HotelPwd = "TAYIGR";
-        public static string AdminApiUrl = "https://sri-tayi-grand.vercel.app/api/admin/rfid-logs";
+        public static string AdminApiUrl = "https://sritayigrand.com/api/admin/rfid-logs";
         public static int ListenPort = 8989;
 
         static HttpListener listener;

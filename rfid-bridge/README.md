@@ -1,6 +1,6 @@
 # Sri Tayi Grand - RFID Hardware Bridge & SDK Package
 
-Complete front-desk keycard encoder SDK and web integration package for **Sri Tayi Grand** (`https://sri-tayi-grand.vercel.app/admin/rfid`).
+Complete front-desk keycard encoder SDK and web integration package for **Sri Tayi Grand** (`https://sritayigrand.com/admin/rfid`).
 
 ---
 
@@ -20,7 +20,7 @@ Complete front-desk keycard encoder SDK and web integration package for **Sri Ta
 1. Connect the Be-Tech USB RFID encoder to the laptop.
 2. Double-click **`start-rfid-bridge.bat`** (or run `install-rfid-service-permanent.bat` for silent auto-start).
 3. The bridge service starts listening on `http://127.0.0.1:8989`.
-4. Open `https://sri-tayi-grand.vercel.app/admin/rfid` (or `http://localhost:3000/admin/rfid`) in Chrome/Edge and manage cards directly.
+4. Open `https://sritayigrand.com/admin/rfid` (or `http://localhost:3000/admin/rfid`) in Chrome/Edge and manage cards directly.
 
 ---
 
@@ -28,4 +28,4 @@ Complete front-desk keycard encoder SDK and web integration package for **Sri Ta
 
 Every single card tap on the encoder is recorded:
 1. **Locally:** In `bin\rfid_tap_audit.log`.
-2. **Web Admin Database:** Automatically sent via background POST to `https://sri-tayi-grand.vercel.app/api/admin/rfid-logs` (or local `/api/admin/rfid-logs`).
+2. **Web Admin Database:** Automatically sent via background POST to `https://sritayigrand.com/api/admin/rfid-logs` (or local `/api/admin/rfid-logs`).

@@ -24,28 +24,15 @@ export function ReceptionStandeeModal({
   onClose,
   defaultToken = 'STG_RECEPT_DESK_SEC_7749',
 }: ReceptionStandeeModalProps) {
-  const [urlMode, setUrlMode] = useState<'production' | 'network' | 'custom'>('production');
-  const [customHost, setCustomHost] = useState('');
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
-  const [targetUrl, setTargetUrl] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  // Compute target URL based on mode
-  useEffect(() => {
-    let host = 'http://192.168.1.20:3000';
-    if (urlMode === 'production') {
-      host = 'https://sri-tayi-grand.vercel.app';
-    } else if (urlMode === 'custom' && customHost.trim()) {
-      host = customHost.trim();
-    }
-    const computed = `${host.replace(/\/$/, '')}/walk-in?token=${encodeURIComponent(defaultToken)}`;
-    setTargetUrl(computed);
-  }, [urlMode, customHost, defaultToken]);
+  const targetUrl = `https://sri-tayi-grand.vercel.app/walk-in?token=${encodeURIComponent(defaultToken)}`;
 
   // Fetch generated high-res QR code
   useEffect(() => {
-    if (!targetUrl || !isOpen) return;
+    if (!isOpen) return;
     let isCancelled = false;
 
     async function loadQR() {
@@ -104,63 +91,17 @@ export function ReceptionStandeeModal({
           </button>
         </div>
 
-        {/* Target URL Selector */}
+        {/* Clean QR Destination Link */}
         <div className="space-y-1.5 text-xs bg-[#FAF7F2] p-3 rounded-xl border border-[#EFE3D6]">
           <label className="font-bold text-[#382216] block">QR Code Destination Link:</label>
-          <div className="grid grid-cols-3 gap-1.5">
-            <button
-              type="button"
-              onClick={() => setUrlMode('production')}
-              className={`py-1.5 px-2 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
-                urlMode === 'production'
-                  ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
-                  : 'bg-white border border-[#EFE3D6] text-[#786B61] hover:bg-gray-50'
-              }`}
-            >
-              Live Vercel App
-            </button>
-            <button
-              type="button"
-              onClick={() => setUrlMode('network')}
-              className={`py-1.5 px-2 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
-                urlMode === 'network'
-                  ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
-                  : 'bg-white border border-[#EFE3D6] text-[#786B61] hover:bg-gray-50'
-              }`}
-            >
-              Local Wi-Fi
-            </button>
-            <button
-              type="button"
-              onClick={() => setUrlMode('custom')}
-              className={`py-1.5 px-2 rounded-lg font-bold text-[11px] transition-all cursor-pointer ${
-                urlMode === 'custom'
-                  ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
-                  : 'bg-white border border-[#EFE3D6] text-[#786B61] hover:bg-gray-50'
-              }`}
-            >
-              Custom Host
-            </button>
-          </div>
-
-          {urlMode === 'custom' && (
-            <input
-              type="text"
-              placeholder="e.g. https://hotel.mydomain.com"
-              value={customHost}
-              onChange={(e) => setCustomHost(e.target.value)}
-              className="w-full mt-2 p-2 rounded-lg border border-[#EFE3D6] bg-white text-xs text-[#241912]"
-            />
-          )}
-
-          <div className="flex items-center justify-between text-[10px] text-[#786B61] pt-1">
-            <span className="truncate max-w-[320px] font-mono">{targetUrl}</span>
+          <div className="flex items-center justify-between text-[11px] bg-white p-2.5 rounded-lg border border-[#EFE3D6]">
+            <span className="truncate font-mono text-[#241912] max-w-[340px]">{targetUrl}</span>
             <button
               type="button"
               onClick={handleCopyUrl}
-              className="text-[#D8AD56] hover:underline font-bold flex items-center gap-1 shrink-0 ml-2 cursor-pointer"
+              className="text-[#D8AD56] hover:text-[#b58e3e] font-bold flex items-center gap-1 shrink-0 ml-2 cursor-pointer transition-colors"
             >
-              {copied ? <CheckCircle2 className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+              {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-[#D8AD56]" />}
               <span>{copied ? 'Copied' : 'Copy'}</span>
             </button>
           </div>
