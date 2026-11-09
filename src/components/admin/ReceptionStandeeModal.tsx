@@ -28,7 +28,7 @@ export function ReceptionStandeeModal({
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const targetUrl = `https://sri-tayi-grand.vercel.app/walk-in?token=${encodeURIComponent(defaultToken)}`;
+  const targetUrl = `https://sritayigrand.com/walk-in?token=${encodeURIComponent(defaultToken)}`;
 
   // Fetch generated high-res QR code
   useEffect(() => {

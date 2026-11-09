@@ -20,7 +20,7 @@ export async function GET(request: Request) {
       if (host) {
         targetUrl = `${host.replace(/\/$/, '')}/walk-in?token=${encodeURIComponent(token)}`;
       } else {
-        targetUrl = `https://sri-tayi-grand.vercel.app/walk-in?token=${encodeURIComponent(token)}`;
+        targetUrl = `https://sritayigrand.com/walk-in?token=${encodeURIComponent(token)}`;
       }
     }
 

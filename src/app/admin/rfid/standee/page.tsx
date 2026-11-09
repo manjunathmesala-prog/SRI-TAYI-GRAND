@@ -20,7 +20,7 @@ export default function StandeeAdminPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const defaultToken = 'STG_RECEPT_DESK_SEC_7749';
-  const targetUrl = `https://sri-tayi-grand.vercel.app/walk-in?token=${encodeURIComponent(defaultToken)}`;
+  const targetUrl = `https://sritayigrand.com/walk-in?token=${encodeURIComponent(defaultToken)}`;
 
   useEffect(() => {
     let isCancelled = false;
