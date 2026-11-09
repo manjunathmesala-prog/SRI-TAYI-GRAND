@@ -266,14 +266,23 @@ export async function recordRfidTapAsync(input: RecordTapInput): Promise<RfidTap
       }
     }
 
-    // 6. Snapshot Customer Details
+    // 6. Snapshot Customer / Cardholder Details
     const customerId = linkedBooking?.guest_id || null;
-    const customerName =
-      linkedBooking?.guest_name ||
-      cardRecord?.guest_name ||
-      cardRecord?.holder_name ||
-      (resolvedCardType === 'STAFF' ? (cardRecord?.holder_name || 'Housekeeping Staff') : null) ||
-      (resolvedCardType === 'MASTER' ? (cardRecord?.holder_name || 'Super Admin') : null);
+    let customerName: string | null = null;
+
+    if (resolvedCardType === 'MASTER') {
+      customerName = cardRecord?.holder_name || input.result.event?.holder_name || 'Super Admin Master';
+    } else if (resolvedCardType === 'STAFF') {
+      customerName = cardRecord?.holder_name || input.result.event?.holder_name || 'Housekeeping Staff';
+    } else if (resolvedCardType === 'MAINTENANCE') {
+      customerName = cardRecord?.holder_name || 'Maintenance Staff';
+    } else {
+      customerName =
+        linkedBooking?.guest_name ||
+        cardRecord?.guest_name ||
+        cardRecord?.holder_name ||
+        'Guest';
+    }
 
     // 7. Assemble Append-Only Audit Record
     const recordId = `tap-${Date.now()}-${Math.random().toString(36).substring(2, 8)}`;
