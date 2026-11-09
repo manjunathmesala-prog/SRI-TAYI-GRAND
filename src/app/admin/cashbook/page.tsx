@@ -167,7 +167,7 @@ export default function AdminCashbookPage() {
   const handleRecordTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!txReason.trim()) {
-      alert('Please specify a description / reason.');
+      showNotification('error', 'Please specify a description / reason.');
       return;
     }
     try {

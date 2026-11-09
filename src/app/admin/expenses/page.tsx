@@ -90,7 +90,7 @@ export default function AdminExpensesPage() {
   const handleCreateExpense = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !amount || amount <= 0) {
-      alert('Please enter a valid title and positive amount.');
+      showNotification('error', 'Please enter a valid title and positive amount.');
       return;
     }
 

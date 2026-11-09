@@ -175,9 +175,23 @@ export function useRealtimeSync(options: UseRealtimeSyncOptions = {}) {
 // AUTHORITATIVE ADMIN OPERATIONS CLIENT HELPER
 // ==============================================================================
 
+function getAdminHeaders(extra: Record<string, string> = {}): Record<string, string> {
+  const headers: Record<string, string> = { ...extra };
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('stg_token');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+  }
+  return headers;
+}
+
 export const adminOperations = {
   async fetchFullState() {
-    const res = await fetch('/api/admin/operations', { cache: 'no-store' });
+    const res = await fetch('/api/admin/operations', {
+      cache: 'no-store',
+      headers: getAdminHeaders(),
+    });
     if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch authoritative state`);
     return res.json();
   },
@@ -196,7 +210,7 @@ export const adminOperations = {
   }) {
     const res = await fetch('/api/admin/operations', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ action: 'check_in', ...params }),
     });
     const data = await res.json();
@@ -213,7 +227,7 @@ export const adminOperations = {
   }) {
     const res = await fetch('/api/admin/operations', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ action: 'check_out', ...params }),
     });
     const data = await res.json();
@@ -229,7 +243,7 @@ export const adminOperations = {
   }) {
     const res = await fetch('/api/admin/operations', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ action: 'assign_room', ...params }),
     });
     const data = await res.json();
@@ -246,7 +260,7 @@ export const adminOperations = {
   }) {
     const res = await fetch('/api/admin/operations', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ action: 'housekeeping', ...params }),
     });
     const data = await res.json();
@@ -262,7 +276,7 @@ export const adminOperations = {
   }) {
     const res = await fetch('/api/admin/operations', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ action: 'booking_status', ...params }),
     });
     const data = await res.json();
@@ -279,7 +293,7 @@ export const adminOperations = {
   }) {
     const res = await fetch('/api/admin/operations', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ action: 'record_payment', ...params }),
     });
     const data = await res.json();
@@ -288,7 +302,9 @@ export const adminOperations = {
   },
 
   async fetchFolioCharges(bookingIdOrRef: string) {
-    const res = await fetch(`/api/admin/bookings/${encodeURIComponent(bookingIdOrRef)}/charges`);
+    const res = await fetch(`/api/admin/bookings/${encodeURIComponent(bookingIdOrRef)}/charges`, {
+      headers: getAdminHeaders(),
+    });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to fetch folio charges');
     return data;
@@ -303,7 +319,7 @@ export const adminOperations = {
   }) {
     const res = await fetch(`/api/admin/bookings/${encodeURIComponent(bookingIdOrRef)}/charges`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(params),
     });
     const data = await res.json();
@@ -314,6 +330,7 @@ export const adminOperations = {
   async deleteFolioCharge(bookingIdOrRef: string, chargeId: string) {
     const res = await fetch(`/api/admin/bookings/${encodeURIComponent(bookingIdOrRef)}/charges?chargeId=${encodeURIComponent(chargeId)}`, {
       method: 'DELETE',
+      headers: getAdminHeaders(),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to delete folio charge');
@@ -347,7 +364,7 @@ export const adminOperations = {
   }) {
     const res = await fetch('/api/admin/operations', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ action: 'statutory_walk_in', ...params }),
     });
     const data = await res.json();

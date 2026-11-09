@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, useEffect, useCallback, use } from 'react';
 import { useSearchParams } from 'next/navigation';
 import NextLink from 'next/link';
 import {
@@ -50,7 +50,7 @@ export default function PickupPage({ params }: { params: Promise<{ code: string 
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchStatus = async () => {
+  const fetchStatus = useCallback(async () => {
     try {
       const res = await fetch(`/api/walk-in/pickup-status?code=${encodeURIComponent(pickupCode)}&ref=${encodeURIComponent(bookingRef)}`);
       if (res.ok) {
@@ -66,14 +66,14 @@ export default function PickupPage({ params }: { params: Promise<{ code: string 
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [pickupCode, bookingRef]);
 
   useEffect(() => {
     fetchStatus();
     // Poll every 3 seconds to auto-update when receptionist issues keycard
     const interval = setInterval(fetchStatus, 3000);
     return () => clearInterval(interval);
-  }, [pickupCode, bookingRef]);
+  }, [fetchStatus]);
 
   if (isLoading) {
     return (

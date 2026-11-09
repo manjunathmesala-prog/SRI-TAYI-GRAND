@@ -1,12 +1,18 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
+import { verifyStaffRole } from '@/lib/auth';
 
 /**
  * Endpoint: POST /api/admin/walk-ins/assign-and-encode
  * Front Desk Staff selects physical room, verifies payment, and issues keycard via Be-Tech USB encoder
  */
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    const auth = verifyStaffRole(request, ['Super Admin', 'Hotel Manager', 'Front Desk', 'Receptionist']);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error || 'Unauthorized' }, { status: 403 });
+    }
+
     const body = await request.json();
     const {
       bookingReference,
@@ -25,7 +31,7 @@ export async function POST(request: Request) {
 
     const ref = bookingReference || booking_reference;
     const room = roomNumber || room_number;
-    const staff = staffName || staff_name || 'Front Desk Staff';
+    const staff = auth.session?.name || staffName || staff_name || 'Front Desk Staff';
 
     if (!ref || !room) {
       return NextResponse.json(

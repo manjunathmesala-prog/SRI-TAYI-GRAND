@@ -33,6 +33,12 @@ export default function BookingsAdminPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [rooms, setRooms] = useState<PhysicalRoom[]>([]);
   const [loading, setLoading] = useState(true);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const showToast = (type: 'success' | 'error', message: string) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   const fetchBookings = useCallback(async () => {
     try {
@@ -80,9 +86,10 @@ export default function BookingsAdminPage() {
       if (selectedBooking && selectedBooking.booking_reference === bookingRef) {
         setSelectedBooking({ ...selectedBooking, status: newStatus });
       }
+      showToast('success', `Booking ${bookingRef} status updated to ${newStatus.replace('_', ' ')}`);
       await fetchBookings();
     } catch (err: any) {
-      alert(err.message || 'Failed to update booking status');
+      showToast('error', err.message || 'Failed to update booking status');
     }
   };
 
@@ -97,6 +104,26 @@ export default function BookingsAdminPage() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg border flex items-center gap-3 transition-all animate-in slide-in-from-top-2 ${
+            toast.type === 'success'
+              ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
+              : 'bg-rose-50 text-rose-900 border-rose-200'
+          }`}
+        >
+          <span className="text-sm font-medium">{toast.message}</span>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="text-xs opacity-70 hover:opacity-100 font-bold ml-2"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
         <div>
@@ -185,7 +212,27 @@ export default function BookingsAdminPage() {
               {filteredBookings.length === 0 ? (
                 <tr>
                   <td colSpan={9} className="py-12 text-center text-[#786B61]">
-                    No bookings found matching current filters.
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <CalendarCheck className="w-8 h-8 text-stone-300" />
+                      <span className="font-semibold text-sm text-[#241912]">No Reservations Found</span>
+                      <p className="text-xs text-[#786B61] max-w-sm">
+                        {searchQuery || activeTab !== 'all'
+                          ? 'No reservations match your current search query or tab filter.'
+                          : 'No bookings currently registered in the PMS database.'}
+                      </p>
+                      {(searchQuery || activeTab !== 'all') && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSearchQuery('');
+                            setActiveTab('all');
+                          }}
+                          className="mt-2 px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold cursor-pointer transition-colors"
+                        >
+                          Reset Filters
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ) : (

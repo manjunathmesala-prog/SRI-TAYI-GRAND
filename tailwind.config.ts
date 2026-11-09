@@ -78,10 +78,10 @@ const config: Config = {
         },
       },
       fontFamily: {
-        serif: ["'Cormorant Garamond'", "'Playfair Display'", "Georgia", "serif"],
-        display: ["'Playfair Display'", "'Cormorant Garamond'", "serif"],
-        cormorant: ["'Cormorant Garamond'", "Georgia", "serif"],
-        sans: ["'Plus Jakarta Sans'", "Inter", "-apple-system", "BlinkMacSystemFont", "system-ui", "sans-serif"],
+        serif: ["var(--font-cormorant)", "Georgia", "serif"],
+        display: ["var(--font-cormorant)", "Georgia", "serif"],
+        cormorant: ["var(--font-cormorant)", "Georgia", "serif"],
+        sans: ["var(--font-sans)", "Inter", "-apple-system", "BlinkMacSystemFont", "system-ui", "sans-serif"],
       },
       boxShadow: {
         'luxury': '0 4px 20px -2px rgba(66, 43, 25, 0.08), 0 2px 6px -1px rgba(66, 43, 25, 0.04)',

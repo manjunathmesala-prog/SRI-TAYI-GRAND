@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import {
   Wallet,
   UserPlus,
@@ -11,13 +11,28 @@ import {
   Sparkles,
   ArrowUpRight,
   TrendingUp,
+  Crown,
+  Briefcase,
+  Users,
+  LogOut,
+  ChevronDown,
+  ShieldCheck,
+  CheckCircle2,
 } from 'lucide-react';
 import { useRealtimeSync } from '@/lib/realtime-client';
 
 export function AdminHeader() {
   const pathname = usePathname();
+  const router = useRouter();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   const [cashBalance, setCashBalance] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState<string>('');
+  const [userName, setUserName] = useState<string>('Sri Tayi Grand Admin');
+  const [userRole, setUserRole] = useState<string>('Super Admin');
+  const [userEmail, setUserEmail] = useState<string>('admin@sritayigrand.com');
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [switching, setSwitching] = useState(false);
 
   const fetchCashBalance = async () => {
     try {
@@ -46,6 +61,19 @@ export function AdminHeader() {
 
   useEffect(() => {
     fetchCashBalance();
+
+    if (typeof window !== 'undefined') {
+      const storedName = localStorage.getItem('stg_user_name');
+      const storedRole = localStorage.getItem('stg_role');
+      if (storedName) setUserName(storedName);
+      if (storedRole) {
+        setUserRole(storedRole);
+        if (storedRole === 'Super Admin') setUserEmail('admin@sritayigrand.com');
+        else if (storedRole === 'Hotel Manager') setUserEmail('manager@sritayigrand.com');
+        else setUserEmail('staff@sritayigrand.com');
+      }
+    }
+
     const updateClock = () => {
       const now = new Date();
       setCurrentTime(
@@ -59,7 +87,18 @@ export function AdminHeader() {
     };
     updateClock();
     const timer = setInterval(updateClock, 1000);
-    return () => clearInterval(timer);
+
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setProfileOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
   }, []);
 
   // Format page title from pathname
@@ -72,6 +111,47 @@ export function AdminHeader() {
       .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(' ');
   };
+
+  const switchAccount = async (targetEmail: string, targetPass: string) => {
+    setSwitching(true);
+    try {
+      const res = await fetch('/api/admin/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: targetEmail, password: targetPass }),
+      });
+      const data = await res.json();
+      if (data.success && data.session) {
+        localStorage.setItem('stg_token', data.session.token);
+        localStorage.setItem('stg_role', data.session.role);
+        localStorage.setItem('stg_user_name', data.session.name);
+        setProfileOpen(false);
+        window.location.reload();
+      }
+    } catch (err) {
+      console.error('Account switch failed:', err);
+    } finally {
+      setSwitching(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/auth', { method: 'DELETE' });
+    } catch {}
+    localStorage.removeItem('stg_token');
+    localStorage.removeItem('stg_role');
+    localStorage.removeItem('stg_user_name');
+    router.push('/admin/login');
+  };
+
+  const getRoleIcon = (role: string) => {
+    if (role === 'Super Admin') return Crown;
+    if (role === 'Hotel Manager') return Briefcase;
+    return Users;
+  };
+
+  const RoleIcon = getRoleIcon(userRole);
 
   return (
     <header className="sticky top-0 z-30 bg-[#FDFBF7]/95 backdrop-blur-md border-b border-[#241912]/10 px-4 sm:px-6 py-2.5 flex items-center justify-between shadow-xs">
@@ -131,11 +211,150 @@ export function AdminHeader() {
         {/* Quick Walk-In Button */}
         <Link
           href="/admin/front-desk"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold shadow-xs active:scale-95 transition-all"
+          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold shadow-xs active:scale-95 transition-all"
         >
           <UserPlus className="w-3.5 h-3.5" />
-          <span className="hidden xs:inline">Walk-In</span>
+          <span>Walk-In</span>
         </Link>
+
+        {/* User Profile & Role Switcher Dropdown */}
+        <div className="relative" ref={dropdownRef}>
+          <button
+            type="button"
+            onClick={() => setProfileOpen(!profileOpen)}
+            className={`flex items-center gap-2 pl-2.5 pr-2 py-1 rounded-xl border transition-all text-xs font-semibold cursor-pointer ${
+              userRole === 'Super Admin'
+                ? 'bg-amber-500/10 border-amber-500/30 text-amber-900 hover:bg-amber-500/15'
+                : userRole === 'Hotel Manager'
+                ? 'bg-purple-500/10 border-purple-500/30 text-purple-900 hover:bg-purple-500/15'
+                : 'bg-blue-500/10 border-blue-500/30 text-blue-900 hover:bg-blue-500/15'
+            }`}
+          >
+            <div className="w-6 h-6 rounded-lg bg-white shadow-2xs border border-black/5 flex items-center justify-center">
+              <RoleIcon className="w-3.5 h-3.5 text-[#43001F]" />
+            </div>
+            <div className="text-left hidden sm:block">
+              <span className="block text-[11px] font-bold leading-tight truncate max-w-[110px]">
+                {userName.split(' ')[0]}
+              </span>
+              <span className="block text-[9px] uppercase tracking-wider opacity-70 leading-none">
+                {userRole === 'Super Admin' ? 'Super Admin' : userRole === 'Hotel Manager' ? 'Manager' : 'Staff'}
+              </span>
+            </div>
+            <ChevronDown className="w-3.5 h-3.5 opacity-60 ml-0.5" />
+          </button>
+
+          {/* Dropdown Menu */}
+          {profileOpen && (
+            <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-[#D8AD56]/40 p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+              {/* Profile Card Header */}
+              <div className="p-2.5 rounded-xl bg-[#F8F3E9] border border-[#E6D9C5] mb-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-[#43001F]">
+                    Active Role Session
+                  </span>
+                  <span className="text-[9px] px-2 py-0.5 rounded-full font-bold bg-[#43001F] text-white">
+                    {userRole}
+                  </span>
+                </div>
+                <div className="text-xs font-bold text-[#241912] mt-1 truncate">
+                  {userName}
+                </div>
+                <div className="text-[11px] text-[#786B61] font-mono truncate">
+                  {userEmail}
+                </div>
+              </div>
+
+              {/* Fast Role Switching Section */}
+              <div className="space-y-1 mb-2.5">
+                <div className="px-2 py-1 text-[10px] uppercase tracking-widest text-[#786B61] font-bold">
+                  Switch Active Role (Instant Test)
+                </div>
+
+                {/* 1. Super Admin Switch */}
+                <button
+                  type="button"
+                  disabled={switching || userRole === 'Super Admin'}
+                  onClick={() => switchAccount('admin@sritayigrand.com', 'SuperAdmin@TayiGrand2026!')}
+                  className={`w-full flex items-center justify-between p-2 rounded-xl text-left text-xs transition-all cursor-pointer ${
+                    userRole === 'Super Admin'
+                      ? 'bg-amber-50 text-amber-900 border border-amber-200 font-bold'
+                      : 'hover:bg-[#F8F3E9] text-[#241912]'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Crown className="w-3.5 h-3.5 text-amber-600" />
+                    <div>
+                      <span className="block leading-tight">Super Admin</span>
+                      <span className="text-[9px] text-[#786B61] block">admin@sritayigrand.com</span>
+                    </div>
+                  </div>
+                  {userRole === 'Super Admin' && (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-amber-600" />
+                  )}
+                </button>
+
+                {/* 2. Hotel Manager Switch */}
+                <button
+                  type="button"
+                  disabled={switching || userRole === 'Hotel Manager'}
+                  onClick={() => switchAccount('manager@sritayigrand.com', 'Manager@TayiGrand2026!')}
+                  className={`w-full flex items-center justify-between p-2 rounded-xl text-left text-xs transition-all cursor-pointer ${
+                    userRole === 'Hotel Manager'
+                      ? 'bg-purple-50 text-purple-900 border border-purple-200 font-bold'
+                      : 'hover:bg-[#F8F3E9] text-[#241912]'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Briefcase className="w-3.5 h-3.5 text-purple-600" />
+                    <div>
+                      <span className="block leading-tight">Hotel Manager</span>
+                      <span className="text-[9px] text-[#786B61] block">manager@sritayigrand.com</span>
+                    </div>
+                  </div>
+                  {userRole === 'Hotel Manager' && (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-purple-600" />
+                  )}
+                </button>
+
+                {/* 3. Front Desk Staff Switch */}
+                <button
+                  type="button"
+                  disabled={switching || (userRole !== 'Super Admin' && userRole !== 'Hotel Manager')}
+                  onClick={() => switchAccount('staff@sritayigrand.com', 'Staff@TayiGrand2026!')}
+                  className={`w-full flex items-center justify-between p-2 rounded-xl text-left text-xs transition-all cursor-pointer ${
+                    userRole !== 'Super Admin' && userRole !== 'Hotel Manager'
+                      ? 'bg-blue-50 text-blue-900 border border-blue-200 font-bold'
+                      : 'hover:bg-[#F8F3E9] text-[#241912]'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <Users className="w-3.5 h-3.5 text-blue-600" />
+                    <div>
+                      <span className="block leading-tight">Front Desk Staff</span>
+                      <span className="text-[9px] text-[#786B61] block">staff@sritayigrand.com</span>
+                    </div>
+                  </div>
+                  {userRole !== 'Super Admin' && userRole !== 'Hotel Manager' && (
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
+                  )}
+                </button>
+              </div>
+
+              {/* Sign Out Button */}
+              <div className="pt-2 border-t border-[#EFE3D6]">
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Sign Out of Console</span>
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

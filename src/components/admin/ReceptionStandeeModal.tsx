@@ -187,6 +187,7 @@ export function ReceptionStandeeModal({
                 <span className="text-[10px] text-[#241912]">Generating HD QR...</span>
               </div>
             ) : (
+              /* eslint-disable-next-line @next/next/no-img-element */
               <img
                 src={qrDataUrl}
                 alt="Reception Walk-In QR Code"

@@ -1,10 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
+import { verifyStaffRole } from '@/lib/auth';
 
 export const dynamic = 'force-dynamic';
 
+function sanitizeCsvValue(val: unknown): string {
+  const str = String(val ?? '');
+  // Prefix dangerous spreadsheet formula triggers with a single quote
+  const formulaTriggers = ['=', '+', '-', '@', '\t', '\r'];
+  const safeStr = formulaTriggers.includes(str.charAt(0)) ? `'${str}` : str;
+  return `"${safeStr.replace(/"/g, '""')}"`;
+}
+
 export async function GET(request: NextRequest) {
   try {
+    const auth = verifyStaffRole(request, ['Super Admin', 'Hotel Manager', 'Accounts']);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error || 'Unauthorized: Staff session required' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const rangeParam = searchParams.get('range') || '30d';
     const isExportCsv = searchParams.get('export') === 'csv';
@@ -42,7 +56,7 @@ export async function GET(request: NextRequest) {
       rows.push('DISTRIBUTION CHANNEL BREAKDOWN');
       rows.push('Channel Name,Bookings Count,Revenue (INR),Share (%)');
       for (const ch of analytics.channelBreakdown) {
-        rows.push(`"${ch.name}",${ch.count},${ch.revenue},${ch.percentage}%`);
+        rows.push(`${sanitizeCsvValue(ch.name)},${ch.count},${ch.revenue},${ch.percentage}%`);
       }
       rows.push('');
 
@@ -50,7 +64,7 @@ export async function GET(request: NextRequest) {
       rows.push('ROOM CATEGORY YIELD PERFORMANCE');
       rows.push('Category,Base Price (INR),Bookings Count,Revenue (INR),Est. Occupancy (%)');
       for (const cat of analytics.categoryYield) {
-        rows.push(`"${cat.category}",${cat.basePrice},${cat.bookings},${cat.revenue},${cat.occupancy}%`);
+        rows.push(`${sanitizeCsvValue(cat.category)},${cat.basePrice},${cat.bookings},${cat.revenue},${cat.occupancy}%`);
       }
       rows.push('');
 
@@ -58,7 +72,7 @@ export async function GET(request: NextRequest) {
       rows.push('MONTHLY PERFORMANCE TRAJECTORY (LAST 6 MONTHS)');
       rows.push('Month,Revenue (INR),Occupancy (%),Bookings');
       for (const m of analytics.monthlyTrajectory) {
-        rows.push(`${m.month},${m.revenue},${m.occupancy}%,${m.bookings}`);
+        rows.push(`${sanitizeCsvValue(m.month)},${m.revenue},${m.occupancy}%,${m.bookings}`);
       }
 
       const csvContent = rows.join('\r\n');

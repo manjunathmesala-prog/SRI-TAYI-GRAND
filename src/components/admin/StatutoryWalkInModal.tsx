@@ -262,12 +262,22 @@ export function StatutoryWalkInModal({
       const data = await res.json();
       if (data.success) {
         playChimeSound(true);
-        alert(`Lock Test Success! Card ${cardUid} unlocked door for Room ${roomNumber}.`);
+        setRfidBridgeStatus({
+          success: true,
+          message: `Lock Test Success! Card ${cardUid} unlocked door for Room ${roomNumber}.`,
+          cardUid,
+        });
       } else {
-        alert(`Lock Test Warning: ${data.message || 'Access Denied'}`);
+        setRfidBridgeStatus({
+          success: false,
+          message: `Lock Test Warning: ${data.message || 'Access Denied'}`,
+        });
       }
     } catch {
-      alert('RFID Door lock simulation tap completed.');
+      setRfidBridgeStatus({
+        success: true,
+        message: `RFID Door lock simulation tap completed for Room ${roomNumber}.`,
+      });
     }
   };
 

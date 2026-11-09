@@ -494,6 +494,24 @@ export const INITIAL_STAFF: StaffMember[] = [
     }
   },
   { 
+    id: 'stf-staff', 
+    full_name: 'Sri Tayi Grand Staff', 
+    email: 'staff@sritayigrand.com', 
+    phone: '9848123457', 
+    role: 'Front Desk', 
+    department: 'Front Desk & Operations',
+    is_active: true, 
+    last_login: '2026-11-09T10:00:00+05:30',
+    permissions: {
+      can_override_rates: false,
+      can_process_refunds: false,
+      can_view_accounting: false,
+      can_encode_rfid: true,
+      can_run_night_audit: false,
+      can_manage_inventory: true
+    }
+  },
+  { 
     id: 'stf-04', 
     full_name: 'K. Ramesh', 
     email: 'housekeeping@sritayigrand.com', 

@@ -20,6 +20,7 @@ import {
   MessageSquare,
   AlertCircle,
   Clock,
+  TrendingDown,
 } from 'lucide-react';
 import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
 
@@ -71,6 +72,12 @@ export default function PaymentsAdminPage() {
   const [expDesc, setExpDesc] = useState('');
   const [expReceipt, setExpReceipt] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const showToast = (type: 'success' | 'error', message: string) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   const fetchFinancials = useCallback(async () => {
     try {
@@ -147,10 +154,11 @@ export default function PaymentsAdminPage() {
       if (!res.ok) throw new Error(data.error || 'Failed to reconcile payments');
 
       setReconcileFeedback(`Reconciliation complete: ${data.reconciled_count} payments verified (₹${data.total_amount.toLocaleString('en-IN')})`);
+      showToast('success', `Reconciliation complete: ${data.reconciled_count} payments verified.`);
       await fetchFinancials();
       setTimeout(() => setReconcileFeedback(null), 6000);
     } catch (err: any) {
-      alert(err.message || 'Error reconciling payments');
+      showToast('error', err.message || 'Error reconciling payments');
     } finally {
       setIsReconciling(false);
     }
@@ -239,9 +247,10 @@ export default function PaymentsAdminPage() {
       }
 
       setGeneratedLinkUrl(data.link_url);
+      showToast('success', 'Payment link generated successfully.');
       await fetchFinancials();
     } catch (err: any) {
-      alert(err.message || 'Failed to create payment link');
+      showToast('error', err.message || 'Failed to create payment link');
     } finally {
       setIsGeneratingLink(false);
     }
@@ -276,9 +285,10 @@ export default function PaymentsAdminPage() {
       setPaymentBookingRef('');
       setPaymentGuestName('');
       setPaymentAmount(2000);
+      showToast('success', `Payment of ₹${Number(paymentAmount).toLocaleString('en-IN')} recorded successfully.`);
       await fetchFinancials();
     } catch (err: any) {
-      alert(err.message || 'Failed to record payment');
+      showToast('error', err.message || 'Failed to record payment');
     } finally {
       setSubmitting(false);
     }
@@ -316,9 +326,10 @@ export default function PaymentsAdminPage() {
       setExpDesc('');
       setExpReceipt('');
       setExpAmount(500);
+      showToast('success', `Expense "${expTitle}" recorded in financial ledger.`);
       await fetchFinancials();
     } catch (err: any) {
-      alert(err.message || 'Failed to create expense');
+      showToast('error', err.message || 'Failed to create expense');
     } finally {
       setSubmitting(false);
     }
@@ -333,9 +344,10 @@ export default function PaymentsAdminPage() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to delete expense');
+      showToast('success', 'Expense record removed successfully.');
       await fetchFinancials();
     } catch (err: any) {
-      alert(err.message || 'Failed to delete expense');
+      showToast('error', err.message || 'Failed to delete expense');
     }
   };
 
@@ -357,6 +369,26 @@ export default function PaymentsAdminPage() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg border flex items-center gap-3 transition-all animate-in slide-in-from-top-2 ${
+            toast.type === 'success'
+              ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
+              : 'bg-rose-50 text-rose-900 border-rose-200'
+          }`}
+        >
+          <span className="text-sm font-medium">{toast.message}</span>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="text-xs opacity-70 hover:opacity-100 font-bold ml-2"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
         <div>
@@ -556,8 +588,25 @@ export default function PaymentsAdminPage() {
               <tbody className="divide-y divide-[#EFE3D6] text-[#241912]">
                 {filteredPayments.length === 0 ? (
                   <tr>
-                    <td colSpan={9} className="py-10 text-center text-[#786B61]">
-                      No payment records found.
+                    <td colSpan={9} className="py-12 text-center text-[#786B61]">
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <CreditCard className="w-8 h-8 text-stone-300" />
+                        <span className="font-semibold text-sm text-[#241912]">No Payment Transactions Found</span>
+                        <p className="text-xs text-[#786B61] max-w-sm">
+                          {searchQuery
+                            ? 'No payment records match your search filter.'
+                            : 'No guest payments have been recorded yet.'}
+                        </p>
+                        {searchQuery && (
+                          <button
+                            type="button"
+                            onClick={() => setSearchQuery('')}
+                            className="mt-2 px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold cursor-pointer transition-colors"
+                          >
+                            Clear Search
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ) : (
@@ -627,7 +676,7 @@ export default function PaymentsAdminPage() {
                               <button
                                 onClick={() => {
                                   navigator.clipboard.writeText(p.payment_link_url || '');
-                                  alert('Payment link copied to clipboard!');
+                                  showToast('success', 'Payment link copied to clipboard!');
                                 }}
                                 className="p-1 rounded text-blue-600 hover:bg-blue-50 cursor-pointer"
                                 title="Copy Payment Link"
@@ -674,8 +723,25 @@ export default function PaymentsAdminPage() {
               <tbody className="divide-y divide-[#EFE3D6] text-[#241912]">
                 {filteredExpenses.length === 0 ? (
                   <tr>
-                    <td colSpan={8} className="py-10 text-center text-[#786B61]">
-                      No expense records found.
+                    <td colSpan={8} className="py-12 text-center text-[#786B61]">
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <TrendingDown className="w-8 h-8 text-stone-300" />
+                        <span className="font-semibold text-sm text-[#241912]">No Expenses Logged</span>
+                        <p className="text-xs text-[#786B61] max-w-sm">
+                          {searchQuery
+                            ? 'No operational expenses match your search query.'
+                            : 'No operating expenses logged yet.'}
+                        </p>
+                        {searchQuery && (
+                          <button
+                            type="button"
+                            onClick={() => setSearchQuery('')}
+                            className="mt-2 px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold cursor-pointer transition-colors"
+                          >
+                            Clear Search
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ) : (

@@ -1,10 +1,28 @@
 import { NextRequest } from 'next/server';
 import { repo } from '@/lib/db/repository';
+import { verifyStaffRole } from '@/lib/auth';
 import { RealtimeMessage } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  // Enforce staff session on real-time event streaming
+  const auth = verifyStaffRole(request, [
+    'Super Admin',
+    'Hotel Manager',
+    'Front Desk',
+    'Accounts',
+    'Receptionist',
+    'Housekeeping',
+  ]);
+
+  if (!auth.authorized) {
+    return new Response(JSON.stringify({ error: auth.error || 'Unauthorized stream access' }), {
+      status: 403,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
   const url = new URL(request.url);
   const headerLastId = request.headers.get('last-event-id');
   const queryLastId = url.searchParams.get('lastEventId');

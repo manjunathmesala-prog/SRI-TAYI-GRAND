@@ -37,6 +37,7 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { useRealtimeSync } from '@/lib/realtime-client';
+import { canAccessRoute } from '@/lib/rbac/types';
 
 export function AdminSidebar() {
   const pathname = usePathname();
@@ -116,7 +117,10 @@ export function AdminSidebar() {
     { label: 'Settings', href: '/admin/settings', icon: Settings },
   ];
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/auth', { method: 'DELETE' });
+    } catch {}
     localStorage.removeItem('stg_token');
     localStorage.removeItem('stg_role');
     localStorage.removeItem('stg_user_name');
@@ -235,9 +239,11 @@ export function AdminSidebar() {
             )}
           </div>
 
-          {/* Navigation Items */}
+          {/* Navigation Items filtered dynamically by RBAC role */}
           <nav className="p-3 space-y-1 max-h-[calc(100vh-220px)] overflow-y-auto">
-            {menuItems.map((item) => {
+            {menuItems
+              .filter((item) => canAccessRoute(userRole, item.href))
+              .map((item) => {
               const isActive =
                 pathname === item.href || (item.href !== '/admin/dashboard' && pathname.startsWith(item.href));
               const Icon = item.icon;

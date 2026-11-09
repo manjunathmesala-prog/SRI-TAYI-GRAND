@@ -3,9 +3,20 @@ import { repo } from '@/lib/db/repository';
 import { checkCategoryAvailability } from '@/lib/booking-engine';
 import { createRazorpayOrder } from '@/lib/razorpay';
 import { sendNotification } from '@/lib/notifications';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limiter';
 
 export async function POST(request: Request) {
   try {
+    // 0. Anti-Abuse Rate Limiter (Max 12 booking creation requests per 5 minutes per IP)
+    const clientIp = getClientIp(request);
+    const rateCheck = checkRateLimit(`booking-create:${clientIp}`, 12, 5 * 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: `Too many booking requests. Please wait ${rateCheck.retryAfterSeconds} seconds before trying again.` },
+        { status: 429, headers: { 'Retry-After': String(rateCheck.retryAfterSeconds || 30) } }
+      );
+    }
+
     const body = await request.json();
     const {
       categoryId,
@@ -97,6 +108,23 @@ export async function POST(request: Request) {
         notes: {
           booking_reference: booking.booking_reference,
           guest_name: guestName,
+          category: avail.category.name,
+        },
+      });
+
+      // Persist in authoritative PaymentOrder ledger with status PENDING
+      repo.createPaymentOrder({
+        booking_reference: booking.booking_reference,
+        guest_name: guestName,
+        guest_email: guestEmail,
+        guest_phone: guestPhone,
+        amount_paise: razorpayOrder.amount,
+        amount_rupees: avail.totalAmount,
+        currency: razorpayOrder.currency,
+        status: 'PENDING',
+        razorpay_order_id: razorpayOrder.id,
+        receipt: razorpayOrder.receipt,
+        notes: {
           category: avail.category.name,
         },
       });

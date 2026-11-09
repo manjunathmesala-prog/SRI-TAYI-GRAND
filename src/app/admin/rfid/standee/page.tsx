@@ -187,6 +187,7 @@ export default function StandeeAdminPage() {
                 <span className="text-xs text-[#241912] font-semibold">Generating HD QR...</span>
               </div>
             ) : (
+              /* eslint-disable-next-line @next/next/no-img-element */
               <img
                 src={qrDataUrl}
                 alt="Reception Walk-In QR Code"

@@ -7,6 +7,11 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
+    const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Accounts', 'Front Desk', 'Housekeeping']);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error || 'Unauthorized' }, { status: 403 });
+    }
+
     const expenses = repo.getExpenses();
     const totalAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
     const byCategory = expenses.reduce((acc: Record<string, number>, e) => {
@@ -43,18 +48,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const recordedBy = auth.session?.name || body.recorded_by || 'Staff Member';
+    const recordedBy = auth.session?.name || 'Staff Member';
 
     const newExpense = repo.createExpense(
       {
         category: category as ExpenseCategory,
-        title,
-        description,
+        title: String(title).trim(),
+        description: description ? String(description).trim() : undefined,
         amount: Number(amount),
         payment_method: (payment_method as PaymentMethod) || 'cash',
         recorded_by: recordedBy,
         expense_date: expense_date || new Date().toISOString().split('T')[0],
-        receipt_ref,
+        receipt_ref: receipt_ref ? String(receipt_ref).trim() : undefined,
         status: 'approved',
       },
       recordedBy

@@ -46,6 +46,9 @@ import {
   HousekeepingTurnaroundChecklist,
   GuestVIPTier,
   EnquiryStatus,
+  PaymentOrder,
+  PaymentOrderStatus,
+  PaymentTransaction,
 } from '@/types';
 
 import { syncCardToSupabase, syncEventToSupabase, deleteCardFromSupabase } from './supabase-rfid';
@@ -119,6 +122,8 @@ export class HotelRepository {
   private folioCharges: FolioCharge[] = JSON.parse(JSON.stringify(INITIAL_FOLIO_CHARGES));
   private contactEnquiries: ContactEnquiry[] = JSON.parse(JSON.stringify(INITIAL_CONTACT_ENQUIRIES));
   private conventionQuotes: ConventionQuote[] = JSON.parse(JSON.stringify(INITIAL_CONVENTION_QUOTES));
+  private paymentOrders: PaymentOrder[] = [];
+  private paymentTransactions: PaymentTransaction[] = [];
 
   // In-Memory Real-Time Event Bus with Reconnection Replay Buffer
   private eventCounter: number = 0;
@@ -639,12 +644,24 @@ export class HotelRepository {
     return { booking, room, card, payment };
   }
 
+  statutoryWalkIn(params: Parameters<HotelRepository['createFrontDeskWalkIn']>[0]) {
+    try {
+      const result = this.createFrontDeskWalkIn(params);
+      return { success: true, ...result };
+    } catch (err: any) {
+      return { success: false, error: err.message };
+    }
+  }
+
   createBooking(
     bookingData: Omit<Booking, 'id' | 'booking_reference' | 'created_at'>,
     actor?: string
   ): Booking {
+    const normalizedCatId = normalizeCategoryId(bookingData.category_id);
     // Concurrency & Overbooking check: verify capacity in requested category
-    const catRooms = this.rooms.filter((r) => r.category_id === bookingData.category_id && r.is_active);
+    const catRooms = this.rooms.filter(
+      (r) => (r.category_id === bookingData.category_id || normalizeCategoryId(r.category_id) === normalizedCatId) && r.is_active
+    );
     const availableRooms = catRooms.filter((r) => r.operational_status === 'available');
     const requestedCount = bookingData.rooms_count || 1;
 
@@ -660,6 +677,7 @@ export class HotelRepository {
 
     const newBooking: Booking = {
       ...bookingData,
+      category_id: normalizedCatId,
       id: `bk-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       booking_reference: bookingReference,
       created_at: new Date().toISOString(),
@@ -1043,6 +1061,14 @@ export class HotelRepository {
     if (!record.amount || isNaN(record.amount) || record.amount <= 0) {
       throw new Error(`Payment amount must be a positive number. Received: ${record.amount}`);
     }
+
+    // Idempotency Guard: prevent duplicate ledger entries on rapid clicks or webhook retries
+    if (record.gateway_payment_id) {
+      const existing = this.payments.find((p) => p.gateway_payment_id === record.gateway_payment_id);
+      if (existing) {
+        return existing;
+      }
+    }
     const rand = Math.floor(100 + Math.random() * 900);
     const newPayment: PaymentRecord = {
       ...record,
@@ -1064,6 +1090,90 @@ export class HotelRepository {
     this.broadcastEvent('payment_recorded', { payment: newPayment, booking }, actor);
 
     return newPayment;
+  }
+
+  // ==============================================================================
+  // RAZORPAY LEDGER & ORDER MANAGEMENT
+  // ==============================================================================
+
+  createPaymentOrder(
+    order: Omit<PaymentOrder, 'id' | 'created_at' | 'updated_at'>
+  ): PaymentOrder {
+    const existing = this.paymentOrders.find(
+      (o) => o.razorpay_order_id === order.razorpay_order_id
+    );
+    if (existing) {
+      return existing;
+    }
+
+    const now = new Date().toISOString();
+    const newOrder: PaymentOrder = {
+      ...order,
+      id: `pord-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
+      created_at: now,
+      updated_at: now,
+    };
+    this.paymentOrders.unshift(newOrder);
+    return newOrder;
+  }
+
+  getPaymentOrderById(id: string): PaymentOrder | undefined {
+    return this.paymentOrders.find((o) => o.id === id);
+  }
+
+  getPaymentOrderByRazorpayId(rzpOrderId: string): PaymentOrder | undefined {
+    return this.paymentOrders.find((o) => o.razorpay_order_id === rzpOrderId);
+  }
+
+  getPaymentOrderByReceipt(receipt: string): PaymentOrder | undefined {
+    return this.paymentOrders.find((o) => o.receipt === receipt || o.booking_reference === receipt);
+  }
+
+  updatePaymentOrderStatus(
+    rzpOrderId: string,
+    status: PaymentOrderStatus
+  ): PaymentOrder | undefined {
+    const order = this.getPaymentOrderByRazorpayId(rzpOrderId);
+    if (order) {
+      order.status = status;
+      order.updated_at = new Date().toISOString();
+    }
+    return order;
+  }
+
+  getPaymentOrders(): PaymentOrder[] {
+    return [...this.paymentOrders];
+  }
+
+  recordPaymentTransaction(
+    tx: Omit<PaymentTransaction, 'id' | 'created_at'>
+  ): PaymentTransaction {
+    // Idempotency guard: avoid duplicating existing transactions
+    if (tx.razorpay_payment_id) {
+      const existing = this.paymentTransactions.find(
+        (t) => t.razorpay_payment_id === tx.razorpay_payment_id
+      );
+      if (existing) {
+        return existing;
+      }
+    }
+
+    const newTx: PaymentTransaction = {
+      ...tx,
+      id: `ptx-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
+      created_at: new Date().toISOString(),
+    };
+    this.paymentTransactions.unshift(newTx);
+    return newTx;
+  }
+
+  getPaymentTransactions(bookingRef?: string): PaymentTransaction[] {
+    if (bookingRef) {
+      return this.paymentTransactions.filter(
+        (t) => t.booking_reference === bookingRef
+      );
+    }
+    return [...this.paymentTransactions];
   }
 
   // ==============================================================================

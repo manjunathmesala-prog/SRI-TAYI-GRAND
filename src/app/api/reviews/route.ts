@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
+import { verifyStaffRole } from '@/lib/auth';
 import { GoogleReview } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -7,12 +8,7 @@ export const dynamic = 'force-dynamic';
 const LIMITATION_NOTE =
   'Curated collection of 44 individual 5-star reviews from Google Travel listing.';
 
-// GET /api/reviews
-// Supports:
-// - ?featured=true (top featured reviews)
-// - ?page=1&limit=9 (pagination)
-// - ?all=true (include unpublished for admin)
-// - ?type=written|rating_only (filter by content presence)
+// GET /api/reviews (Public guest-facing endpoint)
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
@@ -25,14 +21,21 @@ export async function GET(request: NextRequest) {
     if (featured) {
       const limit = limitParam ? parseInt(limitParam, 10) : 6;
       const reviews = repo.getFeaturedReviews(limit);
-      return NextResponse.json({
-        success: true,
-        reviews,
-        total: reviews.length,
-        page: 1,
-        totalPages: 1,
-        limitationNote: LIMITATION_NOTE,
-      });
+      return NextResponse.json(
+        {
+          success: true,
+          reviews,
+          total: reviews.length,
+          page: 1,
+          totalPages: 1,
+          limitationNote: LIMITATION_NOTE,
+        },
+        {
+          headers: {
+            'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+          },
+        }
+      );
     }
 
     // Retrieve either all (admin) or published only (public)
@@ -57,14 +60,21 @@ export async function GET(request: NextRequest) {
     const offset = (page - 1) * limit;
     const paginatedReviews = limitParam ? reviews.slice(offset, offset + limit) : reviews;
 
-    return NextResponse.json({
-      success: true,
-      reviews: paginatedReviews,
-      total,
-      page,
-      totalPages,
-      limitationNote: LIMITATION_NOTE,
-    });
+    return NextResponse.json(
+      {
+        success: true,
+        reviews: paginatedReviews,
+        total,
+        page,
+        totalPages,
+        limitationNote: LIMITATION_NOTE,
+      },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=86400',
+        },
+      }
+    );
   } catch (error) {
     console.error('Error in GET /api/reviews:', error);
     return NextResponse.json(
@@ -77,6 +87,11 @@ export async function GET(request: NextRequest) {
 // POST /api/reviews - Admin import
 export async function POST(request: NextRequest) {
   try {
+    const auth = verifyStaffRole(request, ['Super Admin', 'Hotel Manager']);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error || 'Unauthorized' }, { status: 403 });
+    }
+
     const body = await request.json();
 
     // Validation
@@ -141,6 +156,11 @@ export async function POST(request: NextRequest) {
 // PATCH /api/reviews - Toggle featured or published status
 export async function PATCH(request: NextRequest) {
   try {
+    const auth = verifyStaffRole(request, ['Super Admin', 'Hotel Manager']);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error || 'Unauthorized' }, { status: 403 });
+    }
+
     const body = await request.json();
     const { id, is_featured, is_published } = body;
 
@@ -180,6 +200,11 @@ export async function PATCH(request: NextRequest) {
 // DELETE /api/reviews - Delete review by ID
 export async function DELETE(request: NextRequest) {
   try {
+    const auth = verifyStaffRole(request, ['Super Admin', 'Hotel Manager']);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error || 'Unauthorized' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     let id = searchParams.get('id');
 

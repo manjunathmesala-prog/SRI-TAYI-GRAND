@@ -26,10 +26,29 @@ export default function ContactPage() {
   const [subject, setSubject] = useState('Room Booking');
   const [message, setMessage] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setIsLoading(true);
+    setErrorMessage(null);
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phone, email, subject, message }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to submit contact enquiry');
+      }
+      setSubmitted(true);
+    } catch (err: any) {
+      setErrorMessage(err.message || 'Something went wrong. Please call front desk directly.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -196,6 +215,11 @@ export default function ContactPage() {
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+                  {errorMessage && (
+                    <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs">
+                      {errorMessage}
+                    </div>
+                  )}
                   <div>
                     <label className="block font-semibold text-[#33271D] uppercase tracking-wider text-[11px] mb-1">
                       Full Name *
@@ -268,10 +292,11 @@ export default function ContactPage() {
 
                   <button
                     type="submit"
-                    className="w-full py-3.5 px-6 rounded-full bg-[#43001F] hover:bg-[#2E0015] active:scale-[0.98] text-white text-xs uppercase tracking-[0.16em] font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 group"
+                    disabled={isLoading}
+                    className="w-full py-3.5 px-6 rounded-full bg-[#43001F] hover:bg-[#2E0015] active:scale-[0.98] disabled:opacity-60 text-white text-xs uppercase tracking-[0.16em] font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 group cursor-pointer"
                   >
-                    <span>Send Message</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    <span>{isLoading ? 'Submitting...' : 'Send Message'}</span>
+                    <ArrowRight className={`w-4 h-4 ${isLoading ? 'animate-pulse' : 'group-hover:translate-x-1'} transition-transform`} />
                   </button>
                 </form>
               )}

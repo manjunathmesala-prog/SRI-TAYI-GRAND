@@ -174,6 +174,38 @@ function AvailabilityContent() {
             </div>
           ))}
         </div>
+      ) : results.length === 0 ? (
+        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-12 text-center max-w-xl mx-auto shadow-luxury space-y-4">
+          <div className="w-12 h-12 rounded-full bg-amber-50 border border-[#D8AD56]/40 flex items-center justify-center text-[#D8AD56] mx-auto">
+            <Bed className="w-6 h-6" />
+          </div>
+          <h2 className="font-serif text-2xl font-bold text-[#241912]">No Sanctuaries Available</h2>
+          <p className="text-xs text-[#786B61] leading-relaxed">
+            All rooms are reserved for the selected stay dates ({checkIn} to {checkOut}). Please select alternative dates or call the front desk for priority assistance.
+          </p>
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button
+              onClick={() => {
+                const today = new Date();
+                const nextDay = new Date(today);
+                nextDay.setDate(nextDay.getDate() + 2);
+                const thirdDay = new Date(nextDay);
+                thirdDay.setDate(thirdDay.getDate() + 1);
+                setCheckIn(nextDay.toISOString().split('T')[0]);
+                setCheckOut(thirdDay.toISOString().split('T')[0]);
+              }}
+              className="px-5 py-2.5 rounded-xl bg-[#43001F] text-white text-xs font-semibold uppercase tracking-wider hover:bg-[#2E0015] transition-all cursor-pointer shadow-xs"
+            >
+              Try Flexible Dates
+            </button>
+            <a
+              href="tel:08494223379"
+              className="px-5 py-2.5 rounded-xl bg-amber-50 border border-[#D8AD56]/50 text-[#241912] text-xs font-semibold uppercase tracking-wider hover:bg-amber-100 transition-all cursor-pointer"
+            >
+              Call 084942 23379
+            </a>
+          </div>
+        </div>
       ) : (
         <div className="space-y-6">
           {results.map((result) => {

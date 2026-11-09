@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
+import { verifyStaffRole } from '@/lib/auth';
 import { FolioChargeCategory } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -9,6 +10,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Front Desk', 'Accounts']);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error || 'Unauthorized' }, { status: 403 });
+    }
+
     const { id } = await params;
     if (!id) {
       return NextResponse.json({ success: false, error: 'Booking identifier is required' }, { status: 400 });
@@ -34,6 +40,11 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Front Desk', 'Accounts']);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error || 'Unauthorized' }, { status: 403 });
+    }
+
     const { id } = await params;
     if (!id) {
       return NextResponse.json({ success: false, error: 'Booking identifier is required' }, { status: 400 });
@@ -45,7 +56,7 @@ export async function POST(
     }
 
     const body = await req.json();
-    const { category, description, amount, tax_rate, posted_by } = body;
+    const { category, description, amount, tax_rate } = body;
 
     if (!category || !description || amount === undefined || isNaN(Number(amount)) || Number(amount) <= 0) {
       return NextResponse.json(
@@ -59,6 +70,8 @@ export async function POST(
     const taxAmount = Math.round(baseAmount * taxRate * 100) / 100;
     const totalAmount = Math.round((baseAmount + taxAmount) * 100) / 100;
 
+    const postedBy = auth.session?.name || 'Authorized Staff';
+
     const newCharge = repo.addFolioCharge({
       booking_id: booking.id,
       booking_reference: booking.booking_reference,
@@ -68,7 +81,7 @@ export async function POST(
       tax_rate: taxRate,
       tax_amount: taxAmount,
       total_amount: totalAmount,
-      posted_by: posted_by || 'Front Desk',
+      posted_by: postedBy,
     });
 
     const updatedBooking = repo.getBookingById(booking.id) || repo.getBookingByReference(booking.booking_reference);
@@ -90,6 +103,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Accounts']);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error || 'Unauthorized' }, { status: 403 });
+    }
+
     const { id } = await params;
     const { searchParams } = new URL(req.url);
     let chargeId = searchParams.get('chargeId') || searchParams.get('id');

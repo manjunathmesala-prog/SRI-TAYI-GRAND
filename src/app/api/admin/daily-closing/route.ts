@@ -6,6 +6,11 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
+    const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Accounts', 'Front Desk', 'Receptionist']);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error || 'Unauthorized' }, { status: 403 });
+    }
+
     const url = new URL(req.url);
     const dateStr = url.searchParams.get('date') || undefined;
 
@@ -41,7 +46,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const closedByName = auth.session?.name || body.closedByName || 'Accounts Auditor';
+    const closedByName = auth.session?.name || 'Accounts Auditor';
     const closedByRole = auth.session?.role || 'Accounts';
 
     const closing = repo.performDailyClosing({

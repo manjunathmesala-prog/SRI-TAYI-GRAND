@@ -1,7 +1,8 @@
 import crypto from 'crypto';
+import Razorpay from 'razorpay';
 
 export interface RazorpayOrderOptions {
-  amount: number; // in INR
+  amount: number; // in INR (Rupees)
   currency?: string;
   receipt: string;
   notes?: Record<string, string>;
@@ -15,104 +16,166 @@ export interface RazorpayOrderResult {
   status: string;
 }
 
+/**
+ * Converts INR (Rupees) to subunits (Paise) using safe integer arithmetic.
+ * Mitigates IEEE 754 floating-point rounding errors (e.g. 10.50 -> 1050, 1800 -> 180000).
+ */
+export function inrToPaise(amountInRupees: number): number {
+  if (typeof amountInRupees !== 'number' || isNaN(amountInRupees) || amountInRupees < 0) {
+    throw new Error(`[FINTECH INTEGRITY ERROR] Invalid amount in Rupees: ${amountInRupees}`);
+  }
+  return Math.round(Number((amountInRupees * 100).toFixed(2)));
+}
+
+/**
+ * Converts subunits (Paise) back to INR (Rupees).
+ */
+export function paiseToInr(amountInPaise: number): number {
+  if (typeof amountInPaise !== 'number' || isNaN(amountInPaise) || amountInPaise < 0) {
+    throw new Error(`[FINTECH INTEGRITY ERROR] Invalid amount in Paise: ${amountInPaise}`);
+  }
+  return Math.round(amountInPaise) / 100;
+}
+
+let razorpayClientInstance: Razorpay | null = null;
+
+/**
+ * Lazily initializes and returns the authoritative server-side Razorpay SDK client.
+ */
+export function getRazorpayClient(): Razorpay {
+  const key_id = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+  const key_secret = process.env.RAZORPAY_KEY_SECRET;
+
+  if (!key_id || !key_secret) {
+    throw new Error(
+      '[RAZORPAY CONFIG ERROR] Missing credentials. Define RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in environment.'
+    );
+  }
+
+  if (!razorpayClientInstance) {
+    razorpayClientInstance = new Razorpay({
+      key_id,
+      key_secret,
+    });
+  }
+  return razorpayClientInstance;
+}
+
+/**
+ * Creates an authorized server-side Razorpay order.
+ * Strictly calculates amount in paise using integer math.
+ */
 export async function createRazorpayOrder(
   options: RazorpayOrderOptions
 ): Promise<RazorpayOrderResult> {
-  const keyId = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+  const amountInPaise = inrToPaise(options.amount);
 
-  const amountInPaise = Math.round(options.amount * 100);
-
-  // If live credentials are valid and not placeholders, call Razorpay REST API
-  if (
-    keyId &&
-    keySecret &&
-    !keyId.includes('placeholder') &&
-    keyId.startsWith('rzp_') &&
-    keySecret.length > 8
-  ) {
-    try {
-      const basicAuth = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
-      const response = await fetch('https://api.razorpay.com/v1/orders', {
-        method: 'POST',
-        headers: {
-          Authorization: `Basic ${basicAuth}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          amount: amountInPaise,
-          currency: options.currency || 'INR',
-          receipt: options.receipt,
-          notes: options.notes || {},
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.warn('Razorpay API returned error, falling back to safe local order:', errorText);
-      } else {
-        const orderData = await response.json();
-        return {
-          id: orderData.id,
-          amount: orderData.amount,
-          currency: orderData.currency,
-          receipt: orderData.receipt,
-          status: orderData.status,
-        };
-      }
-    } catch (err) {
-      console.warn('Network error reaching Razorpay API, using resilient order stub:', err);
-    }
+  if (amountInPaise <= 0) {
+    throw new Error('[FINTECH INTEGRITY ERROR] Order amount in paise must be strictly positive.');
   }
 
-  // Resilient safe development order generator (Test Mode)
-  return {
-    id: `order_stg_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
-    amount: amountInPaise,
-    currency: options.currency || 'INR',
-    receipt: options.receipt,
-    status: 'created',
-  };
+  const razorpay = getRazorpayClient();
+
+  try {
+    const order = await razorpay.orders.create({
+      amount: amountInPaise,
+      currency: options.currency || 'INR',
+      receipt: options.receipt.substring(0, 40), // Razorpay receipt max 40 chars
+      notes: options.notes || {},
+    });
+
+    return {
+      id: order.id,
+      amount: Number(order.amount),
+      currency: order.currency,
+      receipt: String(order.receipt || options.receipt),
+      status: String(order.status),
+    };
+  } catch (err: unknown) {
+    console.error('Razorpay SDK Order Creation Failed:', err);
+    throw new Error(
+      `Razorpay order creation failed: ${err instanceof Error ? err.message : String(err)}`
+    );
+  }
 }
 
+/**
+ * Cryptographically validates customer checkout authorization response.
+ * Uses HMAC-SHA256 and constant-time comparison to prevent timing attacks.
+ */
 export function verifyPaymentSignature(
   orderId: string,
   paymentId: string,
-  signature: string
+  signature: string,
+  customSecret?: string
 ): boolean {
-  const secret = process.env.RAZORPAY_KEY_SECRET;
+  if (!orderId || !paymentId || !signature) {
+    return false;
+  }
 
-  // In test / development sandbox, verify simulated signatures gracefully
-  if (!secret || secret.includes('placeholder') || secret.includes('sample')) {
-    return Boolean(orderId && paymentId && signature);
+  const secret = customSecret || process.env.RAZORPAY_KEY_SECRET;
+  if (!secret) {
+    console.error('[SECURITY ERROR] RAZORPAY_KEY_SECRET is not configured for signature verification.');
+    return false;
   }
 
   try {
-    const text = `${orderId}|${paymentId}`;
+    const payload = `${orderId}|${paymentId}`;
     const expectedSignature = crypto
       .createHmac('sha256', secret)
-      .update(text)
+      .update(payload)
       .digest('hex');
 
-    return expectedSignature === signature;
+    const expectedBuf = Buffer.from(expectedSignature, 'utf8');
+    const signatureBuf = Buffer.from(signature, 'utf8');
+
+    if (expectedBuf.length !== signatureBuf.length) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(expectedBuf, signatureBuf);
   } catch (err) {
-    console.error('Error verifying Razorpay signature:', err);
+    console.error('Error verifying Razorpay payment signature:', err);
     return false;
   }
 }
 
-export function verifyWebhookSignature(payload: string, signature: string): boolean {
-  const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
-  if (!webhookSecret) return true;
+/**
+ * Cryptographically validates asynchronous incoming Razorpay webhook payloads.
+ * Strictly verifies raw payload buffer against RAZORPAY_WEBHOOK_SECRET.
+ */
+export function verifyWebhookSignature(
+  rawPayload: string | Buffer,
+  signature: string | null | undefined,
+  customWebhookSecret?: string
+): boolean {
+  if (!rawPayload || !signature) {
+    return false;
+  }
+
+  const webhookSecret = customWebhookSecret || process.env.RAZORPAY_WEBHOOK_SECRET;
+  if (!webhookSecret) {
+    console.error('[SECURITY ERROR] RAZORPAY_WEBHOOK_SECRET is not configured.');
+    return false;
+  }
 
   try {
+    const payloadString = Buffer.isBuffer(rawPayload) ? rawPayload.toString('utf8') : rawPayload;
     const expectedSignature = crypto
       .createHmac('sha256', webhookSecret)
-      .update(payload)
+      .update(payloadString)
       .digest('hex');
-    return expectedSignature === signature;
+
+    const expectedBuf = Buffer.from(expectedSignature, 'utf8');
+    const signatureBuf = Buffer.from(signature, 'utf8');
+
+    if (expectedBuf.length !== signatureBuf.length) {
+      return false;
+    }
+
+    return crypto.timingSafeEqual(expectedBuf, signatureBuf);
   } catch (err) {
-    console.error('Error verifying webhook signature:', err);
+    console.error('Error verifying Razorpay webhook signature:', err);
     return false;
   }
 }

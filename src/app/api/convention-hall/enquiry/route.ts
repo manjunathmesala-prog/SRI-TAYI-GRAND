@@ -1,9 +1,19 @@
 import { NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
 import { sendNotification } from '@/lib/notifications';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limiter';
 
 export async function POST(request: Request) {
   try {
+    const clientIp = getClientIp(request);
+    const rateCheck = checkRateLimit(`convention-enquiry:${clientIp}`, 5, 10 * 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { error: `Too many submissions. Please wait ${rateCheck.retryAfterSeconds} seconds before sending another enquiry.` },
+        { status: 429, headers: { 'Retry-After': String(rateCheck.retryAfterSeconds || 60) } }
+      );
+    }
+
     const body = await request.json();
     const { name, phone, email, eventType, eventDate, expectedGuests, requirements, message } = body;
 

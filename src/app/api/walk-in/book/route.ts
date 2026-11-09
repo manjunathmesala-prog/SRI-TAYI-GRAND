@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
+import { checkRateLimit, getClientIp } from '@/lib/rate-limiter';
 
 /**
  * Endpoint: POST /api/walk-in/book
@@ -7,6 +8,15 @@ import { repo } from '@/lib/db/repository';
  */
 export async function POST(request: Request) {
   try {
+    const clientIp = getClientIp(request);
+    const rateCheck = checkRateLimit(`walk-in-book:${clientIp}`, 10, 5 * 60 * 1000);
+    if (!rateCheck.allowed) {
+      return NextResponse.json(
+        { success: false, error: `Too many booking attempts. Please wait ${rateCheck.retryAfterSeconds} seconds.` },
+        { status: 429, headers: { 'Retry-After': String(rateCheck.retryAfterSeconds || 30) } }
+      );
+    }
+
     const body = await request.json();
     const {
       token,

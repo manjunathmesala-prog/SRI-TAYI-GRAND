@@ -19,7 +19,9 @@ ALTER TABLE rfid_access_events
 ADD COLUMN IF NOT EXISTS card_type VARCHAR(30) DEFAULT 'guest',
 ADD COLUMN IF NOT EXISTS action_type VARCHAR(50) DEFAULT 'door_unlock',
 ADD COLUMN IF NOT EXISTS holder_name VARCHAR(150),
-ADD COLUMN IF NOT EXISTS booking_reference VARCHAR(50);
+ADD COLUMN IF NOT EXISTS booking_reference VARCHAR(50),
+ADD COLUMN IF NOT EXISTS room_number VARCHAR(20),
+ADD COLUMN IF NOT EXISTS device_name VARCHAR(100);
 
 -- 3. Create room_cleaning_sessions table for in/out tap tracking
 CREATE TABLE IF NOT EXISTS room_cleaning_sessions (

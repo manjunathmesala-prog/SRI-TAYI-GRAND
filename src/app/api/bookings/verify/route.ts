@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
-import { verifyPaymentSignature } from '@/lib/razorpay';
+import { verifyPaymentSignature, inrToPaise } from '@/lib/razorpay';
 import { sendNotification } from '@/lib/notifications';
 
 export async function POST(request: Request) {
@@ -13,9 +13,9 @@ export async function POST(request: Request) {
       razorpaySignature,
     } = body;
 
-    if (!bookingReference || !razorpayOrderId || !razorpayPaymentId) {
+    if (!bookingReference || !razorpayOrderId || !razorpayPaymentId || !razorpaySignature) {
       return NextResponse.json(
-        { error: 'Missing payment verification credentials' },
+        { error: 'Missing payment verification credentials: order ID, payment ID, and cryptographic signature are required.' },
         { status: 400 }
       );
     }
@@ -32,10 +32,24 @@ export async function POST(request: Request) {
     const isValid = verifyPaymentSignature(
       razorpayOrderId,
       razorpayPaymentId,
-      razorpaySignature || 'dev_valid_sig'
+      razorpaySignature
     );
 
     if (!isValid) {
+      repo.updatePaymentOrderStatus(razorpayOrderId, 'FAILED');
+      repo.recordPaymentTransaction({
+        booking_reference: bookingReference,
+        razorpay_order_id: razorpayOrderId,
+        razorpay_payment_id: razorpayPaymentId,
+        razorpay_signature: razorpaySignature,
+        status: 'failed',
+        amount_paise: inrToPaise(booking.total_amount),
+        amount_rupees: booking.total_amount,
+        currency: 'INR',
+        error_code: 'SIGNATURE_VERIFICATION_FAILED',
+        error_description: 'Cryptographic signature mismatch.',
+      });
+
       return NextResponse.json(
         { error: 'Payment signature verification failed. Fraud attempt logged.' },
         { status: 400 }
@@ -45,7 +59,22 @@ export async function POST(request: Request) {
     // Transactionally update booking
     booking.status = 'confirmed';
     booking.payment_status = 'successful';
-    booking.paid_amount = booking.total_amount;
+
+    // Update PaymentOrder in ledger
+    repo.updatePaymentOrderStatus(razorpayOrderId, 'PAID');
+
+    // Record PaymentTransaction
+    repo.recordPaymentTransaction({
+      booking_reference: booking.booking_reference,
+      razorpay_order_id: razorpayOrderId,
+      razorpay_payment_id: razorpayPaymentId,
+      razorpay_signature: razorpaySignature,
+      status: 'captured',
+      amount_paise: inrToPaise(booking.total_amount),
+      amount_rupees: booking.total_amount,
+      currency: 'INR',
+      method: 'online',
+    });
 
     // Record payment ledger entry
     repo.recordPayment({

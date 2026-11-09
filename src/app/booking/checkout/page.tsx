@@ -157,65 +157,68 @@ function CheckoutContent() {
 
       if (typeof window.Razorpay === 'function' && razorpayOrder && razorpayOrder.id) {
         const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_placeholder',
+          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_Ty3N7lQ7MDxqRm',
           amount: razorpayOrder.amount,
-          currency: razorpayOrder.currency,
+          currency: razorpayOrder.currency || 'INR',
           name: 'SRI TAYI GRAND',
-          description: `Stay: ${pricing?.categoryName || 'Room Reservation'}`,
+          description: `Reservation: ${pricing?.categoryName || 'Room Stay'}`,
           order_id: razorpayOrder.id,
+          image: '/images/hotel/tayi-grand-logo.png',
           prefill: {
             name: guestName,
             email: guestEmail,
             contact: guestPhone,
           },
+          notes: {
+            booking_reference: bookingReference,
+          },
           theme: {
             color: '#43001F',
           },
           handler: async function (response: any) {
-            const verifyRes = await fetch('/api/bookings/verify', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                bookingReference,
-                razorpayOrderId: response.razorpay_order_id || razorpayOrder.id,
-                razorpayPaymentId: response.razorpay_payment_id || `pay_${Date.now()}`,
-                razorpaySignature: response.razorpay_signature || 'dev_valid_sig',
-              }),
-            });
+            try {
+              const verifyRes = await fetch('/api/bookings/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  bookingReference,
+                  razorpayOrderId: response.razorpay_order_id || razorpayOrder.id,
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpaySignature: response.razorpay_signature,
+                }),
+              });
 
-            if (verifyRes.ok) {
-              router.push(`/booking/confirmation/${bookingReference}`);
-            } else {
-              setErrorMessage('Payment verification failed. Please contact reception.');
+              const verifyData = await verifyRes.json();
+              if (verifyRes.ok && verifyData.success) {
+                router.push(`/booking/confirmation/${bookingReference}`);
+              } else {
+                setErrorMessage(verifyData.error || 'Payment signature verification failed. Please contact front desk.');
+                setIsSubmitting(false);
+              }
+            } catch (vErr: any) {
+              setErrorMessage('Network error verifying payment. Please contact reception with reference: ' + bookingReference);
               setIsSubmitting(false);
             }
           },
           modal: {
             ondismiss: function () {
               setIsSubmitting(false);
+              setErrorMessage('Payment window was closed. You can retry payment anytime.');
             },
+            escape: true,
+            backdropclose: false,
           },
         };
 
         const rzp = new window.Razorpay(options);
+        rzp.on('payment.failed', function (resp: any) {
+          setIsSubmitting(false);
+          setErrorMessage(resp.error?.description || 'Your payment attempt was declined. Please try with another card or UPI.');
+        });
         rzp.open();
       } else {
-        const verifyRes = await fetch('/api/bookings/verify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            bookingReference,
-            razorpayOrderId: `order_dev_${Date.now()}`,
-            razorpayPaymentId: `pay_sim_${Date.now()}`,
-            razorpaySignature: 'dev_valid_sig',
-          }),
-        });
-
-        if (verifyRes.ok) {
-          router.push(`/booking/confirmation/${bookingReference}`);
-        } else {
-          router.push(`/booking/confirmation/${bookingReference}`);
-        }
+        setErrorMessage('Unable to initialize Razorpay payment gateway. Please verify your internet connection or choose Pay at Hotel.');
+        setIsSubmitting(false);
       }
     } catch (err: unknown) {
       setErrorMessage(err instanceof Error ? err.message : 'An error occurred during reservation');

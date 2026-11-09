@@ -207,7 +207,7 @@ export function normalizeCategoryId(identifier?: string | null): string {
     clean === 'double-room' ||
     clean === 'cat-double-bed-02' ||
     clean === 'double-bed-room' ||
-    clean === 'cat-double-01'
+    clean === 'cat-double-01' || clean === 'deluxe-ac' || clean === 'deluxe' || clean === 'standard-ac' || clean === 'standard'
   ) {
     return 'cat-double-03';
   }
@@ -360,6 +360,10 @@ export interface BookingTariffCalculation {
   tariffSourceDocument: string;
 }
 
+export function formatRupees(val: number): string {
+  return '₹' + val.toLocaleString('en-IN');
+}
+
 /**
  * Authoritative Server-Side Tariff Calculator.
  * Enforces integer paise arithmetic, guest allocation, and configurable billing rules.
@@ -382,6 +386,53 @@ export function calculateBookingTariff(params: {
   const adultsCount = Math.max(1, Number(params.adultsCount) || 1);
   const childrenCount = Math.max(0, Number(params.childrenCount) || 0);
   const totalGuests = adultsCount + childrenCount;
+
+  // Inverted / invalid date check
+  const dIn = new Date(params.checkIn);
+  const dOut = new Date(params.checkOut);
+  const isInvalidDate = isNaN(dIn.getTime()) || isNaN(dOut.getTime()) || dOut.getTime() <= dIn.getTime();
+  if (isInvalidDate) {
+    return {
+      isValid: false,
+      errorMessage: 'Check-out date must be strictly after check-in date.',
+      category,
+      billingPeriods: 0,
+      billingUnit: 'night',
+      roomsCount,
+      adultsCount,
+      childrenCount,
+      totalGuests,
+      includedOccupancyTotal: roomsCount * category.includedOccupancy,
+      maxPermittedOccupancyTotal: roomsCount * category.maxPermittedOccupancy,
+      extraPersonsCount: 0,
+      roomTariffRatePaise: category.baseTariffPaise,
+      extraPersonTariffRatePaise: category.extraPersonTariffPaise,
+      roomChargesPaise: 0,
+      extraPersonChargesPaise: 0,
+      subtotalPaise: 0,
+      taxPercentage: 0,
+      taxAmountPaise: 0,
+      totalPaise: 0,
+      roomTariffRateRupees: category.baseTariffRupees,
+      extraPersonTariffRateRupees: category.extraPersonTariffRupees,
+      roomChargesRupees: 0,
+      extraPersonChargesRupees: 0,
+      subtotalRupees: 0,
+      taxAmountRupees: 0,
+      totalRupees: 0,
+      formatted: {
+        roomRate: formatRupees(category.baseTariffRupees),
+        extraPersonRate: formatRupees(category.extraPersonTariffRupees),
+        roomCharges: formatRupees(0),
+        extraPersonCharges: formatRupees(0),
+        subtotal: formatRupees(0),
+        tax: formatRupees(0),
+        total: formatRupees(0),
+      },
+      tariffSourceDate: TARIFF_SOURCE_DATE,
+      tariffSourceDocument: TARIFF_SOURCE_DOCUMENT,
+    };
+  }
 
   const billingPeriods = calculateBillingPeriods(params.checkIn, params.checkOut);
   const billingUnit: BillingPeriodUnit = params.billingUnit || 'night';
@@ -436,7 +487,6 @@ export function calculateBookingTariff(params: {
   const taxAmountRupees = taxAmountPaise / 100;
   const totalRupees = totalPaise / 100;
 
-  const formatRupees = (val: number) => `₹${val.toLocaleString('en-IN')}`;
 
   return {
     isValid: allocation.isPermitted,

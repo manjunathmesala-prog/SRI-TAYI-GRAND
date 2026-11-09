@@ -1,16 +1,22 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState } from 'react';
 import NextLink from 'next/link';
 import { notFound } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { repo } from '@/lib/db/repository';
+import { Booking } from '@/types';
 import {
   CheckCircle2,
   Printer,
   ArrowRight,
   Building,
+  Calendar,
+  XCircle,
+  AlertCircle,
+  X,
+  RefreshCw,
 } from 'lucide-react';
 
 interface ConfirmationPageProps {
@@ -21,16 +27,88 @@ export default function ConfirmationPage({ params }: ConfirmationPageProps) {
   const resolvedParams = use(params);
   const reference = resolvedParams.reference;
 
-  const booking = repo.getBookingByReference(reference);
-  if (!booking) {
+  const initialBooking = repo.getBookingByReference(reference);
+  if (!initialBooking) {
     notFound();
   }
+
+  const [booking, setBooking] = useState<Booking>(initialBooking);
+
+  // Modals state
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [cancelReason, setCancelReason] = useState('Change of travel plans');
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+
+  const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+  const [newCheckIn, setNewCheckIn] = useState(booking.check_in_date);
+  const [newCheckOut, setNewCheckOut] = useState(booking.check_out_date);
+  const [rescheduleLoading, setRescheduleLoading] = useState(false);
+  const [rescheduleError, setRescheduleError] = useState<string | null>(null);
 
   const handlePrint = () => {
     if (typeof window !== 'undefined') {
       window.print();
     }
   };
+
+  const handleCancelBooking = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCancelLoading(true);
+    setCancelError(null);
+    try {
+      const res = await fetch('/api/bookings/cancel', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookingReference: booking.booking_reference,
+          reason: cancelReason,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to cancel booking');
+      }
+      setBooking((prev) => ({ ...prev, status: 'cancelled' }));
+      setShowCancelModal(false);
+    } catch (err: any) {
+      setCancelError(err.message || 'Error processing cancellation');
+    } finally {
+      setCancelLoading(false);
+    }
+  };
+
+  const handleRescheduleBooking = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setRescheduleLoading(true);
+    setRescheduleError(null);
+    try {
+      const res = await fetch('/api/bookings/reschedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookingReference: booking.booking_reference,
+          newCheckInDate: newCheckIn,
+          newCheckOutDate: newCheckOut,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to reschedule dates');
+      }
+      if (data.booking) {
+        setBooking(data.booking);
+      }
+      setShowRescheduleModal(false);
+    } catch (err: any) {
+      setRescheduleError(err.message || 'Error processing reschedule');
+    } finally {
+      setRescheduleLoading(false);
+    }
+  };
+
+  const isCancelled = booking.status === 'cancelled';
+  const isConfirmed = booking.status === 'confirmed';
 
   return (
     <div className="flex flex-col min-h-screen bg-[#F8F1E9]">
@@ -40,19 +118,35 @@ export default function ConfirmationPage({ params }: ConfirmationPageProps) {
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Confirmation Card */}
           <div className="bg-white rounded-3xl border border-[#D8AD56]/30 shadow-luxury overflow-hidden">
-            {/* Header Success Banner */}
-            <div className="bg-[#20120B] text-white p-8 sm:p-10 text-center relative overflow-hidden">
-              <div className="w-14 h-14 rounded-full bg-[#D8AD56]/20 border border-[#D8AD56] flex items-center justify-center mx-auto mb-4 text-[#D8AD56]">
-                <CheckCircle2 className="w-8 h-8" />
+            {/* Header Success / Cancel Banner */}
+            <div
+              className={`p-8 sm:p-10 text-center relative overflow-hidden text-white ${
+                isCancelled ? 'bg-[#3A1414]' : 'bg-[#20120B]'
+              }`}
+            >
+              <div
+                className={`w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 ${
+                  isCancelled
+                    ? 'bg-red-500/20 border border-red-400 text-red-300'
+                    : 'bg-[#D8AD56]/20 border border-[#D8AD56] text-[#D8AD56]'
+                }`}
+              >
+                {isCancelled ? <XCircle className="w-8 h-8" /> : <CheckCircle2 className="w-8 h-8" />}
               </div>
-              <span className="text-[11px] uppercase tracking-[0.25em] font-semibold text-[#D8AD56] block mb-1">
-                Reservation Confirmed
+              <span
+                className={`text-[11px] uppercase tracking-[0.25em] font-semibold block mb-1 ${
+                  isCancelled ? 'text-red-300' : 'text-[#D8AD56]'
+                }`}
+              >
+                {isCancelled ? 'Reservation Cancelled' : 'Reservation Confirmed'}
               </span>
               <h1 className="font-serif text-2xl sm:text-3xl font-normal text-white">
-                We Await Your Arrival, {booking.guest_name}
+                {isCancelled ? `Booking Cancelled, ${booking.guest_name}` : `We Await Your Arrival, ${booking.guest_name}`}
               </h1>
               <p className="text-xs text-[#EFE3D6]/75 mt-2 max-w-sm mx-auto font-light">
-                Your reservation at Sri Tayi Grand is confirmed. A copy of details has been dispatched to your mobile.
+                {isCancelled
+                  ? 'This reservation is cancelled. Any eligible refund will be credited per hotel policy.'
+                  : 'Your reservation at Sri Tayi Grand is confirmed. A copy of details has been dispatched to your mobile.'}
               </p>
 
               {/* Reference Badge */}
@@ -79,8 +173,14 @@ export default function ConfirmationPage({ params }: ConfirmationPageProps) {
                   </div>
                 </div>
 
-                <span className="text-xs font-medium text-[#2E7D32] bg-[#E8F5E9] px-3 py-1 rounded-full uppercase tracking-wider">
-                  Confirmed
+                <span
+                  className={`text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider ${
+                    isCancelled
+                      ? 'text-red-800 bg-red-100'
+                      : 'text-[#2E7D32] bg-[#E8F5E9]'
+                  }`}
+                >
+                  {booking.status}
                 </span>
               </div>
 
@@ -130,14 +230,36 @@ export default function ConfirmationPage({ params }: ConfirmationPageProps) {
               </div>
 
               {/* Action Buttons */}
-              <div className="pt-6 border-t border-[#F8F1E9] flex items-center justify-between gap-4 print:hidden">
-                <button
-                  onClick={handlePrint}
-                  className="px-5 py-2.5 rounded-full border border-[#D8AD56]/60 text-[#241912] text-xs font-medium uppercase tracking-wider hover:bg-[#FAF7F2] transition-colors flex items-center gap-2"
-                >
-                  <Printer className="w-3.5 h-3.5 text-[#D8AD56]" />
-                  <span>Print Receipt</span>
-                </button>
+              <div className="pt-6 border-t border-[#F8F1E9] flex flex-wrap items-center justify-between gap-3 print:hidden">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handlePrint}
+                    className="px-4 py-2 rounded-full border border-[#D8AD56]/60 text-[#241912] text-xs font-medium uppercase tracking-wider hover:bg-[#FAF7F2] transition-colors flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Printer className="w-3.5 h-3.5 text-[#D8AD56]" />
+                    <span>Print Receipt</span>
+                  </button>
+
+                  {isConfirmed && (
+                    <>
+                      <button
+                        onClick={() => setShowRescheduleModal(true)}
+                        className="px-4 py-2 rounded-full border border-[#B18A4A] text-[#43001F] text-xs font-semibold uppercase tracking-wider hover:bg-[#FAF7F2] transition-colors flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <Calendar className="w-3.5 h-3.5 text-[#B18A4A]" />
+                        <span>Reschedule</span>
+                      </button>
+
+                      <button
+                        onClick={() => setShowCancelModal(true)}
+                        className="px-4 py-2 rounded-full border border-red-300 text-red-700 text-xs font-semibold uppercase tracking-wider hover:bg-red-50 transition-colors flex items-center gap-1.5 cursor-pointer"
+                      >
+                        <XCircle className="w-3.5 h-3.5 text-red-600" />
+                        <span>Cancel</span>
+                      </button>
+                    </>
+                  )}
+                </div>
 
                 <NextLink
                   href="/"
@@ -151,6 +273,136 @@ export default function ConfirmationPage({ params }: ConfirmationPageProps) {
           </div>
         </div>
       </main>
+
+      {/* RESCHEDULE MODAL */}
+      {showRescheduleModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-[#D8AD56]/40 p-6 sm:p-7 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#EFE3D6] pb-3">
+              <div>
+                <span className="text-[10px] uppercase font-semibold text-[#D8AD56]">RESERVATION MODIFICATION</span>
+                <h3 className="font-serif text-lg font-bold text-[#241912]">Reschedule Stay Dates</h3>
+              </div>
+              <button onClick={() => setShowRescheduleModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {rescheduleError && (
+              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                <span>{rescheduleError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleRescheduleBooking} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-semibold text-[#382216] mb-1">New Check-In Date *</label>
+                <input
+                  type="date"
+                  required
+                  value={newCheckIn}
+                  onChange={(e) => setNewCheckIn(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-[#EFE3D6] bg-[#FAF7F2] text-[#241912] focus:border-[#D8AD56] focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-semibold text-[#382216] mb-1">New Check-Out Date *</label>
+                <input
+                  type="date"
+                  required
+                  value={newCheckOut}
+                  onChange={(e) => setNewCheckOut(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-[#EFE3D6] bg-[#FAF7F2] text-[#241912] focus:border-[#D8AD56] focus:outline-none"
+                />
+              </div>
+
+              <div className="pt-2 flex justify-end gap-2 border-t border-[#EFE3D6]">
+                <button
+                  type="button"
+                  onClick={() => setShowRescheduleModal(false)}
+                  className="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={rescheduleLoading}
+                  className="px-5 py-2 rounded-xl bg-[#382216] text-[#D8AD56] font-semibold hover:bg-[#25150F] flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
+                >
+                  <RefreshCw className={`w-3.5 h-3.5 ${rescheduleLoading ? 'animate-spin' : ''}`} />
+                  <span>{rescheduleLoading ? 'Checking Availability...' : 'Confirm Reschedule'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* CANCEL RESERVATION MODAL */}
+      {showCancelModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-red-300 p-6 sm:p-7 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#EFE3D6] pb-3">
+              <div>
+                <span className="text-[10px] uppercase font-semibold text-red-600">CONFIRM CANCELLATION</span>
+                <h3 className="font-serif text-lg font-bold text-[#241912]">Cancel Reservation?</h3>
+              </div>
+              <button onClick={() => setShowCancelModal(false)} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {cancelError && (
+              <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+                <span>{cancelError}</span>
+              </div>
+            )}
+
+            <p className="text-xs text-[#786B61] leading-relaxed">
+              Are you sure you want to cancel booking <strong>{booking.booking_reference}</strong>? 
+              This action will immediately release your reserved room.
+            </p>
+
+            <form onSubmit={handleCancelBooking} className="space-y-4 text-xs">
+              <div>
+                <label className="block font-semibold text-[#382216] mb-1">Reason for Cancellation</label>
+                <select
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-[#EFE3D6] bg-[#FAF7F2] text-[#241912] focus:border-[#D8AD56] focus:outline-none"
+                >
+                  <option value="Change of travel plans">Change of travel plans</option>
+                  <option value="Emergency or personal reasons">Emergency or personal reasons</option>
+                  <option value="Booking dates entered incorrectly">Booking dates entered incorrectly</option>
+                  <option value="Alternative accommodation arranged">Alternative accommodation arranged</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div className="pt-2 flex justify-end gap-2 border-t border-[#EFE3D6]">
+                <button
+                  type="button"
+                  onClick={() => setShowCancelModal(false)}
+                  className="px-4 py-2 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 cursor-pointer"
+                >
+                  Keep Reservation
+                </button>
+                <button
+                  type="submit"
+                  disabled={cancelLoading}
+                  className="px-5 py-2 rounded-xl bg-red-700 text-white font-semibold hover:bg-red-800 flex items-center gap-1.5 cursor-pointer disabled:opacity-60"
+                >
+                  <XCircle className={`w-3.5 h-3.5 ${cancelLoading ? 'animate-spin' : ''}`} />
+                  <span>{cancelLoading ? 'Cancelling...' : 'Confirm Cancellation'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

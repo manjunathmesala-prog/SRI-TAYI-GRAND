@@ -207,6 +207,50 @@ export interface PaymentRecord {
   reconciled_at?: string;
 }
 
+export type PaymentOrderStatus = 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';
+
+export interface PaymentOrder {
+  id: string;
+  booking_reference: string;
+  user_id?: string;
+  guest_name?: string;
+  guest_email?: string;
+  guest_phone?: string;
+  amount_paise: number;
+  amount_rupees: number;
+  currency: string;
+  status: PaymentOrderStatus;
+  razorpay_order_id: string;
+  receipt: string;
+  notes?: Record<string, string>;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface PaymentTransaction {
+  id: string;
+  order_id?: string;
+  booking_reference: string;
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature?: string;
+  status: 'captured' | 'failed' | 'refunded';
+  amount_paise: number;
+  amount_rupees: number;
+  currency: string;
+  method?: string; // card, upi, netbanking, wallet
+  bank?: string;
+  wallet?: string;
+  vpa?: string;
+  fee_paise?: number;
+  tax_paise?: number;
+  error_code?: string;
+  error_description?: string;
+  notes?: Record<string, string>;
+  raw_webhook_payload?: string;
+  created_at: string;
+}
+
 export interface HallEnquiry {
   id: string;
   enquiry_reference: string;

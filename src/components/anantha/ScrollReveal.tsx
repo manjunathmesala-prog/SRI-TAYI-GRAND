@@ -40,8 +40,18 @@ export default function ScrollReveal() {
 
     observeElements();
 
+    let isScheduled = false;
+    const debouncedObserve = () => {
+      if (isScheduled) return;
+      isScheduled = true;
+      requestAnimationFrame(() => {
+        observeElements();
+        isScheduled = false;
+      });
+    };
+
     const mutationObserver = new MutationObserver(() => {
-      observeElements();
+      debouncedObserve();
     });
 
     mutationObserver.observe(document.body, {

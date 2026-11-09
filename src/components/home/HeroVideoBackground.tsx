@@ -15,16 +15,21 @@ export function HeroVideoBackground() {
     video.defaultMuted = true;
     video.playsInline = true;
 
-    const playPromise = video.play();
-    if (playPromise !== undefined) {
-      playPromise
-        .then(() => {
-          setIsVideoLoaded(true);
-        })
-        .catch(() => {
-          // Autoplay fallback to poster
-        });
-    }
+    // Defer video playback until after the critical frame to prioritize LCP image rendering
+    const rafId = requestAnimationFrame(() => {
+      const playPromise = video.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsVideoLoaded(true);
+          })
+          .catch(() => {
+            // Autoplay fallback to poster
+          });
+      }
+    });
+
+    return () => cancelAnimationFrame(rafId);
   }, []);
 
   return (
@@ -48,7 +53,8 @@ export function HeroVideoBackground() {
         loop
         muted
         playsInline
-        preload="auto"
+        preload="none"
+        poster="/images/hotel/hotel-exterior-hero-clean.jpg"
         onPlaying={() => setIsVideoLoaded(true)}
         className={`absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-1000 ${
           isVideoLoaded ? 'opacity-100' : 'opacity-0'

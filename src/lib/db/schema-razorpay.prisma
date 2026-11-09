@@ -1,0 +1,84 @@
+// ==============================================================================
+// SRI TAYI GRAND - RAZORPAY PAYMENT GATEWAY & TRANSACTION LEDGER SCHEMA (PRISMA)
+// Zero Financial Leakage • Double-Entry Reconciliation • Idempotency Enforced
+// ==============================================================================
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum TransactionStatus {
+  captured
+  failed
+  refunded
+}
+
+model PaymentOrder {
+  id                String       @id @default(uuid()) @db.Uuid
+  userId            String?      @map("user_id") @db.Uuid
+  bookingReference  String       @map("booking_reference") @db.VarChar(50)
+  amountPaise       BigInt       @map("amount_paise") // Subunits in paise
+  amountRupees      Decimal      @map("amount_rupees") @db.Decimal(12, 2)
+  currency          String       @default("INR") @db.VarChar(10)
+  status            OrderStatus  @default(PENDING)
+  razorpayOrderId   String       @unique @map("razorpay_order_id") @db.VarChar(100)
+  receipt           String       @unique @db.VarChar(100)
+  guestName         String?      @map("guest_name") @db.VarChar(150)
+  guestEmail        String?      @map("guest_email") @db.VarChar(150)
+  guestPhone        String?      @map("guest_phone") @db.VarChar(50)
+  notes             Json?        @db.JsonB
+  createdAt         DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  // Relationships
+  transactions      PaymentTransaction[]
+
+  @@index([bookingReference])
+  @@index([status])
+  @@index([razorpayOrderId])
+  @@map("payment_orders")
+}
+
+model PaymentTransaction {
+  id                 String            @id @default(uuid()) @db.Uuid
+  orderId            String?           @map("order_id") @db.Uuid
+  bookingReference   String            @map("booking_reference") @db.VarChar(50)
+  razorpayPaymentId  String            @unique @map("razorpay_payment_id") @db.VarChar(100)
+  razorpayOrderId    String            @map("razorpay_order_id") @db.VarChar(100)
+  razorpaySignature  String?           @map("razorpay_signature") @db.VarChar(255)
+  status             TransactionStatus @default(captured)
+  amountPaise        BigInt            @map("amount_paise")
+  amountRupees       Decimal           @map("amount_rupees") @db.Decimal(12, 2)
+  currency           String            @default("INR") @db.VarChar(10)
+  method             String?           @db.VarChar(50) // 'card', 'upi', 'netbanking', 'wallet'
+  bank               String?           @db.VarChar(100)
+  wallet             String?           @db.VarChar(100)
+  vpa                String?           @db.VarChar(100) // For UPI payments
+  feePaise           BigInt?           @map("fee_paise") // Gateway processing fee in paise
+  taxPaise           BigInt?           @map("tax_paise") // GST on gateway fee in paise
+  errorCode          String?           @map("error_code") @db.VarChar(100)
+  errorDescription   String?           @map("error_description") @db.Text
+  rawWebhookPayload  String?           @map("raw_webhook_payload") @db.Text
+  createdAt          DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  // Foreign Key to Order
+  order              PaymentOrder?     @relation(fields: [orderId], references: [id], onDelete: SetNull)
+
+  @@index([razorpayPaymentId])
+  @@index([razorpayOrderId])
+  @@index([bookingReference])
+  @@index([status])
+  @@map("payment_transactions")
+}

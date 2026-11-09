@@ -9,9 +9,16 @@ export default function FloatingActionBar() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      const isPastHero = window.scrollY > 450;
-      setIsVisible(isPastHero);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const isPastHero = window.scrollY > 450;
+          setIsVisible(isPastHero);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });

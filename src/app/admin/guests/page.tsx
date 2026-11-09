@@ -21,6 +21,7 @@ import {
   DollarSign,
   Crown,
   CheckCircle2,
+  Download,
 } from 'lucide-react';
 import { useRealtimeSync } from '@/lib/realtime-client';
 
@@ -58,6 +59,12 @@ export default function GuestsAdminPage() {
   const [newPreferenceTag, setNewPreferenceTag] = useState('');
   const [editNotes, setEditNotes] = useState('');
   const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const showToast = (type: 'success' | 'error', message: string) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   const fetchGuests = useCallback(async () => {
     try {
@@ -115,9 +122,10 @@ export default function GuestsAdminPage() {
       }
 
       setBlacklistModalGuest(null);
+      showToast('success', 'Guest blacklist status updated successfully');
       await fetchGuests();
     } catch (err: any) {
-      alert(err.message || 'Error updating blacklist');
+      showToast('error', err.message || 'Error updating blacklist');
     } finally {
       setIsSubmittingBlacklist(false);
     }
@@ -183,9 +191,10 @@ export default function GuestsAdminPage() {
       }
 
       setEditModalGuest(null);
+      showToast('success', `Guest profile for ${editModalGuest.full_name} updated successfully`);
       await fetchGuests();
     } catch (err: any) {
-      alert(err.message || 'Error updating guest profile');
+      showToast('error', err.message || 'Error updating guest profile');
     } finally {
       setIsSubmittingEdit(false);
     }
@@ -242,6 +251,26 @@ export default function GuestsAdminPage() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg border flex items-center gap-3 transition-all animate-in slide-in-from-top-2 ${
+            toast.type === 'success'
+              ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
+              : 'bg-rose-50 text-rose-900 border-rose-200'
+          }`}
+        >
+          <span className="text-sm font-medium">{toast.message}</span>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="text-xs opacity-70 hover:opacity-100 font-bold ml-2"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
         <div>
@@ -257,16 +286,26 @@ export default function GuestsAdminPage() {
           </p>
         </div>
 
-        {/* Search */}
-        <div className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 text-[#786B61] absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search guest name, phone, preference..."
-            className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-[#EFE3D6] bg-white text-[#241912] focus:border-[#D8AD56] focus:outline-none shadow-sm"
-          />
+        {/* Search & Export */}
+        <div className="flex items-center gap-2 w-full sm:w-auto">
+          <div className="relative w-full sm:w-72">
+            <Search className="w-4 h-4 text-[#786B61] absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search guest name, phone, preference..."
+              className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-[#EFE3D6] bg-white text-[#241912] focus:border-[#D8AD56] focus:outline-none shadow-sm"
+            />
+          </div>
+          <button
+            onClick={() => { window.location.href = '/api/admin/guests?export=csv'; }}
+            className="px-3.5 py-2.5 rounded-xl bg-white border border-[#EFE3D6] hover:bg-[#FAF7F2] text-[#382216] text-xs font-semibold flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
+            title="Export Guest Directory to CSV"
+          >
+            <Download className="w-3.5 h-3.5 text-[#D8AD56]" />
+            <span className="hidden sm:inline">Export CSV</span>
+          </button>
         </div>
       </div>
 
@@ -352,8 +391,28 @@ export default function GuestsAdminPage() {
             <tbody className="divide-y divide-[#EFE3D6] text-[#241912]">
               {filteredGuests.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-10 text-center text-[#786B61]">
-                    No guest profiles found matching your criteria.
+                  <td colSpan={7} className="py-12 text-center text-[#786B61]">
+                    <div className="flex flex-col items-center justify-center space-y-2">
+                      <Users className="w-8 h-8 text-stone-300" />
+                      <span className="font-semibold text-sm text-[#241912]">No Guest Profiles Found</span>
+                      <p className="text-xs text-[#786B61] max-w-sm">
+                        {searchQuery || tierFilter !== 'all'
+                          ? 'No guest profiles match your current search query or tier filter.'
+                          : 'No guest profiles currently registered.'}
+                      </p>
+                      {(searchQuery || tierFilter !== 'all') && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSearchQuery('');
+                            setTierFilter('all');
+                          }}
+                          className="mt-2 px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold cursor-pointer transition-colors"
+                        >
+                          Clear Filters
+                        </button>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ) : (

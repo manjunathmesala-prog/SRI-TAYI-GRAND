@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
+import { verifyStaffRole } from '@/lib/auth';
 import { EnquiryStatus } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -9,6 +10,11 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const auth = verifyStaffRole(request, ['Super Admin', 'Hotel Manager', 'Front Desk', 'Event Manager']);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error || 'Unauthorized' }, { status: 403 });
+    }
+
     const { id } = await params;
     if (!id) {
       return NextResponse.json(

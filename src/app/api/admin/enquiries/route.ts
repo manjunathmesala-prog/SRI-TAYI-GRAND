@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
+import { verifyStaffRole } from '@/lib/auth';
 import { EnquiryStatus, EnquiryType } from '@/types';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   try {
+    const auth = verifyStaffRole(request, ['Super Admin', 'Hotel Manager', 'Front Desk', 'Event Manager']);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error || 'Unauthorized' }, { status: 403 });
+    }
+
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type') as EnquiryType | 'all' | null;
     const status = searchParams.get('status') as EnquiryStatus | 'all' | null;

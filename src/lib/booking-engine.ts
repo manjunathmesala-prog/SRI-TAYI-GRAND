@@ -97,6 +97,31 @@ export function checkCategoryAvailability(
 ): AvailabilityResult {
   cleanExpiredHolds();
 
+  // Inverted date check
+  const checkInTime = new Date(checkIn).getTime();
+  const checkOutTime = new Date(checkOut).getTime();
+  if (isNaN(checkInTime) || isNaN(checkOutTime) || checkOutTime <= checkInTime) {
+    const categories = repo.getCategories();
+    const cat = categories.find((c) => c.id === categoryId || c.slug === categoryId) || categories[0];
+    return {
+      category: cat,
+      totalRooms: 0,
+      availableRooms: 0,
+      isAvailable: false,
+      nights: 0,
+      pricePerNight: cat.base_price_per_night,
+      roomCharges: 0,
+      extraPersonsCount: 0,
+      extraPersonCharges: 0,
+      subtotal: 0,
+      taxPercentage: 0,
+      taxAmount: 0,
+      totalAmount: 0,
+      tariffSourceDate: new Date().toISOString().split('T')[0],
+      tariffSourceDocument: 'Invalid date sequence: check-out must be strictly after check-in',
+    };
+  }
+
   const normalizedId = normalizeCategoryId(categoryId);
   const categories = repo.getCategories();
   const category =

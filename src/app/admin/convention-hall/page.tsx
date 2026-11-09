@@ -158,6 +158,12 @@ export default function ConventionHallAdminPage() {
 
   const [isSubmittingQuote, setIsSubmittingQuote] = useState(false);
   const [viewingQuoteForPrint, setViewingQuoteForPrint] = useState<ConventionQuote | null>(null);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const showToast = (type: 'success' | 'error', message: string) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   const fetchData = useCallback(async () => {
     try {
@@ -199,7 +205,7 @@ export default function ConventionHallAdminPage() {
   const handleGenerateQuote = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!clientName || !clientPhone || !eventName || guestCount <= 0) {
-      alert('Please complete all required fields.');
+      showToast('error', 'Please complete all required fields.');
       return;
     }
 
@@ -240,11 +246,12 @@ export default function ConventionHallAdminPage() {
         throw new Error(data.error || 'Failed to generate quote');
       }
 
+      showToast('success', 'Convention quotation generated successfully.');
       await fetchData();
       setViewingQuoteForPrint(data.quote);
       setActiveTab('quotes');
     } catch (err: any) {
-      alert(err.message || 'Error generating quote');
+      showToast('error', err.message || 'Error generating quote');
     } finally {
       setIsSubmittingQuote(false);
     }
@@ -289,9 +296,10 @@ export default function ConventionHallAdminPage() {
       }
 
       setSelectedEnquiry(null);
+      showToast('success', 'Enquiry status and quote updated successfully.');
       await fetchData();
     } catch (err: any) {
-      alert(err.message || 'Error saving enquiry');
+      showToast('error', err.message || 'Error saving enquiry');
     }
   };
 
@@ -330,6 +338,26 @@ export default function ConventionHallAdminPage() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg border flex items-center gap-3 transition-all animate-in slide-in-from-top-2 ${
+            toast.type === 'success'
+              ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
+              : 'bg-rose-50 text-rose-900 border-rose-200'
+          }`}
+        >
+          <span className="text-sm font-medium">{toast.message}</span>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="text-xs opacity-70 hover:opacity-100 font-bold ml-2"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
         <div>

@@ -32,7 +32,14 @@ export async function GET(request: NextRequest) {
       roomsCount
     );
 
-    return NextResponse.json({ success: true, results });
+    return NextResponse.json(
+      { success: true, results },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=30',
+        },
+      }
+    );
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : 'Failed to check availability';
     return NextResponse.json({ error: message }, { status: 500 });

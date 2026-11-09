@@ -38,6 +38,12 @@ export default function HousekeepingAdminPage() {
   const [inspectionNotes, setInspectionNotes] = useState('');
   const [inspectorName, setInspectorName] = useState('G. Mohan Kumar (Hotel Manager)');
   const [isSubmittingInspection, setIsSubmittingInspection] = useState(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const showToast = (type: 'success' | 'error', message: string) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   const fetchHousekeepingData = useCallback(async () => {
     try {
@@ -128,9 +134,10 @@ export default function HousekeepingAdminPage() {
       }
 
       setInspectionRoom(null);
+      showToast('success', 'Room inspection passed and room marked clean & available.');
       await fetchHousekeepingData();
     } catch (err: any) {
-      alert(err.message || 'Error completing inspection');
+      showToast('error', err.message || 'Error completing inspection');
     } finally {
       setIsSubmittingInspection(false);
     }
@@ -162,9 +169,10 @@ export default function HousekeepingAdminPage() {
         throw new Error(data.error || 'Failed to assign housekeeper');
       }
 
+      showToast('success', `Room assigned to ${selectedStaff.full_name}`);
       await fetchHousekeepingData();
     } catch (err: any) {
-      alert(err.message || 'Error assigning staff');
+      showToast('error', err.message || 'Error assigning staff');
     } finally {
       setIsUpdating(null);
     }
@@ -193,9 +201,10 @@ export default function HousekeepingAdminPage() {
         throw new Error(data.error || 'Failed to update cleaning status');
       }
 
+      showToast('success', 'Room marked as cleaning in progress');
       await fetchHousekeepingData();
     } catch (err: any) {
-      alert(err.message || 'Error updating status');
+      showToast('error', err.message || 'Error updating status');
     } finally {
       setIsUpdating(null);
     }
@@ -221,6 +230,26 @@ export default function HousekeepingAdminPage() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg border flex items-center gap-3 transition-all animate-in slide-in-from-top-2 ${
+            toast.type === 'success'
+              ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
+              : 'bg-rose-50 text-rose-900 border-rose-200'
+          }`}
+        >
+          <span className="text-sm font-medium">{toast.message}</span>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="text-xs opacity-70 hover:opacity-100 font-bold ml-2"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
         <div>

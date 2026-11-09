@@ -1,12 +1,18 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
+import { verifyStaffRole } from '@/lib/auth';
 
 /**
  * Endpoint: GET /api/admin/walk-ins/queue
  * Real-time queue of walk-in guests waiting for physical room assignment and keycard encoding
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Front Desk', 'Receptionist']);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error || 'Unauthorized' }, { status: 403 });
+    }
+
     const queue = repo.getWalkInQueue();
     const cleanRooms = repo.getAvailableCleanRooms();
     const allRooms = repo.getRooms();

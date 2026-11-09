@@ -217,10 +217,11 @@ export default function FrontDeskPage() {
 
       setCheckInModalBooking(null);
       setSelectedRoomId('');
+      setWalkInAlert({ type: 'success', message: `Guest ${checkInModalBooking.guest_name} checked into Room ${assignedRoom.room_number} successfully.` });
       await fetchLiveState();
       await fetchWalkInQueue();
     } catch (err: any) {
-      alert(err.message || 'Check-in failed');
+      setWalkInAlert({ type: 'error', message: err.message || 'Check-in failed' });
     }
   };
 
@@ -243,12 +244,13 @@ export default function FrontDeskPage() {
       }
 
       setCheckOutSuccessRef(checkOutModalBooking.booking_reference);
+      setWalkInAlert({ type: 'success', message: `Reservation ${checkOutModalBooking.booking_reference} (Room ${checkOutModalBooking.assigned_room_number || ''}) checked out successfully.` });
       setCheckOutModalBooking(null);
       setAdditionalCharges(0);
       await fetchLiveState();
       await fetchWalkInQueue();
     } catch (err: any) {
-      alert(err.message || 'Check-out failed');
+      setWalkInAlert({ type: 'error', message: err.message || 'Check-out failed' });
     }
   };
 

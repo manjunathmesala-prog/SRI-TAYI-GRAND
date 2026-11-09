@@ -51,6 +51,12 @@ export default function StaffAdminPage() {
     can_manage_inventory: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  const showToast = (type: 'success' | 'error', message: string) => {
+    setToast({ type, message });
+    setTimeout(() => setToast(null), 4000);
+  };
 
   const fetchStaff = useCallback(async () => {
     try {
@@ -136,9 +142,10 @@ export default function StaffAdminPage() {
       }
 
       setSelectedStaff(null);
+      showToast('success', `Permissions updated for ${selectedStaff?.full_name || 'staff member'}.`);
       await fetchStaff();
     } catch (err: any) {
-      alert(err.message || 'Error updating permissions');
+      showToast('error', err.message || 'Error updating permissions');
     } finally {
       setIsSubmitting(false);
     }
@@ -211,6 +218,26 @@ export default function StaffAdminPage() {
 
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
+      {/* Toast Notification */}
+      {toast && (
+        <div
+          className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-xl shadow-lg border flex items-center gap-3 transition-all animate-in slide-in-from-top-2 ${
+            toast.type === 'success'
+              ? 'bg-emerald-50 text-emerald-900 border-emerald-200'
+              : 'bg-rose-50 text-rose-900 border-rose-200'
+          }`}
+        >
+          <span className="text-sm font-medium">{toast.message}</span>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="text-xs opacity-70 hover:opacity-100 font-bold ml-2"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
         <div>

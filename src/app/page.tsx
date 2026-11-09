@@ -9,8 +9,18 @@ import { AtmosphericGlow } from '@/components/motion/AtmosphericGlow';
 import TayiBrandIcon from '@/components/anantha/TayiBrandIcon';
 import MobileStickyBookingBar from '@/components/anantha/MobileStickyBookingBar';
 import FloatingActionBar from '@/components/anantha/FloatingActionBar';
-import { TestimonialsSection } from '@/components/testimonials/TestimonialsSection';
-import { CelebrityShowcase } from '@/components/home/CelebrityShowcase';
+import nextDynamic from 'next/dynamic';
+
+const TestimonialsSection = nextDynamic(
+  () => import('@/components/testimonials/TestimonialsSection').then((mod) => mod.TestimonialsSection),
+  { ssr: true }
+);
+
+
+const CelebrityShowcase = nextDynamic(
+  () => import('@/components/home/CelebrityShowcase').then((mod) => mod.CelebrityShowcase),
+  { ssr: true }
+);
 import { HeroVideoBackground } from '@/components/home/HeroVideoBackground';
 import { repo } from '@/lib/db/repository';
 import {

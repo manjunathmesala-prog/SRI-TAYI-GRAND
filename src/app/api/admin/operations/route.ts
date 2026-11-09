@@ -7,6 +7,18 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
+    const auth = verifyStaffRole(req, [
+      'Super Admin',
+      'Hotel Manager',
+      'Front Desk',
+      'Accounts',
+      'Receptionist',
+      'Housekeeping',
+    ]);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error || 'Unauthorized: Staff session required' }, { status: 403 });
+    }
+
     const fullState = repo.getFullState();
     return NextResponse.json({
       success: true,

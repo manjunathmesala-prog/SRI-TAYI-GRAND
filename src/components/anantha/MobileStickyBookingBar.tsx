@@ -8,11 +8,14 @@ export default function MobileStickyBookingBar() {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      if (window.scrollY > 360) {
-        setIsVisible(true);
-      } else {
-        setIsVisible(false);
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          setIsVisible(window.scrollY > 360);
+          ticking = false;
+        });
+        ticking = true;
       }
     };
 

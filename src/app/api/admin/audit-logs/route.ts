@@ -88,14 +88,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Security fix: Strictly bind audit log identity to verified staff session (prevent identity spoofing)
     const log = repo.recordAuditLog({
       action: String(action),
       entityType: entityType as AuditActionCategory,
       entityId: String(entityId),
       details: String(details),
-      userId: body.userId || auth.session?.userId || 'stf-sys',
-      userName: body.userName || auth.session?.name || 'Authorized Staff',
-      userRole: body.userRole || auth.session?.role || 'Staff',
+      userId: auth.session?.userId || 'stf-sys',
+      userName: auth.session?.name || 'Authorized Staff',
+      userRole: auth.session?.role || 'Staff',
       previousValue,
       newValue,
     });
