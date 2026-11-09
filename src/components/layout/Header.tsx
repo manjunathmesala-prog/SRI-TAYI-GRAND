@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import NextLink from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { Menu, X, ArrowRight, Phone, MapPin } from 'lucide-react';
+import { Menu, X, ArrowRight, Phone, MapPin, Smartphone } from 'lucide-react';
 
 interface HeaderProps {
   transparentInitially?: boolean;
@@ -228,6 +228,21 @@ export function Header({ transparentInitially = false }: HeaderProps) {
                 <span>Directions</span>
               </a>
             </div>
+
+            {/* Install App CTA in Mobile Drawer */}
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                if (typeof window !== 'undefined') {
+                  window.dispatchEvent(new CustomEvent('open-pwa-install'));
+                }
+              }}
+              className="w-full py-2.5 px-3 rounded-[3.5px] bg-[#43001F] text-[#F8F3E9] text-xs font-medium hover:bg-[#5E002B] flex items-center justify-center gap-2 border border-[#B18A4A]/40 transition-colors shadow-sm"
+            >
+              <Smartphone className="w-3.5 h-3.5 text-[#E2C785]" />
+              <span>Install Official App (PWA)</span>
+            </button>
 
             <p className="text-center font-serif text-[10.5px] tracking-widest text-[#8a7b6a] uppercase mt-2">
               Sri Tayi Grand &bull; Kadiri, Andhra Pradesh

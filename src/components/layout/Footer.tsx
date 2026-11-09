@@ -3,7 +3,7 @@
 import React from 'react';
 import NextLink from 'next/link';
 import Image from 'next/image';
-import { ArrowUp, MapPin, Mail, Phone, ShieldCheck } from 'lucide-react';
+import { ArrowUp, MapPin, Mail, Phone, ShieldCheck, Smartphone } from 'lucide-react';
 
 export function Footer() {
   const scrollToTop = () => {
@@ -52,6 +52,20 @@ export function Footer() {
                 <span>Admin Panel</span>
                 <span className="text-[10px] text-[#B18A4A] group-hover:text-white/80 font-normal transition-transform group-hover:translate-x-0.5">→</span>
               </NextLink>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== 'undefined') {
+                    window.dispatchEvent(new CustomEvent('open-pwa-install'));
+                  }
+                }}
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#2D2218] hover:bg-[#43001F] text-[#E6D9C5] hover:text-white border border-[#B18A4A]/40 hover:border-[#B18A4A] text-xs font-semibold tracking-wide transition-all duration-200 shadow-sm group cursor-pointer"
+              >
+                <Smartphone className="w-4 h-4 text-[#B18A4A] group-hover:text-white transition-colors" />
+                <span>Install App</span>
+                <span className="text-[10px] text-[#B18A4A] group-hover:text-white/80 font-normal transition-transform group-hover:translate-x-0.5">↓</span>
+              </button>
             </div>
           </div>
 

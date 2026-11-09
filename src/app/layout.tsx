@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Cormorant_Garamond, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import ScrollReveal from '@/components/anantha/ScrollReveal';
+import PwaProvider from '@/components/pwa/PwaProvider';
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
@@ -29,6 +30,15 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://sritayigrand.com'),
+  manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: 'Sri Tayi Grand',
+  },
+  formatDetection: {
+    telephone: false,
+  },
   title: {
     default: 'Sri Tayi Grand | Luxury Stay & Grand Convention Hall in Kadiri',
     template: '%s | Sri Tayi Grand Hotel Kadiri',
@@ -37,11 +47,16 @@ export const metadata: Metadata = {
   keywords: 'Sri Tayi Grand, Tayi Grand Hotel, Kadiri Hotel, Hotels in Kadiri, Convention Hall Kadiri, Luxury Hotel Anantapur, Rooms in Kadiri',
   icons: {
     icon: [
+      { url: '/icons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
       { url: '/images/hotel/tayi-grand-logo.png', type: 'image/png' },
       { url: '/favicon.ico' },
     ],
-    shortcut: '/images/hotel/tayi-grand-logo.png',
-    apple: '/images/hotel/tayi-grand-logo.png',
+    shortcut: '/icons/icon-192x192.png',
+    apple: [
+      { url: '/icons/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: '/images/hotel/tayi-grand-logo.png' },
+    ],
   },
   openGraph: {
     title: 'Sri Tayi Grand | Luxury Stay & Grand Convention Hall',
@@ -102,6 +117,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen flex flex-col bg-[#F8F3E9] text-[#33271D] selection:bg-[#B18A4A] selection:text-white relative">
         <ScrollReveal />
+        <PwaProvider />
         {children}
       </body>
     </html>

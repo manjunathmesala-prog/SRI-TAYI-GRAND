@@ -1,0 +1,139 @@
+import type { MetadataRoute } from 'next';
+
+export default function manifest(): MetadataRoute.Manifest {
+  return {
+    id: 'com.sritayigrand.pwa',
+    name: 'Sri Tayi Grand | Luxury Stay & Grand Convention Hall',
+    short_name: 'Sri Tayi Grand',
+    description:
+      'Experience thoughtful comfort and authentic hospitality at Sri Tayi Grand, Kadiri. Fully AC Deluxe Rooms, Four Bed Family Rooms, Executive Suites, and Grand 800-capacity Convention Hall.',
+    start_url: '/?source=pwa',
+    scope: '/',
+    display: 'standalone',
+    orientation: 'portrait-primary',
+    background_color: '#F8F3E9',
+    theme_color: '#43001F',
+    lang: 'en-IN',
+    dir: 'ltr',
+    prefer_related_applications: false,
+    categories: ['travel', 'hotel', 'hospitality', 'lifestyle', 'business'],
+    icons: [
+      {
+        src: '/icons/icon-72x72.png',
+        sizes: '72x72',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/icons/icon-96x96.png',
+        sizes: '96x96',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/icons/icon-128x128.png',
+        sizes: '128x128',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/icons/icon-144x144.png',
+        sizes: '144x144',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/icons/icon-152x152.png',
+        sizes: '152x152',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/icons/icon-192x192.png',
+        sizes: '192x192',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/icons/icon-384x384.png',
+        sizes: '384x384',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/icons/icon-512x512.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'any',
+      },
+      {
+        src: '/icons/maskable-icon-512x512.png',
+        sizes: '512x512',
+        type: 'image/png',
+        purpose: 'maskable',
+      },
+    ],
+    shortcuts: [
+      {
+        name: 'Book a Room',
+        short_name: 'Rooms',
+        description: 'Browse and book AC Deluxe and Executive rooms at Sri Tayi Grand',
+        url: '/rooms?source=pwa_shortcut',
+        icons: [
+          {
+            src: '/icons/icon-96x96.png',
+            sizes: '96x96',
+            type: 'image/png',
+          },
+        ],
+      },
+      {
+        name: 'Convention Hall',
+        short_name: 'Convention',
+        description: 'Grand 800-capacity fully air-conditioned celebration hall with dining',
+        url: '/convention-hall?source=pwa_shortcut',
+        icons: [
+          {
+            src: '/icons/icon-96x96.png',
+            sizes: '96x96',
+            type: 'image/png',
+          },
+        ],
+      },
+      {
+        name: 'Front Desk & Status',
+        short_name: 'Front Desk',
+        description: 'Direct reception and front-desk booking concierge',
+        url: '/admin/front-desk?source=pwa_shortcut',
+        icons: [
+          {
+            src: '/icons/icon-96x96.png',
+            sizes: '96x96',
+            type: 'image/png',
+          },
+        ],
+      },
+      {
+        name: 'Hotel Gallery & Amenities',
+        short_name: 'Amenities',
+        description: 'Explore Sri Tayi Grand suites, car parking, and guest facilities',
+        url: '/amenities?source=pwa_shortcut',
+        icons: [
+          {
+            src: '/icons/icon-96x96.png',
+            sizes: '96x96',
+            type: 'image/png',
+          },
+        ],
+      },
+    ],
+    screenshots: [
+      {
+        src: '/images/hotel/hotel-exterior-hero-clean.jpg',
+        sizes: '1200x630',
+        type: 'image/jpeg',
+        label: 'Sri Tayi Grand Hotel Kadiri Exterior',
+      },
+    ],
+  };
+}
