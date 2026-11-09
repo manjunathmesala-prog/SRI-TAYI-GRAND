@@ -245,7 +245,7 @@ class NotificationEngine {
    */
   private async persistToSupabase(notif: SuperAdminNotification): Promise<void> {
     try {
-      const { error } = await supabaseAdmin.from('super_admin_notifications').insert({
+      const { error } = await supabaseAdmin.from('super_admin_notifications').upsert({
         id: notif.id,
         recipient_id: notif.recipientId,
         type: notif.type,
@@ -302,24 +302,24 @@ class NotificationEngine {
         n.readAt = now;
       });
       // Async update in Supabase
-      supabaseAdmin
-        .from('super_admin_notifications')
-        .update({ is_read: true, read_at: now })
-        .eq('recipient_id', 'super-admin')
-        .eq('is_read', false)
-        .then(() => {})
-        .catch(() => {});
+      Promise.resolve(
+        supabaseAdmin
+          .from('super_admin_notifications')
+          .update({ is_read: true, read_at: now })
+          .eq('recipient_id', 'super-admin')
+          .eq('is_read', false)
+      ).catch(() => {});
     } else if (id) {
       const item = inMemoryNotifications.find((n) => n.id === id);
       if (item) {
         item.isRead = true;
         item.readAt = now;
-        supabaseAdmin
-          .from('super_admin_notifications')
-          .update({ is_read: true, read_at: now })
-          .eq('id', id)
-          .then(() => {})
-          .catch(() => {});
+        Promise.resolve(
+          supabaseAdmin
+            .from('super_admin_notifications')
+            .update({ is_read: true, read_at: now })
+            .eq('id', id)
+        ).catch(() => {});
       }
     }
   }
@@ -330,21 +330,21 @@ class NotificationEngine {
   public clearNotifications(id?: string, clearAll = false): void {
     if (clearAll) {
       inMemoryNotifications.length = 0;
-      supabaseAdmin
-        .from('super_admin_notifications')
-        .delete()
-        .eq('recipient_id', 'super-admin')
-        .then(() => {})
-        .catch(() => {});
+      Promise.resolve(
+        supabaseAdmin
+          .from('super_admin_notifications')
+          .delete()
+          .eq('recipient_id', 'super-admin')
+      ).catch(() => {});
     } else if (id) {
       const idx = inMemoryNotifications.findIndex((n) => n.id === id);
       if (idx !== -1) inMemoryNotifications.splice(idx, 1);
-      supabaseAdmin
-        .from('super_admin_notifications')
-        .delete()
-        .eq('id', id)
-        .then(() => {})
-        .catch(() => {});
+      Promise.resolve(
+        supabaseAdmin
+          .from('super_admin_notifications')
+          .delete()
+          .eq('id', id)
+      ).catch(() => {});
     }
   }
 }

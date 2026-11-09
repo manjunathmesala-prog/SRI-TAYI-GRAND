@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
+import { notifySuperAdmin } from '@/lib/notifications/engine';
 import { checkCategoryAvailability } from '@/lib/booking-engine';
 import { createRazorpayOrder } from '@/lib/razorpay';
 import { sendNotification } from '@/lib/notifications';
@@ -139,6 +140,20 @@ export async function POST(request: Request) {
         reference: booking.booking_reference,
         hotelName: 'SRI TAYI GRAND',
         total: avail.totalAmount,
+      },
+    });
+
+    notifySuperAdmin({
+      eventType: 'EVENT_NEW_BOOKING',
+      payload: {
+        bookingReference: booking.booking_reference,
+        customerName: booking.guest_name,
+        roomCategory: booking.category_name,
+        roomsCount: booking.rooms_count,
+        checkInDate: booking.check_in_date,
+        checkOutDate: booking.check_out_date,
+        totalAmount: booking.total_amount,
+        source: 'online',
       },
     });
 

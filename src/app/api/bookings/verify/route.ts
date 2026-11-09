@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
+import { notifySuperAdmin } from '@/lib/notifications/engine';
 import { verifyPaymentSignature, inrToPaise } from '@/lib/razorpay';
 import { sendNotification } from '@/lib/notifications';
 
@@ -87,6 +88,20 @@ export async function POST(request: Request) {
       gateway_payment_id: razorpayPaymentId,
       status: 'successful',
       paid_at: new Date().toISOString(),
+    });
+
+    // Non-blocking Super Admin payment alert
+    notifySuperAdmin({
+      eventType: 'EVENT_TRANSACTION',
+      payload: {
+        transactionId: razorpayPaymentId,
+        amount: booking.total_amount,
+        currency: 'INR',
+        method: 'upi',
+        payerName: booking.guest_name,
+        bookingReference: booking.booking_reference,
+        status: 'captured',
+      },
     });
 
     // Send confirmation notification

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
+import { notifySuperAdmin } from '@/lib/notifications/engine';
+import { recordRfidTapAsync } from '@/lib/rfid/tap-logger';
 
 /**
  * RFID Tap Processing Engine
@@ -28,6 +30,32 @@ export async function POST(request: Request) {
     }
 
     const result = repo.processDoorTap(cardUid, roomNumber, action);
+
+    // =========================================================================
+    // STEP 2: NON-BLOCKING RFID TAP HISTORY & AUDIT TRAIL HOOK (OBSERVER PATTERN)
+    // Zero throw propagation — hardware door response is never blocked or delayed
+    // =========================================================================
+    recordRfidTapAsync({
+      cardUid,
+      roomNumber,
+      result,
+      cardType: result.cardType,
+    }).catch((err) => console.error('RFID History Log Error:', err));
+
+    // Non-blocking Super Admin notification dispatch with 3s deduplication
+    notifySuperAdmin({
+      eventType: 'EVENT_RFID_TAP',
+      payload: {
+        deviceId: body.deviceId || `reader-${roomNumber}`,
+        location: `Room ${roomNumber}`,
+        cardUid,
+        holderName: result.event?.holder_name,
+        cardType: result.cardType,
+        result: result.success ? 'GRANTED' : 'DENIED',
+        reason: result.message,
+        timestamp: new Date().toISOString(),
+      },
+    });
 
     return NextResponse.json({
       success: result.success,

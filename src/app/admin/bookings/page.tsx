@@ -18,15 +18,18 @@ import {
   RefreshCw,
   Receipt,
   FileText,
+  Key,
 } from 'lucide-react';
 import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
 import { GuestFolioModal } from '@/components/admin/GuestFolioModal';
 import { PrintGstInvoiceModal } from '@/components/admin/PrintGstInvoiceModal';
+import { RfidHistoryTable } from '@/components/admin/RfidHistoryTable';
 
 export default function BookingsAdminPage() {
   const [activeTab, setActiveTab] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [rfidAuditBooking, setRfidAuditBooking] = useState<Booking | null>(null);
   const [folioModalBooking, setFolioModalBooking] = useState<Booking | null>(null);
   const [printInvoiceBooking, setPrintInvoiceBooking] = useState<Booking | null>(null);
   const [printInvoiceCharges, setPrintInvoiceCharges] = useState<FolioCharge[]>([]);
@@ -289,6 +292,14 @@ export default function BookingsAdminPage() {
                     <td className="py-3.5 px-4 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <button
+                          onClick={() => setRfidAuditBooking(b)}
+                          className="px-2.5 py-1.5 rounded-lg bg-[#FAF5EB] hover:bg-[#E2D5BE]/60 text-xs font-semibold text-[#8a6a2a] border border-[#E2D5BE] transition-colors inline-flex items-center gap-1 cursor-pointer"
+                          title="View Physical RFID Door Tap History"
+                        >
+                          <Key className="w-3.5 h-3.5 text-[#9b7a3e]" />
+                          <span>RFID Taps</span>
+                        </button>
+                        <button
                           onClick={() => setFolioModalBooking(b)}
                           className="px-2.5 py-1.5 rounded-lg bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] text-xs font-bold transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
                           title="View Guest Folio, Charges & Invoice"
@@ -413,6 +424,18 @@ export default function BookingsAdminPage() {
                   onClick={() => {
                     const b = selectedBooking;
                     setSelectedBooking(null);
+                    setRfidAuditBooking(b);
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-[#FAF5EB] border border-[#E2D5BE] text-[#8a6a2a] text-xs font-bold hover:bg-[#E2D5BE]/60 flex items-center gap-1.5 cursor-pointer shadow-xs"
+                >
+                  <Key className="w-3.5 h-3.5 text-[#9b7a3e]" />
+                  <span>RFID Tap History</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const b = selectedBooking;
+                    setSelectedBooking(null);
                     setFolioModalBooking(b);
                   }}
                   className="px-3 py-1.5 rounded-lg bg-[#382216] text-[#D8AD56] text-xs font-bold hover:bg-[#25150F] flex items-center gap-1.5 shadow-xs cursor-pointer"
@@ -442,6 +465,44 @@ export default function BookingsAdminPage() {
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* RFID TAP HISTORY & FORENSIC AUDIT TRAIL MODAL */}
+      {rfidAuditBooking && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5">
+          <div className="bg-white rounded-2xl border border-[#D8AD56]/40 p-4 sm:p-6 max-w-4xl w-full shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#EFE3D6]">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#FAF5EB] border border-[#E2D5BE] flex items-center justify-center text-[#9b7a3e]">
+                  <Key className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-[#9b7a3e] block">
+                    Forensic Door Lock Audit Trail
+                  </span>
+                  <h3 className="font-serif text-base sm:text-lg font-bold text-[#241912]">
+                    Stay {rfidAuditBooking.booking_reference} • Room {rfidAuditBooking.assigned_room_number || rfidAuditBooking.room_number || 'Unassigned'}
+                  </h3>
+                </div>
+              </div>
+              <button
+                onClick={() => setRfidAuditBooking(null)}
+                className="text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-stone-100 transition-colors"
+                title="Close Audit Trail"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <RfidHistoryTable
+              roomNumber={rfidAuditBooking.assigned_room_number || rfidAuditBooking.room_number}
+              bookingId={rfidAuditBooking.id || rfidAuditBooking.booking_reference}
+              guestName={rfidAuditBooking.guest_name}
+              checkInTime={rfidAuditBooking.checked_in_at || rfidAuditBooking.check_in_date}
+              checkOutTime={rfidAuditBooking.checked_out_at || rfidAuditBooking.check_out_date}
+            />
           </div>
         </div>
       )}

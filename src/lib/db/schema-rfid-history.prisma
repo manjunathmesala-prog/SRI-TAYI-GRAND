@@ -1,0 +1,49 @@
+// ==============================================================================
+// SRI TAYI GRAND - RFID TAP HISTORY & ACTIVITY AUDIT TRAIL SCHEMA (PRISMA)
+// Append-Only Audit Ledger • Zero-Latency Hardware Interceptor • Stay-Linked
+// ==============================================================================
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum RfidCardType {
+  GUEST
+  STAFF
+  MASTER
+  MAINTENANCE
+}
+
+enum RfidAccessResult {
+  GRANTED
+  DENIED
+  WRONG_ROOM
+  EXPIRED
+}
+
+model RfidTapHistory {
+  id           String           @id @default(uuid()) @db.Uuid
+  cardUid      String           @map("card_uid") @db.VarChar(100)
+  cardType     RfidCardType     @default(GUEST) @map("card_type")
+  roomNumber   String           @map("room_number") @db.VarChar(20)
+  bookingId    String?          @map("booking_id") @db.VarChar(100)
+  customerId   String?          @map("customer_id") @db.VarChar(100)
+  customerName String?          @map("customer_name") @db.VarChar(200)
+  accessResult RfidAccessResult @map("access_result")
+  doorStatus   String           @default("UNLOCKED") @map("door_status") @db.VarChar(50)
+  reason       String?          @db.Text
+  metadata     Json?            @db.JsonB
+  tappedAt     DateTime         @default(now()) @map("tapped_at") @db.Timestamptz(6)
+
+  // Compound Indexes for high-speed chronological queries
+  @@index([roomNumber, tappedAt(sort: Desc)], name: "idx_rfid_tap_room_tapped_at")
+  @@index([bookingId, tappedAt(sort: Desc)], name: "idx_rfid_tap_booking_tapped_at")
+  @@index([cardUid, tappedAt(sort: Desc)], name: "idx_rfid_tap_card_tapped_at")
+  @@index([accessResult, tappedAt(sort: Desc)], name: "idx_rfid_tap_result_tapped_at")
+  @@map("rfid_tap_history")
+}

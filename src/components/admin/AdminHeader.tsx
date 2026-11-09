@@ -20,6 +20,7 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { useRealtimeSync } from '@/lib/realtime-client';
+import { SuperAdminNotificationBell } from '@/components/admin/SuperAdminNotificationBell';
 
 export function AdminHeader() {
   const pathname = usePathname();
@@ -216,6 +217,9 @@ export function AdminHeader() {
           <UserPlus className="w-3.5 h-3.5" />
           <span>Walk-In</span>
         </Link>
+
+        {/* Super Admin Live Alert Bell & Drawer */}
+        <SuperAdminNotificationBell />
 
         {/* User Profile & Role Switcher Dropdown */}
         <div className="relative" ref={dropdownRef}>

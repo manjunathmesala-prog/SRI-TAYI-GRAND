@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
+import { notifySuperAdmin } from '@/lib/notifications/engine';
 import { verifyStaffRole } from '@/lib/auth';
 import { BookingStatus, HousekeepingStatus, OperationalStatus, PaymentMethod } from '@/types';
 
@@ -116,6 +117,17 @@ export async function POST(req: NextRequest) {
           updatedBooking.keycard_uid = issuedCard.card_uid;
         }
 
+        notifySuperAdmin({
+          eventType: 'EVENT_CHECK_IN',
+          payload: {
+            guestName: booking.guest_name,
+            roomNumber: updatedBooking?.assigned_room_number || targetRoomIdentifier || 'Room',
+            bookingReference: booking.booking_reference,
+            checkInTime: new Date().toISOString(),
+            staffName,
+          },
+        });
+
         return NextResponse.json({
           success: true,
           message: `Guest ${booking.guest_name} successfully checked in.`,
@@ -181,6 +193,19 @@ export async function POST(req: NextRequest) {
 
         // Update status to checked_out and mark room dirty
         const updatedBooking = repo.updateBookingStatus(bookingReference, 'checked_out', undefined, staffName);
+
+        notifySuperAdmin({
+          eventType: 'EVENT_CHECK_OUT',
+          payload: {
+            guestName: booking.guest_name,
+            roomNumber: booking.assigned_room_number || 'Room',
+            bookingReference: booking.booking_reference,
+            checkOutTime: new Date().toISOString(),
+            balanceStatus: pendingBalance > 0 && !settlementPayment ? 'pending' : 'settled',
+            outstandingAmount: pendingBalance > 0 && !settlementPayment ? pendingBalance : 0,
+            staffName,
+          },
+        });
 
         return NextResponse.json({
           success: true,

@@ -162,8 +162,8 @@ export interface Booking {
   paid_amount: number;
   tariff_source_date?: string;
   special_requests?: string;
-  early_check_in_requested: boolean;
-  late_check_out_requested: boolean;
+  early_check_in_requested?: boolean;
+  late_check_out_requested?: boolean;
   checked_in_at?: string;
   checked_out_at?: string;
   cancelled_at?: string;
@@ -893,5 +893,7 @@ export interface ConventionQuote {
   created_at: string;
   valid_until: string;
 }
+
+export * from './rfid-history';
 
 

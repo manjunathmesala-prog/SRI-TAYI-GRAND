@@ -20,6 +20,7 @@ import {
   CreditCard,
   Building,
   KeyRound,
+  Key,
   RefreshCw,
   Plus,
   X,
@@ -29,10 +30,12 @@ import {
   Wrench,
   Check,
 } from 'lucide-react';
+import { RfidHistoryTable } from '@/components/admin/RfidHistoryTable';
 
 export default function RoomTapeChartPage() {
   const [rooms, setRooms] = useState<PhysicalRoom[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [rfidAuditRoom, setRfidAuditRoom] = useState<string | null>(null);
   const [categories, setCategories] = useState<RoomCategory[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -798,7 +801,20 @@ export default function RoomTapeChartPage() {
                 </div>
               )}
 
-              <div className="pt-3 border-t border-stone-100 flex items-center justify-end gap-2">
+              <div className="pt-3 border-t border-stone-100 flex items-center justify-between gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const b = selectedBooking;
+                    setSelectedBooking(null);
+                    setRfidAuditRoom(b.assigned_room_number || b.room_number || null);
+                  }}
+                  className="px-3 py-1.5 rounded-lg border border-[#D8AD56]/60 bg-[#FAF5EB] text-[#8a6a2a] text-xs font-bold hover:bg-[#E2D5BE]/60 transition-colors flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Key className="w-3.5 h-3.5 text-[#9b7a3e]" />
+                  <span>RFID Tap History</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => setSelectedBooking(null)}
@@ -886,6 +902,19 @@ export default function RoomTapeChartPage() {
                     <span>Mark OOO</span>
                   </button>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const rNum = quickRoomModal.room.room_number;
+                    setQuickRoomModal(null);
+                    setRfidAuditRoom(rNum);
+                  }}
+                  className="w-full mt-2.5 py-2 px-3 rounded-lg border border-[#D8AD56]/60 bg-[#FAF5EB] text-[#8a6a2a] text-xs font-bold hover:bg-[#E2D5BE]/60 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs"
+                >
+                  <Key className="w-3.5 h-3.5 text-[#9b7a3e]" />
+                  <span>View Room {quickRoomModal.room.room_number} RFID Tap History</span>
+                </button>
               </div>
 
               {/* Direct Reservation Form */}
@@ -982,6 +1011,38 @@ export default function RoomTapeChartPage() {
                 </form>
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* RFID TAP HISTORY MODAL FOR ROOM */}
+      {rfidAuditRoom && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-5">
+          <div className="bg-white rounded-2xl border border-[#D8AD56]/40 p-4 sm:p-6 max-w-4xl w-full shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-stone-200">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-[#FAF5EB] border border-[#E2D5BE] flex items-center justify-center text-[#9b7a3e]">
+                  <Key className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase font-bold tracking-wider text-[#9b7a3e] block">
+                    Forensic Door Lock Audit Trail
+                  </span>
+                  <h3 className="font-serif text-base sm:text-lg font-bold text-stone-900">
+                    Room {rfidAuditRoom} Access History
+                  </h3>
+                </div>
+              </div>
+              <button
+                onClick={() => setRfidAuditRoom(null)}
+                className="text-stone-400 hover:text-stone-700 p-1.5 rounded-lg hover:bg-stone-100 transition-colors"
+                title="Close Audit Trail"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <RfidHistoryTable roomNumber={rfidAuditRoom} />
           </div>
         </div>
       )}
