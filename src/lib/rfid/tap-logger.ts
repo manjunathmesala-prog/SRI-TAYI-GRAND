@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import { repo } from '@/lib/db/repository';
 import { supabase } from '@/lib/supabase/client';
+import { syncTapHistoryToSupabase } from '@/lib/db/supabase-rfid';
 import {
   RfidTapHistoryRecord,
   RfidHistoryCardType,
@@ -97,6 +98,27 @@ function ensureInitialized() {
  * Optional Supabase sync for cloud redundancy
  */
 async function syncToSupabaseAsync(record: RfidTapHistoryRecord): Promise<void> {
+  // Direct PG pool persistence to Supabase cloud
+  try {
+    await syncTapHistoryToSupabase({
+      id: record.id,
+      card_uid: record.cardUid,
+      card_type: record.cardType,
+      room_number: record.roomNumber,
+      booking_id: record.bookingId,
+      customer_id: record.customerId,
+      customer_name: record.customerName,
+      access_result: record.accessResult,
+      door_status: record.doorStatus,
+      reason: record.reason || null,
+      metadata: record.metadata || {},
+      tapped_at: record.tappedAt,
+    });
+  } catch (err) {
+    console.warn('[RFID DIRECT SUPABASE PG SYNC WARN]', err);
+  }
+
+  // Secondary REST fallback
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   if (!url || url.includes('placeholder') || url.includes('your-supabase-project')) {
     return;
@@ -119,7 +141,7 @@ async function syncToSupabaseAsync(record: RfidTapHistoryRecord): Promise<void> 
     });
 
     if (error) {
-      console.warn('[RFID SUPABASE SYNC WARN]', error.message);
+      console.warn('[RFID SUPABASE REST SYNC WARN]', error.message);
     }
   } catch (err) {
     console.warn('[RFID SUPABASE SYNC ERROR]', err);
