@@ -1,0 +1,182 @@
+[
+  {
+    "id": "tap-1794238565303-pc74vw",
+    "cardUid": "BT-57-1000020527",
+    "cardType": "MASTER",
+    "roomNumber": "104",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "M. S. Reddy (Managing Director)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Super Admin Master Clearance: Door unlocked for M. S. Reddy (Managing Director).",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-104",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-09T15:36:05.302Z"
+  },
+  {
+    "id": "tap-1794238565347-z8r91o",
+    "cardUid": "BT-57-1000020528",
+    "cardType": "STAFF",
+    "roomNumber": "204",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "R. Kavitha (Head of Housekeeping)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Cleaner started: Room 204 status moved to In-Progress. Door unlocked.",
+    "metadata": {
+      "roomStatus": "cleaning",
+      "housekeepingStatus": "in_progress",
+      "actionType": "cleaning_started",
+      "device": "Lock-Room-204",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-09T15:36:05.346Z"
+  },
+  {
+    "id": "tap-1794238565382-tltg6i",
+    "cardUid": "BT-57-1000020528",
+    "cardType": "STAFF",
+    "roomNumber": "204",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "R. Kavitha (Head of Housekeeping)",
+    "accessResult": "GRANTED",
+    "doorStatus": "LOCKED (CLEAN)",
+    "reason": "Cleaner finished: Room 204 is now Clean & Available for new guests.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "cleaning_completed",
+      "device": "Lock-Room-204",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-09T15:36:05.382Z"
+  },
+  {
+    "id": "tap-1794238602951-9ezkjx",
+    "cardUid": "BT-57-1000020527",
+    "cardType": "MASTER",
+    "roomNumber": "104",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "M. S. Reddy (Managing Director)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Super Admin Master Clearance: Door unlocked for M. S. Reddy (Managing Director).",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-104",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-09T15:36:42.951Z"
+  },
+  {
+    "id": "tap-1794238602993-ljhx25",
+    "cardUid": "BT-57-1000020528",
+    "cardType": "STAFF",
+    "roomNumber": "204",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "R. Kavitha (Head of Housekeeping)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Cleaner started: Room 204 status moved to In-Progress. Door unlocked.",
+    "metadata": {
+      "roomStatus": "cleaning",
+      "housekeepingStatus": "in_progress",
+      "actionType": "cleaning_started",
+      "device": "Lock-Room-204",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-09T15:36:42.992Z"
+  },
+  {
+    "id": "tap-1794238603021-0tdal5",
+    "cardUid": "BT-57-1000020528",
+    "cardType": "STAFF",
+    "roomNumber": "204",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "R. Kavitha (Head of Housekeeping)",
+    "accessResult": "GRANTED",
+    "doorStatus": "LOCKED (CLEAN)",
+    "reason": "Cleaner finished: Room 204 is now Clean & Available for new guests.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "cleaning_completed",
+      "device": "Lock-Room-204",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-09T15:36:43.021Z"
+  },
+  {
+    "id": "tap-1794238670420-kxct41",
+    "cardUid": "BT-57-1000020527",
+    "cardType": "MASTER",
+    "roomNumber": "104",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "M. S. Reddy (Managing Director)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Super Admin Master Clearance: Door unlocked for M. S. Reddy (Managing Director).",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-104",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-09T15:37:50.419Z"
+  },
+  {
+    "id": "tap-1794238670459-8k58d1",
+    "cardUid": "BT-57-1000020528",
+    "cardType": "STAFF",
+    "roomNumber": "204",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "R. Kavitha (Head of Housekeeping)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Cleaner started: Room 204 status moved to In-Progress. Door unlocked.",
+    "metadata": {
+      "roomStatus": "cleaning",
+      "housekeepingStatus": "in_progress",
+      "actionType": "cleaning_started",
+      "device": "Lock-Room-204",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-09T15:37:50.459Z"
+  },
+  {
+    "id": "tap-1794238670506-b7xd9h",
+    "cardUid": "BT-57-1000020528",
+    "cardType": "STAFF",
+    "roomNumber": "204",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "R. Kavitha (Head of Housekeeping)",
+    "accessResult": "GRANTED",
+    "doorStatus": "LOCKED (CLEAN)",
+    "reason": "Cleaner finished: Room 204 is now Clean & Available for new guests.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "cleaning_completed",
+      "device": "Lock-Room-204",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-09T15:37:50.506Z"
+  }
+]

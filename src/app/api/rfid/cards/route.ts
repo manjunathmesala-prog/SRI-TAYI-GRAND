@@ -44,8 +44,9 @@ export async function POST(request: Request) {
         const cardLabel = body.cardLabel || body.card_label || 'Super Admin Master Key';
         const holderName = body.holderName || body.holder_name || 'Executive Admin';
         const issuedBy = body.issuedBy || body.issued_by || 'System Admin';
+        const cardUid = body.cardUid || body.card_uid;
 
-        const card = repo.issueSuperAdminCard(cardLabel, holderName, issuedBy);
+        const card = repo.issueSuperAdminCard(cardLabel, holderName, issuedBy, cardUid);
         return NextResponse.json({
           success: true,
           message: `Super Admin Lifetime Card created for ${card.holder_name}`,
@@ -57,8 +58,9 @@ export async function POST(request: Request) {
         const cardLabel = body.cardLabel || body.card_label || 'Housekeeping Cleaning Card';
         const holderName = body.holderName || body.holder_name || 'Housekeeping Staff';
         const issuedBy = body.issuedBy || body.issued_by || 'Front Desk';
+        const cardUid = body.cardUid || body.card_uid;
 
-        const card = repo.issueCleanerCard(cardLabel, holderName, issuedBy);
+        const card = repo.issueCleanerCard(cardLabel, holderName, issuedBy, cardUid);
         return NextResponse.json({
           success: true,
           message: `Housekeeping Cleaning Card created for ${card.holder_name}`,
@@ -80,12 +82,14 @@ export async function POST(request: Request) {
           );
         }
 
+        const cardUid = body.cardUid || body.card_uid;
         const card = repo.issueRFIDCard(
           roomNumber,
           bookingRef,
           guestName,
           issuedBy,
-          expiresAt
+          expiresAt,
+          cardUid
         );
         return NextResponse.json({
           success: true,

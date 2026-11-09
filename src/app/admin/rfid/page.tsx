@@ -109,6 +109,15 @@ export default function RFIDAdminPage() {
   const [cleanerHolderName, setCleanerHolderName] = useState('Housekeeping Supervisor');
   const [cleanerModalError, setCleanerModalError] = useState<string | null>(null);
 
+  // Physical USB Encoding & Live Card Scanning toggles for Super Admin & Cleaner
+  const [saWritePhysical, setSaWritePhysical] = useState(true);
+  const [saScannedUid, setSaScannedUid] = useState<string | null>(null);
+  const [saScanning, setSaScanning] = useState(false);
+
+  const [cleanerWritePhysical, setCleanerWritePhysical] = useState(true);
+  const [cleanerScannedUid, setCleanerScannedUid] = useState<string | null>(null);
+  const [cleanerScanning, setCleanerScanning] = useState(false);
+
   // Issue guest card modal
   const [isIssuingCard, setIsIssuingCard] = useState(false);
   const [showStandeeModal, setShowStandeeModal] = useState(false);

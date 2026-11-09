@@ -2196,10 +2196,11 @@ export class HotelRepository {
   issueSuperAdminCard(
     cardLabel: string = 'Super Admin Master Key',
     holderName: string = 'Managing Director',
-    issuedBy: string = 'System Root'
+    issuedBy: string = 'System Root',
+    customCardUid?: string
   ): RFIDCard {
     const randSuffix = Math.floor(100 + Math.random() * 900);
-    const cardUid = `SA-LIFETIME-${randSuffix}`;
+    const cardUid = customCardUid || `SA-LIFETIME-${randSuffix}`;
     const newCard: RFIDCard = {
       id: `crd-sa-${Date.now()}`,
       card_uid: cardUid,
@@ -2241,10 +2242,11 @@ export class HotelRepository {
   issueCleanerCard(
     cardLabel: string = 'Housekeeping Cleaning Card',
     holderName: string = 'Housekeeping Staff',
-    issuedBy: string = 'Admin'
+    issuedBy: string = 'Admin',
+    customCardUid?: string
   ): RFIDCard {
     const randSuffix = Math.floor(100 + Math.random() * 900);
-    const cardUid = `CLN-HK-${randSuffix}`;
+    const cardUid = customCardUid || `CLN-HK-${randSuffix}`;
     const newCard: RFIDCard = {
       id: `crd-cln-${Date.now()}`,
       card_uid: cardUid,
@@ -2287,9 +2289,10 @@ export class HotelRepository {
     bookingRef: string,
     guestName: string,
     issuedBy: string = 'Front Desk',
-    expiresAt?: string
+    expiresAt?: string,
+    customCardUid?: string
   ): RFIDCard {
-    const cardUid = `BT-57-${Math.floor(1000020000 + Math.random() * 99999)}`;
+    const cardUid = customCardUid || `BT-57-${Math.floor(1000020000 + Math.random() * 99999)}`;
     const newCard: RFIDCard = {
       id: `crd-${Date.now()}`,
       card_uid: cardUid,
