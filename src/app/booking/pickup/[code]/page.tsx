@@ -3,6 +3,9 @@
 import { useState, useEffect, useCallback, use } from 'react';
 import { useSearchParams } from 'next/navigation';
 import NextLink from 'next/link';
+import Image from 'next/image';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import {
   Sparkles,
   KeyRound,
@@ -101,23 +104,33 @@ export default function PickupPage({ params }: { params: Promise<{ code: string 
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-[#241912] pb-16">
-      {/* Top Header */}
-      <header className="bg-[#241912] text-white border-b border-[#382216] py-3.5 px-4 shadow-sm">
+      {/* Landing Page Architectural Header with Logo */}
+      <Header transparentInitially={false} />
+
+      {/* Keycard Pickup Pass Sub-header Bar */}
+      <div className="bg-[#241912] text-white border-b border-[#382216] py-3 px-4 shadow-sm">
         <div className="max-w-md mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-[#382216] border border-[#D8AD56]/40 flex items-center justify-center text-[#D8AD56]">
-              <Sparkles className="w-4 h-4" />
+          <div className="flex items-center gap-2.5">
+            <div className="relative w-8 h-8 rounded-lg bg-[#382216] border border-[#D8AD56]/40 p-1 flex items-center justify-center shrink-0">
+              <Image
+                src="/images/hotel/tayi-grand-logo.png"
+                alt="Sri Tayi Grand"
+                width={24}
+                height={24}
+                className="object-contain"
+                priority
+              />
             </div>
             <div>
-              <h1 className="font-serif text-sm font-bold tracking-wide">SRI TAYI GRAND</h1>
-              <p className="text-[10px] text-[#D8AD56]">Keycard Pickup Pass</p>
+              <h1 className="font-serif text-sm font-bold tracking-wide text-white">SRI TAYI GRAND</h1>
+              <p className="text-[10px] text-[#D8AD56]">Digital Keycard Pickup Pass</p>
             </div>
           </div>
-          <span className="text-[9px] uppercase px-2 py-0.5 rounded-full font-bold bg-[#D8AD56] text-[#241912]">
+          <span className="text-[9px] uppercase px-2.5 py-0.5 rounded-full font-bold bg-[#D8AD56] text-[#241912]">
             {data.is_key_issued ? 'Checked In' : 'At Reception'}
           </span>
         </div>
-      </header>
+      </div>
 
       <main className="max-w-md mx-auto px-4 pt-5 space-y-4">
         {/* Pass Card with Gold Crest */}
@@ -252,6 +265,8 @@ export default function PickupPage({ params }: { params: Promise<{ code: string 
           </p>
         </div>
       </main>
+
+      <Footer />
     </div>
   );
 }

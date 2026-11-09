@@ -248,7 +248,7 @@ export default function RoomTapeChartPage() {
     try {
       const room = quickRoomModal.room;
       const category = categories.find((c) => c.id === room.category_id);
-      const basePrice = category ? category.base_price_per_night : 2500;
+      const basePrice = category ? category.base_price_per_night : 1800;
 
       const checkInDate = new Date(newResCheckIn);
       const checkOutDate = new Date(newResCheckOut);

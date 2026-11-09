@@ -11,6 +11,7 @@ import React, { useEffect, useState } from 'react';
 import NextLink from 'next/link';
 import Image from 'next/image';
 import { ShieldAlert, ArrowLeft, LogOut, Lock, Home } from 'lucide-react';
+import { authStorage } from '@/lib/auth-storage';
 
 export default function ForbiddenPage() {
   const [userRole, setUserRole] = useState<string>('Staff');
@@ -18,8 +19,8 @@ export default function ForbiddenPage() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedRole = localStorage.getItem('stg_role');
-      const storedName = localStorage.getItem('stg_user_name');
+      const storedRole = authStorage.getRole();
+      const storedName = authStorage.getUserName();
       if (storedRole) setUserRole(storedRole);
       if (storedName) setUserName(storedName);
     }

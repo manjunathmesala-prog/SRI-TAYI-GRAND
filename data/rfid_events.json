@@ -1,5 +1,34 @@
 [
   {
+    "card_uid": "BT-57-1000057859",
+    "card_type": "guest",
+    "card_label": "Guest Card (Room 205)",
+    "device_name": "Front-Desk-Encoder-01",
+    "room_number": "205",
+    "event_type": "access_granted",
+    "action_type": "door_unlock",
+    "holder_name": "P. Sudhakar Reddy",
+    "booking_reference": "STG-20261105-3921",
+    "source": "encoder",
+    "reason": "Customer Keycard encoded & issued to P. Sudhakar Reddy for Room 205",
+    "id": "evt-1794235356152",
+    "occurred_at": "2026-11-09T14:42:36.153Z"
+  },
+  {
+    "card_uid": "BT-57-1000020008",
+    "card_type": "guest",
+    "card_label": "GUEST Card",
+    "device_name": "Lock-Room-203",
+    "room_number": "203",
+    "event_type": "access_granted",
+    "action_type": "door_unlock",
+    "holder_name": "Production Test",
+    "source": "lock_reader",
+    "reason": "[TAP_READ] Staff/Holder: Production Test | Status: SUCCESS | Valid: 2611072333 - 2611082333",
+    "id": "evt-1794233906597",
+    "occurred_at": "2026-11-09T14:18:26.597Z"
+  },
+  {
     "card_uid": "BT-57-1000069939",
     "card_type": "guest",
     "card_label": "Guest Card (Room 101)",

@@ -53,6 +53,33 @@ export default function RFIDAdminPage() {
   // Live Hardware Bridge State
   const [bridgeStatus, setBridgeStatus] = useState<BridgeHealthStatus>({ isOnline: true });
   const [hardwareBusy, setHardwareBusy] = useState(false);
+  const [isRecheckingHardware, setIsRecheckingHardware] = useState(false);
+
+  const handleRecheckHardware = async () => {
+    setIsRecheckingHardware(true);
+    setHardwareMessage({ text: 'Pinging Be-Tech USB RFID reader hardware...', type: 'info' });
+    try {
+      const status = await checkBridgeHealth();
+      setBridgeStatus(status);
+      playChimeSound(status.isOnline);
+      if (status.isOnline) {
+        setHardwareMessage({
+          text: `🟢 Be-Tech BIS 5.7 USB Card Encoder is ONLINE & READY (Port ${status.port || 1}, Type ${status.readerType || 4})`,
+          type: 'success',
+        });
+      } else {
+        setHardwareMessage({
+          text: status.error || 'Be-Tech USB Reader not responding. Check that the USB cable is firmly plugged in.',
+          type: 'error',
+        });
+      }
+    } catch (err: any) {
+      playChimeSound(false);
+      setHardwareMessage({ text: err.message || 'Failed to ping hardware reader', type: 'error' });
+    } finally {
+      setIsRecheckingHardware(false);
+    }
+  };
   const [isActivatingAll, setIsActivatingAll] = useState(false);
   const [hardwareMessage, setHardwareMessage] = useState<{
     text: string;
@@ -817,31 +844,35 @@ export default function RFIDAdminPage() {
         </div>
 
         <div className="flex items-center gap-2.5 self-end md:self-center flex-wrap">
-          <a
-            href="/api/rfid/download-setup"
-            download="SriTayiGrand_RFID_Setup.exe"
-            className="px-3.5 py-1.5 rounded-xl bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm"
-            title="Download one-click automatic RFID setup for this system"
+          <button
+            type="button"
+            onClick={handleRecheckHardware}
+            disabled={isRecheckingHardware}
+            className="px-4 py-2 rounded-xl bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-bold transition-all flex items-center gap-2 shadow-md cursor-pointer disabled:opacity-50"
+            title="Recheck Be-Tech USB reader connection"
           >
-            <Download className="w-3.5 h-3.5" />
-            <span>Download RFID Setup</span>
-          </a>
+            <RefreshCw className={`w-3.5 h-3.5 ${isRecheckingHardware ? 'animate-spin' : ''}`} />
+            <span>{isRecheckingHardware ? 'Checking Reader...' : 'Recheck RFID Connection'}</span>
+          </button>
 
           <button
+            type="button"
+            onClick={refreshAllData}
+            className="px-3 py-1.5 rounded-lg border border-[#D8AD56]/40 text-xs text-[#D8AD56] hover:bg-[#D8AD56]/10 transition-colors flex items-center gap-1.5 cursor-pointer"
+            title="Refresh card registry and enrolled locks"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>Refresh Cards</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => setShowHostModal(true)}
             className="px-3 py-1.5 rounded-lg border border-[#EFE3D6]/20 hover:border-[#D8AD56]/40 text-xs text-[#EFE3D6]/90 hover:text-white transition-colors flex items-center gap-1.5 bg-white/5 cursor-pointer"
             title="Configure Bridge Host IP"
           >
             <Settings className="w-3.5 h-3.5 text-[#D8AD56]" />
-            <span>Bridge Host</span>
-          </button>
-
-          <button
-            onClick={refreshAllData}
-            className="px-3 py-1.5 rounded-lg border border-[#D8AD56]/40 text-xs text-[#D8AD56] hover:bg-[#D8AD56]/10 transition-colors flex items-center gap-1.5 cursor-pointer"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span>Refresh Live Data</span>
+            <span>Host Settings</span>
           </button>
         </div>
       </div>

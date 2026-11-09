@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { RealtimeEventType, RealtimeMessage } from '@/types';
+import { authStorage } from './auth-storage';
 
 export type ConnectionStatus = 'connecting' | 'connected' | 'reconnecting' | 'offline';
 
@@ -178,7 +179,7 @@ export function useRealtimeSync(options: UseRealtimeSyncOptions = {}) {
 function getAdminHeaders(extra: Record<string, string> = {}): Record<string, string> {
   const headers: Record<string, string> = { ...extra };
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('stg_token');
+    const token = authStorage.getToken();
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
@@ -357,6 +358,7 @@ export const adminOperations = {
     tariffOverrideReason?: string;
     paymentMethod: string;
     amountCollected?: number;
+    paymentReference?: string;
     issueKeycard?: boolean;
     cardUid?: string;
     specialRequests?: string;

@@ -256,8 +256,8 @@ export default function AdminPricingPage() {
   // Calculator effective rate breakdown
   const calculatedBreakdown = useMemo(() => {
     const category = categories.find((c) => c.id === calcCategoryId) || categories[0];
-    const baseRate = category ? category.base_price_per_night : 2500;
-    const extraBedTariff = category ? category.extra_person_tariff_rupees || 500 : 500;
+    const baseRate = category ? category.base_price_per_night : 1800;
+    const extraBedTariff = category ? category.extra_person_tariff_rupees || 300 : 300;
 
     let effective = baseRate;
     const appliedRules: { name: string; amount: number; type: string }[] = [];
@@ -538,7 +538,7 @@ export default function AdminPricingPage() {
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-stone-600 font-medium">Extra Adults / Rollaway Bed</label>
                   <span className="text-stone-500 font-mono text-[11px]">
-                    +₹{calculatedBreakdown.category?.extra_person_tariff_rupees || 500} / guest
+                    +₹{calculatedBreakdown.category?.extra_person_tariff_rupees || 300} / guest
                   </span>
                 </div>
                 <div className="flex items-center gap-2">

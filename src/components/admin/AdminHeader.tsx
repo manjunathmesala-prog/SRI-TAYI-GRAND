@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { useRealtimeSync } from '@/lib/realtime-client';
 import { SuperAdminNotificationBell } from '@/components/admin/SuperAdminNotificationBell';
+import { authStorage } from '@/lib/auth-storage';
 
 export function AdminHeader() {
   const pathname = usePathname();
@@ -64,14 +65,30 @@ export function AdminHeader() {
     fetchCashBalance();
 
     if (typeof window !== 'undefined') {
-      const storedName = localStorage.getItem('stg_user_name');
-      const storedRole = localStorage.getItem('stg_role');
+      const storedName = authStorage.getUserName();
+      const storedRole = authStorage.getRole();
+      const storedEmail = authStorage.getUserEmail();
       if (storedName) setUserName(storedName);
       if (storedRole) {
         setUserRole(storedRole);
-        if (storedRole === 'Super Admin') setUserEmail('admin@sritayigrand.com');
-        else if (storedRole === 'Hotel Manager') setUserEmail('manager@sritayigrand.com');
-        else setUserEmail('staff@sritayigrand.com');
+        if (storedEmail) {
+          setUserEmail(storedEmail);
+        } else if (storedRole === 'Super Admin') {
+          setUserEmail('admin@sritayigrand.com');
+        } else if (storedRole === 'Hotel Manager') {
+          setUserEmail('manager@sritayigrand.com');
+        } else {
+          setUserEmail('staff@sritayigrand.com');
+        }
+      } else {
+        // Rehydrate claims from server session cookie if sessionStorage is blank
+        authStorage.rehydrate().then((claims) => {
+          if (claims) {
+            if (claims.name) setUserName(claims.name);
+            if (claims.role) setUserRole(claims.role);
+            if (claims.email) setUserEmail(claims.email);
+          }
+        });
       }
     }
 
@@ -123,9 +140,12 @@ export function AdminHeader() {
       });
       const data = await res.json();
       if (data.success && data.session) {
-        localStorage.setItem('stg_token', data.session.token);
-        localStorage.setItem('stg_role', data.session.role);
-        localStorage.setItem('stg_user_name', data.session.name);
+        authStorage.setSession({
+          token: data.session.token,
+          role: data.session.role,
+          name: data.session.name,
+          email: targetEmail,
+        });
         setProfileOpen(false);
         window.location.reload();
       }
@@ -140,9 +160,7 @@ export function AdminHeader() {
     try {
       await fetch('/api/admin/auth', { method: 'DELETE' });
     } catch {}
-    localStorage.removeItem('stg_token');
-    localStorage.removeItem('stg_role');
-    localStorage.removeItem('stg_user_name');
+    authStorage.clearSession();
     router.push('/admin/login');
   };
 

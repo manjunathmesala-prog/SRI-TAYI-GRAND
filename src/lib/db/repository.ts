@@ -467,6 +467,7 @@ export class HotelRepository {
     tariffOverrideReason?: string;
     paymentMethod: PaymentMethod;
     amountCollected?: number;
+    paymentReference?: string;
     issueKeycard?: boolean;
     cardUid?: string;
     specialRequests?: string;
@@ -500,7 +501,7 @@ export class HotelRepository {
     // Rate calculation
     const nightlyRate = params.isTariffOverridden && typeof params.baseTariff === 'number'
       ? params.baseTariff
-      : (category?.base_price_per_night || 2499);
+      : (category?.base_price_per_night || 1800);
 
     const subtotal = nightlyRate * nights;
     const taxRate = (this.settings.tax_percentage || 12) / 100;
@@ -602,6 +603,7 @@ export class HotelRepository {
           amount: paidAmount,
           currency: 'INR',
           payment_method: params.paymentMethod,
+          payment_reference: params.paymentReference,
           status: 'successful',
           paid_at: new Date().toISOString(),
         },
@@ -1055,7 +1057,7 @@ export class HotelRepository {
   }
 
   recordPayment(
-    record: Omit<PaymentRecord, 'id' | 'payment_reference' | 'created_at'>,
+    record: Omit<PaymentRecord, 'id' | 'payment_reference' | 'created_at'> & { payment_reference?: string },
     actor?: string
   ): PaymentRecord {
     if (!record.amount || isNaN(record.amount) || record.amount <= 0) {
@@ -1073,7 +1075,7 @@ export class HotelRepository {
     const newPayment: PaymentRecord = {
       ...record,
       id: `pay-${Date.now()}-${rand}`,
-      payment_reference: `PAY-STG-${Date.now().toString().slice(-6)}-${rand}`,
+      payment_reference: record.payment_reference || `PAY-STG-${Date.now().toString().slice(-6)}-${rand}`,
       created_at: new Date().toISOString(),
     };
     this.payments.unshift(newPayment);
@@ -1750,7 +1752,7 @@ export class HotelRepository {
     dateStr?: string
   ): { baseRate: number; effectiveRate: number; appliedRules: string[] } {
     const cat = this.categories.find((c) => c.id === categoryId);
-    const baseRate = cat ? cat.base_price_per_night : 2000;
+    const baseRate = cat ? cat.base_price_per_night : 1800;
     let rate = baseRate;
     const appliedRules: string[] = [];
 

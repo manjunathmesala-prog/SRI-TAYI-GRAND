@@ -26,6 +26,7 @@ import {
   NotificationEventType,
 } from '@/lib/notifications/types';
 import { playNotificationChime } from '@/lib/notifications/audio';
+import { authStorage } from '@/lib/auth-storage';
 
 export function SuperAdminNotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
@@ -54,7 +55,7 @@ export function SuperAdminNotificationBell() {
   // Fetch initial notifications
   const fetchNotifications = useCallback(async (category = activeTab) => {
     try {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('stg_token') : null;
+      const token = authStorage.getToken();
       const res = await fetch(`/api/admin/notifications?category=${category}&limit=50`, {
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -77,7 +78,7 @@ export function SuperAdminNotificationBell() {
   useEffect(() => {
     fetchNotifications('all');
 
-    const token = typeof window !== 'undefined' ? localStorage.getItem('stg_token') : '';
+    const token = authStorage.getToken() || '';
     // Append token query param for SSE auth if cookies aren't shared
     const streamUrl = `/api/admin/notifications/stream${token ? `?token=${encodeURIComponent(token)}` : ''}`;
     let eventSource: EventSource | null = null;
@@ -140,7 +141,7 @@ export function SuperAdminNotificationBell() {
   // Mark all as read
   const handleMarkAllRead = async () => {
     try {
-      const token = localStorage.getItem('stg_token');
+      const token = authStorage.getToken();
       await fetch('/api/admin/notifications', {
         method: 'POST',
         headers: {
@@ -158,7 +159,7 @@ export function SuperAdminNotificationBell() {
   // Mark single as read
   const handleMarkSingleRead = async (id: string) => {
     try {
-      const token = localStorage.getItem('stg_token');
+      const token = authStorage.getToken();
       await fetch('/api/admin/notifications', {
         method: 'POST',
         headers: {
@@ -178,7 +179,7 @@ export function SuperAdminNotificationBell() {
   // Clear all
   const handleClearAll = async () => {
     try {
-      const token = localStorage.getItem('stg_token');
+      const token = authStorage.getToken();
       await fetch('/api/admin/notifications?clearAll=true', {
         method: 'DELETE',
         headers: {

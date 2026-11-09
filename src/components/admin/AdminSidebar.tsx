@@ -38,6 +38,7 @@ import {
 } from 'lucide-react';
 import { useRealtimeSync } from '@/lib/realtime-client';
 import { canAccessRoute } from '@/lib/rbac/types';
+import { authStorage } from '@/lib/auth-storage';
 
 export function AdminSidebar() {
   const pathname = usePathname();
@@ -59,7 +60,6 @@ export function AdminSidebar() {
     } catch {}
   };
 
-  // Real-time synchronization connection hook
   const { status, isConnected } = useRealtimeSync({
     onEvent: (event) => {
       if (
@@ -76,10 +76,19 @@ export function AdminSidebar() {
   useEffect(() => {
     fetchCashBalance();
     if (typeof window !== 'undefined') {
-      const storedName = localStorage.getItem('stg_user_name');
-      const storedRole = localStorage.getItem('stg_role');
+      const storedName = authStorage.getUserName();
+      const storedRole = authStorage.getRole();
       if (storedName) setUserName(storedName);
-      if (storedRole) setUserRole(storedRole);
+      if (storedRole) {
+        setUserRole(storedRole);
+      } else {
+        authStorage.rehydrate().then((claims) => {
+          if (claims) {
+            if (claims.name) setUserName(claims.name);
+            if (claims.role) setUserRole(claims.role);
+          }
+        });
+      }
     }
   }, []);
 
@@ -121,9 +130,7 @@ export function AdminSidebar() {
     try {
       await fetch('/api/admin/auth', { method: 'DELETE' });
     } catch {}
-    localStorage.removeItem('stg_token');
-    localStorage.removeItem('stg_role');
-    localStorage.removeItem('stg_user_name');
+    authStorage.clearSession();
     router.push('/admin/login');
   };
 

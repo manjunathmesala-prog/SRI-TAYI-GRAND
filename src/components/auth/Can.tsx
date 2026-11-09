@@ -4,6 +4,7 @@
  * ==============================================================================
  * SRI TAYI GRAND - DECLARATIVE RBAC AUTHORIZATION COMPONENT (<Can />)
  * Dynamically hides, disables, or reveals UI buttons, actions, and sections.
+ * Backed by tab-scoped sessionStorage with self-healing cookie rehydration.
  * ==============================================================================
  */
 
@@ -16,6 +17,7 @@ import {
   hasPermission,
   isRoleAtLeast,
 } from '@/lib/rbac/types';
+import { authStorage } from '@/lib/auth-storage';
 
 interface RBACContextValue {
   role: RoleEnum;
@@ -40,7 +42,7 @@ const RBACContext = createContext<RBACContextValue>({
 });
 
 /**
- * Context Provider that tracks active authenticated role from localStorage
+ * Context Provider that tracks active authenticated role from authStorage (sessionStorage)
  */
 export function RBACProvider({
   children,
@@ -53,9 +55,16 @@ export function RBACProvider({
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('stg_role');
-      if (stored) {
-        setRoleStr(stored);
+      const activeRole = authStorage.getRole();
+      if (activeRole) {
+        setRoleStr(activeRole);
+      } else {
+        // Transparent rehydration if tab opened fresh with active httpOnly session cookie
+        authStorage.rehydrate().then((claims) => {
+          if (claims?.role) {
+            setRoleStr(claims.role);
+          }
+        });
       }
     }
   }, []);

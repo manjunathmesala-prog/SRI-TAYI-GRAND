@@ -156,7 +156,7 @@ export default function RoomCategoriesAdminPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
-                    Base Price / Night (â‚¹)
+                    Base Price / Night (₹)
                   </label>
                   <input
                     type="number"

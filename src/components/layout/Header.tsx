@@ -120,16 +120,17 @@ export function Header({ transparentInitially = false }: HeaderProps) {
             aria-label="Sri Tayi Grand Hotel — Return to Home"
           >
             <div className="relative transition-transform duration-300 group-hover:scale-105 flex flex-col items-center justify-center">
-              <div className="relative w-6 h-6 sm:w-7 sm:h-7 mb-1">
+              <div className="relative w-8 h-8 sm:w-10 sm:h-10 mb-1">
                 <Image
                   src="/images/hotel/tayi-grand-logo.png"
                   alt="Sri Tayi Grand Official Emblem"
                   fill
                   priority
-                  className="object-contain"
+                  className="object-contain drop-shadow-[0_2px_4px_rgba(46,0,21,0.2)]"
+                  sizes="(max-width: 640px) 32px, 40px"
                 />
               </div>
-              <span className="font-serif text-[10px] sm:text-[11.5px] font-semibold tracking-[0.22em] text-[#2b241c] uppercase leading-none text-center whitespace-nowrap">
+              <span className="font-serif text-[10.5px] sm:text-[12px] font-bold tracking-[0.22em] text-[#2b241c] uppercase leading-none text-center whitespace-nowrap">
                 Sri Tayi Grand
               </span>
             </div>
@@ -185,6 +186,23 @@ export function Header({ transparentInitially = false }: HeaderProps) {
       {/* Mobile Animated Luxury Drawer */}
       {mobileMenuOpen && (
         <div className="lg:hidden bg-[#FAF5EB] border-b border-[#e2d5be] px-6 py-6 shadow-2xl animate-in slide-in-from-top-2">
+          {/* Brand Logo Header in Mobile Drawer */}
+          <div className="flex items-center gap-3 pb-4 mb-3 border-b border-[#e2d5be]/80">
+            <div className="relative w-10 h-10 rounded-xl bg-white/80 border border-[#B18A4A]/30 p-1 flex items-center justify-center shadow-xs shrink-0">
+              <Image
+                src="/images/hotel/tayi-grand-logo.png"
+                alt="Sri Tayi Grand Logo"
+                width={32}
+                height={32}
+                className="object-contain"
+              />
+            </div>
+            <div>
+              <p className="font-serif text-sm font-bold tracking-wider text-[#2b241c] uppercase">Sri Tayi Grand</p>
+              <p className="text-[10px] text-[#8a7b6a] font-medium tracking-wide">Kadiri, Andhra Pradesh</p>
+            </div>
+          </div>
+
           <div className="flex flex-col space-y-3.5">
             {allNavLinks.map((link) => (
               <NextLink

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ReceptionStandeeModal } from '@/components/admin/ReceptionStandeeModal';
 import { StatutoryWalkInModal } from '@/components/admin/StatutoryWalkInModal';
 import { Booking, PhysicalRoom, RoomCategory } from '@/types';
-import { issuePhysicalKeycard, checkoutPhysicalCard, playChimeSound } from '@/lib/rfid/bridge-client';
+import { issuePhysicalKeycard, checkoutPhysicalCard, playChimeSound, checkBridgeHealth } from '@/lib/rfid/bridge-client';
 import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
 import {
   ConciergeBell,
@@ -58,6 +58,27 @@ export default function FrontDeskPage() {
   // Check-out form fields
   const [additionalCharges, setAdditionalCharges] = useState<number>(0);
   const [chargeDescription, setChargeDescription] = useState('Extra Mineral Water & Tea');
+  const [rfidOnline, setRfidOnline] = useState<boolean>(true);
+  const [isCheckingRfid, setIsCheckingRfid] = useState(false);
+
+  const handleRecheckRfid = useCallback(async () => {
+    setIsCheckingRfid(true);
+    try {
+      const res = await checkBridgeHealth();
+      setRfidOnline(res.isOnline);
+      playChimeSound(res.isOnline);
+    } catch {
+      setRfidOnline(false);
+    } finally {
+      setIsCheckingRfid(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    handleRecheckRfid();
+    const interval = setInterval(handleRecheckRfid, 12000);
+    return () => clearInterval(interval);
+  }, [handleRecheckRfid]);
   const [settlementMethod, setSettlementMethod] = useState<'cash' | 'upi' | 'card'>('cash');
   const [checkOutSuccessRef, setCheckOutSuccessRef] = useState<string | null>(null);
 

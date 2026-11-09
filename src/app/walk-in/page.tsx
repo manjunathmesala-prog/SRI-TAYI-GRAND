@@ -26,6 +26,8 @@ import {
   Lock,
 } from 'lucide-react';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
+import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 
 interface CategoryItem {
   id: string;
@@ -187,33 +189,43 @@ function WalkInContent() {
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-[#241912] pb-16">
-      {/* Top Gold Header */}
-      <header className="bg-[#241912] text-white border-b border-[#382216] sticky top-0 z-30 shadow-md">
-        <div className="max-w-3xl mx-auto px-4 py-3.5 flex items-center justify-between">
+      {/* Landing Page Architectural Header with Logo */}
+      <Header transparentInitially={false} />
+
+      {/* Reception Walk-In Status Sub-Header Bar */}
+      <div className="bg-[#241912] text-white border-b border-[#382216] shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#382216] border border-[#D8AD56]/40 flex items-center justify-center text-[#D8AD56]">
-              <Sparkles className="w-5 h-5 text-[#D8AD56]" />
+            <div className="relative w-9 h-9 rounded-xl bg-[#382216] border border-[#D8AD56]/40 p-1 flex items-center justify-center shrink-0 shadow-inner">
+              <Image
+                src="/images/hotel/tayi-grand-logo.png"
+                alt="Sri Tayi Grand Official Emblem"
+                width={26}
+                height={26}
+                className="object-contain"
+                priority
+              />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="font-serif text-base font-bold tracking-wide text-white">SRI TAYI GRAND</h1>
+                <span className="font-serif text-sm sm:text-base font-bold tracking-wide text-white">SRI TAYI GRAND</span>
                 <span className="text-[9px] uppercase px-2 py-0.5 rounded-full font-bold bg-[#D8AD56] text-[#241912]">
                   Walk-In
                 </span>
               </div>
-              <p className="text-[11px] text-[#D8AD56] font-medium flex items-center gap-1">
-                <span>âš¡ Express Self Check-In</span>
-                <span>&bull;</span>
+              <p className="text-[11px] text-[#D8AD56] font-medium flex items-center gap-1.5 mt-0.5">
+                <span>⚡ Express Self Check-In</span>
+                <span>•</span>
                 <span className="text-emerald-400 font-semibold">{hotelInfo?.total_clean_rooms || 0} Clean Rooms Ready</span>
               </p>
             </div>
           </div>
-          <div className="text-right hidden sm:block">
+          <div className="text-right">
             <p className="text-[10px] text-[#EFE3D6]/70">Desk Standee</p>
             <p className="text-xs text-[#D8AD56] font-bold">Counter #1</p>
           </div>
         </div>
-      </header>
+      </div>
 
       {/* Main Flow Container */}
       <main className="max-w-3xl mx-auto px-4 pt-5 space-y-5">
@@ -296,7 +308,7 @@ function WalkInContent() {
                     <div className="flex items-baseline justify-between">
                       <h4 className="font-serif font-bold text-base text-[#241912]">{cat.name}</h4>
                       <div className="text-right">
-                        <span className="text-lg font-bold text-[#241912]">â‚¹{cat.base_price_per_night}</span>
+                        <span className="text-lg font-bold text-[#241912]">₹{cat.base_price_per_night.toLocaleString('en-IN')}</span>
                         <span className="text-[10px] text-[#786B61]">/night</span>
                       </div>
                     </div>
@@ -346,7 +358,7 @@ function WalkInContent() {
                 onClick={() => setSelectedCat(null)}
                 className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-gray-600 text-sm font-bold cursor-pointer"
               >
-                âœ•
+                ✕
               </button>
             </div>
 
@@ -536,6 +548,8 @@ function WalkInContent() {
           </div>
         </div>
       )}
+
+      <Footer />
     </div>
   );
 }
