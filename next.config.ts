@@ -37,6 +37,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  serverExternalPackages: ['pg'],
   reactStrictMode: true,
   poweredByHeader: false,
   compress: true,
@@ -87,6 +88,11 @@ const nextConfig: NextConfig = {
         ...config.resolve.fallback,
         fs: false,
         path: false,
+        net: false,
+        tls: false,
+        dns: false,
+        pg: false,
+        'pg-native': false,
       };
     }
     return config;
