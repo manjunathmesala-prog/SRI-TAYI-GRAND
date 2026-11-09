@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { PhysicalRoom, Booking, RoomCategory } from '@/types';
-import { useRealtimeSync } from '@/lib/realtime-client';
+import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
 import {
   CalendarRange,
   ChevronLeft,
@@ -95,11 +95,8 @@ export default function RoomTapeChartPage() {
   const fetchData = useCallback(async (showSpinner = true) => {
     if (showSpinner) setLoading(true);
     try {
-      const res = await fetch('/api/admin/operations', {
-        headers: { 'x-staff-role': 'Super Admin' },
-      });
-      const data = await res.json();
-      if (data.success) {
+      const data = await adminOperations.fetchFullState();
+      if (data && data.success) {
         setRooms(data.rooms || []);
         setBookings(data.bookings || []);
         setCategories(data.categories || []);

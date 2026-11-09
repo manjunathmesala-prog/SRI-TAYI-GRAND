@@ -36,7 +36,7 @@ import {
   TrendingUp,
   MessageSquare,
 } from 'lucide-react';
-import { useRealtimeSync } from '@/lib/realtime-client';
+import { useRealtimeSync, cashbookClient } from '@/lib/realtime-client';
 import { canAccessRoute } from '@/lib/rbac/types';
 import { authStorage } from '@/lib/auth-storage';
 
@@ -48,14 +48,11 @@ export function AdminSidebar() {
   const [userRole, setUserRole] = useState('Super Admin');
   const [cashBalance, setCashBalance] = useState<number | null>(null);
 
-  const fetchCashBalance = async () => {
+  const fetchCashBalance = async (force = false) => {
     try {
-      const res = await fetch('/api/admin/cashbook', {
-        headers: { 'x-staff-role': 'Super Admin' },
-      });
-      const data = await res.json();
-      if (data.success && typeof data.balance === 'number') {
-        setCashBalance(data.balance);
+      const bal = await cashbookClient.getBalance(force);
+      if (typeof bal === 'number') {
+        setCashBalance(bal);
       }
     } catch {}
   };
@@ -175,7 +172,7 @@ export function AdminSidebar() {
         {/* Brand Header */}
         <div>
           <div className="p-5 border-b border-white/10 flex items-center justify-between">
-            <NextLink href="/admin/dashboard" className="flex items-center gap-3 group">
+            <NextLink href="/admin/dashboard" prefetch={false} className="flex items-center gap-3 group">
               <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
                 <Image
                   src="/images/hotel/tayi-grand-logo.png"
@@ -234,6 +231,7 @@ export function AdminSidebar() {
             {cashBalance !== null && (
               <NextLink
                 href="/admin/cashbook"
+                prefetch={false}
                 className="flex items-center justify-between px-3 py-1.5 rounded-lg text-[10px] font-semibold bg-[#382216]/60 border border-[#D8AD56]/30 text-[#D8AD56] hover:bg-[#382216] transition-colors"
                 title="Front Desk Cash Drawer Balance"
               >
@@ -258,6 +256,7 @@ export function AdminSidebar() {
                 <NextLink
                   key={item.href}
                   href={item.href}
+                  prefetch={false}
                   onClick={() => setMobileOpen(false)}
                   className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
                     isActive
@@ -288,6 +287,7 @@ export function AdminSidebar() {
         <div className="p-4 border-t border-white/10 space-y-3 bg-[#1D100B]">
           <NextLink
             href="/"
+            prefetch={false}
             target="_blank"
             className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-[#EFE3D6]/80 transition-colors"
           >

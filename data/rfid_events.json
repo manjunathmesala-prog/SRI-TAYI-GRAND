@@ -1,5 +1,20 @@
 [
   {
+    "card_uid": "BT-57-1000037978",
+    "card_type": "guest",
+    "card_label": "Guest Card (Room 205)",
+    "device_name": "Front-Desk-Encoder-01",
+    "room_number": "205",
+    "event_type": "access_granted",
+    "action_type": "door_unlock",
+    "holder_name": "P. Sudhakar Reddy",
+    "booking_reference": "STG-20261105-3921",
+    "source": "encoder",
+    "reason": "Customer Keycard encoded & issued to P. Sudhakar Reddy for Room 205",
+    "id": "evt-1794236077625",
+    "occurred_at": "2026-11-09T14:54:37.625Z"
+  },
+  {
     "card_uid": "BT-57-1000057859",
     "card_type": "guest",
     "card_label": "Guest Card (Room 205)",

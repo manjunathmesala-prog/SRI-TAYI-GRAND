@@ -72,7 +72,12 @@ export function SuperAdminNotificationBell() {
     } catch {
       // Quiet fail on network hiccups
     }
-  }, [activeTab]);
+  }, []);
+
+  // Fetch notifications on activeTab change
+  useEffect(() => {
+    fetchNotifications(activeTab);
+  }, [activeTab, fetchNotifications]);
 
   // Connect to dedicated Super Admin SSE stream
   useEffect(() => {
@@ -131,7 +136,7 @@ export function SuperAdminNotificationBell() {
       if (reconnectTimer) clearTimeout(reconnectTimer);
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     };
-  }, [fetchNotifications]);
+  }, []);
 
   // Re-fetch on filter change
   useEffect(() => {

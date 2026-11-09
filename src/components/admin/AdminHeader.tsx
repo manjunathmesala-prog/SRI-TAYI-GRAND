@@ -19,7 +19,7 @@ import {
   ShieldCheck,
   CheckCircle2,
 } from 'lucide-react';
-import { useRealtimeSync } from '@/lib/realtime-client';
+import { useRealtimeSync, cashbookClient } from '@/lib/realtime-client';
 import { SuperAdminNotificationBell } from '@/components/admin/SuperAdminNotificationBell';
 import { authStorage } from '@/lib/auth-storage';
 
@@ -36,14 +36,11 @@ export function AdminHeader() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [switching, setSwitching] = useState(false);
 
-  const fetchCashBalance = async () => {
+  const fetchCashBalance = async (force = false) => {
     try {
-      const res = await fetch('/api/admin/cashbook', {
-        headers: { 'x-staff-role': 'Super Admin' },
-      });
-      const data = await res.json();
-      if (data.success && typeof data.balance === 'number') {
-        setCashBalance(data.balance);
+      const bal = await cashbookClient.getBalance(force);
+      if (typeof bal === 'number') {
+        setCashBalance(bal);
       }
     } catch {}
   };
@@ -211,6 +208,7 @@ export function AdminHeader() {
         {cashBalance !== null && (
           <Link
             href="/admin/cashbook"
+            prefetch={false}
             className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#43001F]/10 hover:bg-[#43001F]/15 border border-[#43001F]/20 text-[#43001F] text-xs font-mono font-bold transition-all shadow-2xs group"
             title="Front Desk Cash Drawer Balance"
           >
@@ -230,6 +228,7 @@ export function AdminHeader() {
         {/* Quick Walk-In Button */}
         <Link
           href="/admin/front-desk"
+          prefetch={false}
           className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold shadow-xs active:scale-95 transition-all"
         >
           <UserPlus className="w-3.5 h-3.5" />

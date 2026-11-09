@@ -4,15 +4,15 @@ const path = require('path');
 
 async function main() {
   const client = new Client({
-    host: 'db.wercvaimozbbkbwmuoct.supabase.co',
-    port: 5432,
-    database: 'postgres',
-    user: 'postgres',
-    password: 'Vaynex@2026',
+    host: process.env.PGHOST || 'aws-0-ap-northeast-1.pooler.supabase.com',
+    port: Number(process.env.PGPORT) || 5432,
+    database: process.env.PGDATABASE || 'postgres',
+    user: process.env.PGUSER || 'postgres.wercvaimozbbkbwmuoct',
+    password: process.env.PGPASSWORD || 'Vaynex@2026',
     ssl: { rejectUnauthorized: false },
   });
 
-  console.log('Connecting to PostgreSQL database...');
+  console.log('Connecting to PostgreSQL database via connection pooler...');
   await client.connect();
   console.log('Connected!');
 

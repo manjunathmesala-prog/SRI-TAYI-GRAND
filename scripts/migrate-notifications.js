@@ -2,16 +2,16 @@ const { Client } = require('pg');
 
 async function migrate() {
   const client = new Client({
-    host: 'db.wercvaimozbbkbwmuoct.supabase.co',
-    port: 5432,
-    database: 'postgres',
-    user: 'postgres',
-    password: 'Vaynex@2026',
+    host: process.env.PGHOST || 'aws-0-ap-northeast-1.pooler.supabase.com',
+    port: Number(process.env.PGPORT) || 5432,
+    database: process.env.PGDATABASE || 'postgres',
+    user: process.env.PGUSER || 'postgres.wercvaimozbbkbwmuoct',
+    password: process.env.PGPASSWORD || 'Vaynex@2026',
     ssl: { rejectUnauthorized: false },
   });
 
   await client.connect();
-  console.log('Connected to Postgres.');
+  console.log('Connected to Postgres via connection pooler.');
 
   const sql = `
     CREATE TABLE IF NOT EXISTS super_admin_notifications (

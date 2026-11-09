@@ -402,6 +402,18 @@ export class HotelRepository {
       throw new Error(`Conflict: Room ${room.room_number} is already reserved for booking ${room.current_booking_ref}.`);
     }
 
+    // Release previous room reservation if reassigning to a different room
+    if (booking.assigned_room_id && booking.assigned_room_id !== room.id) {
+      const prevRoom = this.rooms.find(
+        (r) => r.id === booking.assigned_room_id || r.room_number === booking.assigned_room_number
+      );
+      if (prevRoom && prevRoom.current_booking_ref?.toLowerCase() === bookingRef.toLowerCase()) {
+        prevRoom.operational_status = 'available';
+        prevRoom.current_booking_ref = undefined;
+        prevRoom.current_guest_name = undefined;
+      }
+    }
+
     // Atomically assign
     room.current_booking_ref = bookingRef;
     room.current_guest_name = guestName;

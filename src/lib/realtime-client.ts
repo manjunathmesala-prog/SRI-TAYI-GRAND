@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { RealtimeEventType, RealtimeMessage } from '@/types';
 import { authStorage } from './auth-storage';
 
@@ -13,65 +13,103 @@ interface UseRealtimeSyncOptions {
   enabled?: boolean;
 }
 
-export function useRealtimeSync(options: UseRealtimeSyncOptions = {}) {
-  const { onEvent, onRefresh, filterTypes, enabled = true } = options;
-  const [status, setStatus] = useState<ConnectionStatus>('connecting');
-  const [lastEventId, setLastEventId] = useState<number>(0);
-  const [lastMessage, setLastMessage] = useState<RealtimeMessage | null>(null);
+// ==============================================================================
+// GLOBAL BROWSER SINGLETON REALTIME SSE CLIENT
+// Maintains exactly ONE EventSource connection shared across the entire app.
+// Eliminates HTTP/1.1 socket exhaustion and makes route navigation instantaneous.
+// ==============================================================================
 
-  const eventSourceRef = useRef<EventSource | null>(null);
-  const processedIdsRef = useRef<Set<number>>(new Set());
-  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const backoffRef = useRef<number>(1000);
-  const isMountedRef = useRef<boolean>(true);
+type RealtimeListener = {
+  id: string;
+  onEvent?: (event: RealtimeMessage) => void;
+  onRefresh?: () => void;
+  filterTypes?: Set<RealtimeEventType>;
+};
 
-  // Keep latest callbacks in ref to prevent reconnect loops on re-render
-  const onEventRef = useRef(onEvent);
-  onEventRef.current = onEvent;
-  const onRefreshRef = useRef(onRefresh);
-  onRefreshRef.current = onRefresh;
+class RealtimeSingleton {
+  private es: EventSource | null = null;
+  private status: ConnectionStatus = 'connecting';
+  private listeners: Map<string, RealtimeListener> = new Map();
+  private statusListeners: Set<(s: ConnectionStatus) => void> = new Set();
+  private processedIds: Set<number> = new Set();
+  private reconnectTimer: NodeJS.Timeout | null = null;
+  private backoffMs = 1000;
+  private lastMessage: RealtimeMessage | null = null;
+  private lastEventId = 0;
 
-  const connect = useCallback(() => {
-    if (!enabled || typeof window === 'undefined') return;
+  public getStatus(): ConnectionStatus {
+    return this.status;
+  }
 
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-      eventSourceRef.current = null;
+  public getLastMessage(): RealtimeMessage | null {
+    return this.lastMessage;
+  }
+
+  public getLastEventId(): number {
+    return this.lastEventId;
+  }
+
+  public subscribeStatus(cb: (s: ConnectionStatus) => void): () => void {
+    this.statusListeners.add(cb);
+    cb(this.status);
+    return () => this.statusListeners.delete(cb);
+  }
+
+  public subscribe(listener: RealtimeListener): () => void {
+    this.listeners.set(listener.id, listener);
+    this.ensureConnected();
+    return () => {
+      this.listeners.delete(listener.id);
+    };
+  }
+
+  private setStatus(s: ConnectionStatus) {
+    if (this.status !== s) {
+      this.status = s;
+      this.statusListeners.forEach((cb) => {
+        try { cb(s); } catch {}
+      });
+    }
+  }
+
+  public ensureConnected() {
+    if (typeof window === 'undefined') return;
+    if (this.es && (this.es.readyState === EventSource.OPEN || this.es.readyState === EventSource.CONNECTING)) {
+      return;
+    }
+
+    if (this.es) {
+      try { this.es.close(); } catch {}
+      this.es = null;
     }
 
     const storedLastId = parseInt(sessionStorage.getItem('stg_last_event_id') || '0', 10);
     const streamUrl = `/api/realtime/stream?lastEventId=${storedLastId}`;
 
-    setStatus(storedLastId > 0 ? 'reconnecting' : 'connecting');
+    this.setStatus(storedLastId > 0 ? 'reconnecting' : 'connecting');
 
     try {
       const es = new EventSource(streamUrl);
-      eventSourceRef.current = es;
+      this.es = es;
 
       es.onopen = () => {
-        if (!isMountedRef.current) return;
-        setStatus('connected');
-        backoffRef.current = 1000; // Reset backoff
+        this.setStatus('connected');
+        this.backoffMs = 1000;
       };
 
-      const handleIncomingMessage = (event: MessageEvent, eventType: RealtimeEventType) => {
-        if (!isMountedRef.current) return;
+      const handleMsg = (event: MessageEvent, eventType: RealtimeEventType) => {
         try {
           const data: RealtimeMessage = JSON.parse(event.data);
           const evtId = data.eventId || (event.lastEventId ? parseInt(event.lastEventId, 10) : 0);
 
-          // Deduplication Guard: Ignore if already processed (idempotency)
           if (evtId > 0) {
-            if (processedIdsRef.current.has(evtId)) {
-              return;
+            if (this.processedIds.has(evtId)) return;
+            this.processedIds.add(evtId);
+            if (this.processedIds.size > 1000) {
+              const first = Array.from(this.processedIds)[0];
+              this.processedIds.delete(first);
             }
-            processedIdsRef.current.add(evtId);
-            if (processedIdsRef.current.size > 1000) {
-              // Keep memory bounded
-              const first = Array.from(processedIdsRef.current)[0];
-              processedIdsRef.current.delete(first);
-            }
-            setLastEventId(evtId);
+            this.lastEventId = evtId;
             sessionStorage.setItem('stg_last_event_id', evtId.toString());
           }
 
@@ -81,23 +119,26 @@ export function useRealtimeSync(options: UseRealtimeSyncOptions = {}) {
             eventType: data.eventType || data.type || eventType,
           };
 
-          setLastMessage(msgWithAliases);
+          this.lastMessage = msgWithAliases;
 
-          // Filtering check
-          if (!filterTypes || filterTypes.includes(msgWithAliases.eventType)) {
-            if (onEventRef.current) {
-              onEventRef.current(msgWithAliases);
+          // Invalidate client-side full state and cashbook caches on any real-time mutation
+          adminOperations.invalidateFullState();
+          cashbookClient.invalidate();
+
+          // Notify all registered listeners
+          this.listeners.forEach((sub) => {
+            if (!sub.filterTypes || sub.filterTypes.has(msgWithAliases.eventType)) {
+              if (sub.onEvent) {
+                try { sub.onEvent(msgWithAliases); } catch {}
+              }
+              if (sub.onRefresh) {
+                try { sub.onRefresh(); } catch {}
+              }
             }
-            if (onRefreshRef.current) {
-              onRefreshRef.current();
-            }
-          }
-        } catch {
-          // Parsing error or handshake comment
-        }
+          });
+        } catch {}
       };
 
-      // Listen for all hotel domain event types
       const allEventTypes: RealtimeEventType[] = [
         'booking_created',
         'booking_updated',
@@ -123,44 +164,84 @@ export function useRealtimeSync(options: UseRealtimeSyncOptions = {}) {
       ];
 
       allEventTypes.forEach((type) => {
-        es.addEventListener(type, (e) => handleIncomingMessage(e, type));
+        es.addEventListener(type, (e) => handleMsg(e, type));
       });
 
       es.onerror = () => {
-        if (!isMountedRef.current) return;
-        setStatus('reconnecting');
-        es.close();
-        eventSourceRef.current = null;
+        this.setStatus('reconnecting');
+        try { es.close(); } catch {}
+        this.es = null;
 
-        // Exponential backoff reconnect
-        const delay = Math.min(backoffRef.current, 10000);
-        backoffRef.current *= 1.5;
+        const delay = Math.min(this.backoffMs, 10000);
+        this.backoffMs *= 1.5;
 
-        if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-        reconnectTimeoutRef.current = setTimeout(() => {
-          if (isMountedRef.current) {
-            connect();
-          }
+        if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
+        this.reconnectTimer = setTimeout(() => {
+          this.ensureConnected();
         }, delay);
       };
     } catch {
-      setStatus('offline');
+      this.setStatus('offline');
     }
-  }, [enabled, filterTypes]);
+  }
+
+  public reconnect() {
+    this.backoffMs = 1000;
+    if (this.reconnectTimer) clearTimeout(this.reconnectTimer);
+    if (this.es) {
+      try { this.es.close(); } catch {}
+      this.es = null;
+    }
+    this.ensureConnected();
+  }
+}
+
+// Global browser instance
+const realtimeSingleton = new RealtimeSingleton();
+
+export function useRealtimeSync(options: UseRealtimeSyncOptions = {}) {
+  const { onEvent, onRefresh, filterTypes, enabled = true } = options;
+  const [status, setStatus] = useState<ConnectionStatus>(realtimeSingleton.getStatus());
+  const [lastMessage, setLastMessage] = useState<RealtimeMessage | null>(realtimeSingleton.getLastMessage());
+  const [lastEventId, setLastEventId] = useState<number>(realtimeSingleton.getLastEventId());
+
+  const listenerIdRef = useRef<string>(Math.random().toString(36).slice(2));
+
+  const onEventRef = useRef(onEvent);
+  onEventRef.current = onEvent;
+  const onRefreshRef = useRef(onRefresh);
+  onRefreshRef.current = onRefresh;
+
+  const filterTypesKey = filterTypes ? filterTypes.join(',') : '';
+  const filterSetRef = useRef<Set<RealtimeEventType> | undefined>(
+    filterTypes ? new Set(filterTypes) : undefined
+  );
+  useEffect(() => {
+    filterSetRef.current = filterTypes ? new Set(filterTypes) : undefined;
+  }, [filterTypesKey]);
 
   useEffect(() => {
-    isMountedRef.current = true;
-    connect();
+    if (!enabled) return;
+
+    const unsubStatus = realtimeSingleton.subscribeStatus(setStatus);
+    const unsubMessage = realtimeSingleton.subscribe({
+      id: listenerIdRef.current,
+      onEvent: (msg) => {
+        setLastMessage(msg);
+        setLastEventId(realtimeSingleton.getLastEventId());
+        if (onEventRef.current) onEventRef.current(msg);
+      },
+      onRefresh: () => {
+        if (onRefreshRef.current) onRefreshRef.current();
+      },
+      filterTypes: filterSetRef.current,
+    });
 
     return () => {
-      isMountedRef.current = false;
-      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-        eventSourceRef.current = null;
-      }
+      unsubStatus();
+      unsubMessage();
     };
-  }, [connect]);
+  }, [enabled]);
 
   return {
     status,
@@ -168,12 +249,12 @@ export function useRealtimeSync(options: UseRealtimeSyncOptions = {}) {
     lastEventId,
     lastMessage,
     lastEvent: lastMessage,
-    reconnect: connect,
+    reconnect: () => realtimeSingleton.reconnect(),
   };
 }
 
 // ==============================================================================
-// AUTHORITATIVE ADMIN OPERATIONS CLIENT HELPER
+// AUTHORITATIVE ADMIN OPERATIONS CLIENT HELPER (WITH IN-MEMORY SWR CACHE)
 // ==============================================================================
 
 function getAdminHeaders(extra: Record<string, string> = {}): Record<string, string> {
@@ -187,14 +268,87 @@ function getAdminHeaders(extra: Record<string, string> = {}): Record<string, str
   return headers;
 }
 
+let cachedFullState: any = null;
+let cachedFullStateTimestamp = 0;
+const FULL_STATE_TTL_MS = 25000; // 25s TTL, invalidated instantly on SSE events or mutations
+let pendingFullStatePromise: Promise<any> | null = null;
+
+// Deduplicated Cashbook Client
+let cachedCashBalance: number | null = null;
+let cachedCashBalanceTimestamp = 0;
+let pendingCashBalancePromise: Promise<number | null> | null = null;
+
+export const cashbookClient = {
+  invalidate() {
+    cachedCashBalance = null;
+    cachedCashBalanceTimestamp = 0;
+  },
+
+  async getBalance(force = false): Promise<number | null> {
+    const now = Date.now();
+    if (!force && cachedCashBalance !== null && (now - cachedCashBalanceTimestamp < 15000)) {
+      return cachedCashBalance;
+    }
+
+    if (pendingCashBalancePromise && !force) {
+      return pendingCashBalancePromise;
+    }
+
+    pendingCashBalancePromise = (async () => {
+      try {
+        const res = await fetch('/api/admin/cashbook', {
+          headers: getAdminHeaders({ 'x-staff-role': 'Super Admin' }),
+        });
+        const data = await res.json();
+        if (data.success && typeof data.balance === 'number') {
+          cachedCashBalance = data.balance;
+          cachedCashBalanceTimestamp = Date.now();
+          return data.balance;
+        }
+        return cachedCashBalance;
+      } catch {
+        return cachedCashBalance;
+      } finally {
+        pendingCashBalancePromise = null;
+      }
+    })();
+
+    return pendingCashBalancePromise;
+  },
+};
+
 export const adminOperations = {
-  async fetchFullState() {
-    const res = await fetch('/api/admin/operations', {
-      cache: 'no-store',
-      headers: getAdminHeaders(),
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch authoritative state`);
-    return res.json();
+  invalidateFullState() {
+    cachedFullState = null;
+    cachedFullStateTimestamp = 0;
+  },
+
+  async fetchFullState(force = false) {
+    const now = Date.now();
+    if (!force && cachedFullState && (now - cachedFullStateTimestamp < FULL_STATE_TTL_MS)) {
+      return cachedFullState;
+    }
+
+    if (pendingFullStatePromise && !force) {
+      return pendingFullStatePromise;
+    }
+
+    pendingFullStatePromise = (async () => {
+      try {
+        const res = await fetch('/api/admin/operations', {
+          headers: getAdminHeaders(),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}: Failed to fetch authoritative state`);
+        const data = await res.json();
+        cachedFullState = data;
+        cachedFullStateTimestamp = Date.now();
+        return data;
+      } finally {
+        pendingFullStatePromise = null;
+      }
+    })();
+
+    return pendingFullStatePromise;
   },
 
   async checkIn(params: {
@@ -209,6 +363,7 @@ export const adminOperations = {
     cityOfOrigin?: string;
     purposeOfVisit?: string;
   }) {
+    adminOperations.invalidateFullState();
     const res = await fetch('/api/admin/operations', {
       method: 'POST',
       headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
@@ -216,6 +371,7 @@ export const adminOperations = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Check-in failed');
+    adminOperations.invalidateFullState();
     return data;
   },
 
@@ -226,6 +382,7 @@ export const adminOperations = {
     settlementMethod?: string;
     staffName?: string;
   }) {
+    adminOperations.invalidateFullState();
     const res = await fetch('/api/admin/operations', {
       method: 'POST',
       headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
@@ -233,6 +390,8 @@ export const adminOperations = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Check-out failed');
+    adminOperations.invalidateFullState();
+    cashbookClient.invalidate();
     return data;
   },
 
@@ -242,6 +401,7 @@ export const adminOperations = {
     guestName?: string;
     staffName?: string;
   }) {
+    adminOperations.invalidateFullState();
     const res = await fetch('/api/admin/operations', {
       method: 'POST',
       headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
@@ -249,6 +409,7 @@ export const adminOperations = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Room allocation failed');
+    adminOperations.invalidateFullState();
     return data;
   },
 
@@ -259,6 +420,7 @@ export const adminOperations = {
     notes?: string;
     staffName?: string;
   }) {
+    adminOperations.invalidateFullState();
     const res = await fetch('/api/admin/operations', {
       method: 'POST',
       headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
@@ -266,6 +428,7 @@ export const adminOperations = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Housekeeping update failed');
+    adminOperations.invalidateFullState();
     return data;
   },
 
@@ -275,6 +438,7 @@ export const adminOperations = {
     notes?: string;
     staffName?: string;
   }) {
+    adminOperations.invalidateFullState();
     const res = await fetch('/api/admin/operations', {
       method: 'POST',
       headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
@@ -282,6 +446,7 @@ export const adminOperations = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Booking status update failed');
+    adminOperations.invalidateFullState();
     return data;
   },
 
@@ -292,6 +457,7 @@ export const adminOperations = {
     paymentMethod: string;
     staffName?: string;
   }) {
+    adminOperations.invalidateFullState();
     const res = await fetch('/api/admin/operations', {
       method: 'POST',
       headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
@@ -299,6 +465,8 @@ export const adminOperations = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Payment recording failed');
+    adminOperations.invalidateFullState();
+    cashbookClient.invalidate();
     return data;
   },
 
@@ -325,6 +493,7 @@ export const adminOperations = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to add folio charge');
+    adminOperations.invalidateFullState();
     return data;
   },
 
@@ -335,6 +504,7 @@ export const adminOperations = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to delete folio charge');
+    adminOperations.invalidateFullState();
     return data;
   },
 
@@ -364,6 +534,7 @@ export const adminOperations = {
     specialRequests?: string;
     staffName?: string;
   }) {
+    adminOperations.invalidateFullState();
     const res = await fetch('/api/admin/operations', {
       method: 'POST',
       headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
@@ -371,6 +542,8 @@ export const adminOperations = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Statutory walk-in registration failed');
+    adminOperations.invalidateFullState();
+    cashbookClient.invalidate();
     return data;
   },
 };
