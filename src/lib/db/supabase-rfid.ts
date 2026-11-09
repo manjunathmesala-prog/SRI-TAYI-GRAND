@@ -145,3 +145,61 @@ export async function deleteCardFromSupabase(cardUid: string): Promise<void> {
     console.warn('[SUPABASE RFID DELETE WARN]', err.message);
   }
 }
+
+/**
+ * Production Live Supabase Sync for RFID Tap History (Door sensor / lock taps)
+ * Persists directly to Supabase rfid_tap_history table
+ */
+export async function syncTapHistoryToSupabase(record: {
+  id: string;
+  card_uid: string;
+  card_type: string;
+  room_number: string;
+  booking_id?: string | null;
+  customer_id?: string | null;
+  customer_name?: string | null;
+  access_result: string;
+  door_status: string;
+  reason?: string | null;
+  metadata?: any;
+  tapped_at?: string | Date;
+}): Promise<void> {
+  if (!isServerEnvironment() || !record) return;
+
+  const pool = getPgPool();
+  if (!pool) return;
+
+  try {
+    const query = `
+      INSERT INTO rfid_tap_history (
+        id, card_uid, card_type, room_number, booking_id, customer_id, customer_name,
+        access_result, door_status, reason, metadata, tapped_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+      ON CONFLICT (id) DO UPDATE SET
+        access_result = EXCLUDED.access_result,
+        door_status = EXCLUDED.door_status,
+        reason = EXCLUDED.reason;
+    `;
+
+    const values = [
+      record.id,
+      record.card_uid,
+      record.card_type,
+      record.room_number,
+      record.booking_id || null,
+      record.customer_id || null,
+      record.customer_name || null,
+      record.access_result,
+      record.door_status,
+      record.reason || null,
+      JSON.stringify(record.metadata || {}),
+      record.tapped_at ? new Date(record.tapped_at) : new Date(),
+    ];
+
+    await pool.query(query, values);
+    console.log(`[SUPABASE CLOUD SYNC] Tap history ${record.id} for Room ${record.room_number} recorded in Supabase`);
+  } catch (err: any) {
+    console.warn('[SUPABASE TAP HISTORY SYNC WARN]', err.message);
+  }
+}
+

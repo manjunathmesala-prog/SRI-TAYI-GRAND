@@ -1,5 +1,19 @@
 [
   {
+    "card_uid": "BT-57-1000020527",
+    "card_type": "guest",
+    "card_label": "GUEST Card",
+    "device_name": "Lock-Room-104",
+    "room_number": "104",
+    "event_type": "access_granted",
+    "action_type": "door_unlock",
+    "holder_name": "Front Desk",
+    "source": "lock_reader",
+    "reason": "[TAP_READ] Staff/Holder: Front Desk | Status: SUCCESS | Valid: 2611092024 - 2611102024",
+    "id": "evt-1794237726093",
+    "occurred_at": "2026-11-09T15:22:06.093Z"
+  },
+  {
     "card_uid": "BT-57-1000037978",
     "card_type": "guest",
     "card_label": "Guest Card (Room 205)",
