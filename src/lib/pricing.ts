@@ -371,8 +371,12 @@ export function formatRupees(val: number): string {
  */
 export function calculateBookingTariff(params: {
   categoryId: string;
-  checkIn: string;
-  checkOut: string;
+  checkIn?: string;
+  checkInDate?: string;
+  checkOut?: string;
+  checkOutDate?: string;
+  adults?: number;
+  children?: number;
   roomsCount?: number;
   adultsCount?: number;
   childrenCount?: number;
@@ -383,14 +387,16 @@ export function calculateBookingTariff(params: {
 }): BookingTariffCalculation {
   const category = getAuthoritativeTariff(params.categoryId);
   const roomsCount = Math.max(1, Number(params.roomsCount) || 1);
-  const adultsCount = Math.max(1, Number(params.adultsCount) || 1);
-  const childrenCount = Math.max(0, Number(params.childrenCount) || 0);
+  const adultsCount = Math.max(1, Number(params.adultsCount ?? params.adults) || 1);
+  const childrenCount = Math.max(0, Number(params.childrenCount ?? params.children) || 0);
   const totalGuests = adultsCount + childrenCount;
 
   // Inverted / invalid date check
-  const dIn = new Date(params.checkIn);
-  const dOut = new Date(params.checkOut);
-  const isInvalidDate = isNaN(dIn.getTime()) || isNaN(dOut.getTime()) || dOut.getTime() <= dIn.getTime();
+  const checkInVal = params.checkIn || params.checkInDate || '';
+  const checkOutVal = params.checkOut || params.checkOutDate || '';
+  const dIn = new Date(checkInVal);
+  const dOut = new Date(checkOutVal);
+  const isInvalidDate = !checkInVal || !checkOutVal || isNaN(dIn.getTime()) || isNaN(dOut.getTime()) || dOut.getTime() <= dIn.getTime();
   if (isInvalidDate) {
     return {
       isValid: false,
@@ -434,7 +440,7 @@ export function calculateBookingTariff(params: {
     };
   }
 
-  const billingPeriods = calculateBillingPeriods(params.checkIn, params.checkOut);
+  const billingPeriods = calculateBillingPeriods(checkInVal, checkOutVal);
   const billingUnit: BillingPeriodUnit = params.billingUnit || 'night';
   const extraPersonFrequency: ExtraPersonChargeFrequency = params.extraPersonFrequency || 'per_billing_period';
 

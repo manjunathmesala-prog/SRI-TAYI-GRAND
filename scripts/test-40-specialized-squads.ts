@@ -10,6 +10,7 @@
  * ==============================================================================
  */
 
+import crypto from 'crypto';
 import { repo } from '../src/lib/db/repository';
 import { searchAvailability } from '../src/lib/booking-engine';
 import { calculateBookingTariff } from '../src/lib/pricing';
@@ -661,7 +662,10 @@ async function runSquadVerification() {
 
   // Agent 32: Razorpay Webhook Engine
   try {
-    const webhookSigValid = verifyWebhookSignature('{"test":"payload"}', 'dev_valid_sig');
+    const testSecret = 'dev_webhook_secret_for_test';
+    const testPayload = '{"test":"payload"}';
+    const validWebhookSig = crypto.createHmac('sha256', testSecret).update(testPayload).digest('hex');
+    const webhookSigValid = verifyWebhookSignature(testPayload, validWebhookSig, testSecret);
     recordAgent({
       agentId: 'AGENT-32',
       squad: 'Delta',
@@ -676,7 +680,10 @@ async function runSquadVerification() {
 
   // Agent 33: Payment Signature Verification
   try {
-    const sigCheck = verifyPaymentSignature('order_test_123', 'pay_test_456', 'dev_valid_sig');
+    const testKeySecret = 'dev_key_secret_for_test';
+    const payload = 'order_test_123|pay_test_456';
+    const validSig = crypto.createHmac('sha256', testKeySecret).update(payload).digest('hex');
+    const sigCheck = verifyPaymentSignature('order_test_123', 'pay_test_456', validSig, testKeySecret);
     recordAgent({
       agentId: 'AGENT-33',
       squad: 'Delta',

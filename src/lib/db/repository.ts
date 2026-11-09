@@ -52,6 +52,7 @@ import {
 } from '@/types';
 
 import { syncCardToSupabase, syncEventToSupabase, deleteCardFromSupabase } from './supabase-rfid';
+import { syncBookingToSupabase, loadBookingsFromSupabase } from './supabase-bookings';
 import {
   loadPersistedCards,
   savePersistedCards,
@@ -135,6 +136,16 @@ export class HotelRepository {
     this.rfidCards = loadedCards.length > 0 ? loadedCards : JSON.parse(JSON.stringify(INITIAL_RFID_CARDS));
     const loadedEvents = loadPersistedEvents();
     this.rfidEvents = loadedEvents.length > 0 ? loadedEvents : JSON.parse(JSON.stringify(INITIAL_RFID_ACCESS_EVENTS));
+    loadBookingsFromSupabase().then((pgBookings) => {
+      if (pgBookings && pgBookings.length > 0) {
+        for (const pgB of pgBookings) {
+          const exists = this.bookings.some((b) => b.booking_reference === pgB.booking_reference);
+          if (!exists) {
+            this.bookings.push(pgB);
+          }
+        }
+      }
+    }).catch(() => {});
   }
 
   // ==============================================================================
@@ -655,6 +666,7 @@ export class HotelRepository {
       userRole: 'Front Desk',
     });
 
+    syncBookingToSupabase(booking);
     return { booking, room, card, payment };
   }
 
@@ -730,6 +742,7 @@ export class HotelRepository {
 
     // Broadcast new booking in real-time
     this.broadcastEvent('booking_created', newBooking, actor);
+    syncBookingToSupabase(newBooking);
 
     return newBooking;
   }
@@ -745,6 +758,7 @@ export class HotelRepository {
 
     booking.status = status;
     if (notes) booking.internal_notes = notes;
+    syncBookingToSupabase(booking);
 
     if (status === 'checked_in') {
       booking.checked_in_at = new Date().toISOString();
@@ -927,6 +941,7 @@ export class HotelRepository {
     }
 
     this.broadcastEvent('walk_in_created', booking, params.actor);
+    syncBookingToSupabase(booking);
 
     return booking;
   }
@@ -1026,6 +1041,7 @@ export class HotelRepository {
       params.staffName
     );
 
+    syncBookingToSupabase(booking);
     return {
       success: true,
       booking,
