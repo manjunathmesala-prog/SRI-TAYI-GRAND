@@ -1,5 +1,20 @@
 [
   {
+    "card_uid": "BT-57-1000069939",
+    "card_type": "guest",
+    "card_label": "Guest Card (Room 101)",
+    "device_name": "Front-Desk-Encoder-01",
+    "room_number": "101",
+    "event_type": "access_granted",
+    "action_type": "door_unlock",
+    "holder_name": "K. Seshadri Naidu (Online)",
+    "booking_reference": "STG-20261109-6782",
+    "source": "encoder",
+    "reason": "Customer Keycard encoded & issued to K. Seshadri Naidu (Online) for Room 101",
+    "id": "evt-1794198189476",
+    "occurred_at": "2026-11-09T04:23:09.476Z"
+  },
+  {
     "card_uid": "BT-57-1000090889",
     "card_type": "guest",
     "card_label": "Guest Card (Room 102)",

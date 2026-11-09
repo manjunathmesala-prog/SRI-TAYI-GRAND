@@ -1,5 +1,43 @@
-﻿import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { searchAvailability } from '@/lib/booking-engine';
+
+export async function GET(request: NextRequest) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const checkIn = searchParams.get('checkIn');
+    const checkOut = searchParams.get('checkOut');
+    const adults = Number(searchParams.get('adults')) || 1;
+    const children = Number(searchParams.get('children')) || 0;
+    const roomsCount = Number(searchParams.get('roomsCount') || searchParams.get('rooms')) || 1;
+
+    if (!checkIn || !checkOut) {
+      return NextResponse.json(
+        { error: 'Check-in and check-out dates are required' },
+        { status: 400 }
+      );
+    }
+
+    if (new Date(checkOut) <= new Date(checkIn)) {
+      return NextResponse.json(
+        { error: 'Check-out date must be after check-in date' },
+        { status: 400 }
+      );
+    }
+
+    const results = searchAvailability(
+      checkIn,
+      checkOut,
+      adults,
+      children,
+      roomsCount
+    );
+
+    return NextResponse.json({ success: true, results });
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : 'Failed to check availability';
+    return NextResponse.json({ error: message }, { status: 500 });
+  }
+}
 
 export async function POST(request: Request) {
   try {

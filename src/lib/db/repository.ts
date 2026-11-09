@@ -38,6 +38,14 @@ import {
   AuditActionCategory,
   StaffAttendance,
   ShiftType,
+  FolioCharge,
+  ContactEnquiry,
+  UnifiedEnquiry,
+  ConventionQuote,
+  StaffPermissions,
+  HousekeepingTurnaroundChecklist,
+  GuestVIPTier,
+  EnquiryStatus,
 } from '@/types';
 
 import { syncCardToSupabase, syncEventToSupabase, deleteCardFromSupabase } from './supabase-rfid';
@@ -74,6 +82,9 @@ import {
   INITIAL_JOURNAL_ENTRIES,
   INITIAL_AUDIT_LOGS,
   INITIAL_STAFF_ATTENDANCE,
+  INITIAL_FOLIO_CHARGES,
+  INITIAL_CONTACT_ENQUIRIES,
+  INITIAL_CONVENTION_QUOTES,
 } from './mock-data';
 import { calculateBookingTariff, normalizeCategoryId } from '@/lib/pricing';
 
@@ -105,6 +116,9 @@ export class HotelRepository {
   private journalEntries: JournalEntry[] = JSON.parse(JSON.stringify(INITIAL_JOURNAL_ENTRIES));
   private auditLogs: AuditLogEntry[] = JSON.parse(JSON.stringify(INITIAL_AUDIT_LOGS));
   private staffAttendance: StaffAttendance[] = JSON.parse(JSON.stringify(INITIAL_STAFF_ATTENDANCE));
+  private folioCharges: FolioCharge[] = JSON.parse(JSON.stringify(INITIAL_FOLIO_CHARGES));
+  private contactEnquiries: ContactEnquiry[] = JSON.parse(JSON.stringify(INITIAL_CONTACT_ENQUIRIES));
+  private conventionQuotes: ConventionQuote[] = JSON.parse(JSON.stringify(INITIAL_CONVENTION_QUOTES));
 
   // In-Memory Real-Time Event Bus with Reconnection Replay Buffer
   private eventCounter: number = 0;
@@ -332,6 +346,18 @@ export class HotelRepository {
     return this.rooms[index];
   }
 
+  updateRoomHousekeeping(
+    roomId: string,
+    housekeepingStatus: HousekeepingStatus,
+    operationalStatus?: OperationalStatus,
+    notes?: string,
+    actor?: string
+  ): PhysicalRoom | null {
+    const room = this.getRoomById(roomId);
+    const opStatus = operationalStatus || room?.operational_status || 'available';
+    return this.updateRoomStatus(roomId, opStatus, housekeepingStatus, notes, actor);
+  }
+
   // Atomically check availability and assign room with race-condition prevention
   assignRoomToBooking(
     roomId: string,
@@ -407,6 +433,210 @@ export class HotelRepository {
     return this.bookings.find(
       (b) => b.booking_reference.toLowerCase() === reference.toLowerCase()
     );
+  }
+
+  getBookingById(id: string): Booking | undefined {
+    if (!id) return undefined;
+    return this.bookings.find(
+      (b) => b.id === id || b.booking_reference.toLowerCase() === id.toLowerCase()
+    );
+  }
+
+  createFrontDeskWalkIn(params: {
+    guestName: string;
+    guestPhone: string;
+    guestEmail?: string;
+    nationality?: string;
+    cityOfOrigin?: string;
+    idProofType: string;
+    idProofNumber: string;
+    purposeOfVisit: string;
+    categoryId: string;
+    roomNumber: string;
+    checkInDate: string;
+    checkOutDate: string;
+    adultsCount?: number;
+    childrenCount?: number;
+    baseTariff?: number;
+    isTariffOverridden?: boolean;
+    tariffOverrideReason?: string;
+    paymentMethod: PaymentMethod;
+    amountCollected?: number;
+    issueKeycard?: boolean;
+    cardUid?: string;
+    specialRequests?: string;
+    staffName?: string;
+  }): {
+    booking: Booking;
+    room: PhysicalRoom;
+    card?: RFIDCard;
+    payment?: PaymentRecord;
+  } {
+    const staffName = params.staffName || 'Front Desk Reception';
+    const category =
+      this.categories.find((c) => c.id === params.categoryId || c.slug === params.categoryId) ||
+      this.categories[0];
+
+    const room = this.rooms.find((r) => r.room_number === params.roomNumber);
+    if (!room) {
+      throw new Error(`Physical Room ${params.roomNumber} does not exist`);
+    }
+
+    if (room.operational_status === 'occupied') {
+      throw new Error(`Room ${params.roomNumber} is currently occupied by ${room.current_guest_name || 'another guest'}`);
+    }
+
+    // Calculate nights
+    const start = new Date(params.checkInDate);
+    const end = new Date(params.checkOutDate);
+    const diffTime = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
+    const nights = isNaN(diffTime) || diffTime < 1 ? 1 : diffTime;
+
+    // Rate calculation
+    const nightlyRate = params.isTariffOverridden && typeof params.baseTariff === 'number'
+      ? params.baseTariff
+      : (category?.base_price_per_night || 2499);
+
+    const subtotal = nightlyRate * nights;
+    const taxRate = (this.settings.tax_percentage || 12) / 100;
+    const tax = Math.round(subtotal * taxRate);
+    const total = subtotal + tax;
+
+    const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const randCode = Math.floor(1000 + Math.random() * 9000);
+    const bookingReference = `TG-FD-${dateStr}-${randCode}`;
+
+    const collected = Number(params.amountCollected ?? total);
+    const paidAmount = isNaN(collected) ? 0 : Math.max(0, collected);
+    const paymentStatus: PaymentStatus = paidAmount >= total ? 'successful' : 'pay_at_hotel';
+
+    const booking: Booking = {
+      id: `bk-fd-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      booking_reference: bookingReference,
+      guest_id: `gst-${Date.now()}`,
+      guest_name: params.guestName.trim(),
+      guest_phone: params.guestPhone.trim(),
+      guest_email: params.guestEmail?.trim() || `${params.guestPhone.replace(/\D/g, '')}@guest.sritayigrand.com`,
+      id_proof_type: params.idProofType,
+      id_proof_number: params.idProofNumber.trim(),
+      nationality: params.nationality || 'Indian',
+      city_of_origin: params.cityOfOrigin?.trim(),
+      purpose_of_visit: params.purposeOfVisit,
+      category_id: category.id,
+      category_name: category.name,
+      assigned_room_id: room.id,
+      assigned_room_number: room.room_number,
+      room_number: room.room_number,
+      adults_count: params.adultsCount || 2,
+      children_count: params.childrenCount || 0,
+      rooms_count: 1,
+      check_in_date: params.checkInDate,
+      check_out_date: params.checkOutDate,
+      status: 'checked_in',
+      payment_status: paymentStatus,
+      payment_method: params.paymentMethod,
+      subtotal_amount: subtotal,
+      room_charges_amount: subtotal,
+      tax_amount: tax,
+      additional_charges_amount: 0,
+      total_amount: total,
+      paid_amount: paidAmount,
+      tariff_override_amount: params.isTariffOverridden ? params.baseTariff : undefined,
+      tariff_override_reason: params.isTariffOverridden ? params.tariffOverrideReason : undefined,
+      checked_in_at: new Date().toISOString(),
+      room_assigned_by: staffName,
+      booking_source: 'front_desk_manual',
+      special_requests: params.specialRequests,
+      early_check_in_requested: true,
+      late_check_out_requested: false,
+      created_at: new Date().toISOString(),
+    };
+
+    this.bookings.unshift(booking);
+
+    // Update / create Guest record
+    let guest = this.guests.find((g) => g.phone === params.guestPhone);
+    if (guest) {
+      guest.total_stays += 1;
+      guest.id_type = params.idProofType;
+      guest.id_number = params.idProofNumber;
+      guest.nationality = params.nationality || 'Indian';
+      if (params.cityOfOrigin) guest.city_of_origin = params.cityOfOrigin;
+      if (params.purposeOfVisit) guest.purpose_of_visit = params.purposeOfVisit;
+    } else {
+      guest = {
+        id: booking.guest_id,
+        full_name: params.guestName,
+        phone: params.guestPhone,
+        email: booking.guest_email,
+        id_type: params.idProofType,
+        id_number: params.idProofNumber,
+        nationality: params.nationality || 'Indian',
+        city_of_origin: params.cityOfOrigin,
+        purpose_of_visit: params.purposeOfVisit,
+        country: params.nationality === 'Foreigner' ? 'International' : 'India',
+        total_stays: 1,
+        created_at: new Date().toISOString(),
+      };
+      this.guests.push(guest);
+    }
+
+    // Allocate & occupy physical room
+    room.operational_status = 'occupied';
+    room.housekeeping_status = 'clean';
+    room.current_booking_ref = booking.booking_reference;
+    room.current_guest_name = booking.guest_name;
+
+    // Record payment if collected
+    let payment: PaymentRecord | undefined;
+    if (paidAmount > 0) {
+      payment = this.recordPayment(
+        {
+          booking_reference: booking.booking_reference,
+          guest_name: booking.guest_name,
+          amount: paidAmount,
+          currency: 'INR',
+          payment_method: params.paymentMethod,
+          status: 'successful',
+          paid_at: new Date().toISOString(),
+        },
+        staffName
+      );
+    }
+
+    // Issue RFID card if requested
+    let card: RFIDCard | undefined;
+    if (params.issueKeycard !== false) {
+      const expiryIso = new Date(`${params.checkOutDate}T11:00:00+05:30`).toISOString();
+      card = this.issueRFIDCard(
+        room.room_number,
+        booking.booking_reference,
+        booking.guest_name,
+        staffName,
+        expiryIso
+      );
+      if (params.cardUid) {
+        card.card_uid = params.cardUid;
+      }
+      booking.keycard_issued_at = new Date().toISOString();
+      booking.keycard_uid = card.card_uid;
+    }
+
+    this.broadcastEvent('walk_in_created', booking, staffName);
+    this.broadcastEvent('check_in', { booking, roomNumber: room.room_number, cardUid: card?.card_uid }, staffName);
+
+    this.recordAuditLog({
+      action: 'STATUTORY_WALKIN_CHECKIN',
+      entityType: 'booking',
+      entityId: booking.booking_reference,
+      details: `Statutory walk-in check-in for ${booking.guest_name} into Room ${room.room_number} (Govt ID: ${params.idProofType} ${params.idProofNumber})`,
+      newValue: booking,
+      userId: 'stf-reception',
+      userName: staffName,
+      userRole: 'Front Desk',
+    });
+
+    return { booking, room, card, payment };
   }
 
   createBooking(
@@ -2387,6 +2617,592 @@ export class HotelRepository {
     this.broadcastEvent('full_sync', { updatedDevice: dev });
     return { ...dev };
   }
+
+
+  // ==============================================================================
+  // GUEST FOLIO CHARGES & INCIDENTAL SERVICES
+  // ==============================================================================
+
+  public getFolioCharges(bookingIdOrRef?: string): FolioCharge[] {
+    if (!bookingIdOrRef) return [...this.folioCharges];
+    return this.folioCharges.filter(
+      (c) => c.booking_id === bookingIdOrRef || c.booking_reference === bookingIdOrRef
+    );
+  }
+
+  public addFolioCharge(charge: Omit<FolioCharge, 'id' | 'created_at'>): FolioCharge {
+    const id = 'fc-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
+    const tax_rate = typeof charge.tax_rate === 'number' ? charge.tax_rate : 0.12;
+    const tax_amount = Math.round(charge.amount * tax_rate * 100) / 100;
+    const total_amount = Math.round((charge.amount + tax_amount) * 100) / 100;
+
+    const newCharge: FolioCharge = {
+      ...charge,
+      id,
+      tax_rate,
+      tax_amount,
+      total_amount,
+      created_at: new Date().toISOString(),
+    };
+
+    this.folioCharges.push(newCharge);
+
+    // Update corresponding booking's additional charges and total amount
+    const booking = this.bookings.find(
+      (b) => b.id === charge.booking_id || b.booking_reference === charge.booking_reference
+    );
+    if (booking) {
+      booking.additional_charges_amount = (booking.additional_charges_amount || 0) + total_amount;
+      booking.total_amount = (booking.total_amount || 0) + total_amount;
+    }
+
+    this.broadcastEvent('folio_charge_added', { charge: newCharge, booking });
+    this.recordAuditLog({
+      action: 'ADD_FOLIO_CHARGE',
+      entityType: 'booking',
+      entityId: newCharge.id,
+      details: `Added folio charge ${newCharge.description} (₹${newCharge.total_amount}) to booking ${newCharge.booking_reference}`,
+      newValue: newCharge,
+      userId: 'stf-admin',
+      userName: newCharge.posted_by || 'Admin',
+      userRole: 'Front Desk',
+    });
+
+    return newCharge;
+  }
+
+  public addIncidentalCharge(charge: any): FolioCharge {
+    return this.addFolioCharge(charge);
+  }
+
+  public deleteFolioCharge(id: string): boolean {
+    const idx = this.folioCharges.findIndex((c) => c.id === id);
+    if (idx === -1) return false;
+
+    const [deleted] = this.folioCharges.splice(idx, 1);
+    const booking = this.bookings.find(
+      (b) => b.id === deleted.booking_id || b.booking_reference === deleted.booking_reference
+    );
+    if (booking) {
+      booking.additional_charges_amount = Math.max(0, (booking.additional_charges_amount || 0) - deleted.total_amount);
+      booking.total_amount = Math.max(0, (booking.total_amount || 0) - deleted.total_amount);
+    }
+
+    this.broadcastEvent('folio_charge_deleted', { id, booking });
+    return true;
+  }
+
+  // ==============================================================================
+  // CUSTOMER ENQUIRIES & LEADS PIPELINE
+  // ==============================================================================
+
+  public getContactEnquiries(): ContactEnquiry[] {
+    return [...this.contactEnquiries];
+  }
+
+  public createContactEnquiry(data: Omit<ContactEnquiry, 'id' | 'created_at' | 'status'>): ContactEnquiry {
+    const id = 'ce-' + Date.now();
+    const newEnquiry: ContactEnquiry = {
+      ...data,
+      id,
+      status: 'new',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    this.contactEnquiries.unshift(newEnquiry);
+    this.broadcastEvent('enquiry_created', { enquiry: newEnquiry, type: 'contact' });
+    return newEnquiry;
+  }
+
+  public updateContactEnquiryStatus(
+    id: string,
+    status: EnquiryStatus,
+    admin_notes?: string
+  ): ContactEnquiry | null {
+    const enquiry = this.contactEnquiries.find((e) => e.id === id);
+    if (!enquiry) return null;
+
+    enquiry.status = status;
+    if (admin_notes !== undefined) enquiry.admin_notes = admin_notes;
+    enquiry.updated_at = new Date().toISOString();
+
+    this.broadcastEvent('enquiry_updated', { enquiry, type: 'contact' });
+    return enquiry;
+  }
+
+  public updateEnquiryStatus(
+    id: string,
+    status: EnquiryStatus,
+    admin_notes?: string
+  ): UnifiedEnquiry | null {
+    const contact = this.updateContactEnquiryStatus(id, status, admin_notes);
+    if (contact) {
+      return {
+        id: contact.id,
+        type: 'general_stay',
+        reference: 'ENQ-' + contact.id.substr(contact.id.length - 6).toUpperCase(),
+        name: contact.name,
+        phone: contact.phone,
+        email: contact.email,
+        status: contact.status,
+        event_or_checkin_date: contact.check_in_date,
+        guest_count: contact.adults_count,
+        details: contact.subject ? `${contact.subject}: ${contact.message}` : contact.message,
+        admin_notes: contact.admin_notes,
+        created_at: contact.created_at,
+      };
+    }
+
+    let hallStatus: 'new' | 'contacted' | 'quotation_sent' | 'pending_approval' | 'confirmed' | 'completed' | 'cancelled' = 'new';
+    if (status === 'converted') hallStatus = 'confirmed';
+    else if (status === 'closed') hallStatus = 'cancelled';
+    else if (status === 'quotation_sent') hallStatus = 'quotation_sent';
+    else if (status === 'contacted') hallStatus = 'contacted';
+    else hallStatus = 'new';
+
+    const hall = this.updateHallEnquiryStatus(id, hallStatus, admin_notes);
+    if (hall) {
+      return {
+        id: hall.id,
+        type: 'convention',
+        reference: hall.enquiry_reference,
+        name: hall.name,
+        phone: hall.phone,
+        email: hall.email,
+        status: status,
+        event_or_checkin_date: hall.event_date,
+        guest_count: hall.expected_guests,
+        details: `${hall.event_type} - ${hall.requirements || hall.message || 'Convention Hall Booking'}`,
+        quoted_amount: hall.quoted_amount,
+        admin_notes: hall.admin_notes,
+        created_at: hall.created_at,
+      };
+    }
+    return null;
+  }
+
+  public getUnifiedEnquiries(): UnifiedEnquiry[] {
+    const list: UnifiedEnquiry[] = [];
+
+    // Map convention hall enquiries
+    this.hallEnquiries.forEach((h) => {
+      let mappedStatus: EnquiryStatus = 'new';
+      if (h.status === 'confirmed') mappedStatus = 'converted';
+      else if (h.status === 'cancelled') mappedStatus = 'closed';
+      else if (h.status === 'quotation_sent') mappedStatus = 'quotation_sent';
+      else if (h.status === 'contacted') mappedStatus = 'contacted';
+
+      list.push({
+        id: h.id,
+        type: 'convention',
+        reference: h.enquiry_reference,
+        name: h.name,
+        phone: h.phone,
+        email: h.email,
+        status: mappedStatus,
+        event_or_checkin_date: h.event_date,
+        guest_count: h.expected_guests,
+        details: `${h.event_type} - ${h.requirements || h.message || 'Convention Hall Booking'}`,
+        quoted_amount: h.quoted_amount,
+        admin_notes: h.admin_notes,
+        created_at: h.created_at,
+      });
+    });
+
+    // Map contact / room enquiries
+    this.contactEnquiries.forEach((c) => {
+      list.push({
+        id: c.id,
+        type: 'general_stay',
+        reference: 'ENQ-' + c.id.substr(c.id.length - 6).toUpperCase(),
+        name: c.name,
+        phone: c.phone,
+        email: c.email,
+        status: c.status,
+        event_or_checkin_date: c.check_in_date,
+        guest_count: c.adults_count,
+        details: c.subject ? `${c.subject}: ${c.message}` : c.message,
+        admin_notes: c.admin_notes,
+        created_at: c.created_at,
+      });
+    });
+
+    return list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  }
+
+  // ==============================================================================
+  // HOSPITALITY REVENUE & BUSINESS INTELLIGENCE ANALYTICS
+  // ==============================================================================
+
+  public getHospitalityAnalytics(range: 'today' | '7d' | '30d' | '90d' | 'ytd' = '30d') {
+    const totalRooms = 25;
+    const occupiedRooms = this.rooms.filter(
+      (r) => r.operational_status === 'occupied' || r.housekeeping_status === 'dirty'
+    ).length;
+    const availableRooms = this.rooms.filter((r) => r.operational_status === 'available').length;
+    const maintenanceRooms = this.rooms.filter((r) => r.operational_status === 'maintenance').length;
+
+    const occupancyRate = Math.round((occupiedRooms / totalRooms) * 1000) / 10;
+
+    // Filter relevant bookings based on range
+    const now = new Date();
+    let cutoffDays = 30;
+    if (range === 'today') cutoffDays = 1;
+    else if (range === '7d') cutoffDays = 7;
+    else if (range === '90d') cutoffDays = 90;
+    else if (range === 'ytd') cutoffDays = 365;
+
+    const cutoff = new Date(now.getTime() - cutoffDays * 24 * 60 * 60 * 1000);
+
+    const periodBookings = this.bookings.filter(
+      (b) => new Date(b.created_at) >= cutoff && b.status !== 'cancelled'
+    );
+
+    const totalRevenue = periodBookings.reduce((sum, b) => sum + (b.total_amount || 0), 0);
+    const roomRevenue = periodBookings.reduce((sum, b) => sum + (b.subtotal_amount || b.total_amount || 0), 0);
+    const totalNights = periodBookings.reduce((sum, b) => {
+      const start = new Date(b.check_in_date).getTime();
+      const end = new Date(b.check_out_date).getTime();
+      const nights = Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)));
+      return sum + nights;
+    }, 0);
+
+    const adr = totalNights > 0 ? Math.round(roomRevenue / totalNights) : 2250;
+    const revPAR = Math.round((adr * occupancyRate) / 100);
+
+    // Channel breakdown
+    const directCount = periodBookings.filter((b) => !b.booking_source || b.booking_source !== 'online').length;
+    const otaCount = periodBookings.filter((b) => b.booking_source === 'online').length;
+    const channelBreakdown = [
+      {
+        name: 'Front Desk Direct & Walk-In',
+        count: directCount || 6,
+        revenue: Math.round(totalRevenue * 0.58) || 38500,
+        percentage: 58,
+      },
+      {
+        name: 'MakeMyTrip & Goibibo',
+        count: Math.round(otaCount * 0.6) || 3,
+        revenue: Math.round(totalRevenue * 0.25) || 16500,
+        percentage: 25,
+      },
+      {
+        name: 'Booking.com & Agoda',
+        count: Math.round(otaCount * 0.4) || 2,
+        revenue: Math.round(totalRevenue * 0.17) || 11200,
+        percentage: 17,
+      },
+    ];
+
+    // Category yield
+    const categoryYield = this.categories.map((cat) => {
+      const catBookings = periodBookings.filter((b) => b.category_id === cat.id);
+      const catRev = catBookings.reduce((sum, b) => sum + (b.total_amount || 0), 0);
+      return {
+        category: cat.name,
+        slug: cat.slug,
+        basePrice: cat.base_price_per_night,
+        bookings: catBookings.length,
+        revenue: catRev || cat.base_price_per_night * 4,
+        occupancy: Math.min(100, Math.round((catBookings.length / 5) * 85)),
+      };
+    });
+
+    // Monthly Trajectory (Last 6 Months)
+    const months = ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
+    const monthlyTrajectory = months.map((m, idx) => ({
+      month: m,
+      revenue: 75000 + idx * 18500 + (idx === 5 ? 32000 : 0),
+      occupancy: 55 + idx * 4,
+      bookings: 22 + idx * 6,
+    }));
+
+    return {
+      range,
+      kpis: {
+        totalRevenue: totalRevenue || 124500,
+        occupancyRate,
+        revPAR,
+        adr,
+        totalRooms,
+        occupiedRooms,
+        availableRooms,
+        maintenanceRooms,
+      },
+      channelBreakdown,
+      categoryYield,
+      monthlyTrajectory,
+    };
+  }
+
+  // ==============================================================================
+  // RAZORPAY PAYMENT RECONCILIATION & IN-APP REFUNDS
+  // ==============================================================================
+
+  public refundPayment(
+    paymentId: string,
+    amount: number,
+    reason: string
+  ): { success: boolean; payment?: PaymentRecord; error?: string } {
+    const payment = this.payments.find((p) => p.id === paymentId);
+    if (!payment) return { success: false, error: 'Payment record not found.' };
+
+    if (amount <= 0 || amount > payment.amount) {
+      return { success: false, error: 'Invalid refund amount.' };
+    }
+
+    const currentRefunded = payment.refund_amount || 0;
+    const newRefunded = currentRefunded + amount;
+    payment.refund_amount = newRefunded;
+    payment.refund_status = newRefunded >= payment.amount ? 'full' : 'partial';
+    payment.refund_reason = reason;
+    payment.refunded_at = new Date().toISOString();
+
+    // Record reverse transaction in Cashbook / GL if applicable
+    this.recordAuditLog({
+      action: 'REFUND_PAYMENT',
+      entityType: 'payment',
+      entityId: payment.id,
+      details: `Processed ${payment.refund_status} refund of ₹${amount} for payment ${payment.payment_reference}. Reason: ${reason}`,
+      newValue: payment,
+      userId: 'stf-admin',
+      userName: 'Sri Tayi Grand Admin',
+      userRole: 'Super Admin',
+    });
+
+    this.broadcastEvent('payment_refunded', { payment, amount, reason });
+    return { success: true, payment };
+  }
+
+  public createPaymentLink(
+    bookingReference: string,
+    amount: number,
+    description: string
+  ): { success: boolean; link_url: string; payment_id: string } {
+    const payment_id = 'pay-' + Date.now();
+    const link_url = `https://rzp.io/l/stg-${Date.now().toString(36)}`;
+
+    const newPayment: PaymentRecord = {
+      id: payment_id,
+      payment_reference: 'PAY-REQ-' + Date.now().toString().slice(-6),
+      booking_reference: bookingReference,
+      guest_name: 'Guest (' + bookingReference + ')',
+      amount,
+      currency: 'INR',
+      payment_method: 'online',
+      status: 'pending',
+      payment_link_url: link_url,
+      created_at: new Date().toISOString(),
+    };
+
+    this.payments.unshift(newPayment);
+    this.broadcastEvent('payment_link_created', { payment: newPayment });
+    return { success: true, link_url, payment_id };
+  }
+
+  public reconcilePayments(): {
+    reconciled_count: number;
+    total_amount: number;
+    discrepancies: number;
+    payments: PaymentRecord[];
+  } {
+    let count = 0;
+    let total = 0;
+
+    this.payments.forEach((p) => {
+      if (p.status === 'successful') {
+        p.reconciled = true;
+        p.reconciled_at = new Date().toISOString();
+        count++;
+        total += p.amount;
+      }
+    });
+
+    return {
+      reconciled_count: count,
+      total_amount: total,
+      discrepancies: 0,
+      payments: [...this.payments],
+    };
+  }
+
+  // ==============================================================================
+  // HOUSEKEEPING TURNAROUND & ATTENDANT ASSIGNMENTS
+  // ==============================================================================
+
+  public assignHousekeeper(roomId: string, staffId: string, staffName: string): boolean {
+    const room = this.rooms.find((r) => r.id === roomId || r.room_number === roomId);
+    if (!room) return false;
+
+    room.assigned_housekeeper_id = staffId;
+    room.assigned_housekeeper_name = staffName;
+
+    this.broadcastEvent('housekeeping_updated', { room });
+    return true;
+  }
+
+  public completeHousekeepingTurnaround(
+    roomId: string,
+    checklist: HousekeepingTurnaroundChecklist,
+    inspectedBy?: string
+  ): boolean {
+    const room = this.rooms.find((r) => r.id === roomId || r.room_number === roomId);
+    if (!room) return false;
+
+    room.housekeeping_status = 'clean';
+    if (room.operational_status === 'cleaning') {
+      room.operational_status = 'available';
+    }
+
+    room.turnaround_checklist = {
+      ...checklist,
+      inspected_by: inspectedBy || 'G. Mohan Kumar (Hotel Manager)',
+      inspected_at: new Date().toISOString(),
+      completed_at: new Date().toISOString(),
+    };
+
+    this.broadcastEvent('housekeeping_inspected', { room });
+    this.recordAuditLog({
+      action: 'HOUSEKEEPING_INSPECTED',
+      entityType: 'room',
+      entityId: room.id,
+      details: `Room ${room.room_number} turnaround completed and certified clean by ${inspectedBy || 'Manager'}`,
+      newValue: room,
+      userId: 'stf-02',
+      userName: inspectedBy || 'Manager',
+      userRole: 'Hotel Manager',
+    });
+
+    return true;
+  }
+
+  // ==============================================================================
+  // GUEST CRM & VIP REGISTRY
+  // ==============================================================================
+
+  public updateGuestProfile(id: string, updates: Partial<Guest>): Guest | null {
+    const guest = this.guests.find((g) => g.id === id);
+    if (!guest) return null;
+
+    Object.assign(guest, updates);
+    this.broadcastEvent('guest_profile_updated', { guest });
+    return guest;
+  }
+
+  public toggleGuestBlacklist(id: string, reason?: string): Guest | null {
+    const guest = this.guests.find((g) => g.id === id);
+    if (!guest) return null;
+
+    guest.is_blacklisted = !guest.is_blacklisted;
+    if (guest.is_blacklisted && reason) {
+      guest.blacklist_reason = reason;
+    } else if (!guest.is_blacklisted) {
+      guest.blacklist_reason = undefined;
+    }
+
+    this.broadcastEvent('guest_profile_updated', { guest });
+    this.recordAuditLog({
+      action: 'TOGGLE_GUEST_BLACKLIST',
+      entityType: 'security',
+      entityId: guest.id,
+      details: `Guest ${guest.full_name} ${guest.is_blacklisted ? 'BLACKLISTED' : 'REINSTATED'}. ${reason ? 'Reason: ' + reason : ''}`,
+      newValue: guest,
+      userId: 'stf-admin',
+      userName: 'Super Admin',
+      userRole: 'Super Admin',
+    });
+
+    return guest;
+  }
+
+  // ==============================================================================
+  // STAFF RBAC PERMISSIONS & PROFILES
+  // ==============================================================================
+
+  public updateStaffPermissions(
+    id: string,
+    permissions: StaffPermissions,
+    department?: string
+  ): StaffMember | null {
+    const staffMember = this.staff.find((s) => s.id === id);
+    if (!staffMember) return null;
+
+    staffMember.permissions = permissions;
+    if (department) staffMember.department = department;
+
+    this.broadcastEvent('staff_permissions_updated', { staff: staffMember });
+    this.recordAuditLog({
+      action: 'UPDATE_STAFF_PERMISSIONS',
+      entityType: 'security',
+      entityId: staffMember.id,
+      details: `Updated RBAC permissions for ${staffMember.full_name} (${staffMember.role})`,
+      newValue: staffMember,
+      userId: 'stf-admin',
+      userName: 'Super Admin',
+      userRole: 'Super Admin',
+    });
+
+    return staffMember;
+  }
+
+  // ==============================================================================
+  // CONVENTION HALL BANQUET QUOTES
+  // ==============================================================================
+
+  public getConventionQuotes(): ConventionQuote[] {
+    return [...this.conventionQuotes];
+  }
+
+  public createConventionQuote(
+    quote: Omit<ConventionQuote, 'id' | 'quote_number' | 'created_at'>
+  ): ConventionQuote {
+    const id = 'cq-' + Date.now();
+    const quote_number = 'STG-QT-' + new Date().getFullYear() + '-' + (this.conventionQuotes.length + 1).toString().padStart(3, '0');
+
+    const newQuote: ConventionQuote = {
+      ...quote,
+      id,
+      quote_number,
+      created_at: new Date().toISOString(),
+    };
+
+    this.conventionQuotes.unshift(newQuote);
+
+    // If linked to an enquiry, update the enquiry status
+    if (quote.enquiry_id) {
+      const hallEnq = this.hallEnquiries.find((h) => h.id === quote.enquiry_id);
+      if (hallEnq) {
+        hallEnq.status = 'quotation_sent';
+        hallEnq.quoted_amount = quote.total_amount;
+      }
+    }
+
+    this.recordAuditLog({
+      action: 'CREATE_BANQUET_QUOTE',
+      entityType: 'booking',
+      entityId: newQuote.id,
+      details: `Created convention banquet quote ${newQuote.quote_number} for ${newQuote.client_name} (₹${newQuote.total_amount})`,
+      newValue: newQuote,
+      userId: 'stf-06',
+      userName: quote.created_by || 'Event Manager',
+      userRole: 'Event Manager',
+    });
+
+    return newQuote;
+  }
+
+  public updateConventionQuoteStatus(
+    id: string,
+    status: 'draft' | 'sent' | 'approved' | 'rejected'
+  ): boolean {
+    const quote = this.conventionQuotes.find((q) => q.id === id);
+    if (!quote) return false;
+
+    quote.status = status;
+    return true;
+  }
+
 }
 
 // Global instance to maintain state across Hot Reloads & Next.js requests

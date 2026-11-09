@@ -116,6 +116,8 @@ export function useRealtimeSync(options: UseRealtimeSyncOptions = {}) {
         'maintenance_ticket_created',
         'maintenance_ticket_updated',
         'maintenance_ticket_deleted',
+        'folio_charge_added',
+        'folio_charge_deleted',
         'full_sync',
       ];
 
@@ -186,6 +188,11 @@ export const adminOperations = {
     roomNumber?: string;
     issueRfid?: boolean;
     staffName?: string;
+    idProofType?: string;
+    idProofNumber?: string;
+    nationality?: string;
+    cityOfOrigin?: string;
+    purposeOfVisit?: string;
   }) {
     const res = await fetch('/api/admin/operations', {
       method: 'POST',
@@ -277,6 +284,74 @@ export const adminOperations = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Payment recording failed');
+    return data;
+  },
+
+  async fetchFolioCharges(bookingIdOrRef: string) {
+    const res = await fetch(`/api/admin/bookings/${encodeURIComponent(bookingIdOrRef)}/charges`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to fetch folio charges');
+    return data;
+  },
+
+  async addFolioCharge(bookingIdOrRef: string, params: {
+    category: string;
+    description: string;
+    amount: number;
+    tax_rate?: number;
+    posted_by?: string;
+  }) {
+    const res = await fetch(`/api/admin/bookings/${encodeURIComponent(bookingIdOrRef)}/charges`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to add folio charge');
+    return data;
+  },
+
+  async deleteFolioCharge(bookingIdOrRef: string, chargeId: string) {
+    const res = await fetch(`/api/admin/bookings/${encodeURIComponent(bookingIdOrRef)}/charges?chargeId=${encodeURIComponent(chargeId)}`, {
+      method: 'DELETE',
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to delete folio charge');
+    return data;
+  },
+
+  async statutoryWalkIn(params: {
+    guestName: string;
+    guestPhone: string;
+    guestEmail?: string;
+    nationality?: string;
+    cityOfOrigin?: string;
+    idProofType: string;
+    idProofNumber: string;
+    purposeOfVisit: string;
+    categoryId: string;
+    roomNumber: string;
+    checkInDate: string;
+    checkOutDate: string;
+    adultsCount?: number;
+    childrenCount?: number;
+    baseTariff?: number;
+    isTariffOverridden?: boolean;
+    tariffOverrideReason?: string;
+    paymentMethod: string;
+    amountCollected?: number;
+    issueKeycard?: boolean;
+    cardUid?: string;
+    specialRequests?: string;
+    staffName?: string;
+  }) {
+    const res = await fetch('/api/admin/operations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'statutory_walk_in', ...params }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Statutory walk-in registration failed');
     return data;
   },
 };

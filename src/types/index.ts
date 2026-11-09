@@ -100,7 +100,12 @@ export interface PhysicalRoom {
   notes?: string;
   is_active: boolean;
   rfid_device_id?: string;
+  assigned_housekeeper_id?: string;
+  assigned_housekeeper_name?: string;
+  turnaround_checklist?: HousekeepingTurnaroundChecklist;
 }
+
+export type GuestVIPTier = 'regular' | 'silver' | 'gold' | 'vip_platinum';
 
 export interface Guest {
   id: string;
@@ -111,11 +116,20 @@ export interface Guest {
   city?: string;
   state?: string;
   country: string;
+  nationality?: string;
+  city_of_origin?: string;
+  purpose_of_visit?: string;
   id_type?: string;
   id_number?: string;
   total_stays: number;
   notes?: string;
   created_at: string;
+  vip_tier?: GuestVIPTier;
+  preferences?: string[];
+  is_blacklisted?: boolean;
+  blacklist_reason?: string;
+  total_spend?: number;
+  last_stay_date?: string;
 }
 
 export interface Booking {
@@ -163,6 +177,11 @@ export interface Booking {
   keycard_uid?: string;
   id_proof_type?: string;
   id_proof_number?: string;
+  nationality?: string;
+  city_of_origin?: string;
+  purpose_of_visit?: string;
+  tariff_override_amount?: number;
+  tariff_override_reason?: string;
   created_at: string;
 }
 
@@ -179,6 +198,13 @@ export interface PaymentRecord {
   status: PaymentStatus;
   paid_at?: string;
   created_at: string;
+  refund_status?: 'none' | 'partial' | 'full';
+  refund_amount?: number;
+  refund_reason?: string;
+  refunded_at?: string;
+  payment_link_url?: string;
+  reconciled?: boolean;
+  reconciled_at?: string;
 }
 
 export interface HallEnquiry {
@@ -313,6 +339,15 @@ export interface CleaningSession {
   status: 'in_progress' | 'completed' | 'aborted';
 }
 
+export interface StaffPermissions {
+  can_override_rates: boolean;
+  can_process_refunds: boolean;
+  can_view_accounting: boolean;
+  can_encode_rfid: boolean;
+  can_run_night_audit: boolean;
+  can_manage_inventory: boolean;
+}
+
 export interface StaffMember {
   id: string;
   full_name: string;
@@ -321,6 +356,11 @@ export interface StaffMember {
   role: StaffRole;
   is_active: boolean;
   last_login?: string;
+  department?: string;
+  permissions?: StaffPermissions;
+  shift?: ShiftType;
+  emergency_contact?: string;
+  monthly_salary?: number;
 }
 
 
@@ -458,11 +498,13 @@ export interface MaintenanceTicket {
 export type RealtimeEventType = 
   | 'booking_created' 
   | 'booking_updated' 
+  | 'booking_status_updated'
   | 'walk_in_created'
   | 'room_assigned' 
   | 'check_in' 
   | 'check_out' 
   | 'payment_recorded' 
+  | 'payment_received'
   | 'expense_created' 
   | 'expense_deleted'
   | 'daily_closing' 
@@ -470,6 +512,7 @@ export type RealtimeEventType =
   | 'rfid_event'
   | 'rfid_scan'
   | 'room_status_changed'
+  | 'room_status_updated'
   | 'cash_shift_opened'
   | 'cash_shift_closed'
   | 'cash_transaction_created'
@@ -484,6 +527,15 @@ export type RealtimeEventType =
   | 'journal_entry_created'
   | 'audit_log_created'
   | 'attendance_recorded'
+  | 'enquiry_created'
+  | 'enquiry_updated'
+  | 'folio_charge_added'
+  | 'folio_charge_deleted'
+  | 'payment_refunded'
+  | 'payment_link_created'
+  | 'housekeeping_inspected'
+  | 'guest_profile_updated'
+  | 'staff_permissions_updated'
   | 'full_sync';
 
 export interface RealtimeMessage {
@@ -674,4 +726,128 @@ export interface StaffAttendance {
   notes?: string;
   created_at: string;
 }
+
+// ==============================================================================
+// GUEST FOLIO BILLING & INCIDENTAL CHARGES
+// ==============================================================================
+
+export type FolioChargeCategory = 
+  | 'extra_bed' 
+  | 'laundry' 
+  | 'room_service' 
+  | 'late_checkout' 
+  | 'early_checkin'
+  | 'minibar' 
+  | 'damage' 
+  | 'misc';
+
+export interface FolioCharge {
+  id: string;
+  booking_id: string;
+  booking_reference: string;
+  description: string;
+  category: FolioChargeCategory;
+  amount: number;
+  tax_rate: number; // e.g. 0.12 (12% GST)
+  tax_amount: number;
+  total_amount: number;
+  posted_by: string;
+  created_at: string;
+}
+
+// ==============================================================================
+// HOUSEKEEPING TURNAROUND & INSPECTION CHECKLISTS
+// ==============================================================================
+
+export interface HousekeepingTurnaroundChecklist {
+  linen_changed: boolean;
+  towels_replaced: boolean;
+  bathroom_sanitized: boolean;
+  toiletries_restocked: boolean;
+  ac_geyser_checked: boolean;
+  dustbin_emptied: boolean;
+  floor_mopped: boolean;
+  assigned_staff_id?: string;
+  assigned_staff_name?: string;
+  inspection_notes?: string;
+  inspected_by?: string;
+  inspected_at?: string;
+  completed_at?: string;
+}
+
+// ==============================================================================
+// UNIFIED CUSTOMER ENQUIRIES & LEADS PIPELINE
+// ==============================================================================
+
+export type EnquiryType = 'convention' | 'general_stay';
+export type EnquiryStatus = 'new' | 'contacted' | 'quotation_sent' | 'converted' | 'closed';
+
+export interface ContactEnquiry {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  subject?: string;
+  message: string;
+  check_in_date?: string;
+  check_out_date?: string;
+  room_type?: string;
+  adults_count?: number;
+  status: EnquiryStatus;
+  source: 'website_contact' | 'room_enquiry' | 'direct_phone' | 'walk_in';
+  admin_notes?: string;
+  created_at: string;
+  updated_at?: string;
+}
+
+export interface UnifiedEnquiry {
+  id: string;
+  type: EnquiryType;
+  reference: string;
+  name: string;
+  phone: string;
+  email?: string;
+  status: EnquiryStatus;
+  event_or_checkin_date?: string;
+  guest_count?: number;
+  details?: string;
+  quoted_amount?: number;
+  admin_notes?: string;
+  created_at: string;
+}
+
+// ==============================================================================
+// CONVENTION HALL BANQUET QUOTE & EVENT PLANNING
+// ==============================================================================
+
+export type SeatingLayoutType = 'theater' | 'cluster' | 'classroom' | 'ushape';
+export type CateringPackageType = 'veg_thali' | 'deluxe_buffet' | 'royal_feast' | 'high_tea' | 'none';
+
+export interface ConventionQuote {
+  id: string;
+  quote_number: string;
+  enquiry_id?: string;
+  client_name: string;
+  client_phone: string;
+  client_email?: string;
+  event_name: string;
+  event_date: string;
+  seating_layout: SeatingLayoutType;
+  guest_count: number;
+  catering_package: CateringPackageType;
+  catering_rate_per_plate: number;
+  hall_rental_charge: number;
+  av_sound_lighting: number;
+  stage_decoration: number;
+  generator_diesel: number;
+  subtotal: number;
+  gst_rate: number; // 0.18 for banquet / services
+  gst_amount: number;
+  total_amount: number;
+  status: 'draft' | 'sent' | 'approved' | 'rejected';
+  created_by: string;
+  created_at: string;
+  valid_until: string;
+}
+
 

@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { ReceptionStandeeModal } from '@/components/admin/ReceptionStandeeModal';
-import { Booking, PhysicalRoom } from '@/types';
+import { StatutoryWalkInModal } from '@/components/admin/StatutoryWalkInModal';
+import { Booking, PhysicalRoom, RoomCategory } from '@/types';
 import { issuePhysicalKeycard, checkoutPhysicalCard, playChimeSound } from '@/lib/rfid/bridge-client';
 import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
 import {
@@ -22,21 +23,33 @@ import {
   Plus,
   AlertCircle,
   Radio,
+  UserCheck,
+  ShieldCheck,
 } from 'lucide-react';
 
 export default function FrontDeskPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [rooms, setRooms] = useState<PhysicalRoom[]>([]);
+  const [categories, setCategories] = useState<RoomCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Modals state
   const [checkInModalBooking, setCheckInModalBooking] = useState<Booking | null>(null);
   const [checkOutModalBooking, setCheckOutModalBooking] = useState<Booking | null>(null);
+  const [showStatutoryModal, setShowStatutoryModal] = useState(false);
+  const [statutoryInitialData, setStatutoryInitialData] = useState<any>(null);
 
   // Check-in form fields
   const [selectedRoomId, setSelectedRoomId] = useState('');
   const [issueRfid, setIssueRfid] = useState(true);
+
+  // Expected arrival statutory check-in fields
+  const [arrivalIdType, setArrivalIdType] = useState('Aadhaar Card');
+  const [arrivalIdNumber, setArrivalIdNumber] = useState('');
+  const [arrivalNationality, setArrivalNationality] = useState<'Indian' | 'Foreigner'>('Indian');
+  const [arrivalCity, setArrivalCity] = useState('Kadiri');
+  const [arrivalPurpose, setArrivalPurpose] = useState('Pilgrimage / Temple Darshan');
 
   // Check-out form fields
   const [additionalCharges, setAdditionalCharges] = useState<number>(0);
@@ -62,6 +75,7 @@ export default function FrontDeskPage() {
       if (data.success) {
         setBookings(data.bookings || []);
         setRooms(data.rooms || []);
+        if (data.categories) setCategories(data.categories);
       }
     } catch {
       // Ignored
@@ -185,6 +199,11 @@ export default function FrontDeskPage() {
         roomId: assignedRoom.id,
         roomNumber: assignedRoom.room_number,
         issueRfid,
+        idProofType: arrivalIdType,
+        idProofNumber: arrivalIdNumber.trim() || undefined,
+        nationality: arrivalNationality,
+        cityOfOrigin: arrivalCity.trim() || undefined,
+        purposeOfVisit: arrivalPurpose,
         staffName: 'Front Desk Reception',
       });
 
@@ -262,16 +281,30 @@ export default function FrontDeskPage() {
           </p>
         </div>
 
-        {/* Search */}
-        <div className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 text-[#786B61] absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search guest, phone, room, or ref..."
-            className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-[#EFE3D6] bg-white text-[#241912] focus:border-[#D8AD56] focus:outline-none shadow-sm"
-          />
+        {/* Action Buttons & Search */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
+          <button
+            type="button"
+            onClick={() => {
+              setStatutoryInitialData(null);
+              setShowStatutoryModal(true);
+            }}
+            className="px-4 py-2.5 rounded-xl bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer shrink-0"
+          >
+            <UserCheck className="w-4 h-4 text-[#D8AD56]" />
+            <span>+ Statutory Walk-In Check-In</span>
+          </button>
+
+          <div className="relative w-full sm:w-64">
+            <Search className="w-4 h-4 text-[#786B61] absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search guest, phone, room, or ref..."
+              className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-[#EFE3D6] bg-white text-[#241912] focus:border-[#D8AD56] focus:outline-none shadow-sm"
+            />
+          </div>
         </div>
       </div>
 
@@ -424,29 +457,50 @@ export default function FrontDeskPage() {
                     </div>
                   </div>
 
-                  {/* 1-Click Encode & Issue CTA */}
-                  <button
-                    type="button"
-                    disabled={isEncoding || !currentSelectedRoom}
-                    onClick={() => handleAssignAndEncodeWalkIn(item)}
-                    className="w-full py-2.5 px-3 rounded-lg bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 cursor-pointer"
-                  >
-                    {isEncoding ? (
-                      <>
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#D8AD56]" />
-                        <span>Programming Be-Tech Keycard...</span>
-                      </>
-                    ) : (
-                      <>
-                        <KeyRound className="w-3.5 h-3.5 text-[#D8AD56]" />
-                        <span>
-                          {isPaid
-                            ? ('⚡ 1-Click Encode & Issue Room ' + (currentSelectedRoom || ''))
-                            : ('💵 Collect ₹' + item.total_amount + ' & Issue Room ' + (currentSelectedRoom || ''))}
-                        </span>
-                      </>
-                    )}
-                  </button>
+                  <div className="space-y-1.5">
+                    {/* 1-Click Encode & Issue CTA */}
+                    <button
+                      type="button"
+                      disabled={isEncoding || !currentSelectedRoom}
+                      onClick={() => handleAssignAndEncodeWalkIn(item)}
+                      className="w-full py-2 px-3 rounded-lg bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 cursor-pointer"
+                    >
+                      {isEncoding ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#D8AD56]" />
+                          <span>Programming Be-Tech Keycard...</span>
+                        </>
+                      ) : (
+                        <>
+                          <KeyRound className="w-3.5 h-3.5 text-[#D8AD56]" />
+                          <span>
+                            {isPaid
+                              ? ('⚡ 1-Click Encode & Issue Room ' + (currentSelectedRoom || ''))
+                              : ('💵 Collect ₹' + item.total_amount + ' & Issue Room ' + (currentSelectedRoom || ''))}
+                          </span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStatutoryInitialData({
+                          guestName: item.guest_name,
+                          guestPhone: item.guest_phone,
+                          guestEmail: item.guest_email,
+                          categoryId: item.category_id,
+                          roomNumber: currentSelectedRoom,
+                          bookingReference: item.booking_reference,
+                        });
+                        setShowStatutoryModal(true);
+                      }}
+                      className="w-full py-1.5 px-3 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] border border-[#D8AD56]/40 text-[#382216] text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#D8AD56]" />
+                      <span>Statutory Registration & Tariff Form</span>
+                    </button>
+                  </div>
                 </div>
               );
             })}
@@ -510,6 +564,11 @@ export default function FrontDeskPage() {
                         setCheckInModalBooking(b);
                         const match = availableRooms.find((r) => r.category_id === b.category_id);
                         setSelectedRoomId(match ? match.id : (availableRooms[0]?.id || ''));
+                        setArrivalIdType(b.id_proof_type || 'Aadhaar Card');
+                        setArrivalIdNumber(b.id_proof_number || '');
+                        setArrivalNationality((b.nationality as any) || 'Indian');
+                        setArrivalCity(b.city_of_origin || 'Kadiri');
+                        setArrivalPurpose(b.purpose_of_visit || 'Pilgrimage / Temple Darshan');
                       }}
                       className="px-3.5 py-1.5 rounded-lg bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm"
                     >
@@ -632,6 +691,79 @@ export default function FrontDeskPage() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              {/* Statutory Guest Identity & Origin (Form C Norms) */}
+              <div className="p-3 rounded-xl bg-[#FAF7F2] border border-[#EFE3D6] space-y-2.5">
+                <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-[#D8AD56]">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Indian Statutory Identity Verification</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-0.5">Govt ID Type *</label>
+                    <select
+                      value={arrivalIdType}
+                      onChange={(e) => setArrivalIdType(e.target.value)}
+                      className="w-full p-2 text-xs font-semibold rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                    >
+                      <option value="Aadhaar Card">Aadhaar Card</option>
+                      <option value="Passport">Passport</option>
+                      <option value="Driving License">Driving License</option>
+                      <option value="Voter ID">Voter ID</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-0.5">Govt ID Number *</label>
+                    <input
+                      type="text"
+                      required
+                      value={arrivalIdNumber}
+                      onChange={(e) => setArrivalIdNumber(e.target.value)}
+                      placeholder="e.g. 5482 1928 3847"
+                      className="w-full p-2 text-xs font-mono font-bold rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-0.5">Nationality</label>
+                    <select
+                      value={arrivalNationality}
+                      onChange={(e) => setArrivalNationality(e.target.value as any)}
+                      className="w-full p-2 text-xs rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                    >
+                      <option value="Indian">Indian Citizen</option>
+                      <option value="Foreigner">Foreign National</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-0.5">City of Origin</label>
+                    <input
+                      type="text"
+                      value={arrivalCity}
+                      onChange={(e) => setArrivalCity(e.target.value)}
+                      placeholder="e.g. Bengaluru"
+                      className="w-full p-2 text-xs rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-0.5">Purpose of Visit</label>
+                    <select
+                      value={arrivalPurpose}
+                      onChange={(e) => setArrivalPurpose(e.target.value)}
+                      className="w-full p-2 text-xs rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                    >
+                      <option value="Pilgrimage / Temple Darshan">Pilgrimage / Temple Darshan</option>
+                      <option value="Business">Business</option>
+                      <option value="Transit">Transit</option>
+                      <option value="Personal / Family">Personal / Family</option>
+                    </select>
+                  </div>
+                </div>
               </div>
 
               <div className="p-3 rounded-lg border border-[#EFE3D6] flex items-center justify-between bg-white">
@@ -776,6 +908,24 @@ export default function FrontDeskPage() {
         </div>
       )}
       <ReceptionStandeeModal isOpen={showStandeeModal} onClose={() => setShowStandeeModal(false)} />
+      <StatutoryWalkInModal
+        isOpen={showStatutoryModal}
+        onClose={() => {
+          setShowStatutoryModal(false);
+          setStatutoryInitialData(null);
+        }}
+        availableRooms={availableRooms}
+        categories={categories}
+        initialData={statutoryInitialData}
+        onSuccess={async (booking, roomNum) => {
+          setWalkInAlert({
+            message: `Walk-in guest ${booking.guest_name} registered and checked into Room ${roomNum}! Smart keycard encoded.`,
+            type: 'success',
+          });
+          await fetchLiveState();
+          await fetchWalkInQueue();
+        }}
+      />
     </div>
   );
 }

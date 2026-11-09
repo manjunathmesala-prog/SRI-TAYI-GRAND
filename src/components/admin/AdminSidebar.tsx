@@ -34,6 +34,7 @@ import {
   ShieldCheck,
   CalendarRange,
   TrendingUp,
+  MessageSquare,
 } from 'lucide-react';
 import { useRealtimeSync } from '@/lib/realtime-client';
 
@@ -88,9 +89,11 @@ export function AdminSidebar() {
 
   const menuItems = [
     { label: 'Dashboard Overview', href: '/admin/dashboard', icon: LayoutDashboard },
+    { label: 'Analytics', href: '/admin/analytics', icon: BarChart3, badge: 'Executive' },
     { label: 'Front Desk / Reception', href: '/admin/front-desk', icon: ConciergeBell, highlight: true },
     { label: 'Room Tape Chart', href: '/admin/rooms/board', icon: CalendarRange, badge: 'Matrix' },
     { label: 'Bookings', href: '/admin/bookings', icon: CalendarCheck },
+    { label: 'Enquiries Pipeline', href: '/admin/enquiries', icon: MessageSquare, badge: 'Leads' },
     { label: 'OTA Channel Manager', href: '/admin/channels', icon: Globe, badge: '2-Way' },
     { label: 'Dynamic Pricing', href: '/admin/pricing', icon: TrendingUp, badge: 'Yield' },
     { label: 'Cashbook & Drawer', href: '/admin/cashbook', icon: Wallet, badge: 'Live' },

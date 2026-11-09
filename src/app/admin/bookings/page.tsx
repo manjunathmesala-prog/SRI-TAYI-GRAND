@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Booking, BookingStatus, PhysicalRoom } from '@/types';
+import { Booking, BookingStatus, PhysicalRoom, FolioCharge } from '@/types';
 import {
   CalendarCheck,
   Search,
@@ -16,13 +16,20 @@ import {
   Printer,
   Radio,
   RefreshCw,
+  Receipt,
+  FileText,
 } from 'lucide-react';
 import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
+import { GuestFolioModal } from '@/components/admin/GuestFolioModal';
+import { PrintGstInvoiceModal } from '@/components/admin/PrintGstInvoiceModal';
 
 export default function BookingsAdminPage() {
   const [activeTab, setActiveTab] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [folioModalBooking, setFolioModalBooking] = useState<Booking | null>(null);
+  const [printInvoiceBooking, setPrintInvoiceBooking] = useState<Booking | null>(null);
+  const [printInvoiceCharges, setPrintInvoiceCharges] = useState<FolioCharge[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [rooms, setRooms] = useState<PhysicalRoom[]>([]);
   const [loading, setLoading] = useState(true);
@@ -233,13 +240,23 @@ export default function BookingsAdminPage() {
                       </span>
                     </td>
                     <td className="py-3.5 px-4 text-right">
-                      <button
-                        onClick={() => setSelectedBooking(b)}
-                        className="px-2.5 py-1.5 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-xs font-semibold text-[#382216] transition-colors inline-flex items-center gap-1 cursor-pointer"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>Manage</span>
-                      </button>
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => setFolioModalBooking(b)}
+                          className="px-2.5 py-1.5 rounded-lg bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] text-xs font-bold transition-all inline-flex items-center gap-1.5 cursor-pointer shadow-xs"
+                          title="View Guest Folio, Charges & Invoice"
+                        >
+                          <Receipt className="w-3.5 h-3.5" />
+                          <span>Folio / Invoice</span>
+                        </button>
+                        <button
+                          onClick={() => setSelectedBooking(b)}
+                          className="px-2.5 py-1.5 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] text-xs font-semibold text-[#382216] transition-colors inline-flex items-center gap-1 cursor-pointer"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Manage</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -342,11 +359,38 @@ export default function BookingsAdminPage() {
               </div>
             </div>
 
-            <div className="pt-3 border-t border-[#EFE3D6] flex justify-end">
+            <div className="pt-3 border-t border-[#EFE3D6] flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const b = selectedBooking;
+                    setSelectedBooking(null);
+                    setFolioModalBooking(b);
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-[#382216] text-[#D8AD56] text-xs font-bold hover:bg-[#25150F] flex items-center gap-1.5 shadow-xs cursor-pointer"
+                >
+                  <Receipt className="w-3.5 h-3.5" />
+                  <span>Open Folio & Charges</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const b = selectedBooking;
+                    setSelectedBooking(null);
+                    setPrintInvoiceBooking(b);
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-[#FAF7F2] border border-[#D8AD56]/40 text-[#382216] text-xs font-bold hover:bg-[#EFE3D6] flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Printer className="w-3.5 h-3.5" />
+                  <span>Print Tax Invoice</span>
+                </button>
+              </div>
+
               <button
                 type="button"
                 onClick={() => setSelectedBooking(null)}
-                className="px-4 py-2 rounded-lg bg-[#382216] text-[#EFE3D6] text-xs font-semibold"
+                className="px-4 py-2 rounded-lg bg-gray-200 text-gray-700 text-xs font-semibold hover:bg-gray-300"
               >
                 Close
               </button>
@@ -354,6 +398,26 @@ export default function BookingsAdminPage() {
           </div>
         </div>
       )}
+
+      {/* GUEST FOLIO & INCIDENTAL CHARGES MODAL */}
+      <GuestFolioModal
+        isOpen={!!folioModalBooking}
+        onClose={() => setFolioModalBooking(null)}
+        booking={folioModalBooking}
+        onOpenPrintInvoice={(b, charges) => {
+          setPrintInvoiceBooking(b);
+          setPrintInvoiceCharges(charges);
+        }}
+        onBookingUpdated={fetchBookings}
+      />
+
+      {/* PRINTABLE GST TAX INVOICE MODAL */}
+      <PrintGstInvoiceModal
+        isOpen={!!printInvoiceBooking}
+        onClose={() => setPrintInvoiceBooking(null)}
+        booking={printInvoiceBooking}
+        folioCharges={printInvoiceCharges}
+      />
     </div>
   );
 }

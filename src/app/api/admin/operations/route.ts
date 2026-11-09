@@ -79,6 +79,15 @@ export async function POST(req: NextRequest) {
         // Update status to checked_in
         const updatedBooking = repo.updateBookingStatus(bookingReference, 'checked_in', undefined, staffName);
 
+        // Update statutory guest registration fields if provided
+        if (updatedBooking) {
+          if (body.idProofType) updatedBooking.id_proof_type = body.idProofType;
+          if (body.idProofNumber) updatedBooking.id_proof_number = body.idProofNumber;
+          if (body.nationality) updatedBooking.nationality = body.nationality;
+          if (body.cityOfOrigin) updatedBooking.city_of_origin = body.cityOfOrigin;
+          if (body.purposeOfVisit) updatedBooking.purpose_of_visit = body.purposeOfVisit;
+        }
+
         // Issue RFID if requested
         let issuedCard = null;
         if (issueRfid && updatedBooking?.assigned_room_number) {
@@ -370,6 +379,90 @@ export async function POST(req: NextRequest) {
           });
         } catch (overbookErr: any) {
           return NextResponse.json({ success: false, error: overbookErr.message }, { status: 409 });
+        }
+      }
+
+      case 'statutory_walk_in': {
+        const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Front Desk', 'Receptionist']);
+        if (!auth.authorized) {
+          return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
+        }
+
+        const {
+          guestName,
+          guestPhone,
+          guestEmail,
+          nationality,
+          cityOfOrigin,
+          idProofType,
+          idProofNumber,
+          purposeOfVisit,
+          categoryId,
+          roomNumber,
+          checkInDate,
+          checkOutDate,
+          adultsCount,
+          childrenCount,
+          baseTariff,
+          isTariffOverridden,
+          tariffOverrideReason,
+          paymentMethod,
+          amountCollected,
+          issueKeycard,
+          cardUid,
+          specialRequests,
+        } = body;
+
+        if (!guestName || !guestPhone || !idProofType || !idProofNumber || !roomNumber || !categoryId) {
+          return NextResponse.json(
+            { success: false, error: 'Guest name, phone, Govt ID type, Govt ID number, room number, and category are required' },
+            { status: 400 }
+          );
+        }
+
+        if (isTariffOverridden && !tariffOverrideReason) {
+          return NextResponse.json(
+            { success: false, error: 'Manager justification note is required when tariff is overridden' },
+            { status: 400 }
+          );
+        }
+
+        const staffName = auth.session?.name || body.staffName || 'Front Desk Reception';
+
+        try {
+          const result = repo.createFrontDeskWalkIn({
+            guestName,
+            guestPhone,
+            guestEmail,
+            nationality,
+            cityOfOrigin,
+            idProofType,
+            idProofNumber,
+            purposeOfVisit: purposeOfVisit || 'Pilgrimage / Temple Darshan',
+            categoryId,
+            roomNumber,
+            checkInDate: checkInDate || new Date().toISOString().split('T')[0],
+            checkOutDate: checkOutDate || new Date(Date.now() + 86400000).toISOString().split('T')[0],
+            adultsCount: Number(adultsCount) || 2,
+            childrenCount: Number(childrenCount) || 0,
+            baseTariff: baseTariff !== undefined ? Number(baseTariff) : undefined,
+            isTariffOverridden: Boolean(isTariffOverridden),
+            tariffOverrideReason,
+            paymentMethod: paymentMethod || 'cash',
+            amountCollected: amountCollected !== undefined ? Number(amountCollected) : undefined,
+            issueKeycard: issueKeycard !== false,
+            cardUid,
+            specialRequests,
+            staffName,
+          });
+
+          return NextResponse.json({
+            success: true,
+            message: `Walk-in guest ${result.booking.guest_name} registered and checked into Room ${result.room.room_number}.`,
+            ...result,
+          });
+        } catch (err: any) {
+          return NextResponse.json({ success: false, error: err.message }, { status: 409 });
         }
       }
 

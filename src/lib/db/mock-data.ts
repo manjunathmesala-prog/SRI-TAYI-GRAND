@@ -25,7 +25,12 @@ import {
   GLAccount,
   JournalEntry,
   AuditLogEntry,
-  StaffAttendance
+  StaffAttendance,
+  FolioCharge,
+  ContactEnquiry,
+  ConventionQuote,
+  StaffPermissions,
+  HousekeepingTurnaroundChecklist
 } from '@/types';
 import { INITIAL_GOOGLE_REVIEWS } from '@/lib/reviews-data';
 
@@ -339,9 +344,62 @@ export const INITIAL_BOOKINGS: Booking[] = [
 ];
 
 export const INITIAL_GUESTS: Guest[] = [
-  { id: 'gst-01', full_name: 'K. Venkatesh Rao', phone: '9848022331', email: 'venkatesh.rao@gmail.com', city: 'Anantapur', state: 'Andhra Pradesh', country: 'India', total_stays: 3, created_at: '2026-08-15T10:00:00+05:30' },
-  { id: 'gst-02', full_name: 'P. Sudhakar Reddy', phone: '9440123890', email: 'sudhakar.reddy@yahoo.com', city: 'Pulivendula', state: 'Andhra Pradesh', country: 'India', total_stays: 1, created_at: '2026-11-03T16:20:00+05:30' },
-  { id: 'gst-03', full_name: 'Dr. Anand Raman', phone: '9989011223', email: 'dr.anand@apollo.org', city: 'Bengaluru', state: 'Karnataka', country: 'India', total_stays: 4, created_at: '2026-05-10T12:00:00+05:30' },
+  { 
+    id: 'gst-01', 
+    full_name: 'K. Venkatesh Rao', 
+    phone: '9848022331', 
+    email: 'venkatesh.rao@gmail.com', 
+    city: 'Anantapur', 
+    state: 'Andhra Pradesh', 
+    country: 'India', 
+    id_type: 'Aadhaar Card',
+    id_number: 'XXXX-XXXX-8921',
+    total_stays: 3, 
+    vip_tier: 'gold',
+    preferences: ['Ground Floor Room', 'Extra Pillows', 'Late Checkout'],
+    is_blacklisted: false,
+    total_spend: 20153.28,
+    last_stay_date: '2026-11-02',
+    notes: 'Regular family pilgrim from Anantapur for Kadiri Narasimha Swamy darshan.',
+    created_at: '2026-08-15T10:00:00+05:30' 
+  },
+  { 
+    id: 'gst-02', 
+    full_name: 'P. Sudhakar Reddy', 
+    phone: '9440123890', 
+    email: 'sudhakar.reddy@yahoo.com', 
+    city: 'Pulivendula', 
+    state: 'Andhra Pradesh', 
+    country: 'India', 
+    id_type: 'Driving License',
+    id_number: 'AP-02-2018-987654',
+    total_stays: 1, 
+    vip_tier: 'regular',
+    preferences: ['Quiet Wing'],
+    is_blacklisted: false,
+    total_spend: 4480,
+    last_stay_date: '2026-11-03',
+    created_at: '2026-11-03T16:20:00+05:30' 
+  },
+  { 
+    id: 'gst-03', 
+    full_name: 'Dr. Anand Raman', 
+    phone: '9989011223', 
+    email: 'dr.anand@apollo.org', 
+    city: 'Bengaluru', 
+    state: 'Karnataka', 
+    country: 'India', 
+    id_type: 'Passport',
+    id_number: 'N8923411',
+    total_stays: 4, 
+    vip_tier: 'vip_platinum',
+    preferences: ['King Suite Preferred', 'Non-smoking floor', 'High-speed WiFi'],
+    is_blacklisted: false,
+    total_spend: 44791.04,
+    last_stay_date: '2026-10-30',
+    notes: 'Senior consulting surgeon from Apollo Bengaluru. VIP courtesy protocol.',
+    created_at: '2026-05-10T12:00:00+05:30' 
+  },
 ];
 
 export const INITIAL_HALL_ENQUIRIES: HallEnquiry[] = [
@@ -381,12 +439,114 @@ export const INITIAL_PAYMENTS: PaymentRecord[] = [
 ];
 
 export const INITIAL_STAFF: StaffMember[] = [
-  { id: 'stf-01', full_name: 'Sri Tayi Grand Admin', email: 'admin@sritayigrand.com', phone: '084942 23379', role: 'Super Admin', is_active: true, last_login: '2026-11-04T22:30:00+05:30' },
-  { id: 'stf-02', full_name: 'G. Mohan Kumar', email: 'manager@sritayigrand.com', phone: '9440812345', role: 'Hotel Manager', is_active: true, last_login: '2026-11-04T20:15:00+05:30' },
-  { id: 'stf-03', full_name: 'B. Lakshmi Devi', email: 'frontdesk@sritayigrand.com', phone: '9848123456', role: 'Front Desk', is_active: true, last_login: '2026-11-04T21:45:00+05:30' },
-  { id: 'stf-04', full_name: 'K. Ramesh', email: 'housekeeping@sritayigrand.com', phone: '9177123456', role: 'Housekeeping', is_active: true, last_login: '2026-11-04T18:00:00+05:30' },
-  { id: 'stf-05', full_name: 'S. Chandrasekhar', email: 'accounts@sritayigrand.com', phone: '9989123456', role: 'Accounts', is_active: true, last_login: '2026-11-04T17:30:00+05:30' },
-  { id: 'stf-06', full_name: 'V. Naresh Reddy', email: 'events@sritayigrand.com', phone: '9652123456', role: 'Event Manager', is_active: true, last_login: '2026-11-04T19:00:00+05:30' },
+  { 
+    id: 'stf-01', 
+    full_name: 'Sri Tayi Grand Admin', 
+    email: 'admin@sritayigrand.com', 
+    phone: '084942 23379', 
+    role: 'Super Admin', 
+    department: 'Executive Management',
+    is_active: true, 
+    last_login: '2026-11-04T22:30:00+05:30',
+    permissions: {
+      can_override_rates: true,
+      can_process_refunds: true,
+      can_view_accounting: true,
+      can_encode_rfid: true,
+      can_run_night_audit: true,
+      can_manage_inventory: true
+    }
+  },
+  { 
+    id: 'stf-02', 
+    full_name: 'G. Mohan Kumar', 
+    email: 'manager@sritayigrand.com', 
+    phone: '9440812345', 
+    role: 'Hotel Manager', 
+    department: 'Hotel Operations',
+    is_active: true, 
+    last_login: '2026-11-04T20:15:00+05:30',
+    permissions: {
+      can_override_rates: true,
+      can_process_refunds: true,
+      can_view_accounting: true,
+      can_encode_rfid: true,
+      can_run_night_audit: true,
+      can_manage_inventory: true
+    }
+  },
+  { 
+    id: 'stf-03', 
+    full_name: 'B. Lakshmi Devi', 
+    email: 'frontdesk@sritayigrand.com', 
+    phone: '9848123456', 
+    role: 'Front Desk', 
+    department: 'Front Desk & Reception',
+    is_active: true, 
+    last_login: '2026-11-04T21:45:00+05:30',
+    permissions: {
+      can_override_rates: true,
+      can_process_refunds: false,
+      can_view_accounting: false,
+      can_encode_rfid: true,
+      can_run_night_audit: true,
+      can_manage_inventory: true
+    }
+  },
+  { 
+    id: 'stf-04', 
+    full_name: 'K. Ramesh', 
+    email: 'housekeeping@sritayigrand.com', 
+    phone: '9177123456', 
+    role: 'Housekeeping', 
+    department: 'Housekeeping & Facilities',
+    is_active: true, 
+    last_login: '2026-11-04T18:00:00+05:30',
+    permissions: {
+      can_override_rates: false,
+      can_process_refunds: false,
+      can_view_accounting: false,
+      can_encode_rfid: false,
+      can_run_night_audit: false,
+      can_manage_inventory: true
+    }
+  },
+  { 
+    id: 'stf-05', 
+    full_name: 'S. Chandrasekhar', 
+    email: 'accounts@sritayigrand.com', 
+    phone: '9989123456', 
+    role: 'Accounts', 
+    department: 'Accounts & Finance',
+    is_active: true, 
+    last_login: '2026-11-04T17:30:00+05:30',
+    permissions: {
+      can_override_rates: false,
+      can_process_refunds: true,
+      can_view_accounting: true,
+      can_encode_rfid: false,
+      can_run_night_audit: true,
+      can_manage_inventory: false
+    }
+  },
+  { 
+    id: 'stf-06', 
+    full_name: 'V. Naresh Reddy', 
+    email: 'events@sritayigrand.com', 
+    phone: '9652123456', 
+    role: 'Event Manager', 
+    department: 'Banquets & Conventions',
+    is_active: true, 
+    last_login: '2026-11-04T19:00:00+05:30',
+    permissions: {
+      can_override_rates: true,
+      can_process_refunds: false,
+      can_view_accounting: false,
+      can_encode_rfid: false,
+      can_run_night_audit: false,
+      can_manage_inventory: true
+    }
+  },
 ];
 
 export const INITIAL_RFID_DEVICES: RFIDDevice[] = [
@@ -852,3 +1012,155 @@ export const INITIAL_STAFF_ATTENDANCE: StaffAttendance[] = [
   },
 ];
 
+
+
+// ==============================================================================
+// GUEST FOLIO CHARGES & INCIDENTAL SERVICES SEEDS
+// ==============================================================================
+
+export const INITIAL_FOLIO_CHARGES: FolioCharge[] = [
+  {
+    id: 'fc-001',
+    booking_id: 'bk-stg-01',
+    booking_reference: 'STG-20261104-8142',
+    description: 'Rollaway Extra Bed & Comfort Linen (1 Night)',
+    category: 'extra_bed',
+    amount: 500,
+    tax_rate: 0.12,
+    tax_amount: 60,
+    total_amount: 560,
+    posted_by: 'B. Lakshmi Devi (Front Desk)',
+    created_at: '2026-11-04T12:30:00+05:30',
+  },
+  {
+    id: 'fc-002',
+    booking_id: 'bk-stg-01',
+    booking_reference: 'STG-20261104-8142',
+    description: 'Express Laundry Service (Traditional Dhotis & Kurtas)',
+    category: 'laundry',
+    amount: 350,
+    tax_rate: 0.12,
+    tax_amount: 42,
+    total_amount: 392,
+    posted_by: 'K. Ramesh (Housekeeping)',
+    created_at: '2026-11-04T16:00:00+05:30',
+  },
+  {
+    id: 'fc-003',
+    booking_id: 'bk-stg-02',
+    booking_reference: 'STG-20261103-1189',
+    description: 'Late Check-out Surcharge (Up to 3:00 PM)',
+    category: 'late_checkout',
+    amount: 600,
+    tax_rate: 0.12,
+    tax_amount: 72,
+    total_amount: 672,
+    posted_by: 'G. Mohan Kumar (Hotel Manager)',
+    created_at: '2026-11-04T11:15:00+05:30',
+  },
+];
+
+// ==============================================================================
+// CUSTOMER CONTACT & ROOM ENQUIRIES SEEDS
+// ==============================================================================
+
+export const INITIAL_CONTACT_ENQUIRIES: ContactEnquiry[] = [
+  {
+    id: 'ce-001',
+    name: 'Nagaraju Reddy',
+    phone: '+91 94401 23456',
+    email: 'nagaraju.reddy@gmail.com',
+    subject: 'Group Room Booking for Temple Darshan',
+    message: 'We require 5 Deluxe AC rooms for 2 nights during the weekend for Kadiri Sri Lakshmi Narasimha Swamy temple visit. Family of 12 members.',
+    check_in_date: '2026-11-15',
+    check_out_date: '2026-11-17',
+    room_type: 'deluxe_ac',
+    adults_count: 12,
+    status: 'new',
+    source: 'website_contact',
+    admin_notes: 'Spoke briefly on call. Interested in combo package with breakfast.',
+    created_at: '2026-11-06T10:15:00+05:30',
+  },
+  {
+    id: 'ce-002',
+    name: 'Suresh Kumar',
+    phone: '+91 98490 87654',
+    email: 'suresh.k@tcs.com',
+    subject: 'Corporate Team Retreat Enquiry',
+    message: 'Looking for 8 rooms and meeting space for our regional sales review meeting. Need projector, high-speed WiFi and lunch buffet.',
+    check_in_date: '2026-11-20',
+    check_out_date: '2026-11-21',
+    status: 'contacted',
+    source: 'room_enquiry',
+    admin_notes: 'Sent room tariff sheet via WhatsApp. Follow up on Monday.',
+    created_at: '2026-11-05T16:45:00+05:30',
+  },
+  {
+    id: 'ce-003',
+    name: 'Venkata Lakshmi',
+    phone: '+91 99890 11223',
+    subject: 'Wedding Reception Accommodation',
+    message: 'Need 10 rooms for marriage guests from Bangalore. Please confirm if 24-hr hot water and lift are functional.',
+    status: 'quotation_sent',
+    source: 'direct_phone',
+    admin_notes: 'Quotation of ₹18,000 for 10 rooms sent via WhatsApp.',
+    created_at: '2026-11-04T11:20:00+05:30',
+  },
+];
+
+// ==============================================================================
+// CONVENTION HALL BANQUET QUOTES SEEDS
+// ==============================================================================
+
+export const INITIAL_CONVENTION_QUOTES: ConventionQuote[] = [
+  {
+    id: 'cq-001',
+    quote_number: 'STG-QT-2026-001',
+    enquiry_id: 'che-001',
+    client_name: 'Dr. P. Ramachandra Rao',
+    client_phone: '+91 98480 33445',
+    client_email: 'ramachandra.rao@gmail.com',
+    event_name: 'Daughter Wedding Reception & Sangeet',
+    event_date: '2026-11-28',
+    seating_layout: 'cluster',
+    guest_count: 350,
+    catering_package: 'deluxe_buffet',
+    catering_rate_per_plate: 550,
+    hall_rental_charge: 45000,
+    av_sound_lighting: 15000,
+    stage_decoration: 25000,
+    generator_diesel: 5000,
+    subtotal: 282500,
+    gst_rate: 0.18,
+    gst_amount: 50850,
+    total_amount: 333350,
+    status: 'sent',
+    created_by: 'V. Naresh Reddy (Event Manager)',
+    created_at: '2026-11-05T12:00:00+05:30',
+    valid_until: '2026-11-20',
+  },
+  {
+    id: 'cq-002',
+    quote_number: 'STG-QT-2026-002',
+    client_name: 'Kadiri Rotary Club',
+    client_phone: '+91 94412 88990',
+    event_name: 'Annual District Governors Meet',
+    event_date: '2026-12-05',
+    seating_layout: 'theater',
+    guest_count: 200,
+    catering_package: 'high_tea',
+    catering_rate_per_plate: 180,
+    hall_rental_charge: 30000,
+    av_sound_lighting: 10000,
+    stage_decoration: 5000,
+    generator_diesel: 3000,
+    subtotal: 84000,
+    gst_rate: 0.18,
+    gst_amount: 15120,
+    total_amount: 99120,
+    status: 'approved',
+    created_by: 'G. Mohan Kumar (Hotel Manager)',
+    created_at: '2026-11-04T15:30:00+05:30',
+    valid_until: '2026-11-18',
+  },
+];
