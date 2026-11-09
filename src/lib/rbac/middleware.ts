@@ -50,6 +50,14 @@ export function getAuthenticatedSession(req: Request): AuthSession | null {
     if (match) token = match[1];
   }
 
+  if (!token) {
+    try {
+      const url = new URL(req.url);
+      const queryToken = url.searchParams.get('token');
+      if (queryToken) token = queryToken;
+    } catch {}
+  }
+
   return verifySessionToken(token);
 }
 

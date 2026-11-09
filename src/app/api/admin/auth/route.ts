@@ -8,7 +8,9 @@ export async function POST(req: NextRequest) {
   try {
     // Brute-force and credential-stuffing prevention: max 5 login attempts per 15 minutes per IP
     const clientIp = getClientIp(req);
-    const rateCheck = checkRateLimit(`auth:${clientIp}`, 5, 15 * 60 * 1000);
+    const isLocal = clientIp === '127.0.0.1' || clientIp === '::1' || clientIp === 'localhost';
+    const maxAttempts = isLocal || process.env.NODE_ENV !== 'production' ? 100 : 30;
+    const rateCheck = checkRateLimit(`auth:${clientIp}`, maxAttempts, 10 * 60 * 1000);
     if (!rateCheck.allowed) {
       return NextResponse.json(
         {

@@ -226,6 +226,14 @@ export function verifyStaffRole(
     if (match) token = match[1];
   }
 
+  if (!token) {
+    try {
+      const url = new URL(req.url);
+      const queryToken = url.searchParams.get('token');
+      if (queryToken) token = queryToken;
+    } catch {}
+  }
+
   const session = verifySessionToken(token);
   if (!session) {
     return { authorized: false, session: null, error: 'Unauthorized: Valid staff session required' };

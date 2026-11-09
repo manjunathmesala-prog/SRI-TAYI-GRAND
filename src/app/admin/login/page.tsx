@@ -7,7 +7,7 @@
  * ==============================================================================
  */
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import NextLink from 'next/link';
 import Image from 'next/image';
@@ -67,8 +67,26 @@ function AdminLoginContent() {
   const [password, setPassword] = useState('SuperAdmin@TayiGrand2026!');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(false);
   const [activePreset, setActivePreset] = useState<string>('SUPER_ADMIN');
   const [error, setError] = useState<string | null>(null);
+
+  // Fast auto-redirect if staff already has an active, valid session
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const existingToken = localStorage.getItem('stg_token');
+      if (existingToken) {
+        fetch('/api/admin/auth')
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.success && d.session) {
+              window.location.href = redirectPath;
+            }
+          })
+          .catch(() => {});
+      }
+    }
+  }, [redirectPath]);
 
   const performLogin = async (staffEmail: string, staffPass: string) => {
     setLoading(true);
@@ -93,11 +111,12 @@ function AdminLoginContent() {
         localStorage.setItem('stg_user_name', data.session.name);
       }
 
-      router.push(redirectPath);
-      router.refresh();
+      setLoginSuccess(true);
+      window.location.href = redirectPath;
     } catch (err: any) {
       setError(err.message || 'Login failed. Please verify credentials.');
       setLoading(false);
+      setLoginSuccess(false);
     }
   };
 
@@ -317,7 +336,7 @@ function AdminLoginContent() {
               disabled={loading}
               className="w-full py-3 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
             >
-              <span>{loading ? 'Authenticating Role...' : `Sign In as ${activePreset.replace('_', ' ')}`}</span>
+              <span>{loginSuccess ? 'Access Granted! Opening Dashboard...' : loading ? 'Authenticating Role...' : `Sign In as ${activePreset.replace('_', ' ')}`}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </form>

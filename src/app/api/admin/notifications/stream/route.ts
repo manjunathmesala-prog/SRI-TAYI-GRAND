@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
   // Strict Security Enforcement: Only authenticated Super Admin can join private alert channel
-  const auth = verifyStaffRole(request, ['Super Admin']);
+  const auth = verifyStaffRole(request, ['Super Admin', 'Hotel Manager', 'Front Desk', 'Accounts']);
   if (!auth.authorized) {
     return new Response(
       JSON.stringify({
