@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { StaffAttendance, StaffMember, ShiftType, AttendanceStatus } from '@/types';
 import { useRealtimeSync } from '@/lib/realtime-client';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import {
   UserCheck,
   Users,
@@ -650,18 +651,17 @@ export default function AdminStaffAttendancePage() {
                 <label className="block text-xs font-semibold text-stone-700 mb-1">
                   Staff Member <span className="text-rose-500">*</span>
                 </label>
-                <select
-                  required
+                <LuxurySelect
+                  size="md"
+                  variant="admin"
                   value={clockInStaffId}
-                  onChange={(e) => setClockInStaffId(e.target.value)}
-                  className="w-full px-3 py-2.5 text-xs rounded-xl border border-stone-200 bg-white focus:outline-none focus:border-[#D8AD56]"
-                >
-                  {staffList.map((stf) => (
-                    <option key={stf.id} value={stf.id}>
-                      {stf.full_name} — {stf.role}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setClockInStaffId(String(val))}
+                  placeholder="Select staff member..."
+                  options={staffList.map((stf) => ({
+                    value: stf.id,
+                    label: `${stf.full_name} — ${stf.role}`,
+                  }))}
+                />
               </div>
 
               {/* Select Shift */}

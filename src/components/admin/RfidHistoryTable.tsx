@@ -7,6 +7,7 @@ import {
   RfidHistoryCardType,
   RfidHistoryAccessResult,
 } from '@/types/rfid-history';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import {
   Clock,
   Key,
@@ -366,33 +367,41 @@ export function RfidHistoryTable({
         {/* Filter Dropdowns */}
         <div className="flex items-center gap-2">
           {/* Card Type Filter */}
-          <div className="flex items-center gap-1 text-xs text-stone-600">
+          <div className="flex items-center gap-1.5 text-xs text-stone-600">
             <Filter className="w-3 h-3 text-stone-400" />
-            <select
-              value={filterCardType}
-              onChange={(e) => setFilterCardType(e.target.value as any)}
-              className="text-xs bg-stone-50 border border-stone-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#9b7a3e]"
-            >
-              <option value="ALL">All Card Types</option>
-              <option value="GUEST">Guest Keys</option>
-              <option value="STAFF">Housekeeping Staff</option>
-              <option value="MASTER">Super Admin Master</option>
-              <option value="MAINTENANCE">Maintenance</option>
-            </select>
+            <div className="min-w-[140px]">
+              <LuxurySelect
+                size="sm"
+                variant="admin"
+                value={filterCardType}
+                onChange={(val) => setFilterCardType(val as any)}
+                options={[
+                  { value: 'ALL', label: 'All Card Types' },
+                  { value: 'GUEST', label: 'Guest Keys' },
+                  { value: 'STAFF', label: 'Housekeeping Staff' },
+                  { value: 'MASTER', label: 'Super Admin Master' },
+                  { value: 'MAINTENANCE', label: 'Maintenance' },
+                ]}
+              />
+            </div>
           </div>
 
           {/* Result Filter */}
-          <select
-            value={filterResult}
-            onChange={(e) => setFilterResult(e.target.value as any)}
-            className="text-xs bg-stone-50 border border-stone-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-[#9b7a3e]"
-          >
-            <option value="ALL">All Results</option>
-            <option value="GRANTED">Granted Only</option>
-            <option value="DENIED">Denied Only</option>
-            <option value="EXPIRED">Expired Cards</option>
-            <option value="WRONG_ROOM">Wrong Room</option>
-          </select>
+          <div className="min-w-[130px]">
+            <LuxurySelect
+              size="sm"
+              variant="admin"
+              value={filterResult}
+              onChange={(val) => setFilterResult(val as any)}
+              options={[
+                { value: 'ALL', label: 'All Results' },
+                { value: 'GRANTED', label: 'Granted Only' },
+                { value: 'DENIED', label: 'Denied Only' },
+                { value: 'EXPIRED', label: 'Expired Cards' },
+                { value: 'WRONG_ROOM', label: 'Wrong Room' },
+              ]}
+            />
+          </div>
         </div>
       </div>
 

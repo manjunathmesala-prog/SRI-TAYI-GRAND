@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { repo } from '@/lib/db/repository';
 import { RoomCategory } from '@/types';
 import { Layers, Plus, Edit, Check, X, ShieldCheck } from 'lucide-react';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 
 export default function RoomCategoriesAdminPage() {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -198,14 +199,16 @@ export default function RoomCategoriesAdminPage() {
                   <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
                     Status
                   </label>
-                  <select
+                  <LuxurySelect
+                    size="md"
+                    variant="admin"
                     value={isActive ? 'true' : 'false'}
-                    onChange={(e) => setIsActive(e.target.value === 'true')}
-                    className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6]"
-                  >
-                    <option value="true">Active (Bookable)</option>
-                    <option value="false">Inactive (Hidden)</option>
-                  </select>
+                    onChange={(val) => setIsActive(val === 'true')}
+                    options={[
+                      { value: 'true', label: 'Active (Bookable)' },
+                      { value: 'false', label: 'Inactive (Hidden)' },
+                    ]}
+                  />
                 </div>
               </div>
 

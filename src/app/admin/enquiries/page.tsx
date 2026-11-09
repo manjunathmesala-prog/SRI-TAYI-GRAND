@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { UnifiedEnquiry, EnquiryStatus, EnquiryType } from '@/types';
 import { useRealtimeSync } from '@/lib/realtime-client';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 
 export default function EnquiriesPipelinePage() {
   const [activeTab, setActiveTab] = useState<EnquiryType>('convention');
@@ -395,18 +396,22 @@ export default function EnquiriesPipelinePage() {
           </div>
 
           {/* Status Dropdown */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as any)}
-            className="px-3 py-1.5 rounded-xl border border-[#E6D9C5] bg-[#FDFBF7] text-xs font-semibold text-[#43001F] focus:outline-none focus:border-[#43001F]"
-          >
-            <option value="all">All Statuses</option>
-            <option value="new">New</option>
-            <option value="contacted">Contacted</option>
-            <option value="quotation_sent">Quotation Sent</option>
-            <option value="converted">Converted</option>
-            <option value="closed">Closed</option>
-          </select>
+          <div className="min-w-[140px]">
+            <LuxurySelect
+              size="sm"
+              variant="admin"
+              value={statusFilter}
+              onChange={(val) => setStatusFilter(val as any)}
+              options={[
+                { value: 'all', label: 'All Statuses' },
+                { value: 'new', label: 'New' },
+                { value: 'contacted', label: 'Contacted' },
+                { value: 'quotation_sent', label: 'Quotation Sent' },
+                { value: 'converted', label: 'Converted' },
+                { value: 'closed', label: 'Closed' },
+              ]}
+            />
+          </div>
         </div>
       </div>
 
@@ -647,15 +652,17 @@ export default function EnquiriesPipelinePage() {
                   <label className="block font-semibold text-[#33271D] mb-1">
                     Lead Source
                   </label>
-                  <select
+                  <LuxurySelect
+                    size="md"
+                    variant="admin"
                     value={newForm.source}
-                    onChange={(e) => setNewForm({ ...newForm, source: e.target.value as any })}
-                    className="w-full px-3 py-2 rounded-xl border border-[#E6D9C5] focus:outline-none focus:border-[#43001F]"
-                  >
-                    <option value="direct_phone">Direct Phone Call</option>
-                    <option value="walk_in">Front Desk Walk-In</option>
-                    <option value="website_contact">Website Contact Form</option>
-                  </select>
+                    onChange={(val) => setNewForm({ ...newForm, source: val as any })}
+                    options={[
+                      { value: 'direct_phone', label: 'Direct Phone Call' },
+                      { value: 'walk_in', label: 'Front Desk Walk-In' },
+                      { value: 'website_contact', label: 'Website Contact Form' },
+                    ]}
+                  />
                 </div>
               </div>
 

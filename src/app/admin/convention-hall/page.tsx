@@ -29,47 +29,51 @@ import {
   Zap,
   Layers,
   UtensilsCrossed,
+  GraduationCap,
+  Briefcase,
+  AlertTriangle,
   Clock,
   Send,
   Eye,
   Check,
 } from 'lucide-react';
 import { useRealtimeSync } from '@/lib/realtime-client';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 
 const SEATING_LAYOUTS: {
   id: SeatingLayoutType;
   label: string;
   maxPax: number;
   description: string;
-  icon: string;
+  icon: React.ComponentType<{ className?: string }>;
 }[] = [
   {
     id: 'theater',
     label: 'Theater Style',
     maxPax: 500,
     description: 'Row-based audience seating facing main stage. Ideal for conventions and talks.',
-    icon: '🎭',
+    icon: Users,
   },
   {
     id: 'cluster',
     label: 'Cluster / Round Table',
     maxPax: 350,
     description: 'Round banquet tables of 6-8 pax. Ideal for receptions and dinners.',
-    icon: '🍽️',
+    icon: UtensilsCrossed,
   },
   {
     id: 'classroom',
     label: 'Classroom Style',
     maxPax: 250,
     description: 'Parallel desks and chairs facing projector. Ideal for seminars and training.',
-    icon: '📚',
+    icon: GraduationCap,
   },
   {
     id: 'ushape',
     label: 'U-Shape Boardroom',
     maxPax: 150,
     description: 'Open horseshoe layout for interactive executive discussions and summits.',
-    icon: '🤝',
+    icon: Briefcase,
   },
 ];
 
@@ -561,7 +565,14 @@ export default function ConventionHallAdminPage() {
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="text-2xl">{layout.icon}</span>
+                          {(() => {
+                            const LayoutIcon = layout.icon;
+                            return (
+                              <div className="w-8 h-8 rounded-lg bg-[#FAF7F2] text-[#D8AD56] flex items-center justify-center border border-[#EFE3D6]">
+                                <LayoutIcon className="w-4 h-4" />
+                              </div>
+                            );
+                          })()}
                           <div>
                             <div className="font-bold text-xs text-[#241912]">{layout.label}</div>
                             <div className="text-[10px] text-[#786B61] font-semibold">Up to {layout.maxPax} Pax</div>
@@ -576,7 +587,7 @@ export default function ConventionHallAdminPage() {
                       <p className="text-[11px] text-[#786B61] mt-2 leading-relaxed">{layout.description}</p>
                       {isExceeded && isSelected && (
                         <div className="mt-2 text-[10px] text-amber-700 bg-amber-50 p-1.5 rounded font-semibold border border-amber-200">
-                          ⚠️ Guest count ({guestCount}) exceeds recommended layout limit ({layout.maxPax} pax).
+                          <span className="inline-flex items-center gap-1.5"><AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" /><span>Guest count ({guestCount}) exceeds recommended layout limit ({layout.maxPax} pax).</span></span>
                         </div>
                       )}
                     </div>
@@ -1207,17 +1218,19 @@ export default function ConventionHallAdminPage() {
             <form onSubmit={handleSaveEnquiry} className="space-y-4">
               <div>
                 <label className="block text-[11px] font-bold text-[#786B61] uppercase mb-1">Status</label>
-                <select
+                <LuxurySelect
+                  size="md"
+                  variant="admin"
                   value={enqStatus}
-                  onChange={(e) => setEnqStatus(e.target.value as any)}
-                  className="w-full text-xs p-2.5 rounded-lg border border-[#EFE3D6] focus:border-[#D8AD56] focus:outline-none"
-                >
-                  <option value="new">New Enquiry</option>
-                  <option value="contacted">Contacted</option>
-                  <option value="quotation_sent">Quotation Sent</option>
-                  <option value="confirmed">Confirmed / Booked</option>
-                  <option value="lost">Lost / Cancelled</option>
-                </select>
+                  onChange={(val) => setEnqStatus(val as any)}
+                  options={[
+                    { value: 'new', label: 'New Enquiry' },
+                    { value: 'contacted', label: 'Contacted' },
+                    { value: 'quotation_sent', label: 'Quotation Sent' },
+                    { value: 'confirmed', label: 'Confirmed / Booked' },
+                    { value: 'lost', label: 'Lost / Cancelled' },
+                  ]}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">

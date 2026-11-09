@@ -20,6 +20,7 @@ import {
   RefreshCw,
   IndianRupee,
 } from 'lucide-react';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 
 interface GuestFolioModalProps {
   isOpen: boolean;
@@ -427,15 +428,17 @@ export function GuestFolioModal({
                   <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-1">
                     Payment Channel
                   </label>
-                  <select
+                  <LuxurySelect
+                    size="md"
+                    variant="admin"
                     value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                    className="w-full text-xs font-bold p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
-                  >
-                    <option value="cash">💵 Cash (Front Desk Drawer)</option>
-                    <option value="upi">📱 UPI / PhonePe / GPay</option>
-                    <option value="card">💳 Card (POS Terminal)</option>
-                  </select>
+                    onChange={(val) => setPaymentMethod(val as PaymentMethod)}
+                    options={[
+                      { value: 'cash', label: 'Cash (Front Desk Drawer)' },
+                      { value: 'upi', label: 'UPI / PhonePe / GPay' },
+                      { value: 'card', label: 'Card (POS Terminal)' },
+                    ]}
+                  />
                 </div>
 
                 <button
@@ -498,17 +501,19 @@ export function GuestFolioModal({
                     <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-1">
                       Category *
                     </label>
-                    <select
+                    <LuxurySelect
+                      size="md"
+                      variant="admin"
                       value={chargeCategory}
-                      onChange={(e) => handleCategoryChange(e.target.value as FolioChargeCategory)}
-                      className="w-full text-xs font-semibold p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
-                    >
-                      <option value="extra_bed">Rollaway Extra Bed (₹500)</option>
-                      <option value="laundry">Laundry & Dry Cleaning</option>
-                      <option value="room_service">Room Service & Dining</option>
-                      <option value="late_checkout">Late Checkout Extension</option>
-                      <option value="misc">Miscellaneous Service</option>
-                    </select>
+                      onChange={(val) => handleCategoryChange(val as FolioChargeCategory)}
+                      options={[
+                        { value: 'extra_bed', label: 'Rollaway Extra Bed (₹500)' },
+                        { value: 'laundry', label: 'Laundry & Dry Cleaning' },
+                        { value: 'room_service', label: 'Room Service & Dining' },
+                        { value: 'late_checkout', label: 'Late Checkout Extension' },
+                        { value: 'misc', label: 'Miscellaneous Service' },
+                      ]}
+                    />
                   </div>
 
                   <div className="sm:col-span-2">

@@ -1,5 +1,6 @@
 'use client';
 
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import { use, useState } from 'react';
 import NextLink from 'next/link';
 import { notFound } from 'next/navigation';
@@ -369,17 +370,19 @@ export default function ConfirmationPage({ params }: ConfirmationPageProps) {
             <form onSubmit={handleCancelBooking} className="space-y-4 text-xs">
               <div>
                 <label className="block font-semibold text-[#382216] mb-1">Reason for Cancellation</label>
-                <select
+                <LuxurySelect
+                  size="md"
+                  variant="admin"
                   value={cancelReason}
-                  onChange={(e) => setCancelReason(e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-[#EFE3D6] bg-[#FAF7F2] text-[#241912] focus:border-[#D8AD56] focus:outline-none"
-                >
-                  <option value="Change of travel plans">Change of travel plans</option>
-                  <option value="Emergency or personal reasons">Emergency or personal reasons</option>
-                  <option value="Booking dates entered incorrectly">Booking dates entered incorrectly</option>
-                  <option value="Alternative accommodation arranged">Alternative accommodation arranged</option>
-                  <option value="Other">Other</option>
-                </select>
+                  onChange={(val) => setCancelReason(String(val))}
+                  options={[
+                    { value: 'Change of travel plans', label: 'Change of travel plans' },
+                    { value: 'Emergency or personal reasons', label: 'Emergency or personal reasons' },
+                    { value: 'Booking dates entered incorrectly', label: 'Booking dates entered incorrectly' },
+                    { value: 'Alternative accommodation arranged', label: 'Alternative accommodation arranged' },
+                    { value: 'Other', label: 'Other' },
+                  ]}
+                />
               </div>
 
               <div className="pt-2 flex justify-end gap-2 border-t border-[#EFE3D6]">

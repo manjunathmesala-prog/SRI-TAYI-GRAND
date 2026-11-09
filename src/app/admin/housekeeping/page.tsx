@@ -19,6 +19,7 @@ import {
   Search,
 } from 'lucide-react';
 import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 
 export default function HousekeepingAdminPage() {
   const [rooms, setRooms] = useState<PhysicalRoom[]>([]);
@@ -359,19 +360,18 @@ export default function HousekeepingAdminPage() {
                       <User className="w-3 h-3 text-[#D8AD56]" />
                       <span>Assigned Attendant</span>
                     </label>
-                    <select
+                    <LuxurySelect
+                      size="sm"
+                      variant="admin"
                       value={r.assigned_housekeeper_id || ''}
-                      onChange={(e) => handleAssignHousekeeper(r.id, e.target.value)}
+                      placeholder="Select Staff Member..."
                       disabled={isUpdating === r.id}
-                      className="w-full text-xs p-2 rounded-lg border border-[#EFE3D6] bg-white font-medium focus:border-[#D8AD56] focus:outline-none"
-                    >
-                      <option value="">Select Staff Member...</option>
-                      {staffList.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.full_name} ({s.role})
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(val) => handleAssignHousekeeper(r.id, String(val))}
+                      options={[
+                        { value: '', label: 'Select Staff Member...' },
+                        ...staffList.map((s) => ({ value: s.id, label: `${s.full_name} (${s.role})` })),
+                      ]}
+                    />
                   </div>
 
                   {/* Action Buttons */}
@@ -434,19 +434,18 @@ export default function HousekeepingAdminPage() {
                       <UserCheck className="w-3 h-3 text-amber-600" />
                       <span>Assigned Attendant</span>
                     </label>
-                    <select
+                    <LuxurySelect
+                      size="sm"
+                      variant="admin"
                       value={r.assigned_housekeeper_id || ''}
-                      onChange={(e) => handleAssignHousekeeper(r.id, e.target.value)}
+                      placeholder="Select Staff Member..."
                       disabled={isUpdating === r.id}
-                      className="w-full text-xs p-2 rounded-lg border border-[#EFE3D6] bg-white font-medium focus:border-[#D8AD56] focus:outline-none"
-                    >
-                      <option value="">Select Staff Member...</option>
-                      {staffList.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.full_name} ({s.role})
-                        </option>
-                      ))}
-                    </select>
+                      onChange={(val) => handleAssignHousekeeper(r.id, String(val))}
+                      options={[
+                        { value: '', label: 'Select Staff Member...' },
+                        ...staffList.map((s) => ({ value: s.id, label: `${s.full_name} (${s.role})` })),
+                      ]}
+                    />
                   </div>
 
                   {/* Turnaround Inspection Button */}

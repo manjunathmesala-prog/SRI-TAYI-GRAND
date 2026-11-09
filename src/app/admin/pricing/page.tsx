@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { PricingRule, PricingRuleType } from '@/types';
 import { useRealtimeSync } from '@/lib/realtime-client';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import {
   TrendingUp,
   Percent,
@@ -477,17 +478,16 @@ export default function AdminPricingPage() {
               {/* Category Selector */}
               <div>
                 <label className="block text-stone-600 font-medium mb-1">Room Category</label>
-                <select
+                <LuxurySelect
+                  size="md"
+                  variant="admin"
                   value={calcCategoryId}
-                  onChange={(e) => setCalcCategoryId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56] bg-white font-medium text-stone-800"
-                >
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name} (Base ₹{c.base_price_per_night})
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setCalcCategoryId(String(val))}
+                  options={categories.map((c) => ({
+                    value: c.id,
+                    label: `${c.name} (Base ₹${c.base_price_per_night})`,
+                  }))}
+                />
               </div>
 
               {/* Date Input & Quick Presets */}
@@ -794,31 +794,33 @@ export default function AdminPricingPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-stone-600 font-semibold mb-1">Rule Type</label>
-                  <select
+                  <LuxurySelect
+                    size="md"
+                    variant="admin"
                     value={formRuleType}
-                    onChange={(e) => setFormRuleType(e.target.value as PricingRuleType)}
-                    className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56] bg-white"
-                  >
-                    <option value="weekend_surge">Weekend Surge</option>
-                    <option value="festival_surge">Festival Surge</option>
-                    <option value="seasonal_surge">Seasonal Surge</option>
-                    <option value="extra_bed">Extra Bed / Adult</option>
-                    <option value="special_discount">Special Discount</option>
-                  </select>
+                    onChange={(val) => setFormRuleType(val as PricingRuleType)}
+                    options={[
+                      { value: 'weekend_surge', label: 'Weekend Surge' },
+                      { value: 'festival_surge', label: 'Festival Surge' },
+                      { value: 'seasonal_surge', label: 'Seasonal Surge' },
+                      { value: 'extra_bed', label: 'Extra Bed / Adult' },
+                      { value: 'special_discount', label: 'Special Discount' },
+                    ]}
+                  />
                 </div>
 
                 <div>
                   <label className="block text-stone-600 font-semibold mb-1">Adjustment Type</label>
-                  <select
+                  <LuxurySelect
+                    size="md"
+                    variant="admin"
                     value={formAdjustmentType}
-                    onChange={(e) =>
-                      setFormAdjustmentType(e.target.value as 'percentage' | 'fixed_amount')
-                    }
-                    className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56] bg-white"
-                  >
-                    <option value="percentage">Percentage (%)</option>
-                    <option value="fixed_amount">Fixed Amount (₹ INR)</option>
-                  </select>
+                    onChange={(val) => setFormAdjustmentType(val as 'percentage' | 'fixed_amount')}
+                    options={[
+                      { value: 'percentage', label: 'Percentage (%)' },
+                      { value: 'fixed_amount', label: 'Fixed Amount (₹ INR)' },
+                    ]}
+                  />
                 </div>
               </div>
 
@@ -838,18 +840,16 @@ export default function AdminPricingPage() {
 
                 <div>
                   <label className="block text-stone-600 font-semibold mb-1">Target Categories</label>
-                  <select
+                  <LuxurySelect
+                    size="md"
+                    variant="admin"
                     value={formCategorySelection}
-                    onChange={(e) => setFormCategorySelection(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56] bg-white"
-                  >
-                    <option value="all">All Room Categories</option>
-                    {categories.map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.name}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => setFormCategorySelection(String(val))}
+                    options={[
+                      { value: 'all', label: 'All Room Categories' },
+                      ...categories.map((c) => ({ value: c.id, label: c.name })),
+                    ]}
+                  />
                 </div>
               </div>
 

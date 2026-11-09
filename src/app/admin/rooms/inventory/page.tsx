@@ -13,7 +13,9 @@ import {
   X,
   Plus,
   RefreshCw,
+  User,
 } from 'lucide-react';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 
 export default function RoomInventoryPage() {
   const [refreshKey, setRefreshKey] = useState(0);
@@ -81,30 +83,38 @@ export default function RoomInventoryPage() {
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Floor filter */}
-          <select
-            value={selectedFloor}
-            onChange={(e) => setSelectedFloor(e.target.value === 'all' ? 'all' : Number(e.target.value))}
-            className="text-xs font-medium p-2 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
-          >
-            <option value="all">All Floors (1–3)</option>
-            <option value={1}>Floor 1</option>
-            <option value={2}>Floor 2</option>
-            <option value={3}>Floor 3</option>
-          </select>
+          <div className="min-w-[150px]">
+            <LuxurySelect
+              size="sm"
+              variant="admin"
+              value={selectedFloor}
+              onChange={(val) => setSelectedFloor(val === 'all' ? 'all' : Number(val))}
+              options={[
+                { value: 'all', label: 'All Floors (1–3)' },
+                { value: 1, label: 'Floor 1' },
+                { value: 2, label: 'Floor 2' },
+                { value: 3, label: 'Floor 3' },
+              ]}
+            />
+          </div>
 
           {/* Status filter */}
-          <select
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="text-xs font-medium p-2 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
-          >
-            <option value="all">All Operational Statuses</option>
-            <option value="available">Available</option>
-            <option value="occupied">Occupied</option>
-            <option value="reserved">Reserved</option>
-            <option value="cleaning">Cleaning</option>
-            <option value="maintenance">Maintenance</option>
-          </select>
+          <div className="min-w-[180px]">
+            <LuxurySelect
+              size="sm"
+              variant="admin"
+              value={selectedStatus}
+              onChange={(val) => setSelectedStatus(String(val))}
+              options={[
+                { value: 'all', label: 'All Operational Statuses' },
+                { value: 'available', label: 'Available' },
+                { value: 'occupied', label: 'Occupied' },
+                { value: 'reserved', label: 'Reserved' },
+                { value: 'cleaning', label: 'Cleaning' },
+                { value: 'maintenance', label: 'Maintenance' },
+              ]}
+            />
+          </div>
         </div>
       </div>
 
@@ -135,7 +145,7 @@ export default function RoomInventoryPage() {
 
               {room.current_guest_name && (
                 <div className="mt-2 text-[10px] text-[#241912] font-semibold bg-[#FAF7F2] p-1.5 rounded line-clamp-1">
-                  👤 {room.current_guest_name}
+                  <span className="flex items-center gap-1.5"><User className="w-3 h-3 text-[#D8AD56]" /><span>{room.current_guest_name}</span></span>
                 </div>
               )}
             </div>
@@ -177,34 +187,38 @@ export default function RoomInventoryPage() {
                 <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
                   Operational Status
                 </label>
-                <select
+                <LuxurySelect
+                  size="md"
+                  variant="admin"
                   value={newStatus}
-                  onChange={(e) => setNewStatus(e.target.value as OperationalStatus)}
-                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
-                >
-                  <option value="available">Available (Vacant & Ready)</option>
-                  <option value="occupied">Occupied (Guest In-House)</option>
-                  <option value="reserved">Reserved (Awaiting Arrival)</option>
-                  <option value="cleaning">Cleaning (Housekeeping Assigned)</option>
-                  <option value="maintenance">Maintenance (Blocked for Repair)</option>
-                  <option value="out_of_service">Out of Service</option>
-                </select>
+                  onChange={(val) => setNewStatus(val as OperationalStatus)}
+                  options={[
+                    { value: 'available', label: 'Available (Vacant & Ready)' },
+                    { value: 'occupied', label: 'Occupied (Guest In-House)' },
+                    { value: 'reserved', label: 'Reserved (Awaiting Arrival)' },
+                    { value: 'cleaning', label: 'Cleaning (Housekeeping Assigned)' },
+                    { value: 'maintenance', label: 'Maintenance (Blocked for Repair)' },
+                    { value: 'out_of_service', label: 'Out of Service' },
+                  ]}
+                />
               </div>
 
               <div>
                 <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
                   Housekeeping Readiness
                 </label>
-                <select
+                <LuxurySelect
+                  size="md"
+                  variant="admin"
                   value={newHkStatus}
-                  onChange={(e) => setNewHkStatus(e.target.value as HousekeepingStatus)}
-                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
-                >
-                  <option value="clean">Clean (Ready for Inspection/Guest)</option>
-                  <option value="dirty">Dirty (Requires Turnover Cleaning)</option>
-                  <option value="in_progress">In Progress (Staff Currently Inside)</option>
-                  <option value="inspected">Inspected (Supervisor Approved)</option>
-                </select>
+                  onChange={(val) => setNewHkStatus(val as HousekeepingStatus)}
+                  options={[
+                    { value: 'clean', label: 'Clean (Ready for Inspection/Guest)' },
+                    { value: 'dirty', label: 'Dirty (Requires Turnover Cleaning)' },
+                    { value: 'in_progress', label: 'In Progress (Staff Currently Inside)' },
+                    { value: 'inspected', label: 'Inspected (Supervisor Approved)' },
+                  ]}
+                />
               </div>
 
               <div>

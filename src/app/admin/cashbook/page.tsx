@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { CashShift, CashTransaction, CashTransactionCategory } from '@/types';
 import { useRealtimeSync } from '@/lib/realtime-client';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import {
   Wallet,
   ArrowDownLeft,
@@ -753,27 +754,23 @@ export default function AdminCashbookPage() {
 
               <div>
                 <label className="block font-bold text-[#241912] mb-1">Category</label>
-                <select
+                <LuxurySelect
+                  size="md"
+                  variant="admin"
                   value={txCategory}
-                  onChange={(e) => setTxCategory(e.target.value as CashTransactionCategory)}
-                  className="w-full px-3.5 py-2 rounded-xl border border-[#EFE3D6] text-xs text-[#241912] focus:outline-none focus:ring-1 focus:ring-[#D8AD56]"
-                >
-                  {txType === 'cash_in' ? (
-                    <>
-                      <option value="guest_payment">Guest Stay Payment / Folio Settlement</option>
-                      <option value="front_desk_advance">Advance Room Deposit</option>
-                      <option value="change_replenishment">Bank Cash / Float Replenishment</option>
-                      <option value="other">Other Cash Inflow</option>
-                    </>
-                  ) : (
-                    <>
-                      <option value="petty_cash">Petty Cash Disbursement</option>
-                      <option value="vendor_payout">Vendor / Supply Payout</option>
-                      <option value="expense_payout">Hotel Operating Expense</option>
-                      <option value="other">Other Cash Outflow</option>
-                    </>
-                  )}
-                </select>
+                  onChange={(val) => setTxCategory(val as CashTransactionCategory)}
+                  options={txType === 'cash_in' ? [
+                    { value: 'guest_payment', label: 'Guest Stay Payment / Folio Settlement' },
+                    { value: 'front_desk_advance', label: 'Advance Room Deposit' },
+                    { value: 'change_replenishment', label: 'Bank Cash / Float Replenishment' },
+                    { value: 'other', label: 'Other Cash Inflow' },
+                  ] : [
+                    { value: 'petty_cash', label: 'Petty Cash Disbursement' },
+                    { value: 'vendor_payout', label: 'Vendor / Supply Payout' },
+                    { value: 'expense_payout', label: 'Hotel Operating Expense' },
+                    { value: 'other', label: 'Other Cash Outflow' },
+                  ]}
+                />
               </div>
 
               <div>

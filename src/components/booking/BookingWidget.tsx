@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { Users, ArrowRight, Minus, Plus } from 'lucide-react';
+import { Users, ArrowRight, Minus, Plus, ChevronDown } from 'lucide-react';
 import LuxuryDateRangePicker from '@/components/anantha/LuxuryDateRangePicker';
 
 interface BookingWidgetProps {
@@ -137,16 +137,23 @@ export function BookingWidget({
           ref={guestContainerRef}
           className="lg:col-span-3 relative px-3 py-2.5 bg-[#FAF6EE] hover:bg-[#F2E8D8]/50 rounded-2xl transition-all border border-[#E6D9C5]/80 hover:border-[#8D672F]/50 cursor-pointer"
         >
-          <div onClick={() => setGuestDropdownOpen(!guestDropdownOpen)}>
-            <label className="text-[10px] sm:text-[11px] uppercase tracking-wider text-[#786A5B] font-semibold block cursor-pointer">
-              GUESTS & ROOMS
-            </label>
-            <div className="flex items-center gap-2 mt-1">
-              <Users className="w-4 h-4 text-[#8D672F] shrink-0" strokeWidth={1.75} />
-              <span className="text-xs sm:text-sm font-semibold text-[#33271D] truncate">
-                {totalGuests} {totalGuests === 1 ? 'Guest' : 'Guests'} · {rooms} {rooms === 1 ? 'Room' : 'Rooms'}
-              </span>
+          <div onClick={() => setGuestDropdownOpen(!guestDropdownOpen)} className="flex items-center justify-between">
+            <div className="min-w-0 pr-1">
+              <label className="text-[10px] sm:text-[11px] uppercase tracking-wider text-[#786A5B] font-semibold block cursor-pointer">
+                GUESTS & ROOMS
+              </label>
+              <div className="flex items-center gap-2 mt-1">
+                <Users className="w-4 h-4 text-[#8D672F] shrink-0" strokeWidth={1.75} />
+                <span className="text-xs sm:text-sm font-semibold text-[#33271D] truncate">
+                  {totalGuests} {totalGuests === 1 ? 'Guest' : 'Guests'} · {rooms} {rooms === 1 ? 'Room' : 'Rooms'}
+                </span>
+              </div>
             </div>
+            <ChevronDown
+              className={`w-4 h-4 text-[#8D672F] shrink-0 transition-transform duration-200 ${
+                guestDropdownOpen ? 'rotate-180' : ''
+              }`}
+            />
           </div>
 
           {/* Guest Count Popover */}

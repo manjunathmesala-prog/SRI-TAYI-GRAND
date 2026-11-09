@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { GLAccount, JournalEntry, JournalLine, AccountCategory } from '@/types';
 import { useRealtimeSync } from '@/lib/realtime-client';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import {
   Calculator,
   Scale,
@@ -1327,17 +1328,16 @@ export default function AdminAccountingPage() {
                     >
                       {/* Account Selector */}
                       <div className="w-full md:w-5/12">
-                        <select
+                        <LuxurySelect
+                          size="sm"
+                          variant="admin"
                           value={line.accountCode}
-                          onChange={(e) => handleLineAccountChange(index, e.target.value)}
-                          className="w-full px-2.5 py-2 text-xs rounded-xl border border-stone-200 bg-white focus:outline-none focus:border-[#D8AD56]"
-                        >
-                          {glAccounts.map((acc) => (
-                            <option key={acc.code} value={acc.code}>
-                              [{acc.code}] {acc.name} ({acc.category.toUpperCase()})
-                            </option>
-                          ))}
-                        </select>
+                          onChange={(val) => handleLineAccountChange(index, String(val))}
+                          options={glAccounts.map((acc) => ({
+                            value: acc.code,
+                            label: `[${acc.code}] ${acc.name} (${acc.category.toUpperCase()})`,
+                          }))}
+                        />
                       </div>
 
                       {/* Line Narration */}

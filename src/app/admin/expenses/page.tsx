@@ -22,6 +22,7 @@ import {
   Building,
   TrendingDown,
 } from 'lucide-react';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 
 const CATEGORY_LABELS: Record<ExpenseCategory, string> = {
   laundry: 'Linen & Laundry',
@@ -278,18 +279,18 @@ export default function AdminExpensesPage() {
               />
             </div>
 
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value as any)}
-              className="px-3 py-1.5 rounded-xl border border-[#EFE3D6] text-xs font-semibold text-[#241912] bg-white focus:outline-none focus:ring-1 focus:ring-[#D8AD56]"
-            >
-              <option value="all">All Expense Categories</option>
-              {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
-                <option key={k} value={k}>
-                  {v}
-                </option>
-              ))}
-            </select>
+            <div className="min-w-[190px]">
+              <LuxurySelect
+                size="sm"
+                variant="admin"
+                value={categoryFilter}
+                onChange={(val) => setCategoryFilter(val as any)}
+                options={[
+                  { value: 'all', label: 'All Expense Categories' },
+                  ...Object.entries(CATEGORY_LABELS).map(([k, v]) => ({ value: k, label: v })),
+                ]}
+              />
+            </div>
           </div>
         </div>
 
@@ -385,17 +386,13 @@ export default function AdminExpensesPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-[#241912] mb-1">Expense Category</label>
-                  <select
+                  <LuxurySelect
+                    size="md"
+                    variant="admin"
                     value={category}
-                    onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
-                    className="w-full px-3 py-2 rounded-xl border border-[#EFE3D6] text-xs font-semibold text-[#241912] focus:outline-none focus:ring-1 focus:ring-[#D8AD56]"
-                  >
-                    {Object.entries(CATEGORY_LABELS).map(([k, v]) => (
-                      <option key={k} value={k}>
-                        {v}
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => setCategory(val as ExpenseCategory)}
+                    options={Object.entries(CATEGORY_LABELS).map(([k, v]) => ({ value: k, label: v }))}
+                  />
                 </div>
 
                 <div>
@@ -438,16 +435,18 @@ export default function AdminExpensesPage() {
 
                 <div>
                   <label className="block font-bold text-[#241912] mb-1">Payment Method</label>
-                  <select
+                  <LuxurySelect
+                    size="md"
+                    variant="admin"
                     value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-                    className="w-full px-3 py-2 rounded-xl border border-[#EFE3D6] text-xs font-semibold text-[#241912] focus:outline-none focus:ring-1 focus:ring-[#D8AD56]"
-                  >
-                    <option value="cash">Cash (Auto-deducts from Drawer)</option>
-                    <option value="upi">UPI / QR Code Scan</option>
-                    <option value="card">Business Debit / Credit Card</option>
-                    <option value="online">Net Banking / NEFT</option>
-                  </select>
+                    onChange={(val) => setPaymentMethod(val as PaymentMethod)}
+                    options={[
+                      { value: 'cash', label: 'Cash (Auto-deducts from Drawer)' },
+                      { value: 'upi', label: 'UPI / QR Code Scan' },
+                      { value: 'card', label: 'Business Debit / Credit Card' },
+                      { value: 'online', label: 'Net Banking / NEFT' },
+                    ]}
+                  />
                 </div>
               </div>
 

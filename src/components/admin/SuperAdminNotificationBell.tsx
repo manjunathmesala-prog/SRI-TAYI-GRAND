@@ -10,6 +10,7 @@ import {
   Trash2,
   X,
   CreditCard,
+  Building,
   UserCheck,
   UserMinus,
   Calendar,
@@ -261,7 +262,7 @@ export function SuperAdminNotificationBell() {
                 </span>
               </div>
               <p className="text-xs font-medium text-[#241912] leading-snug line-clamp-2">
-                {activeToast.message}
+                {activeToast.message.replace(/^[🟢🔵💰📅💳🚨]\s*/u, '')}
               </p>
               {activeToast.metadata?.deepLink && (
                 <Link
@@ -371,26 +372,30 @@ export function SuperAdminNotificationBell() {
               <div className="px-4 py-2.5 bg-[#F8F3E9]/60 border-b border-[#241912]/10 overflow-x-auto scrollbar-none flex items-center gap-1.5 shrink-0">
                 {(
                   [
-                    { id: 'all', label: 'All Alerts' },
-                    { id: 'financials', label: '💰 Financials' },
-                    { id: 'check_in_out', label: '🏨 Check-Ins/Outs' },
-                    { id: 'rfid_taps', label: '💳 RFID Taps' },
-                    { id: 'bookings', label: '📅 Bookings' },
+                    { id: 'all', label: 'All Alerts', icon: Bell },
+                    { id: 'financials', label: 'Financials', icon: CreditCard },
+                    { id: 'check_in_out', label: 'Check-Ins/Outs', icon: Building },
+                    { id: 'rfid_taps', label: 'RFID Taps', icon: KeyRound },
+                    { id: 'bookings', label: 'Bookings', icon: Calendar },
                   ] as const
-                ).map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`px-3 py-1 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
-                      activeTab === tab.id
-                        ? 'bg-[#43001F] text-white shadow-xs'
-                        : 'bg-white text-stone-600 hover:bg-[#F8F3E9] border border-[#241912]/10'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
+                ).map((tab) => {
+                  const Icon = tab.icon;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveTab(tab.id)}
+                      className={`px-3 py-1 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
+                        activeTab === tab.id
+                          ? 'bg-[#43001F] text-white shadow-xs'
+                          : 'bg-white text-stone-600 hover:bg-[#F8F3E9] border border-[#241912]/10'
+                      }`}
+                    >
+                      <Icon className="w-3 h-3 shrink-0" />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
               </div>
 
               {/* Notifications Scroll List */}
@@ -433,7 +438,7 @@ export function SuperAdminNotificationBell() {
                           </div>
 
                           <p className="text-xs font-medium text-[#241912] leading-relaxed">
-                            {notif.message}
+                            {notif.message.replace(/^[🟢🔵💰📅💳🚨]\s*/u, '')}
                           </p>
 
                           {/* Footer Action Links */}

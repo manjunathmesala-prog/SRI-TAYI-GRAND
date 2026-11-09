@@ -12,6 +12,8 @@ import {
   KeyRound,
   CheckCircle2,
   AlertCircle,
+  AlertTriangle,
+  Zap,
   RefreshCw,
   Sparkles,
   BedDouble,
@@ -20,6 +22,7 @@ import {
   Compass,
   Radio,
 } from 'lucide-react';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 
 interface StatutoryWalkInModalProps {
   isOpen: boolean;
@@ -462,14 +465,16 @@ export function StatutoryWalkInModal({
                 <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-1">
                   Nationality *
                 </label>
-                <select
+                <LuxurySelect
+                  size="md"
+                  variant="admin"
                   value={nationality}
-                  onChange={(e) => setNationality(e.target.value as any)}
-                  className="w-full text-xs font-semibold p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
-                >
-                  <option value="Indian">🇮🇳 Indian Citizen</option>
-                  <option value="Foreigner">🌍 Foreign National (Form C)</option>
-                </select>
+                  onChange={(val) => setNationality(val as any)}
+                  options={[
+                    { value: 'Indian', label: 'Indian Citizen' },
+                    { value: 'Foreigner', label: 'Foreign National (Form C)' },
+                  ]}
+                />
               </div>
 
               <div>
@@ -490,32 +495,36 @@ export function StatutoryWalkInModal({
                 <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-1">
                   Purpose of Visit *
                 </label>
-                <select
+                <LuxurySelect
+                  size="md"
+                  variant="admin"
                   value={purposeOfVisit}
-                  onChange={(e) => setPurposeOfVisit(e.target.value)}
-                  className="w-full text-xs font-semibold p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
-                >
-                  <option value="Pilgrimage / Temple Darshan">🛕 Pilgrimage / Temple Darshan</option>
-                  <option value="Business">💼 Business / Commercial</option>
-                  <option value="Transit">🚗 Transit / Highway Stopover</option>
-                  <option value="Personal / Family">👨‍👩‍👧‍👦 Personal / Family Visit</option>
-                </select>
+                  onChange={(val) => setPurposeOfVisit(String(val))}
+                  options={[
+                    { value: 'Pilgrimage / Temple Darshan', label: 'Pilgrimage / Temple Darshan' },
+                    { value: 'Business', label: 'Business / Commercial' },
+                    { value: 'Transit', label: 'Transit / Highway Stopover' },
+                    { value: 'Personal / Family', label: 'Personal / Family Visit' },
+                  ]}
+                />
               </div>
 
               <div>
                 <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-1">
                   Govt ID Proof Type *
                 </label>
-                <select
+                <LuxurySelect
+                  size="md"
+                  variant="admin"
                   value={idProofType}
-                  onChange={(e) => setIdProofType(e.target.value)}
-                  className="w-full text-xs font-bold p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
-                >
-                  <option value="Aadhaar Card">Aadhaar Card (UIDAI)</option>
-                  <option value="Passport">Passport</option>
-                  <option value="Driving License">Driving License</option>
-                  <option value="Voter ID">Voter ID (Election Card)</option>
-                </select>
+                  onChange={(val) => setIdProofType(String(val))}
+                  options={[
+                    { value: 'Aadhaar Card', label: 'Aadhaar Card (UIDAI)' },
+                    { value: 'Passport', label: 'Passport' },
+                    { value: 'Driving License', label: 'Driving License' },
+                    { value: 'Voter ID', label: 'Voter ID (Election Card)' },
+                  ]}
+                />
               </div>
 
               <div className="sm:col-span-2">
@@ -545,7 +554,11 @@ export function StatutoryWalkInModal({
                         idValidation.valid ? 'text-emerald-700' : 'text-amber-700'
                       }`}
                     >
-                      {idValidation.valid ? '✓ ' : '⚠ '}
+                      {idValidation.valid ? (
+                        <CheckCircle2 className="w-3.5 h-3.5 inline mr-1 text-emerald-600 align-text-bottom" />
+                      ) : (
+                        <AlertTriangle className="w-3.5 h-3.5 inline mr-1 text-amber-600 align-text-bottom" />
+                      )}
                       {idValidation.msg}
                     </span>
                   )}
@@ -573,39 +586,33 @@ export function StatutoryWalkInModal({
                 <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-1">
                   Room Category *
                 </label>
-                <select
+                <LuxurySelect
+                  size="md"
+                  variant="admin"
                   value={categoryId}
-                  onChange={(e) => handleCategoryChange(e.target.value)}
-                  className="w-full text-xs font-bold p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
-                >
-                  {categories.map((c) => (
-                    <option key={c.id} value={c.id}>
-                      {c.name} &bull; Base ₹{c.base_price_per_night} / night
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => handleCategoryChange(String(val))}
+                  options={categories.map((c) => ({
+                    value: c.id,
+                    label: `${c.name} • Base ₹${c.base_price_per_night} / night`,
+                  }))}
+                />
               </div>
 
               <div className="sm:col-span-2">
                 <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-1">
                   Allocate Clean Physical Room *
                 </label>
-                <select
-                  required
+                <LuxurySelect
+                  size="md"
+                  variant="admin"
                   value={roomNumber}
-                  onChange={(e) => setRoomNumber(e.target.value)}
-                  className="w-full text-xs font-mono font-bold p-2.5 rounded-lg border-2 border-[#D8AD56] bg-white text-[#241912]"
-                >
-                  {availableRooms.length === 0 ? (
-                    <option value="">No clean rooms available</option>
-                  ) : (
-                    availableRooms.map((r) => (
-                      <option key={r.id} value={r.room_number}>
-                        Room {r.room_number} &bull; Floor {r.floor_number} &bull; {r.category_name || 'Standard'} (Clean & Inspected)
-                      </option>
-                    ))
-                  )}
-                </select>
+                  placeholder={availableRooms.length === 0 ? "No clean rooms available" : "Select clean room..."}
+                  onChange={(val) => setRoomNumber(String(val))}
+                  options={availableRooms.map((r) => ({
+                    value: r.room_number,
+                    label: `Room ${r.room_number} • Floor ${r.floor_number} • ${r.category_name || 'Standard'} (Clean & Inspected)`,
+                  }))}
+                />
               </div>
 
               <div>
@@ -818,7 +825,10 @@ export function StatutoryWalkInModal({
                       ) : (
                         <KeyRound className="w-3.5 h-3.5 text-[#D8AD56]" />
                       )}
-                      <span>⚡ Test Reader / Encode Card</span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Zap className="w-3.5 h-3.5 text-[#D8AD56]" />
+                        <span>Test Reader / Encode Card</span>
+                      </span>
                     </button>
 
                     <button

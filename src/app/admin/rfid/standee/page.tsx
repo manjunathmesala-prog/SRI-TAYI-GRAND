@@ -117,7 +117,7 @@ export default function StandeeAdminPage() {
                   : 'bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100'
               }`}
             >
-              🌐 Live Vercel App (sri-tayi-grand.vercel.app)
+              Live Vercel App (sri-tayi-grand.vercel.app)
             </button>
             <button
               type="button"
@@ -128,7 +128,7 @@ export default function StandeeAdminPage() {
                   : 'bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100'
               }`}
             >
-              📱 Local Wi-Fi (192.168.1.20:3000)
+              Local Wi-Fi (192.168.1.20:3000)
             </button>
             <button
               type="button"
@@ -139,7 +139,7 @@ export default function StandeeAdminPage() {
                   : 'bg-gray-50 border border-gray-200 text-gray-700 hover:bg-gray-100'
               }`}
             >
-              ⚙️ Custom Host URL
+              Custom Host URL
             </button>
           </div>
 
@@ -199,7 +199,7 @@ export default function StandeeAdminPage() {
           {/* Bilingual Instructions */}
           <div className="space-y-1.5 text-xs">
             <p className="font-serif font-black text-base text-[#D8AD56] tracking-wide">
-              ⚡ SCAN TO SELF CHECK-IN
+              SCAN TO SELF CHECK-IN
             </p>
             <p className="text-sm font-bold text-white/95">
               స్కాన్ చేయండి &bull; గది ఎంచుకోండి &bull; కీ తీసుకోండి

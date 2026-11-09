@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { OtaChannel, ChannelSyncLog } from '@/types';
 import { useRealtimeSync } from '@/lib/realtime-client';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import {
   Globe,
   RefreshCw,
@@ -731,17 +732,16 @@ export default function AdminChannelsPage() {
             <form onSubmit={handleSimulateWebhook} className="space-y-3 text-xs">
               <div>
                 <label className="block text-stone-600 font-medium mb-1">Originating Channel</label>
-                <select
+                <LuxurySelect
+                  size="md"
+                  variant="admin"
                   value={simChannelId}
-                  onChange={(e) => setSimChannelId(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56] bg-white text-stone-800"
-                >
-                  {channels.map((ch) => (
-                    <option key={ch.id} value={ch.id}>
-                      {ch.name} ({ch.logoText})
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setSimChannelId(String(val))}
+                  options={channels.map((ch) => ({
+                    value: ch.id,
+                    label: `${ch.name} (${ch.logoText})`,
+                  }))}
+                />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -779,17 +779,16 @@ export default function AdminChannelsPage() {
                 </div>
                 <div>
                   <label className="block text-stone-600 font-medium mb-1">Room Category</label>
-                  <select
+                  <LuxurySelect
+                    size="md"
+                    variant="admin"
                     value={simCategoryId}
-                    onChange={(e) => setSimCategoryId(e.target.value)}
-                    className="w-full px-3 py-2 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56] bg-white"
-                  >
-                    {categories.map((cat) => (
-                      <option key={cat.id} value={cat.id}>
-                        {cat.name} (₹{cat.base_price_per_night})
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => setSimCategoryId(String(val))}
+                    options={categories.map((cat) => ({
+                      value: cat.id,
+                      label: `${cat.name} (₹${cat.base_price_per_night})`,
+                    }))}
+                  />
                 </div>
               </div>
 
@@ -884,18 +883,18 @@ export default function AdminChannelsPage() {
               </div>
 
               {/* Channel Filter */}
-              <select
-                value={selectedChannelFilter}
-                onChange={(e) => setSelectedChannelFilter(e.target.value)}
-                className="text-xs px-2.5 py-1.5 rounded-lg border border-stone-200 bg-white text-stone-700 focus:outline-none focus:border-[#D8AD56]"
-              >
-                <option value="all">All Channels ({syncLogs.length})</option>
-                {channels.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+              <div className="min-w-[160px]">
+                <LuxurySelect
+                  size="sm"
+                  variant="admin"
+                  value={selectedChannelFilter}
+                  onChange={(val) => setSelectedChannelFilter(String(val))}
+                  options={[
+                    { value: 'all', label: `All Channels (${syncLogs.length})` },
+                    ...channels.map((c) => ({ value: c.id, label: c.name })),
+                  ]}
+                />
+              </div>
             </div>
 
             <div className="space-y-2.5 max-h-[500px] overflow-y-auto pr-1">

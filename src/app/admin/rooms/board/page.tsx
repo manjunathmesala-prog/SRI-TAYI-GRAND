@@ -31,6 +31,7 @@ import {
   Check,
 } from 'lucide-react';
 import { RfidHistoryTable } from '@/components/admin/RfidHistoryTable';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 
 export default function RoomTapeChartPage() {
   const [rooms, setRooms] = useState<PhysicalRoom[]>([]);
@@ -501,35 +502,39 @@ export default function RoomTapeChartPage() {
           {/* Category Filter */}
           <div className="flex items-center gap-1.5 ml-2">
             <span className="text-stone-500 font-medium">Category:</span>
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="px-2.5 py-1 rounded-lg border border-stone-200 bg-white text-stone-700 focus:outline-none focus:border-[#D8AD56]"
-            >
-              <option value="all">All Categories</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+            <div className="min-w-[140px]">
+              <LuxurySelect
+                size="sm"
+                variant="admin"
+                value={categoryFilter}
+                onChange={(val) => setCategoryFilter(String(val))}
+                options={[
+                  { value: 'all', label: 'All Categories' },
+                  ...categories.map((c) => ({ value: c.id, label: c.name })),
+                ]}
+              />
+            </div>
           </div>
 
           {/* Status Filter */}
           <div className="flex items-center gap-1.5 ml-2">
             <span className="text-stone-500 font-medium">Status:</span>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-2.5 py-1 rounded-lg border border-stone-200 bg-white text-stone-700 focus:outline-none focus:border-[#D8AD56]"
-            >
-              <option value="all">All Statuses</option>
-              <option value="available">Available</option>
-              <option value="occupied">Occupied</option>
-              <option value="reserved">Reserved</option>
-              <option value="cleaning">Cleaning</option>
-              <option value="maintenance">Maintenance</option>
-            </select>
+            <div className="min-w-[130px]">
+              <LuxurySelect
+                size="sm"
+                variant="admin"
+                value={statusFilter}
+                onChange={(val) => setStatusFilter(String(val))}
+                options={[
+                  { value: 'all', label: 'All Statuses' },
+                  { value: 'available', label: 'Available' },
+                  { value: 'occupied', label: 'Occupied' },
+                  { value: 'reserved', label: 'Reserved' },
+                  { value: 'cleaning', label: 'Cleaning' },
+                  { value: 'maintenance', label: 'Maintenance' },
+                ]}
+              />
+            </div>
           </div>
 
           {/* Search Box */}

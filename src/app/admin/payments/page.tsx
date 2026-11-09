@@ -23,6 +23,7 @@ import {
   TrendingDown,
 } from 'lucide-react';
 import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 
 export default function PaymentsAdminPage() {
   const [activeTab, setActiveTab] = useState<'payments' | 'expenses'>('payments');
@@ -1048,17 +1049,20 @@ export default function PaymentsAdminPage() {
                 <label className="block text-[11px] font-bold text-[#786B61] uppercase mb-1">
                   Reason for Refund *
                 </label>
-                <select
+                <LuxurySelect
+                  size="md"
+                  variant="admin"
                   value={refundReason}
-                  onChange={(e) => setRefundReason(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-lg border border-[#EFE3D6] mb-2 focus:border-rose-500 focus:outline-none"
-                >
-                  <option value="Cancellation">Booking Cancellation</option>
-                  <option value="Overcharge">Billing Overcharge / Dual Debit</option>
-                  <option value="Booking adjustment">Booking Date Adjustment / Downgrade</option>
-                  <option value="Service complaint">Service Complaint / Room Issue</option>
-                  <option value="Other">Other Reason</option>
-                </select>
+                  onChange={(val) => setRefundReason(String(val))}
+                  className="mb-2"
+                  options={[
+                    { value: 'Cancellation', label: 'Booking Cancellation' },
+                    { value: 'Overcharge', label: 'Billing Overcharge / Dual Debit' },
+                    { value: 'Booking adjustment', label: 'Booking Date Adjustment / Downgrade' },
+                    { value: 'Service complaint', label: 'Service Complaint / Room Issue' },
+                    { value: 'Other', label: 'Other Reason' },
+                  ]}
+                />
 
                 {refundReason === 'Other' && (
                   <input
@@ -1151,16 +1155,18 @@ export default function PaymentsAdminPage() {
                   <label className="block text-[11px] font-bold text-[#786B61] uppercase mb-1">
                     Method *
                   </label>
-                  <select
+                  <LuxurySelect
+                    size="md"
+                    variant="admin"
                     value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value as any)}
-                    className="w-full text-xs p-2.5 rounded-lg border border-[#EFE3D6]"
-                  >
-                    <option value="cash">Cash</option>
-                    <option value="upi">UPI</option>
-                    <option value="card">Card</option>
-                    <option value="online">Online</option>
-                  </select>
+                    onChange={(val) => setPaymentMethod(val as any)}
+                    options={[
+                      { value: 'cash', label: 'Cash' },
+                      { value: 'upi', label: 'UPI' },
+                      { value: 'card', label: 'Card' },
+                      { value: 'online', label: 'Online' },
+                    ]}
+                  />
                 </div>
               </div>
 
@@ -1216,35 +1222,39 @@ export default function PaymentsAdminPage() {
                   <label className="block text-[11px] font-bold text-[#786B61] uppercase mb-1">
                     Category *
                   </label>
-                  <select
+                  <LuxurySelect
+                    size="md"
+                    variant="admin"
                     value={expCategory}
-                    onChange={(e) => setExpCategory(e.target.value as any)}
-                    className="w-full text-xs p-2.5 rounded-lg border border-[#EFE3D6]"
-                  >
-                    <option value="laundry">Laundry</option>
-                    <option value="maintenance">Maintenance</option>
-                    <option value="fnb_supplies">F&B Supplies</option>
-                    <option value="utilities">Utilities</option>
-                    <option value="staff_welfare">Staff Welfare</option>
-                    <option value="repairs">Repairs</option>
-                    <option value="marketing">Marketing</option>
-                    <option value="other">Other</option>
-                  </select>
+                    onChange={(val) => setExpCategory(val as any)}
+                    options={[
+                      { value: 'laundry', label: 'Laundry' },
+                      { value: 'maintenance', label: 'Maintenance' },
+                      { value: 'fnb_supplies', label: 'F&B Supplies' },
+                      { value: 'utilities', label: 'Utilities' },
+                      { value: 'staff_welfare', label: 'Staff Welfare' },
+                      { value: 'repairs', label: 'Repairs' },
+                      { value: 'marketing', label: 'Marketing' },
+                      { value: 'other', label: 'Other' },
+                    ]}
+                  />
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-bold text-[#786B61] uppercase mb-1">
                     Payment Method *
                   </label>
-                  <select
+                  <LuxurySelect
+                    size="md"
+                    variant="admin"
                     value={expMethod}
-                    onChange={(e) => setExpMethod(e.target.value as any)}
-                    className="w-full text-xs p-2.5 rounded-lg border border-[#EFE3D6]"
-                  >
-                    <option value="cash">Cash (Drawer)</option>
-                    <option value="upi">UPI</option>
-                    <option value="card">Card</option>
-                  </select>
+                    onChange={(val) => setExpMethod(val as any)}
+                    options={[
+                      { value: 'cash', label: 'Cash (Drawer)' },
+                      { value: 'upi', label: 'UPI' },
+                      { value: 'card', label: 'Card' },
+                    ]}
+                  />
                 </div>
               </div>
 

@@ -8,6 +8,7 @@ import {
   MaintenanceStatus,
 } from '@/types';
 import { useRealtimeSync } from '@/lib/realtime-client';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import {
   Wrench,
   AlertTriangle,
@@ -439,43 +440,55 @@ export default function AdminMaintenancePage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-          <select
-            value={categoryFilter}
-            onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-3 py-2 rounded-xl border border-[#EFE3D6] text-xs font-semibold text-[#241912] bg-white outline-none focus:border-[#D8AD56]"
-          >
-            <option value="all">All Categories</option>
-            <option value="ac_climate">Air Conditioning (HVAC)</option>
-            <option value="plumbing_bath">Plumbing & Sanitary</option>
-            <option value="electrical_lighting">Electrical & Power</option>
-            <option value="smart_lock">Smart RFID Lock</option>
-            <option value="tv_wifi">TV & Wi-Fi</option>
-            <option value="furniture_linen">Furniture & Fixtures</option>
-            <option value="other">General Maintenance</option>
-          </select>
+          <div className="min-w-[170px]">
+            <LuxurySelect
+              size="sm"
+              variant="admin"
+              value={categoryFilter}
+              onChange={(val) => setCategoryFilter(String(val))}
+              options={[
+                { value: 'all', label: 'All Categories' },
+                { value: 'ac_climate', label: 'Air Conditioning (HVAC)' },
+                { value: 'plumbing_bath', label: 'Plumbing & Sanitary' },
+                { value: 'electrical_lighting', label: 'Electrical & Power' },
+                { value: 'smart_lock', label: 'Smart RFID Lock' },
+                { value: 'tv_wifi', label: 'TV & Wi-Fi' },
+                { value: 'furniture_linen', label: 'Furniture & Fixtures' },
+                { value: 'other', label: 'General Maintenance' },
+              ]}
+            />
+          </div>
 
-          <select
-            value={priorityFilter}
-            onChange={(e) => setPriorityFilter(e.target.value)}
-            className="px-3 py-2 rounded-xl border border-[#EFE3D6] text-xs font-semibold text-[#241912] bg-white outline-none focus:border-[#D8AD56]"
-          >
-            <option value="all">All Priorities</option>
-            <option value="urgent">Urgent</option>
-            <option value="high">High</option>
-            <option value="normal">Normal</option>
-            <option value="low">Low</option>
-          </select>
+          <div className="min-w-[140px]">
+            <LuxurySelect
+              size="sm"
+              variant="admin"
+              value={priorityFilter}
+              onChange={(val) => setPriorityFilter(String(val))}
+              options={[
+                { value: 'all', label: 'All Priorities' },
+                { value: 'urgent', label: 'Urgent' },
+                { value: 'high', label: 'High' },
+                { value: 'normal', label: 'Normal' },
+                { value: 'low', label: 'Low' },
+              ]}
+            />
+          </div>
 
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 rounded-xl border border-[#EFE3D6] text-xs font-semibold text-[#241912] bg-white outline-none focus:border-[#D8AD56]"
-          >
-            <option value="all">All Statuses</option>
-            <option value="reported">Reported</option>
-            <option value="in_progress">In Progress</option>
-            <option value="resolved">Resolved</option>
-          </select>
+          <div className="min-w-[140px]">
+            <LuxurySelect
+              size="sm"
+              variant="admin"
+              value={statusFilter}
+              onChange={(val) => setStatusFilter(String(val))}
+              options={[
+                { value: 'all', label: 'All Statuses' },
+                { value: 'reported', label: 'Reported' },
+                { value: 'in_progress', label: 'In Progress' },
+                { value: 'resolved', label: 'Resolved' },
+              ]}
+            />
+          </div>
         </div>
       </div>
 
@@ -664,33 +677,34 @@ export default function AdminMaintenancePage() {
                   <label className="block font-bold text-[#241912] uppercase tracking-wider mb-1">
                     Room Number *
                   </label>
-                  <select
+                  <LuxurySelect
+                    size="md"
+                    variant="admin"
                     value={roomNumber}
-                    onChange={(e) => setRoomNumber(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl border border-[#EFE3D6] font-mono font-bold text-sm text-[#241912] bg-white outline-none focus:border-[#D8AD56]"
-                  >
-                    {rooms.map((r) => (
-                      <option key={r.room_number} value={r.room_number}>
-                        Room {r.room_number} ({r.category_name})
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => setRoomNumber(String(val))}
+                    options={rooms.map((r) => ({
+                      value: r.room_number,
+                      label: `Room ${r.room_number} (${r.category_name})`,
+                    }))}
+                  />
                 </div>
 
                 <div>
                   <label className="block font-bold text-[#241912] uppercase tracking-wider mb-1">
                     Priority Level *
                   </label>
-                  <select
+                  <LuxurySelect
+                    size="md"
+                    variant="admin"
                     value={priority}
-                    onChange={(e) => setPriority(e.target.value as MaintenancePriority)}
-                    className="w-full px-3 py-2.5 rounded-xl border border-[#EFE3D6] font-semibold text-xs text-[#241912] bg-white outline-none focus:border-[#D8AD56]"
-                  >
-                    <option value="low">Low (Cosmetic / Non-Urgent)</option>
-                    <option value="normal">Normal (Standard Fix)</option>
-                    <option value="high">High (Affects Guest Stay)</option>
-                    <option value="urgent">Urgent (Immediate Fix Needed)</option>
-                  </select>
+                    onChange={(val) => setPriority(val as MaintenancePriority)}
+                    options={[
+                      { value: 'low', label: 'Low (Cosmetic / Non-Urgent)' },
+                      { value: 'normal', label: 'Normal (Standard Fix)' },
+                      { value: 'high', label: 'High (Affects Guest Stay)' },
+                      { value: 'urgent', label: 'Urgent (Immediate Fix Needed)' },
+                    ]}
+                  />
                 </div>
               </div>
 
@@ -713,19 +727,21 @@ export default function AdminMaintenancePage() {
                   <label className="block font-bold text-[#241912] uppercase tracking-wider mb-1">
                     Category *
                   </label>
-                  <select
+                  <LuxurySelect
+                    size="md"
+                    variant="admin"
                     value={category}
-                    onChange={(e) => setCategory(e.target.value as MaintenanceCategory)}
-                    className="w-full px-3 py-2.5 rounded-xl border border-[#EFE3D6] font-semibold text-xs text-[#241912] bg-white outline-none focus:border-[#D8AD56]"
-                  >
-                    <option value="ac_climate">Air Conditioning (HVAC)</option>
-                    <option value="plumbing_bath">Plumbing & Sanitary</option>
-                    <option value="electrical_lighting">Electrical & Power</option>
-                    <option value="smart_lock">Smart RFID Door Lock</option>
-                    <option value="tv_wifi">Smart TV & Wi-Fi</option>
-                    <option value="furniture_linen">Furniture & Bedding</option>
-                    <option value="other">General Maintenance</option>
-                  </select>
+                    onChange={(val) => setCategory(val as MaintenanceCategory)}
+                    options={[
+                      { value: 'ac_climate', label: 'Air Conditioning (HVAC)' },
+                      { value: 'plumbing_bath', label: 'Plumbing & Sanitary' },
+                      { value: 'electrical_lighting', label: 'Electrical & Power' },
+                      { value: 'smart_lock', label: 'Smart RFID Door Lock' },
+                      { value: 'tv_wifi', label: 'Smart TV & Wi-Fi' },
+                      { value: 'furniture_linen', label: 'Furniture & Bedding' },
+                      { value: 'other', label: 'General Maintenance' },
+                    ]}
+                  />
                 </div>
 
                 <div>

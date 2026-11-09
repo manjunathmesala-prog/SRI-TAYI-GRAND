@@ -25,7 +25,11 @@ import {
   Radio,
   UserCheck,
   ShieldCheck,
+  Phone,
+  Zap,
+  Banknote,
 } from 'lucide-react';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 
 export default function FrontDeskPage() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -418,7 +422,7 @@ export default function FrontDeskPage() {
                           </span>
                         </div>
                         <p className="text-[11px] text-[#786B61] mt-0.5">
-                          📞 {item.guest_phone} &bull; {item.category_name}
+                          <span className="inline-flex items-center gap-1"><Phone className="w-3 h-3 text-[#D8AD56]" /><span>{item.guest_phone}</span></span> &bull; {item.category_name}
                         </p>
                       </div>
 
@@ -436,26 +440,22 @@ export default function FrontDeskPage() {
                       <label className="text-[10px] font-bold text-[#786B61] uppercase tracking-wider block">
                         Select Physical Clean Room:
                       </label>
-                      <select
+                      <LuxurySelect
+                        size="sm"
+                        variant="admin"
                         value={currentSelectedRoom}
-                        onChange={(e) =>
+                        placeholder={cleanRoomsList.length === 0 ? "No clean rooms available" : "Select clean room..."}
+                        onChange={(val) =>
                           setSelectedWalkInRooms((prev) => ({
                             ...prev,
-                            [item.booking_reference]: e.target.value,
+                            [item.booking_reference]: String(val),
                           }))
                         }
-                        className="w-full p-2 text-xs font-bold rounded-md border border-[#EFE3D6] bg-white text-[#241912]"
-                      >
-                        {cleanRoomsList.length === 0 ? (
-                          <option value="">No clean rooms available</option>
-                        ) : (
-                          cleanRoomsList.map((r) => (
-                            <option key={r.id} value={r.room_number}>
-                              Room {r.room_number} &bull; Floor {r.floor_number} &bull; {r.category_name || 'Standard'} (Clean)
-                            </option>
-                          ))
-                        )}
-                      </select>
+                        options={cleanRoomsList.map((r) => ({
+                          value: r.room_number,
+                          label: `Room ${r.room_number} • Floor ${r.floor_number} • ${r.category_name || 'Standard'} (Clean)`,
+                        }))}
+                      />
                     </div>
                   </div>
 
@@ -477,8 +477,18 @@ export default function FrontDeskPage() {
                           <KeyRound className="w-3.5 h-3.5 text-[#D8AD56]" />
                           <span>
                             {isPaid
-                              ? ('⚡ 1-Click Encode & Issue Room ' + (currentSelectedRoom || ''))
-                              : ('💵 Collect ₹' + item.total_amount + ' & Issue Room ' + (currentSelectedRoom || ''))}
+                              ? (
+                                <span className="inline-flex items-center gap-1">
+                                  <Zap className="w-3.5 h-3.5 text-[#D8AD56]" />
+                                  <span>1-Click Encode & Issue Room {currentSelectedRoom || ''}</span>
+                                </span>
+                              )
+                              : (
+                                <span className="inline-flex items-center gap-1">
+                                  <Banknote className="w-3.5 h-3.5 text-[#D8AD56]" />
+                                  <span>Collect ₹{item.total_amount} & Issue Room {currentSelectedRoom || ''}</span>
+                                </span>
+                              )}
                           </span>
                         </>
                       )}
@@ -680,19 +690,17 @@ export default function FrontDeskPage() {
                 <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
                   Assign Physical Room (Clean & Ready) *
                 </label>
-                <select
-                  required
+                <LuxurySelect
+                  size="md"
+                  variant="admin"
                   value={selectedRoomId}
-                  onChange={(e) => setSelectedRoomId(e.target.value)}
-                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912] focus:border-[#D8AD56]"
-                >
-                  <option value="">Select a ready clean room...</option>
-                  {availableRooms.map((r) => (
-                    <option key={r.id} value={r.id}>
-                      Room {r.room_number} (Floor {r.floor_number} - {r.category_name})
-                    </option>
-                  ))}
-                </select>
+                  placeholder="Select a ready clean room..."
+                  onChange={(val) => setSelectedRoomId(String(val))}
+                  options={availableRooms.map((r) => ({
+                    value: r.id,
+                    label: `Room ${r.room_number} (Floor ${r.floor_number} - ${r.category_name})`,
+                  }))}
+                />
               </div>
 
               {/* Statutory Guest Identity & Origin (Form C Norms) */}
@@ -705,16 +713,18 @@ export default function FrontDeskPage() {
                 <div className="grid grid-cols-2 gap-2 text-xs">
                   <div>
                     <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-0.5">Govt ID Type *</label>
-                    <select
+                    <LuxurySelect
+                      size="sm"
+                      variant="admin"
                       value={arrivalIdType}
-                      onChange={(e) => setArrivalIdType(e.target.value)}
-                      className="w-full p-2 text-xs font-semibold rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
-                    >
-                      <option value="Aadhaar Card">Aadhaar Card</option>
-                      <option value="Passport">Passport</option>
-                      <option value="Driving License">Driving License</option>
-                      <option value="Voter ID">Voter ID</option>
-                    </select>
+                      onChange={(val) => setArrivalIdType(String(val))}
+                      options={[
+                        { value: 'Aadhaar Card', label: 'Aadhaar Card' },
+                        { value: 'Passport', label: 'Passport' },
+                        { value: 'Driving License', label: 'Driving License' },
+                        { value: 'Voter ID', label: 'Voter ID' },
+                      ]}
+                    />
                   </div>
 
                   <div>
@@ -731,14 +741,16 @@ export default function FrontDeskPage() {
 
                   <div>
                     <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-0.5">Nationality</label>
-                    <select
+                    <LuxurySelect
+                      size="sm"
+                      variant="admin"
                       value={arrivalNationality}
-                      onChange={(e) => setArrivalNationality(e.target.value as any)}
-                      className="w-full p-2 text-xs rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
-                    >
-                      <option value="Indian">Indian Citizen</option>
-                      <option value="Foreigner">Foreign National</option>
-                    </select>
+                      onChange={(val) => setArrivalNationality(val as any)}
+                      options={[
+                        { value: 'Indian', label: 'Indian Citizen' },
+                        { value: 'Foreigner', label: 'Foreign National' },
+                      ]}
+                    />
                   </div>
 
                   <div>
@@ -754,16 +766,18 @@ export default function FrontDeskPage() {
 
                   <div className="col-span-2">
                     <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-0.5">Purpose of Visit</label>
-                    <select
+                    <LuxurySelect
+                      size="sm"
+                      variant="admin"
                       value={arrivalPurpose}
-                      onChange={(e) => setArrivalPurpose(e.target.value)}
-                      className="w-full p-2 text-xs rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
-                    >
-                      <option value="Pilgrimage / Temple Darshan">Pilgrimage / Temple Darshan</option>
-                      <option value="Business">Business</option>
-                      <option value="Transit">Transit</option>
-                      <option value="Personal / Family">Personal / Family</option>
-                    </select>
+                      onChange={(val) => setArrivalPurpose(String(val))}
+                      options={[
+                        { value: 'Pilgrimage / Temple Darshan', label: 'Pilgrimage / Temple Darshan' },
+                        { value: 'Business', label: 'Business' },
+                        { value: 'Transit', label: 'Transit' },
+                        { value: 'Personal / Family', label: 'Personal / Family' },
+                      ]}
+                    />
                   </div>
                 </div>
               </div>

@@ -23,6 +23,7 @@ import {
   Search,
 } from 'lucide-react';
 import { useRealtimeSync } from '@/lib/realtime-client';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 
 const DEPARTMENTS = [
   'Executive Management',
@@ -447,17 +448,13 @@ export default function StaffAdminPage() {
                 <label className="block text-[11px] font-bold uppercase tracking-wider text-[#786B61] mb-1.5">
                   Department Assignment
                 </label>
-                <select
+                <LuxurySelect
+                  size="md"
+                  variant="admin"
                   value={editDepartment}
-                  onChange={(e) => setEditDepartment(e.target.value)}
-                  className="w-full text-xs p-2.5 rounded-lg border border-[#EFE3D6] bg-white font-semibold focus:border-[#D8AD56] focus:outline-none"
-                >
-                  {DEPARTMENTS.map((dept) => (
-                    <option key={dept} value={dept}>
-                      {dept}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(val) => setEditDepartment(String(val))}
+                  options={DEPARTMENTS.map((dept) => ({ value: dept, label: dept }))}
+                />
               </div>
 
               {/* 6 RBAC Switches */}

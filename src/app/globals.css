@@ -105,11 +105,17 @@ select {
   -webkit-appearance: none;
   -moz-appearance: none;
   cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+select:hover {
+  border-color: #D8AD56;
 }
 
 select:focus {
   outline: none;
-  border-color: #43001F;
+  border-color: #D8AD56;
+  box-shadow: 0 0 0 2px rgba(216, 173, 86, 0.2);
 }
 
 select option {
@@ -121,6 +127,21 @@ select option {
 select option:checked {
   background-color: #43001F;
   color: #FFFFFF;
+}
+
+/* Luxury custom dropdown scrollbars */
+[role="listbox"]::-webkit-scrollbar {
+  width: 5px;
+}
+[role="listbox"]::-webkit-scrollbar-track {
+  background: transparent;
+}
+[role="listbox"]::-webkit-scrollbar-thumb {
+  background: #E6D9C5;
+  border-radius: 9999px;
+}
+[role="listbox"]::-webkit-scrollbar-thumb:hover {
+  background: #B18A4A;
 }
 
 /* Luxury styling for native date inputs */

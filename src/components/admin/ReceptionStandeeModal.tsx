@@ -117,7 +117,7 @@ export function ReceptionStandeeModal({
                   : 'bg-white border border-[#EFE3D6] text-[#786B61] hover:bg-gray-50'
               }`}
             >
-              🌐 Live Vercel App
+              Live Vercel App
             </button>
             <button
               type="button"
@@ -128,7 +128,7 @@ export function ReceptionStandeeModal({
                   : 'bg-white border border-[#EFE3D6] text-[#786B61] hover:bg-gray-50'
               }`}
             >
-              📱 Local Wi-Fi
+              Local Wi-Fi
             </button>
             <button
               type="button"
@@ -139,7 +139,7 @@ export function ReceptionStandeeModal({
                   : 'bg-white border border-[#EFE3D6] text-[#786B61] hover:bg-gray-50'
               }`}
             >
-              ⚙️ Custom Host
+              Custom Host
             </button>
           </div>
 
@@ -199,7 +199,7 @@ export function ReceptionStandeeModal({
           {/* Bilingual Instructions */}
           <div className="space-y-1 text-xs">
             <p className="font-serif font-black text-sm text-[#D8AD56] tracking-wide">
-              ⚡ SCAN TO SELF CHECK-IN
+              SCAN TO SELF CHECK-IN
             </p>
             <p className="text-[12px] font-semibold text-white/95">
               స్కాన్ చేయండి &bull; గది ఎంచుకోండి &bull; కీ తీసుకోండి
