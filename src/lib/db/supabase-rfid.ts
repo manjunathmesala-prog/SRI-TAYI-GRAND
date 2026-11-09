@@ -1,86 +1,147 @@
-import { supabase } from '@/lib/supabase/client';
 import { RFIDCard, RFIDAccessEvent } from '@/types';
 
-const isSupabaseConfigured = () => {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  return Boolean(
-    url &&
-    !url.includes('placeholder') &&
-    !url.includes('your-supabase-project')
-  );
-};
-
-/**
- * Production Supabase Sync for RFID Cards
- */
-export async function syncCardToSupabase(card: RFIDCard): Promise<void> {
-  if (!isSupabaseConfigured()) return;
-
-  try {
-    const { error } = await supabase.from('rfid_cards').upsert(
-      {
-        card_uid: card.card_uid,
-        card_label: card.card_label,
-        card_type: card.card_type || 'guest',
-        is_lifetime: Boolean(card.is_lifetime),
-        holder_name: card.holder_name || card.guest_name || null,
-        holder_role: card.holder_role || (card.card_type === 'super_admin' ? 'Super Admin' : card.card_type === 'cleaner' ? 'Housekeeping' : 'Guest'),
-        status: card.status,
-        activated_at: card.activated_at || null,
-        expires_at: card.expires_at || null,
-        deactivated_at: card.deactivated_at || null,
-        last_tap_room: card.last_tap_room || null,
-        last_tap_at: card.last_tap_at || null,
-        notes: card.notes || null,
-      },
-      { onConflict: 'card_uid' }
-    );
-
-    if (error) {
-      console.warn('[SUPABASE RFID SYNC WARN] Failed to sync card:', error.message);
-    }
-  } catch (err: any) {
-    console.warn('[SUPABASE RFID SYNC ERROR]', err.message);
-  }
+// Browser-safe server detection
+function isServerEnvironment(): boolean {
+  return typeof window === 'undefined' && typeof process !== 'undefined';
 }
 
-/**
- * Production Supabase Sync for RFID Access Tap Events
- */
-export async function syncEventToSupabase(event: RFIDAccessEvent): Promise<void> {
-  if (!isSupabaseConfigured()) return;
+// Lazy-initialized PostgreSQL pool for direct Supabase cloud persistence
+let pgPoolInstance: any = null;
+
+function getPgPool() {
+  if (!isServerEnvironment()) return null;
+  if (pgPoolInstance) return pgPoolInstance;
 
   try {
-    const { error } = await supabase.from('rfid_access_events').insert({
-      room_number: event.room_number,
-      device_name: event.device_name,
-      event_type: event.event_type,
-      action_type: event.action_type || 'door_unlock',
-      card_type: event.card_type || 'guest',
-      holder_name: event.holder_name || null,
-      booking_reference: event.booking_reference || null,
-      reason: event.reason || null,
-      source: event.source || 'lock_reader',
-      occurred_at: event.occurred_at,
+    // Dynamic require so Webpack client bundles never attempt to package pg
+    const { Pool } = require('pg');
+    pgPoolInstance = new Pool({
+      host: process.env.SUPABASE_DB_HOST || 'aws-0-ap-northeast-1.pooler.supabase.com',
+      port: Number(process.env.SUPABASE_DB_PORT) || 5432,
+      database: process.env.SUPABASE_DB_NAME || 'postgres',
+      user: process.env.SUPABASE_DB_USER || 'postgres.wercvaimozbbkbwmuoct',
+      password: process.env.SUPABASE_DB_PASSWORD || 'Vaynex@2026',
+      ssl: { rejectUnauthorized: false },
+      max: 10,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 8000,
     });
 
-    if (error) {
-      console.warn('[SUPABASE RFID EVENT SYNC WARN] Failed to sync tap event:', error.message);
-    }
+    pgPoolInstance.on('error', (err: any) => {
+      console.warn('[SUPABASE PG POOL WARN]', err.message);
+    });
+
+    return pgPoolInstance;
   } catch (err: any) {
-    console.warn('[SUPABASE RFID EVENT SYNC ERROR]', err.message);
+    console.warn('[SUPABASE PG POOL INIT WARN]', err.message);
+    return null;
   }
 }
 
 /**
- * Production Supabase Sync for Deleting Cards
+ * Production Live Supabase Sync for RFID Cards
+ * Persists cards directly to Supabase rfid_cards table in PostgreSQL
  */
-export async function deleteCardFromSupabase(cardUid: string): Promise<void> {
-  if (!isSupabaseConfigured()) return;
+export async function syncCardToSupabase(card: RFIDCard): Promise<void> {
+  if (!isServerEnvironment() || !card) return;
+
+  const pool = getPgPool();
+  if (!pool) return;
 
   try {
-    await supabase.from('rfid_cards').delete().eq('card_uid', cardUid);
+    const query = `
+      INSERT INTO rfid_cards (
+        card_uid, card_label, card_type, is_lifetime, holder_name, holder_role, status, activated_at, expires_at, deactivated_at, last_tap_room, last_tap_at, notes
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+      ON CONFLICT (card_uid) DO UPDATE SET
+        card_label = EXCLUDED.card_label,
+        card_type = EXCLUDED.card_type,
+        is_lifetime = EXCLUDED.is_lifetime,
+        holder_name = EXCLUDED.holder_name,
+        holder_role = EXCLUDED.holder_role,
+        status = EXCLUDED.status,
+        activated_at = EXCLUDED.activated_at,
+        expires_at = EXCLUDED.expires_at,
+        deactivated_at = EXCLUDED.deactivated_at,
+        last_tap_room = EXCLUDED.last_tap_room,
+        last_tap_at = EXCLUDED.last_tap_at,
+        notes = EXCLUDED.notes,
+        updated_at = NOW();
+    `;
+
+    const values = [
+      card.card_uid,
+      card.card_label || `Card (${card.card_uid})`,
+      card.card_type || 'guest',
+      Boolean(card.is_lifetime),
+      card.holder_name || card.guest_name || 'Guest',
+      card.holder_role || (card.card_type === 'super_admin' ? 'Super Admin' : card.card_type === 'cleaner' ? 'Housekeeping' : 'Guest'),
+      card.status || 'active',
+      card.activated_at ? new Date(card.activated_at) : null,
+      card.expires_at ? new Date(card.expires_at) : null,
+      card.deactivated_at ? new Date(card.deactivated_at) : null,
+      card.last_tap_room || card.assigned_room_number || card.room_number || null,
+      card.last_tap_at ? new Date(card.last_tap_at) : null,
+      card.notes || null,
+    ];
+
+    await pool.query(query, values);
+    console.log(`[SUPABASE CLOUD SYNC] Card ${card.card_uid} (${card.status}) recorded in Supabase`);
   } catch (err: any) {
-    console.warn('[SUPABASE RFID DELETE ERROR]', err.message);
+    console.warn('[SUPABASE RFID CARD SYNC WARN]', err.message);
+  }
+}
+
+/**
+ * Production Live Supabase Sync for RFID Access Tap Events
+ * Persists tap audits directly to Supabase rfid_access_events table
+ */
+export async function syncEventToSupabase(event: RFIDAccessEvent): Promise<void> {
+  if (!isServerEnvironment() || !event) return;
+
+  const pool = getPgPool();
+  if (!pool) return;
+
+  try {
+    const query = `
+      INSERT INTO rfid_access_events (
+        room_number, device_name, event_type, action_type, card_type, holder_name, booking_reference, reason, source, occurred_at
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
+    `;
+
+    const values = [
+      event.room_number || 'N/A',
+      event.device_name || 'Be-Tech-BIS-57-USB-Encoder',
+      event.event_type || 'access_granted',
+      event.action_type || 'door_unlock',
+      event.card_type || 'guest',
+      event.holder_name || 'Front Desk',
+      event.booking_reference || null,
+      event.reason || null,
+      event.source || 'encoder',
+      event.occurred_at ? new Date(event.occurred_at) : new Date(),
+    ];
+
+    await pool.query(query, values);
+    console.log(`[SUPABASE CLOUD SYNC] Tap event for Room ${event.room_number} (${event.event_type}) recorded in Supabase`);
+  } catch (err: any) {
+    console.warn('[SUPABASE RFID EVENT SYNC WARN]', err.message);
+  }
+}
+
+/**
+ * Production Live Supabase Sync for Deleting Cards
+ */
+export async function deleteCardFromSupabase(cardUid: string): Promise<void> {
+  if (!isServerEnvironment() || !cardUid) return;
+
+  const pool = getPgPool();
+  if (!pool) return;
+
+  try {
+    await pool.query('DELETE FROM rfid_cards WHERE card_uid = $1;', [cardUid]);
+    console.log(`[SUPABASE CLOUD SYNC] Card ${cardUid} deleted from Supabase`);
+  } catch (err: any) {
+    console.warn('[SUPABASE RFID DELETE WARN]', err.message);
   }
 }
