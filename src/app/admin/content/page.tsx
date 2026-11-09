@@ -1,36 +1,98 @@
 'use client';
 
-import { useState } from 'react';
-import { repo } from '@/lib/db/repository';
-import { Globe, Save, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Globe, Save, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { authStorage } from '@/lib/auth-storage';
 
 export default function ContentCMSPage() {
-  const currentSettings = repo.getSettings();
+  const [hotelName, setHotelName] = useState('SRI TAYI GRAND');
+  const [tagline, setTagline] = useState('Stay · Host · Celebrate');
+  const [phone, setPhone] = useState('084942 23379');
+  const [whatsapp, setWhatsapp] = useState('+918494223379');
+  const [email, setEmail] = useState('contact@sritayigrand.com');
+  const [address, setAddress] = useState('');
+  const [road, setRoad] = useState('');
 
-  const [hotelName, setHotelName] = useState(currentSettings.hotel_name);
-  const [tagline, setTagline] = useState(currentSettings.tagline);
-  const [phone, setPhone] = useState(currentSettings.phone);
-  const [whatsapp, setWhatsapp] = useState(currentSettings.whatsapp);
-  const [email, setEmail] = useState(currentSettings.email);
-  const [address, setAddress] = useState(currentSettings.address);
-  const [road, setRoad] = useState(currentSettings.road);
-
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSave = (e: React.FormEvent) => {
+  useEffect(() => {
+    async function loadContent() {
+      try {
+        const token = authStorage.getToken();
+        const headers: Record<string, string> = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch('/api/admin/settings', { headers });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.settings) {
+            setHotelName(data.settings.hotel_name || 'SRI TAYI GRAND');
+            setTagline(data.settings.tagline || 'Stay · Host · Celebrate');
+            setPhone(data.settings.phone || '084942 23379');
+            setWhatsapp(data.settings.whatsapp || '+918494223379');
+            setEmail(data.settings.email || 'contact@sritayigrand.com');
+            setAddress(data.settings.address || '');
+            setRoad(data.settings.road || '');
+          }
+        }
+      } catch (err: any) {
+        console.warn('Failed to load CMS content from server', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadContent();
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    repo.updateSettings({
-      hotel_name: hotelName,
-      tagline,
-      phone,
-      whatsapp,
-      email,
-      address,
-      road,
-    });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    setSaving(true);
+    setError(null);
+    setSaved(false);
+
+    try {
+      const token = authStorage.getToken();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          hotel_name: hotelName,
+          tagline,
+          phone,
+          whatsapp,
+          email,
+          address,
+          road,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to update website content');
+      }
+
+      setSaved(true);
+      setTimeout(() => setSaved(false), 4000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to update website content');
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <RefreshCw className="w-6 h-6 animate-spin text-[#D8AD56]" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
@@ -45,15 +107,22 @@ export default function ContentCMSPage() {
             <span>Website Content Management</span>
           </h1>
           <p className="text-xs text-[#786B61] mt-0.5">
-            Modify public website copy, hero headlines, contact information, and address without redeploying code.
+            Modify public website copy, hero headlines, contact information, and address without redeploying code. Persisted directly to Supabase cloud.
           </p>
         </div>
       </div>
 
       {saved && (
-        <div className="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800 text-xs flex items-center gap-2">
+        <div className="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800 text-xs flex items-center gap-2 shadow-xs">
           <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
-          <span>Website content updated successfully! Live changes are now visible across all public pages.</span>
+          <span>Website content updated successfully! Live changes are now visible across all public pages and Supabase cloud.</span>
+        </div>
+      )}
+
+      {error && (
+        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-center gap-2 shadow-xs">
+          <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+          <span>{error}</span>
         </div>
       )}
 
@@ -154,10 +223,20 @@ export default function ContentCMSPage() {
         <div className="pt-4 border-t border-[#EFE3D6] flex justify-end">
           <button
             type="submit"
-            className="px-6 py-3 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold tracking-wide transition-colors flex items-center gap-2 shadow-sm"
+            disabled={saving}
+            className="px-6 py-3 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold tracking-wide transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50"
           >
-            <Save className="w-4 h-4" />
-            <span>Save & Publish Live Changes</span>
+            {saving ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                <span>Saving to Cloud...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                <span>Save & Publish Live Changes</span>
+              </>
+            )}
           </button>
         </div>
       </form>

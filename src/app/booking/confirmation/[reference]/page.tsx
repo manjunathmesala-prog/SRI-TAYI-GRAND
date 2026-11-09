@@ -1,12 +1,11 @@
 'use client';
 
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
-import { use, useState } from 'react';
+import { use, useState, useEffect } from 'react';
 import NextLink from 'next/link';
 import { notFound } from 'next/navigation';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { repo } from '@/lib/db/repository';
 import { Booking } from '@/types';
 import {
   CheckCircle2,
@@ -28,12 +27,22 @@ export default function ConfirmationPage({ params }: ConfirmationPageProps) {
   const resolvedParams = use(params);
   const reference = resolvedParams.reference;
 
-  const initialBooking = repo.getBookingByReference(reference);
-  if (!initialBooking) {
-    notFound();
-  }
+  const [booking, setBooking] = useState<Booking | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [booking, setBooking] = useState<Booking>(initialBooking);
+  useEffect(() => {
+    if (!booking && reference) {
+      fetch(`/api/bookings/verify?reference=${encodeURIComponent(reference)}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success && data.booking) {
+            setBooking(data.booking);
+          }
+        })
+        .catch(() => {})
+        .finally(() => setIsLoading(false));
+    }
+  }, [booking, reference]);
 
   // Modals state
   const [showCancelModal, setShowCancelModal] = useState(false);
@@ -42,8 +51,20 @@ export default function ConfirmationPage({ params }: ConfirmationPageProps) {
   const [cancelError, setCancelError] = useState<string | null>(null);
 
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
-  const [newCheckIn, setNewCheckIn] = useState(booking.check_in_date);
-  const [newCheckOut, setNewCheckOut] = useState(booking.check_out_date);
+  const [newCheckIn, setNewCheckIn] = useState(booking?.check_in_date || '');
+  const [newCheckOut, setNewCheckOut] = useState(booking?.check_out_date || '');
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#FAF7F2] flex items-center justify-center">
+        <RefreshCw className="w-6 h-6 animate-spin text-[#D8AD56]" />
+      </div>
+    );
+  }
+
+  if (!booking) {
+    notFound();
+  }
   const [rescheduleLoading, setRescheduleLoading] = useState(false);
   const [rescheduleError, setRescheduleError] = useState<string | null>(null);
 
@@ -70,7 +91,7 @@ export default function ConfirmationPage({ params }: ConfirmationPageProps) {
       if (!res.ok || !data.success) {
         throw new Error(data.error || 'Failed to cancel booking');
       }
-      setBooking((prev) => ({ ...prev, status: 'cancelled' }));
+      setBooking((prev) => (prev ? { ...prev, status: 'cancelled' } : null));
       setShowCancelModal(false);
     } catch (err: any) {
       setCancelError(err.message || 'Error processing cancellation');

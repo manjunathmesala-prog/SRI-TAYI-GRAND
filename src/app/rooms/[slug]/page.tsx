@@ -11,7 +11,7 @@ import FloatingActionBar from '@/components/anantha/FloatingActionBar';
 import TayiBrandIcon from '@/components/anantha/TayiBrandIcon';
 import { LuxuryDatePicker } from '@/components/ui/LuxuryDatePicker';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
-import { repo } from '@/lib/db/repository';
+import { INITIAL_ROOM_CATEGORIES } from '@/lib/db/mock-data';
 import { calculateBookingTariff } from '@/lib/pricing';
 import {
   Users,
@@ -39,12 +39,12 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
   const resolvedParams = use(params);
   const router = useRouter();
 
-  const room = repo.getCategoryBySlug(resolvedParams.slug);
+  const room = INITIAL_ROOM_CATEGORIES.find((cat) => cat.slug === resolvedParams.slug);
   if (!room) {
     notFound();
   }
 
-  const allCategories = repo.getCategories();
+  const allCategories = INITIAL_ROOM_CATEGORIES;
   const otherRooms = allCategories.filter((c) => c.slug !== room.slug).slice(0, 3);
 
   const galleryImages = room.gallery_images && room.gallery_images.length > 0 

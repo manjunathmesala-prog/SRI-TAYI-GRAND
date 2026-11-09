@@ -7,11 +7,11 @@ import { Footer } from '@/components/layout/Footer';
 import MobileStickyBookingBar from '@/components/anantha/MobileStickyBookingBar';
 import FloatingActionBar from '@/components/anantha/FloatingActionBar';
 import TayiBrandIcon from '@/components/anantha/TayiBrandIcon';
-import { repo } from '@/lib/db/repository';
+import { INITIAL_GALLERY_IMAGES } from '@/lib/db/mock-data';
 import { X, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
 
 export default function GalleryPage() {
-  const allImages = repo.getGallery();
+  const allImages = INITIAL_GALLERY_IMAGES;
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 

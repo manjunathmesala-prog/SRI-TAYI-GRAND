@@ -4,6 +4,27 @@ import { notifySuperAdmin } from '@/lib/notifications/engine';
 import { verifyPaymentSignature, inrToPaise } from '@/lib/razorpay';
 import { sendNotification } from '@/lib/notifications';
 
+export const dynamic = 'force-dynamic';
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const reference = searchParams.get('reference');
+    if (!reference) {
+      return NextResponse.json({ error: 'Missing reference' }, { status: 400 });
+    }
+
+    const booking = repo.getBookingByReference(reference);
+    if (!booking) {
+      return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
+    }
+
+    return NextResponse.json({ success: true, booking });
+  } catch (err: any) {
+    return NextResponse.json({ error: err.message || 'Error fetching booking' }, { status: 500 });
+  }
+}
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -48,11 +69,11 @@ export async function POST(request: Request) {
         amount_rupees: booking.total_amount,
         currency: 'INR',
         error_code: 'SIGNATURE_VERIFICATION_FAILED',
-        error_description: 'Cryptographic signature mismatch.',
+        error_description: 'Cryptographic signature mismatch during verification',
       });
 
       return NextResponse.json(
-        { error: 'Payment signature verification failed. Fraud attempt logged.' },
+        { error: 'Invalid payment signature. Verification failed.' },
         { status: 400 }
       );
     }
@@ -60,6 +81,7 @@ export async function POST(request: Request) {
     // Transactionally update booking
     booking.status = 'confirmed';
     booking.payment_status = 'successful';
+    repo.updateBookingStatus(bookingReference, 'confirmed');
 
     // Update PaymentOrder in ledger
     repo.updatePaymentOrderStatus(razorpayOrderId, 'PAID');

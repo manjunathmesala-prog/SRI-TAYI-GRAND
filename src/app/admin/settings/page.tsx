@@ -1,32 +1,92 @@
 'use client';
 
-import { useState } from 'react';
-import { repo } from '@/lib/db/repository';
-import { Settings, Save, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Settings, Save, CheckCircle2, AlertCircle, RefreshCw } from 'lucide-react';
+import { authStorage } from '@/lib/auth-storage';
 
 export default function SettingsAdminPage() {
-  const currentSettings = repo.getSettings();
+  const [checkInTime, setCheckInTime] = useState('14:00');
+  const [checkOutTime, setCheckOutTime] = useState('11:00');
+  const [taxPercentage, setTaxPercentage] = useState(12);
+  const [allowPayAtHotel, setAllowPayAtHotel] = useState(true);
+  const [holdTimeoutMinutes, setHoldTimeoutMinutes] = useState(15);
 
-  const [checkInTime, setCheckInTime] = useState(currentSettings.check_in_time);
-  const [checkOutTime, setCheckOutTime] = useState(currentSettings.check_out_time);
-  const [taxPercentage, setTaxPercentage] = useState(currentSettings.tax_percentage);
-  const [allowPayAtHotel, setAllowPayAtHotel] = useState(currentSettings.allow_pay_at_hotel);
-  const [holdTimeoutMinutes, setHoldTimeoutMinutes] = useState(currentSettings.hold_timeout_minutes);
-
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSave = (e: React.FormEvent) => {
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const token = authStorage.getToken();
+        const headers: Record<string, string> = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch('/api/admin/settings', { headers });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.settings) {
+            setCheckInTime(data.settings.check_in_time || '14:00');
+            setCheckOutTime(data.settings.check_out_time || '11:00');
+            setTaxPercentage(data.settings.tax_percentage ?? 12);
+            setAllowPayAtHotel(Boolean(data.settings.allow_pay_at_hotel));
+            setHoldTimeoutMinutes(data.settings.hold_timeout_minutes ?? 15);
+          }
+        }
+      } catch (err: any) {
+        console.warn('Failed to load settings from server', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadSettings();
+  }, []);
+
+  const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    repo.updateSettings({
-      check_in_time: checkInTime,
-      check_out_time: checkOutTime,
-      tax_percentage: Number(taxPercentage),
-      allow_pay_at_hotel: Boolean(allowPayAtHotel),
-      hold_timeout_minutes: Number(holdTimeoutMinutes),
-    });
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    setSaving(true);
+    setError(null);
+    setSaved(false);
+
+    try {
+      const token = authStorage.getToken();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
+      const res = await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          check_in_time: checkInTime,
+          check_out_time: checkOutTime,
+          tax_percentage: Number(taxPercentage),
+          allow_pay_at_hotel: Boolean(allowPayAtHotel),
+          hold_timeout_minutes: Number(holdTimeoutMinutes),
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to save settings');
+      }
+
+      setSaved(true);
+      setTimeout(() => setSaved(false), 4000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to save settings');
+    } finally {
+      setSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center p-12">
+        <RefreshCw className="w-6 h-6 animate-spin text-[#D8AD56]" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-8 max-w-4xl mx-auto">
@@ -41,15 +101,22 @@ export default function SettingsAdminPage() {
             <span>Hotel Operational Settings</span>
           </h1>
           <p className="text-xs text-[#786B61] mt-0.5">
-            Configure system check-in/out schedules, GST tax computation rates, checkout hold leases, and payment policies.
+            Configure system check-in/out schedules, GST tax computation rates, checkout hold leases, and payment policies. Persisted directly to Supabase cloud.
           </p>
         </div>
       </div>
 
       {saved && (
-        <div className="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800 text-xs flex items-center gap-2">
+        <div className="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800 text-xs flex items-center gap-2 shadow-xs">
           <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
-          <span>Settings saved and updated successfully across all booking calculations!</span>
+          <span>Settings saved and updated successfully across Supabase cloud and active calculations!</span>
+        </div>
+      )}
+
+      {error && (
+        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-center gap-2 shadow-xs">
+          <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+          <span>{error}</span>
         </div>
       )}
 
@@ -129,10 +196,20 @@ export default function SettingsAdminPage() {
         <div className="pt-4 border-t border-[#EFE3D6] flex justify-end">
           <button
             type="submit"
-            className="px-6 py-3 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold tracking-wide transition-colors flex items-center gap-2 shadow-sm"
+            disabled={saving}
+            className="px-6 py-3 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold tracking-wide transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50"
           >
-            <Save className="w-4 h-4" />
-            <span>Update Global Settings</span>
+            {saving ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                <span>Saving to Cloud...</span>
+              </>
+            ) : (
+              <>
+                <Save className="w-4 h-4" />
+                <span>Update Global Settings</span>
+              </>
+            )}
           </button>
         </div>
       </form>

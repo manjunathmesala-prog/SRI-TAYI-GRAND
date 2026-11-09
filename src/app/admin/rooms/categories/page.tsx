@@ -1,15 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
-import { repo } from '@/lib/db/repository';
 import { RoomCategory } from '@/types';
-import { Layers, Plus, Edit, Check, X, ShieldCheck } from 'lucide-react';
+import { Layers, Plus, Edit, Check, X, ShieldCheck, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
+import { authStorage } from '@/lib/auth-storage';
 
 export default function RoomCategoriesAdminPage() {
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [categories, setCategories] = useState<RoomCategory[]>([]);
+  const [loading, setLoading] = useState(true);
   const [editingCategory, setEditingCategory] = useState<RoomCategory | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
   // Form fields
   const [name, setName] = useState('');
@@ -19,7 +22,25 @@ export default function RoomCategoriesAdminPage() {
   const [maxOccupancy, setMaxOccupancy] = useState(3);
   const [isActive, setIsActive] = useState(true);
 
-  const categories = repo.getCategories();
+  const fetchCategories = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/rooms/categories');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.categories) {
+          setCategories(data.categories);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to load categories', err);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
 
   const handleOpenEdit = (cat: RoomCategory) => {
     setEditingCategory(cat);
@@ -31,26 +52,49 @@ export default function RoomCategoriesAdminPage() {
     setIsActive(cat.is_active);
   };
 
-  const handleSaveCategory = (e: React.FormEvent) => {
+  const handleSaveCategory = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingCategory) return;
 
-    repo.updateCategory(editingCategory.id, {
-      name,
-      short_description: shortDesc,
-      base_price_per_night: Number(price),
-      base_tariff_paise: Number(price) * 100,
-      bed_type: bedType,
-      max_occupancy: Number(maxOccupancy),
-      is_active: isActive,
-    });
+    setIsSubmitting(true);
+    try {
+      const token = authStorage.getToken();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) headers['Authorization'] = `Bearer ${token}`;
 
-    setEditingCategory(null);
-    setRefreshKey((k) => k + 1);
+      const res = await fetch('/api/admin/rooms/categories', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({
+          categoryId: editingCategory.id,
+          name,
+          short_description: shortDesc,
+          base_price_per_night: Number(price),
+          base_tariff_paise: Number(price) * 100,
+          bed_type: bedType,
+          max_occupancy: Number(maxOccupancy),
+          is_active: isActive,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to update category');
+      }
+
+      setToast(`Category ${name} updated successfully!`);
+      setTimeout(() => setToast(null), 4000);
+      setEditingCategory(null);
+      await fetchCategories();
+    } catch (err: any) {
+      alert(err.message || 'Failed to update category');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto" key={refreshKey}>
+    <div className="space-y-8 max-w-7xl mx-auto">
       {/* Top Banner */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
         <div>
@@ -65,7 +109,22 @@ export default function RoomCategoriesAdminPage() {
             Configure rates per night, bed types, guest limits, descriptions, and active status.
           </p>
         </div>
+
+        <button
+          onClick={() => fetchCategories()}
+          className="px-3.5 py-2 rounded-xl border border-[#D8AD56]/40 hover:bg-[#FAF7F2] text-xs font-semibold text-[#382216] transition-colors flex items-center gap-1.5 shadow-xs"
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+          <span>Refresh</span>
+        </button>
       </div>
+
+      {toast && (
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 shadow-xs">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>{toast}</span>
+        </div>
+      )}
 
       {/* Categories Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -228,6 +287,7 @@ export default function RoomCategoriesAdminPage() {
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#EFE3D6]">
                 <button
                   type="button"
+                  disabled={isSubmitting}
                   onClick={() => setEditingCategory(null)}
                   className="px-4 py-2 rounded-lg border border-gray-300 text-xs text-gray-700"
                 >
@@ -235,9 +295,11 @@ export default function RoomCategoriesAdminPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-lg bg-[#43001F] text-white text-xs font-bold hover:bg-[#2E0015]"
+                  disabled={isSubmitting}
+                  className="px-5 py-2 rounded-lg bg-[#43001F] text-white text-xs font-bold hover:bg-[#2E0015] disabled:opacity-50 flex items-center gap-1.5"
                 >
-                  Save Changes
+                  {isSubmitting && <RefreshCw className="w-3 h-3 animate-spin" />}
+                  <span>{isSubmitting ? 'Saving...' : 'Save Changes'}</span>
                 </button>
               </div>
             </form>

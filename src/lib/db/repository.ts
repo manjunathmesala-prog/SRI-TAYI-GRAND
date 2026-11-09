@@ -52,7 +52,16 @@ import {
 } from '@/types';
 
 import { syncCardToSupabase, syncEventToSupabase, deleteCardFromSupabase } from './supabase-rfid';
-import { syncBookingToSupabase, loadBookingsFromSupabase } from './supabase-bookings';
+import {
+  syncBookingToSupabase,
+  loadBookingsFromSupabase,
+  syncPaymentToSupabase,
+  loadPaymentsFromSupabase,
+  syncRoomStatusToSupabase,
+  loadRoomsFromSupabase,
+  syncSettingsToSupabase,
+  loadSettingsFromSupabase,
+} from './supabase-sync';
 import {
   loadPersistedCards,
   savePersistedCards,
@@ -136,14 +145,47 @@ export class HotelRepository {
     this.rfidCards = loadedCards.length > 0 ? loadedCards : JSON.parse(JSON.stringify(INITIAL_RFID_CARDS));
     const loadedEvents = loadPersistedEvents();
     this.rfidEvents = loadedEvents.length > 0 ? loadedEvents : JSON.parse(JSON.stringify(INITIAL_RFID_ACCESS_EVENTS));
+    // Hydrate all operational state from live Supabase PostgreSQL
     loadBookingsFromSupabase().then((pgBookings) => {
       if (pgBookings && pgBookings.length > 0) {
         for (const pgB of pgBookings) {
-          const exists = this.bookings.some((b) => b.booking_reference === pgB.booking_reference);
-          if (!exists) {
+          const index = this.bookings.findIndex((b) => b.booking_reference === pgB.booking_reference);
+          if (index !== -1) {
+            this.bookings[index] = { ...this.bookings[index], ...pgB };
+          } else {
             this.bookings.push(pgB);
           }
         }
+      }
+    }).catch(() => {});
+
+    loadRoomsFromSupabase().then((pgRooms) => {
+      if (pgRooms && pgRooms.length > 0) {
+        for (const pgR of pgRooms) {
+          const r = this.rooms.find((rm) => rm.room_number === pgR.room_number);
+          if (r) {
+            r.operational_status = pgR.operational_status;
+            if (pgR.housekeeping_status) r.housekeeping_status = pgR.housekeeping_status;
+            if (pgR.notes) r.notes = pgR.notes;
+          }
+        }
+      }
+    }).catch(() => {});
+
+    loadPaymentsFromSupabase().then((pgPayments) => {
+      if (pgPayments && pgPayments.length > 0) {
+        for (const pgP of pgPayments) {
+          const exists = this.payments.some((p) => p.payment_reference === pgP.payment_reference);
+          if (!exists) {
+            this.payments.unshift(pgP);
+          }
+        }
+      }
+    }).catch(() => {});
+
+    loadSettingsFromSupabase().then((pgSettings) => {
+      if (pgSettings) {
+        this.settings = { ...this.settings, ...pgSettings };
       }
     }).catch(() => {});
   }
@@ -232,6 +274,7 @@ export class HotelRepository {
   updateSettings(partial: Partial<HotelSettings>): HotelSettings {
     this.settings = { ...this.settings, ...partial };
     this.broadcastEvent('full_sync', { settings: this.settings });
+    syncSettingsToSupabase(this.settings);
     return this.settings;
   }
 
@@ -359,6 +402,13 @@ export class HotelRepository {
       actor
     );
 
+    syncRoomStatusToSupabase({
+      roomNumber: this.rooms[index].room_number,
+      operationalStatus: this.rooms[index].operational_status,
+      housekeepingStatus: this.rooms[index].housekeeping_status,
+      notes: this.rooms[index].notes,
+    });
+
     return this.rooms[index];
   }
 
@@ -445,6 +495,13 @@ export class HotelRepository {
       },
       actor
     );
+
+    syncBookingToSupabase(booking);
+    syncRoomStatusToSupabase({
+      roomNumber: room.room_number,
+      operationalStatus: room.operational_status,
+      housekeepingStatus: room.housekeeping_status,
+    });
 
     return room;
   }
@@ -1118,6 +1175,11 @@ export class HotelRepository {
     }
 
     this.broadcastEvent('payment_recorded', { payment: newPayment, booking }, actor);
+
+    syncPaymentToSupabase(newPayment);
+    if (booking) {
+      syncBookingToSupabase(booking);
+    }
 
     return newPayment;
   }
