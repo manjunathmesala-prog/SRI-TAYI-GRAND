@@ -79,6 +79,10 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
 
   const handleProceedBooking = (e: React.FormEvent) => {
     e.preventDefault();
+    if (room.walk_in_only) {
+      alert('The Single Room is available for front-desk walk-in reservations only and cannot be booked online.');
+      return;
+    }
     const query = new URLSearchParams({
       categoryId: room.id,
       slug: room.slug,
