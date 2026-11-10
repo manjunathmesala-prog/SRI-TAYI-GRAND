@@ -278,8 +278,24 @@ export default function AnanthaWalkInPage() {
       setError('Guest mobile number is required.');
       return;
     }
-    if (!guestIdProofNumber.trim()) {
-      setError('Government ID Proof Number is required for Indian hotel compliance.');
+    const cleanManualId = guestIdProofNumber.trim().replace(/\s+/g, '').toUpperCase();
+    if (!cleanManualId) {
+      setError('Government ID Proof Number is mandatory for Indian statutory hotel compliance.');
+      return;
+    }
+    if (guestIdProofType.toLowerCase().includes('aadhaar')) {
+      const numericAadhaar = cleanManualId.replace(/\D/g, '');
+      if (numericAadhaar.length !== 12) {
+        setError('Please enter the full 12-digit Aadhaar Card number.');
+        return;
+      }
+    } else if (guestIdProofType.toLowerCase().includes('pan')) {
+      if (cleanManualId.length !== 10) {
+        setError('PAN Card number must be exactly 10 alphanumeric characters.');
+        return;
+      }
+    } else if (cleanManualId.length < 6) {
+      setError('Please enter the complete full Government ID number.');
       return;
     }
 
@@ -524,6 +540,23 @@ export default function AnanthaWalkInPage() {
                   <span className="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[9px] font-bold uppercase">
                     Awaiting Room & Key
                   </span>
+                </div>
+
+                {/* HIGHLIGHTED GOVERNMENT ID VERIFICATION BOX */}
+                <div className="bg-[#2D1F13] border-2 border-[#D8AD56]/70 rounded-xl p-2.5 space-y-1.5 shadow-sm">
+                  <div className="flex items-center justify-between text-[11px]">
+                    <span className="text-[#D8AD56] font-extrabold uppercase flex items-center gap-1 tracking-wider">
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#D8AD56]" />
+                      <span>{item.id_proof_type?.replace(/_/g, ' ').toUpperCase() || 'GOVT ID'}</span>
+                    </span>
+                    <span className="text-[9px] bg-amber-400 text-black font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                      Verify Physical Copy
+                    </span>
+                  </div>
+                  <div className="font-mono font-black text-xs text-white tracking-widest bg-black/50 px-2.5 py-1.5 rounded-lg border border-white/15 flex items-center justify-between">
+                    <span>{item.id_proof_number || 'NO ID SUBMITTED'}</span>
+                    <span className="text-[9px] font-sans font-medium text-[#D8AD56]">Check Original</span>
+                  </div>
                 </div>
 
                 <div className="flex items-center justify-between text-xs text-stone-300 pt-1 border-t border-white/10">
@@ -1371,6 +1404,25 @@ export default function AnanthaWalkInPage() {
               <div className="flex justify-between">
                 <span className="text-[#786A5B]">Total Folio:</span>
                 <span className="font-bold text-[#33271D]">₹{selectedQueueItem.total_amount?.toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+
+            {/* PROMINENT GOVERNMENT ID STATUTORY CHECK IN MODAL */}
+            <div className="bg-amber-50 rounded-2xl p-3.5 border-2 border-amber-300 space-y-1.5 shadow-sm">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-extrabold text-amber-950 flex items-center gap-1.5 uppercase tracking-wider">
+                  <ShieldCheck className="w-4 h-4 text-amber-700" />
+                  <span>Statutory Government ID Proof ({selectedQueueItem.id_proof_type?.replace(/_/g, ' ').toUpperCase() || 'GOVT ID'})</span>
+                </span>
+                <span className="text-[10px] bg-amber-300 text-amber-950 font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  Mandatory Verification
+                </span>
+              </div>
+              <div className="font-mono font-black text-sm text-[#21180F] tracking-widest bg-white p-2.5 rounded-xl border border-amber-300 flex items-center justify-between">
+                <span>{selectedQueueItem.id_proof_number || 'NO ID NUMBER RECORDED'}</span>
+                <span className="text-[10px] font-sans font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
+                  Cross-verify with physical copy
+                </span>
               </div>
             </div>
 

@@ -637,6 +637,27 @@ export default function FrontDeskPage() {
                     <div>Pay Status: <strong className={b.payment_status === 'successful' ? 'text-[#2E7D32]' : 'text-[#E65100]'}>{b.payment_status}</strong></div>
                   </div>
 
+                  {/* HIGHLIGHTED GOVERNMENT ID BADGE */}
+                  {b.id_proof_number ? (
+                    <div className="flex items-center justify-between gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-300 text-xs shadow-2xs">
+                      <span className="inline-flex items-center gap-1 font-extrabold uppercase text-[9px] bg-amber-200 text-amber-950 px-1.5 py-0.5 rounded">
+                        <ShieldCheck className="w-3 h-3 text-amber-800" />
+                        {b.id_proof_type?.replace(/_/g, ' ').toUpperCase() || 'GOVT ID'}
+                      </span>
+                      <span className="font-mono font-black text-xs text-[#21180F] tracking-wider">
+                        {b.id_proof_number}
+                      </span>
+                      <span className="text-[9px] text-amber-800 font-semibold bg-white/70 px-1.5 py-0.5 rounded">
+                        Verify Physical Copy
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="text-[10px] text-rose-600 font-bold flex items-center gap-1 px-1">
+                      <AlertCircle className="w-3 h-3 text-rose-500" />
+                      <span>ID Verification Pending</span>
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between pt-1">
                     <span className="font-bold text-xs text-[#241912]">
                       ₹ {b.total_amount.toLocaleString('en-IN')}

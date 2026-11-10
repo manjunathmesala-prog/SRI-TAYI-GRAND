@@ -219,6 +219,33 @@ function WalkInKioskContent() {
       return;
     }
 
+    const cleanId = idProofNumber.trim().replace(/\s+/g, '').toUpperCase();
+    if (!cleanId) {
+      toast.error('Government ID Proof number is mandatory for all hotel check-ins.');
+      return;
+    }
+
+    if (idProofType === 'aadhaar') {
+      const numericAadhaar = cleanId.replace(/\D/g, '');
+      if (numericAadhaar.length !== 12) {
+        toast.error('Please enter the full 12-digit Aadhaar Card number.');
+        return;
+      }
+    } else if (idProofType === 'pan') {
+      if (cleanId.length !== 10) {
+        toast.error('PAN Card number must be exactly 10 alphanumeric characters.');
+        return;
+      }
+    } else if (idProofType === 'passport') {
+      if (cleanId.length < 8) {
+        toast.error('Please enter the full 8-character Passport number.');
+        return;
+      }
+    } else if (cleanId.length < 6) {
+      toast.error('Please enter the complete full Government ID number.');
+      return;
+    }
+
     try {
       setSubmitting(true);
       const res = await fetch('/api/walk-in/book', {
@@ -231,7 +258,7 @@ function WalkInKioskContent() {
           guestPhone: cleanPhone,
           guestEmail: guestEmail.trim() || undefined,
           idProofType,
-          idProofNumber: idProofNumber.trim() || undefined,
+          idProofNumber: cleanId,
           paymentMethod,
           numNights,
           specialRequests: specialRequests.trim() || undefined,
@@ -601,31 +628,63 @@ function WalkInKioskContent() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-2">
-              <div>
-                <label className="block text-[11px] font-bold text-[#33271D] mb-1">ID Type</label>
-                <select
-                  value={idProofType}
-                  onChange={(e) => setIdProofType(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-[#E6D9C5] text-xs text-[#33271D] bg-white focus:outline-none focus:ring-1 focus:ring-[#8D672F]"
-                >
-                  <option value="aadhaar">Aadhaar Card</option>
-                  <option value="driving_licence">Driving Licence</option>
-                  <option value="passport">Passport</option>
-                  <option value="voter_id">Voter ID</option>
-                </select>
+            {/* Government Statutory ID Proof (Mandatory) */}
+            <div className="bg-[#FAF7F2] p-3.5 rounded-2xl border-2 border-[#D8AD56]/40 space-y-2.5 shadow-xs">
+              <div className="flex items-center justify-between">
+                <label className="text-[11px] font-bold text-[#33271D] flex items-center gap-1.5">
+                  <ShieldCheck className="w-4 h-4 text-[#8D672F]" />
+                  <span>Government ID Proof <span className="text-red-600 font-bold">*</span></span>
+                </label>
+                <span className="text-[10px] text-[#8D672F] font-bold bg-[#8D672F]/15 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  Mandatory for Check-In
+                </span>
               </div>
 
-              <div>
-                <label className="block text-[11px] font-bold text-[#33271D] mb-1">Last 4 Digits / Number</label>
-                <input
-                  type="text"
-                  placeholder="e.g. 8921"
-                  value={idProofNumber}
-                  onChange={(e) => setIdProofNumber(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-[#E6D9C5] text-xs text-[#33271D] focus:outline-none focus:ring-1 focus:ring-[#8D672F]"
-                />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#786A5B] mb-1">
+                    Select ID Type <span className="text-red-600">*</span>
+                  </label>
+                  <select
+                    value={idProofType}
+                    onChange={(e) => setIdProofType(e.target.value)}
+                    className="w-full p-2.5 rounded-xl border border-[#E6D9C5] text-xs text-[#33271D] bg-white focus:outline-none focus:ring-1 focus:ring-[#8D672F] font-semibold"
+                  >
+                    <option value="aadhaar">Aadhaar Card (12 Digits)</option>
+                    <option value="driving_licence">Driving Licence (DL No)</option>
+                    <option value="passport">Passport (8 Characters)</option>
+                    <option value="voter_id">Voter ID / EPIC Card</option>
+                    <option value="pan">PAN Card (10 Characters)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[10px] font-semibold text-[#786A5B] mb-1">
+                    Full ID Document Number <span className="text-red-600">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder={
+                      idProofType === 'aadhaar'
+                        ? '12-digit Aadhaar Number'
+                        : idProofType === 'passport'
+                        ? '8-character Passport No'
+                        : idProofType === 'pan'
+                        ? '10-character PAN Number'
+                        : 'Enter full ID number'
+                    }
+                    value={idProofNumber}
+                    onChange={(e) => setIdProofNumber(e.target.value.toUpperCase())}
+                    className="w-full p-2.5 rounded-xl border border-[#E6D9C5] text-xs text-[#33271D] bg-white focus:outline-none focus:ring-1 focus:ring-[#8D672F] font-mono tracking-wider font-bold"
+                  />
+                </div>
               </div>
+
+              <p className="text-[10px] text-[#786A5B] flex items-center gap-1.5 pt-0.5">
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0"></span>
+                <span>Physical original ID card must be presented at the reception desk for cross-verification.</span>
+              </p>
             </div>
 
             <div className="grid grid-cols-2 gap-2">

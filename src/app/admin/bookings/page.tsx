@@ -33,6 +33,7 @@ import {
   QrCode,
   Download,
   FileText,
+  ShieldCheck,
   Key,
   Receipt,
   Radio,
@@ -781,9 +782,24 @@ export default function BookingsAdminPage() {
                             <Phone className="w-3 h-3" />
                             <span>{r.guest_phone}</span>
                           </a>
-                          {r.id_proof_number && (
-                            <div className="text-[10px] text-[#786A5B] font-mono mt-0.5">
-                              ID: {r.id_proof_type?.toUpperCase()} {r.id_proof_number}
+                          {/* HIGHLIGHTED GOVERNMENT ID BADGE */}
+                          {r.id_proof_number ? (
+                            <div className="mt-1.5 flex flex-wrap items-center gap-1.5 p-1.5 rounded-lg bg-amber-50 border border-amber-300 shadow-2xs">
+                              <span className="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wider bg-amber-200 text-amber-950 px-1.5 py-0.5 rounded">
+                                <ShieldCheck className="w-3 h-3 text-amber-700" />
+                                {r.id_proof_type?.replace(/_/g, ' ').toUpperCase() || 'GOVT ID'}
+                              </span>
+                              <span className="font-mono font-black text-[11px] text-[#21180F] tracking-wider">
+                                {r.id_proof_number}
+                              </span>
+                              <span className="text-[9px] text-amber-800 font-semibold ml-auto">
+                                [Verify Copy]
+                              </span>
+                            </div>
+                          ) : (
+                            <div className="mt-1 text-[10px] text-rose-600 font-bold flex items-center gap-1">
+                              <AlertCircle className="w-3 h-3 text-rose-500" />
+                              <span>ID Verification Pending</span>
                             </div>
                           )}
                         </div>
@@ -1005,9 +1021,21 @@ export default function BookingsAdminPage() {
                             >
                               {r.guest_phone}
                             </a>
-                            {r.id_proof_number && (
-                              <div className="text-[10px] text-[#786A5B] font-mono mt-0.5">
-                                ID: {r.id_proof_type?.toUpperCase()} {r.id_proof_number}
+                            {/* HIGHLIGHTED GOVERNMENT ID BADGE (DESKTOP) */}
+                            {r.id_proof_number ? (
+                              <div className="mt-1.5 flex items-center gap-1.5 px-2 py-1 rounded-lg bg-amber-50 border border-amber-300 max-w-fit shadow-2xs">
+                                <span className="inline-flex items-center gap-1 text-[9px] font-extrabold uppercase tracking-wider bg-amber-200 text-amber-950 px-1.5 py-0.5 rounded">
+                                  <ShieldCheck className="w-3 h-3 text-amber-800" />
+                                  {r.id_proof_type?.replace(/_/g, ' ').toUpperCase() || 'GOVT ID'}
+                                </span>
+                                <span className="font-mono font-black text-xs text-[#21180F] tracking-wider">
+                                  {r.id_proof_number}
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="mt-1 text-[10px] text-rose-600 font-bold flex items-center gap-1">
+                                <AlertCircle className="w-3 h-3 text-rose-500" />
+                                <span>ID Pending</span>
                               </div>
                             )}
                           </td>
@@ -1720,12 +1748,24 @@ export default function BookingsAdminPage() {
               <div><span className="text-[#786A5B]">Reservation Status:</span> <span className="font-bold uppercase text-[#8D672F]">{selectedRes.status}</span></div>
               <div><span className="text-[#786A5B]">Payment Status:</span> <span className="font-bold uppercase text-[#8D672F]">{selectedRes.payment_status}</span></div>
 
-              {selectedRes.id_proof_number && (
-                <div className="col-span-2 p-2.5 rounded-xl bg-[#F8F3E9] border border-[#E6D9C5] flex items-center justify-between">
-                  <span><b>Government ID:</b> {selectedRes.id_proof_type?.toUpperCase()}</span>
-                  <span className="font-mono font-bold text-[#33271D]">{selectedRes.id_proof_number}</span>
+              {/* HIGHLIGHTED STATUTORY GOVERNMENT ID PROOF CARD */}
+              <div className="col-span-2 p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-300 space-y-2 shadow-xs">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-extrabold text-amber-950 flex items-center gap-1.5 uppercase tracking-wider">
+                    <ShieldCheck className="w-4 h-4 text-amber-700" />
+                    <span>Statutory Government ID Proof ({selectedRes.id_proof_type?.replace(/_/g, ' ').toUpperCase() || 'GOVT ID'})</span>
+                  </span>
+                  <span className="text-[10px] bg-amber-200 text-amber-900 font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                    Reception Physical Verification Required
+                  </span>
                 </div>
-              )}
+                <div className="font-mono font-black text-sm text-[#21180F] tracking-widest bg-white p-2.5 rounded-xl border border-amber-300 flex items-center justify-between">
+                  <span>{selectedRes.id_proof_number || 'NO ID SUBMITTED'}</span>
+                  <span className="text-[10px] font-sans font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
+                    Cross-verify with physical original card
+                  </span>
+                </div>
+              </div>
             </div>
 
             {/* Financial breakdown */}

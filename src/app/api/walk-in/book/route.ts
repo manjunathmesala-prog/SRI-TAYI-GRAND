@@ -77,6 +77,60 @@ export async function POST(request: Request) {
       );
     }
 
+    const rawIdType = (idProofType || id_proof_type || '').trim().toLowerCase();
+    const rawIdNum = (idProofNumber || id_proof_number || '').trim().replace(/\s+/g, '').toUpperCase();
+
+    if (!rawIdType || !rawIdNum) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Government ID Proof type and full ID number are mandatory statutory requirements for hotel check-in.',
+        },
+        { status: 400 }
+      );
+    }
+
+    if (rawIdType === 'aadhaar') {
+      const aadhaarDigits = rawIdNum.replace(/\D/g, '');
+      if (aadhaarDigits.length !== 12) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Invalid Aadhaar number: Aadhaar must be exactly 12 digits.',
+          },
+          { status: 400 }
+        );
+      }
+    } else if (rawIdType === 'pan') {
+      if (rawIdNum.length !== 10) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Invalid PAN number: PAN must be exactly 10 alphanumeric characters.',
+          },
+          { status: 400 }
+        );
+      }
+    } else if (rawIdType === 'passport') {
+      if (rawIdNum.length < 8) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: 'Invalid Passport number: Please provide the full 8-character passport number.',
+          },
+          { status: 400 }
+        );
+      }
+    } else if (rawIdNum.length < 6) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Invalid Government ID number: Please provide the full statutory ID number.',
+        },
+        { status: 400 }
+      );
+    }
+
     const rawPayment = (paymentMethod || payment_method || 'cash').toLowerCase();
     const isOnline = rawPayment === 'online' || rawPayment === 'upi' || rawPayment === 'card';
     const nights = parseInt(String(numNights || numberOfNights || number_of_nights || '1'), 10);
@@ -86,8 +140,8 @@ export async function POST(request: Request) {
       guestName: name,
       guestPhone: phone,
       guestEmail: guestEmail || guest_email,
-      idProofType: idProofType || id_proof_type,
-      idProofNumber: idProofNumber || id_proof_number,
+      idProofType: rawIdType,
+      idProofNumber: rawIdNum,
       numberOfNights: isNaN(nights) || nights < 1 ? 1 : nights,
       paymentMethod: isOnline ? 'upi' : 'cash',
       walkInToken,
