@@ -61,6 +61,33 @@ import {
   loadRoomsFromSupabase,
   syncSettingsToSupabase,
   loadSettingsFromSupabase,
+  syncExpenseToSupabase,
+  loadExpensesFromSupabase,
+  deleteExpenseFromSupabase,
+  syncHallEnquiryToSupabase,
+  loadHallEnquiriesFromSupabase,
+  syncConventionQuoteToSupabase,
+  loadConventionQuotesFromSupabase,
+  syncMaintenanceTicketToSupabase,
+  loadMaintenanceTicketsFromSupabase,
+  syncCashShiftToSupabase,
+  loadCashShiftsFromSupabase,
+  syncCashTransactionToSupabase,
+  loadCashTransactionsFromSupabase,
+  syncDailyClosingToSupabase,
+  loadDailyClosingsFromSupabase,
+  syncStaffAttendanceToSupabase,
+  loadStaffAttendanceFromSupabase,
+  syncContactEnquiryToSupabase,
+  loadContactEnquiriesFromSupabase,
+  syncFolioChargeToSupabase,
+  loadFolioChargesFromSupabase,
+  deleteFolioChargeFromSupabase,
+  syncAuditLogToSupabase,
+  loadAuditLogsFromSupabase,
+  loadReviewsFromSupabase,
+  syncWebsiteContentToSupabase,
+  loadWebsiteContentFromSupabase,
 } from './supabase-sync';
 import {
   loadPersistedCards,
@@ -187,6 +214,54 @@ export class HotelRepository {
       if (pgSettings) {
         this.settings = { ...this.settings, ...pgSettings };
       }
+    }).catch(() => {});
+
+    loadExpensesFromSupabase().then((pgExpenses: any) => {
+      if (pgExpenses && pgExpenses.length > 0) this.expenses = pgExpenses;
+    }).catch(() => {});
+
+    loadHallEnquiriesFromSupabase().then((pgHE: any) => {
+      if (pgHE && pgHE.length > 0) this.hallEnquiries = pgHE;
+    }).catch(() => {});
+
+    loadConventionQuotesFromSupabase().then((pgCQ: any) => {
+      if (pgCQ && pgCQ.length > 0) this.conventionQuotes = pgCQ;
+    }).catch(() => {});
+
+    loadMaintenanceTicketsFromSupabase().then((pgMT: any) => {
+      if (pgMT && pgMT.length > 0) this.maintenanceTickets = pgMT;
+    }).catch(() => {});
+
+    loadCashShiftsFromSupabase().then((pgCS: any) => {
+      if (pgCS && pgCS.length > 0) this.cashShifts = pgCS;
+    }).catch(() => {});
+
+    loadCashTransactionsFromSupabase().then((pgCT: any) => {
+      if (pgCT && pgCT.length > 0) this.cashTransactions = pgCT;
+    }).catch(() => {});
+
+    loadDailyClosingsFromSupabase().then((pgDC: any) => {
+      if (pgDC && pgDC.length > 0) this.dailyClosings = pgDC;
+    }).catch(() => {});
+
+    loadStaffAttendanceFromSupabase().then((pgSA: any) => {
+      if (pgSA && pgSA.length > 0) this.staffAttendance = pgSA;
+    }).catch(() => {});
+
+    loadContactEnquiriesFromSupabase().then((pgCE: any) => {
+      if (pgCE && pgCE.length > 0) this.contactEnquiries = pgCE;
+    }).catch(() => {});
+
+    loadFolioChargesFromSupabase().then((pgFC: any) => {
+      if (pgFC && pgFC.length > 0) this.folioCharges = pgFC;
+    }).catch(() => {});
+
+    loadAuditLogsFromSupabase().then((pgAL: any) => {
+      if (pgAL && pgAL.length > 0) this.auditLogs = pgAL;
+    }).catch(() => {});
+
+    loadReviewsFromSupabase().then((pgRev: any) => {
+      if (pgRev && pgRev.length > 0) this.reviews = pgRev;
     }).catch(() => {});
   }
 
@@ -1328,6 +1403,7 @@ export class HotelRepository {
       created_at: new Date().toISOString(),
     };
     this.expenses.unshift(newExpense);
+    syncExpenseToSupabase(newExpense);
     this.broadcastEvent('expense_created', newExpense, actor);
 
     // Auto-record cash out transaction in cashbook if paid in cash
@@ -1353,6 +1429,7 @@ export class HotelRepository {
     const index = this.expenses.findIndex((e) => e.id === id);
     if (index === -1) return false;
     const removed = this.expenses.splice(index, 1)[0];
+    deleteExpenseFromSupabase(id);
     this.broadcastEvent('expense_deleted', { id: removed.id, title: removed.title }, actor);
     return true;
   }
@@ -1506,6 +1583,7 @@ export class HotelRepository {
     };
 
     this.dailyClosings.unshift(closing);
+    syncDailyClosingToSupabase(closing);
     this.broadcastEvent('daily_closing', closing, params.closedByName);
 
     return closing;
@@ -1556,6 +1634,7 @@ export class HotelRepository {
     };
 
     this.cashShifts.unshift(newShift);
+    syncCashShiftToSupabase(newShift);
     this.broadcastEvent('cash_shift_opened', newShift, actor || params.cashierName);
     return newShift;
   }
@@ -1586,6 +1665,7 @@ export class HotelRepository {
       shift.notes = shift.notes ? `${shift.notes} | Close: ${params.notes}` : params.notes;
     }
 
+    syncCashShiftToSupabase(shift);
     this.broadcastEvent('cash_shift_closed', shift, actor || params.closedByName);
     return shift;
   }
@@ -1615,6 +1695,7 @@ export class HotelRepository {
     };
 
     this.cashTransactions.unshift(newTx);
+    syncCashTransactionToSupabase(newTx);
     this.broadcastEvent('cash_transaction_created', newTx, actor || params.performed_by);
     return newTx;
   }
@@ -1678,6 +1759,7 @@ export class HotelRepository {
     };
 
     this.maintenanceTickets.unshift(newTicket);
+    syncMaintenanceTicketToSupabase(newTicket);
 
     if (newTicket.room_blocked) {
       const room = this.rooms.find((r) => r.room_number === newTicket.room_number);
@@ -1731,6 +1813,7 @@ export class HotelRepository {
       }
     }
 
+    syncMaintenanceTicketToSupabase(ticket);
     this.broadcastEvent('maintenance_ticket_updated', ticket, actor);
     return ticket;
   }
@@ -2068,6 +2151,7 @@ export class HotelRepository {
       newValue: params.newValue,
     };
     this.auditLogs.unshift(entry);
+    syncAuditLogToSupabase(entry);
     this.broadcastEvent('audit_log_created', entry, entry.userName);
     return entry;
   }
@@ -2106,6 +2190,7 @@ export class HotelRepository {
       created_at: new Date().toISOString(),
     };
     this.staffAttendance.unshift(attendance);
+    syncStaffAttendanceToSupabase(attendance);
     this.broadcastEvent('attendance_recorded', attendance, actor);
     this.recordAuditLog({
       action: 'STAFF_CLOCK_IN',
@@ -2128,6 +2213,7 @@ export class HotelRepository {
       const diffMs = new Date(clockOutTime).getTime() - new Date(record.clock_in).getTime();
       record.work_hours = Math.round((diffMs / (3600 * 1000)) * 10) / 10;
     }
+    syncStaffAttendanceToSupabase(record);
     this.broadcastEvent('attendance_recorded', record, actor);
     this.recordAuditLog({
       action: 'STAFF_CLOCK_OUT',
@@ -2159,6 +2245,7 @@ export class HotelRepository {
       created_at: new Date().toISOString(),
     };
     this.hallEnquiries.unshift(enquiry);
+    syncHallEnquiryToSupabase(enquiry);
     this.broadcastEvent('full_sync', { enquiry });
     return enquiry;
   }
@@ -2176,6 +2263,7 @@ export class HotelRepository {
     if (admin_notes !== undefined) this.hallEnquiries[index].admin_notes = admin_notes;
     if (quoted_amount !== undefined) this.hallEnquiries[index].quoted_amount = quoted_amount;
     if (advance_amount !== undefined) this.hallEnquiries[index].advance_amount = advance_amount;
+    syncHallEnquiryToSupabase(this.hallEnquiries[index]);
     this.broadcastEvent('full_sync', { enquiry: this.hallEnquiries[index] });
     return this.hallEnquiries[index];
   }
@@ -2886,6 +2974,7 @@ export class HotelRepository {
     };
 
     this.folioCharges.push(newCharge);
+    syncFolioChargeToSupabase(newCharge);
 
     // Update corresponding booking's additional charges and total amount
     const booking = this.bookings.find(
@@ -2920,6 +3009,7 @@ export class HotelRepository {
     if (idx === -1) return false;
 
     const [deleted] = this.folioCharges.splice(idx, 1);
+    deleteFolioChargeFromSupabase(id);
     const booking = this.bookings.find(
       (b) => b.id === deleted.booking_id || b.booking_reference === deleted.booking_reference
     );
@@ -2951,6 +3041,7 @@ export class HotelRepository {
     };
 
     this.contactEnquiries.unshift(newEnquiry);
+    syncContactEnquiryToSupabase(newEnquiry);
     this.broadcastEvent('enquiry_created', { enquiry: newEnquiry, type: 'contact' });
     return newEnquiry;
   }
@@ -2967,6 +3058,7 @@ export class HotelRepository {
     if (admin_notes !== undefined) enquiry.admin_notes = admin_notes;
     enquiry.updated_at = new Date().toISOString();
 
+    syncContactEnquiryToSupabase(enquiry);
     this.broadcastEvent('enquiry_updated', { enquiry, type: 'contact' });
     return enquiry;
   }
@@ -3408,6 +3500,7 @@ export class HotelRepository {
     };
 
     this.conventionQuotes.unshift(newQuote);
+    syncConventionQuoteToSupabase(newQuote);
 
     // If linked to an enquiry, update the enquiry status
     if (quote.enquiry_id) {
@@ -3440,6 +3533,7 @@ export class HotelRepository {
     if (!quote) return false;
 
     quote.status = status;
+    syncConventionQuoteToSupabase(quote);
     return true;
   }
 

@@ -211,7 +211,6 @@ export const INITIAL_ROOM_CATEGORIES: RoomCategory[] = [
       '/images/hotel/room-corner-photo-enhanced.png',
       '/images/hotel/room-double-bed-photo-enhanced.png',
       '/images/hotel/room-headboard-detail-photo-enhanced.png',
-      '/images/hotel/suite-bathroom.jpg',
     ],
     amenities: [
       'Fully AC',
