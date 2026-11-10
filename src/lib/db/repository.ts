@@ -1357,6 +1357,29 @@ export class HotelRepository {
       }
     }
 
+    // Auto-record cash in transaction in cashbook if paid in cash
+    if (newPayment.payment_method === 'cash') {
+      try {
+        const existingTx = this.cashTransactions.find(
+          (t) => t.receipt_ref === newPayment.payment_reference ||
+                 (t.booking_reference === newPayment.booking_reference && t.amount === newPayment.amount && Math.abs(new Date(t.performed_at).getTime() - Date.now()) < 5000)
+        );
+        if (!existingTx) {
+          this.recordCashTransaction({
+            type: 'cash_in',
+            category: 'guest_payment',
+            amount: newPayment.amount,
+            reason: `Guest Payment: ${newPayment.guest_name} (${newPayment.booking_reference})`,
+            booking_reference: newPayment.booking_reference,
+            receipt_ref: newPayment.payment_reference,
+            performed_by: actor || 'Front Desk Staff',
+          }, actor);
+        }
+      } catch {
+        // non-blocking if shift not open
+      }
+    }
+
     this.broadcastEvent('payment_recorded', { payment: newPayment, booking }, actor);
 
     syncPaymentToSupabase(newPayment);

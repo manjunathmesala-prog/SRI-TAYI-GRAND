@@ -11,6 +11,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: auth.error || 'Unauthorized' }, { status: 403 });
     }
 
+    await repo.ensureCashbookLoaded();
+
     const url = new URL(req.url);
     const dateStr = url.searchParams.get('date') || undefined;
 
@@ -48,6 +50,8 @@ export async function POST(req: NextRequest) {
 
     const closedByName = auth.session?.name || 'Accounts Auditor';
     const closedByRole = auth.session?.role || 'Accounts';
+
+    await repo.ensureCashbookLoaded();
 
     const closing = repo.performDailyClosing({
       closingDate: targetDate,
