@@ -20,7 +20,15 @@ export default function StandeeAdminPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
   const defaultToken = 'STG_RECEPT_DESK_SEC_7749';
-  const targetUrl = `https://sritayigrand.com/walk-in?token=${encodeURIComponent(defaultToken)}`;
+  const [targetUrl, setTargetUrl] = useState(
+    `https://sritayigrand.com/walk-in?token=${encodeURIComponent(defaultToken)}`
+  );
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setTargetUrl(`${window.location.origin}/walk-in?token=${encodeURIComponent(defaultToken)}`);
+    }
+  }, [defaultToken]);
 
   useEffect(() => {
     let isCancelled = false;

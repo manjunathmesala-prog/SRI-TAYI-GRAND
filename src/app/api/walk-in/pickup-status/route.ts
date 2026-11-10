@@ -33,7 +33,7 @@ export async function GET(request: Request) {
       booking.status === 'checked_in' || !!booking.keycard_issued_at || !!booking.keycard_uid;
     const isPaid =
       booking.payment_status === 'successful' ||
-      booking.payment_status === 'paid' ||
+      (booking.payment_status as string) === 'paid' ||
       booking.paid_amount >= booking.total_amount;
 
     return NextResponse.json({

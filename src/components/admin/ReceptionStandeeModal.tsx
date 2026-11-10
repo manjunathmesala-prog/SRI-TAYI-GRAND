@@ -28,7 +28,15 @@ export function ReceptionStandeeModal({
   const [isGenerating, setIsGenerating] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const targetUrl = `https://sritayigrand.com/walk-in?token=${encodeURIComponent(defaultToken)}`;
+  const [targetUrl, setTargetUrl] = useState(
+    `https://sritayigrand.com/walk-in?token=${encodeURIComponent(defaultToken)}`
+  );
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setTargetUrl(`${window.location.origin}/walk-in?token=${encodeURIComponent(defaultToken)}`);
+    }
+  }, [defaultToken]);
 
   // Fetch generated high-res QR code
   useEffect(() => {

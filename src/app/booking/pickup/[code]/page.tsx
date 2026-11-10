@@ -1,11 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback, use } from 'react';
+import React, { useState, useEffect, useCallback, use } from 'react';
 import { useSearchParams } from 'next/navigation';
-import NextLink from 'next/link';
+import Link from 'next/link';
 import Image from 'next/image';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
 import {
   Sparkles,
   KeyRound,
@@ -14,36 +12,52 @@ import {
   Wifi,
   Phone,
   MapPin,
-  QrCode,
   ShieldCheck,
-  CreditCard,
-  Building,
-  ArrowRight,
+  Copy,
   RefreshCw,
+  Home,
+  Check,
 } from 'lucide-react';
 
 interface PickupData {
   success: boolean;
-  booking_reference: string;
-  pickup_code: string;
-  guest_name: string;
-  category_name: string;
-  status: string;
-  payment_status: string;
-  payment_method: string;
-  total_amount: number;
-  paid_amount: number;
-  check_in_date: string;
-  check_out_date: string;
-  is_assigned: boolean;
-  is_key_issued: boolean;
+  bookingReference: string;
+  booking_reference?: string;
+  pickupCode: string;
+  pickup_code?: string;
+  guestName: string;
+  guest_name?: string;
+  guestPhone: string;
+  guest_phone?: string;
+  roomTypeName: string;
+  category_name?: string;
+  assignedRoomNumber?: string;
   assigned_room_number?: string;
-  keycard_issued_at?: string;
-  wifi_ssid: string;
-  wifi_password: string;
+  isKeyHandedOver: boolean;
+  is_key_issued?: boolean;
+  status: string;
+  paymentStatus: string;
+  payment_status?: string;
+  paymentMethod: string;
+  payment_method?: string;
+  totalAmountInr: number;
+  total_amount?: number;
+  amountPaidInr: number;
+  paid_amount?: number;
+  checkInDate: string;
+  check_in_date?: string;
+  checkOutDate: string;
+  check_out_date?: string;
+  wifiSsid: string;
+  wifi_ssid?: string;
+  wifiPassword: string;
+  wifi_password?: string;
+  hotelName: string;
+  hotelAddress: string;
+  hotelPhone: string;
 }
 
-export default function PickupPage({ params }: { params: Promise<{ code: string }> }) {
+export default function WalkInPickupPage({ params }: { params: Promise<{ code: string }> }) {
   const resolvedParams = use(params);
   const pickupCode = decodeURIComponent(resolvedParams.code);
   const searchParams = useSearchParams();
@@ -52,20 +66,25 @@ export default function PickupPage({ params }: { params: Promise<{ code: string 
   const [data, setData] = useState<PickupData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [wifiCopied, setWifiCopied] = useState(false);
 
   const fetchStatus = useCallback(async () => {
     try {
-      const res = await fetch(`/api/walk-in/pickup-status?code=${encodeURIComponent(pickupCode)}&ref=${encodeURIComponent(bookingRef)}`);
+      const res = await fetch(
+        `/api/walk-in/pickup-status?code=${encodeURIComponent(pickupCode)}&ref=${encodeURIComponent(
+          bookingRef
+        )}`
+      );
       if (res.ok) {
         const d = await res.json();
         setData(d);
         setError(null);
       } else {
         const d = await res.json();
-        setError(d.error || 'Pickup record not found');
+        setError(d.error || 'Could not locate pickup pass.');
       }
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error checking status');
+    } catch {
+      setError('Connection interrupted. Retrying...');
     } finally {
       setIsLoading(false);
     }
@@ -73,200 +92,257 @@ export default function PickupPage({ params }: { params: Promise<{ code: string 
 
   useEffect(() => {
     fetchStatus();
-    // Poll every 3 seconds to auto-update when receptionist issues keycard
-    const interval = setInterval(fetchStatus, 3000);
+    // Real-time polling every 3.5 seconds until key is handed over
+    const interval = setInterval(() => {
+      fetchStatus();
+    }, 3500);
+
     return () => clearInterval(interval);
   }, [fetchStatus]);
 
+  const copyWifiPassword = () => {
+    const pwd = data?.wifiPassword || data?.wifi_password;
+    if (!pwd) return;
+    navigator.clipboard.writeText(pwd);
+    setWifiCopied(true);
+    setTimeout(() => setWifiCopied(false), 2500);
+  };
+
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7] flex flex-col items-center justify-center p-6 text-center">
-        <div className="w-12 h-12 border-3 border-[#D8AD56] border-t-transparent rounded-full animate-spin mb-4" />
-        <h2 className="font-serif text-lg font-bold text-[#241912]">Generating Keycard Pickup Pass...</h2>
+      <div className="min-h-screen bg-[#21180F] flex flex-col items-center justify-center p-6 text-center text-white">
+        <div className="w-12 h-12 rounded-full border-2 border-[#D8AD56] border-t-transparent animate-spin mb-4" />
+        <h2 className="font-serif text-lg font-bold">Verifying Room Key Pass...</h2>
+        <p className="text-stone-400 text-xs mt-1">Connecting to Sri Tayi Grand Reception</p>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7] flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto">
-        <h2 className="font-serif text-xl font-bold text-red-700">Pickup Record Not Found</h2>
-        <p className="text-xs text-[#786B61] mt-2">{error || 'Could not locate your reservation.'}</p>
-        <NextLink
+      <div className="min-h-screen bg-[#21180F] flex flex-col items-center justify-center p-6 text-center text-white">
+        <div className="w-12 h-12 rounded-full bg-rose-900/40 text-rose-400 flex items-center justify-center mb-4 text-xl font-bold">
+          !
+        </div>
+        <h1 className="font-serif text-xl font-bold">Key Pass Not Found</h1>
+        <p className="text-stone-400 text-xs mt-2 max-w-sm">{error || 'Invalid pickup code.'}</p>
+        <Link
           href="/walk-in"
-          className="mt-5 px-5 py-2.5 rounded-xl bg-[#382216] text-[#D8AD56] font-bold text-xs shadow-sm"
+          className="mt-6 px-5 py-2.5 rounded-xl bg-[#8D672F] text-white text-xs font-semibold hover:bg-[#6D4E21] transition-all"
         >
           Return to Express Check-In
-        </NextLink>
+        </Link>
       </div>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-[#FDFBF7] text-[#241912] pb-16">
-      {/* Landing Page Architectural Header with Logo */}
-      <Header transparentInitially={false} />
+  const isCheckedIn =
+    data.isKeyHandedOver ||
+    data.is_key_issued ||
+    data.status === 'checked_in';
 
-      {/* Keycard Pickup Pass Sub-header Bar */}
-      <div className="bg-[#241912] text-white border-b border-[#382216] py-3 px-4 shadow-sm">
+  const guestName = data.guestName || data.guest_name || 'Guest';
+  const bookingReference = data.bookingReference || data.booking_reference || '';
+  const code = data.pickupCode || data.pickup_code || pickupCode;
+  const roomTypeName = data.roomTypeName || data.category_name || 'Room';
+  const assignedRoomNumber = data.assignedRoomNumber || data.assigned_room_number;
+  const checkInDate = data.checkInDate || data.check_in_date || '';
+  const checkOutDate = data.checkOutDate || data.check_out_date || '';
+  const totalAmount = data.totalAmountInr ?? data.total_amount ?? 0;
+  const paymentStatus = data.paymentStatus || data.payment_status || 'unpaid';
+  const isPaid = paymentStatus === 'paid' || paymentStatus === 'successful';
+  const wifiSsid = data.wifiSsid || data.wifi_ssid || 'SriTayiGrand_Guest';
+  const wifiPassword = data.wifiPassword || data.wifi_password || 'TayiGrand@2026';
+  const hotelAddress = data.hotelAddress || 'Main Road, Kadiri, Andhra Pradesh 515591';
+  const hotelPhone = data.hotelPhone || '+91 85002 23344';
+
+  return (
+    <div className="min-h-screen bg-[#F8F3E9] text-[#33271D] pb-16">
+      {/* Top Banner */}
+      <div className="bg-[#21180F] text-white px-4 py-3.5 border-b border-[#8D672F]/40 shadow-md">
         <div className="max-w-md mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="relative w-8 h-8 rounded-lg bg-[#382216] border border-[#D8AD56]/40 p-1 flex items-center justify-center shrink-0">
+            <div className="relative w-9 h-9 rounded-full border border-[#D8AD56]/80 p-1 bg-[#33271D] shadow-xs flex items-center justify-center shrink-0">
               <Image
                 src="/images/hotel/tayi-grand-logo.png"
-                alt="Sri Tayi Grand"
-                width={24}
-                height={24}
+                alt="Sri Tayi Grand Hotel Logo"
+                width={26}
+                height={26}
                 className="object-contain"
-                priority
               />
             </div>
             <div>
-              <h1 className="font-serif text-sm font-bold tracking-wide text-white">SRI TAYI GRAND</h1>
-              <p className="text-[10px] text-[#D8AD56]">Digital Keycard Pickup Pass</p>
+              <span className="font-serif font-bold text-sm block leading-tight text-white">
+                Sri Tayi Grand Hotel
+              </span>
+              <span className="text-[10px] text-[#D8AD56] font-medium">
+                Official Room Key Pass &bull; Reception Counter
+              </span>
             </div>
           </div>
-          <span className="text-[9px] uppercase px-2.5 py-0.5 rounded-full font-bold bg-[#D8AD56] text-[#241912]">
-            {data.is_key_issued ? 'Checked In' : 'At Reception'}
-          </span>
+          <button
+            onClick={fetchStatus}
+            className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs flex items-center gap-1 transition-colors cursor-pointer"
+            title="Refresh Status"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span className="text-[10px]">Refresh</span>
+          </button>
         </div>
       </div>
 
-      <main className="max-w-md mx-auto px-4 pt-5 space-y-4">
-        {/* Pass Card with Gold Crest */}
-        <div className="bg-white rounded-3xl border border-[#EFE3D6] shadow-xl overflow-hidden text-center relative">
-          <div className="bg-gradient-to-r from-[#382216] to-[#25150F] text-white p-5 space-y-1 relative">
+      <div className="max-w-md mx-auto px-4 py-6 space-y-6">
+        {/* Status Hero Card */}
+        <div
+          className={`rounded-3xl p-6 text-center border shadow-xl relative overflow-hidden ${
+            isCheckedIn
+              ? 'bg-gradient-to-b from-[#1C2C1D] to-[#121B13] text-white border-emerald-500/40'
+              : 'bg-[#21180F] text-white border-[#8D672F]/50'
+          }`}
+        >
+          <div className="space-y-2">
             <span className="text-[10px] font-bold uppercase tracking-widest text-[#D8AD56]">
-              OFFICIAL RECEPTION PICKUP PASS
+              {isCheckedIn ? 'Key Handed Over • Checked In' : 'Step 3: Collect Key at Reception'}
             </span>
-            <h2 className="font-serif text-xl font-bold text-white">{data.guest_name}</h2>
-            <p className="text-xs text-[#EFE3D6]/80">{data.category_name}</p>
-          </div>
 
-          <div className="p-6 space-y-5">
-            {!data.is_key_issued ? (
-              /* State A: Waiting for Keycard Handover */
-              <div className="space-y-4">
-                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 space-y-1.5 animate-pulse">
-                  <p className="text-[11px] font-semibold text-amber-800 uppercase tracking-wide">
-                    Show this pickup code to Front Desk:
-                  </p>
-                  <div className="font-mono text-4xl sm:text-5xl font-black text-[#241912] tracking-wider py-1">
-                    {data.pickup_code}
-                  </div>
-                  <p className="text-[10px] text-[#786B61]">Reference: {data.booking_reference}</p>
+            {isCheckedIn ? (
+              <div className="space-y-1">
+                <div className="w-12 h-12 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-400">
+                  <CheckCircle2 className="w-7 h-7" />
                 </div>
-
-                {/* Simulated Barcode */}
-                <div className="p-3 rounded-xl bg-gray-50 border border-gray-200 flex flex-col items-center justify-center space-y-1">
-                  <div className="flex items-center gap-1 h-12 w-48 justify-center overflow-hidden">
-                    {Array.from({ length: 32 }).map((_, i) => (
-                      <div
-                        key={i}
-                        className="bg-black h-full"
-                        style={{ width: `${(i % 3) + 1.5}px`, marginRight: `${(i % 2) + 1}px` }}
-                      />
-                    ))}
-                  </div>
-                  <span className="font-mono text-[9px] text-gray-500 tracking-widest">{data.pickup_code}</span>
-                </div>
-
-                <div className="p-3.5 rounded-xl bg-[#F6EFE6] border border-[#EFE3D6] text-left text-xs space-y-2">
-                  <div className="flex items-center gap-2 text-[#382216] font-bold">
-                    <Clock className="w-4 h-4 text-[#D8AD56] animate-spin" />
-                    <span>Receptionist is preparing your room keycard...</span>
-                  </div>
-                  <p className="text-[11px] text-[#786B61] leading-relaxed">
-                    Staff is assigning an inspected physical room and programming your RFID card on the counter USB encoder right now. This screen will automatically refresh as soon as your key is ready.
-                  </p>
-                </div>
+                <h1 className="font-serif text-2xl font-bold text-white pt-1">
+                  Welcome to Room {assignedRoomNumber}
+                </h1>
+                <p className="text-stone-300 text-xs">
+                  Your physical room key has been handed over. Enjoy your stay!
+                </p>
               </div>
             ) : (
-              /* State B: Keycard Programmed & Room Ready! */
-              <div className="space-y-4 animate-in zoom-in-95 duration-300">
-                <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto shadow-sm">
-                  <CheckCircle2 className="w-9 h-9" />
+              <div className="space-y-2">
+                <div className="w-12 h-12 rounded-full bg-[#8D672F]/20 text-[#D8AD56] flex items-center justify-center mx-auto border border-[#8D672F] animate-pulse">
+                  <Clock className="w-6 h-6" />
                 </div>
+                <h1 className="font-serif text-2xl font-bold text-white">
+                  Show Code to Receptionist
+                </h1>
+                <p className="text-stone-300 text-xs max-w-xs mx-auto">
+                  Show this pass code to the receptionist standing at the counter to collect your physical room key.
+                </p>
 
-                <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">
-                    KEYCARD ACTIVATED & READY
+                {/* Pickup Code Badge */}
+                <div className="bg-white/10 border-2 border-dashed border-[#D8AD56] rounded-2xl py-3 px-6 inline-block my-2">
+                  <span className="text-[10px] uppercase tracking-widest text-stone-300 block">
+                    Pickup Pass Code
                   </span>
-                  <h3 className="font-serif text-2xl font-bold text-[#241912] mt-0.5">
-                    Welcome to Room {data.assigned_room_number}!
-                  </h3>
-                  <p className="text-xs text-[#786B61] mt-1">
-                    Your Be-Tech RFID keycard has been authorized and handed to you.
-                  </p>
-                </div>
-
-                {/* Room & Stay Details Card */}
-                <div className="p-4 rounded-2xl bg-[#F6EFE6] border border-[#EFE3D6] text-left space-y-2.5 text-xs">
-                  <div className="flex justify-between pb-2 border-b border-[#EFE3D6]">
-                    <span className="text-[#786B61]">Assigned Room</span>
-                    <span className="font-bold text-[#241912] text-sm">Room {data.assigned_room_number}</span>
-                  </div>
-                  <div className="flex justify-between pb-2 border-b border-[#EFE3D6]">
-                    <span className="text-[#786B61]">Floor Location</span>
-                    <span className="font-bold text-[#241912]">
-                      {data.assigned_room_number?.startsWith('3') ? 'Floor 3 (Take Lift)' : 'Floor 2 (Take Lift)'}
-                    </span>
-                  </div>
-                  <div className="flex justify-between pb-2 border-b border-[#EFE3D6]">
-                    <span className="text-[#786B61]">Standard Checkout</span>
-                    <span className="font-bold text-[#241912]">11:00 AM, {data.check_out_date}</span>
-                  </div>
-                  <div className="flex justify-between items-center pt-1">
-                    <span className="text-[#786B61] flex items-center gap-1">
-                      <Wifi className="w-3.5 h-3.5 text-[#D8AD56]" />
-                      <span>Guest Wi-Fi</span>
-                    </span>
-                    <span className="font-mono font-bold text-[11px] text-[#241912]">
-                      {data.wifi_password}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 text-left">
-                  <KeyRound className="w-5 h-5 text-emerald-600 shrink-0" />
-                  <span>
-                    Tap your physical card flat on your door lock to enter. Enjoy your stay at Sri Tayi Grand!
+                  <span className="font-mono text-3xl font-bold tracking-wider text-[#D8AD56]">
+                    {code}
                   </span>
                 </div>
               </div>
             )}
+          </div>
+        </div>
 
-            {/* Payment Summary Footer */}
-            <div className="pt-3 border-t border-[#EFE3D6] flex justify-between items-center text-xs">
-              <span className="text-[#786B61]">Payment Status:</span>
+        {/* Guest Wi-Fi Delivery Card */}
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5] shadow-xs space-y-3">
+          <div className="flex items-center justify-between pb-2 border-b border-[#E6D9C5]">
+            <h3 className="font-serif font-bold text-xs uppercase tracking-wider text-[#33271D] flex items-center gap-2">
+              <Wifi className="w-4 h-4 text-[#8D672F]" />
+              <span>Complimentary Guest Wi-Fi</span>
+            </h3>
+            <span className="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full font-bold">
+              High Speed Fiber
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3 text-xs">
+            <div className="bg-[#F8F3E9] p-3 rounded-xl">
+              <span className="text-[10px] text-[#786A5B] block font-semibold uppercase">Network Name (SSID)</span>
+              <span className="font-mono font-bold text-[#33271D] text-xs mt-0.5 block truncate">
+                {wifiSsid}
+              </span>
+            </div>
+
+            <div className="bg-[#F8F3E9] p-3 rounded-xl flex items-center justify-between">
+              <div>
+                <span className="text-[10px] text-[#786A5B] block font-semibold uppercase">Password</span>
+                <span className="font-mono font-bold text-[#8D672F] text-xs mt-0.5 block">
+                  {wifiPassword}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={copyWifiPassword}
+                className="p-2 rounded-lg bg-white border border-[#E6D9C5] text-[#8D672F] hover:bg-stone-50 cursor-pointer transition-all active:scale-95"
+                title="Copy Password"
+              >
+                {wifiCopied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Stay Summary */}
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5] shadow-xs space-y-3 text-xs">
+          <h3 className="font-serif font-bold text-xs uppercase tracking-wider text-[#786A5B] pb-2 border-b border-[#E6D9C5]">
+            Reservation Folio Details
+          </h3>
+
+          <div className="space-y-2">
+            <div className="flex justify-between">
+              <span className="text-[#786A5B]">Booking Reference:</span>
+              <span className="font-mono font-bold text-[#33271D]">{bookingReference}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-[#786A5B]">Primary Guest:</span>
+              <span className="font-bold text-[#33271D]">{guestName}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-[#786A5B]">Room Category:</span>
+              <span className="font-bold text-[#8D672F]">{roomTypeName}</span>
+            </div>
+            {assignedRoomNumber && (
+              <div className="flex justify-between bg-emerald-50 p-2 rounded-xl text-emerald-900 font-bold">
+                <span>Assigned Room:</span>
+                <span>Room {assignedRoomNumber}</span>
+              </div>
+            )}
+            <div className="flex justify-between">
+              <span className="text-[#786A5B]">Check-In / Out:</span>
+              <span>{checkInDate} &rarr; {checkOutDate}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-[#786A5B]">Total Amount (Inc. 5% GST):</span>
+              <span className="font-bold text-[#33271D]">₹{totalAmount.toLocaleString('en-IN')}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-[#786A5B]">Payment Status:</span>
               <span
-                className={`font-bold px-2.5 py-0.5 rounded-full text-[10px] ${
-                  data.payment_status === 'successful'
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-amber-100 text-amber-800'
+                className={`px-2 py-0.5 rounded-full font-bold uppercase text-[10px] ${
+                  isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
                 }`}
               >
-                {data.payment_status === 'successful'
-                  ? `PAID (₹${data.total_amount})`
-                  : `COLLECT AT DESK (₹${data.total_amount})`}
+                {isPaid ? 'Paid Online' : 'Pay at Reception Desk'}
               </span>
             </div>
           </div>
         </div>
 
-        {/* Hotel Contact Help Card */}
-        <div className="p-4 rounded-2xl bg-white border border-[#EFE3D6] text-xs space-y-2 text-[#786B61]">
-          <p className="font-bold text-[#241912] flex items-center gap-1.5">
-            <Building className="w-3.5 h-3.5 text-[#D8AD56]" />
-            <span>Sri Tayi Grand Front Desk Support</span>
+        {/* Front Desk Assistance Footer */}
+        <div className="p-4 rounded-2xl bg-white border border-[#E6D9C5] text-center space-y-2 text-xs shadow-xs">
+          <p className="font-bold text-[#33271D]">Need front desk assistance?</p>
+          <p className="text-[11px] text-[#786A5B]">
+            {hotelAddress}
           </p>
-          <p className="text-[11px]">
-            Need extra towels, room service, or late checkout? Dial <b>0</b> or <b>100</b> from your room intercom, or visit reception.
-          </p>
+          <a
+            href={`tel:${hotelPhone.replace(/\s+/g, '')}`}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#8D672F] hover:bg-[#6D4E21] text-white text-xs font-semibold mt-1 transition-all"
+          >
+            <Phone className="w-3.5 h-3.5" />
+            <span>Call Front Desk: {hotelPhone}</span>
+          </a>
         </div>
-      </main>
-
-      <Footer />
+      </div>
     </div>
   );
 }
