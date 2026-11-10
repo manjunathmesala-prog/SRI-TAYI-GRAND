@@ -44,8 +44,13 @@ async function getResolvedTunnelUrl(forceFresh: boolean = false): Promise<string
 /**
  * Auto-Spawns the Be-Tech C# Hardware Bridge Service in the background if it is stopped.
  */
+let lastAutoSpawnAttempt = 0;
+
 function autoSpawnHardwareBridge(): boolean {
   if (process.platform !== 'win32') return false;
+  const now = Date.now();
+  if (now - lastAutoSpawnAttempt < 60000) return false; // 60s cooldown
+  lastAutoSpawnAttempt = now;
 
   try {
     const candidatePaths = [
@@ -131,8 +136,9 @@ export async function GET(req: Request) {
     }
   }
 
-  // 3. If on Windows and local, attempt auto-spawn
-  if (!isOnline && isLocalHost && process.platform === 'win32') {
+  // 3. Only attempt auto-spawn if bridge service is completely dead (unresponsive) and on local Windows machine
+  const bridgeServiceResponding = bridgeData !== null;
+  if (!bridgeServiceResponding && isLocalHost && process.platform === 'win32') {
     const spawned = autoSpawnHardwareBridge();
     if (spawned) {
       await new Promise((r) => setTimeout(r, 1000));
