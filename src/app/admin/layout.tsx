@@ -24,11 +24,11 @@ export default function AdminLayout({
 
   return (
     <RBACProvider>
-      <div className="min-h-screen bg-[#FDFBF7] text-[#241912] flex flex-col">
+      <div className="min-h-screen bg-[#FAF6EE] text-[#33271D] flex flex-col md:flex-row antialiased w-full overflow-x-hidden">
         <AdminSidebar />
-        <div className="lg:pl-64 flex-1 flex flex-col pt-14 lg:pt-0">
+        <div className="md:pl-72 flex-1 flex flex-col min-w-0 w-full pt-14 md:pt-0">
           <AdminHeader />
-          <main className="p-4 sm:p-6 lg:p-8 flex-1">
+          <main className="flex-1 flex flex-col min-w-0 w-full overflow-x-hidden p-3.5 sm:p-6 lg:p-8 pb-28 sm:pb-32 md:pb-8">
             {children}
           </main>
         </div>

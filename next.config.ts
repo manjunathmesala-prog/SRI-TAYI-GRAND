@@ -16,7 +16,7 @@ const securityHeaders = [
   },
   {
     key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=()",
+    value: "camera=(), microphone=(), geolocation=(), payment=*",
   },
   {
     key: "Strict-Transport-Security",
@@ -26,12 +26,13 @@ const securityHeaders = [
     key: "Content-Security-Policy",
     value: [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com data:",
-      "img-src 'self' data: https: blob:",
-      "frame-src https://api.razorpay.com",
-      "connect-src 'self' https://api.razorpay.com https://*.supabase.co wss://*.supabase.co",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://*.razorpay.com https://cdn.razorpay.com",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.razorpay.com",
+      "font-src 'self' https://fonts.gstatic.com data: https://*.razorpay.com",
+      "img-src 'self' data: https: blob: https://*.razorpay.com",
+      "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://*.razorpay.com",
+      "child-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://*.razorpay.com blob:",
+      "connect-src 'self' https://api.razorpay.com https://*.razorpay.com https://lumberjack.razorpay.com https://lumberjack-cx.razorpay.com https://razorpay.com https://*.supabase.co wss://*.supabase.co",
     ].join("; "),
   },
 ];
