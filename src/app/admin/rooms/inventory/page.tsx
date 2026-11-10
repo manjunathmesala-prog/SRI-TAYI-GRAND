@@ -95,6 +95,7 @@ export default function RoomInventoryPage() {
       );
       setTimeout(() => setToast(null), 4000);
       setEditingRoom(null);
+      adminOperations.invalidateFullState();
       await fetchRooms();
     } catch (err: any) {
       alert(err.message || 'Failed to update room status');

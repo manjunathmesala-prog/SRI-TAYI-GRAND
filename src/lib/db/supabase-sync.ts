@@ -2,6 +2,7 @@ import {
   Booking,
   PaymentRecord,
   PhysicalRoom,
+  RoomCategory,
   HotelSettings,
   OperationalStatus,
   HousekeepingStatus,
@@ -2059,5 +2060,94 @@ export async function loadWebsiteContentFromSupabase(): Promise<Record<string, a
   } catch (err: unknown) {
     console.warn('[SUPABASE LOAD WEBSITE CONTENT WARN]', err instanceof Error ? err.message : String(err));
     return {};
+  }
+}
+
+// ==============================================================================
+// 3.5. ROOM CATEGORIES SYNCHRONIZATION
+// ==============================================================================
+
+export async function loadCategoriesFromSupabase(): Promise<RoomCategory[]> {
+  if (typeof window !== 'undefined') return [];
+
+  const db = getSupabasePgPool();
+  if (!db) return [];
+
+  try {
+    const client = await db.connect();
+    try {
+      const res = await client.query(`
+        SELECT 
+          id, slug, name, short_description, full_description, 
+          base_price_per_night, max_adults, max_children, max_occupancy, 
+          bed_type, room_size_sqft, cover_image_url, is_active
+        FROM room_categories
+        ORDER BY base_price_per_night ASC;
+      `);
+      return res.rows.map((r: any) => ({
+        id: r.id,
+        slug: r.slug,
+        name: r.name,
+        short_description: r.short_description || '',
+        full_description: r.full_description || '',
+        base_price_per_night: Number(r.base_price_per_night),
+        base_tariff_paise: Math.round(Number(r.base_price_per_night) * 100),
+        max_adults: Number(r.max_adults) || 2,
+        max_children: Number(r.max_children) || 1,
+        max_occupancy: Number(r.max_occupancy) || 3,
+        bed_type: r.bed_type || 'Double Bed',
+        room_size_sqft: Number(r.room_size_sqft) || 250,
+        cover_image_url: r.cover_image_url || '/images/hotel/room-double-large.jpg',
+        gallery_images: [],
+        amenities: [],
+        is_active: r.is_active !== false,
+      }));
+    } finally {
+      client.release();
+    }
+  } catch (err: unknown) {
+    console.warn('[SUPABASE LOAD CATEGORIES WARN]', err instanceof Error ? err.message : String(err));
+    return [];
+  }
+}
+
+export async function syncCategoryToSupabase(category: RoomCategory): Promise<void> {
+  if (typeof window !== 'undefined' || !category) return;
+
+  const db = getSupabasePgPool();
+  if (!db) return;
+
+  try {
+    const client = await db.connect();
+    try {
+      await client.query(
+        `UPDATE room_categories 
+         SET name = $1,
+             short_description = COALESCE($2, short_description),
+             base_price_per_night = $3,
+             bed_type = COALESCE($4, bed_type),
+             max_occupancy = COALESCE($5, max_occupancy),
+             is_active = COALESCE($6, is_active),
+             updated_at = NOW()
+         WHERE id::text = $7 OR slug = $8;`,
+        [
+          category.name,
+          category.short_description || null,
+          category.base_price_per_night,
+          category.bed_type || null,
+          category.max_occupancy,
+          category.is_active,
+          category.id,
+          category.slug || category.name.toLowerCase().replace(/\s+/g, '-'),
+        ]
+      );
+    } finally {
+      client.release();
+    }
+  } catch (err: unknown) {
+    console.warn(
+      `[SUPABASE CATEGORY SYNC WARN] (${category.name}):`,
+      err instanceof Error ? err.message : String(err)
+    );
   }
 }

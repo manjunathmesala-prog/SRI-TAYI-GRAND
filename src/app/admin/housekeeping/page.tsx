@@ -138,6 +138,7 @@ export default function HousekeepingAdminPage() {
 
       setInspectionRoom(null);
       showToast('success', 'Room inspection passed and room marked clean & available.');
+      adminOperations.invalidateFullState();
       await fetchHousekeepingData();
     } catch (err: any) {
       showToast('error', err.message || 'Error completing inspection');
@@ -205,6 +206,7 @@ export default function HousekeepingAdminPage() {
       }
 
       showToast('success', 'Room marked as cleaning in progress');
+      adminOperations.invalidateFullState();
       await fetchHousekeepingData();
     } catch (err: any) {
       showToast('error', err.message || 'Error updating status');

@@ -59,6 +59,8 @@ import {
   loadPaymentsFromSupabase,
   syncRoomStatusToSupabase,
   loadRoomsFromSupabase,
+  loadCategoriesFromSupabase,
+  syncCategoryToSupabase,
   syncSettingsToSupabase,
   loadSettingsFromSupabase,
   syncExpenseToSupabase,
@@ -181,6 +183,21 @@ export class HotelRepository {
             this.bookings[index] = { ...this.bookings[index], ...pgB };
           } else {
             this.bookings.push(pgB);
+          }
+        }
+      }
+    }).catch(() => {});
+
+    loadCategoriesFromSupabase().then((pgCategories) => {
+      if (pgCategories && pgCategories.length > 0) {
+        for (const pgC of pgCategories) {
+          const index = this.categories.findIndex(
+            (c) => c.id === pgC.id || c.slug === pgC.slug || c.name.toLowerCase() === pgC.name.toLowerCase()
+          );
+          if (index !== -1) {
+            this.categories[index] = { ...this.categories[index], ...pgC };
+          } else {
+            this.categories.push(pgC);
           }
         }
       }
@@ -407,6 +424,7 @@ export class HotelRepository {
     const index = this.categories.findIndex((c) => c.id === id);
     if (index === -1) return null;
     this.categories[index] = { ...this.categories[index], ...updates };
+    syncCategoryToSupabase(this.categories[index]);
     this.broadcastEvent('full_sync', { category: this.categories[index] });
     return this.categories[index];
   }
