@@ -23,7 +23,7 @@ export function loadPersistedCards(): RFIDCard[] {
     if (fs.existsSync(paths.CARDS_FILE)) {
       const data = fs.readFileSync(paths.CARDS_FILE, 'utf-8');
       const parsed = JSON.parse(data);
-      if (Array.isArray(parsed) && parsed.length > 0) {
+      if (Array.isArray(parsed)) {
         return parsed;
       }
     }

@@ -132,17 +132,22 @@ export async function syncEventToSupabase(event: RFIDAccessEvent): Promise<void>
 /**
  * Production Live Supabase Sync for Deleting Cards
  */
-export async function deleteCardFromSupabase(cardUid: string): Promise<void> {
-  if (!isServerEnvironment() || !cardUid) return;
+export async function deleteCardFromSupabase(cardIdentifier: string): Promise<boolean> {
+  if (!isServerEnvironment() || !cardIdentifier) return false;
 
   const pool = getPgPool();
-  if (!pool) return;
+  if (!pool) return false;
 
   try {
-    await pool.query('DELETE FROM rfid_cards WHERE card_uid = $1;', [cardUid]);
-    console.log(`[SUPABASE CLOUD SYNC] Card ${cardUid} deleted from Supabase`);
+    const res = await pool.query(
+      'DELETE FROM rfid_cards WHERE card_uid = $1 OR id::text = $1;',
+      [cardIdentifier]
+    );
+    console.log(`[SUPABASE CLOUD SYNC] Card ${cardIdentifier} deleted from Supabase (${res.rowCount} row(s) removed)`);
+    return true;
   } catch (err: any) {
     console.warn('[SUPABASE RFID DELETE WARN]', err.message);
+    return false;
   }
 }
 

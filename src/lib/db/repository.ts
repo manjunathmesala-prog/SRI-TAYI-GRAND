@@ -2479,14 +2479,27 @@ export class HotelRepository {
   getRFIDCards(): RFIDCard[] {
     const persisted = loadPersistedCards();
     if (persisted.length > 0) {
+      // Deduplicate cards by physical card_uid (or id) to ensure strictly unique entries
+      const seen = new Set<string>();
+      const deduped: RFIDCard[] = [];
+      let hadDuplicates = false;
+
       for (const p of persisted) {
-        const existingIdx = this.rfidCards.findIndex((c) => c.id === p.id || c.card_uid === p.card_uid);
-        if (existingIdx === -1) {
-          this.rfidCards.push(p);
+        const key = p.card_uid || p.id;
+        if (!seen.has(key)) {
+          seen.add(key);
+          deduped.push(p);
         } else {
-          this.rfidCards[existingIdx] = { ...p, ...this.rfidCards[existingIdx] };
+          hadDuplicates = true;
         }
       }
+
+      this.rfidCards = deduped;
+      if (hadDuplicates) {
+        savePersistedCards(this.rfidCards);
+      }
+    } else {
+      this.rfidCards = [];
     }
     return [...this.rfidCards];
   }

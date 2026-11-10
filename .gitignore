@@ -39,3 +39,4 @@ DumpPE.exe
 
 *.dat
 latest_production_tunnel_url.txt
+scratch/
