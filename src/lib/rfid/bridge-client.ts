@@ -92,21 +92,26 @@ export function getSavedBridgeHost(): string {
 }
 
 /**
- * Ping the hardware bridge service across all devices (direct or via multi-device proxy)
+ * Check if code is running in a local developer environment
+ */
+function isLocalBrowser(): boolean {
+  if (typeof window === 'undefined') return true;
+  const h = window.location.hostname;
+  return h === 'localhost' || h === '127.0.0.1' || h === '::1';
+}
+
+/**
+ * Ping the hardware bridge service across all devices (direct on localhost, universal proxy on cloud/production)
  */
 export async function checkBridgeHealth(): Promise<BridgeHealthStatus> {
   const host = getSavedBridgeHost();
-  const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
-  const isLocalHttp = host.includes('127.0.0.1') || host.includes('localhost');
+  const isLocal = isLocalBrowser();
 
-  // If on HTTPS and host is insecure HTTP localhost, browser strictly forbids direct fetch (Mixed Content).
-  // In that case, we query the universal server proxy /api/rfid/bridge which connects to local bridge or secure tunnel.
-  const canAttemptDirect = !isHttps || !isLocalHttp || host.startsWith('https://');
-
-  if (canAttemptDirect) {
+  // 1. If running locally on localhost, attempt direct connection first
+  if (isLocal) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3000);
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
 
       const res = await fetch(`${host}/api/status`, {
         method: 'GET',
@@ -126,11 +131,11 @@ export async function checkBridgeHealth(): Promise<BridgeHealthStatus> {
         };
       }
     } catch {
-      // Direct connection failed or cross-device PNA block, fall back to universal API proxy
+      // Direct connection failed, fall through to universal proxy
     }
   }
 
-  // 2. Query universal proxy /api/rfid/bridge (works on all devices: production HTTPS, mobile, remote PCs)
+  // 2. Query universal proxy /api/rfid/bridge (Same-Origin, 100% immune to CSP, Mixed Content, or PNA blocks)
   try {
     const proxyRes = await fetch(`/api/rfid/bridge?host=${encodeURIComponent(host)}`);
     if (proxyRes.ok) {
@@ -161,11 +166,9 @@ export async function checkBridgeHealth(): Promise<BridgeHealthStatus> {
  */
 export async function readPhysicalCard(staffUser: string = 'Front Desk'): Promise<RfidCardResult> {
   const host = getSavedBridgeHost();
-  const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
-  const isLocalHttp = host.includes('127.0.0.1') || host.includes('localhost');
-  const canAttemptDirect = !isHttps || !isLocalHttp || host.startsWith('https://');
+  const isLocal = isLocalBrowser();
 
-  if (canAttemptDirect) {
+  if (isLocal) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 25000);
@@ -230,9 +233,7 @@ export async function issuePhysicalKeycard(params: {
   bookingRef?: string;
 }): Promise<RfidCardResult> {
   const host = getSavedBridgeHost();
-  const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
-  const isLocalHttp = host.includes('127.0.0.1') || host.includes('localhost');
-  const canAttemptDirect = !isHttps || !isLocalHttp || host.startsWith('https://');
+  const isLocal = isLocalBrowser();
 
   const payload = {
     roomNumber: params.roomNumber,
@@ -260,7 +261,7 @@ export async function issuePhysicalKeycard(params: {
     }
   };
 
-  if (canAttemptDirect) {
+  if (isLocal) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 25000);
@@ -329,9 +330,7 @@ export async function checkoutPhysicalCard(
   staffUser: string = 'Front Desk'
 ): Promise<RfidCardResult> {
   const host = getSavedBridgeHost();
-  const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
-  const isLocalHttp = host.includes('127.0.0.1') || host.includes('localhost');
-  const canAttemptDirect = !isHttps || !isLocalHttp || host.startsWith('https://');
+  const isLocal = isLocalBrowser();
 
   const autoDeactivateSuccess = () => {
     if (typeof window !== 'undefined') {
@@ -347,7 +346,7 @@ export async function checkoutPhysicalCard(
     }
   };
 
-  if (canAttemptDirect) {
+  if (isLocal) {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 25000);

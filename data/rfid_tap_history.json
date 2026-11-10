@@ -402,5 +402,23 @@
       "hotelProperty": "Sri Tayi Grand"
     },
     "tappedAt": "2026-11-10T19:48:06.000Z"
+  },
+  {
+    "id": "tap-1794341732990-52gbg9",
+    "cardUid": "BT-57-1000020518",
+    "cardType": "GUEST",
+    "roomNumber": "104",
+    "bookingId": "bk-pg-8d240fd7-b778-49a6-98e6-aeed434029d8",
+    "customerId": "a4e53699-d4c1-40f3-843e-5a2b0db675bc",
+    "customerName": "HNN",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "SUCCESS",
+    "metadata": {
+      "actionType": "door_unlock",
+      "device": "Lock-Room-104",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-10T20:15:32.000Z"
   }
 ]

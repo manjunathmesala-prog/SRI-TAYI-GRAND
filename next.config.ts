@@ -32,7 +32,7 @@ const securityHeaders = [
       "img-src 'self' data: https: blob: https://*.razorpay.com",
       "frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://*.razorpay.com",
       "child-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://*.razorpay.com blob:",
-      "connect-src 'self' https://api.razorpay.com https://*.razorpay.com https://lumberjack.razorpay.com https://lumberjack-cx.razorpay.com https://razorpay.com https://*.supabase.co wss://*.supabase.co",
+      "connect-src 'self' https://api.razorpay.com https://*.razorpay.com https://lumberjack.razorpay.com https://lumberjack-cx.razorpay.com https://razorpay.com https://*.supabase.co wss://*.supabase.co https://*.trycloudflare.com https://trycloudflare.com http://127.0.0.1:* http://localhost:*",
     ].join("; "),
   },
 ];
