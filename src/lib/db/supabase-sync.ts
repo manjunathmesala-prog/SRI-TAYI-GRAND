@@ -1184,6 +1184,8 @@ export async function syncMaintenanceTicketToSupabase(ticket: MaintenanceTicket)
   try {
     const client = await db.connect();
     try {
+      const estimatedCost = Number(ticket.estimated_cost || 0);
+      const actualCost = Number(ticket.actual_cost || 0);
       const cost = Number(ticket.actual_cost ?? ticket.estimated_cost ?? 0);
       const notes = ticket.resolution_notes || null;
       const createdAt = ticket.created_at || new Date().toISOString();
@@ -1192,25 +1194,35 @@ export async function syncMaintenanceTicketToSupabase(ticket: MaintenanceTicket)
         await client.query(
           `UPDATE room_maintenance 
            SET room_number = $1,
-               issue_description = $2,
-               category = $3,
-               priority = $4,
-               status = $5,
-               assigned_technician = $6,
-               reported_by = $7,
-               cost = $8,
-               notes = $9,
+               issue_title = $2,
+               issue_description = $3,
+               category = $4,
+               priority = $5,
+               status = $6,
+               assigned_technician = $7,
+               reported_by = $8,
+               estimated_cost = $9,
+               actual_cost = $10,
+               cost = $11,
+               room_blocked = $12,
+               resolution_notes = $13,
+               notes = $14,
                updated_at = NOW()
-           WHERE ticket_id = $10;`,
+           WHERE ticket_id = $15;`,
           [
             ticket.room_number,
+            ticket.issue_title || ticket.description || 'Maintenance Issue',
             ticket.description || ticket.issue_title,
             ticket.category,
-            ticket.priority || 'medium',
+            ticket.priority || 'normal',
             ticket.status,
             ticket.assigned_to || null,
             ticket.reported_by || 'Staff',
+            estimatedCost,
+            actualCost,
             cost,
+            Boolean(ticket.room_blocked),
+            notes,
             notes,
             ticket.id,
           ]
@@ -1218,20 +1230,26 @@ export async function syncMaintenanceTicketToSupabase(ticket: MaintenanceTicket)
       } else {
         await client.query(
           `INSERT INTO room_maintenance (
-            ticket_id, room_number, issue_description, category, priority, status,
-            start_date, assigned_technician, reported_by, cost, notes, created_at, updated_at
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW());`,
+            ticket_id, room_number, issue_title, issue_description, category, priority, status,
+            start_date, assigned_technician, reported_by, estimated_cost, actual_cost, cost,
+            room_blocked, resolution_notes, notes, created_at, updated_at
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, NOW());`,
           [
             ticket.id,
             ticket.room_number,
+            ticket.issue_title || ticket.description || 'Maintenance Issue',
             ticket.description || ticket.issue_title,
             ticket.category,
-            ticket.priority || 'medium',
+            ticket.priority || 'normal',
             ticket.status,
             createdAt.split('T')[0],
             ticket.assigned_to || null,
             ticket.reported_by || 'Staff',
+            estimatedCost,
+            actualCost,
             cost,
+            Boolean(ticket.room_blocked),
+            notes,
             notes,
             createdAt,
           ]
@@ -1258,15 +1276,19 @@ export async function loadMaintenanceTicketsFromSupabase(): Promise<MaintenanceT
         SELECT 
           COALESCE(ticket_id, id::text) as id,
           COALESCE(room_number, '101') as room_number,
+          COALESCE(issue_title, issue_description, 'Maintenance Issue') as issue_title,
           issue_description as description,
-          COALESCE(category, 'general') as category,
-          COALESCE(priority, 'medium') as priority,
+          COALESCE(category, 'ac_climate') as category,
+          COALESCE(priority, 'normal') as priority,
           status,
           COALESCE(reported_by, 'Staff') as reported_by,
           created_at,
           assigned_technician as assigned_to,
-          cost::float as cost,
-          notes
+          COALESCE(estimated_cost, cost, 0)::float as estimated_cost,
+          COALESCE(actual_cost, 0)::float as actual_cost,
+          COALESCE(cost, 0)::float as cost,
+          COALESCE(room_blocked, false) as room_blocked,
+          COALESCE(resolution_notes, notes) as resolution_notes
         FROM room_maintenance
         ORDER BY created_at DESC;
       `);
@@ -1274,7 +1296,7 @@ export async function loadMaintenanceTicketsFromSupabase(): Promise<MaintenanceT
       return res.rows.map((row: any) => ({
         id: row.id,
         room_number: row.room_number,
-        issue_title: row.description || 'Maintenance Issue',
+        issue_title: row.issue_title,
         category: row.category,
         priority: row.priority,
         description: row.description,
@@ -1282,10 +1304,10 @@ export async function loadMaintenanceTicketsFromSupabase(): Promise<MaintenanceT
         reported_by: row.reported_by,
         created_at: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
         assigned_to: row.assigned_to || undefined,
-        estimated_cost: Number(row.cost) || 0,
-        actual_cost: Number(row.cost) || undefined,
-        room_blocked: false,
-        resolution_notes: row.notes || undefined,
+        estimated_cost: Number(row.estimated_cost) || 0,
+        actual_cost: Number(row.actual_cost) || undefined,
+        room_blocked: Boolean(row.room_blocked),
+        resolution_notes: row.resolution_notes || undefined,
       }));
     } finally {
       client.release();
@@ -1293,6 +1315,24 @@ export async function loadMaintenanceTicketsFromSupabase(): Promise<MaintenanceT
   } catch (err: unknown) {
     console.warn('[SUPABASE LOAD MAINTENANCE WARN]', err instanceof Error ? err.message : String(err));
     return [];
+  }
+}
+
+export async function deleteMaintenanceTicketFromSupabase(id: string): Promise<void> {
+  if (typeof window !== 'undefined' || !id) return;
+
+  const db = getSupabasePgPool();
+  if (!db) return;
+
+  try {
+    const client = await db.connect();
+    try {
+      await client.query(`DELETE FROM room_maintenance WHERE ticket_id = $1 OR id::text = $1;`, [id]);
+    } finally {
+      client.release();
+    }
+  } catch (err: unknown) {
+    console.warn(`[SUPABASE DELETE MAINTENANCE WARN] (${id}):`, err instanceof Error ? err.message : String(err));
   }
 }
 

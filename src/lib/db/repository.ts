@@ -72,6 +72,7 @@ import {
   loadConventionQuotesFromSupabase,
   syncMaintenanceTicketToSupabase,
   loadMaintenanceTicketsFromSupabase,
+  deleteMaintenanceTicketFromSupabase,
   syncCashShiftToSupabase,
   loadCashShiftsFromSupabase,
   syncCashTransactionToSupabase,
@@ -1878,6 +1879,7 @@ export class HotelRepository {
       const room = this.rooms.find((r) => r.room_number === newTicket.room_number);
       if (room) {
         room.operational_status = 'maintenance';
+        syncRoomStatusToSupabase({ roomNumber: room.room_number, operationalStatus: room.operational_status, housekeepingStatus: room.housekeeping_status, notes: room.notes });
         this.broadcastEvent(
           'room_assigned',
           { room_number: room.room_number, operational_status: 'maintenance' },
@@ -1909,6 +1911,7 @@ export class HotelRepository {
       if (room && room.operational_status === 'maintenance') {
         room.operational_status = 'cleaning';
         room.housekeeping_status = 'dirty';
+        syncRoomStatusToSupabase({ roomNumber: room.room_number, operationalStatus: room.operational_status, housekeepingStatus: room.housekeeping_status, notes: room.notes });
         this.broadcastEvent(
           'housekeeping_updated',
           { room_number: room.room_number, status: 'dirty', operational_status: 'cleaning' },
@@ -1923,6 +1926,7 @@ export class HotelRepository {
         } else if (room.operational_status === 'maintenance') {
           room.operational_status = 'available';
         }
+        syncRoomStatusToSupabase({ roomNumber: room.room_number, operationalStatus: room.operational_status, housekeepingStatus: room.housekeeping_status, notes: room.notes });
       }
     }
 
@@ -1939,14 +1943,27 @@ export class HotelRepository {
       const room = this.rooms.find((r) => r.room_number === removed.room_number);
       if (room && room.operational_status === 'maintenance') {
         room.operational_status = 'available';
+        syncRoomStatusToSupabase({ roomNumber: room.room_number, operationalStatus: room.operational_status, housekeepingStatus: room.housekeeping_status, notes: room.notes });
       }
     }
+    deleteMaintenanceTicketFromSupabase(id);
     this.broadcastEvent(
       'maintenance_ticket_deleted',
       { id: removed.id, room_number: removed.room_number },
       actor
     );
     return true;
+  }
+
+  async ensureMaintenanceLoaded(): Promise<void> {
+    try {
+      const pgMT = await loadMaintenanceTicketsFromSupabase();
+      if (pgMT && pgMT.length > 0) {
+        this.maintenanceTickets = pgMT;
+      }
+    } catch (err) {
+      console.warn('[ENSURE MAINTENANCE LOAD WARN]', err);
+    }
   }
 
   // ==============================================================================

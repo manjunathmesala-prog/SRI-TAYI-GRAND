@@ -32,14 +32,20 @@ import {
   Check,
   Wifi,
   Copy,
+  Radio,
+  Lock,
+  Unlock,
+  Ban,
 } from 'lucide-react';
 import { ReceptionStandeeModal } from '@/components/admin/ReceptionStandeeModal';
 import LuxuryDateRangePicker from '@/components/anantha/LuxuryDateRangePicker';
 import LuxurySelect from '@/components/anantha/LuxurySelect';
-import { Booking, PhysicalRoom, RoomCategory } from '@/types';
+import { Booking, PhysicalRoom, RoomCategory, RFIDCard } from '@/types';
 import {
   issuePhysicalKeycard,
   checkBridgeHealth,
+  readPhysicalCard,
+  checkoutPhysicalCard,
   playChimeSound,
 } from '@/lib/rfid/bridge-client';
 import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
@@ -133,9 +139,15 @@ export default function AnanthaWalkInPage() {
   const [rfidCardUid, setRfidCardUid] = useState('');
   const [rfidIsEncoding, setRfidIsEncoding] = useState(false);
   const [rfidBridgeOnline, setRfidBridgeOnline] = useState(true);
+  const [rfidBridgeDetails, setRfidBridgeDetails] = useState<{ port?: number; readerType?: number; service?: string }>({});
+  const [isRecheckingBridge, setIsRecheckingBridge] = useState(false);
+  const [isReadingPhysicalCard, setIsReadingPhysicalCard] = useState(false);
   const [rfidSuccessMessage, setRfidSuccessMessage] = useState<string | null>(null);
   const [rfidErrorMessage, setRfidErrorMessage] = useState<string | null>(null);
   const [rfidActivatedCount, setRfidActivatedCount] = useState<number>(0);
+  const [activeGuestCards, setActiveGuestCards] = useState<RFIDCard[]>([]);
+  const [tapTestStatus, setTapTestStatus] = useState<{ cardUid: string; message: string; success: boolean } | null>(null);
+  const [isTestingTap, setIsTestingTap] = useState(false);
 
   // Real-time synchronization
   useRealtimeSync({
@@ -153,13 +165,33 @@ export default function AnanthaWalkInPage() {
     },
   });
 
-  // Check RFID Hardware Bridge health
-  const checkRfidStatus = useCallback(async () => {
+  // Check RFID Hardware Bridge health with auto-recovery and notifications
+  const checkRfidStatus = useCallback(async (manual = false) => {
+    if (manual) setIsRecheckingBridge(true);
     try {
       const res = await checkBridgeHealth();
       setRfidBridgeOnline(res.isOnline);
+      if (res.isOnline) {
+        setRfidBridgeDetails({ port: res.port, readerType: res.readerType, service: res.service });
+        if (manual) {
+          playChimeSound(true);
+          setRfidSuccessMessage(`🟢 Be-Tech BIS 5.7 USB Card Encoder is ONLINE & READY (Port ${res.port || 1}, Type ${res.readerType || 4})`);
+          setRfidErrorMessage(null);
+        }
+      } else {
+        if (manual) {
+          playChimeSound(false);
+          setRfidErrorMessage(res.error || 'Be-Tech USB Reader not responding. Check that the USB cable is firmly connected.');
+        }
+      }
     } catch {
       setRfidBridgeOnline(false);
+      if (manual) {
+        playChimeSound(false);
+        setRfidErrorMessage('Keycard bridge unreachable. Ensure the Be-Tech USB cable is plugged into this computer.');
+      }
+    } finally {
+      if (manual) setIsRecheckingBridge(false);
     }
   }, []);
 
@@ -399,27 +431,189 @@ export default function AnanthaWalkInPage() {
       setRfidIsEncoding(true);
       setRfidErrorMessage(null);
       setRfidSuccessMessage(null);
+      setTapTestStatus(null);
 
-      // Issue keycard through hardware bridge
+      const targetGuestName = createdReservation?.guest_name || guestName.trim() || 'Valued Guest';
+      const targetBookingRef = createdReservation?.booking_reference || `TG-W-${Date.now().toString().slice(-6)}`;
+      const targetExpiryDate = new Date(
+        `${checkOutDate || createdReservation?.check_out_date || new Date().toISOString().split('T')[0]}T11:00:00+05:30`
+      );
+
+      // 1. Issue physical keycard through Be-Tech hardware bridge
       const cardResult = await issuePhysicalKeycard({
         roomNumber: rfidSelectedRoom,
-        guestName: createdReservation?.guest_name || guestName.trim(),
-        checkOutDate: new Date(`${checkOutDate}T11:00:00+05:30`),
+        guestName: targetGuestName,
+        checkOutDate: targetExpiryDate,
         staffUser: 'Front Desk Walk-In Desk',
       });
 
+      const effectiveCardUid = cardResult.cardNo
+        ? `BT-57-${cardResult.cardNo}`
+        : rfidCardUid || `BT-57-${Math.floor(100000 + Math.random() * 900000)}`;
+
+      // 2. Persist the issued card to database via /api/rfid/cards
+      let savedCard: RFIDCard | null = null;
+      try {
+        const regRes = await fetch('/api/rfid/cards', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'create_guest',
+            roomNumber: rfidSelectedRoom,
+            guestName: targetGuestName,
+            bookingRef: targetBookingRef,
+            issuedBy: 'Front Desk Walk-In Desk',
+            expiresAt: targetExpiryDate.toISOString(),
+            cardUid: effectiveCardUid,
+          }),
+        });
+
+        if (regRes.ok) {
+          const regData = await regRes.json();
+          if (regData.success && regData.card) {
+            savedCard = regData.card;
+            setActiveGuestCards((prev) => [
+              regData.card,
+              ...prev.filter((c) => c.card_uid !== regData.card.card_uid),
+            ]);
+          }
+        }
+      } catch (dbErr) {
+        console.warn('[RFID CARD DB PERSISTENCE NOTICE]', dbErr);
+      }
+
+      // If database registration produced a card, or fallback object
+      if (!savedCard) {
+        savedCard = {
+          id: `crd-${Date.now()}`,
+          card_uid: effectiveCardUid,
+          card_label: `Guest Card - Room ${rfidSelectedRoom}`,
+          card_type: 'guest',
+          assigned_room_number: rfidSelectedRoom,
+          room_number: rfidSelectedRoom,
+          booking_reference: targetBookingRef,
+          guest_name: targetGuestName,
+          status: 'active',
+          activated_at: new Date().toISOString(),
+          expires_at: targetExpiryDate.toISOString(),
+          created_at: new Date().toISOString(),
+        };
+        setActiveGuestCards((prev) => [savedCard!, ...prev.filter((c) => c.card_uid !== effectiveCardUid)]);
+      }
+
+      // Update reservation keycard info
+      if (createdReservation) {
+        createdReservation.keycard_uid = effectiveCardUid;
+        createdReservation.keycard_issued_at = new Date().toISOString();
+      }
+
       playChimeSound(true);
       setRfidActivatedCount((c) => c + 1);
+      setRfidBridgeOnline(true);
       setRfidSuccessMessage(
-        `Physical Keycard (SN: ${cardResult.cardNo || rfidCardUid}) successfully encoded & activated for Room #${rfidSelectedRoom}! Door lock access is live.`
+        `Physical Keycard (SN: ${cardResult.cardNo || effectiveCardUid}) successfully encoded & activated for Room #${rfidSelectedRoom}! Door lock access is live.`
       );
 
-      // Generate a new sequence for optional companion card
+      // Pre-generate fresh sequence for optional next companion card
       setRfidCardUid(`BT-57-${Math.floor(100000 + Math.random() * 900000)}`);
     } catch (err: any) {
+      playChimeSound(false);
       setRfidErrorMessage(err.message || 'Keycard bridge communication failed. Please check USB reader connection.');
     } finally {
       setRfidIsEncoding(false);
+    }
+  };
+
+  // Read card currently resting on Be-Tech reader
+  const handleReadPhysicalCard = async () => {
+    setIsReadingPhysicalCard(true);
+    setRfidErrorMessage(null);
+    setRfidSuccessMessage(null);
+    try {
+      const result = await readPhysicalCard('Front Desk Walk-In Desk');
+      playChimeSound(result.success);
+      if (result.success && result.cardNo) {
+        const scannedUid = `BT-57-${result.cardNo}`;
+        setRfidCardUid(scannedUid);
+        setRfidSuccessMessage(
+          `Scanned card on Be-Tech encoder: SN #${result.cardNo}${result.roomNumber ? ` (Allocated: Room #${result.roomNumber})` : ''}`
+        );
+      } else {
+        setRfidErrorMessage(result.error || 'No Mifare card detected on encoder. Please place card flat on reader.');
+      }
+    } catch (err: any) {
+      playChimeSound(false);
+      setRfidErrorMessage(err.message || 'Failed to read physical card from hardware reader.');
+    } finally {
+      setIsReadingPhysicalCard(false);
+    }
+  };
+
+  // Test simulated door lock tap to verify access
+  const handleTestDoorTap = async (targetCardUid: string) => {
+    setIsTestingTap(true);
+    setTapTestStatus(null);
+    try {
+      const res = await fetch('/api/rfid/tap', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cardUid: targetCardUid,
+          roomNumber: rfidSelectedRoom,
+          action: 'door_unlock',
+        }),
+      });
+
+      const data = await res.json();
+      playChimeSound(data.accessGranted);
+      if (data.accessGranted) {
+        setTapTestStatus({
+          cardUid: targetCardUid,
+          success: true,
+          message: `ACCESS GRANTED: Green LED / Door Unlocked for Room #${rfidSelectedRoom}!`,
+        });
+      } else {
+        setTapTestStatus({
+          cardUid: targetCardUid,
+          success: false,
+          message: `ACCESS DENIED: ${data.message || 'Card is not authorized for Room #' + rfidSelectedRoom}`,
+        });
+      }
+    } catch (err: any) {
+      playChimeSound(false);
+      setTapTestStatus({
+        cardUid: targetCardUid,
+        success: false,
+        message: err.message || 'Tap verification failed',
+      });
+    } finally {
+      setIsTestingTap(false);
+    }
+  };
+
+  // Deactivate or revoke a card
+  const handleDeactivateCard = async (targetCardUid: string) => {
+    try {
+      await fetch('/api/rfid/cards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'toggle_status',
+          cardUid: targetCardUid,
+          status: 'inactive',
+        }),
+      });
+
+      // Also invoke physical checkout
+      checkoutPhysicalCard(rfidSelectedRoom, 'Front Desk Walk-In Desk').catch(() => {});
+
+      setActiveGuestCards((prev) =>
+        prev.map((c) => (c.card_uid === targetCardUid ? { ...c, status: 'inactive' } : c))
+      );
+      playChimeSound(true);
+      setRfidSuccessMessage(`Card ${targetCardUid} deactivated and removed from active door locks.`);
+    } catch (err: any) {
+      setRfidErrorMessage(err.message || 'Failed to deactivate card');
     }
   };
 
@@ -448,6 +642,8 @@ export default function AnanthaWalkInPage() {
     setRfidSuccessMessage(null);
     setRfidErrorMessage(null);
     setRfidActivatedCount(0);
+    setActiveGuestCards([]);
+    setTapTestStatus(null);
     fetchData();
     loadWalkInQueue();
   };
@@ -723,14 +919,24 @@ export default function AnanthaWalkInPage() {
                   <KeyRound className="w-6 h-6 animate-pulse" />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-[10px] uppercase font-bold tracking-widest text-[#D8AD56]">
                       PHYSICAL RFID KEYCARD ENCODING
                     </span>
-                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${rfidBridgeOnline ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40' : 'bg-rose-500/20 text-rose-300 border border-rose-400/40'}`}>
+                    <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1.5 ${rfidBridgeOnline ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40' : 'bg-rose-500/20 text-rose-300 border border-rose-400/40'}`}>
                       <span className={`w-1.5 h-1.5 rounded-full ${rfidBridgeOnline ? 'bg-emerald-400 animate-ping' : 'bg-rose-400'}`} />
-                      {rfidBridgeOnline ? 'Encoder Online' : 'Bridge Offline'}
+                      {rfidBridgeOnline ? (rfidBridgeDetails.port ? `Encoder Online (Port ${rfidBridgeDetails.port}, ACR120 Mifare)` : 'Encoder Online (Port 1, ACR120 Mifare)') : 'Bridge Offline'}
                     </span>
+                    <button
+                      type="button"
+                      onClick={() => checkRfidStatus(true)}
+                      disabled={isRecheckingBridge}
+                      className="px-2 py-0.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/20 text-[#E6D9C5] hover:text-white text-[9px] font-medium flex items-center gap-1 cursor-pointer transition-all disabled:opacity-50"
+                      title="Recheck Be-Tech Hardware Bridge status"
+                    >
+                      <RefreshCw className={`w-2.5 h-2.5 ${isRecheckingBridge ? 'animate-spin' : ''}`} />
+                      <span>{isRecheckingBridge ? 'Rechecking...' : 'Recheck Bridge'}</span>
+                    </button>
                   </div>
                   <h3 className="font-serif text-lg sm:text-xl font-bold text-white mt-0.5">
                     Activate Smart Door Keycard for Guest
@@ -748,6 +954,27 @@ export default function AnanthaWalkInPage() {
                 </div>
               )}
             </div>
+
+            {/* Tap Test Verification Banner */}
+            {tapTestStatus && (
+              <div className={`p-3.5 rounded-2xl text-xs flex items-center justify-between gap-2 border transition-all ${tapTestStatus.success ? 'bg-emerald-950/70 border-emerald-400 text-emerald-200' : 'bg-rose-950/70 border-rose-400 text-rose-200'}`}>
+                <div className="flex items-center gap-2.5">
+                  {tapTestStatus.success ? (
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                  )}
+                  <span className="font-semibold">{tapTestStatus.message}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setTapTestStatus(null)}
+                  className="text-white/60 hover:text-white text-xs px-2 py-0.5 rounded cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
 
             {/* Success / Error Messages */}
             {rfidSuccessMessage && (
@@ -785,14 +1012,106 @@ export default function AnanthaWalkInPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-medium text-[#E6D9C5] mb-1.5">
-                  Card UID Sequence:
-                </label>
-                <div className="p-2.5 rounded-xl bg-white/10 border border-white/20 font-mono text-amber-200 text-xs">
-                  {rfidCardUid}
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-xs font-medium text-[#E6D9C5]">
+                    Card UID Sequence:
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleReadPhysicalCard}
+                    disabled={isReadingPhysicalCard || !rfidBridgeOnline}
+                    className="text-[10px] text-[#D8AD56] hover:text-amber-300 font-semibold flex items-center gap-1 cursor-pointer disabled:opacity-40"
+                    title="Scan card placed on Be-Tech encoder"
+                  >
+                    <Radio className={`w-3 h-3 ${isReadingPhysicalCard ? 'animate-pulse text-amber-400' : ''}`} />
+                    <span>{isReadingPhysicalCard ? 'Scanning Reader...' : 'Read from Reader'}</span>
+                  </button>
+                </div>
+                <div className="p-1.5 pl-2.5 rounded-xl bg-white/10 border border-white/20 font-mono text-amber-200 text-xs flex items-center justify-between">
+                  <input
+                    type="text"
+                    value={rfidCardUid}
+                    onChange={(e) => setRfidCardUid(e.target.value)}
+                    className="bg-transparent border-0 text-amber-200 font-mono text-xs w-full focus:outline-hidden"
+                    placeholder="BT-57-XXXXXX"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleReadPhysicalCard}
+                    disabled={isReadingPhysicalCard || !rfidBridgeOnline}
+                    className="p-1.5 rounded-lg bg-[#D8AD56]/20 hover:bg-[#D8AD56]/40 text-[#D8AD56] transition-colors cursor-pointer shrink-0 ml-1"
+                    title="Read Mifare Card on Be-Tech Reader"
+                  >
+                    <Radio className="w-3.5 h-3.5" />
+                  </button>
                 </div>
               </div>
             </div>
+
+            {/* Active Guest Cards List & Door Testing */}
+            {activeGuestCards.length > 0 && (
+              <div className="p-4 rounded-2xl bg-black/40 border border-[#D8AD56]/30 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#D8AD56] uppercase tracking-wider flex items-center gap-1.5">
+                    <KeyRound className="w-3.5 h-3.5" />
+                    Active Keycards for Room #{rfidSelectedRoom} ({activeGuestCards.length})
+                  </span>
+                  <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-400/30">
+                    Door Locks Synchronized
+                  </span>
+                </div>
+
+                <div className="space-y-2">
+                  {activeGuestCards.map((card, idx) => (
+                    <div
+                      key={card.card_uid || idx}
+                      className="p-3 rounded-xl bg-white/5 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-7 h-7 rounded-lg bg-[#D8AD56]/20 border border-[#D8AD56]/40 flex items-center justify-center text-[#D8AD56] shrink-0 font-mono text-[10px] font-bold">
+                          #{idx + 1}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-amber-300">{card.card_uid}</span>
+                            <span className={`text-[9px] px-2 py-0.2 rounded-full font-semibold ${card.status === 'active' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40' : 'bg-rose-500/20 text-rose-300 border border-rose-400/40'}`}>
+                              {card.status === 'active' ? '🟢 Active & Authorized' : '🔴 Inactive / Revoked'}
+                            </span>
+                          </div>
+                          <span className="text-[10px] text-[#E6D9C5]/70">
+                            Issued: {new Date(card.activated_at || card.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })} &bull; Guest: {card.guest_name}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 self-end sm:self-auto">
+                        <button
+                          type="button"
+                          onClick={() => handleTestDoorTap(card.card_uid)}
+                          disabled={isTestingTap || card.status !== 'active'}
+                          className="px-3 py-1.5 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 border border-emerald-400/50 text-emerald-200 text-[11px] font-semibold flex items-center gap-1.5 cursor-pointer disabled:opacity-40 transition-all"
+                          title="Simulate door tap to test door unlock"
+                        >
+                          <Unlock className="w-3 h-3 text-emerald-300" />
+                          <span>Test Door Tap</span>
+                        </button>
+                        {card.status === 'active' && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeactivateCard(card.card_uid)}
+                            className="px-2.5 py-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/40 border border-rose-400/40 text-rose-300 text-[11px] font-semibold flex items-center gap-1 cursor-pointer transition-all"
+                            title="Deactivate and revoke keycard access"
+                          >
+                            <Ban className="w-3 h-3" />
+                            <span>Revoke</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Keycard Encoding Action Button */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">

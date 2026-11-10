@@ -362,6 +362,9 @@ export const adminOperations = {
     nationality?: string;
     cityOfOrigin?: string;
     purposeOfVisit?: string;
+    collectPayment?: boolean;
+    paymentAmount?: number;
+    paymentMethod?: string;
   }) {
     adminOperations.invalidateFullState();
     const res = await fetch('/api/admin/operations', {
@@ -372,6 +375,9 @@ export const adminOperations = {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Check-in failed');
     adminOperations.invalidateFullState();
+    if (params.collectPayment) {
+      cashbookClient.invalidate();
+    }
     return data;
   },
 

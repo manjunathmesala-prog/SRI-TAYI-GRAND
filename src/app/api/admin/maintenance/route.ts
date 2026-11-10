@@ -12,6 +12,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
     }
 
+    await repo.ensureMaintenanceLoaded();
+
     const tickets = repo.getMaintenanceTickets();
     const rooms = repo.getRooms();
 
@@ -48,6 +50,8 @@ export async function POST(req: NextRequest) {
     if (!auth.authorized) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
     }
+
+    await repo.ensureMaintenanceLoaded();
 
     const body = await req.json();
     const { room_number, issue_title, description, category, priority, assigned_to, estimated_cost, room_blocked } =
@@ -94,6 +98,8 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
     }
 
+    await repo.ensureMaintenanceLoaded();
+
     const body = await req.json();
     const { id, updates } = body;
 
@@ -126,6 +132,8 @@ export async function DELETE(req: NextRequest) {
     if (!id) {
       return NextResponse.json({ success: false, error: 'Missing ticket id.' }, { status: 400 });
     }
+
+    await repo.ensureMaintenanceLoaded();
 
     const staffName = auth.session?.name || 'Admin';
     const deleted = repo.deleteMaintenanceTicket(id, staffName);

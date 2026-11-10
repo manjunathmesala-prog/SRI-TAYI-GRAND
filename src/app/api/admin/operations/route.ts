@@ -102,6 +102,25 @@ export async function POST(req: NextRequest) {
           if (body.purposeOfVisit) updatedBooking.purpose_of_visit = body.purposeOfVisit;
         }
 
+        // Record check-in advance / room payment if requested
+        if (body.collectPayment && Number(body.paymentAmount) > 0 && updatedBooking) {
+          const payAmt = Number(body.paymentAmount);
+          const payMethod = (body.paymentMethod as PaymentMethod) || 'cash';
+          repo.recordPayment(
+            {
+              booking_reference: updatedBooking.booking_reference,
+              guest_name: updatedBooking.guest_name,
+              amount: payAmt,
+              payment_method: payMethod,
+              currency: 'INR',
+              status: 'successful',
+              paid_at: new Date().toISOString(),
+
+            },
+            staffName
+          );
+        }
+
         // Issue RFID if requested
         let issuedCard = null;
         if (issueRfid && updatedBooking?.assigned_room_number) {

@@ -1,13 +1,20 @@
 'use client';
 
 import Link from 'next/link';
-
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { ReceptionStandeeModal } from '@/components/admin/ReceptionStandeeModal';
 import { StatutoryWalkInModal } from '@/components/admin/StatutoryWalkInModal';
-import { Booking, PhysicalRoom, RoomCategory } from '@/types';
-import { issuePhysicalKeycard, checkoutPhysicalCard, playChimeSound, checkBridgeHealth } from '@/lib/rfid/bridge-client';
-import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
+import { PrintGrcModal } from '@/components/admin/PrintGrcModal';
+import { PrintGstInvoiceModal } from '@/components/admin/PrintGstInvoiceModal';
+import { GuestFolioModal } from '@/components/admin/GuestFolioModal';
+import { Booking, PhysicalRoom, RoomCategory, PaymentRecord } from '@/types';
+import {
+  issuePhysicalKeycard,
+  checkoutPhysicalCard,
+  playChimeSound,
+  checkBridgeHealth,
+} from '@/lib/rfid/bridge-client';
+import { useRealtimeSync, adminOperations, cashbookClient } from '@/lib/realtime-client';
 import {
   ConciergeBell,
   Search,
@@ -30,6 +37,11 @@ import {
   Phone,
   Zap,
   Banknote,
+  Calendar,
+  CalendarCheck,
+  Clock,
+  Receipt,
+  ExternalLink,
 } from 'lucide-react';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
@@ -40,11 +52,15 @@ export default function FrontDeskPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [rooms, setRooms] = useState<PhysicalRoom[]>([]);
   const [categories, setCategories] = useState<RoomCategory[]>([]);
+  const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Modals state
   const [checkInModalBooking, setCheckInModalBooking] = useState<Booking | null>(null);
   const [checkOutModalBooking, setCheckOutModalBooking] = useState<Booking | null>(null);
+  const [grcModalBooking, setGrcModalBooking] = useState<Booking | null>(null);
+  const [invoiceModalBooking, setInvoiceModalBooking] = useState<Booking | null>(null);
+  const [folioModalBooking, setFolioModalBooking] = useState<Booking | null>(null);
   const [showStatutoryModal, setShowStatutoryModal] = useState(false);
   const [statutoryInitialData, setStatutoryInitialData] = useState<any>(null);
 
@@ -53,8 +69,19 @@ export default function FrontDeskPage() {
   const [issueRfid, setIssueRfid] = useState(true);
   const [checkInError, setCheckInError] = useState<string | null>(null);
   const [isSubmittingCheckIn, setIsSubmittingCheckIn] = useState(false);
+  const [checkInCollectPayment, setCheckInCollectPayment] = useState<boolean>(true);
+  const [checkInPaymentAmount, setCheckInPaymentAmount] = useState<number>(0);
+  const [checkInPaymentMethod, setCheckInPaymentMethod] = useState<'cash' | 'upi' | 'card'>('cash');
+  const [checkInPrintGrc, setCheckInPrintGrc] = useState<boolean>(true);
+
+  // Check-out form fields
   const [checkOutError, setCheckOutError] = useState<string | null>(null);
   const [isSubmittingCheckOut, setIsSubmittingCheckOut] = useState(false);
+  const [additionalCharges, setAdditionalCharges] = useState<number>(0);
+  const [chargeDescription, setChargeDescription] = useState('Extra Mineral Water & Tea');
+  const [settlementMethod, setSettlementMethod] = useState<'cash' | 'upi' | 'card'>('cash');
+  const [checkOutSuccessRef, setCheckOutSuccessRef] = useState<string | null>(null);
+  const [lastCheckedOutBooking, setLastCheckedOutBooking] = useState<Booking | null>(null);
 
   // Expected arrival statutory check-in fields
   const [arrivalIdType, setArrivalIdType] = useState('Aadhaar Card');
@@ -63,9 +90,7 @@ export default function FrontDeskPage() {
   const [arrivalCity, setArrivalCity] = useState('Kadiri');
   const [arrivalPurpose, setArrivalPurpose] = useState('Pilgrimage / Temple Darshan');
 
-  // Check-out form fields
-  const [additionalCharges, setAdditionalCharges] = useState<number>(0);
-  const [chargeDescription, setChargeDescription] = useState('Extra Mineral Water & Tea');
+  // Hardware RFID Bridge monitoring
   const [rfidOnline, setRfidOnline] = useState<boolean>(true);
   const [isCheckingRfid, setIsCheckingRfid] = useState(false);
 
@@ -87,8 +112,6 @@ export default function FrontDeskPage() {
     const interval = setInterval(() => handleRecheckRfid(false), 20000);
     return () => clearInterval(interval);
   }, [handleRecheckRfid]);
-  const [settlementMethod, setSettlementMethod] = useState<'cash' | 'upi' | 'card'>('cash');
-  const [checkOutSuccessRef, setCheckOutSuccessRef] = useState<string | null>(null);
 
   // Live Walk-In Reception Queue
   interface WalkInItem extends Booking {
@@ -109,6 +132,7 @@ export default function FrontDeskPage() {
         setBookings(data.bookings || []);
         setRooms(data.rooms || []);
         if (data.categories) setCategories(data.categories);
+        if (data.payments) setPayments(data.payments);
       }
     } catch {
       // Ignored
@@ -147,7 +171,7 @@ export default function FrontDeskPage() {
     fetchWalkInQueue();
   }, [fetchLiveState, fetchWalkInQueue]);
 
-  // Real-time synchronization subscription: re-hydrates automatically on any domain event
+  // Real-time synchronization subscription
   const { isConnected, status } = useRealtimeSync({
     onRefresh: () => {
       fetchLiveState();
@@ -196,30 +220,83 @@ export default function FrontDeskPage() {
     }
   };
 
-  // Filter lists
-  const pendingArrivals = bookings.filter(
-    (b) =>
-      (b.status === 'confirmed' || b.status === 'pending') &&
-      (b.guest_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        b.booking_reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        b.guest_phone.includes(searchQuery))
-  );
+  // Re-encode / Duplicate RFID Card for In-House Guest
+  const handleDuplicateKeycard = async (roomNumber: string, guestName: string) => {
+    try {
+      await issuePhysicalKeycard({
+        roomNumber,
+        guestName,
+        staffUser: 'Front Desk',
+      });
+      playChimeSound(true);
+      setWalkInAlert({
+        type: 'success',
+        message: `Duplicate RFID keycard for Room ${roomNumber} (${guestName}) programmed successfully.`,
+      });
+    } catch (err: any) {
+      setWalkInAlert({
+        type: 'error',
+        message: err?.message || 'Be-Tech hardware bridge could not encode duplicate card.',
+      });
+    }
+  };
 
-  const activeStays = bookings.filter(
-    (b) =>
-      b.status === 'checked_in' &&
-      (b.guest_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        b.booking_reference.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (b.assigned_room_number && b.assigned_room_number.includes(searchQuery)))
-  );
+  // IST Date String for Daily Metrics
+  const todayStr = useMemo(() => {
+    return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+  }, []);
 
-  // Available clean rooms for walk-in modal
-  const availableRooms = rooms.filter(
-    (r) => r.operational_status === 'available' && r.housekeeping_status === 'clean'
-  );
+  // Filter lists based on search
+  const pendingArrivals = useMemo(() => {
+    const q = searchQuery.toLowerCase();
+    return bookings.filter(
+      (b) =>
+        (b.status === 'confirmed' || b.status === 'pending') &&
+        (b.guest_name.toLowerCase().includes(q) ||
+          b.booking_reference.toLowerCase().includes(q) ||
+          b.guest_phone.includes(searchQuery) ||
+          (b.id_proof_number && b.id_proof_number.toLowerCase().includes(q)) ||
+          (b.category_name && b.category_name.toLowerCase().includes(q)))
+    );
+  }, [bookings, searchQuery]);
 
-  // Selectable clean rooms for check-in assignment:
-  // Includes available clean rooms PLUS any room already assigned/reserved for the currently selected check-in guest
+  const activeStays = useMemo(() => {
+    const q = searchQuery.toLowerCase();
+    return bookings.filter(
+      (b) =>
+        b.status === 'checked_in' &&
+        (b.guest_name.toLowerCase().includes(q) ||
+          b.booking_reference.toLowerCase().includes(q) ||
+          (b.assigned_room_number && b.assigned_room_number.includes(searchQuery)) ||
+          b.guest_phone.includes(searchQuery))
+    );
+  }, [bookings, searchQuery]);
+
+  // Operational metrics
+  const todayArrivalsCount = useMemo(() => {
+    return bookings.filter(
+      (b) => (b.status === 'confirmed' || b.status === 'pending') && (b.check_in_date === todayStr || b.check_in_date <= todayStr)
+    ).length;
+  }, [bookings, todayStr]);
+
+  const todayDeparturesCount = useMemo(() => {
+    return bookings.filter((b) => b.status === 'checked_in' && b.check_out_date === todayStr).length;
+  }, [bookings, todayStr]);
+
+  const availableCleanRooms = useMemo(() => {
+    return rooms.filter((r) => r.operational_status === 'available' && r.housekeeping_status === 'clean');
+  }, [rooms]);
+
+  const todayCollections = useMemo(() => {
+    return payments
+      .filter((p) => {
+        const pDate = p.paid_at ? p.paid_at.slice(0, 10) : '';
+        return pDate === todayStr && p.status === 'successful';
+      })
+      .reduce((sum, p) => sum + (p.amount || 0), 0);
+  }, [payments, todayStr]);
+
+  // Selectable clean rooms for check-in assignment
   const selectableRoomsForCheckIn = rooms.filter((r) => {
     if (r.housekeeping_status !== 'clean') return false;
     if (r.operational_status === 'available') return true;
@@ -242,7 +319,6 @@ export default function FrontDeskPage() {
 
     setCheckInError(null);
 
-    // Ensure selectedRoomId is present; fallback to selectable room if valid
     let effectiveRoomId = selectedRoomId;
     if (!effectiveRoomId && selectableRoomsForCheckIn.length > 0) {
       effectiveRoomId = selectableRoomsForCheckIn[0].id;
@@ -268,7 +344,7 @@ export default function FrontDeskPage() {
     setIsSubmittingCheckIn(true);
 
     try {
-      await adminOperations.checkIn({
+      const result = await adminOperations.checkIn({
         bookingReference: checkInModalBooking.booking_reference,
         roomId: assignedRoom.id,
         roomNumber: assignedRoom.room_number,
@@ -279,6 +355,9 @@ export default function FrontDeskPage() {
         cityOfOrigin: arrivalCity.trim() || undefined,
         purposeOfVisit: arrivalPurpose,
         staffName: 'Front Desk Reception',
+        collectPayment: checkInCollectPayment && checkInPaymentAmount > 0,
+        paymentAmount: checkInCollectPayment ? checkInPaymentAmount : 0,
+        paymentMethod: checkInPaymentMethod,
       });
 
       if (issueRfid) {
@@ -299,11 +378,44 @@ export default function FrontDeskPage() {
 
       const guestName = checkInModalBooking.guest_name;
       const roomNum = assignedRoom.room_number;
+      const completedBooking: Booking = {
+        ...checkInModalBooking,
+        status: 'checked_in',
+        assigned_room_id: assignedRoom.id,
+        assigned_room_number: roomNum,
+        id_proof_type: arrivalIdType,
+        id_proof_number: arrivalIdNumber.trim(),
+        nationality: arrivalNationality,
+        city_of_origin: arrivalCity.trim(),
+        purpose_of_visit: arrivalPurpose,
+        paid_amount:
+          checkInModalBooking.paid_amount +
+          (checkInCollectPayment && checkInPaymentAmount > 0 ? checkInPaymentAmount : 0),
+        payment_status:
+          checkInModalBooking.paid_amount +
+            (checkInCollectPayment && checkInPaymentAmount > 0 ? checkInPaymentAmount : 0) >=
+          checkInModalBooking.total_amount
+            ? 'successful'
+            : 'pending',
+      };
 
       setCheckInModalBooking(null);
       setSelectedRoomId('');
       setCheckInError(null);
-      setWalkInAlert({ type: 'success', message: `Guest ${guestName} checked into Room ${roomNum} successfully.` });
+      setWalkInAlert({
+        type: 'success',
+        message: `Guest ${guestName} checked into Room ${roomNum} successfully.${
+          checkInCollectPayment && checkInPaymentAmount > 0
+            ? ` Payment of ₹${checkInPaymentAmount} collected via ${checkInPaymentMethod}.`
+            : ''
+        }`,
+      });
+
+      // Auto-open GRC for counter signature if requested
+      if (checkInPrintGrc) {
+        setGrcModalBooking(completedBooking);
+      }
+
       await fetchLiveState();
       await fetchWalkInQueue();
     } catch (err: any) {
@@ -337,14 +449,28 @@ export default function FrontDeskPage() {
       }
 
       const ref = checkOutModalBooking.booking_reference;
+      const departedBooking: Booking = {
+        ...checkOutModalBooking,
+        status: 'checked_out',
+        total_amount: checkOutModalBooking.total_amount + additionalCharges,
+        paid_amount: checkOutModalBooking.total_amount + additionalCharges,
+        payment_status: 'successful',
+      };
+
       setCheckOutSuccessRef(ref);
+      setLastCheckedOutBooking(departedBooking);
       setWalkInAlert({
         type: 'success',
-        message: `Folio ${ref} checked out and room marked for housekeeping.`,
+        message: `Folio ${ref} checked out and settled. Room ${checkOutModalBooking.assigned_room_number} released for housekeeping turnover.`,
       });
+
       setCheckOutModalBooking(null);
       setAdditionalCharges(0);
       setCheckOutError(null);
+
+      // Offer immediate GST Tax Invoice print
+      setInvoiceModalBooking(departedBooking);
+
       await fetchLiveState();
       await fetchWalkInQueue();
     } catch (err: any) {
@@ -356,8 +482,8 @@ export default function FrontDeskPage() {
   };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
-      {/* Top Banner */}
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Top Banner & Title */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
         <div>
           <div className="flex items-center gap-2">
@@ -366,21 +492,30 @@ export default function FrontDeskPage() {
             </span>
             <span
               className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
-                isConnected
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-amber-100 text-amber-800'
+                isConnected ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
               }`}
             >
               <Radio className="w-2.5 h-2.5" />
               {isConnected ? 'Real-Time Sync Active' : `Sync: ${status}`}
             </span>
+            <span
+              className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
+                rfidOnline ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-rose-50 text-rose-800 border border-rose-200'
+              }`}
+            >
+              <KeyRound className="w-2.5 h-2.5" />
+              {rfidOnline ? 'RFID Bridge: 8989 Online' : 'RFID Bridge: Offline'}
+            </span>
           </div>
           <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-0.5 flex items-center gap-2">
             <ConciergeBell className="w-6 h-6 text-[#D8AD56]" />
-            <span>{t('frontDesk.title', 'Front Desk & Reception')}</span>
+            <span>{isTelugu ? 'ఫ్రంట్ డెస్క్ & రిసెప్షన్' : 'Front Desk & Reception'}</span>
           </h1>
           <p className="text-xs text-[#786B61] mt-0.5">
-            {t('frontDesk.subtitle', 'Rapid guest check-in, room key issuance, active stay folios, and checkout settlement.')}
+            {t(
+              'frontDesk.subtitle',
+              'Rapid guest check in, room key issuance, active stay folios, and checkout settlement.'
+            )}
           </p>
         </div>
 
@@ -391,7 +526,7 @@ export default function FrontDeskPage() {
             className="px-4 py-2.5 rounded-xl bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer shrink-0"
           >
             <BedDouble className="w-4 h-4 text-[#D8AD56]" />
-            <span>{t('walkIn.title', 'Walk-In Registration Desk')}</span>
+            <span>{isTelugu ? 'వాక్-ఇన్ డెస్క్' : 'Walk-In Registration Desk'}</span>
           </Link>
 
           <div className="relative w-full sm:w-64">
@@ -400,36 +535,140 @@ export default function FrontDeskPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={t('common.search', "Search guest, phone, room, or ref...")}
-              className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-[#EFE3D6] bg-white text-[#241912] focus:border-[#D8AD56] focus:outline-none shadow-sm"
+              placeholder={isTelugu ? 'అతిథి, ఫోన్, రూమ్ శోధించండి...' : 'Search guest, phone, room, or ref...'}
+              className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-[#EFE3D6] bg-white text-[#241912] focus:border-[#D8AD56] focus:outline-none shadow-xs"
             />
           </div>
         </div>
       </div>
 
-      {checkOutSuccessRef && (
-        <div className="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800 text-xs flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
-            <span>Stay <strong>{checkOutSuccessRef}</strong> successfully checked out and settled. Room marked for housekeeping cleaning.</span>
+      {/* LIVE FRONT DESK TELEMETRY KPI STRIP */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="p-3.5 rounded-2xl bg-white border border-[#EFE3D6] shadow-xs hover:border-[#D8AD56]/60 transition-all flex items-center justify-between">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#786B61] block">
+              {isTelugu ? 'నేటి రాకడలు' : "Expected Arrivals"}
+            </span>
+            <span className="font-serif text-2xl font-bold text-[#1565C0] mt-0.5 block">
+              {todayArrivalsCount}
+            </span>
+            <span className="text-[10px] text-[#786B61]">
+              {pendingArrivals.length} {isTelugu ? 'పెండింగ్' : 'pending check-in'}
+            </span>
           </div>
-          <button
-            onClick={() => setCheckOutSuccessRef(null)}
-            className="text-green-800 font-bold hover:underline"
-          >
-            Dismiss
-          </button>
+          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+            <CalendarCheck className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="p-3.5 rounded-2xl bg-white border border-[#EFE3D6] shadow-xs hover:border-[#D8AD56]/60 transition-all flex items-center justify-between">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#786B61] block">
+              {isTelugu ? 'ఇన్-హౌస్ గదులు' : 'In-House Stays'}
+            </span>
+            <span className="font-serif text-2xl font-bold text-[#2E7D32] mt-0.5 block">
+              {activeStays.length}
+            </span>
+            <span className="text-[10px] text-[#786B61]">
+              {isTelugu ? 'ప్రస్తుతం ఆక్యుపైడ్' : 'Active occupied rooms'}
+            </span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+            <BedDouble className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="p-3.5 rounded-2xl bg-white border border-[#EFE3D6] shadow-xs hover:border-[#D8AD56]/60 transition-all flex items-center justify-between">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#786B61] block">
+              {isTelugu ? 'నేటి నిష్క్రమణలు' : 'Due Today'}
+            </span>
+            <span className="font-serif text-2xl font-bold text-[#E65100] mt-0.5 block">
+              {todayDeparturesCount}
+            </span>
+            <span className="text-[10px] text-[#786B61]">
+              {isTelugu ? '11:00 AM వరకు' : 'Departing by 11:00 AM'}
+            </span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+            <Clock className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="p-3.5 rounded-2xl bg-white border border-[#EFE3D6] shadow-xs hover:border-[#D8AD56]/60 transition-all flex items-center justify-between">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#786B61] block">
+              {isTelugu ? 'సిద్ధమైన గదులు' : 'Clean & Ready'}
+            </span>
+            <span className="font-serif text-2xl font-bold text-[#241912] mt-0.5 block">
+              {availableCleanRooms.length}
+            </span>
+            <span className="text-[10px] text-emerald-700 font-semibold">
+              {rooms.length} {isTelugu ? 'మొత్తం గదులు' : 'total rooms'}
+            </span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-[#FAF7F2] text-[#D8AD56] flex items-center justify-center font-bold border border-[#EFE3D6]">
+            <Sparkles className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div className="p-3.5 rounded-2xl bg-white border border-[#EFE3D6] shadow-xs hover:border-[#D8AD56]/60 transition-all flex items-center justify-between col-span-2 sm:col-span-1">
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#786B61] block">
+              {isTelugu ? 'నేటి వసూళ్లు' : "Today's Collections"}
+            </span>
+            <span className="font-serif text-2xl font-bold text-[#241912] mt-0.5 block">
+              ₹ {todayCollections.toLocaleString('en-IN')}
+            </span>
+            <span className="text-[10px] text-[#786B61]">
+              {isTelugu ? 'కౌంటర్ + యూపీఐ' : 'Desk cash + UPI'}
+            </span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
+            <Banknote className="w-5 h-5" />
+          </div>
+        </div>
+      </div>
+
+      {/* Checkout Success Banner with Instant Print Invoice Shortcut */}
+      {checkOutSuccessRef && (
+        <div className="p-4 rounded-xl bg-green-50 border border-green-200 text-green-900 text-xs flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />
+            <span>
+              Stay <strong>{checkOutSuccessRef}</strong> successfully checked out and settled. Room released for housekeeping turnover.
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            {lastCheckedOutBooking && (
+              <button
+                type="button"
+                onClick={() => setInvoiceModalBooking(lastCheckedOutBooking)}
+                className="px-3 py-1 rounded-lg bg-green-700 hover:bg-green-800 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
+              >
+                <Printer className="w-3.5 h-3.5" />
+                <span>{isTelugu ? 'ఇన్‌వాయిస్ ప్రింట్' : 'Print GST Invoice'}</span>
+              </button>
+            )}
+            <button
+              onClick={() => setCheckOutSuccessRef(null)}
+              className="text-green-800 font-bold hover:underline px-2"
+            >
+              Dismiss
+            </button>
+          </div>
         </div>
       )}
 
       {/* Walk-In Alert Banner */}
       {walkInAlert && (
         <div
-          className={'p-4 rounded-xl text-xs flex items-center justify-between ' + (
-            walkInAlert.type === 'success'
+          className={
+            'p-4 rounded-xl text-xs flex items-center justify-between shadow-xs ' +
+            (walkInAlert.type === 'success'
               ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
-              : 'bg-red-50 border border-red-200 text-red-800'
-          )}
+              : 'bg-red-50 border border-red-200 text-red-800')
+          }
         >
           <div className="flex items-center gap-2">
             {walkInAlert.type === 'success' ? (
@@ -439,7 +678,7 @@ export default function FrontDeskPage() {
             )}
             <span>{walkInAlert.message}</span>
           </div>
-          <button onClick={() => setWalkInAlert(null)} className="font-bold hover:underline">
+          <button onClick={() => setWalkInAlert(null)} className="font-bold hover:underline px-2 cursor-pointer">
             ✕
           </button>
         </div>
@@ -482,6 +721,15 @@ export default function FrontDeskPage() {
               <Printer className="w-3.5 h-3.5" />
               <span>Print Desk Standee QR</span>
             </button>
+            <a
+              href="/walk-in"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 text-xs font-semibold flex items-center gap-1"
+            >
+              <ExternalLink className="w-3.5 h-3.5 text-[#D8AD56]" />
+              <span>Open Walk-In Form</span>
+            </a>
           </div>
         </div>
 
@@ -515,16 +763,21 @@ export default function FrontDeskPage() {
                           </span>
                         </div>
                         <p className="text-[11px] text-[#786B61] mt-0.5">
-                          <span className="inline-flex items-center gap-1"><Phone className="w-3 h-3 text-[#D8AD56]" /><span>{item.guest_phone}</span></span> &bull; {item.category_name}
+                          <span className="inline-flex items-center gap-1">
+                            <Phone className="w-3 h-3 text-[#D8AD56]" />
+                            <span>{item.guest_phone}</span>
+                          </span>{' '}
+                          &bull; {item.category_name}
                         </p>
                       </div>
 
                       <span
-                        className={'text-[10px] font-bold px-2.5 py-1 rounded-full ' + (
-                          isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
-                        )}
+                        className={
+                          'text-[10px] font-bold px-2.5 py-1 rounded-full ' +
+                          (isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800')
+                        }
                       >
-                        {isPaid ? ('PAID ₹' + item.total_amount) : ('COLLECT CASH ₹' + item.total_amount)}
+                        {isPaid ? `PAID ₹${item.total_amount}` : `COLLECT CASH ₹${item.total_amount}`}
                       </span>
                     </div>
 
@@ -537,7 +790,7 @@ export default function FrontDeskPage() {
                         size="sm"
                         variant="admin"
                         value={currentSelectedRoom}
-                        placeholder={cleanRoomsList.length === 0 ? "No clean rooms available" : "Select clean room..."}
+                        placeholder={cleanRoomsList.length === 0 ? 'No clean rooms available' : 'Select clean room...'}
                         onChange={(val) =>
                           setSelectedWalkInRooms((prev) => ({
                             ...prev,
@@ -569,19 +822,17 @@ export default function FrontDeskPage() {
                         <>
                           <KeyRound className="w-3.5 h-3.5 text-[#D8AD56]" />
                           <span>
-                            {isPaid
-                              ? (
-                                <span className="inline-flex items-center gap-1">
-                                  <Zap className="w-3.5 h-3.5 text-[#D8AD56]" />
-                                  <span>1-Click Encode & Issue Room {currentSelectedRoom || ''}</span>
-                                </span>
-                              )
-                              : (
-                                <span className="inline-flex items-center gap-1">
-                                  <Banknote className="w-3.5 h-3.5 text-[#D8AD56]" />
-                                  <span>Collect ₹{item.total_amount} & Issue Room {currentSelectedRoom || ''}</span>
-                                </span>
-                              )}
+                            {isPaid ? (
+                              <span className="inline-flex items-center gap-1">
+                                <Zap className="w-3.5 h-3.5 text-[#D8AD56]" />
+                                <span>1-Click Encode & Issue Room {currentSelectedRoom || ''}</span>
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1">
+                                <Banknote className="w-3.5 h-3.5 text-[#D8AD56]" />
+                                <span>Collect ₹{item.total_amount} & Issue Room {currentSelectedRoom || ''}</span>
+                              </span>
+                            )}
                           </span>
                         </>
                       )}
@@ -613,20 +864,22 @@ export default function FrontDeskPage() {
         )}
       </div>
 
-      {/* Two Workstations: Expected Arrivals (Left) & In-House Stays (Right) */}
+      {/* Two Main Workstations: Expected Arrivals (Left) & In-House Stays (Right) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         {/* Left Column: Arrivals / Check-In Queue */}
-        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-[#EFE3D6]">
             <div>
               <h2 className="font-serif text-lg font-bold text-[#241912] flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#1565C0]" />
-                <span>Expected Arrivals ({pendingArrivals.length})</span>
+                <span>
+                  {isTelugu ? 'రావలసిన అతిథులు' : 'Expected Arrivals'} ({pendingArrivals.length})
+                </span>
               </h2>
-              <p className="text-xs text-[#786B61]">Awaiting guest arrival and room assignment</p>
+              <p className="text-xs text-[#786B61]">Awaiting guest arrival, statutory ID check, and key handover</p>
             </div>
             <span className="text-[11px] font-semibold text-[#2E7D32] bg-[#E8F5E9] px-2.5 py-1 rounded-full">
-              {availableRooms.length} Clean Rooms Ready
+              {availableCleanRooms.length} {isTelugu ? 'సిద్ధమైన గదులు' : 'Clean Rooms Ready'}
             </span>
           </div>
 
@@ -635,19 +888,27 @@ export default function FrontDeskPage() {
               No expected arrivals matching current query.
             </div>
           ) : (
-            <div className="space-y-3 max-h-[600px] overflow-y-auto">
+            <div className="space-y-3 max-h-[640px] overflow-y-auto pr-1">
               {pendingArrivals.map((b) => (
                 <div
                   key={b.id}
-                  className="p-4 rounded-xl border border-[#EFE3D6] hover:border-[#D8AD56] transition-all bg-[#FAF7F2]/50 space-y-2.5"
+                  className="p-4 rounded-xl border border-[#EFE3D6] hover:border-[#D8AD56] transition-all bg-[#FAF7F2]/50 space-y-2.5 shadow-2xs"
                 >
                   <div className="flex items-start justify-between">
                     <div>
                       <span className="font-serif font-bold text-sm text-[#241912] block">
                         {b.guest_name}
                       </span>
-                      <span className="text-[10px] font-mono text-[#786B61]">
-                        {b.booking_reference} · {b.guest_phone}
+                      <span className="text-[10px] font-mono text-[#786B61] flex items-center gap-1.5 mt-0.5">
+                        <span>{b.booking_reference}</span>
+                        <span>&bull;</span>
+                        <a
+                          href={`tel:${b.guest_phone}`}
+                          className="text-[#1565C0] hover:underline flex items-center gap-0.5"
+                        >
+                          <Phone className="w-2.5 h-2.5" />
+                          <span>{b.guest_phone}</span>
+                        </a>
                       </span>
                     </div>
                     <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#E3F2FD] text-[#1565C0]">
@@ -656,8 +917,21 @@ export default function FrontDeskPage() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-xs text-[#786B61] py-1 border-y border-[#EFE3D6]">
-                    <div>Dates: <strong>{b.check_in_date} to {b.check_out_date}</strong></div>
-                    <div>Pay Status: <strong className={b.payment_status === 'successful' ? 'text-[#2E7D32]' : 'text-[#E65100]'}>{b.payment_status}</strong></div>
+                    <div>
+                      Dates: <strong>{b.check_in_date} to {b.check_out_date}</strong>
+                    </div>
+                    <div>
+                      Pay Status:{' '}
+                      <strong
+                        className={
+                          b.payment_status === 'successful'
+                            ? 'text-[#2E7D32]'
+                            : 'text-[#E65100]'
+                        }
+                      >
+                        {b.payment_status}
+                      </strong>
+                    </div>
                   </div>
 
                   {/* HIGHLIGHTED GOVERNMENT ID BADGE */}
@@ -671,13 +945,13 @@ export default function FrontDeskPage() {
                         {b.id_proof_number}
                       </span>
                       <span className="text-[9px] text-amber-800 font-semibold bg-white/70 px-1.5 py-0.5 rounded">
-                        Verify Physical Copy
+                        Verify Physical Document
                       </span>
                     </div>
                   ) : (
                     <div className="text-[10px] text-rose-600 font-bold flex items-center gap-1 px-1">
                       <AlertCircle className="w-3 h-3 text-rose-500" />
-                      <span>ID Verification Pending</span>
+                      <span>ID Verification Pending (Aadhaar / Passport required at desk)</span>
                     </div>
                   )}
 
@@ -685,36 +959,63 @@ export default function FrontDeskPage() {
                     <span className="font-bold text-xs text-[#241912]">
                       ₹ {b.total_amount.toLocaleString('en-IN')}
                     </span>
-                    <button
-                      onClick={() => {
-                        setCheckInError(null);
-                        setCheckInModalBooking(b);
-                        const preAssigned = rooms.find(
-                          (r) =>
-                            (b.assigned_room_id && r.id === b.assigned_room_id) ||
-                            (b.assigned_room_number && r.room_number === b.assigned_room_number) ||
-                            (r.current_booking_ref && r.current_booking_ref.toLowerCase() === b.booking_reference.toLowerCase())
-                        );
-                        if (preAssigned && preAssigned.housekeeping_status === 'clean') {
-                          setSelectedRoomId(preAssigned.id);
-                        } else {
-                          const match = rooms.find(
-                            (r) => r.operational_status === 'available' && r.housekeeping_status === 'clean' && r.category_id === b.category_id
+                    <div className="flex items-center gap-1.5">
+                      {/* Print GRC Button */}
+                      <button
+                        type="button"
+                        onClick={() => setGrcModalBooking(b)}
+                        className="px-2.5 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
+                        title={isTelugu ? 'GRC రిజిస్ట్రేషన్ స్లిప్ ప్రింట్ చేయండి' : 'Print Guest Registration Slip (GRC)'}
+                      >
+                        <Printer className="w-3.5 h-3.5 text-gray-600" />
+                        <span>GRC</span>
+                      </button>
+
+                      {/* Check In CTA */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setCheckInError(null);
+                          setCheckInModalBooking(b);
+                          const preAssigned = rooms.find(
+                            (r) =>
+                              (b.assigned_room_id && r.id === b.assigned_room_id) ||
+                              (b.assigned_room_number && r.room_number === b.assigned_room_number) ||
+                              (r.current_booking_ref &&
+                                r.current_booking_ref.toLowerCase() === b.booking_reference.toLowerCase())
                           );
-                          const anyClean = rooms.find((r) => r.operational_status === 'available' && r.housekeeping_status === 'clean');
-                          setSelectedRoomId(match ? match.id : (anyClean ? anyClean.id : ''));
-                        }
-                        setArrivalIdType(b.id_proof_type || 'Aadhaar Card');
-                        setArrivalIdNumber(b.id_proof_number || '');
-                        setArrivalNationality((b.nationality as any) || 'Indian');
-                        setArrivalCity(b.city_of_origin || 'Kadiri');
-                        setArrivalPurpose(b.purpose_of_visit || 'Pilgrimage / Temple Darshan');
-                      }}
-                      className="px-3.5 py-1.5 rounded-lg bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm"
-                    >
-                      <ConciergeBell className="w-3.5 h-3.5" />
-                      <span>Check In Guest</span>
-                    </button>
+                          if (preAssigned && preAssigned.housekeeping_status === 'clean') {
+                            setSelectedRoomId(preAssigned.id);
+                          } else {
+                            const match = rooms.find(
+                              (r) =>
+                                r.operational_status === 'available' &&
+                                r.housekeeping_status === 'clean' &&
+                                r.category_id === b.category_id
+                            );
+                            const anyClean = rooms.find(
+                              (r) => r.operational_status === 'available' && r.housekeeping_status === 'clean'
+                            );
+                            setSelectedRoomId(match ? match.id : anyClean ? anyClean.id : '');
+                          }
+                          setArrivalIdType(b.id_proof_type || 'Aadhaar Card');
+                          setArrivalIdNumber(b.id_proof_number || '');
+                          setArrivalNationality((b.nationality as any) || 'Indian');
+                          setArrivalCity(b.city_of_origin || 'Kadiri');
+                          setArrivalPurpose(b.purpose_of_visit || 'Pilgrimage / Temple Darshan');
+
+                          const pendingAmt = Math.max(0, b.total_amount - (b.paid_amount || 0));
+                          setCheckInCollectPayment(b.payment_status !== 'successful' && pendingAmt > 0);
+                          setCheckInPaymentAmount(pendingAmt);
+                          setCheckInPaymentMethod('cash');
+                          setCheckInPrintGrc(true);
+                        }}
+                        className="px-3.5 py-1.5 rounded-lg bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
+                      >
+                        <ConciergeBell className="w-3.5 h-3.5" />
+                        <span>{isTelugu ? 'గెస్ట్ చెక్-ఇన్' : 'Check In Guest'}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -723,14 +1024,16 @@ export default function FrontDeskPage() {
         </div>
 
         {/* Right Column: In-House Stays / Checkout Queue */}
-        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-6 shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-[#EFE3D6]">
             <div>
               <h2 className="font-serif text-lg font-bold text-[#241912] flex items-center gap-2">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#2E7D32]" />
-                <span>In-House Active Stays ({activeStays.length})</span>
+                <span>
+                  {isTelugu ? 'ఇన్-హౌస్ బసలు' : 'In-House Active Stays'} ({activeStays.length})
+                </span>
               </h2>
-              <p className="text-xs text-[#786B61]">Currently occupied rooms and pending checkouts</p>
+              <p className="text-xs text-[#786B61]">Currently occupied rooms, incidentals, and pending checkouts</p>
             </div>
           </div>
 
@@ -739,17 +1042,19 @@ export default function FrontDeskPage() {
               No active in-house guests at this time.
             </div>
           ) : (
-            <div className="space-y-3 max-h-[600px] overflow-y-auto">
+            <div className="space-y-3 max-h-[640px] overflow-y-auto pr-1">
               {activeStays.map((b) => {
-                const pendingBalance = b.total_amount - b.paid_amount;
+                const pendingBalance = Math.max(0, b.total_amount - (b.paid_amount || 0));
+                const isDepartingToday = b.check_out_date === todayStr;
+
                 return (
                   <div
                     key={b.id}
-                    className="p-4 rounded-xl border border-[#EFE3D6] hover:border-[#D8AD56] transition-all bg-white shadow-xs space-y-2.5"
+                    className="p-4 rounded-xl border border-[#EFE3D6] hover:border-[#D8AD56] transition-all bg-white shadow-xs space-y-3"
                   >
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="px-2.5 py-1.5 rounded-lg bg-[#382216] text-[#D8AD56] font-bold text-sm">
+                        <div className="px-2.5 py-1.5 rounded-lg bg-[#382216] text-[#D8AD56] font-bold text-sm tracking-wide">
                           Room {b.assigned_room_number || 'N/A'}
                         </div>
                         <div>
@@ -757,32 +1062,92 @@ export default function FrontDeskPage() {
                             {b.guest_name}
                           </span>
                           <span className="text-[10px] text-[#786B61]">
-                            Stayed since {b.check_in_date} · Depart: {b.check_out_date}
+                            Stayed since {b.check_in_date} &bull; Depart: <strong>{b.check_out_date}</strong>
                           </span>
                         </div>
                       </div>
 
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#E8F5E9] text-[#2E7D32]">
-                        OCCUPIED
-                      </span>
+                      <div className="flex items-center gap-1.5">
+                        {isDepartingToday && (
+                          <span className="px-2 py-0.5 rounded text-[9px] font-black uppercase bg-amber-100 text-amber-900 border border-amber-300">
+                            Departing Today
+                          </span>
+                        )}
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#E8F5E9] text-[#2E7D32]">
+                          OCCUPIED
+                        </span>
+                      </div>
                     </div>
 
                     <div className="flex items-center justify-between text-xs py-1 border-y border-[#EFE3D6]">
-                      <span>Folio Total: <strong>₹ {b.total_amount.toLocaleString('en-IN')}</strong></span>
                       <span>
-                        Balance: <strong className={pendingBalance > 0 ? 'text-red-600' : 'text-green-700'}>
+                        Folio Total: <strong>₹ {b.total_amount.toLocaleString('en-IN')}</strong>
+                      </span>
+                      <span>
+                        Balance:{' '}
+                        <strong className={pendingBalance > 0 ? 'text-red-600 font-bold' : 'text-green-700 font-bold'}>
                           {pendingBalance > 0 ? `₹ ${pendingBalance.toLocaleString('en-IN')} Due` : 'Fully Settled'}
                         </strong>
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-end gap-2 pt-1">
+                    {/* Operational Action Buttons Bar */}
+                    <div className="flex flex-wrap items-center justify-end gap-1.5 pt-1">
+                      {/* GRC Print */}
                       <button
+                        type="button"
+                        onClick={() => setGrcModalBooking(b)}
+                        className="px-2 py-1.5 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700 text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer"
+                        title={isTelugu ? 'GRC రిజిస్ట్రేషన్ స్లిప్ ప్రింట్ చేయండి' : 'Print Guest Registration Card (GRC)'}
+                      >
+                        <Printer className="w-3.5 h-3.5 text-gray-600" />
+                        <span>GRC</span>
+                      </button>
+
+                      {/* Folio & Charges */}
+                      <button
+                        type="button"
+                        onClick={() => setFolioModalBooking(b)}
+                        className="px-2.5 py-1.5 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] border border-[#D8AD56]/40 text-[#382216] text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer"
+                        title={isTelugu ? 'ఫోలియో & అదనపు ఛార్జీలు' : 'Manage Folio & Incidentals'}
+                      >
+                        <Receipt className="w-3.5 h-3.5 text-[#D8AD56]" />
+                        <span>{isTelugu ? 'ఫోలియో' : 'Folio'}</span>
+                      </button>
+
+                      {/* Duplicate Keycard */}
+                      {b.assigned_room_number && (
+                        <button
+                          type="button"
+                          onClick={() => handleDuplicateKeycard(b.assigned_room_number!, b.guest_name)}
+                          className="px-2 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer"
+                          title={isTelugu ? 'డూప్లికేట్ కీకార్డు ఎన్‌కోడ్ చేయండి' : 'Encode / Duplicate Room Keycard'}
+                        >
+                          <KeyRound className="w-3.5 h-3.5 text-amber-700" />
+                          <span>{isTelugu ? 'కీకార్డు' : 'Keycard'}</span>
+                        </button>
+                      )}
+
+                      {/* Collect Pending Balance */}
+                      {pendingBalance > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => setFolioModalBooking(b)}
+                          className="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer"
+                        >
+                          <Banknote className="w-3.5 h-3.5 text-emerald-700" />
+                          <span>{isTelugu ? `వసూలు ₹${pendingBalance}` : `Collect ₹${pendingBalance}`}</span>
+                        </button>
+                      )}
+
+                      {/* Checkout & Settle */}
+                      <button
+                        type="button"
                         onClick={() => setCheckOutModalBooking(b)}
-                        className="px-3.5 py-1.5 rounded-lg bg-[#382216] hover:bg-[#25150F] text-[#EFE3D6] text-xs font-semibold transition-colors flex items-center gap-1.5"
+                        className="px-3 py-1.5 rounded-lg bg-[#382216] hover:bg-[#25150F] text-[#EFE3D6] text-xs font-semibold transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
                       >
                         <LogOut className="w-3.5 h-3.5 text-[#D8AD56]" />
-                        <span>Checkout & Settle</span>
+                        <span>{isTelugu ? 'చెక్-అవుట్' : 'Checkout & Settle'}</span>
                       </button>
                     </div>
                   </div>
@@ -800,14 +1165,16 @@ export default function FrontDeskPage() {
             <div className="flex items-center justify-between border-b border-[#EFE3D6] pb-3">
               <div>
                 <span className="text-[10px] uppercase font-semibold text-[#D8AD56]">RECEPTION CHECK-IN</span>
-                <h3 className="font-serif text-lg font-bold text-[#241912]">Check In {checkInModalBooking.guest_name}</h3>
+                <h3 className="font-serif text-lg font-bold text-[#241912]">
+                  Check In {checkInModalBooking.guest_name}
+                </h3>
               </div>
               <button
                 onClick={() => {
                   setCheckInModalBooking(null);
                   setCheckInError(null);
                 }}
-                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -825,9 +1192,15 @@ export default function FrontDeskPage() {
 
             <form onSubmit={handleConfirmCheckIn} className="space-y-4">
               <div className="p-3 rounded-lg bg-[#FAF7F2] text-xs space-y-1">
-                <div>Ref: <strong>{checkInModalBooking.booking_reference}</strong></div>
-                <div>Category: <strong>{checkInModalBooking.category_name}</strong></div>
-                <div>Dates: <strong>{checkInModalBooking.check_in_date} to {checkInModalBooking.check_out_date}</strong></div>
+                <div>
+                  Ref: <strong>{checkInModalBooking.booking_reference}</strong>
+                </div>
+                <div>
+                  Category: <strong>{checkInModalBooking.category_name}</strong>
+                </div>
+                <div>
+                  Dates: <strong>{checkInModalBooking.check_in_date} to {checkInModalBooking.check_out_date}</strong>
+                </div>
               </div>
 
               <div>
@@ -852,7 +1225,9 @@ export default function FrontDeskPage() {
                           r.current_booking_ref.toLowerCase() === checkInModalBooking.booking_reference.toLowerCase()));
                     return {
                       value: r.id,
-                      label: `Room ${r.room_number} (Floor ${r.floor_number} - ${r.category_name})${isPreAssigned ? ' • Pre-Assigned' : ''}`,
+                      label: `Room ${r.room_number} (Floor ${r.floor_number} - ${r.category_name})${
+                        isPreAssigned ? ' • Pre-Assigned' : ''
+                      }`,
                     };
                   })}
                 />
@@ -865,7 +1240,7 @@ export default function FrontDeskPage() {
               </div>
 
               {/* Statutory Guest Identity & Origin (Form C Norms) */}
-              <div className="p-3 rounded-xl bg-[#FAF7F2] border border-[#EFE3D6] space-y-2.5">
+              <div className="p-3.5 rounded-xl bg-[#FAF7F2] border border-[#EFE3D6] space-y-2.5">
                 <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-[#D8AD56]">
                   <ShieldCheck className="w-3.5 h-3.5" />
                   <span>Indian Statutory Identity Verification</span>
@@ -943,6 +1318,76 @@ export default function FrontDeskPage() {
                 </div>
               </div>
 
+              {/* Front Desk Payment Collection at Check-In */}
+              <div className="p-3.5 rounded-xl bg-[#FAF7F2] border border-[#EFE3D6] space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-[#D8AD56]">
+                    <Banknote className="w-3.5 h-3.5 text-[#D8AD56]" />
+                    <span>{isTelugu ? 'చెక్-ఇన్ చెల్లింపు సేకరణ' : 'Collect Stay Payment at Check-In'}</span>
+                  </div>
+                  <label className="flex items-center gap-1.5 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={checkInCollectPayment}
+                      onChange={(e) => setCheckInCollectPayment(e.target.checked)}
+                      className="w-4 h-4 text-[#D8AD56] rounded"
+                    />
+                    <span className="text-xs font-semibold text-[#241912]">
+                      {isTelugu ? 'ఇప్పుడే వసూలు' : 'Collect Now'}
+                    </span>
+                  </label>
+                </div>
+
+                {checkInCollectPayment && (
+                  <div className="grid grid-cols-2 gap-2 text-xs pt-1">
+                    <div>
+                      <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-1">
+                        {isTelugu ? 'మొత్తం (₹)' : 'Collection Amount (₹)'}
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={checkInPaymentAmount}
+                        onChange={(e) => setCheckInPaymentAmount(Number(e.target.value))}
+                        className="w-full p-2 text-xs font-mono font-bold rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-1">
+                        {isTelugu ? 'చెల్లింపు విధానం' : 'Payment Method'}
+                      </label>
+                      <LuxurySelect
+                        size="sm"
+                        variant="admin"
+                        value={checkInPaymentMethod}
+                        onChange={(val) => setCheckInPaymentMethod(val as any)}
+                        options={[
+                          { value: 'cash', label: isTelugu ? 'నగదు (Cash Drawer)' : 'Cash (Drawer)' },
+                          { value: 'upi', label: 'UPI / QR Code' },
+                          { value: 'card', label: 'Credit / Debit Card' },
+                        ]}
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Auto-Print GRC Slip on Check-In */}
+              <div className="p-3 rounded-lg border border-[#EFE3D6] flex items-center justify-between bg-white">
+                <div className="flex items-center gap-2 text-xs">
+                  <Printer className="w-4 h-4 text-[#D8AD56]" />
+                  <span>{isTelugu ? 'చెక్-ఇన్ పూర్తయ్యాక GRC ప్రింట్ చేయండి' : 'Auto-Print Guest Registration Card (GRC)'}</span>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={checkInPrintGrc}
+                  onChange={(e) => setCheckInPrintGrc(e.target.checked)}
+                  className="w-4 h-4 text-[#D8AD56] rounded cursor-pointer"
+                />
+              </div>
+
+              {/* Hardware RFID Keycard Encoding */}
               <div className="p-3 rounded-lg border border-[#EFE3D6] flex items-center justify-between bg-white">
                 <div className="flex items-center gap-2 text-xs">
                   <KeyRound className="w-4 h-4 text-[#D8AD56]" />
@@ -952,7 +1397,7 @@ export default function FrontDeskPage() {
                   type="checkbox"
                   checked={issueRfid}
                   onChange={(e) => setIssueRfid(e.target.checked)}
-                  className="w-4 h-4 text-[#D8AD56] rounded"
+                  className="w-4 h-4 text-[#D8AD56] rounded cursor-pointer"
                 />
               </div>
 
@@ -964,13 +1409,12 @@ export default function FrontDeskPage() {
                     setCheckInModalBooking(null);
                     setCheckInError(null);
                   }}
-                  className="px-4 py-2 rounded-lg border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
-                  type="button"
-                  onClick={handleConfirmCheckIn}
+                  type="submit"
                   disabled={!selectedRoomId || isSubmittingCheckIn}
                   className="px-5 py-2 rounded-lg bg-[#43001F] text-white text-xs font-bold hover:bg-[#2E0015] disabled:opacity-50 flex items-center gap-2 shadow-sm transition-all cursor-pointer"
                 >
@@ -996,14 +1440,16 @@ export default function FrontDeskPage() {
             <div className="flex items-center justify-between border-b border-[#EFE3D6] pb-3">
               <div>
                 <span className="text-[10px] uppercase font-semibold text-[#D8AD56]">RECEPTION CHECK-OUT</span>
-                <h3 className="font-serif text-lg font-bold text-[#241912]">Checkout Room {checkOutModalBooking.assigned_room_number}</h3>
+                <h3 className="font-serif text-lg font-bold text-[#241912]">
+                  Checkout Room {checkOutModalBooking.assigned_room_number}
+                </h3>
               </div>
               <button
                 onClick={() => {
                   setCheckOutModalBooking(null);
                   setCheckOutError(null);
                 }}
-                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -1067,7 +1513,11 @@ export default function FrontDeskPage() {
               <div className="p-3 rounded-lg bg-[#EFE3D6]/50 border border-[#D8AD56]/30 flex items-center justify-between">
                 <span className="text-xs font-semibold text-[#241912]">Settlement Amount:</span>
                 <span className="font-serif text-lg font-bold text-[#382216]">
-                  ₹ {Math.max(0, checkOutModalBooking.total_amount + additionalCharges - checkOutModalBooking.paid_amount).toLocaleString('en-IN')}
+                  ₹{' '}
+                  {Math.max(
+                    0,
+                    checkOutModalBooking.total_amount + additionalCharges - checkOutModalBooking.paid_amount
+                  ).toLocaleString('en-IN')}
                 </span>
               </div>
 
@@ -1081,7 +1531,7 @@ export default function FrontDeskPage() {
                       type="button"
                       key={method}
                       onClick={() => setSettlementMethod(method as any)}
-                      className={`p-2 rounded-lg text-xs font-semibold uppercase border transition-all ${
+                      className={`p-2 rounded-lg text-xs font-semibold uppercase border transition-all cursor-pointer ${
                         settlementMethod === method
                           ? 'bg-[#382216] text-[#D8AD56] border-[#D8AD56]'
                           : 'bg-white text-gray-700 border-gray-200'
@@ -1101,14 +1551,14 @@ export default function FrontDeskPage() {
                     setCheckOutModalBooking(null);
                     setCheckOutError(null);
                   }}
-                  className="px-4 py-2 rounded-lg border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  className="px-4 py-2 rounded-lg border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmittingCheckOut}
-                  className="px-5 py-2 rounded-lg bg-[#43001F] text-white text-xs font-bold hover:bg-[#2E0015] disabled:opacity-50 flex items-center gap-2 shadow-sm transition-all"
+                  className="px-5 py-2 rounded-lg bg-[#43001F] text-white text-xs font-bold hover:bg-[#2E0015] disabled:opacity-50 flex items-center gap-2 shadow-sm transition-all cursor-pointer"
                 >
                   {isSubmittingCheckOut ? (
                     <>
@@ -1124,14 +1574,48 @@ export default function FrontDeskPage() {
           </div>
         </div>
       )}
-      <ReceptionStandeeModal isOpen={showStandeeModal} onClose={() => setShowStandeeModal(false)} />
+
+      {/* PRINT GRC REGISTRATION MODAL */}
+      <PrintGrcModal
+        isOpen={!!grcModalBooking}
+        onClose={() => setGrcModalBooking(null)}
+        booking={grcModalBooking}
+      />
+
+      {/* PRINT GST TAX INVOICE MODAL */}
+      <PrintGstInvoiceModal
+        isOpen={!!invoiceModalBooking}
+        onClose={() => setInvoiceModalBooking(null)}
+        booking={invoiceModalBooking}
+      />
+
+      {/* GUEST FOLIO & INCIDENTALS MODAL */}
+      <GuestFolioModal
+        isOpen={!!folioModalBooking}
+        onClose={() => setFolioModalBooking(null)}
+        booking={folioModalBooking}
+        onOpenPrintInvoice={(b) => {
+          setInvoiceModalBooking(b);
+        }}
+        onBookingUpdated={async () => {
+          await fetchLiveState();
+        }}
+      />
+
+      {/* RECEPTION STANDEE QR MODAL */}
+      <ReceptionStandeeModal
+        isOpen={showStandeeModal}
+        onClose={() => setShowStandeeModal(false)}
+      />
+
+      {/* STATUTORY WALK-IN REGISTRATION MODAL */}
       <StatutoryWalkInModal
         isOpen={showStatutoryModal}
         onClose={() => {
           setShowStatutoryModal(false);
           setStatutoryInitialData(null);
         }}
-        availableRooms={availableRooms}
+        availableRooms={availableCleanRooms}
         categories={categories}
         initialData={statutoryInitialData}
         onSuccess={async (booking, roomNum) => {
