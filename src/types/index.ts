@@ -85,6 +85,7 @@ export interface RoomCategory {
   is_active: boolean;
   total_physical_rooms?: number;
   available_physical_rooms?: number;
+  walk_in_only?: boolean;
 }
 
 export interface PhysicalRoom {
@@ -103,6 +104,7 @@ export interface PhysicalRoom {
   assigned_housekeeper_id?: string;
   assigned_housekeeper_name?: string;
   turnaround_checklist?: HousekeepingTurnaroundChecklist;
+  walk_in_only?: boolean;
 }
 
 export type GuestVIPTier = 'regular' | 'silver' | 'gold' | 'vip_platinum';

@@ -53,6 +53,30 @@ interface CategoryItem {
   is_available_now: boolean;
 }
 
+const loadRazorpayScript = (): Promise<boolean> => {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined') return resolve(false);
+    if (window.Razorpay) return resolve(true);
+
+    const scriptId = 'razorpay-checkout-js';
+    let script = document.getElementById(scriptId) as HTMLScriptElement | null;
+    if (script) {
+      if (window.Razorpay) return resolve(true);
+      script.addEventListener('load', () => resolve(true));
+      script.addEventListener('error', () => resolve(false));
+      return;
+    }
+
+    script = document.createElement('script');
+    script.id = scriptId;
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 function WalkInKioskContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -136,14 +160,9 @@ function WalkInKioskContent() {
   const [specialRequests, setSpecialRequests] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  // Dynamically load Razorpay Checkout SDK
+  // Dynamically preload Razorpay Checkout SDK
   useEffect(() => {
-    if (typeof window !== 'undefined' && !window.Razorpay) {
-      const script = document.createElement('script');
-      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-      script.async = true;
-      document.body.appendChild(script);
-    }
+    loadRazorpayScript();
   }, []);
 
   // Verify Kiosk Token & Load Categories
@@ -229,93 +248,95 @@ function WalkInKioskContent() {
       const { bookingReference, pickupCode, razorpayOrder } = data;
 
       // Case A: Online Payment via Razorpay
-      if (paymentMethod === 'online' && razorpayOrder) {
-        if (typeof window !== 'undefined' && window.Razorpay) {
-          const razorpayKey =
-            process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_Ty3N7lQ7MDxqRm';
-
-          const options = {
-            key: razorpayKey,
-            amount: razorpayOrder.amount,
-            currency: razorpayOrder.currency || 'INR',
-            name: 'SRI TAYI GRAND',
-            description: `Walk-In Booking: ${selectedCat.name} (${numNights} Night${numNights > 1 ? 's' : ''})`,
-            image: '/images/hotel/tayi-grand-logo.png',
-            order_id: razorpayOrder.id,
-            prefill: {
-              name: guestName.trim(),
-              email: guestEmail.trim() || `${cleanPhone}@guest.sritayigrand.com`,
-              contact: cleanPhone,
-            },
-            theme: {
-              color: '#382216',
-            },
-            handler: async function (response: any) {
-              try {
-                // Verify cryptographic payment signature
-                const verifyRes = await fetch('/api/bookings/verify', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    bookingReference,
-                    razorpayOrderId: response.razorpay_order_id || razorpayOrder.id,
-                    razorpayPaymentId: response.razorpay_payment_id,
-                    razorpaySignature: response.razorpay_signature,
-                  }),
-                });
-
-                const verifyData = await verifyRes.json();
-                if (verifyRes.ok && verifyData.success) {
-                  toast.success('Payment verified! Redirecting to your digital key pass...');
-                  router.push(
-                    `/booking/pickup/${encodeURIComponent(pickupCode)}?ref=${encodeURIComponent(
-                      bookingReference
-                    )}`
-                  );
-                } else {
-                  toast.warning('Payment received, confirming reservation at desk...');
-                  router.push(
-                    `/booking/pickup/${encodeURIComponent(pickupCode)}?ref=${encodeURIComponent(
-                      bookingReference
-                    )}`
-                  );
-                }
-              } catch {
-                toast.success('Payment processed! Loading key pickup pass...');
-                router.push(
-                  `/booking/pickup/${encodeURIComponent(pickupCode)}?ref=${encodeURIComponent(
-                    bookingReference
-                  )}`
-                );
-              }
-            },
-            modal: {
-              ondismiss: function () {
-                setSubmitting(false);
-                toast.info('Payment window closed. You can retry or pay at the counter.');
-              },
-            },
-          };
-
-          const rzpInstance = new window.Razorpay(options);
-          rzpInstance.on('payment.failed', function (err: any) {
-            setSubmitting(false);
-            toast.error(err.error?.description || 'Online payment failed. Please pay at counter.');
-          });
-          rzpInstance.open();
-          return;
-        } else {
-          // Fallback if Razorpay SDK failed to load
-          toast.info('Directing to counter payment pass...');
+      if (paymentMethod === 'online') {
+        if (!razorpayOrder) {
+          toast.error('Payment gateway unavailable. You can pay at the counter.');
           router.push(
             `/booking/pickup/${encodeURIComponent(pickupCode)}?ref=${encodeURIComponent(
               bookingReference
             )}`
           );
+          return;
         }
+
+        const isLoaded = await loadRazorpayScript();
+        if (!isLoaded || !window.Razorpay) {
+          toast.warning('Payment SDK could not be loaded. Please pay at the counter.');
+          router.push(
+            `/booking/pickup/${encodeURIComponent(pickupCode)}?ref=${encodeURIComponent(
+              bookingReference
+            )}`
+          );
+          return;
+        }
+
+        const razorpayKey =
+          process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_Ty3N7lQ7MDxqRm';
+
+        const options = {
+          key: razorpayKey,
+          amount: razorpayOrder.amount,
+          currency: razorpayOrder.currency || 'INR',
+          name: 'SRI TAYI GRAND',
+          description: `Walk-In Booking: ${selectedCat.name} (${numNights} Night${numNights > 1 ? 's' : ''})`,
+          image: '/images/hotel/tayi-grand-logo.png',
+          order_id: razorpayOrder.id,
+          prefill: {
+            name: guestName.trim(),
+            email: guestEmail.trim() || `${cleanPhone}@guest.sritayigrand.com`,
+            contact: cleanPhone,
+          },
+          theme: {
+            color: '#382216',
+          },
+          handler: async function (response: any) {
+            try {
+              // Verify cryptographic payment signature
+              const verifyRes = await fetch('/api/bookings/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  bookingReference,
+                  razorpayOrderId: response.razorpay_order_id || razorpayOrder.id,
+                  razorpayPaymentId: response.razorpay_payment_id,
+                  razorpaySignature: response.razorpay_signature,
+                }),
+              });
+
+              const verifyData = await verifyRes.json();
+              if (verifyRes.ok && verifyData.success) {
+                toast.success('Payment verified! Redirecting to your digital key pass...');
+              } else {
+                toast.warning('Payment recorded. Front desk will confirm key issuance...');
+              }
+            } catch {
+              toast.success('Payment completed! Loading key pickup pass...');
+            } finally {
+              router.push(
+                `/booking/pickup/${encodeURIComponent(pickupCode)}?ref=${encodeURIComponent(
+                  bookingReference
+                )}`
+              );
+            }
+          },
+          modal: {
+            ondismiss: function () {
+              setSubmitting(false);
+              toast.info('Payment window closed. You can retry online payment or pay at counter.');
+            },
+          },
+        };
+
+        const rzpInstance = new window.Razorpay(options);
+        rzpInstance.on('payment.failed', function (err: any) {
+          setSubmitting(false);
+          toast.error(err.error?.description || 'Online payment failed. Please pay at counter.');
+        });
+        rzpInstance.open();
+        return;
       } else {
         // Case B: Cash/Counter Payment
-        toast.success('Room reserved successfully! Redirecting to key pickup pass...');
+        toast.success('Room reserved successfully! Proceed to front desk to collect your key.');
         router.push(
           `/booking/pickup/${encodeURIComponent(pickupCode)}?ref=${encodeURIComponent(
             bookingReference
@@ -634,6 +655,39 @@ function WalkInKioskContent() {
                 </select>
               </div>
             </div>
+
+            {/* Payment Method Details Badge */}
+            {paymentMethod === 'online' ? (
+              <div className="p-3 rounded-xl bg-amber-50/90 border border-[#D8AD56]/50 text-xs space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-[#382216] flex items-center gap-1.5">
+                    <CreditCard className="w-3.5 h-3.5 text-[#8D672F]" />
+                    <span>Instant Online Payment (UPI / Cards)</span>
+                  </span>
+                  <span className="text-[10px] bg-emerald-100 text-emerald-800 font-bold px-2 py-0.5 rounded-full">
+                    Fast Track
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#786A5B] leading-relaxed">
+                  Pay securely with Google Pay, PhonePe, Paytm, BHIM, Debit/Credit Cards, or NetBanking. Instant keycode pass issuance.
+                </p>
+              </div>
+            ) : (
+              <div className="p-3 rounded-xl bg-[#FAF7F2] border border-[#E6D9C5] text-xs space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-[#382216] flex items-center gap-1.5">
+                    <KeyRound className="w-3.5 h-3.5 text-[#8D672F]" />
+                    <span>Pay at Front Desk Counter</span>
+                  </span>
+                  <span className="text-[10px] bg-amber-100 text-amber-800 font-bold px-2 py-0.5 rounded-full">
+                    Cash / QR
+                  </span>
+                </div>
+                <p className="text-[11px] text-[#786A5B] leading-relaxed">
+                  Reserve now and pay ₹{totalInr.toLocaleString('en-IN')} via Cash or scan Counter UPI QR when collecting key from receptionist.
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Pricing Summary */}

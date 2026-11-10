@@ -17,7 +17,15 @@ import {
   RefreshCw,
   Home,
   Check,
+  CreditCard,
+  Loader2,
 } from 'lucide-react';
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 interface PickupData {
   success: boolean;
@@ -67,6 +75,89 @@ export default function WalkInPickupPage({ params }: { params: Promise<{ code: s
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [wifiCopied, setWifiCopied] = useState(false);
+  const [payingNow, setPayingNow] = useState(false);
+
+  // Dynamically preload Razorpay SDK for pickup pass
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !window.Razorpay) {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
+  const handlePayNowOnline = async () => {
+    if (!bookingRef && !data?.bookingReference) return;
+    const refToUse = bookingRef || data?.bookingReference || '';
+    try {
+      setPayingNow(true);
+      const res = await fetch('/api/razorpay/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingReference: refToUse }),
+      });
+      const orderData = await res.json();
+      if (!res.ok || !orderData.success) {
+        alert(orderData.error || 'Failed to initialize payment gateway.');
+        setPayingNow(false);
+        return;
+      }
+
+      const razorpayKey =
+        process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_Ty3N7lQ7MDxqRm';
+
+      const options = {
+        key: razorpayKey,
+        amount: orderData.amount,
+        currency: orderData.currency || 'INR',
+        name: 'SRI TAYI GRAND',
+        description: `Walk-In Stay: ${data?.roomTypeName || 'Room Stay'}`,
+        image: '/images/hotel/tayi-grand-logo.png',
+        order_id: orderData.orderId,
+        prefill: {
+          name: data?.guestName || '',
+          email: `${data?.guestPhone || 'guest'}@guest.sritayigrand.com`,
+          contact: data?.guestPhone || '',
+        },
+        theme: {
+          color: '#382216',
+        },
+        handler: async function (response: any) {
+          try {
+            await fetch('/api/bookings/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                bookingReference: refToUse,
+                razorpayOrderId: response.razorpay_order_id || orderData.orderId,
+                razorpayPaymentId: response.razorpay_payment_id,
+                razorpaySignature: response.razorpay_signature,
+              }),
+            });
+          } finally {
+            setPayingNow(false);
+            fetchStatus();
+          }
+        },
+        modal: {
+          ondismiss: function () {
+            setPayingNow(false);
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (err: any) {
+        setPayingNow(false);
+        alert(err.error?.description || 'Payment failed.');
+      });
+      rzp.open();
+    } catch {
+      alert('Unable to connect to payment gateway.');
+      setPayingNow(false);
+    }
+  };
 
   const fetchStatus = useCallback(async () => {
     try {
@@ -315,7 +406,7 @@ export default function WalkInPickupPage({ params }: { params: Promise<{ code: s
               <span className="text-[#786A5B]">Total Amount (Inc. 5% GST):</span>
               <span className="font-bold text-[#33271D]">₹{totalAmount.toLocaleString('en-IN')}</span>
             </div>
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <span className="text-[#786A5B]">Payment Status:</span>
               <span
                 className={`px-2 py-0.5 rounded-full font-bold uppercase text-[10px] ${
@@ -326,6 +417,38 @@ export default function WalkInPickupPage({ params }: { params: Promise<{ code: s
               </span>
             </div>
           </div>
+
+          {!isPaid && (
+            <div className="pt-3 border-t border-[#E6D9C5] space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[#382216]">Prefer to pay online via phone?</span>
+                <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">
+                  Instant UPI
+                </span>
+              </div>
+              <p className="text-[11px] text-[#786A5B]">
+                Pay ₹${totalAmount.toLocaleString('en-IN')} now via Google Pay, PhonePe, Paytm, or Card to fast-track your key pickup.
+              </p>
+              <button
+                type="button"
+                onClick={handlePayNowOnline}
+                disabled={payingNow}
+                className="w-full py-2.5 px-3 rounded-xl bg-[#8D672F] hover:bg-[#6D4E21] text-white text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                {payingNow ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    <span>Connecting to Payment Gateway...</span>
+                  </>
+                ) : (
+                  <>
+                    <CreditCard className="w-3.5 h-3.5" />
+                    <span>Pay ₹${totalAmount.toLocaleString('en-IN')} Online Now</span>
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Front Desk Assistance Footer */}

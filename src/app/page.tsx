@@ -50,7 +50,7 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  const categories = repo.getCategories();
+  const categories = repo.getCategories().filter((c) => !c.walk_in_only);
 
   return (
     <main className="min-h-screen flex flex-col bg-[#F8F3E9] text-[#33271D]">

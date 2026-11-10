@@ -98,8 +98,13 @@ export default function RoomsPage() {
                     priority={index === 0}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="absolute top-4 left-4 bg-[#F8F3E9]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-semibold text-[#43001F] tracking-wider uppercase border border-[#E6D9C5] shadow-xs">
-                    ₹ {room.base_price_per_night.toLocaleString('en-IN')} / night
+                  <div className="absolute top-4 left-4 bg-[#F8F3E9]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-semibold text-[#43001F] tracking-wider uppercase border border-[#E6D9C5] shadow-xs flex items-center gap-1.5">
+                    <span>₹ {room.base_price_per_night.toLocaleString('en-IN')} / night</span>
+                    {room.walk_in_only && (
+                      <span className="bg-amber-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">
+                        Walk-In Only
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -137,25 +142,45 @@ export default function RoomsPage() {
 
                   {/* Action Buttons */}
                   <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-3">
-                    <NextLink
-                      href={`/rooms/${room.slug}`}
-                      className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-7 py-3 rounded-full bg-[#43001F] hover:bg-[#2E0015] active:scale-[0.98] text-white text-xs uppercase tracking-[0.14em] font-semibold shadow-md hover:shadow-lg transition-all duration-200 group/btn"
-                    >
-                      <span>Book Now</span>
-                      <span className="text-amber-200/80 font-normal">·</span>
-                      <span className="font-sans font-bold text-sm tracking-tight tabular-nums">
-                        ₹{room.base_price_per_night.toLocaleString('en-IN')}
-                      </span>
-                      <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
-                    </NextLink>
+                    {room.walk_in_only ? (
+                      <>
+                        <div className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-full bg-amber-100 border border-amber-300 text-amber-900 text-xs uppercase tracking-[0.14em] font-semibold">
+                          <span>Front Desk Walk-In Only</span>
+                          <span className="text-amber-700">·</span>
+                          <span className="font-sans font-bold text-sm tracking-tight tabular-nums">
+                            ₹{room.base_price_per_night.toLocaleString('en-IN')}
+                          </span>
+                        </div>
+                        <a
+                          href="tel:08494223379"
+                          className="inline-flex items-center justify-center gap-1.5 px-6 py-3 rounded-full border border-[#43001F]/30 hover:border-[#43001F] bg-[#FAF6EE]/80 hover:bg-[#F3EAD9] active:scale-[0.98] text-[#43001F] hover:text-[#2E0015] text-xs uppercase tracking-[0.14em] font-semibold transition-all duration-200"
+                        >
+                          <span>Call Desk: 084942 23379</span>
+                        </a>
+                      </>
+                    ) : (
+                      <>
+                        <NextLink
+                          href={`/rooms/${room.slug}`}
+                          className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-7 py-3 rounded-full bg-[#43001F] hover:bg-[#2E0015] active:scale-[0.98] text-white text-xs uppercase tracking-[0.14em] font-semibold shadow-md hover:shadow-lg transition-all duration-200 group/btn"
+                        >
+                          <span>Book Now</span>
+                          <span className="text-amber-200/80 font-normal">·</span>
+                          <span className="font-sans font-bold text-sm tracking-tight tabular-nums">
+                            ₹{room.base_price_per_night.toLocaleString('en-IN')}
+                          </span>
+                          <ArrowRight className="w-3.5 h-3.5 group-hover/btn:translate-x-0.5 transition-transform" />
+                        </NextLink>
 
-                    <NextLink
-                      href={`/rooms/${room.slug}`}
-                      className="inline-flex items-center justify-center gap-1.5 px-6 py-3 rounded-full border border-[#43001F]/30 hover:border-[#43001F] bg-[#FAF6EE]/80 hover:bg-[#F3EAD9] active:scale-[0.98] text-[#43001F] hover:text-[#2E0015] text-xs uppercase tracking-[0.14em] font-semibold transition-all duration-200 group/det"
-                    >
-                      <span>View Details</span>
-                      <ArrowRight className="w-3.5 h-3.5 group-hover/det:translate-x-0.5 transition-transform" />
-                    </NextLink>
+                        <NextLink
+                          href={`/rooms/${room.slug}`}
+                          className="inline-flex items-center justify-center gap-1.5 px-6 py-3 rounded-full border border-[#43001F]/30 hover:border-[#43001F] bg-[#FAF6EE]/80 hover:bg-[#F3EAD9] active:scale-[0.98] text-[#43001F] hover:text-[#2E0015] text-xs uppercase tracking-[0.14em] font-semibold transition-all duration-200 group/det"
+                        >
+                          <span>View Details</span>
+                          <ArrowRight className="w-3.5 h-3.5 group-hover/det:translate-x-0.5 transition-transform" />
+                        </NextLink>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

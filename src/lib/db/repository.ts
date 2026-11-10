@@ -953,12 +953,9 @@ export class HotelRepository {
     const bookingReference = `TG-W-${dateStr}-${randCode}`;
     const pickupCode = `TG-${randCode}`;
 
-    const isPaidOnline =
-      params.paymentMethod === 'online' ||
-      params.paymentMethod === 'upi' ||
-      params.paymentMethod === 'card';
-    const paymentStatus: PaymentStatus = isPaidOnline ? 'successful' : 'pay_at_hotel';
-    const paidAmount = isPaidOnline ? total : (params.paidAmount || 0);
+    const isFullyPaid = !!(params.paidAmount && params.paidAmount >= total);
+    const paymentStatus: PaymentStatus = isFullyPaid ? 'successful' : 'pending';
+    const paidAmount = params.paidAmount || 0;
 
     const booking: Booking = {
       id: `bk-walkin-${Date.now()}`,
@@ -1020,7 +1017,7 @@ export class HotelRepository {
     }
 
     // If paid online, record in financial payment ledger
-    if (isPaidOnline) {
+    if (isFullyPaid) {
       this.recordPayment(
         {
           booking_reference: bookingReference,

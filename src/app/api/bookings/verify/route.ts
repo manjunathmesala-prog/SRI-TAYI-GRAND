@@ -81,6 +81,7 @@ export async function POST(request: Request) {
     // Transactionally update booking
     booking.status = 'confirmed';
     booking.payment_status = 'successful';
+    booking.paid_amount = booking.total_amount;
     repo.updateBookingStatus(bookingReference, 'confirmed');
 
     // Update PaymentOrder in ledger

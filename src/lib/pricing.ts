@@ -25,12 +25,14 @@ export const TARIFF_SOURCE_DOCUMENT = 'Owner Tariff Card dated 01-09-2023';
 export const DOUBLE_ROOM_PAISE = 180000;    // ₹1,800
 export const FOUR_BED_ROOM_PAISE = 280000; // ₹2,800
 export const SUITE_ROOM_PAISE = 330000;    // ₹3,300
+export const SINGLE_ROOM_PAISE = 120000;   // ₹1,200 (Walk-in only)
 export const EXTRA_PERSON_PAISE = 30000;   // ₹300
 
 // In Rupee integer units
 export const DOUBLE_ROOM_RUPEES = 1800;
 export const FOUR_BED_ROOM_RUPEES = 2800;
 export const SUITE_ROOM_RUPEES = 3300;
+export const SINGLE_ROOM_RUPEES = 1200;
 export const EXTRA_PERSON_RUPEES = 300;
 
 export const STARTING_PRICE_RUPEES = 1800;
@@ -58,6 +60,7 @@ export interface AuthoritativeRoomCategoryTariff {
   galleryImages: string[];
   amenities: string[];
   features: string[];
+  walkInOnly?: boolean;
 }
 
 export const AUTHORITATIVE_ROOM_TARIFFS: Record<string, AuthoritativeRoomCategoryTariff> = {
@@ -171,6 +174,42 @@ export const AUTHORITATIVE_ROOM_TARIFFS: Record<string, AuthoritativeRoomCategor
       'Private balcony with panoramic aspect',
     ],
   },
+  'cat-single-04': {
+    id: 'cat-single-04',
+    slug: 'single-room',
+    name: 'Single Room',
+    airConditioning: true,
+    includedOccupancy: 1,
+    maxPermittedOccupancy: 1,
+    baseTariffPaise: SINGLE_ROOM_PAISE,
+    baseTariffRupees: SINGLE_ROOM_RUPEES,
+    extraPersonTariffPaise: EXTRA_PERSON_PAISE,
+    extraPersonTariffRupees: EXTRA_PERSON_RUPEES,
+    bedType: 'Single Bed',
+    shortDescription: 'Compact air-conditioned room with comfortable single bed, private bath, and essentials for solo travelers. Front desk walk-in only.',
+    fullDescription: 'Designed exclusively for solo travelers, single executives, and pilgrims visiting Kadiri. Offers a comfortable single bed, individual climate control AC, high-speed Wi-Fi, attached ensuite bathroom with 24/7 hot water, smart TV, and wardrobe space. This category is available exclusively for front-desk walk-in reservations.',
+    coverImageUrl: '/images/hotel/room-corner-photo-enhanced.png',
+    galleryImages: [
+      '/images/hotel/room-corner-photo-enhanced.png',
+      '/images/hotel/room-double-bed-photo-enhanced.png',
+      '/images/hotel/room-headboard-detail-photo-enhanced.png',
+    ],
+    amenities: [
+      'Fully AC',
+      'High-Speed Wi-Fi',
+      'Smart TV',
+      'Attached Bathroom',
+      '24/7 Hot Water',
+      'Wardrobe Space',
+    ],
+    features: [
+      'Included occupancy: 1 person',
+      'Dedicated single bed',
+      'Attached ensuite modern bathroom',
+      'Exclusive front-desk walk-in availability',
+    ],
+    walkInOnly: true,
+  },
 };
 
 /**
@@ -186,13 +225,22 @@ export function normalizeCategoryId(identifier?: string | null): string {
     return 'cat-suite-01';
   }
 
-  // Four Bed Room (also aliases legacy single-bed if requested)
+  // Single Room (Walk-in only)
+  if (
+    clean === 'cat-single-04' ||
+    clean === 'single-room' ||
+    clean === 'single' ||
+    clean === 'single-bed-room' ||
+    clean === 'cat-single-01'
+  ) {
+    return 'cat-single-04';
+  }
+
+  // Four Bed Room
   if (
     clean === 'cat-four-bed-02' ||
     clean === 'four-bed-room' ||
-    clean === 'four-bed' ||
-    clean === 'cat-single-04' ||
-    clean === 'single-bed-room'
+    clean === 'four-bed'
   ) {
     return 'cat-four-bed-02';
   }

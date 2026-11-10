@@ -222,9 +222,13 @@ export function searchAvailability(
   checkOut: string,
   adults: number = 1,
   children: number = 0,
-  roomsCount: number = 1
+  roomsCount: number = 1,
+  channel: 'online' | 'walk_in' = 'online'
 ): AvailabilityResult[] {
-  const categories = repo.getCategories().filter((c) => c.is_active);
+  let categories = repo.getCategories().filter((c) => c.is_active);
+  if (channel === 'online') {
+    categories = categories.filter((c) => !c.walk_in_only);
+  }
 
   return categories.map((cat) => {
     return checkCategoryAvailability(

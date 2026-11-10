@@ -68,6 +68,14 @@ export async function POST(request: Request) {
       );
     }
 
+    // 2.1 Enforce Online vs Walk-In Only perimeter check
+    if (avail.category.walk_in_only) {
+      return NextResponse.json(
+        { error: `${avail.category.name} is reserved strictly for front-desk walk-in reservations and cannot be booked online.` },
+        { status: 403 }
+      );
+    }
+
     // 3. Create Booking Record
     const isPayAtHotel = paymentMethod === 'pay_at_hotel';
     const booking = repo.createBooking({

@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
     const adults = Number(searchParams.get('adults')) || 1;
     const children = Number(searchParams.get('children')) || 0;
     const roomsCount = Number(searchParams.get('roomsCount') || searchParams.get('rooms')) || 1;
+    const channel = searchParams.get('channel') === 'walk_in' ? 'walk_in' : 'online';
 
     if (!checkIn || !checkOut) {
       return NextResponse.json(
@@ -29,7 +30,8 @@ export async function GET(request: NextRequest) {
       checkOut,
       adults,
       children,
-      roomsCount
+      roomsCount,
+      channel
     );
 
     return NextResponse.json(
@@ -49,7 +51,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { checkIn, checkOut, adults = 1, children = 0, roomsCount = 1 } = body;
+    const { checkIn, checkOut, adults = 1, children = 0, roomsCount = 1, channel = 'online' } = body;
 
     if (!checkIn || !checkOut) {
       return NextResponse.json(
@@ -70,7 +72,8 @@ export async function POST(request: Request) {
       checkOut,
       Number(adults),
       Number(children),
-      Number(roomsCount)
+      Number(roomsCount),
+      channel === 'walk_in' ? 'walk_in' : 'online'
     );
 
     return NextResponse.json({ success: true, results });
