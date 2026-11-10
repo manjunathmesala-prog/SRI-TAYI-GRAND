@@ -53,6 +53,8 @@ export default function ConfirmationPage({ params }: ConfirmationPageProps) {
   const [showRescheduleModal, setShowRescheduleModal] = useState(false);
   const [newCheckIn, setNewCheckIn] = useState(booking?.check_in_date || '');
   const [newCheckOut, setNewCheckOut] = useState(booking?.check_out_date || '');
+  const [rescheduleLoading, setRescheduleLoading] = useState(false);
+  const [rescheduleError, setRescheduleError] = useState<string | null>(null);
 
   if (isLoading) {
     return (
@@ -62,11 +64,10 @@ export default function ConfirmationPage({ params }: ConfirmationPageProps) {
     );
   }
 
+
   if (!booking) {
     notFound();
   }
-  const [rescheduleLoading, setRescheduleLoading] = useState(false);
-  const [rescheduleError, setRescheduleError] = useState<string | null>(null);
 
   const handlePrint = () => {
     if (typeof window !== 'undefined') {
