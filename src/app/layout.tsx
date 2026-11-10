@@ -1,21 +1,26 @@
 import type { Metadata, Viewport } from 'next';
-import { Cormorant_Garamond, Plus_Jakarta_Sans } from 'next/font/google';
+import { Cormorant_Garamond, Playfair_Display, Plus_Jakarta_Sans } from 'next/font/google';
 import './globals.css';
 import ScrollReveal from '@/components/anantha/ScrollReveal';
 import PwaProvider from '@/components/pwa/PwaProvider';
 
 const cormorant = Cormorant_Garamond({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  style: ['normal', 'italic'],
+  weight: ['400', '500', '600', '700'],
   variable: '--font-cormorant',
   display: 'swap',
 });
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-playfair',
+  display: 'swap',
+});
+
+const plusJakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600', '700', '800'],
-  variable: '--font-sans',
+  variable: '--font-plus-jakarta',
   display: 'swap',
 });
 
@@ -108,14 +113,17 @@ export default function RootLayout({
   };
 
   return (
-    <html lang="en" className={`${cormorant.variable} ${plusJakartaSans.variable}`}>
+    <html
+      lang="en"
+      className={`scroll-smooth ${cormorant.variable} ${playfair.variable} ${plusJakarta.variable}`}
+    >
       <head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(hotelStructuredData) }}
         />
       </head>
-      <body className="min-h-screen flex flex-col bg-[#F8F3E9] text-[#33271D] selection:bg-[#B18A4A] selection:text-white relative">
+      <body className="w-full min-h-screen flex flex-col bg-[#F8F3E9] text-[#33271D] font-sans antialiased selection:bg-[#B18A4A] selection:text-white relative">
         <ScrollReveal />
         <PwaProvider />
         {children}
