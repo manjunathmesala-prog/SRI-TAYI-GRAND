@@ -16,6 +16,8 @@ import {
   LogIn,
   LogOut,
   PlusCircle,
+  Plus,
+  RotateCcw,
   Printer,
   BedDouble,
   User,
@@ -45,12 +47,13 @@ import { GuestFolioModal } from '@/components/admin/GuestFolioModal';
 import { PrintGstInvoiceModal } from '@/components/admin/PrintGstInvoiceModal';
 import { RfidHistoryTable } from '@/components/admin/RfidHistoryTable';
 import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
-import { Booking, BookingStatus, PhysicalRoom, FolioCharge } from '@/types';
+import { Booking, BookingStatus, PhysicalRoom, RoomCategory, FolioCharge } from '@/types';
 import { toast } from '@/components/ui/Toast';
 
 export default function BookingsAdminPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [physicalRooms, setPhysicalRooms] = useState<PhysicalRoom[]>([]);
+  const [categories, setCategories] = useState<RoomCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -60,6 +63,13 @@ export default function BookingsAdminPage() {
   // Full Folio / Details inspection modal
   const [selectedRes, setSelectedRes] = useState<Booking | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Add / Assign Room modal
+  const [assignRoomTarget, setAssignRoomTarget] = useState<Booking | null>(null);
+  const [selectedAssignRoomId, setSelectedAssignRoomId] = useState('');
+
+  // Cancel Checkout modal
+  const [cancelCheckoutTarget, setCancelCheckoutTarget] = useState<Booking | null>(null);
 
   // RFID Forensic Door Tap Audit modal
   const [rfidAuditBooking, setRfidAuditBooking] = useState<Booking | null>(null);
@@ -103,6 +113,7 @@ export default function BookingsAdminPage() {
       if (data.success) {
         setBookings(data.bookings || []);
         setPhysicalRooms(data.rooms || []);
+        setCategories(data.categories || []);
       }
     } catch (err: any) {
       console.error('Failed to load reservations:', err);
@@ -138,6 +149,8 @@ export default function BookingsAdminPage() {
       if (e.key === 'Escape') {
         setCheckInTarget(null);
         setCheckOutTarget(null);
+        setAssignRoomTarget(null);
+        setCancelCheckoutTarget(null);
         setChargeTarget(null);
         setSelectedRes(null);
         setRfidAuditBooking(null);
@@ -308,6 +321,77 @@ export default function BookingsAdminPage() {
     link.click();
     document.body.removeChild(link);
     toast.success('Reservation folios exported to CSV successfully.');
+  };
+
+  // Category & Bed Type subtitle lookup helper (e.g. "Standard room: Twin bed")
+  const getCategoryBedSubtitle = (catId?: string, catName?: string) => {
+    const cat = categories.find((c) => c.id === catId || c.name === catName || c.slug === catId);
+    const displayName = cat ? cat.name : catName || 'Standard Room';
+    if (cat && cat.bed_type) {
+      return `${displayName}: ${cat.bed_type}`;
+    }
+    return displayName;
+  };
+
+  // Action: Confirm Room Assignment
+  const handleConfirmAssignRoom = async () => {
+    if (!assignRoomTarget) return;
+    if (!selectedAssignRoomId) {
+      toast.warning('Please select a clean physical room to assign.');
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      const res = await adminOperations.assignRoom({
+        roomId: selectedAssignRoomId,
+        bookingReference: assignRoomTarget.booking_reference,
+        guestName: assignRoomTarget.guest_name,
+        staffName: 'Front Desk Duty Officer',
+      });
+
+      if (res.success) {
+        toast.success(`Room #${selectedAssignRoomId} successfully assigned to ${assignRoomTarget.guest_name}.`);
+        setAssignRoomTarget(null);
+        setSelectedAssignRoomId('');
+        await fetchBookings();
+      } else {
+        toast.error(res.error || 'Failed to assign room');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Network error while assigning room');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Action: Confirm Cancel Checkout (Revert stay to In-House)
+  const handleConfirmCancelCheckout = async () => {
+    if (!cancelCheckoutTarget) return;
+
+    setActionLoading(true);
+    try {
+      const res = await adminOperations.cancelCheckout({
+        bookingReference: cancelCheckoutTarget.booking_reference,
+        staffName: 'Front Desk Duty Officer',
+      });
+
+      if (res.success) {
+        toast.success(
+          `Checkout cancelled. Stay ${cancelCheckoutTarget.booking_reference} (Room #${
+            cancelCheckoutTarget.assigned_room_number || cancelCheckoutTarget.room_number || 'Room'
+          }) restored to In-House status.`
+        );
+        setCancelCheckoutTarget(null);
+        await fetchBookings();
+      } else {
+        toast.error(res.error || 'Failed to cancel checkout');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Network error while cancelling checkout');
+    } finally {
+      setActionLoading(false);
+    }
   };
 
   // Action: Confirm Check-In
@@ -705,15 +789,28 @@ export default function BookingsAdminPage() {
                         </div>
                         <div className="text-right shrink-0">
                           {r.assigned_room_number ? (
-                            <span className="inline-flex items-center space-x-1 font-bold text-xs bg-[#21180F] text-white px-2.5 py-1 rounded-xl">
-                              <span>Room #{r.assigned_room_number}</span>
-                            </span>
+                            <div className="flex flex-col items-end gap-0.5">
+                              <span className="inline-flex items-center space-x-1 font-bold text-xs bg-[#21180F] text-white px-2.5 py-1 rounded-xl">
+                                <span>Room #{r.assigned_room_number}</span>
+                              </span>
+                              <div className="text-[10px] text-[#786A5B] font-medium">{getCategoryBedSubtitle(r.category_id, r.category_name)}</div>
+                            </div>
                           ) : (
-                            <span className="text-[11px] text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                              Unassigned
-                            </span>
+                            <div className="flex flex-col items-end gap-0.5">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setAssignRoomTarget(r);
+                                  setSelectedAssignRoomId('');
+                                }}
+                                className="text-[11px] text-amber-700 font-semibold bg-amber-50 hover:bg-amber-100 hover:border-amber-300 px-2 py-0.5 rounded border border-amber-200 transition-colors cursor-pointer"
+                                title="Click to assign room"
+                              >
+                                Unassigned
+                              </button>
+                              <div className="text-[10px] text-[#786A5B] font-medium">{getCategoryBedSubtitle(r.category_id, r.category_name)}</div>
+                            </div>
                           )}
-                          <div className="text-[10px] text-[#786A5B] mt-1">{r.category_name}</div>
                         </div>
                       </div>
 
@@ -736,6 +833,21 @@ export default function BookingsAdminPage() {
 
                       {/* Action Buttons Toolbar for mobile */}
                       <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-[#E6D9C5]/50">
+                        {/* 1. Add Room */}
+                        {isConfirmed && !r.assigned_room_number && (
+                          <button
+                            onClick={() => {
+                              setAssignRoomTarget(r);
+                              setSelectedAssignRoomId('');
+                            }}
+                            className="py-2 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-sm min-h-[40px] cursor-pointer"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            <span>Add Room</span>
+                          </button>
+                        )}
+
+                        {/* 2. Check In */}
                         {isConfirmed && (
                           <button
                             onClick={() => {
@@ -751,6 +863,7 @@ export default function BookingsAdminPage() {
                           </button>
                         )}
 
+                        {/* 3. Check Out */}
                         {isCheckedIn && (
                           <>
                             <button
@@ -772,6 +885,18 @@ export default function BookingsAdminPage() {
                               <span>+ Charge</span>
                             </button>
                           </>
+                        )}
+
+                        {/* 4. Cancel Checkout */}
+                        {r.status === 'checked_out' && (
+                          <button
+                            onClick={() => setCancelCheckoutTarget(r)}
+                            className="flex-1 py-2 px-3 rounded-xl bg-[#FAF5EB] hover:bg-[#EFE3D6] text-[#8a6a2a] border border-[#D8AD56]/60 font-bold text-xs flex items-center justify-center space-x-1.5 shadow-xs min-h-[40px] cursor-pointer transition-all"
+                            title="Cancel checkout & restore guest to In-House status"
+                          >
+                            <RotateCcw className="w-3.5 h-3.5 text-[#9b7a3e]" />
+                            <span>Cancel Checkout</span>
+                          </button>
                         )}
 
                         {/* RFID Door Tap History */}
@@ -888,15 +1013,28 @@ export default function BookingsAdminPage() {
                           </td>
                           <td className="p-3">
                             {r.assigned_room_number ? (
-                              <span className="inline-flex items-center space-x-1 font-bold text-xs bg-[#21180F] text-white px-2.5 py-1 rounded-xl">
-                                <span>Room #{r.assigned_room_number}</span>
-                              </span>
+                              <div className="flex flex-col items-start gap-0.5">
+                                <span className="inline-flex items-center space-x-1 font-bold text-xs bg-[#21180F] text-white px-2.5 py-1 rounded-xl">
+                                  <span>Room #{r.assigned_room_number}</span>
+                                </span>
+                                <div className="text-[10px] text-[#786A5B] font-medium">{getCategoryBedSubtitle(r.category_id, r.category_name)}</div>
+                              </div>
                             ) : (
-                              <span className="text-[11px] text-amber-700 font-semibold bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                                Unassigned
-                              </span>
+                              <div className="flex flex-col items-start gap-0.5">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setAssignRoomTarget(r);
+                                    setSelectedAssignRoomId('');
+                                  }}
+                                  className="inline-flex items-center gap-1 text-[11px] text-amber-700 font-semibold bg-amber-50 hover:bg-amber-100 hover:border-amber-300 px-2 py-0.5 rounded border border-amber-200 transition-colors cursor-pointer"
+                                  title="Click to assign a physical room"
+                                >
+                                  <span>Unassigned</span>
+                                </button>
+                                <div className="text-[10px] text-[#786A5B] font-medium">{getCategoryBedSubtitle(r.category_id, r.category_name)}</div>
+                              </div>
                             )}
-                            <div className="text-[10px] text-[#786A5B] mt-0.5">{r.category_name}</div>
                           </td>
                           <td className="p-3 text-[#786A5B]">
                             <div className="font-medium text-[#33271D]">{r.check_in_date} &rarr; {r.check_out_date}</div>
@@ -927,7 +1065,22 @@ export default function BookingsAdminPage() {
                           </td>
                           <td className="p-3 text-right">
                             <div className="flex items-center justify-end space-x-1.5">
-                              {/* Quick Check-In if Confirmed */}
+                              {/* 1. Quick Add Room if Confirmed and unassigned */}
+                              {isConfirmed && !r.assigned_room_number && (
+                                <button
+                                  onClick={() => {
+                                    setAssignRoomTarget(r);
+                                    setSelectedAssignRoomId('');
+                                  }}
+                                  className="px-2.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-semibold text-[11px] flex items-center space-x-1 shadow-sm cursor-pointer"
+                                  title="Add / Assign Physical Room to Reservation"
+                                >
+                                  <Plus className="w-3 h-3" />
+                                  <span>Add Room</span>
+                                </button>
+                              )}
+
+                              {/* 2. Quick Check-In if Confirmed */}
                               {isConfirmed && (
                                 <button
                                   onClick={() => {
@@ -944,7 +1097,7 @@ export default function BookingsAdminPage() {
                                 </button>
                               )}
 
-                              {/* Quick Check-Out & Settle if In-House */}
+                              {/* 3. Quick Check-Out & Settle if In-House */}
                               {isCheckedIn && (
                                 <>
                                   <button
@@ -967,6 +1120,18 @@ export default function BookingsAdminPage() {
                                     <PlusCircle className="w-4 h-4" />
                                   </button>
                                 </>
+                              )}
+
+                              {/* 4. Quick Cancel Checkout if Completed / Checked Out */}
+                              {r.status === 'checked_out' && (
+                                <button
+                                  onClick={() => setCancelCheckoutTarget(r)}
+                                  className="px-2.5 py-1.5 rounded-lg bg-[#FAF5EB] hover:bg-[#EFE3D6] text-[#8a6a2a] border border-[#D8AD56]/60 font-semibold text-[11px] flex items-center space-x-1 shadow-xs cursor-pointer transition-all"
+                                  title="Cancel checkout & revert stay to In-House status"
+                                >
+                                  <RotateCcw className="w-3 h-3 text-[#9b7a3e]" />
+                                  <span>Cancel Checkout</span>
+                                </button>
                               )}
 
                               {/* Forensic Door Tap History */}
@@ -1255,6 +1420,180 @@ export default function BookingsAdminPage() {
                   className="px-5 py-2.5 rounded-xl bg-[#21180F] hover:bg-black text-white font-bold text-xs uppercase tracking-wider cursor-pointer"
                 >
                   {actionLoading ? 'Processing...' : 'Settle & Complete Check-Out'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL 2A: ASSIGN / ADD PHYSICAL ROOM TO RESERVATION --- */}
+      {assignRoomTarget && (
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setAssignRoomTarget(null);
+          }}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3.5 sm:p-4"
+        >
+          <div className="bg-white rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-[#E6D9C5] space-y-4 sm:space-y-5 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E6D9C5]">
+              <div>
+                <span className="text-[10px] uppercase tracking-widest text-[#8D672F] font-bold">Room Inventory Allocation</span>
+                <h3 className="text-lg font-serif text-[#33271D] font-bold">Assign Room: {assignRoomTarget.guest_name}</h3>
+              </div>
+              <button onClick={() => setAssignRoomTarget(null)} className="text-xs text-[#786A5B] hover:text-black cursor-pointer">&times;</button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div className="p-3 rounded-2xl bg-[#F8F3E9]/50 border border-[#E6D9C5] space-y-1.5">
+                <div className="flex justify-between">
+                  <span className="text-[#786A5B]">Booking Ref:</span>
+                  <span className="font-mono font-bold text-[#33271D]">{assignRoomTarget.booking_reference}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#786A5B]">Reserved Category:</span>
+                  <span className="font-semibold text-[#8D672F]">
+                    {getCategoryBedSubtitle(assignRoomTarget.category_id, assignRoomTarget.category_name)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#786A5B]">Stay Dates:</span>
+                  <span className="font-medium text-[#33271D]">
+                    {assignRoomTarget.check_in_date} &rarr; {assignRoomTarget.check_out_date}
+                  </span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-[#33271D] mb-1.5">
+                  Select Clean Physical Room Number *
+                </label>
+                <LuxurySelect<string>
+                  value={selectedAssignRoomId}
+                  onChange={(val) => setSelectedAssignRoomId(val)}
+                  placeholder="-- Choose Physical Room --"
+                  options={[
+                    { value: '', label: '-- Choose Physical Room --' },
+                    ...physicalRooms
+                      .filter(
+                        (pr) =>
+                          pr.category_id === assignRoomTarget.category_id ||
+                          pr.room_number === assignRoomTarget.assigned_room_number ||
+                          pr.operational_status === 'available'
+                      )
+                      .map((pr) => {
+                        const isCategoryMatch = pr.category_id === assignRoomTarget.category_id;
+                        const isAvailable = pr.operational_status === 'available';
+                        const statusTag = isAvailable ? 'Clean & Ready' : pr.operational_status;
+                        const matchTag = isCategoryMatch ? 'Exact Category' : 'Upgrade/Cross-type';
+                        return {
+                          value: pr.room_number,
+                          label: `Room #${pr.room_number} (Floor ${pr.floor_number}) • ${matchTag} [${statusTag}]`,
+                        };
+                      }),
+                  ]}
+                  className="w-full"
+                />
+              </div>
+
+              <div className="p-3 bg-[#FAF5EB] border border-[#E2D5BE] rounded-xl text-[11px] text-[#786A5B] leading-relaxed">
+                Allocating a room locks this physical door key for the reservation. Once assigned, front desk staff can directly issue physical RFID keycards or check in the arrival.
+              </div>
+
+              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#E6D9C5]">
+                <button
+                  type="button"
+                  onClick={() => setAssignRoomTarget(null)}
+                  className="px-4 py-2 rounded-xl border border-[#E6D9C5] text-xs text-[#786A5B] hover:bg-[#F8F3E9] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={actionLoading || !selectedAssignRoomId}
+                  onClick={handleConfirmAssignRoom}
+                  className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider flex items-center space-x-1.5 shadow-sm cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{actionLoading ? 'Assigning...' : 'Assign Physical Room'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* --- MODAL 2B: CANCEL CHECKOUT (REVERT STAY TO IN-HOUSE) --- */}
+      {cancelCheckoutTarget && (
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setCancelCheckoutTarget(null);
+          }}
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3.5 sm:p-4"
+        >
+          <div className="bg-white rounded-3xl max-w-md w-full p-5 sm:p-6 shadow-2xl border border-[#E6D9C5] space-y-4 sm:space-y-5 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E6D9C5]">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700">
+                  <RotateCcw className="w-4 h-4" />
+                </div>
+                <div>
+                  <span className="text-[10px] uppercase tracking-widest text-[#8D672F] font-bold">Stay Lifecycle Reversal</span>
+                  <h3 className="text-lg font-serif text-[#33271D] font-bold">Cancel Checkout</h3>
+                </div>
+              </div>
+              <button onClick={() => setCancelCheckoutTarget(null)} className="text-xs text-[#786A5B] hover:text-black cursor-pointer">&times;</button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div className="p-3 rounded-2xl bg-[#FAF5EB] border border-[#E2D5BE] space-y-1.5">
+                <div className="flex justify-between">
+                  <span className="text-[#786A5B]">Guest Name:</span>
+                  <span className="font-bold text-[#33271D]">{cancelCheckoutTarget.guest_name}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#786A5B]">Booking Ref:</span>
+                  <span className="font-mono font-bold text-[#33271D]">{cancelCheckoutTarget.booking_reference}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#786A5B]">Room:</span>
+                  <span className="font-mono font-bold text-amber-900">
+                    Room #{cancelCheckoutTarget.assigned_room_number || cancelCheckoutTarget.room_number || 'N/A'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[#786A5B]">Category:</span>
+                  <span className="text-[#5C4A3A]">
+                    {getCategoryBedSubtitle(cancelCheckoutTarget.category_id, cancelCheckoutTarget.category_name)}
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 space-y-2">
+                <p className="font-semibold text-amber-950">Confirm Checkout Cancellation:</p>
+                <ul className="list-disc pl-4 space-y-1 text-amber-900">
+                  <li>Reservation status reverts from <b>Completed</b> to <b>Checked In (In-House)</b>.</li>
+                  <li>Room <b>#{cancelCheckoutTarget.assigned_room_number || cancelCheckoutTarget.room_number}</b> is restored to <b>Occupied</b>.</li>
+                  <li>Guest physical RFID keycards are restored to <b>Active</b> status.</li>
+                </ul>
+              </div>
+
+              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#E6D9C5]">
+                <button
+                  type="button"
+                  onClick={() => setCancelCheckoutTarget(null)}
+                  className="px-4 py-2 rounded-xl border border-[#E6D9C5] text-xs text-[#786A5B] hover:bg-[#F8F3E9] cursor-pointer"
+                >
+                  Keep Checked Out
+                </button>
+                <button
+                  type="button"
+                  disabled={actionLoading}
+                  onClick={handleConfirmCancelCheckout}
+                  className="px-5 py-2.5 rounded-xl bg-[#21180F] hover:bg-black text-[#D8AD56] font-bold text-xs uppercase tracking-wider flex items-center space-x-1.5 shadow-sm cursor-pointer"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  <span>{actionLoading ? 'Reverting...' : 'Confirm & Restore In-House'}</span>
                 </button>
               </div>
             </div>

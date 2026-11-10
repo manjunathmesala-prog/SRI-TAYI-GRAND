@@ -215,6 +215,50 @@ export async function POST(req: NextRequest) {
         });
       }
 
+      case 'cancel_checkout': {
+        const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Front Desk', 'Receptionist']);
+        if (!auth.authorized) {
+          return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
+        }
+
+        const { bookingReference } = body;
+        if (!bookingReference) {
+          return NextResponse.json({ success: false, error: 'bookingReference is required' }, { status: 400 });
+        }
+
+        const booking = repo.getBookingByReference(bookingReference);
+        if (!booking) {
+          return NextResponse.json({ success: false, error: `Booking ${bookingReference} not found` }, { status: 404 });
+        }
+
+        if (booking.status !== 'checked_out') {
+          return NextResponse.json(
+            { success: false, error: `Cannot cancel checkout: Booking ${bookingReference} is not checked out (current status: ${booking.status}).` },
+            { status: 409 }
+          );
+        }
+
+        const staffName = auth.session?.name || body.staffName || 'Front Desk';
+        const updatedBooking = repo.cancelCheckout(bookingReference, staffName);
+
+        notifySuperAdmin({
+          eventType: 'EVENT_CHECK_IN',
+          payload: {
+            guestName: updatedBooking.guest_name,
+            roomNumber: updatedBooking.assigned_room_number || 'Room',
+            bookingReference: updatedBooking.booking_reference,
+            checkInTime: new Date().toISOString(),
+            staffName,
+          },
+        });
+
+        return NextResponse.json({
+          success: true,
+          message: `Checkout cancelled. Stay ${bookingReference} restored to In-House status.`,
+          booking: updatedBooking,
+        });
+      }
+
       case 'assign_room': {
         const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Front Desk', 'Receptionist']);
         if (!auth.authorized) {

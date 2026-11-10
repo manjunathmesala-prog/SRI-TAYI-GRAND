@@ -395,6 +395,22 @@ export const adminOperations = {
     return data;
   },
 
+  async cancelCheckout(params: {
+    bookingReference: string;
+    staffName?: string;
+  }) {
+    adminOperations.invalidateFullState();
+    const res = await fetch('/api/admin/operations', {
+      method: 'POST',
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ action: 'cancel_checkout', ...params }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Cancel checkout failed');
+    adminOperations.invalidateFullState();
+    return data;
+  },
+
   async assignRoom(params: {
     roomId: string;
     bookingReference: string;

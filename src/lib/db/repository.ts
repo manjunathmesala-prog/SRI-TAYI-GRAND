@@ -860,6 +860,44 @@ export class HotelRepository {
     return booking;
   }
 
+  cancelCheckout(bookingReference: string, actor: string = 'Front Desk'): Booking {
+    const booking = this.getBookingByReference(bookingReference);
+    if (!booking) {
+      throw new Error(`Booking ${bookingReference} not found`);
+    }
+    if (booking.status !== 'checked_out') {
+      throw new Error(`Booking ${bookingReference} is not currently checked out (current status: ${booking.status}).`);
+    }
+
+    booking.status = 'checked_in';
+    booking.checked_out_at = undefined;
+    booking.internal_notes = `${booking.internal_notes || ''}\n[Checkout Cancelled] Reverted to In-House by ${actor} on ${new Date().toISOString()}`.trim();
+
+    if (booking.assigned_room_id) {
+      this.updateRoomStatus(booking.assigned_room_id, 'occupied', 'clean', undefined, actor);
+      const room = this.rooms.find((r) => r.id === booking.assigned_room_id || r.room_number === booking.assigned_room_number);
+      if (room) {
+        room.operational_status = 'occupied';
+        room.current_booking_ref = booking.booking_reference;
+        room.current_guest_name = booking.guest_name;
+        const roomCards = this.rfidCards.filter(
+          (c) =>
+            (c.assigned_room_number === room.room_number || c.room_number === room.room_number) &&
+            c.card_type === 'guest'
+        );
+        for (const card of roomCards) {
+          card.status = 'active';
+          card.deactivated_at = undefined;
+          syncCardToSupabase(card);
+        }
+      }
+    }
+
+    this.broadcastEvent('booking_updated', { booking, status: 'checked_in', action: 'cancel_checkout' }, actor);
+    syncBookingToSupabase(booking);
+    return booking;
+  }
+
   // --- WALK-IN RECEPTION KIOSK METHODS ---
   createWalkInBooking(params: {
     categoryId: string;
