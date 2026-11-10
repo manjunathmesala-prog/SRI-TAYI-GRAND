@@ -46,8 +46,44 @@
 
 ---
 
-## 4. INSTRUCTION FOR FUTURE AGENTS
+## 4. CLOUDFLARE HTTPS TUNNEL ARCHITECTURE (LIFETIME FREE)
+- **Why Cloudflare Tunnel is Used:**
+  - Browsers enforce a strict **Mixed Content Policy**: when front desk staff open `https://sritayigrand.com` (secure HTTPS), the browser strictly blocks direct requests to unencrypted `http://127.0.0.1:8989`.
+  - Cloudflare Tunnel creates an encrypted HTTPS tunnel directly to local port 8989, allowing the cloud dashboard to safely issue, read, and write physical keycards.
+  - **No Public IP or Port Forwarding Needed**: Operates via outbound encrypted tunnels through hotel broadband (Airtel, Jio, ACT) without touching router NAT.
+- **Cost & Terms:**
+  - **100% Lifetime Free** under Cloudflare Zero Trust core infrastructure ($0/month, no trial expiration, no credit card required).
+  - Mode 1: Quick Tunnel (`cloudflared tunnel --url http://127.0.0.1:8989`) gives `https://...trycloudflare.com` for instant zero-configuration operation via `start-production-rfid-tunnel.bat`.
+  - Mode 2: Permanent Named Subdomain (e.g., `rfid.sritayigrand.com`) is also 100% lifetime free, keeping the URL permanent across reception PC reboots.
+- **Local Fallback:**
+  - When accessing locally on `http://localhost:3000`, the tunnel is optional and direct HTTP communication to `127.0.0.1:8989` is supported.
+
+---
+
+## 5. PERMANENT CARD PURGE & RESTORATION RESISTANCE
+- **Cascade Deletion Protocol:**
+  - Deleting an RFID card via UI or API must permanently purge all matching records by `card_uid` and `id` across:
+    1. Memory repository (`this.rfidCards`)
+    2. Local persistent disk storage (`data/cards.json`)
+    3. Supabase PostgreSQL cloud database (`DELETE FROM rfid_cards WHERE card_uid = $1 OR id::text = $1`)
+- **Deduplication Safeguard:**
+  - `getRFIDCards()` strictly deduplicates by `card_uid || id`, preventing duplicate records or old cached copies from resurrecting on page refresh.
+  - Card issuance (`issueSuperAdminCard`, `issueCleanerCard`, `issueRFIDCard`) updates matching `card_uid` records in place instead of creating duplicate rows.
+
+---
+
+## 6. CARD ACTIVATION / DEACTIVATION CONTEXT INTEGRITY
+- **Full Card Context Requirement:**
+  - `handleToggleCardStatus(card)` must evaluate the complete card object (`card_type`, `card_label`, `holder_name`, `assigned_room_number`, `card_uid`).
+  - **NEVER default unassigned rooms to '104'**.
+  - Super Admin and Cleaner cards have universal/facility-wide access and must **never** execute room-specific lock wipes or checkout commands.
+  - Hardware encoding/wiping is only applied to customer cards with an actual assigned room number.
+  - Feedback notifications must accurately specify the card type, holder name, and room number.
+
+---
+
+## 7. INSTRUCTION FOR FUTURE AGENTS
 When performing any future coding, refactoring, package upgrades, UI redesigns, or feature additions:
-1. **DO NOT** modify, delete, or rewrite any of the files listed above.
+1. **DO NOT** modify, delete, or rewrite any of the files listed in Section 1 and Section 2.
 2. **DO NOT** change the communication protocols, payload formats, or ports (8989 for bridge, 3000 for Next.js).
 3. If working on bookings, payments, or other modules, ensure all RFID hooks continue to function without alteration.
