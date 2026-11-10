@@ -1,5 +1,33 @@
 [
   {
+    "card_uid": "BT-57-TEST-DELETE",
+    "card_type": "super_admin",
+    "card_label": "Live HTTP Test Card",
+    "device_name": "Central-RFID-IoT-Gateway",
+    "room_number": "N/A",
+    "event_type": "access_denied",
+    "action_type": "door_lock",
+    "holder_name": "Auto Test Admin",
+    "source": "encoder",
+    "reason": "Card BT-57-TEST-DELETE permanently deleted and revoked from registry",
+    "id": "evt-1794337382053-906",
+    "occurred_at": "2026-11-10T19:03:02.053Z"
+  },
+  {
+    "card_uid": "BT-57-TEST-DELETE",
+    "card_type": "super_admin",
+    "card_label": "Live HTTP Test Card",
+    "device_name": "Central-RFID-IoT-Gateway",
+    "room_number": "ALL",
+    "event_type": "access_granted",
+    "action_type": "door_unlock",
+    "holder_name": "Auto Test Admin",
+    "source": "encoder",
+    "reason": "Super Admin Lifetime Card issued to Auto Test Admin by System Admin",
+    "id": "evt-1794337379155-799",
+    "occurred_at": "2026-11-10T19:02:59.155Z"
+  },
+  {
     "card_uid": "BT-57-1000020528",
     "card_type": "cleaner",
     "card_label": "Housekeeping Supervisor Master",
