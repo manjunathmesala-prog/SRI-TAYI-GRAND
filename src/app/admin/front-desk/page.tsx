@@ -236,20 +236,32 @@ export default function FrontDeskPage() {
   });
 
   // Execute Authoritative Check-In
-  const handleConfirmCheckIn = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleConfirmCheckIn = async (e?: React.FormEvent | React.MouseEvent) => {
+    if (e) e.preventDefault();
     if (!checkInModalBooking) return;
 
     setCheckInError(null);
 
-    if (!selectedRoomId) {
-      setCheckInError('Please select a clean physical room to assign before confirming check-in.');
+    // Ensure selectedRoomId is present; fallback to selectable room if valid
+    let effectiveRoomId = selectedRoomId;
+    if (!effectiveRoomId && selectableRoomsForCheckIn.length > 0) {
+      effectiveRoomId = selectableRoomsForCheckIn[0].id;
+      setSelectedRoomId(effectiveRoomId);
+    }
+
+    if (!effectiveRoomId) {
+      setCheckInError('Please select a clean physical room to allocate before confirming check-in.');
       return;
     }
 
-    const assignedRoom = rooms.find((r) => r.id === selectedRoomId || r.room_number === selectedRoomId);
+    const assignedRoom = rooms.find((r) => r.id === effectiveRoomId || r.room_number === effectiveRoomId);
     if (!assignedRoom) {
-      setCheckInError(`Selected room (${selectedRoomId}) could not be found. Please select an available clean room.`);
+      setCheckInError(`Selected room identifier (${effectiveRoomId}) could not be resolved. Please select an available clean room.`);
+      return;
+    }
+
+    if (!arrivalIdNumber || !arrivalIdNumber.trim()) {
+      setCheckInError('Guest Government ID Number is mandatory per Indian statutory hotel compliance norms.');
       return;
     }
 
@@ -270,12 +282,20 @@ export default function FrontDeskPage() {
       });
 
       if (issueRfid) {
-        issuePhysicalKeycard({
-          roomNumber: assignedRoom.room_number,
-          guestName: checkInModalBooking.guest_name,
-          staffUser: 'Front Desk Reception',
-        }).catch(() => {});
+        try {
+          await issuePhysicalKeycard({
+            roomNumber: assignedRoom.room_number,
+            guestName: checkInModalBooking.guest_name,
+            staffUser: 'Front Desk Reception',
+          });
+        } catch {
+          // Non-blocking bridge warning
+        }
       }
+
+      try {
+        playChimeSound(true);
+      } catch {}
 
       const guestName = checkInModalBooking.guest_name;
       const roomNum = assignedRoom.room_number;
@@ -287,6 +307,7 @@ export default function FrontDeskPage() {
       await fetchLiveState();
       await fetchWalkInQueue();
     } catch (err: any) {
+      console.error('[CHECK IN ERROR]', err);
       setCheckInError(err.message || 'Check-in failed. Please verify room status and permissions.');
       setWalkInAlert({ type: 'error', message: err.message || 'Check-in failed' });
     } finally {
@@ -948,9 +969,10 @@ export default function FrontDeskPage() {
                   Cancel
                 </button>
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={handleConfirmCheckIn}
                   disabled={!selectedRoomId || isSubmittingCheckIn}
-                  className="px-5 py-2 rounded-lg bg-[#43001F] text-white text-xs font-bold hover:bg-[#2E0015] disabled:opacity-50 flex items-center gap-2 shadow-sm transition-all"
+                  className="px-5 py-2 rounded-lg bg-[#43001F] text-white text-xs font-bold hover:bg-[#2E0015] disabled:opacity-50 flex items-center gap-2 shadow-sm transition-all cursor-pointer"
                 >
                   {isSubmittingCheckIn ? (
                     <>

@@ -1,4 +1,5 @@
 'use client';
+import QRCode from 'qrcode';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import Link from 'next/link';
@@ -8,6 +9,8 @@ import {
   BedDouble,
   Calendar,
   CreditCard,
+  Banknote,
+  Smartphone,
   CheckCircle2,
   AlertTriangle,
   Loader2,
@@ -94,10 +97,26 @@ export default function AnanthaWalkInPage() {
 
   // Payment & check-in
   const [instantCheckIn, setInstantCheckIn] = useState(true);
-  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'card' | 'upi' | 'razorpay_link' | 'pay_at_hotel'>('cash');
+  const [paymentMethod, setPaymentMethod] = useState<'cash' | 'upi' | 'card'>('cash');
   const [amountPaid, setAmountPaid] = useState<string>('');
   const [transactionRef, setTransactionRef] = useState('');
   const [frontDeskNotes, setFrontDeskNotes] = useState('');
+
+  // Cash Tendered & Live Change State
+  const [cashTendered, setCashTendered] = useState<number>(0);
+
+  // UPI QR & Verification State
+  const [upiUtr, setUpiUtr] = useState<string>('');
+  const [upiQrDataUrl, setUpiQrDataUrl] = useState<string>('');
+  const [showUpiQr, setShowUpiQr] = useState<boolean>(true);
+  const [upiCopied, setUpiCopied] = useState<boolean>(false);
+  const [upiConfirmed, setUpiConfirmed] = useState<boolean>(false);
+
+  // Card POS Machine Details
+  const [cardLast4, setCardLast4] = useState<string>('');
+  const [cardAuthCode, setCardAuthCode] = useState<string>('');
+  const [cardNetwork, setCardNetwork] = useState<string>('Visa');
+  const [cardConfirmed, setCardConfirmed] = useState<boolean>(false);
 
   // Operational states
   const [submitting, setSubmitting] = useState(false);
@@ -304,16 +323,21 @@ export default function AnanthaWalkInPage() {
     try {
       setSubmitting(true);
 
-      let pMethod: 'cash' | 'upi' | 'card' = 'cash';
-      if (paymentMethod === 'card') pMethod = 'card';
-      else if (paymentMethod === 'upi' || paymentMethod === 'razorpay_link') pMethod = 'upi';
-      else pMethod = 'cash';
+      let pMethod: 'cash' | 'upi' | 'card' = paymentMethod;
+      let finalPayRef = transactionRef.trim();
+      if (!finalPayRef) {
+        if (pMethod === 'cash') finalPayRef = `CASH-DRAWER-₹${paidAmountNum}`;
+        else if (pMethod === 'upi') finalPayRef = upiUtr.trim() ? `UPI-UTR-${upiUtr.trim().toUpperCase()}` : `UPI-VERIFIED-${Date.now().toString().slice(-6)}`;
+        else if (pMethod === 'card') finalPayRef = `POS-${cardNetwork.toUpperCase()}-${cardLast4.trim() ? `****${cardLast4.trim()}` : 'CARD'}-${cardAuthCode.trim() ? cardAuthCode.trim().toUpperCase() : 'AUTH'}`;
+      }
 
       const notesArr = [
         frontDeskNotes.trim() || null,
         discountAmount > 0 ? `Discount ₹${discountAmount}: ${discountReason || 'Front Desk Discount'}` : null,
         selectedServices.length > 0 ? `Add-ons: ${selectedServices.join(', ')}` : null,
-        transactionRef.trim() ? `Txn Ref: ${transactionRef.trim()}` : null,
+        pMethod === 'cash' ? `Cash Collected: ₹${paidAmountNum}${cashTendered > paidAmountNum ? ` (Tendered ₹${cashTendered}, Change ₹${cashTendered - paidAmountNum})` : ''}` : null,
+        pMethod === 'upi' ? `UPI Verified${upiUtr.trim() ? ` | UTR: ${upiUtr.trim()}` : ''}` : null,
+        pMethod === 'card' ? `POS Slip: ${cardNetwork} ${cardLast4.trim() ? `****${cardLast4.trim()}` : ''} ${cardAuthCode.trim() ? `Auth: ${cardAuthCode.trim()}` : ''}`.trim() : null,
       ].filter(Boolean).join(' | ');
 
       const res = await adminOperations.statutoryWalkIn({
@@ -1217,82 +1241,326 @@ export default function AnanthaWalkInPage() {
 
               {/* Settlement Section */}
               <div className="pt-4 border-t border-[#3a2c1f] space-y-4">
-                <div className="text-xs font-semibold text-[#B18A4A] uppercase tracking-wider">
-                  Payment Collection at Counter
-                </div>
-
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { id: 'cash', label: 'Cash (Offline)', digital: false },
-                    { id: 'card', label: 'POS Terminal', digital: false },
-                    { id: 'upi', label: 'Front Desk UPI', digital: false },
-                    { id: 'razorpay_link', label: 'Razorpay Link/QR', digital: true },
-                    { id: 'pay_at_hotel', label: 'Post to Folio', digital: false },
-                  ].map((m) => (
-                    <button
-                      key={m.id}
-                      type="button"
-                      onClick={() => {
-                        setPaymentMethod(m.id as any);
-                        if (m.id === 'razorpay_link') {
-                          setAmountPaid('0');
-                        } else if (!amountPaid || amountPaid === '0') {
-                          setAmountPaid(totalAmountInr.toString());
-                        }
-                      }}
-                      className={`p-2.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
-                        paymentMethod === m.id
-                          ? m.digital
-                            ? 'bg-amber-600 text-white border-amber-400 shadow-md font-bold'
-                            : 'bg-[#8D672F] text-white border-[#B18A4A] shadow-md font-bold'
-                          : 'border-[#3a2c1f] bg-white/5 text-[#E6D9C5] hover:bg-white/10'
-                      }`}
-                    >
-                      {m.label}
-                    </button>
-                  ))}
-                </div>
-
-                {paymentMethod === 'razorpay_link' ? (
-                  <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-400/30 text-xs text-amber-200 space-y-1.5">
-                    <div className="font-semibold text-amber-300 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3 text-amber-300" />
-                      <span>Razorpay Digital Payment Request</span>
-                    </div>
-                    <p className="text-[11px] text-amber-100/80 leading-relaxed">
-                      A live Razorpay payment link (₹{totalAmountInr.toLocaleString('en-IN')}) will be created. The guest can scan the QR code or click the SMS/WhatsApp link to pay via GPay, PhonePe, Cards, or Net Banking.
-                    </p>
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-semibold text-[#B18A4A] uppercase tracking-wider">
+                    Payment Collection Method *
                   </div>
-                ) : (
-                  <div className="space-y-3">
-                    <div>
-                      <label className="block text-[11px] font-medium text-[#E6D9C5]/80 mb-1">
-                        Amount Collected Now (₹)
-                      </label>
-                      <input
-                        type="number"
-                        value={amountPaid}
-                        onChange={(e) => setAmountPaid(e.target.value)}
-                        placeholder="0"
-                        className="w-full p-2.5 rounded-xl border border-[#3a2c1f] bg-white/10 text-white font-mono text-sm outline-none"
-                      />
+                  <span className="text-[11px] text-emerald-400 font-mono font-bold">
+                    Bill Total: ₹{totalAmountInr.toLocaleString('en-IN')}
+                  </span>
+                </div>
+
+                {/* Strictly 3 counter options: CASH, UPI, CARD (Pay Later Removed) */}
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaymentMethod('cash');
+                      if (!amountPaid || amountPaid === '0') setAmountPaid(totalAmountInr.toString());
+                    }}
+                    className={`p-3 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer ${
+                      paymentMethod === 'cash'
+                        ? 'bg-[#8D672F] text-white border-[#B18A4A] shadow-md ring-1 ring-amber-400/50'
+                        : 'border-[#3a2c1f] bg-white/5 text-[#E6D9C5] hover:bg-white/10'
+                    }`}
+                  >
+                    <Banknote className="w-4 h-4 text-amber-300" />
+                    <span>CASH</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaymentMethod('upi');
+                      if (!amountPaid || amountPaid === '0') setAmountPaid(totalAmountInr.toString());
+                    }}
+                    className={`p-3 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer ${
+                      paymentMethod === 'upi'
+                        ? 'bg-[#8D672F] text-white border-[#B18A4A] shadow-md ring-1 ring-amber-400/50'
+                        : 'border-[#3a2c1f] bg-white/5 text-[#E6D9C5] hover:bg-white/10'
+                    }`}
+                  >
+                    <Smartphone className="w-4 h-4 text-amber-300" />
+                    <span>UPI / QR</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPaymentMethod('card');
+                      if (!amountPaid || amountPaid === '0') setAmountPaid(totalAmountInr.toString());
+                    }}
+                    className={`p-3 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer ${
+                      paymentMethod === 'card'
+                        ? 'bg-[#8D672F] text-white border-[#B18A4A] shadow-md ring-1 ring-amber-400/50'
+                        : 'border-[#3a2c1f] bg-white/5 text-[#E6D9C5] hover:bg-white/10'
+                    }`}
+                  >
+                    <CreditCard className="w-4 h-4 text-amber-300" />
+                    <span>CARD (POS)</span>
+                  </button>
+                </div>
+
+                {/* Amount Collected Input */}
+                <div>
+                  <label className="block text-[11px] font-medium text-[#E6D9C5]/80 mb-1">
+                    Amount Collected at Counter (₹) *
+                  </label>
+                  <input
+                    type="number"
+                    value={amountPaid}
+                    onChange={(e) => setAmountPaid(e.target.value)}
+                    placeholder="0"
+                    className="w-full p-2.5 rounded-xl border border-[#3a2c1f] bg-white/10 text-white font-mono text-sm outline-none focus:border-[#B18A4A]"
+                  />
+                </div>
+
+                {/* CASH DYNAMIC PANEL */}
+                {paymentMethod === 'cash' && (
+                  <div className="p-3.5 rounded-xl bg-white/5 border border-amber-400/20 space-y-3">
+                    <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center">
+                          <Banknote className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-white text-xs">Counter Cash Register Collection</h4>
+                          <p className="text-[10px] text-[#E6D9C5]/70">Collect physical Indian currency in front desk cash drawer</p>
+                        </div>
+                      </div>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-400/30">
+                        ₹{paidAmountNum.toLocaleString('en-IN')}
+                      </span>
                     </div>
 
-                    <div>
-                      <label className="block text-[11px] font-medium text-[#E6D9C5]/80 mb-1">
-                        POS Receipt / Offline Transaction Ref (Optional)
-                      </label>
-                      <input
-                        type="text"
-                        value={transactionRef}
-                        onChange={(e) => setTransactionRef(e.target.value)}
-                        placeholder="e.g. POS-9872 or CASH-RECEIPT-01"
-                        className="w-full p-2.5 rounded-xl border border-[#3a2c1f] bg-white/10 text-white font-mono text-xs outline-none"
-                      />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                      <div>
+                        <label className="text-[10px] font-bold text-[#E6D9C5]/80 uppercase block mb-1">
+                          Cash Tendered by Guest (₹)
+                        </label>
+                        <input
+                          type="number"
+                          min={paidAmountNum}
+                          value={cashTendered || ''}
+                          onChange={(e) => setCashTendered(Number(e.target.value))}
+                          placeholder="e.g. 2500"
+                          className="w-full text-xs font-mono font-bold p-2.5 rounded-lg border border-[#3a2c1f] bg-black/30 text-white outline-none focus:border-amber-400"
+                        />
+                        <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+                          <button
+                            type="button"
+                            onClick={() => setCashTendered(paidAmountNum)}
+                            className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/10 hover:bg-white/20 text-amber-200 cursor-pointer"
+                          >
+                            Exact ₹{paidAmountNum}
+                          </button>
+                          {paidAmountNum % 500 !== 0 && (
+                            <button
+                              type="button"
+                              onClick={() => setCashTendered(Math.ceil(paidAmountNum / 500) * 500)}
+                              className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/10 hover:bg-white/20 text-amber-200 cursor-pointer"
+                            >
+                              ₹{Math.ceil(paidAmountNum / 500) * 500}
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => setCashTendered(Math.ceil(paidAmountNum / 1000) * 1000)}
+                            className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/10 hover:bg-white/20 text-amber-200 cursor-pointer"
+                          >
+                            ₹{Math.ceil(paidAmountNum / 1000) * 1000}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="p-3 rounded-lg bg-black/40 border border-white/10 flex flex-col justify-between">
+                        <div>
+                          <span className="text-[10px] font-bold text-[#E6D9C5]/70 uppercase block">Change to Return to Guest:</span>
+                          <span className={`text-base font-bold font-mono ${cashTendered >= paidAmountNum ? 'text-emerald-400' : 'text-stone-400'}`}>
+                            ₹ {Math.max(0, cashTendered - paidAmountNum).toLocaleString('en-IN')}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-emerald-300 flex items-center gap-1 mt-1">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                          <span>Ready to deposit ₹{paidAmountNum.toLocaleString('en-IN')} in cash register</span>
+                        </span>
+                      </div>
                     </div>
                   </div>
                 )}
 
+                {/* UPI DYNAMIC PANEL */}
+                {paymentMethod === 'upi' && (
+                  <div className="p-3.5 rounded-xl bg-white/5 border border-amber-400/20 space-y-3">
+                    <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center">
+                          <Smartphone className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-white text-xs">Instant UPI & QR Code Collection</h4>
+                          <p className="text-[10px] text-[#E6D9C5]/70">Guest scans dynamic QR via Google Pay, PhonePe, Paytm, or BHIM</p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setShowUpiQr(!showUpiQr)}
+                        className="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-white/10 hover:bg-white/20 text-amber-200 border border-white/10 flex items-center gap-1 cursor-pointer"
+                      >
+                        <QrCode className="w-3 h-3 text-amber-300" />
+                        <span>{showUpiQr ? 'Hide QR' : 'Show Dynamic QR'}</span>
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-center">
+                      {showUpiQr && (
+                        <div className="p-3 rounded-xl bg-black/40 border border-amber-400/30 flex flex-col items-center text-center">
+                          <span className="text-[9px] uppercase font-bold text-amber-200/80 tracking-wider mb-1">
+                            Scan to Pay ₹{paidAmountNum.toLocaleString('en-IN')}
+                          </span>
+                          <div className="bg-white p-2 rounded-xl shadow-md">
+                            {upiQrDataUrl ? (
+                              /* eslint-disable-next-line @next/next/no-img-element */
+                              <img
+                                src={upiQrDataUrl}
+                                alt="Sri Tayi Grand Front Desk UPI QR"
+                                className="w-28 h-28 rounded-lg"
+                              />
+                            ) : (
+                              <div className="w-28 h-28 flex items-center justify-center text-stone-500">
+                                <RefreshCw className="w-5 h-5 animate-spin text-amber-400" />
+                              </div>
+                            )}
+                          </div>
+                          <div className="mt-2 flex items-center gap-1.5 text-[10px] font-mono text-amber-200">
+                            <span>UPI ID: <strong>sritayigrand@icici</strong></span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                navigator.clipboard.writeText('sritayigrand@icici');
+                                setUpiCopied(true);
+                                setTimeout(() => setUpiCopied(false), 2000);
+                              }}
+                              className="p-1 rounded hover:bg-white/20 text-amber-300 transition-colors cursor-pointer"
+                              title="Copy UPI ID"
+                            >
+                              {upiCopied ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+                            </button>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="space-y-3">
+                        <div>
+                          <label className="text-[10px] font-bold text-[#E6D9C5]/80 uppercase block mb-1">
+                            12-Digit UPI UTR / Transaction ID (Optional)
+                          </label>
+                          <input
+                            type="text"
+                            value={upiUtr}
+                            onChange={(e) => setUpiUtr(e.target.value)}
+                            placeholder="e.g. 412890123456"
+                            maxLength={22}
+                            className="w-full text-xs font-mono font-bold p-2.5 rounded-lg border border-[#3a2c1f] bg-black/30 text-white outline-none focus:border-amber-400"
+                          />
+                          <span className="text-[10px] text-[#E6D9C5]/60 mt-0.5 block">
+                            Verify 12-digit UTR from guest PhonePe / GPay screen
+                          </span>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setUpiConfirmed(!upiConfirmed)}
+                          className={`w-full py-2 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border ${
+                            upiConfirmed
+                              ? 'bg-emerald-600 text-white border-emerald-500'
+                              : 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40 hover:bg-emerald-500/30'
+                          }`}
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>{upiConfirmed ? '✓ UPI Payment Received & Verified' : 'Mark UPI Payment Verified'}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* CARD DYNAMIC PANEL */}
+                {paymentMethod === 'card' && (
+                  <div className="p-3.5 rounded-xl bg-white/5 border border-amber-400/20 space-y-3">
+                    <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-300 flex items-center justify-center">
+                          <CreditCard className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-white text-xs">Counter EDC POS Machine Terminal</h4>
+                          <p className="text-[10px] text-[#E6D9C5]/70">Swipe, insert chip, or tap contactless card on reception terminal</p>
+                        </div>
+                      </div>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/10 text-blue-300 border border-blue-400/30">
+                        ₹{paidAmountNum.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+                      <div>
+                        <label className="text-[10px] font-bold text-[#E6D9C5]/80 uppercase block mb-1">Card Network *</label>
+                        <select
+                          value={cardNetwork}
+                          onChange={(e) => setCardNetwork(e.target.value)}
+                          className="w-full text-xs font-bold p-2.5 rounded-lg border border-[#3a2c1f] bg-black/40 text-white outline-none focus:border-amber-400"
+                        >
+                          <option value="Visa">Visa Card</option>
+                          <option value="Mastercard">Mastercard</option>
+                          <option value="RuPay">RuPay (Domestic)</option>
+                          <option value="Amex">American Express</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-bold text-[#E6D9C5]/80 uppercase block mb-1">Card Last 4 Digits</label>
+                        <input
+                          type="text"
+                          maxLength={4}
+                          value={cardLast4}
+                          onChange={(e) => setCardLast4(e.target.value.replace(/\D/g, ''))}
+                          placeholder="e.g. 4242"
+                          className="w-full text-xs font-mono font-bold p-2.5 rounded-lg border border-[#3a2c1f] bg-black/40 text-white outline-none focus:border-amber-400"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-bold text-[#E6D9C5]/80 uppercase block mb-1">POS Approval Auth Code</label>
+                        <input
+                          type="text"
+                          value={cardAuthCode}
+                          onChange={(e) => setCardAuthCode(e.target.value)}
+                          placeholder="e.g. AUTH-88291"
+                          className="w-full text-xs font-mono font-bold p-2.5 rounded-lg border border-[#3a2c1f] bg-black/40 text-white outline-none focus:border-amber-400"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1 border-t border-white/10">
+                      <span className="text-[10px] text-[#E6D9C5]/70">
+                        Charge <strong>₹{paidAmountNum.toLocaleString('en-IN')}</strong> on the EDC POS terminal and retain signed slip.
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setCardConfirmed(!cardConfirmed)}
+                        className={`py-1.5 px-3 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer border ${
+                          cardConfirmed
+                            ? 'bg-blue-600 text-white border-blue-500'
+                            : 'bg-blue-500/20 text-blue-300 border-blue-400/40 hover:bg-blue-500/30'
+                        }`}
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>{cardConfirmed ? '✓ Card Charge Authorized' : 'Mark POS Card Charge Authorized'}</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
                 {/* Instant Check-In Toggle */}
                 <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 flex items-start space-x-3">
                   <input
