@@ -49,6 +49,9 @@ import {
   PaymentOrder,
   PaymentOrderStatus,
   PaymentTransaction,
+  RoomTransferRecord,
+  RoomTransferReasonCategory,
+  MaintenanceCategory,
 } from '@/types';
 
 import { syncCardToSupabase, syncEventToSupabase, deleteCardFromSupabase } from './supabase-rfid';
@@ -73,6 +76,8 @@ import {
   syncMaintenanceTicketToSupabase,
   loadMaintenanceTicketsFromSupabase,
   deleteMaintenanceTicketFromSupabase,
+  syncRoomTransferToSupabase,
+  loadRoomTransfersFromSupabase,
   syncCashShiftToSupabase,
   loadCashShiftsFromSupabase,
   syncCashTransactionToSupabase,
@@ -146,6 +151,7 @@ export class HotelRepository {
   private rfidDevices: RFIDDevice[] = JSON.parse(JSON.stringify(INITIAL_RFID_DEVICES));
   private rfidCards: RFIDCard[] = [];
   private rfidEvents: RFIDAccessEvent[] = [];
+  private recentEventSignatures: Map<string, number> = new Map();
   private expenses: Expense[] = JSON.parse(JSON.stringify(INITIAL_EXPENSES));
   private dailyClosings: DailyClosing[] = JSON.parse(JSON.stringify(INITIAL_DAILY_CLOSINGS));
   private reviews: GoogleReview[] = [...INITIAL_REVIEWS];
@@ -2496,12 +2502,32 @@ export class HotelRepository {
   }
 
   logRFIDEvent(event: Omit<RFIDAccessEvent, 'id' | 'occurred_at'>, actor?: string): RFIDAccessEvent {
+    const now = Date.now();
+    // Prune stale deduplication signatures older than 10s
+    if (this.recentEventSignatures.size > 100) {
+      for (const [k, exp] of this.recentEventSignatures.entries()) {
+        if (now - exp > 10000) this.recentEventSignatures.delete(k);
+      }
+    }
+
+    // Deduplication signature: card_uid + room_number + event_type + action_type
+    const sig = `${event.card_uid || ''}_${event.room_number || ''}_${event.event_type || ''}_${event.action_type || ''}`;
+    const lastSeen = this.recentEventSignatures.get(sig);
+    if (lastSeen && (now - lastSeen) < 1500) {
+      const existing = this.rfidEvents.find((e) => e.card_uid === event.card_uid && e.room_number === event.room_number);
+      if (existing) return existing;
+    }
+    this.recentEventSignatures.set(sig, now);
+
     const newEvent: RFIDAccessEvent = {
       ...event,
-      id: 'evt-' + Date.now(),
+      id: 'evt-' + now + '-' + Math.floor(100 + Math.random() * 900),
       occurred_at: new Date().toISOString(),
     };
     this.rfidEvents.unshift(newEvent);
+    if (this.rfidEvents.length > 2000) {
+      this.rfidEvents = this.rfidEvents.slice(0, 2000);
+    }
     savePersistedEvents(this.rfidEvents);
     syncEventToSupabase(newEvent);
     this.broadcastEvent('rfid_event', newEvent, actor);
@@ -2701,6 +2727,66 @@ export class HotelRepository {
   purgeAllRFIDEvents(): void {
     this.rfidEvents = [];
     savePersistedEvents([]);
+  }
+
+  
+  replaceRFIDCard(
+    oldCardIdentifier: string,
+    newCardUid: string,
+    issuedBy: string = 'Front Desk',
+    reason: string = 'Lost/Damaged Card Replacement'
+  ): { oldCard: RFIDCard; newCard: RFIDCard } {
+    let oldCard = this.rfidCards.find((c) => c.id === oldCardIdentifier || c.card_uid === oldCardIdentifier);
+    if (!oldCard) {
+      const persisted = loadPersistedCards();
+      const found = persisted.find((c) => c.id === oldCardIdentifier || c.card_uid === oldCardIdentifier);
+      if (found) {
+        this.rfidCards.push(found);
+        oldCard = found;
+      }
+    }
+    if (!oldCard) {
+      throw new Error(`Original keycard '${oldCardIdentifier}' not found in registry.`);
+    }
+
+    // 1. Revoke / Deactivate Old Card
+    oldCard.status = 'inactive';
+    oldCard.deactivated_at = new Date().toISOString();
+    oldCard.notes = `${oldCard.notes || ''} | Deactivated on replacement by ${newCardUid} (${reason})`.trim();
+    syncCardToSupabase(oldCard);
+
+    // 2. Issue New Card for same room, booking, and guest
+    const newCard = this.issueRFIDCard(
+      oldCard.assigned_room_number || oldCard.room_number || '101',
+      oldCard.booking_reference || `TG-REP-${Date.now().toString().slice(-4)}`,
+      oldCard.guest_name || oldCard.holder_name || 'Valued Guest',
+      issuedBy,
+      oldCard.expires_at,
+      newCardUid
+    );
+    newCard.notes = `Replacement Keycard for revoked UID ${oldCard.card_uid} (${reason})`;
+
+    savePersistedCards(this.rfidCards);
+    syncCardToSupabase(newCard);
+
+    this.logRFIDEvent(
+      {
+        card_uid: newCard.card_uid,
+        card_type: oldCard.card_type || 'guest',
+        card_label: newCard.card_label,
+        device_name: 'Front-Desk-Encoder-01',
+        room_number: oldCard.assigned_room_number || oldCard.room_number || 'N/A',
+        event_type: 'access_granted',
+        action_type: 'door_unlock',
+        holder_name: oldCard.guest_name || oldCard.holder_name,
+        booking_reference: oldCard.booking_reference,
+        source: 'encoder',
+        reason: `Keycard Replacement: Old card ${oldCard.card_uid} revoked -> New card ${newCard.card_uid} issued by ${issuedBy} (${reason})`,
+      },
+      issuedBy
+    );
+
+    return { oldCard, newCard };
   }
 
   deleteRFIDCard(cardId: string): boolean {
@@ -3581,6 +3667,171 @@ export class HotelRepository {
   // ==============================================================================
   // STAFF RBAC PERMISSIONS & PROFILES
   // ==============================================================================
+
+  
+  public transferBookingRoom(params: {
+    bookingReference: string;
+    toRoomIdOrNumber: string;
+    reasonCategory: RoomTransferReasonCategory;
+    reasonNotes: string;
+    actor: string;
+    createMaintenanceTicket?: boolean;
+    oldRoomAction?: 'maintenance' | 'cleaning';
+  }): {
+    booking: Booking;
+    oldRoom: PhysicalRoom;
+    newRoom: PhysicalRoom;
+    transferRecord: RoomTransferRecord;
+    maintenanceTicket?: MaintenanceTicket;
+  } {
+    const {
+      bookingReference,
+      toRoomIdOrNumber,
+      reasonCategory,
+      reasonNotes,
+      actor,
+      createMaintenanceTicket = true,
+      oldRoomAction,
+    } = params;
+
+    const booking = this.getBookingByReference(bookingReference);
+    if (!booking) {
+      throw new Error(`Booking reference '${bookingReference}' not found.`);
+    }
+
+    const currentRoomNumber = booking.assigned_room_number;
+    const oldRoom = this.rooms.find(
+      (r) => r.room_number === currentRoomNumber || r.id === booking.assigned_room_id
+    );
+    if (!oldRoom) {
+      throw new Error(`Current assigned room for booking '${bookingReference}' not found.`);
+    }
+
+    const newRoom = this.rooms.find(
+      (r) => r.room_number === toRoomIdOrNumber || r.id === toRoomIdOrNumber
+    );
+    if (!newRoom) {
+      throw new Error(`Destination room '${toRoomIdOrNumber}' not found in inventory.`);
+    }
+
+    if (newRoom.room_number === oldRoom.room_number) {
+      throw new Error(`Destination room is identical to current room (${oldRoom.room_number}).`);
+    }
+
+    if (newRoom.operational_status === 'occupied') {
+      throw new Error(`Room ${newRoom.room_number} is already occupied by ${newRoom.current_guest_name || 'another guest'}.`);
+    }
+
+    // Determine maintenance category mapping
+    let maintCat: MaintenanceCategory = 'other';
+    if (reasonCategory === 'ac_issue') maintCat = 'ac_hvac';
+    else if (reasonCategory === 'plumbing_water') maintCat = 'plumbing_bath';
+    else if (reasonCategory === 'cleanliness') maintCat = 'furniture_linen';
+    else if (reasonCategory === 'noise') maintCat = 'other';
+
+    // Create Maintenance Ticket if requested
+    let maintTicket: MaintenanceTicket | undefined;
+    if (createMaintenanceTicket) {
+      maintTicket = this.createMaintenanceTicket({
+        room_number: oldRoom.room_number,
+        issue_title: `Room Transfer Relocation: ${reasonNotes}`,
+        description: `Guest relocated to Room ${newRoom.room_number}. Transfer reason: [${reasonCategory}] ${reasonNotes}`,
+        category: maintCat,
+        priority: 'high',
+        reported_by: actor,
+        room_blocked: true,
+        estimated_cost: 0,
+      });
+    }
+
+    // Update Old Room Status
+    const determinedOldStatus = oldRoomAction || (createMaintenanceTicket ? 'maintenance' : 'cleaning');
+    oldRoom.operational_status = determinedOldStatus;
+    oldRoom.housekeeping_status = 'dirty';
+    oldRoom.current_booking_ref = undefined;
+    oldRoom.current_guest_name = undefined;
+    syncRoomStatusToSupabase({
+      roomNumber: oldRoom.room_number,
+      operationalStatus: oldRoom.operational_status,
+      housekeepingStatus: oldRoom.housekeeping_status,
+      notes: `Vacated via room transfer to ${newRoom.room_number}. ${reasonNotes}`,
+    });
+
+    // Update New Room Status
+    newRoom.operational_status = 'occupied';
+    newRoom.current_booking_ref = booking.booking_reference;
+    newRoom.current_guest_name = booking.guest_name;
+    syncRoomStatusToSupabase({
+      roomNumber: newRoom.room_number,
+      operationalStatus: 'occupied',
+      housekeepingStatus: newRoom.housekeeping_status,
+      notes: `Occupied via transfer from ${oldRoom.room_number}`,
+    });
+
+    // Update Booking Assignment
+    booking.assigned_room_id = newRoom.id;
+    booking.assigned_room_number = newRoom.room_number;
+    if (newRoom.category_id) {
+      booking.category_id = newRoom.category_id;
+    }
+
+    const transferRecord: RoomTransferRecord = {
+      id: 'rt-' + Date.now(),
+      booking_reference: booking.booking_reference,
+      guest_name: booking.guest_name,
+      from_room_id: oldRoom.id,
+      from_room_number: oldRoom.room_number,
+      to_room_id: newRoom.id,
+      to_room_number: newRoom.room_number,
+      to_category_id: newRoom.category_id,
+      to_category_name: newRoom.category_name,
+      reason_category: reasonCategory,
+      reason_notes: reasonNotes,
+      actor,
+      old_room_status: determinedOldStatus,
+      maintenance_ticket_id: maintTicket?.id,
+      transferred_at: new Date().toISOString(),
+    };
+
+    if (!booking.room_transfers) {
+      booking.room_transfers = [];
+    }
+    booking.room_transfers.unshift(transferRecord);
+    booking.last_room_transfer = transferRecord;
+
+    syncBookingToSupabase(booking);
+    syncRoomTransferToSupabase(transferRecord);
+
+    this.broadcastEvent('room_transferred', {
+      transfer: transferRecord,
+      booking,
+      oldRoom,
+      newRoom,
+    });
+    this.broadcastEvent('room_assigned', {
+      room: newRoom,
+      booking,
+    });
+
+    this.recordAuditLog({
+      action: 'ROOM_TRANSFER',
+      entityType: 'booking',
+      entityId: booking.id,
+      details: `Transferred guest ${booking.guest_name} (${booking.booking_reference}) from Room ${oldRoom.room_number} to Room ${newRoom.room_number}. Reason: [${reasonCategory}] ${reasonNotes}`,
+      newValue: transferRecord,
+      userId: 'stf-ops',
+      userName: actor,
+      userRole: 'Front Desk',
+    });
+
+    return {
+      booking,
+      oldRoom,
+      newRoom,
+      transferRecord,
+      maintenanceTicket: maintTicket,
+    };
+  }
 
   public updateStaffPermissions(
     id: string,

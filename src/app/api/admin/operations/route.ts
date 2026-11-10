@@ -335,6 +335,73 @@ export async function POST(req: NextRequest) {
         }
       }
 
+      case 'change_room':
+      case 'transfer_room': {
+        const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Front Desk', 'Receptionist']);
+        if (!auth.authorized) {
+          return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
+        }
+
+        const {
+          bookingReference,
+          toRoomIdOrNumber,
+          toRoomNumber,
+          toRoomId,
+          reasonCategory = 'other_technical',
+          reasonNotes = 'Guest requested room change',
+          createMaintenanceTicket = true,
+          oldRoomAction,
+        } = body;
+
+        const targetRoom = toRoomIdOrNumber || toRoomNumber || toRoomId;
+
+        if (!bookingReference || !targetRoom) {
+          return NextResponse.json(
+            { success: false, error: 'bookingReference and toRoomIdOrNumber are required' },
+            { status: 400 }
+          );
+        }
+
+        const staffName = auth.session?.name || body.staffName || 'Front Desk Staff';
+
+        try {
+          const result = repo.transferBookingRoom({
+            bookingReference,
+            toRoomIdOrNumber: targetRoom,
+            reasonCategory,
+            reasonNotes,
+            actor: staffName,
+            createMaintenanceTicket,
+            oldRoomAction,
+          });
+
+          notifySuperAdmin({
+            eventType: 'EVENT_CHECK_IN',
+            payload: { bookingReference, guestName: result.booking.guest_name, roomNumber: result.newRoom.room_number, categoryName: result.newRoom.category_name || 'Room', nights: 1, source: 'front_desk' },
+            title: `Room Transfer: ${result.oldRoom.room_number} ➔ ${result.newRoom.room_number}`,
+            message: `Guest ${result.booking.guest_name} (${bookingReference}) transferred from Room ${result.oldRoom.room_number} to Room ${result.newRoom.room_number}. Reason: ${reasonNotes}`,
+            metadata: {
+              bookingReference,
+              guestName: result.booking.guest_name,
+              fromRoom: result.oldRoom.room_number,
+              toRoom: result.newRoom.room_number,
+              reasonCategory,
+              reasonNotes,
+              staffName,
+              maintenanceTicketId: result.maintenanceTicket?.id,
+            },
+          });
+
+          return NextResponse.json({
+            success: true,
+            message: `Guest ${result.booking.guest_name} successfully transferred from Room ${result.oldRoom.room_number} to Room ${result.newRoom.room_number}.`,
+            ...result,
+          });
+        } catch (transferErr: any) {
+          return NextResponse.json({ success: false, error: transferErr.message || 'Room transfer failed' }, { status: 400 });
+        }
+      }
+
       case 'housekeeping': {
         const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Housekeeping', 'Front Desk']);
         if (!auth.authorized) {

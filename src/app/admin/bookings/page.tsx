@@ -39,11 +39,13 @@ import {
   Radio,
   RefreshCw,
   X,
+  ArrowRightLeft,
 } from 'lucide-react';
 import TayiBrandIcon from '@/components/anantha/TayiBrandIcon';
 const LotusBrandIcon = TayiBrandIcon;
 import LuxurySelect from '@/components/anantha/LuxurySelect';
 import { RecordOtaBookingModal } from '@/components/admin/RecordOtaBookingModal';
+import { ChangeRoomModal } from '@/components/admin/ChangeRoomModal';
 import { GuestFolioModal } from '@/components/admin/GuestFolioModal';
 import { PrintGstInvoiceModal } from '@/components/admin/PrintGstInvoiceModal';
 import { RfidHistoryTable } from '@/components/admin/RfidHistoryTable';
@@ -73,6 +75,7 @@ export default function BookingsAdminPage() {
 
   // Cancel Checkout modal
   const [cancelCheckoutTarget, setCancelCheckoutTarget] = useState<Booking | null>(null);
+  const [changeRoomTarget, setChangeRoomTarget] = useState<Booking | null>(null);
 
   // RFID Forensic Door Tap Audit modal
   const [rfidAuditBooking, setRfidAuditBooking] = useState<Booking | null>(null);
@@ -885,6 +888,14 @@ export default function BookingsAdminPage() {
                         {isCheckedIn && (
                           <>
                             <button
+                              onClick={() => setChangeRoomTarget(r)}
+                              className="py-2 px-3 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-900 border border-sky-300 font-bold text-xs flex items-center justify-center space-x-1.5 min-h-[40px] cursor-pointer shadow-xs"
+                              title="Change room due to AC, plumbing, or technical dissatisfaction"
+                            >
+                              <ArrowRightLeft className="w-3.5 h-3.5 text-sky-700" />
+                              <span>Change Room</span>
+                            </button>
+                            <button
                               onClick={() => {
                                 setCheckOutTarget(r);
                                 setSettlementAmount(balance.toString());
@@ -1130,6 +1141,14 @@ export default function BookingsAdminPage() {
                               {/* 3. Quick Check-Out & Settle if In-House */}
                               {isCheckedIn && (
                                 <>
+                                  <button
+                                    onClick={() => setChangeRoomTarget(r)}
+                                    className="px-2.5 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-900 border border-sky-200 font-semibold text-[11px] flex items-center space-x-1 shadow-xs cursor-pointer"
+                                    title="Change Room (AC / Water / Dissatisfaction)"
+                                  >
+                                    <ArrowRightLeft className="w-3 h-3 text-sky-700" />
+                                    <span>Change Room</span>
+                                  </button>
                                   <button
                                     onClick={() => {
                                       setCheckOutTarget(r);
@@ -1800,6 +1819,40 @@ export default function BookingsAdminPage() {
               </div>
             </div>
 
+            {/* Room Transfer & Relocation Audit Trail */}
+            {selectedRes.room_transfers && selectedRes.room_transfers.length > 0 && (
+              <div className="p-4 rounded-2xl bg-sky-50/60 border border-sky-200 space-y-2.5 text-xs shadow-xs">
+                <div className="flex items-center justify-between pb-2 border-b border-sky-200/60 font-bold text-sky-950">
+                  <span className="flex items-center gap-1.5">
+                    <ArrowRightLeft className="w-4 h-4 text-sky-700" />
+                    <span>Room Transfer & Relocation History ({selectedRes.room_transfers.length})</span>
+                  </span>
+                  <span className="text-[10px] text-sky-700 bg-sky-100 px-2 py-0.5 rounded-full font-semibold">
+                    Relocated Stay
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {selectedRes.room_transfers.map((t, idx) => (
+                    <div key={t.id || idx} className="p-2.5 rounded-xl bg-white border border-sky-200/70 shadow-2xs flex items-start justify-between gap-3">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sky-900 text-xs">Room #{t.from_room_number} &rarr; Room #{t.to_room_number}</span>
+                          <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-sky-100 text-sky-800">
+                            {t.reason_category.replace('_', ' ')}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-[#786A5B] mt-1">{t.reason_notes}</p>
+                      </div>
+                      <div className="text-right text-[10px] text-gray-500 shrink-0">
+                        <span>{t.transferred_at ? new Date(t.transferred_at).toLocaleString('en-IN') : ''}</span>
+                        <span className="block font-semibold text-sky-800 mt-0.5">By {t.actor}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Razorpay Gateway Audit & Digital Settlement Link */}
             <div className="p-4 rounded-2xl bg-white border border-[#E6D9C5] space-y-3 text-xs shadow-sm">
               <div className="flex items-center justify-between pb-2 border-b border-[#E6D9C5]">
@@ -1865,6 +1918,20 @@ export default function BookingsAdminPage() {
             {/* Action Buttons */}
             <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-[#E6D9C5]">
               <div className="flex items-center gap-4">
+                {selectedRes.status === 'checked_in' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const b = selectedRes;
+                      setSelectedRes(null);
+                      setChangeRoomTarget(b);
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-sky-50 border border-sky-300 hover:bg-sky-100 text-sky-900 text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shadow-xs"
+                  >
+                    <ArrowRightLeft className="w-3.5 h-3.5 text-sky-700" />
+                    <span>Change Room</span>
+                  </button>
+                )}
                 <Link
                   href={`/booking/confirmation/${selectedRes.booking_reference}`}
                   target="_blank"
@@ -1969,6 +2036,17 @@ export default function BookingsAdminPage() {
         onClose={() => setPrintInvoiceBooking(null)}
         booking={printInvoiceBooking}
         folioCharges={printInvoiceCharges}
+      />
+
+      {/* --- MODAL 9: GUEST ROOM CHANGE & RELOCATION MODAL --- */}
+      <ChangeRoomModal
+        isOpen={!!changeRoomTarget}
+        onClose={() => setChangeRoomTarget(null)}
+        booking={changeRoomTarget}
+        rooms={physicalRooms}
+        onRoomChanged={async () => {
+          await fetchBookings();
+        }}
       />
 
       {/* --- MODAL 8: RECORD OTA BOOKING MODAL --- */}

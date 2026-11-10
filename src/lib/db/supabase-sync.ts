@@ -18,6 +18,7 @@ import {
   FolioCharge,
   AuditLogEntry,
   GoogleReview,
+  RoomTransferRecord,
 } from '@/types';
 
 /**
@@ -2189,5 +2190,99 @@ export async function syncCategoryToSupabase(category: RoomCategory): Promise<vo
       `[SUPABASE CATEGORY SYNC WARN] (${category.name}):`,
       err instanceof Error ? err.message : String(err)
     );
+  }
+}
+
+
+export async function syncRoomTransferToSupabase(transfer: RoomTransferRecord): Promise<void> {
+  if (typeof window !== 'undefined' || !transfer) return;
+
+  const db = getSupabasePgPool();
+  if (!db) return;
+
+  try {
+    const client = await db.connect();
+    try {
+      await client.query(
+        `INSERT INTO room_transfers (
+          id,
+          booking_reference,
+          from_room_number,
+          to_room_number,
+          from_room_id,
+          to_room_id,
+          reason_category,
+          reason_notes,
+          actor,
+          old_room_status,
+          maintenance_ticket_id,
+          transferred_at,
+          created_at
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, COALESCE($12::timestamptz, NOW()), NOW()
+        )
+        ON CONFLICT (id) DO UPDATE SET
+          reason_notes = EXCLUDED.reason_notes,
+          old_room_status = EXCLUDED.old_room_status,
+          maintenance_ticket_id = COALESCE(EXCLUDED.maintenance_ticket_id, room_transfers.maintenance_ticket_id);`,
+        [
+          transfer.id,
+          transfer.booking_reference,
+          transfer.from_room_number,
+          transfer.to_room_number,
+          transfer.from_room_id || null,
+          transfer.to_room_id || null,
+          transfer.reason_category,
+          transfer.reason_notes,
+          transfer.actor,
+          transfer.old_room_status,
+          transfer.maintenance_ticket_id || null,
+          transfer.transferred_at || new Date().toISOString(),
+        ]
+      );
+    } finally {
+      client.release();
+    }
+  } catch (err: unknown) {
+    console.warn(
+      `[SUPABASE ROOM TRANSFER SYNC WARN] (${transfer.booking_reference}):`,
+      err instanceof Error ? err.message : String(err)
+    );
+  }
+}
+
+export async function loadRoomTransfersFromSupabase(): Promise<RoomTransferRecord[]> {
+  if (typeof window !== 'undefined') return [];
+
+  const db = getSupabasePgPool();
+  if (!db) return [];
+
+  try {
+    const client = await db.connect();
+    try {
+      const res = await client.query(
+        `SELECT * FROM room_transfers ORDER BY transferred_at DESC;`
+      );
+      return res.rows.map((r: any) => ({
+        id: r.id,
+        booking_reference: r.booking_reference,
+        from_room_number: r.from_room_number,
+        to_room_number: r.to_room_number,
+        from_room_id: r.from_room_id || '',
+        to_room_id: r.to_room_id || '',
+        reason_category: r.reason_category,
+        reason_notes: r.reason_notes || '',
+        actor: r.actor || 'Front Desk',
+        old_room_status: r.old_room_status || 'cleaning',
+        maintenance_ticket_id: r.maintenance_ticket_id || undefined,
+        transferred_at: r.transferred_at ? new Date(r.transferred_at).toISOString() : new Date().toISOString(),
+        created_at: r.created_at ? new Date(r.created_at).toISOString() : undefined,
+      }));
+    } finally {
+      client.release();
+    }
+  } catch (err: unknown) {
+    console.warn('[SUPABASE LOAD ROOM TRANSFERS WARN]', err instanceof Error ? err.message : String(err));
+    return [];
   }
 }

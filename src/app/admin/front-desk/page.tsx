@@ -7,6 +7,7 @@ import { StatutoryWalkInModal } from '@/components/admin/StatutoryWalkInModal';
 import { PrintGrcModal } from '@/components/admin/PrintGrcModal';
 import { PrintGstInvoiceModal } from '@/components/admin/PrintGstInvoiceModal';
 import { GuestFolioModal } from '@/components/admin/GuestFolioModal';
+import { ChangeRoomModal } from '@/components/admin/ChangeRoomModal';
 import { Booking, PhysicalRoom, RoomCategory, PaymentRecord } from '@/types';
 import {
   issuePhysicalKeycard,
@@ -42,6 +43,7 @@ import {
   Clock,
   Receipt,
   ExternalLink,
+  ArrowRightLeft,
 } from 'lucide-react';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
@@ -61,6 +63,7 @@ export default function FrontDeskPage() {
   const [grcModalBooking, setGrcModalBooking] = useState<Booking | null>(null);
   const [invoiceModalBooking, setInvoiceModalBooking] = useState<Booking | null>(null);
   const [folioModalBooking, setFolioModalBooking] = useState<Booking | null>(null);
+  const [changeRoomModalBooking, setChangeRoomModalBooking] = useState<Booking | null>(null);
   const [showStatutoryModal, setShowStatutoryModal] = useState(false);
   const [statutoryInitialData, setStatutoryInitialData] = useState<any>(null);
 
@@ -1115,6 +1118,17 @@ export default function FrontDeskPage() {
                         <span>{isTelugu ? 'ఫోలియో' : 'Folio'}</span>
                       </button>
 
+                      {/* Change Room (Relocate) */}
+                      <button
+                        type="button"
+                        onClick={() => setChangeRoomModalBooking(b)}
+                        className="px-2.5 py-1.5 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-900 border border-sky-300 text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer shadow-xs"
+                        title={isTelugu ? 'గది మార్పిడి (AC లేదా సాంకేతిక సమస్యల వల్ల)' : 'Change / Relocate Room (AC or Technical Issues)'}
+                      >
+                        <ArrowRightLeft className="w-3.5 h-3.5 text-sky-700" />
+                        <span>{isTelugu ? 'గది మార్పు' : 'Change Room'}</span>
+                      </button>
+
                       {/* Duplicate Keycard */}
                       {b.assigned_room_number && (
                         <button
@@ -1606,6 +1620,17 @@ export default function FrontDeskPage() {
       <ReceptionStandeeModal
         isOpen={showStandeeModal}
         onClose={() => setShowStandeeModal(false)}
+      />
+
+      {/* GUEST ROOM CHANGE & RELOCATION MODAL */}
+      <ChangeRoomModal
+        isOpen={!!changeRoomModalBooking}
+        onClose={() => setChangeRoomModalBooking(null)}
+        booking={changeRoomModalBooking}
+        rooms={rooms}
+        onRoomChanged={async () => {
+          await fetchLiveState();
+        }}
       />
 
       {/* STATUTORY WALK-IN REGISTRATION MODAL */}

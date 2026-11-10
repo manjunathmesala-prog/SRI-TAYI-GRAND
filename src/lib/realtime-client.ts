@@ -417,6 +417,27 @@ export const adminOperations = {
     return data;
   },
 
+  async changeRoom(params: {
+    bookingReference: string;
+    toRoomIdOrNumber: string;
+    reasonCategory: string;
+    reasonNotes: string;
+    createMaintenanceTicket?: boolean;
+    oldRoomAction?: 'maintenance' | 'cleaning';
+    staffName?: string;
+  }) {
+    adminOperations.invalidateFullState();
+    const res = await fetch('/api/admin/operations', {
+      method: 'POST',
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ action: 'change_room', ...params }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Room change failed');
+    adminOperations.invalidateFullState();
+    return data;
+  },
+
   async assignRoom(params: {
     roomId: string;
     bookingReference: string;
