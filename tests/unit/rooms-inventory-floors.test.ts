@@ -79,4 +79,27 @@ describe('Rooms, Floors & Walk-In Inventory Rules', () => {
     expect(normalizeCategoryId('single-room')).toBe('cat-single-04');
     expect(normalizeCategoryId('single')).toBe('cat-single-04');
   });
+  it('enforces exact authoritative room tariffs for Double, Four Bed, Suite, and Single rooms', () => {
+    const categories = repo.getCategories();
+    
+    const doubleCat = categories.find((c) => c.id === 'cat-double-03');
+    expect(doubleCat).toBeDefined();
+    expect(doubleCat?.base_price_per_night).toBe(1800);
+    expect(doubleCat?.base_tariff_paise).toBe(180000);
+
+    const fourBedCat = categories.find((c) => c.id === 'cat-four-bed-02');
+    expect(fourBedCat).toBeDefined();
+    expect(fourBedCat?.base_price_per_night).toBe(2800);
+    expect(fourBedCat?.base_tariff_paise).toBe(280000);
+
+    const suiteCat = categories.find((c) => c.id === 'cat-suite-01');
+    expect(suiteCat).toBeDefined();
+    expect(suiteCat?.base_price_per_night).toBe(3300);
+    expect(suiteCat?.base_tariff_paise).toBe(330000);
+
+    const singleCat = categories.find((c) => c.id === 'cat-single-04');
+    expect(singleCat).toBeDefined();
+    expect(singleCat?.base_price_per_night).toBe(900);
+    expect(singleCat?.base_tariff_paise).toBe(90000);
+  });
 });

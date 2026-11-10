@@ -25,14 +25,14 @@ export const TARIFF_SOURCE_DOCUMENT = 'Owner Tariff Card dated 01-09-2023';
 export const DOUBLE_ROOM_PAISE = 180000;    // ₹1,800
 export const FOUR_BED_ROOM_PAISE = 280000; // ₹2,800
 export const SUITE_ROOM_PAISE = 330000;    // ₹3,300
-export const SINGLE_ROOM_PAISE = 120000;   // ₹1,200 (Walk-in only)
+export const SINGLE_ROOM_PAISE = 90000;   // ₹900 (Walk-in only)
 export const EXTRA_PERSON_PAISE = 30000;   // ₹300
 
 // In Rupee integer units
 export const DOUBLE_ROOM_RUPEES = 1800;
 export const FOUR_BED_ROOM_RUPEES = 2800;
 export const SUITE_ROOM_RUPEES = 3300;
-export const SINGLE_ROOM_RUPEES = 1200;
+export const SINGLE_ROOM_RUPEES = 900;
 export const EXTRA_PERSON_RUPEES = 300;
 
 export const STARTING_PRICE_RUPEES = 1800;
