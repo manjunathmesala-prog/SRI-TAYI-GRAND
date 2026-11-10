@@ -205,7 +205,7 @@ export function AdminSidebar() {
       {/* ------------------------------------------------------------- */}
       {/* DESKTOP SIDEBAR (Visible on md and above: w-72)                */}
       {/* ------------------------------------------------------------- */}
-      <aside className="hidden md:flex w-72 bg-[#21180F] text-[#F8F3E9] p-5 flex-col justify-between shrink-0 shadow-2xl border-r border-[#3a2c1f] fixed top-0 bottom-0 left-0 z-50 h-screen overflow-y-auto scrollbar-thin scrollbar-thumb-stone-800">
+      <aside className="hidden md:flex w-72 bg-[#21180F] text-[#F8F3E9] font-sans p-5 flex-col justify-between shrink-0 shadow-2xl border-r border-[#3a2c1f] fixed top-0 bottom-0 left-0 z-50 h-screen overflow-y-auto scrollbar-thin scrollbar-thumb-stone-800">
         <div className="space-y-5">
           {/* Logo / Brand Header */}
           <div className="pb-4 border-b border-[#3a2c1f] space-y-3">
@@ -262,7 +262,7 @@ export function AdminSidebar() {
 
               return (
                 <div key={section.title} className="space-y-1">
-                  <div className="text-[10px] uppercase font-bold tracking-widest text-[#B18A4A]/70 px-2 py-1">
+                  <div className="text-[10px] uppercase font-bold tracking-widest font-sans text-[#B18A4A]/70 px-2 py-1">
                     {section.title}
                   </div>
                   <div className="space-y-0.5">
@@ -277,7 +277,7 @@ export function AdminSidebar() {
                           key={item.href}
                           href={item.href}
                           prefetch={false}
-                          className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs uppercase tracking-wider font-medium transition-all ${
+                          className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs uppercase tracking-wider font-sans font-medium transition-all ${
                             isActive
                               ? 'bg-[#8D672F] text-white shadow-md font-semibold'
                               : item.highlight
@@ -346,7 +346,7 @@ export function AdminSidebar() {
       {/* ------------------------------------------------------------- */}
       {/* MOBILE STICKY TOP HEADER (< md)                                */}
       {/* ------------------------------------------------------------- */}
-      <header className="md:hidden sticky top-0 z-40 bg-[#21180F] text-[#F8F3E9] border-b border-[#3a2c1f] px-3 h-14 flex items-center justify-between shadow-md gap-2 w-full max-w-full">
+      <header className="md:hidden sticky top-0 z-40 bg-[#21180F] text-[#F8F3E9] font-sans border-b border-[#3a2c1f] px-3 h-14 flex items-center justify-between shadow-md gap-2 w-full max-w-full">
         <div className="flex items-center space-x-2 min-w-0">
           <button
             type="button"
@@ -414,7 +414,7 @@ export function AdminSidebar() {
           />
 
           {/* Drawer Content */}
-          <div className="relative w-4/5 max-w-xs bg-[#21180F] text-[#F8F3E9] p-5 pb-12 safe-area-bottom flex flex-col justify-between shadow-2xl h-full z-10 overflow-y-auto">
+          <div className="relative w-4/5 max-w-xs bg-[#21180F] text-[#F8F3E9] font-sans p-5 pb-12 safe-area-bottom flex flex-col justify-between shadow-2xl h-full z-10 overflow-y-auto">
             <div className="space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-[#3a2c1f]">
                 <div className="flex items-center space-x-2">
@@ -521,7 +521,7 @@ export function AdminSidebar() {
       {/* ------------------------------------------------------------- */}
       {/* MOBILE BOTTOM NAVIGATION BAR (< md)                            */}
       {/* ------------------------------------------------------------- */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#21180F]/95 backdrop-blur-md border-t border-[#3a2c1f] min-h-[3.75rem] px-2 py-1 flex items-center justify-around shadow-2xl safe-area-bottom">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#21180F]/95 backdrop-blur-md border-t border-[#3a2c1f] min-h-[3.75rem] px-2 py-1 flex items-center justify-around shadow-2xl safe-area-bottom font-sans">
         {bottomBarItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.href;
