@@ -75,6 +75,10 @@ function CheckoutContent() {
     document.body.appendChild(script);
 
     async function loadPricing() {
+      if (categoryId === 'cat-single-04' || categoryId === 'single-room') {
+        setErrorMessage('The Single Room (Room #107) is available for front-desk walk-in reservations only and cannot be booked online.');
+        return;
+      }
       try {
         const res = await fetch('/api/availability/check', {
           method: 'POST',

@@ -263,7 +263,30 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                   <span className="text-xs text-[#43001F] font-semibold">Includes Free Wi-Fi</span>
                 </div>
 
-                {/* Reservation Form */}
+                {room.walk_in_only ? (
+                  <div className="space-y-4 pt-2">
+                    <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs text-amber-900 space-y-2">
+                      <div className="font-bold flex items-center gap-1.5 text-amber-950 text-sm">
+                        <span>⚡ Front Desk Walk-In Only</span>
+                      </div>
+                      <p className="leading-relaxed">
+                        The Single Room (Room #107) is reserved exclusively for on-site walk-in guests and cannot be booked online.
+                      </p>
+                      <div className="pt-1 text-[11px] text-amber-800">
+                        Please visit the front desk upon arrival or call our reception team to check real-time availability.
+                      </div>
+                    </div>
+
+                    <a
+                      href="tel:08494223379"
+                      className="w-full py-3.5 px-6 rounded-full bg-[#43001F] hover:bg-[#2E0015] text-white text-xs uppercase tracking-[0.16em] font-semibold shadow-md flex items-center justify-center gap-2 cursor-pointer transition-all"
+                    >
+                      <span>Call Front Desk: 084942 23379</span>
+                    </a>
+                  </div>
+                ) : (
+                  <>
+                    {/* Reservation Form */}
                 <form onSubmit={handleProceedBooking} className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
                     <LuxuryDatePicker
@@ -343,6 +366,8 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </button>
                 </form>
+                  </>
+                )}
 
                 <div className="mt-4 text-center">
                   <a
