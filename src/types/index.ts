@@ -184,7 +184,36 @@ export interface Booking {
   purpose_of_visit?: string;
   tariff_override_amount?: number;
   tariff_override_reason?: string;
+  room_transfers?: RoomTransferRecord[];
+  last_room_transfer?: RoomTransferRecord;
   created_at: string;
+}
+
+export type RoomTransferReasonCategory =
+  | 'ac_issue'
+  | 'plumbing_water'
+  | 'cleanliness'
+  | 'noise'
+  | 'upgrade'
+  | 'other_technical';
+
+export interface RoomTransferRecord {
+  id: string;
+  booking_reference: string;
+  guest_name?: string;
+  from_room_id: string;
+  from_room_number: string;
+  to_room_id: string;
+  to_room_number: string;
+  to_category_id?: string;
+  to_category_name?: string;
+  reason_category: RoomTransferReasonCategory;
+  reason_notes: string;
+  actor: string;
+  old_room_status: 'cleaning' | 'maintenance';
+  maintenance_ticket_id?: string;
+  transferred_at: string;
+  created_at?: string;
 }
 
 export interface PaymentRecord {
@@ -547,6 +576,7 @@ export type RealtimeEventType =
   | 'booking_status_updated'
   | 'walk_in_created'
   | 'room_assigned' 
+  | 'room_transferred'
   | 'check_in' 
   | 'check_out' 
   | 'payment_recorded' 
