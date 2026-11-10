@@ -143,10 +143,26 @@ export default function RFIDAdminPage() {
     event?: RFIDAccessEvent;
   } | null>(null);
 
-  // Logs Filtering
+  // Replacing Card State & Handlers
+  const [replacingCard, setReplacingCard] = useState<RFIDCard | null>(null);
+  const [replaceNewUid, setReplaceNewUid] = useState('');
+  const [replaceReason, setReplaceReason] = useState('Physical Mifare Demagnetized');
+  const [replaceStaff, setReplaceStaff] = useState('Front Desk');
+  const [isReplacing, setIsReplacing] = useState(false);
+  const [replaceScanning, setReplaceScanning] = useState(false);
+  const [replaceError, setReplaceError] = useState<string | null>(null);
+
+  // Extended Logs Filtering & Telemetry Metrics
   const [logSearchRoom, setLogSearchRoom] = useState('');
+  const [logSearchQuery, setLogSearchQuery] = useState('');
   const [logFilterType, setLogFilterType] = useState<'all' | 'super_admin' | 'cleaner' | 'guest'>('all');
   const [logFilterStatus, setLogFilterStatus] = useState<'all' | 'access_granted' | 'access_denied'>('all');
+  const [logFilterAction, setLogFilterAction] = useState<string>('all');
+  const [logStartDate, setLogStartDate] = useState('');
+  const [logEndDate, setLogEndDate] = useState('');
+  const [logStayRef, setLogStayRef] = useState('');
+  const [logPage, setLogPage] = useState(1);
+  const LOGS_PER_PAGE = 25;
 
   // Load saved bridge host on mount
   useEffect(() => {
@@ -713,6 +729,70 @@ export default function RFIDAdminPage() {
     }
   };
 
+  // Keycard Replacement Handlers
+  const handleScanReplaceCard = async () => {
+    setReplaceScanning(true);
+    setReplaceError(null);
+    try {
+      const card = await readPhysicalCard(replaceStaff);
+      if (card && card.success && (card.cardNo || card.guestSN)) {
+        const uid = `BT-57-${card.cardNo || card.guestSN}`;
+        setReplaceNewUid(uid);
+        playChimeSound(true);
+      } else if (card && card.success) {
+        const uid = `BT-57-${Math.floor(100000 + Math.random() * 900000)}`;
+        setReplaceNewUid(uid);
+        playChimeSound(true);
+      } else {
+        setReplaceError(card?.message || 'No physical card detected on Be-Tech encoder');
+        playChimeSound(false);
+      }
+    } catch (err: any) {
+      setReplaceError(err.message || 'Hardware reader communication error');
+      playChimeSound(false);
+    } finally {
+      setReplaceScanning(false);
+    }
+  };
+
+  const handleExecuteReplaceCard = async () => {
+    if (!replacingCard) return;
+    if (!replaceNewUid.trim()) {
+      setReplaceError('Please provide or scan a new Card UID');
+      return;
+    }
+    setIsReplacing(true);
+    setReplaceError(null);
+    try {
+      const res = await fetch('/api/rfid/cards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'replace_card',
+          oldCardId: replacingCard.id,
+          newCardUid: replaceNewUid.trim(),
+          issuedBy: replaceStaff,
+          reason: replaceReason,
+        }),
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Failed to replace keycard');
+      playChimeSound(true);
+      setHardwareMessage({
+        text: `Keycard replaced! Revoked ${replacingCard.card_uid} and activated new card ${data.newCard?.card_uid} for Room ${data.newCard?.assigned_room_number}`,
+        type: 'success',
+      });
+      setReplacingCard(null);
+      setReplaceNewUid('');
+      await refreshAllData();
+    } catch (err: any) {
+      setReplaceError(err.message || 'Failed to replace card');
+      playChimeSound(false);
+    } finally {
+      setIsReplacing(false);
+    }
+  };
+
   // Interactive Live Door Tap Tester
   const handleSimulateTap = async () => {
     setSimBusy(true);
@@ -754,10 +834,20 @@ export default function RFIDAdminPage() {
     return true;
   });
 
-  // Filtered logs list
+  // Filtered logs list with universal search, action, stay, and date-range criteria
   const filteredEvents = events.filter((evt) => {
-    if (logSearchRoom && !evt.room_number.toLowerCase().includes(logSearchRoom.toLowerCase())) {
+    if (logSearchRoom && !evt.room_number?.toLowerCase().includes(logSearchRoom.toLowerCase())) {
       return false;
+    }
+    if (logSearchQuery) {
+      const q = logSearchQuery.toLowerCase();
+      const match =
+        evt.room_number?.toLowerCase().includes(q) ||
+        evt.card_uid?.toLowerCase().includes(q) ||
+        evt.holder_name?.toLowerCase().includes(q) ||
+        evt.booking_reference?.toLowerCase().includes(q) ||
+        evt.device_name?.toLowerCase().includes(q);
+      if (!match) return false;
     }
     if (logFilterType !== 'all' && evt.card_type !== logFilterType) {
       return false;
@@ -765,8 +855,33 @@ export default function RFIDAdminPage() {
     if (logFilterStatus !== 'all' && evt.event_type !== logFilterStatus) {
       return false;
     }
+    if (logFilterAction !== 'all' && evt.action_type !== logFilterAction) {
+      return false;
+    }
+    if (logStayRef && evt.booking_reference !== logStayRef) {
+      return false;
+    }
+    if (logStartDate) {
+      if (new Date(evt.occurred_at).getTime() < new Date(logStartDate).getTime()) return false;
+    }
+    if (logEndDate) {
+      if (new Date(evt.occurred_at).getTime() > new Date(logEndDate).getTime()) return false;
+    }
     return true;
   });
+
+  // KPI telemetry summaries
+  const totalEventsCount = filteredEvents.length;
+  const grantedCount = filteredEvents.filter((e) => e.event_type === 'access_granted').length;
+  const deniedCount = filteredEvents.filter((e) => e.event_type === 'access_denied').length;
+  const uniqueCardsCount = new Set(filteredEvents.map((e) => e.card_uid).filter(Boolean)).size;
+  const firstRecordedAccess = filteredEvents.length > 0 ? filteredEvents[filteredEvents.length - 1].occurred_at : null;
+  const latestRecordedAccess = filteredEvents.length > 0 ? filteredEvents[0].occurred_at : null;
+
+  // Pagination calculation
+  const totalLogPages = Math.ceil(filteredEvents.length / LOGS_PER_PAGE) || 1;
+  const currentLogsPage = Math.min(logPage, totalLogPages);
+  const paginatedEvents = filteredEvents.slice((currentLogsPage - 1) * LOGS_PER_PAGE, currentLogsPage * LOGS_PER_PAGE);
 
   const onlineDevicesCount = devices.filter((d) => d.status === 'online').length;
 
@@ -1779,6 +1894,20 @@ export default function RFIDAdminPage() {
                               <Cpu className="w-3 h-3" />
                               <span>Write Card (No Time Limit)</span>
                             </button>
+                          {(c.card_type === 'guest' || !c.card_type) && c.status === 'active' && (
+                            <button
+                              onClick={() => {
+                                setReplacingCard(c);
+                                setReplaceNewUid('');
+                                setReplaceError(null);
+                              }}
+                              className="px-2.5 py-1 rounded text-xs font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-900 border border-amber-400/50 cursor-pointer transition-all flex items-center gap-1"
+                              title="Replace lost or damaged physical card with a new card"
+                            >
+                              <RefreshCw className="w-3 h-3 text-amber-700" />
+                              <span>Replace</span>
+                            </button>
+                          )}
                           <button
                             onClick={() => handleToggleCardStatus(c.id, c.status, c.room_number, c.guest_name || c.holder_name)}
                             className={`px-2.5 py-1 rounded text-xs font-semibold cursor-pointer ${
@@ -1963,76 +2092,197 @@ export default function RFIDAdminPage() {
       {/* TAB 4: ACCESS TAP STREAM & FULL TELEMETRY AUDIT                           */}
       {/* ========================================================================= */}
       {activeTab === 'logs' && (
-        <div className="space-y-4">
-          <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-4 shadow-sm flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-3">
+        <div className="space-y-6">
+          {/* 6 Key Performance Telemetry Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <div className="p-3.5 rounded-xl bg-white border border-[#D8AD56]/30 shadow-xs">
+              <span className="text-[10px] font-semibold text-[#786B61] uppercase tracking-wider block">Total Events</span>
+              <strong className="text-xl font-bold text-[#241912]">{totalEventsCount}</strong>
+              <span className="text-[10px] text-[#786B61] block mt-0.5">Recorded door taps</span>
+            </div>
+            <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200 shadow-xs">
+              <span className="text-[10px] font-semibold text-emerald-800 uppercase tracking-wider block">Granted / Unlocked</span>
+              <strong className="text-xl font-bold text-emerald-900">{grantedCount}</strong>
+              <span className="text-[10px] text-emerald-700 block mt-0.5">{totalEventsCount ? Math.round((grantedCount / totalEventsCount) * 100) : 0}% success rate</span>
+            </div>
+            <div className="p-3.5 rounded-xl bg-rose-50/70 border border-rose-200 shadow-xs">
+              <span className="text-[10px] font-semibold text-rose-800 uppercase tracking-wider block">Denied / Blocked</span>
+              <strong className="text-xl font-bold text-rose-900">{deniedCount}</strong>
+              <span className="text-[10px] text-rose-700 block mt-0.5">Security rejections</span>
+            </div>
+            <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 shadow-xs">
+              <span className="text-[10px] font-semibold text-amber-900 uppercase tracking-wider block">Unique Cards</span>
+              <strong className="text-xl font-bold text-amber-950">{uniqueCardsCount}</strong>
+              <span className="text-[10px] text-amber-800 block mt-0.5">Distinct keycards</span>
+            </div>
+            <div className="p-3.5 rounded-xl bg-[#FAF7F2] border border-[#EFE3D6] shadow-xs">
+              <span className="text-[10px] font-semibold text-[#786B61] uppercase tracking-wider block">First Recorded</span>
+              <strong className="text-xs font-bold text-[#241912] truncate block mt-1">
+                {firstRecordedAccess ? new Date(firstRecordedAccess).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }) : 'None'}
+              </strong>
+              <span className="text-[9px] text-[#786B61] block">
+                {firstRecordedAccess ? new Date(firstRecordedAccess).toLocaleDateString('en-IN') : 'No access yet'}
+              </span>
+            </div>
+            <div className="p-3.5 rounded-xl bg-[#FAF7F2] border border-[#EFE3D6] shadow-xs">
+              <span className="text-[10px] font-semibold text-[#786B61] uppercase tracking-wider block">Latest Access</span>
+              <strong className="text-xs font-bold text-[#241912] truncate block mt-1">
+                {latestRecordedAccess ? new Date(latestRecordedAccess).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'None'}
+              </strong>
+              <span className="text-[9px] text-[#786B61] block">
+                {latestRecordedAccess ? new Date(latestRecordedAccess).toLocaleDateString('en-IN') : 'No recent tap'}
+              </span>
+            </div>
+          </div>
+
+          {/* Multi-Dimensional Filter Bar */}
+          <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-4 shadow-sm space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {/* Universal Search */}
               <div className="relative">
                 <Search className="w-3.5 h-3.5 absolute left-3 top-3 text-[#786B61]" />
                 <input
                   type="text"
-                  placeholder="Filter by Room #..."
-                  value={logSearchRoom}
-                  onChange={(e) => setLogSearchRoom(e.target.value)}
-                  className="pl-8 pr-3 py-1.5 text-xs rounded-xl border border-[#EFE3D6] bg-[#FAF7F2] w-40 text-[#241912]"
+                  placeholder="Search Guest, UID, Booking Ref..."
+                  value={logSearchQuery}
+                  onChange={(e) => { setLogSearchQuery(e.target.value); setLogPage(1); }}
+                  className="pl-8 pr-3 py-1.5 text-xs rounded-xl border border-[#EFE3D6] bg-[#FAF7F2] w-full text-[#241912]"
                 />
               </div>
 
-              <div className="flex items-center gap-1 text-xs">
-                <span className="text-[#786B61] text-[11px] font-semibold">Card Role:</span>
-                <select
-                  value={logFilterType}
-                  onChange={(e) => setLogFilterType(e.target.value as any)}
-                  className="p-1.5 text-xs rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
-                >
-                  <option value="all">All Roles</option>
-                  <option value="super_admin">👑 Super Admin Only</option>
-                  <option value="cleaner">✨ Cleaner Only</option>
-                  <option value="guest">🗝️ Customer / Guest Only</option>
-                </select>
+              {/* Room # */}
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Filter Room # (e.g. 104)"
+                  value={logSearchRoom}
+                  onChange={(e) => { setLogSearchRoom(e.target.value); setLogPage(1); }}
+                  className="px-3 py-1.5 text-xs rounded-xl border border-[#EFE3D6] bg-[#FAF7F2] w-full text-[#241912]"
+                />
               </div>
 
-              <div className="flex items-center gap-1 text-xs">
-                <span className="text-[#786B61] text-[11px] font-semibold">Result:</span>
-                <select
-                  value={logFilterStatus}
-                  onChange={(e) => setLogFilterStatus(e.target.value as any)}
-                  className="p-1.5 text-xs rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
-                >
-                  <option value="all">All Results</option>
-                  <option value="access_granted">Unlocked / Granted</option>
-                  <option value="access_denied">Access Denied</option>
-                </select>
+              {/* Card Role Dropdown */}
+              <select
+                value={logFilterType}
+                onChange={(e) => { setLogFilterType(e.target.value as any); setLogPage(1); }}
+                className="p-1.5 text-xs rounded-xl border border-[#EFE3D6] bg-white text-[#241912] w-full"
+              >
+                <option value="all">All Card Roles</option>
+                <option value="super_admin">👑 Super Admin Master Only</option>
+                <option value="cleaner">✨ Housekeeping Cleaner Only</option>
+                <option value="guest">🗝️ Guest / Customer Only</option>
+              </select>
+
+              {/* Result Status Dropdown */}
+              <select
+                value={logFilterStatus}
+                onChange={(e) => { setLogFilterStatus(e.target.value as any); setLogPage(1); }}
+                className="p-1.5 text-xs rounded-xl border border-[#EFE3D6] bg-white text-[#241912] w-full"
+              >
+                <option value="all">All Results (Granted &amp; Denied)</option>
+                <option value="access_granted">🟢 Unlocked / Granted Only</option>
+                <option value="access_denied">🔴 Access Denied Only</option>
+              </select>
+            </div>
+
+            {/* Row 2 Filters: Action, Stay Booking Ref, Date Range */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 border-t border-[#EFE3D6]/60">
+              {/* Action Filter */}
+              <select
+                value={logFilterAction}
+                onChange={(e) => { setLogFilterAction(e.target.value); setLogPage(1); }}
+                className="p-1.5 text-xs rounded-xl border border-[#EFE3D6] bg-white text-[#241912] w-full"
+              >
+                <option value="all">All Actions (Door, Clean, Tap)</option>
+                <option value="door_unlock">Door Unlock</option>
+                <option value="door_lock">Door Lock</option>
+                <option value="cleaning_started">Cleaning Started</option>
+                <option value="cleaning_completed">Cleaning Completed</option>
+                <option value="unauthorized_attempt">Unauthorized Attempt</option>
+              </select>
+
+              {/* Booking Stay Reference */}
+              <input
+                type="text"
+                placeholder="Stay Booking Ref (e.g. TG-W-2026...)"
+                value={logStayRef}
+                onChange={(e) => { setLogStayRef(e.target.value); setLogPage(1); }}
+                className="px-3 py-1.5 text-xs rounded-xl border border-[#EFE3D6] bg-[#FAF7F2] w-full text-[#241912]"
+              />
+
+              {/* Start Date */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] text-[#786B61] whitespace-nowrap">From:</span>
+                <input
+                  type="date"
+                  value={logStartDate}
+                  onChange={(e) => { setLogStartDate(e.target.value); setLogPage(1); }}
+                  className="px-2 py-1 text-xs rounded-lg border border-[#EFE3D6] bg-white text-[#241912] w-full"
+                />
+              </div>
+
+              {/* End Date */}
+              <div className="flex items-center gap-1.5">
+                <span className="text-[10px] text-[#786B61] whitespace-nowrap">To:</span>
+                <input
+                  type="date"
+                  value={logEndDate}
+                  onChange={(e) => { setLogEndDate(e.target.value); setLogPage(1); }}
+                  className="px-2 py-1 text-xs rounded-lg border border-[#EFE3D6] bg-white text-[#241912] w-full"
+                />
               </div>
             </div>
 
-            <div className="text-xs text-[#786B61]">
-              Showing <strong>{filteredEvents.length}</strong> of {events.length} tap records
+            <div className="flex items-center justify-between text-xs text-[#786B61] pt-1">
+              <span>
+                Showing <strong>{paginatedEvents.length}</strong> of <strong>{filteredEvents.length}</strong> matching events (Page {currentLogsPage} of {totalLogPages})
+              </span>
+              {(logSearchQuery || logSearchRoom || logFilterType !== 'all' || logFilterStatus !== 'all' || logFilterAction !== 'all' || logStayRef || logStartDate || logEndDate) && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLogSearchQuery('');
+                    setLogSearchRoom('');
+                    setLogFilterType('all');
+                    setLogFilterStatus('all');
+                    setLogFilterAction('all');
+                    setLogStayRef('');
+                    setLogStartDate('');
+                    setLogEndDate('');
+                    setLogPage(1);
+                  }}
+                  className="text-xs text-[#D8AD56] hover:text-amber-800 font-bold underline cursor-pointer"
+                >
+                  Reset All Filters
+                </button>
+              )}
             </div>
           </div>
 
+          {/* Access Logs Table */}
           <div className="bg-white rounded-2xl border border-[#D8AD56]/30 shadow-luxury overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-[#FAF7F2] text-[#786B61] uppercase tracking-wider text-[10px] border-b border-[#EFE3D6]">
                   <tr>
-                    <th className="py-3.5 px-4 font-semibold">Timestamp</th>
+                    <th className="py-3.5 px-4 font-semibold">Timestamp (IST)</th>
                     <th className="py-3.5 px-4 font-semibold">Room Number</th>
                     <th className="py-3.5 px-4 font-semibold">Card Role</th>
                     <th className="py-3.5 px-4 font-semibold">Card UID</th>
-                    <th className="py-3.5 px-4 font-semibold">Holder / Guest</th>
+                    <th className="py-3.5 px-4 font-semibold">Holder / Guest / Booking</th>
                     <th className="py-3.5 px-4 font-semibold">Action &amp; Status</th>
-                    <th className="py-3.5 px-4 font-semibold">Audit Reason / Telemetry</th>
+                    <th className="py-3.5 px-4 font-semibold">Device &amp; Telemetry Details</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#EFE3D6] text-[#241912]">
-                  {filteredEvents.length === 0 ? (
+                  {paginatedEvents.length === 0 ? (
                     <tr>
                       <td colSpan={7} className="py-8 text-center text-xs text-[#786B61]">
                         No tap events match the selected filters.
                       </td>
                     </tr>
                   ) : (
-                    filteredEvents.map((evt) => (
+                    paginatedEvents.map((evt) => (
                       <tr key={evt.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
                         <td className="py-3.5 px-4 text-[#786B61] whitespace-nowrap">
                           <div className="font-semibold text-[#241912]">
@@ -2099,7 +2349,8 @@ export default function RFIDAdminPage() {
                           </span>
                         </td>
                         <td className="py-3.5 px-4 text-xs max-w-xs text-[#241912]">
-                          {evt.reason || 'Verified tap'}
+                          <div className="font-mono text-[10px] text-[#786B61]">{evt.device_name}</div>
+                          <div>{evt.reason || 'Verified tap'}</div>
                         </td>
                       </tr>
                     ))
@@ -2107,6 +2358,31 @@ export default function RFIDAdminPage() {
                 </tbody>
               </table>
             </div>
+
+            {/* Pagination Controls */}
+            {totalLogPages > 1 && (
+              <div className="flex items-center justify-between px-4 py-3 bg-[#FAF7F2] border-t border-[#EFE3D6] text-xs">
+                <button
+                  type="button"
+                  disabled={currentLogsPage <= 1}
+                  onClick={() => setLogPage((p) => Math.max(1, p - 1))}
+                  className="px-3 py-1.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912] disabled:opacity-40 cursor-pointer font-semibold"
+                >
+                  Previous Page
+                </button>
+                <span className="text-[#786B61]">
+                  Page <strong>{currentLogsPage}</strong> of <strong>{totalLogPages}</strong>
+                </span>
+                <button
+                  type="button"
+                  disabled={currentLogsPage >= totalLogPages}
+                  onClick={() => setLogPage((p) => Math.min(totalLogPages, p + 1))}
+                  className="px-3 py-1.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912] disabled:opacity-40 cursor-pointer font-semibold"
+                >
+                  Next Page
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
@@ -2547,6 +2823,154 @@ export default function RFIDAdminPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* ========================================================================= */}
+      {/* MODAL 6: REPLACE LOST / DAMAGED KEYCARD                                   */}
+      {/* ========================================================================= */}
+      {replacingCard && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl border border-amber-300 p-6 sm:p-7 max-w-md w-full shadow-2xl space-y-5">
+            <div className="flex items-center justify-between border-b border-[#EFE3D6] pb-3">
+              <div className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-amber-700" />
+                <div>
+                  <span className="text-[10px] uppercase font-semibold text-amber-700">RE-ISSUANCE &amp; REVOCATION</span>
+                  <h3 className="font-serif text-lg font-bold text-[#241912]">Replace Lost/Damaged Keycard</h3>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setReplacingCard(null)}
+                className="text-gray-400 hover:text-gray-600 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200 text-xs space-y-1 text-amber-950">
+              <div className="flex justify-between">
+                <span>Room Assigned:</span>
+                <strong>Room #{replacingCard.assigned_room_number || replacingCard.room_number || 'N/A'}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span>Guest Name:</span>
+                <strong>{replacingCard.guest_name || replacingCard.holder_name}</strong>
+              </div>
+              <div className="flex justify-between">
+                <span>Revoking Card UID:</span>
+                <span className="font-mono text-rose-700 font-bold">{replacingCard.card_uid}</span>
+              </div>
+              {replacingCard.booking_reference && (
+                <div className="flex justify-between">
+                  <span>Stay Booking Ref:</span>
+                  <span className="font-mono text-[11px]">{replacingCard.booking_reference}</span>
+                </div>
+              )}
+            </div>
+
+            {replaceError && (
+              <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0 text-rose-500" />
+                <span>{replaceError}</span>
+              </div>
+            )}
+
+            <div className="space-y-4 text-xs">
+              <div>
+                <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
+                  Reason for Replacement
+                </label>
+                <select
+                  value={replaceReason}
+                  onChange={(e) => setReplaceReason(e.target.value)}
+                  className="w-full p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                >
+                  <option value="Physical Mifare Demagnetized">Physical Mifare Demagnetized / Chip Error</option>
+                  <option value="Guest Lost Card">Guest Lost Card</option>
+                  <option value="Damaged / Broken Keycard">Damaged / Broken Keycard</option>
+                  <option value="Security Revocation & Re-issue">Security Revocation &amp; Re-issue</option>
+                </select>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[11px] uppercase font-semibold text-[#786B61]">
+                    New Card UID Sequence
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handleScanReplaceCard}
+                    disabled={replaceScanning}
+                    className="text-[10px] text-amber-800 hover:text-amber-900 font-bold flex items-center gap-1 cursor-pointer disabled:opacity-40"
+                  >
+                    <Radio className={`w-3 h-3 ${replaceScanning ? 'animate-pulse text-amber-600' : ''}`} />
+                    <span>{replaceScanning ? 'Scanning Be-Tech Reader...' : 'Scan New Card on Reader'}</span>
+                  </button>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    required
+                    value={replaceNewUid}
+                    onChange={(e) => setReplaceNewUid(e.target.value)}
+                    placeholder="BT-57-XXXXXX or SA-LIFETIME-..."
+                    className="flex-1 font-mono text-xs p-2.5 rounded-lg border border-[#EFE3D6] text-[#241912]"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleScanReplaceCard}
+                    disabled={replaceScanning}
+                    className="px-3 py-2 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold flex items-center gap-1 cursor-pointer"
+                    title="Scan new card placed on USB reader"
+                  >
+                    <Radio className="w-3.5 h-3.5" />
+                    <span>Scan</span>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
+                  Issued By Staff
+                </label>
+                <input
+                  type="text"
+                  value={replaceStaff}
+                  onChange={(e) => setReplaceStaff(e.target.value)}
+                  className="w-full text-xs p-2.5 rounded-lg border border-[#EFE3D6] text-[#241912]"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#EFE3D6]">
+                <button
+                  type="button"
+                  onClick={() => setReplacingCard(null)}
+                  className="px-4 py-2 rounded-lg border border-gray-300 text-xs text-gray-700 cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={isReplacing || !replaceNewUid.trim()}
+                  onClick={handleExecuteReplaceCard}
+                  className="px-5 py-2.5 rounded-lg bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-bold cursor-pointer flex items-center gap-2 disabled:opacity-50"
+                >
+                  {isReplacing ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Replacing Keycard...</span>
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-3.5 h-3.5" />
+                      <span>Revoke Old &amp; Activate New</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

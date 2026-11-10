@@ -169,6 +169,34 @@ export async function POST(request: Request) {
         });
       }
 
+      case 'replace_card': {
+        const oldCardId = body.oldCardId || body.old_card_id || body.oldCardUid || body.old_card_uid;
+        const newCardUid = body.newCardUid || body.new_card_uid;
+        const issuedBy = body.issuedBy || body.issued_by || 'Front Desk';
+        const reason = body.reason || 'Lost/Damaged Keycard Replacement';
+
+        if (!oldCardId) {
+          return NextResponse.json(
+            { success: false, error: 'Old card identifier (oldCardId / oldCardUid) is required for replacement' },
+            { status: 400 }
+          );
+        }
+        if (!newCardUid) {
+          return NextResponse.json(
+            { success: false, error: 'New card UID sequence (newCardUid) is required' },
+            { status: 400 }
+          );
+        }
+
+        const result = repo.replaceRFIDCard(oldCardId, newCardUid, issuedBy, reason);
+        return NextResponse.json({
+          success: true,
+          message: `Keycard ${oldCardId} revoked and replaced with new card ${result.newCard.card_uid} for Room ${result.newCard.assigned_room_number}`,
+          oldCard: result.oldCard,
+          newCard: result.newCard,
+        });
+      }
+
       case 'purge_mock_data':
       case 'reset_production': {
         repo.purgeAllRFIDCards();
