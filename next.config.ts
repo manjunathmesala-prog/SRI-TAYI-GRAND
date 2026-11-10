@@ -57,6 +57,15 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "maps.googleapis.com" },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/403-forbidden',
+        destination: '/admin/403',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

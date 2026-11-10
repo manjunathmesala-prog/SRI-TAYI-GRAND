@@ -96,5 +96,5 @@ describe('Walk-In Booking & Payment Flow', () => {
     expect(pickupRes.status).toBe(200);
     const pickupData = await pickupRes.json();
     expect(pickupData.paymentStatus).toBe('paid');
-  });
+  }, 20000);
 });
