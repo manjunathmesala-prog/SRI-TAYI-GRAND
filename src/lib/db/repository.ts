@@ -543,17 +543,36 @@ export class HotelRepository {
       throw new Error(`Cannot assign room: Booking '${bookingRef}' has been cancelled.`);
     }
 
-    // Concurrency Lock: verify room is not occupied or assigned to another active reservation
-    if (room.operational_status === 'occupied' && room.current_booking_ref !== bookingRef) {
-      throw new Error(`Conflict: Room ${room.room_number} is already occupied by ${room.current_guest_name || 'another guest'}.`);
+    // Concurrency Lock: date-aware conflict check for room assignment
+    const today = new Date().toISOString().slice(0, 10);
+    const isTodayStay = booking.check_in_date ? (booking.check_in_date <= today && booking.check_out_date > today) : true;
+
+    if (booking.check_in_date && booking.check_out_date) {
+      const hasDateConflict = this.bookings.some(
+        (b) =>
+          b.booking_reference !== bookingRef &&
+          b.status !== 'cancelled' &&
+          b.status !== 'checked_out' &&
+          (b.assigned_room_id === room.id || b.assigned_room_number === room.room_number) &&
+          b.check_in_date < booking.check_out_date &&
+          b.check_out_date > booking.check_in_date
+      );
+      if (hasDateConflict) {
+        throw new Error(`Conflict: Room ${room.room_number} is already booked for overlapping dates.`);
+      }
     }
 
-    if (
-      room.operational_status === 'reserved' &&
-      room.current_booking_ref &&
-      room.current_booking_ref.toLowerCase() !== bookingRef.toLowerCase()
-    ) {
-      throw new Error(`Conflict: Room ${room.room_number} is already reserved for booking ${room.current_booking_ref}.`);
+    if (isTodayStay) {
+      if (room.operational_status === 'occupied' && room.current_booking_ref !== bookingRef) {
+        throw new Error(`Conflict: Room ${room.room_number} is already occupied today by ${room.current_guest_name || 'another guest'}.`);
+      }
+      if (
+        room.operational_status === 'reserved' &&
+        room.current_booking_ref &&
+        room.current_booking_ref.toLowerCase() !== bookingRef.toLowerCase()
+      ) {
+        throw new Error(`Conflict: Room ${room.room_number} is already reserved today for booking ${room.current_booking_ref}.`);
+      }
     }
 
     // Release previous room reservation if reassigning to a different room
@@ -568,10 +587,14 @@ export class HotelRepository {
       }
     }
 
-    // Atomically assign
-    room.current_booking_ref = bookingRef;
-    room.current_guest_name = guestName;
-    room.operational_status = 'reserved';
+    // Atomically assign (only set current active pointer if stay covers today)
+    if (isTodayStay) {
+      room.current_booking_ref = bookingRef;
+      room.current_guest_name = guestName;
+      if (room.operational_status !== 'occupied') {
+        room.operational_status = 'reserved';
+      }
+    }
 
     // Update booking
     booking.assigned_room_id = room.id;
@@ -850,12 +873,32 @@ export class HotelRepository {
     const catRooms = this.rooms.filter(
       (r) => (r.category_id === bookingData.category_id || normalizeCategoryId(r.category_id) === normalizedCatId) && r.is_active
     );
-    const availableRooms = catRooms.filter((r) => r.operational_status === 'available');
+    const checkIn = bookingData.check_in_date;
+    const checkOut = bookingData.check_out_date;
+    const today = new Date().toISOString().slice(0, 10);
+    const isTodayStay = checkIn ? checkIn <= today && checkOut > today : true;
+
+    const availableRooms = catRooms.filter((r) => {
+      if (checkIn && checkOut) {
+        if (isTodayStay && (r.operational_status === 'maintenance' || r.operational_status === 'occupied')) {
+          return false;
+        }
+        const hasOverlap = this.bookings.some((b) => {
+          if (b.status === 'cancelled' || b.status === 'checked_out') return false;
+          const matchesRoom = b.assigned_room_id === r.id || b.assigned_room_number === r.room_number;
+          if (!matchesRoom) return false;
+          return b.check_in_date < checkOut && b.check_out_date > checkIn;
+        });
+        return !hasOverlap;
+      }
+      return r.operational_status === 'available';
+    });
+
     const requestedCount = bookingData.rooms_count || 1;
 
     if (availableRooms.length < requestedCount) {
       throw new Error(
-        `Overbooking Prevention: Category has only ${availableRooms.length} room(s) available, but ${requestedCount} was requested.`
+        `Overbooking Prevention: Category has only ${availableRooms.length} room(s) available for these dates, but ${requestedCount} was requested.`
       );
     }
 
@@ -1761,6 +1804,23 @@ export class HotelRepository {
       totalCashOut,
       currentBalance,
     };
+  }
+
+  async ensureCashbookLoaded(): Promise<void> {
+    try {
+      const [pgCS, pgCT] = await Promise.all([
+        loadCashShiftsFromSupabase(),
+        loadCashTransactionsFromSupabase(),
+      ]);
+      if (pgCS && pgCS.length > 0) {
+        this.cashShifts = pgCS;
+      }
+      if (pgCT && pgCT.length > 0) {
+        this.cashTransactions = pgCT;
+      }
+    } catch (err) {
+      console.warn('[ENSURE CASHBOOK LOAD WARN]', err);
+    }
   }
 
   // ==============================================================================

@@ -562,4 +562,17 @@ export const adminOperations = {
     cashbookClient.invalidate();
     return data;
   },
+
+  async createBooking(bookingData: any, actor = 'Front Desk') {
+    adminOperations.invalidateFullState();
+    const res = await fetch('/api/admin/operations', {
+      method: 'POST',
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ action: 'create_booking', bookingData, actor }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to create booking');
+    adminOperations.invalidateFullState();
+    return data;
+  },
 };

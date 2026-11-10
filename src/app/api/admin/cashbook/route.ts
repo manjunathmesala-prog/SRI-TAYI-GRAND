@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
 import { verifyStaffRole } from '@/lib/auth';
+import { syncCashShiftToSupabase, syncCashTransactionToSupabase } from '@/lib/db/supabase-sync';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,6 +11,9 @@ export async function GET(req: NextRequest) {
     if (!auth.authorized) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
     }
+
+    // Ensure state is rehydrated from PostgreSQL database
+    await repo.ensureCashbookLoaded();
 
     const { searchParams } = new URL(req.url);
     const shiftId = searchParams.get('shiftId') || undefined;
@@ -40,6 +44,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
     }
 
+    // Rehydrate latest shifts & transactions before mutating
+    await repo.ensureCashbookLoaded();
+
     const body = await req.json();
     const { action } = body;
     const staffName = auth.session?.name || body.performedBy || 'Front Desk Staff';
@@ -56,6 +63,10 @@ export async function POST(req: NextRequest) {
         },
         staffName
       );
+
+      // Persist to PostgreSQL
+      await syncCashShiftToSupabase(shift);
+
       return NextResponse.json({
         success: true,
         message: `Cash drawer shift #${shift.shift_number} successfully opened.`,
@@ -80,6 +91,10 @@ export async function POST(req: NextRequest) {
         },
         staffName
       );
+
+      // Persist to PostgreSQL
+      await syncCashShiftToSupabase(shift);
+
       return NextResponse.json({
         success: true,
         message: `Shift #${shift.shift_number} closed with discrepancy ₹${shift.discrepancy}.`,
@@ -109,6 +124,9 @@ export async function POST(req: NextRequest) {
         },
         staffName
       );
+
+      // Persist to PostgreSQL
+      await syncCashTransactionToSupabase(tx);
 
       return NextResponse.json({
         success: true,
