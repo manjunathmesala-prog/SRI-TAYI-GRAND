@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
         rooms_count: 1,
         status: body.instantCheckIn ? 'checked_in' : 'confirmed',
         payment_status: isPrepaid ? 'successful' : 'pay_at_hotel',
-        payment_method: isPrepaid ? 'bank_transfer' : 'cash',
+        payment_method: isPrepaid ? 'online' : 'pay_at_hotel',
         subtotal_amount: subtotal,
         tax_amount: tax,
         additional_charges_amount: 0,
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
     }
 
     notifySuperAdmin({
-      eventType: 'EVENT_BOOKING_CREATED',
+      eventType: 'EVENT_NEW_BOOKING',
       payload: {
         guestName: newBooking.guest_name,
         bookingReference: newBooking.booking_reference,
