@@ -327,6 +327,119 @@ export async function loadBookingsFromSupabase(): Promise<Booking[]> {
   }
 }
 
+export async function getBookingFromSupabase(code?: string, ref?: string): Promise<Booking | null> {
+  if (typeof window !== 'undefined') return null;
+  const cleanCode = (code || '').trim();
+  const cleanRef = (ref || '').trim();
+  if (!cleanCode && !cleanRef) return null;
+
+  const db = getSupabasePgPool();
+  if (!db) return null;
+
+  try {
+    const client = await db.connect();
+    try {
+      const res = await client.query(
+        `SELECT 
+          b.id::text as id,
+          b.booking_reference,
+          b.guest_id::text as guest_id,
+          COALESCE(g.full_name, 'Valued Guest') as guest_name,
+          COALESCE(g.phone, '') as guest_phone,
+          COALESCE(g.email, '') as guest_email,
+          b.check_in_date,
+          b.check_out_date,
+          COALESCE(b.adults_count, 1) as adults_count,
+          COALESCE(b.children_count, 0) as children_count,
+          COALESCE(b.rooms_count, 1) as rooms_count,
+          b.status,
+          b.payment_status,
+          COALESCE(b.payment_method, 'cash') as payment_method,
+          COALESCE(b.subtotal_amount, 0)::float as subtotal_amount,
+          COALESCE(b.tax_amount, 0)::float as tax_amount,
+          COALESCE(b.total_amount, 0)::float as total_amount,
+          COALESCE(b.paid_amount, 0)::float as paid_amount,
+          COALESCE(b.booking_source, 'walk_in_qr') as booking_source,
+          b.walk_in_token,
+          b.pickup_code,
+          b.room_assigned_by,
+          b.keycard_uid,
+          b.keycard_issued_at,
+          b.id_proof_type,
+          b.id_proof_number,
+          b.special_requests,
+          b.checked_in_at,
+          b.checked_out_at,
+          b.assigned_room_id,
+          b.assigned_room_number,
+          COALESCE(b.category_id, 'cat-double-03') as category_id,
+          COALESCE(b.category_name, 'Double Room') as category_name,
+          b.created_at
+        FROM bookings b
+        LEFT JOIN guests g ON b.guest_id = g.id
+        WHERE ($1 != '' AND b.pickup_code ILIKE $1)
+           OR ($2 != '' AND b.booking_reference ILIKE $2)
+        LIMIT 1;`,
+        [cleanCode, cleanRef]
+      );
+
+      if (res.rows.length === 0) return null;
+
+      const row = res.rows[0];
+      const formatDate = (val: any) => {
+        if (!val) return '';
+        if (val instanceof Date) return val.toISOString().split('T')[0];
+        const s = String(val);
+        return s.includes('T') ? s.split('T')[0] : s;
+      };
+
+      return {
+        id: `bk-pg-${row.id}`,
+        booking_reference: row.booking_reference,
+        guest_id: row.guest_id || 'gst-remote',
+        guest_name: row.guest_name,
+        guest_phone: row.guest_phone,
+        guest_email: row.guest_email,
+        check_in_date: formatDate(row.check_in_date),
+        check_out_date: formatDate(row.check_out_date),
+        category_id: row.category_id,
+        category_name: row.category_name,
+        assigned_room_id: row.assigned_room_id || undefined,
+        assigned_room_number: row.assigned_room_number || undefined,
+        adults_count: Number(row.adults_count) || 1,
+        children_count: Number(row.children_count) || 0,
+        rooms_count: Number(row.rooms_count) || 1,
+        status: row.status,
+        payment_status: row.payment_status,
+        payment_method: row.payment_method,
+        subtotal_amount: Number(row.subtotal_amount) || 0,
+        room_charges_amount: Number(row.subtotal_amount) || 0,
+        tax_amount: Number(row.tax_amount) || 0,
+        additional_charges_amount: 0,
+        total_amount: Number(row.total_amount) || 0,
+        paid_amount: Number(row.paid_amount) || 0,
+        booking_source: row.booking_source,
+        walk_in_token: row.walk_in_token,
+        pickup_code: row.pickup_code,
+        room_assigned_by: row.room_assigned_by,
+        keycard_uid: row.keycard_uid,
+        keycard_issued_at: row.keycard_issued_at ? new Date(row.keycard_issued_at).toISOString() : undefined,
+        id_proof_type: row.id_proof_type,
+        id_proof_number: row.id_proof_number,
+        special_requests: row.special_requests,
+        checked_in_at: row.checked_in_at,
+        checked_out_at: row.checked_out_at,
+        created_at: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
+      };
+    } finally {
+      client.release();
+    }
+  } catch (err: unknown) {
+    console.warn('[SUPABASE GET BOOKING WARN]', err instanceof Error ? err.message : String(err));
+    return null;
+  }
+}
+
 // ==============================================================================
 // 2. PAYMENTS SYNCHRONIZATION
 // ==============================================================================

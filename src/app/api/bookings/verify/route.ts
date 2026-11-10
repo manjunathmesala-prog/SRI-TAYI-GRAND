@@ -3,6 +3,7 @@ import { repo } from '@/lib/db/repository';
 import { notifySuperAdmin } from '@/lib/notifications/engine';
 import { verifyPaymentSignature, inrToPaise } from '@/lib/razorpay';
 import { sendNotification } from '@/lib/notifications';
+import { getBookingFromSupabase } from '@/lib/db/supabase-sync';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +15,11 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Missing reference' }, { status: 400 });
     }
 
-    const booking = repo.getBookingByReference(reference);
+    let booking = repo.getBookingByReference(reference);
+    if (!booking) {
+      booking = (await getBookingFromSupabase(undefined, reference)) || undefined;
+      if (booking) repo.upsertBooking(booking);
+    }
     if (!booking) {
       return NextResponse.json({ error: 'Booking not found' }, { status: 404 });
     }
@@ -42,7 +47,11 @@ export async function POST(request: Request) {
       );
     }
 
-    const booking = repo.getBookingByReference(bookingReference);
+    let booking = repo.getBookingByReference(bookingReference);
+    if (!booking) {
+      booking = (await getBookingFromSupabase(undefined, bookingReference)) || undefined;
+      if (booking) repo.upsertBooking(booking);
+    }
     if (!booking) {
       return NextResponse.json(
         { error: 'Booking reference not found' },

@@ -602,6 +602,18 @@ export class HotelRepository {
     );
   }
 
+  upsertBooking(booking: Booking): void {
+    if (!booking || !booking.booking_reference) return;
+    const idx = this.bookings.findIndex(
+      (b) => b.booking_reference.toLowerCase() === booking.booking_reference.toLowerCase()
+    );
+    if (idx >= 0) {
+      this.bookings[idx] = { ...this.bookings[idx], ...booking };
+    } else {
+      this.bookings.unshift(booking);
+    }
+  }
+
   createFrontDeskWalkIn(params: {
     guestName: string;
     guestPhone: string;

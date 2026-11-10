@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
+import { getBookingFromSupabase } from '@/lib/db/supabase-sync';
 
 export const dynamic = 'force-dynamic';
 
@@ -7,19 +8,40 @@ export const dynamic = 'force-dynamic';
  * Endpoint: GET /api/walk-in/pickup-status?code=TG-8821&ref=TG-W-...
  * Returns live status of a walk-in booking for the customer's pickup pass screen.
  * Formatted to support both Anantha-style camelCase clients and Tayi-style snake_case clients.
+ * Queries Supabase PostgreSQL to support multi-device serverless synchronization across Vercel Lambdas.
  */
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const code = searchParams.get('code') || '';
-    const ref = searchParams.get('ref') || '';
+    const code = (searchParams.get('code') || '').trim();
+    const ref = (searchParams.get('ref') || '').trim();
 
-    const bookings = repo.getBookings();
-    const booking = bookings.find(
+    if (!code && !ref) {
+      return NextResponse.json(
+        { success: false, error: 'Pickup code or booking reference is required' },
+        { status: 400 }
+      );
+    }
+
+    // 1. Check local in-memory cache first
+    let booking = repo.getBookings().find(
       (b) =>
         (code && b.pickup_code?.toLowerCase() === code.toLowerCase()) ||
         (ref && b.booking_reference.toLowerCase() === ref.toLowerCase())
     );
+
+    // 2. Authoritative live check: Query Supabase if not in memory or if room not yet assigned
+    if (!booking || !booking.assigned_room_number || booking.status !== 'checked_in') {
+      try {
+        const remote = await getBookingFromSupabase(code, ref);
+        if (remote) {
+          booking = remote;
+          repo.upsertBooking(remote);
+        }
+      } catch (dbErr) {
+        console.warn('[PICKUP STATUS DB FETCH WARN]', dbErr);
+      }
+    }
 
     if (!booking) {
       return NextResponse.json(

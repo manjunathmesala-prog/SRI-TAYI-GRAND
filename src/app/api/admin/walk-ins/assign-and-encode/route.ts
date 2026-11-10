@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
 import { verifyStaffRole } from '@/lib/auth';
+import { getBookingFromSupabase } from '@/lib/db/supabase-sync';
 
 /**
  * Endpoint: POST /api/admin/walk-ins/assign-and-encode
@@ -43,7 +44,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 1. Assign room and issue key in HotelRepository
+    // 1. Ensure booking is loaded from Supabase
+    let booking = repo.getBookingByReference(ref);
+    if (!booking) {
+      booking = (await getBookingFromSupabase(undefined, ref)) || undefined;
+      if (booking) repo.upsertBooking(booking);
+    }
+
+    // 2. Assign room and issue key in HotelRepository
     const result = repo.assignRoomAndIssueWalkInKey({
       bookingReference: ref,
       roomNumber: room,

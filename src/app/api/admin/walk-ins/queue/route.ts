@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
 import { verifyStaffRole } from '@/lib/auth';
+import { loadBookingsFromSupabase } from '@/lib/db/supabase-sync';
 
 /**
  * Endpoint: GET /api/admin/walk-ins/queue
@@ -13,6 +14,10 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: auth.error || 'Unauthorized' }, { status: 403 });
     }
 
+    const remoteBookings = await loadBookingsFromSupabase();
+    if (remoteBookings && remoteBookings.length > 0) {
+      remoteBookings.forEach((b) => repo.upsertBooking(b));
+    }
     const queue = repo.getWalkInQueue();
     const cleanRooms = repo.getAvailableCleanRooms();
     const allRooms = repo.getRooms();
