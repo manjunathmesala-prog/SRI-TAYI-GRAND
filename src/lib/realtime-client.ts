@@ -575,4 +575,39 @@ export const adminOperations = {
     adminOperations.invalidateFullState();
     return data;
   },
+
+  async assignHousekeeper(roomId: string, staffId: string, staffName: string) {
+    adminOperations.invalidateFullState();
+    const res = await fetch('/api/admin/housekeeping', {
+      method: 'POST',
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ action: 'assign_housekeeper', roomId, staffId, staffName }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to assign housekeeper');
+    adminOperations.invalidateFullState();
+    return data;
+  },
+
+  async completeHousekeepingTurnaround(params: {
+    roomId: string;
+    checklist: any;
+    inspectedBy?: string;
+  }) {
+    adminOperations.invalidateFullState();
+    const res = await fetch('/api/admin/housekeeping', {
+      method: 'POST',
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({
+        action: 'complete_turnaround',
+        roomId: params.roomId,
+        checklist: params.checklist,
+        inspectedBy: params.inspectedBy,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to complete turnaround inspection');
+    adminOperations.invalidateFullState();
+    return data;
+  },
 };
