@@ -2555,6 +2555,24 @@ export class HotelRepository {
   ): RFIDCard {
     const randSuffix = Math.floor(100 + Math.random() * 900);
     const cardUid = customCardUid || `SA-LIFETIME-${randSuffix}`;
+
+    // Prevent duplicate entries if a card with this UID already exists
+    const existingIdx = this.rfidCards.findIndex((c) => c.card_uid === cardUid);
+    if (existingIdx !== -1) {
+      this.rfidCards[existingIdx] = {
+        ...this.rfidCards[existingIdx],
+        card_label: cardLabel,
+        holder_name: holderName,
+        status: 'active',
+        activated_at: new Date().toISOString(),
+        expires_at: '2099-12-31T23:59:59.000Z',
+        issued_by_name: issuedBy,
+      };
+      savePersistedCards(this.rfidCards);
+      syncCardToSupabase(this.rfidCards[existingIdx]);
+      return this.rfidCards[existingIdx];
+    }
+
     const newCard: RFIDCard = {
       id: `crd-sa-${Date.now()}`,
       card_uid: cardUid,
@@ -2601,6 +2619,23 @@ export class HotelRepository {
   ): RFIDCard {
     const randSuffix = Math.floor(100 + Math.random() * 900);
     const cardUid = customCardUid || `CLN-HK-${randSuffix}`;
+
+    // Prevent duplicate entries if a card with this UID already exists
+    const existingIdx = this.rfidCards.findIndex((c) => c.card_uid === cardUid);
+    if (existingIdx !== -1) {
+      this.rfidCards[existingIdx] = {
+        ...this.rfidCards[existingIdx],
+        card_label: cardLabel,
+        holder_name: holderName,
+        status: 'active',
+        activated_at: new Date().toISOString(),
+        issued_by_name: issuedBy,
+      };
+      savePersistedCards(this.rfidCards);
+      syncCardToSupabase(this.rfidCards[existingIdx]);
+      return this.rfidCards[existingIdx];
+    }
+
     const newCard: RFIDCard = {
       id: `crd-cln-${Date.now()}`,
       card_uid: cardUid,
@@ -2647,6 +2682,27 @@ export class HotelRepository {
     customCardUid?: string
   ): RFIDCard {
     const cardUid = customCardUid || `BT-57-${Math.floor(1000020000 + Math.random() * 99999)}`;
+
+    // Prevent duplicate entries if a card with this UID already exists
+    const existingIdx = this.rfidCards.findIndex((c) => c.card_uid === cardUid);
+    if (existingIdx !== -1) {
+      this.rfidCards[existingIdx] = {
+        ...this.rfidCards[existingIdx],
+        card_label: `Guest Card (Room ${roomNumber})`,
+        assigned_room_number: roomNumber,
+        booking_reference: bookingRef,
+        guest_name: guestName,
+        holder_name: guestName,
+        status: 'active',
+        activated_at: new Date().toISOString(),
+        expires_at: expiresAt || new Date(Date.now() + 48 * 3600 * 1000).toISOString(),
+        issued_by_name: issuedBy,
+      };
+      savePersistedCards(this.rfidCards);
+      syncCardToSupabase(this.rfidCards[existingIdx]);
+      return this.rfidCards[existingIdx];
+    }
+
     const newCard: RFIDCard = {
       id: `crd-${Date.now()}`,
       card_uid: cardUid,
@@ -2802,19 +2858,69 @@ export class HotelRepository {
     return { oldCard, newCard };
   }
 
-  deleteRFIDCard(cardId: string): boolean {
-    const cardToDelete = this.rfidCards.find((c) => c.id === cardId || c.card_uid === cardId);
-    const initialLen = this.rfidCards.length;
-    this.rfidCards = this.rfidCards.filter((c) => c.id !== cardId && c.card_uid !== cardId);
-
-    if (this.rfidCards.length !== initialLen) {
-      savePersistedCards(this.rfidCards);
-      if (cardToDelete) {
-        deleteCardFromSupabase(cardToDelete.card_uid);
-      }
-      return true;
+  async deleteRFIDCard(cardId: string, cardUid?: string): Promise<boolean> {
+    // 1. Refresh latest cards from disk storage
+    const persisted = loadPersistedCards();
+    if (persisted && persisted.length > 0) {
+      this.rfidCards = persisted;
     }
-    return false;
+
+    // 2. Locate target card and its physical UID
+    const cardToDelete = this.rfidCards.find(
+      (c) => c.id === cardId || c.card_uid === cardId || (cardUid && c.card_uid === cardUid)
+    );
+
+    const targetUid = cardUid || cardToDelete?.card_uid || cardId;
+    const targetId = cardToDelete?.id || cardId;
+
+    const initialLen = this.rfidCards.length;
+
+    // 3. Purge all cards matching targetId OR targetUid OR cardId (including duplicate rows)
+    this.rfidCards = this.rfidCards.filter(
+      (c) =>
+        c.id !== cardId &&
+        c.id !== targetId &&
+        c.card_uid !== cardId &&
+        c.card_uid !== targetUid
+    );
+
+    const wasRemoved = this.rfidCards.length !== initialLen;
+
+    // 4. Save clean state to persistent disk storage
+    savePersistedCards(this.rfidCards);
+
+    // 5. Delete from Supabase PostgreSQL cloud database permanently
+    try {
+      if (targetUid) {
+        await deleteCardFromSupabase(targetUid);
+      }
+      if (targetId && targetId !== targetUid) {
+        await deleteCardFromSupabase(targetId);
+      }
+    } catch (err) {
+      console.warn('[RFID REPO] Supabase card deletion warning:', err);
+    }
+
+    // 6. Log audit event
+    if (cardToDelete || wasRemoved) {
+      this.logRFIDEvent(
+        {
+          card_uid: targetUid,
+          card_type: cardToDelete?.card_type || 'guest',
+          card_label: cardToDelete?.card_label || `Card (${targetUid})`,
+          device_name: 'Central-RFID-IoT-Gateway',
+          room_number: cardToDelete?.assigned_room_number || cardToDelete?.room_number || 'N/A',
+          event_type: 'access_denied',
+          action_type: 'door_lock',
+          holder_name: cardToDelete?.holder_name || cardToDelete?.guest_name || 'Card Holder',
+          source: 'encoder',
+          reason: `Card ${targetUid} permanently deleted and revoked from registry`,
+        },
+        'Front Desk'
+      );
+    }
+
+    return true;
   }
 
   extendGuestCardValidity(

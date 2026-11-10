@@ -154,18 +154,19 @@ export async function POST(request: Request) {
       }
 
       case 'delete_card': {
-        const cardId = body.cardId || body.card_id || body.cardUid || body.card_uid;
-        if (!cardId) {
+        const cardId = body.cardId || body.card_id;
+        const cardUid = body.cardUid || body.card_uid;
+        if (!cardId && !cardUid) {
           return NextResponse.json(
             { success: false, error: 'Card ID or Card UID is required' },
             { status: 400 }
           );
         }
 
-        const deleted = repo.deleteRFIDCard(cardId);
+        const deleted = await repo.deleteRFIDCard(cardId || cardUid, cardUid);
         return NextResponse.json({
           success: deleted,
-          message: deleted ? 'Card removed from system' : 'Card not found',
+          message: deleted ? 'Card permanently removed from database and registry' : 'Card not found',
         });
       }
 

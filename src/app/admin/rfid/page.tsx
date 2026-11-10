@@ -705,8 +705,15 @@ export default function RFIDAdminPage() {
   };
 
   // Delete / Revoke Card
-  const handleDeleteCard = async (cardId: string) => {
+  const handleDeleteCard = async (cardId: string, cardUid?: string) => {
     if (!confirm('Are you sure you want to permanently delete/revoke this card?')) return;
+
+    // 1. Optimistic removal: Immediately filter out matching card(s) from local state
+    const targetUid = cardUid || cards.find((c) => c.id === cardId)?.card_uid;
+    setCards((prev) =>
+      prev.filter((c) => c.id !== cardId && (!targetUid || c.card_uid !== targetUid))
+    );
+
     try {
       const res = await fetch('/api/rfid/cards', {
         method: 'POST',
@@ -714,16 +721,22 @@ export default function RFIDAdminPage() {
         body: JSON.stringify({
           action: 'delete_card',
           cardId,
+          cardUid: targetUid,
         }),
       });
       const data = await res.json();
       if (data.success) {
         setHardwareMessage({
-          text: 'Card permanently revoked and removed from registry.',
+          text: 'Card permanently revoked and removed from registry and database.',
           type: 'info',
         });
-        refreshAllData();
+      } else {
+        setHardwareMessage({
+          text: data.error || 'Failed to delete card',
+          type: 'error',
+        });
       }
+      refreshAllData();
     } catch {
       refreshAllData();
     }
@@ -1217,7 +1230,7 @@ export default function RFIDAdminPage() {
                               {c.status === 'active' ? 'Deactivate' : 'Activate'}
                             </button>
                             <button
-                              onClick={() => handleDeleteCard(c.id)}
+                              onClick={() => handleDeleteCard(c.id, c.card_uid)}
                               className="p-1 rounded text-gray-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
                               title="Delete Card"
                             >
@@ -1361,7 +1374,7 @@ export default function RFIDAdminPage() {
                               {c.status === 'active' ? 'Deactivate' : 'Activate'}
                             </button>
                             <button
-                              onClick={() => handleDeleteCard(c.id)}
+                              onClick={() => handleDeleteCard(c.id, c.card_uid)}
                               className="p-1 rounded text-gray-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
                               title="Delete Card"
                             >
@@ -1919,7 +1932,7 @@ export default function RFIDAdminPage() {
                             {c.status === 'active' ? 'Deactivate' : 'Activate'}
                           </button>
                           <button
-                            onClick={() => handleDeleteCard(c.id)}
+                            onClick={() => handleDeleteCard(c.id, c.card_uid)}
                             className="p-1 rounded text-gray-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
                             title="Delete"
                           >
