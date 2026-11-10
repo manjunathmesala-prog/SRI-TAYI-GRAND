@@ -47,16 +47,38 @@
 ---
 
 ## 4. CLOUDFLARE HTTPS TUNNEL ARCHITECTURE (LIFETIME FREE)
+- **Currently Active Production Tunnel:**
+  - **Live URL**: `https://pavilion-divine-oliver-frames.trycloudflare.com`
+  - **Local Target**: `http://127.0.0.1:8989` (Be-Tech USB BIS 5.7 Mifare Encoder Bridge)
+  - **Status File**: `latest_production_tunnel_url.txt`
+  - **Verification**: `GET https://pavilion-divine-oliver-frames.trycloudflare.com/api/status` returns `{"status":"ok","service":"SriTayiGrand-RFID-Bridge","port":1,"readerType":4}`.
 - **Why Cloudflare Tunnel is Used:**
   - Browsers enforce a strict **Mixed Content Policy**: when front desk staff open `https://sritayigrand.com` (secure HTTPS), the browser strictly blocks direct requests to unencrypted `http://127.0.0.1:8989`.
   - Cloudflare Tunnel creates an encrypted HTTPS tunnel directly to local port 8989, allowing the cloud dashboard to safely issue, read, and write physical keycards.
   - **No Public IP or Port Forwarding Needed**: Operates via outbound encrypted tunnels through hotel broadband (Airtel, Jio, ACT) without touching router NAT.
 - **Cost & Terms:**
   - **100% Lifetime Free** under Cloudflare Zero Trust core infrastructure ($0/month, no trial expiration, no credit card required).
-  - Mode 1: Quick Tunnel (`cloudflared tunnel --url http://127.0.0.1:8989`) gives `https://...trycloudflare.com` for instant zero-configuration operation via `start-production-rfid-tunnel.bat`.
-  - Mode 2: Permanent Named Subdomain (e.g., `rfid.sritayigrand.com`) is also 100% lifetime free, keeping the URL permanent across reception PC reboots.
-- **Local Fallback:**
-  - When accessing locally on `http://localhost:3000`, the tunnel is optional and direct HTTP communication to `127.0.0.1:8989` is supported.
+- **What Happens When the Reception PC Restarts? (Recovery Protocol):**
+  - **1. Be-Tech Hardware Bridge (Port 8989):**
+    - The C# hardware bridge (`SriTayiGrandKeycardBridge.exe`) is configured for permanent auto-start via 3 redundant layers (`install-rfid-service-permanent.bat` / `install-service.ps1`):
+      - Windows Registry Auto-Run: `HKCU:\Software\Microsoft\Windows\CurrentVersion\Run\SriTayiGrand_RFID_Bridge`
+      - Startup Folder shortcut: `shell:startup\SriTayiGrand_RFID_Bridge.lnk`
+      - Windows Scheduled Task: `SriTayiGrand_RFID_Bridge` (AtLogOn trigger)
+    - Result: **The local bridge automatically restarts on PC boot without any staff interaction.**
+  - **2. Cloudflare Quick Tunnel (`trycloudflare.com`):**
+    - When the PC reboots, the ephemeral quick tunnel disconnects.
+    - Front desk staff launches `Start_Production_RFID.bat` (or placed in `shell:startup`):
+      1. Verifies local bridge is running on port 8989 (starts it if stopped).
+      2. Runs `cloudflared tunnel --url http://127.0.0.1:8989`.
+      3. Automatically extracts the new URL and updates `latest_production_tunnel_url.txt`.
+      4. Automatically executes `register-tunnel-supabase.js` to persist the active tunnel URL into Supabase cloud table `integrations` (`service_name = 'rfid_bridge'`).
+      5. Automatically registers with cloud Next.js backend (`/api/rfid/bridge`) and copies URL to Windows clipboard.
+    - In `/admin/rfid`, clicking *Host Settings* will reflect the live tunnel URL.
+  - **3. Permanent Named Domain (`rfid.sritayigrand.com`) (Zero-Maintenance Setup):**
+    - To eliminate URL changes completely on PC reboots, a permanent named tunnel can be installed as a Windows Service (`cloudflared service install <token>`).
+    - The URL remains fixed forever at `https://rfid.sritayigrand.com`, running in the background upon system boot with 0 clicks required.
+  - **4. Local Reception Terminal Fallback:**
+    - When accessing locally on `http://localhost:3000`, the tunnel is optional and direct HTTP communication to `127.0.0.1:8989` is supported without internet dependency.
 
 ---
 
