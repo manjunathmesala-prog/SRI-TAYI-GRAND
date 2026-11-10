@@ -3643,6 +3643,7 @@ if (
   typeof (global.__hotelRepo as any).getFullState !== 'function' ||
   typeof (global.__hotelRepo as any).getReviews !== 'function' ||
   typeof (global.__hotelRepo as any).getCashShifts !== 'function' ||
+  typeof (global.__hotelRepo as any).ensureCashbookLoaded !== 'function' ||
   typeof (global.__hotelRepo as any).getMaintenanceTickets !== 'function'
 ) {
   global.__hotelRepo = new HotelRepository();

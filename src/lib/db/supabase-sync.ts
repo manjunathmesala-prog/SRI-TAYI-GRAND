@@ -43,7 +43,7 @@ export function getSupabasePgPool(): any {
     const { Pool } = req('pg');
 
     const host = process.env.SUPABASE_DB_HOST || 'aws-0-ap-northeast-1.pooler.supabase.com';
-    const port = Number(process.env.SUPABASE_DB_PORT) || 6543;
+    const port = Number(process.env.SUPABASE_DB_PORT) || 5432;
     const database = process.env.SUPABASE_DB_NAME || 'postgres';
     const user = process.env.SUPABASE_DB_USER || 'postgres.wercvaimozbbkbwmuoct';
     const password = process.env.SUPABASE_DB_PASSWORD || 'Vaynex@2026';
