@@ -83,7 +83,6 @@ export const INITIAL_ROOM_CATEGORIES: RoomCategory[] = [
       '/images/hotel/room-twin-render-enhanced.png',
       '/images/hotel/room-headboard-detail-photo-enhanced.png',
       '/images/hotel/room-corner-photo-enhanced.png',
-      '/images/hotel/suite-bathroom.jpg',
     ],
     amenities: [
       'Fully AC',
@@ -126,7 +125,6 @@ export const INITIAL_ROOM_CATEGORIES: RoomCategory[] = [
       '/images/hotel/room-double-bed-photo-enhanced.png',
       '/images/hotel/room-corner-photo-enhanced.png',
       '/images/hotel/room-headboard-detail-photo-enhanced.png',
-      '/images/hotel/suite-bathroom.jpg',
     ],
     amenities: [
       'Fully AC',
@@ -169,8 +167,6 @@ export const INITIAL_ROOM_CATEGORIES: RoomCategory[] = [
       '/images/hotel/suite-seating-photo-enhanced.png',
       '/images/hotel/room-headboard-detail-photo-enhanced.png',
       '/images/hotel/room-corner-photo-enhanced.png',
-      '/images/hotel/suite-balcony-seating.jpg',
-      '/images/hotel/suite-bathroom.jpg',
     ],
     amenities: [
       'Fully AC',
@@ -249,7 +245,6 @@ export const INITIAL_GALLERY_IMAGES: GalleryItem[] = [
   { id: 'gal-9', title: 'Luxury Guest Room Work & Dressing Corner', category: 'rooms', image_url: '/images/hotel/room-corner-photo-enhanced.png', display_order: 9 },
   { id: 'gal-10', title: 'Acoustic Headboard & Ambient Lighting Detail', category: 'rooms', image_url: '/images/hotel/room-headboard-detail-photo-enhanced.png', display_order: 10 },
   { id: 'gal-11', title: 'Hotel Building Exterior Dusk Perspective', category: 'exterior', image_url: '/images/hotel/hotel-exterior-hero.jpg', display_order: 11 },
-  { id: 'gal-12', title: 'Suite Balcony View & Seating', category: 'rooms', image_url: '/images/hotel/suite-balcony-seating.jpg', display_order: 12 },
 ];
 
 export const INITIAL_BOOKINGS: Booking[] = [

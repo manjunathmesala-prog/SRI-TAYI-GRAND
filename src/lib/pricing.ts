@@ -81,7 +81,6 @@ export const AUTHORITATIVE_ROOM_TARIFFS: Record<string, AuthoritativeRoomCategor
       '/images/hotel/room-twin-render-enhanced.png',
       '/images/hotel/room-headboard-detail-photo-enhanced.png',
       '/images/hotel/room-corner-photo-enhanced.png',
-      '/images/hotel/suite-bathroom.jpg',
     ],
     amenities: [
       'Fully AC',
@@ -118,7 +117,6 @@ export const AUTHORITATIVE_ROOM_TARIFFS: Record<string, AuthoritativeRoomCategor
       '/images/hotel/room-double-bed-photo-enhanced.png',
       '/images/hotel/room-corner-photo-enhanced.png',
       '/images/hotel/room-headboard-detail-photo-enhanced.png',
-      '/images/hotel/suite-bathroom.jpg',
     ],
     amenities: [
       'Fully AC',
@@ -155,8 +153,6 @@ export const AUTHORITATIVE_ROOM_TARIFFS: Record<string, AuthoritativeRoomCategor
       '/images/hotel/suite-seating-photo-enhanced.png',
       '/images/hotel/room-headboard-detail-photo-enhanced.png',
       '/images/hotel/room-corner-photo-enhanced.png',
-      '/images/hotel/suite-balcony-seating.jpg',
-      '/images/hotel/suite-bathroom.jpg',
     ],
     amenities: [
       'Fully AC',

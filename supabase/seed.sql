@@ -192,6 +192,5 @@ INSERT INTO gallery_images (title, category, image_url, display_order) VALUES
     ('Lobby Lounge', 'reception', '/images/hotel/lobby-lounge.jpg', 6),
     ('Double Twin Room', 'rooms', '/images/hotel/room-double-large.jpg', 7),
     ('Single Bed Room', 'rooms', '/images/hotel/room-single-large.jpg', 8),
-    ('Suite Room Private Balcony', 'rooms', '/images/hotel/suite-balcony-seating.jpg', 9),
     ('Hotel Building Night Ambience', 'exterior', '/images/hotel/hotel-building-night.jpg', 10)
 ON CONFLICT DO NOTHING;
