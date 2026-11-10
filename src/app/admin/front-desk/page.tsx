@@ -1,5 +1,7 @@
 'use client';
 
+import Link from 'next/link';
+
 import { useState, useEffect, useCallback } from 'react';
 import { ReceptionStandeeModal } from '@/components/admin/ReceptionStandeeModal';
 import { StatutoryWalkInModal } from '@/components/admin/StatutoryWalkInModal';
@@ -361,6 +363,14 @@ export default function FrontDeskPage() {
 
         {/* Action Buttons & Search */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
+          <Link
+            href="/admin/walk-in"
+            className="px-4 py-2.5 rounded-xl bg-white hover:bg-[#FAF7F2] border border-[#E8DFC8] text-[#241912] text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-xs cursor-pointer shrink-0"
+          >
+            <BedDouble className="w-4 h-4 text-[#C49A45]" />
+            <span>Walk-In Registration Desk</span>
+          </Link>
+
           <button
             type="button"
             onClick={() => {
@@ -370,7 +380,7 @@ export default function FrontDeskPage() {
             className="px-4 py-2.5 rounded-xl bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer shrink-0"
           >
             <UserCheck className="w-4 h-4 text-[#D8AD56]" />
-            <span>+ Statutory Walk-In Check-In</span>
+            <span>+ Statutory Walk-In Modal</span>
           </button>
 
           <div className="relative w-full sm:w-64">

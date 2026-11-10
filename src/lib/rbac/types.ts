@@ -295,6 +295,7 @@ export const ROUTE_ACCESS_RULES: { path: string; exact?: boolean; minRole: RoleE
   { path: '/admin/rooms/categories', minRole: 'MANAGER' },
   // Front Desk, Bookings, Guests, Housekeeping, Maintenance, RFID accessible to Staff
   { path: '/admin/front-desk', minRole: 'STAFF' },
+  { path: '/admin/walk-in', minRole: 'STAFF' },
   { path: '/admin/bookings', minRole: 'STAFF' },
   { path: '/admin/guests', minRole: 'STAFF' },
   { path: '/admin/rooms/board', minRole: 'STAFF' },

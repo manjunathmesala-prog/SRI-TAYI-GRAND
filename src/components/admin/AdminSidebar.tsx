@@ -98,6 +98,7 @@ export function AdminSidebar() {
     { label: 'Dashboard Overview', href: '/admin/dashboard', icon: LayoutDashboard },
     { label: 'Analytics', href: '/admin/analytics', icon: BarChart3, badge: 'Executive' },
     { label: 'Front Desk / Reception', href: '/admin/front-desk', icon: ConciergeBell, highlight: true },
+    { label: 'Walk-In Registration', href: '/admin/walk-in', icon: UserCheck, badge: 'Counter' },
     { label: 'Room Tape Chart', href: '/admin/rooms/board', icon: CalendarRange, badge: 'Matrix' },
     { label: 'Bookings', href: '/admin/bookings', icon: CalendarCheck },
     { label: 'Enquiries Pipeline', href: '/admin/enquiries', icon: MessageSquare, badge: 'Leads' },
