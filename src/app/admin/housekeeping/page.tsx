@@ -20,8 +20,10 @@ import {
 } from 'lucide-react';
 import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
+import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 
 export default function HousekeepingAdminPage() {
+  const { t, formatCurrency, formatDate, translateStatus, isTelugu } = useAdminLanguage();
   const [rooms, setRooms] = useState<PhysicalRoom[]>([]);
   const [staffList, setStaffList] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);

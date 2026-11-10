@@ -24,6 +24,7 @@ import {
   Download,
 } from 'lucide-react';
 import { useRealtimeSync } from '@/lib/realtime-client';
+import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 
 const COMMON_PREFERENCES = [
   'Ground Floor Room',
@@ -38,6 +39,7 @@ const COMMON_PREFERENCES = [
 ];
 
 export default function GuestsAdminPage() {
+  const { t, formatCurrency, formatDate, isTelugu } = useAdminLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [tierFilter, setTierFilter] = useState<'all' | GuestVIPTier | 'blacklisted'>('all');
   const [guests, setGuests] = useState<Guest[]>([]);

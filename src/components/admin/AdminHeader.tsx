@@ -21,12 +21,15 @@ import {
 } from 'lucide-react';
 import { useRealtimeSync, cashbookClient } from '@/lib/realtime-client';
 import { SuperAdminNotificationBell } from '@/components/admin/SuperAdminNotificationBell';
+import { AdminLanguageSwitcher } from '@/components/admin/AdminLanguageSwitcher';
+import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 import { authStorage } from '@/lib/auth-storage';
 
 export function AdminHeader() {
   const pathname = usePathname();
   const router = useRouter();
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { t, formatCurrency, isTelugu } = useAdminLanguage();
 
   const [cashBalance, setCashBalance] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState<string>('');
@@ -78,7 +81,6 @@ export function AdminHeader() {
           setUserEmail('staff@sritayigrand.com');
         }
       } else {
-        // Rehydrate claims from server session cookie if sessionStorage is blank
         authStorage.rehydrate().then((claims) => {
           if (claims) {
             if (claims.name) setUserName(claims.name);
@@ -92,7 +94,7 @@ export function AdminHeader() {
     const updateClock = () => {
       const now = new Date();
       setCurrentTime(
-        now.toLocaleTimeString('en-IN', {
+        now.toLocaleTimeString(isTelugu ? 'te-IN' : 'en-IN', {
           hour: '2-digit',
           minute: '2-digit',
           second: '2-digit',
@@ -114,11 +116,39 @@ export function AdminHeader() {
       clearInterval(timer);
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [isTelugu]);
 
-  // Format page title from pathname
+  // Format page title from pathname localized
   const getPageTitle = () => {
-    if (pathname === '/admin' || pathname === '/admin/dashboard') return 'Executive Dashboard';
+    if (pathname === '/admin' || pathname === '/admin/dashboard') {
+      return t('header.executiveDashboard', 'Executive Dashboard');
+    }
+    if (pathname.includes('/bookings')) return t('nav.bookings', 'Bookings');
+    if (pathname.includes('/front-desk')) return t('nav.frontDesk', 'Front Desk');
+    if (pathname.includes('/walk-in')) return t('nav.walkIn', 'Walk-In Registration');
+    if (pathname.includes('/rooms/board')) return isTelugu ? 'రూమ్ టేప్ చార్ట్' : 'Room Tape Chart';
+    if (pathname.includes('/rooms/inventory')) return t('nav.roomInventory', 'Room Inventory');
+    if (pathname.includes('/rooms/categories')) return t('nav.roomCategories', 'Room Categories');
+    if (pathname.includes('/rooms')) return t('nav.rooms', 'Rooms & Inventory');
+    if (pathname.includes('/guests')) return t('nav.guests', 'Guests Directory (CRM)');
+    if (pathname.includes('/payments')) return t('nav.payments', 'Payments');
+    if (pathname.includes('/cashbook')) return t('nav.cashbook', 'Cashbook & Drawer');
+    if (pathname.includes('/expenses')) return t('nav.expenses', 'Expenses');
+    if (pathname.includes('/daily-closing')) return t('nav.dailyClosing', 'Daily Shift Closing');
+    if (pathname.includes('/convention-hall')) return t('nav.conventionHall', 'Convention Hall');
+    if (pathname.includes('/housekeeping')) return t('nav.housekeeping', 'Housekeeping');
+    if (pathname.includes('/maintenance')) return t('nav.maintenance', 'Maintenance');
+    if (pathname.includes('/staff/attendance')) return t('nav.attendance', 'Staff Attendance');
+    if (pathname.includes('/staff')) return t('nav.staff', 'Staff Management');
+    if (pathname.includes('/rfid')) return t('nav.rfid', 'RFID Management');
+    if (pathname.includes('/reports')) return t('nav.reports', 'Reports & Analytics');
+    if (pathname.includes('/analytics')) return isTelugu ? 'విశ్లేషణ' : 'Analytics';
+    if (pathname.includes('/settings')) return t('nav.settings', 'Settings');
+    if (pathname.includes('/content')) return t('nav.content', 'Website Content');
+    if (pathname.includes('/reviews')) return t('nav.reviews', 'Google Reviews');
+    if (pathname.includes('/enquiries')) return t('nav.enquiries', 'Enquiries');
+    if (pathname.includes('/audit-logs')) return t('nav.auditLogs', 'Audit Logs');
+
     const segment = pathname.split('/').filter(Boolean).pop();
     if (!segment) return 'Admin Console';
     return segment
@@ -169,13 +199,19 @@ export function AdminHeader() {
 
   const RoleIcon = getRoleIcon(userRole);
 
+  const getRoleLabel = (role: string) => {
+    if (role === 'Super Admin') return t('header.superAdmin', 'Super Admin');
+    if (role === 'Hotel Manager') return t('header.hotelManager', 'Hotel Manager');
+    return t('header.frontDeskStaff', 'Front Desk Staff');
+  };
+
   return (
     <header className="sticky top-0 z-30 bg-[#FAF6EE]/95 backdrop-blur-md border-b border-[#E6D9C5] px-4 sm:px-6 py-2.5 flex items-center justify-between shadow-xs">
       {/* Left: Breadcrumbs & Page Title */}
       <div className="flex items-center space-x-3">
         <div>
           <div className="text-[10px] uppercase font-bold tracking-widest text-[#8D672F]">
-            Sri Tayi Grand &bull; PMS Console
+            Sri Tayi Grand &bull; {t('nav.liveConsole', 'PMS Console')}
           </div>
           <h1 className="text-base sm:text-lg font-serif font-bold text-[#33271D] leading-tight">
             {getPageTitle()}
@@ -183,7 +219,7 @@ export function AdminHeader() {
         </div>
       </div>
 
-      {/* Right: Live Telemetry, Cash Float & Quick Action Shortcuts */}
+      {/* Right: Live Telemetry, Language Switcher, Cash Float & Quick Action Shortcuts */}
       <div className="flex items-center space-x-2 sm:space-x-3">
         {/* Realtime Status Indicator */}
         <div
@@ -200,7 +236,7 @@ export function AdminHeader() {
             }`}
           />
           <span className="text-[11px] font-mono">
-            {isConnected ? 'LIVE SSE' : 'RECONNECTING'}
+            {isConnected ? t('common.live', 'LIVE SSE') : t('common.reconnecting', 'RECONNECTING')}
           </span>
         </div>
 
@@ -210,10 +246,10 @@ export function AdminHeader() {
             href="/admin/cashbook"
             prefetch={false}
             className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#B18A4A]/15 hover:bg-[#B18A4A]/25 border border-[#B18A4A]/30 text-[#8D672F] text-xs font-mono font-bold transition-all shadow-2xs group"
-            title="Front Desk Cash Drawer Balance"
+            title={t('header.cashInHand', 'Front Desk Cash Drawer Balance')}
           >
             <Wallet className="w-3.5 h-3.5 text-[#8D672F] group-hover:scale-110 transition-transform" />
-            <span>₹{cashBalance.toLocaleString('en-IN')}</span>
+            <span>{formatCurrency(cashBalance)}</span>
           </Link>
         )}
 
@@ -225,6 +261,9 @@ export function AdminHeader() {
           </div>
         )}
 
+        {/* Language Switcher: EN | తెలుగు */}
+        <AdminLanguageSwitcher />
+
         {/* Quick Walk-In Button */}
         <Link
           href="/admin/front-desk"
@@ -232,7 +271,7 @@ export function AdminHeader() {
           className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#8D672F] hover:bg-[#6D4E21] text-white text-xs uppercase tracking-wider font-semibold shadow-sm active:scale-95 transition-all"
         >
           <UserPlus className="w-3.5 h-3.5" />
-          <span>Walk-In</span>
+          <span>{t('bookings.newBooking', 'Walk-In')}</span>
         </Link>
 
         {/* Super Admin Live Alert Bell & Drawer */}
@@ -259,7 +298,7 @@ export function AdminHeader() {
                 {userName.split(' ')[0]}
               </span>
               <span className="block text-[9px] uppercase tracking-wider opacity-70 leading-none">
-                {userRole === 'Super Admin' ? 'Super Admin' : userRole === 'Hotel Manager' ? 'Manager' : 'Staff'}
+                {getRoleLabel(userRole)}
               </span>
             </div>
             <ChevronDown className="w-3.5 h-3.5 opacity-60 ml-0.5" />
@@ -272,10 +311,10 @@ export function AdminHeader() {
               <div className="p-2.5 rounded-xl bg-[#F8F3E9] border border-[#E6D9C5] mb-2.5">
                 <div className="flex items-center justify-between">
                   <span className="text-[10px] uppercase font-bold tracking-wider text-[#43001F]">
-                    Active Role Session
+                    {t('common.status', 'Active Role Session')}
                   </span>
                   <span className="text-[9px] px-2 py-0.5 rounded-full font-bold bg-[#43001F] text-white">
-                    {userRole}
+                    {getRoleLabel(userRole)}
                   </span>
                 </div>
                 <div className="text-xs font-bold text-[#241912] mt-1 truncate">
@@ -289,7 +328,7 @@ export function AdminHeader() {
               {/* Fast Role Switching Section */}
               <div className="space-y-1 mb-2.5">
                 <div className="px-2 py-1 text-[10px] uppercase tracking-widest text-[#786B61] font-bold">
-                  Switch Active Role (Instant Test)
+                  {t('header.switchRole', 'Switch Active Role (Instant Test)')}
                 </div>
 
                 {/* 1. Super Admin Switch */}
@@ -306,7 +345,7 @@ export function AdminHeader() {
                   <div className="flex items-center gap-2">
                     <Crown className="w-3.5 h-3.5 text-amber-600" />
                     <div>
-                      <span className="block leading-tight">Super Admin</span>
+                      <span className="block leading-tight">{t('header.superAdmin', 'Super Admin')}</span>
                       <span className="text-[9px] text-[#786B61] block">admin@sritayigrand.com</span>
                     </div>
                   </div>
@@ -329,7 +368,7 @@ export function AdminHeader() {
                   <div className="flex items-center gap-2">
                     <Briefcase className="w-3.5 h-3.5 text-purple-600" />
                     <div>
-                      <span className="block leading-tight">Hotel Manager</span>
+                      <span className="block leading-tight">{t('header.hotelManager', 'Hotel Manager')}</span>
                       <span className="text-[9px] text-[#786B61] block">manager@sritayigrand.com</span>
                     </div>
                   </div>
@@ -352,7 +391,7 @@ export function AdminHeader() {
                   <div className="flex items-center gap-2">
                     <Users className="w-3.5 h-3.5 text-blue-600" />
                     <div>
-                      <span className="block leading-tight">Front Desk Staff</span>
+                      <span className="block leading-tight">{t('header.frontDeskStaff', 'Front Desk Staff')}</span>
                       <span className="text-[9px] text-[#786B61] block">staff@sritayigrand.com</span>
                     </div>
                   </div>
@@ -370,7 +409,7 @@ export function AdminHeader() {
                   className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" />
-                  <span>Sign Out of Console</span>
+                  <span>{t('header.signOut', 'Sign Out of Console')}</span>
                 </button>
               </div>
             </div>

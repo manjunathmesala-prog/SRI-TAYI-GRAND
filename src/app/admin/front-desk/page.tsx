@@ -32,8 +32,10 @@ import {
   Banknote,
 } from 'lucide-react';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
+import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 
 export default function FrontDeskPage() {
+  const { t, formatCurrency, formatDate, translateStatus, isTelugu } = useAdminLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [rooms, setRooms] = useState<PhysicalRoom[]>([]);
@@ -354,10 +356,10 @@ export default function FrontDeskPage() {
           </div>
           <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-0.5 flex items-center gap-2">
             <ConciergeBell className="w-6 h-6 text-[#D8AD56]" />
-            <span>Front Desk & Reception</span>
+            <span>{t('frontDesk.title', 'Front Desk & Reception')}</span>
           </h1>
           <p className="text-xs text-[#786B61] mt-0.5">
-            Rapid guest check-in, room key issuance, active stay folios, and checkout settlement.
+            {t('frontDesk.subtitle', 'Rapid guest check-in, room key issuance, active stay folios, and checkout settlement.')}
           </p>
         </div>
 
@@ -368,7 +370,7 @@ export default function FrontDeskPage() {
             className="px-4 py-2.5 rounded-xl bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer shrink-0"
           >
             <BedDouble className="w-4 h-4 text-[#D8AD56]" />
-            <span>Walk-In Registration Desk</span>
+            <span>{t('walkIn.title', 'Walk-In Registration Desk')}</span>
           </Link>
 
           <div className="relative w-full sm:w-64">
@@ -377,7 +379,7 @@ export default function FrontDeskPage() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search guest, phone, room, or ref..."
+              placeholder={t('common.search', "Search guest, phone, room, or ref...")}
               className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-[#EFE3D6] bg-white text-[#241912] focus:border-[#D8AD56] focus:outline-none shadow-sm"
             />
           </div>

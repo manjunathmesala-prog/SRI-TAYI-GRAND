@@ -24,8 +24,10 @@ import {
 } from 'lucide-react';
 import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
+import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 
 export default function PaymentsAdminPage() {
+  const { t, formatCurrency, formatDate, translateStatus, isTelugu } = useAdminLanguage();
   const [activeTab, setActiveTab] = useState<'payments' | 'expenses'>('payments');
   const [searchQuery, setSearchQuery] = useState('');
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
@@ -448,7 +450,7 @@ export default function PaymentsAdminPage() {
             className="px-3.5 py-2.5 rounded-xl bg-red-700 hover:bg-red-800 text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
           >
             <Receipt className="w-3.5 h-3.5" />
-            <span>+ Record Expense</span>
+            <span>{isTelugu ? '+ ఖర్చు నమోదు' : '+ Record Expense'}</span>
           </button>
 
           <button

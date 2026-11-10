@@ -27,8 +27,10 @@ import {
 } from '@/lib/notifications/types';
 import { playNotificationChime } from '@/lib/notifications/audio';
 import { authStorage } from '@/lib/auth-storage';
+import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 
 export function SuperAdminNotificationBell() {
+  const { t, isTelugu } = useAdminLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState<SuperAdminNotification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -311,7 +313,7 @@ export function SuperAdminNotificationBell() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-[10px] uppercase font-bold tracking-widest text-[#43001F]">
-                      Super Admin Feed
+                      {isTelugu ? 'సూపర్ అడ్మిన్ ఫీడ్' : 'Super Admin Feed'}
                     </span>
                     {unreadCount > 0 && (
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
@@ -320,7 +322,7 @@ export function SuperAdminNotificationBell() {
                     )}
                   </div>
                   <h2 className="text-base font-serif font-bold text-[#241912]">
-                    Real-Time Telemetry
+                    {isTelugu ? 'లైవ్ టెలిమెట్రీ' : 'Real-Time Telemetry'}
                   </h2>
                 </div>
 

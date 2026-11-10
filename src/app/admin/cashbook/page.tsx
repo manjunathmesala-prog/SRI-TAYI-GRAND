@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { CashShift, CashTransaction, CashTransactionCategory } from '@/types';
 import { useRealtimeSync } from '@/lib/realtime-client';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
+import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 import {
   Wallet,
   ArrowDownLeft,
@@ -27,6 +28,7 @@ import {
 } from 'lucide-react';
 
 export default function AdminCashbookPage() {
+  const { t, formatCurrency, formatDate, isTelugu } = useAdminLanguage();
   const [activeShift, setActiveShift] = useState<CashShift | null>(null);
   const [balance, setBalance] = useState<number>(0);
   const [openingFloat, setOpeningFloat] = useState<number>(0);
@@ -304,7 +306,7 @@ export default function AdminCashbookPage() {
         {/* Drawer Current Cash Balance */}
         <div className="bg-gradient-to-br from-[#241912] via-[#382216] to-[#1E110A] text-white rounded-2xl p-5 border border-[#D8AD56]/40 shadow-xl relative overflow-hidden">
           <div className="flex items-center justify-between text-xs text-[#EFE3D6]/80 font-medium">
-            <span>Physical Drawer Cash</span>
+            <span>{t('header.cashInHand', 'Physical Drawer Cash')}</span>
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           </div>
           <div className="text-3xl font-serif font-black text-[#D8AD56] tracking-tight mt-2">
@@ -321,7 +323,7 @@ export default function AdminCashbookPage() {
         {/* Opening Float */}
         <div className="bg-white rounded-2xl p-5 border border-[#EFE3D6] shadow-sm space-y-1">
           <div className="flex items-center justify-between text-xs text-[#786B61] font-semibold">
-            <span>Opening Float</span>
+            <span>{isTelugu ? 'ప్రారంభ ఫ్లోట్' : 'Opening Float'}</span>
             <Clock className="w-4 h-4 text-[#D8AD56]" />
           </div>
           <div className="text-2xl font-serif font-bold text-[#241912]">
@@ -333,7 +335,7 @@ export default function AdminCashbookPage() {
         {/* Total Cash In */}
         <div className="bg-white rounded-2xl p-5 border border-[#EFE3D6] shadow-sm space-y-1">
           <div className="flex items-center justify-between text-xs text-emerald-700 font-semibold">
-            <span>Total Cash In</span>
+            <span>{isTelugu ? 'మొత్తం నగదు జమ' : 'Total Cash In'}</span>
             <ArrowDownLeft className="w-4 h-4 text-emerald-600" />
           </div>
           <div className="text-2xl font-serif font-bold text-emerald-600">
@@ -345,7 +347,7 @@ export default function AdminCashbookPage() {
         {/* Total Cash Out */}
         <div className="bg-white rounded-2xl p-5 border border-[#EFE3D6] shadow-sm space-y-1">
           <div className="flex items-center justify-between text-xs text-rose-700 font-semibold">
-            <span>Total Cash Out</span>
+            <span>{isTelugu ? 'మొత్తం నగదు ఖర్చు' : 'Total Cash Out'}</span>
             <ArrowUpRight className="w-4 h-4 text-rose-600" />
           </div>
           <div className="text-2xl font-serif font-bold text-rose-600">

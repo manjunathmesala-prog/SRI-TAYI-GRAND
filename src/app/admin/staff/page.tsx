@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { useRealtimeSync } from '@/lib/realtime-client';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
+import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 
 const DEPARTMENTS = [
   'Executive Management',
@@ -35,6 +36,7 @@ const DEPARTMENTS = [
 ] as const;
 
 export default function StaffAdminPage() {
+  const { t, formatCurrency, formatDate, translateStatus, isTelugu } = useAdminLanguage();
   const [staff, setStaff] = useState<StaffMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');

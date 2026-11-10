@@ -2,7 +2,7 @@
 
 /**
  * ==============================================================================
- * SRI TAYI GRAND - ENTERPRISE AUTHENTICATION PORTAL
+ * SRI TAYI GRAND - ENTERPRISE AUTHENTICATION PORTAL (BILINGUAL: EN + TELUGU)
  * Supports Super Admin, Hotel Manager, and Front Desk Staff Sign-In.
  * Engineered for full mobile responsiveness, session isolation, and accessibility.
  * ==============================================================================
@@ -29,37 +29,45 @@ import {
   KeyRound,
 } from 'lucide-react';
 import { authStorage } from '@/lib/auth-storage';
+import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
+import { AdminLanguageSwitcher } from '@/components/admin/AdminLanguageSwitcher';
 
 const PRESET_ACCOUNTS = [
   {
     roleId: 'SUPER_ADMIN',
     roleLabel: 'Super Admin',
+    roleLabelTe: 'సూపర్ అడ్మిన్',
     name: 'Sri Tayi Grand Admin',
     email: 'admin@sritayigrand.com',
     password: 'SuperAdmin@TayiGrand2026!',
     icon: Crown,
     badgeColor: 'bg-amber-100 text-amber-900 border-amber-300',
-    scope: 'Full Unrestricted Access • Settings • Audit Logs • P&L',
+    scopeEn: 'Full Unrestricted Access • Settings • Audit Logs • P&L',
+    scopeTe: 'పూర్తి అపరిమిత యాక్సెస్ • సెట్టింగులు • ఆడిట్ లాగ్స్ • P&L',
   },
   {
     roleId: 'MANAGER',
     roleLabel: 'Hotel Manager',
+    roleLabelTe: 'హోటల్ మేనేజర్',
     name: 'G. Mohan Kumar',
     email: 'manager@sritayigrand.com',
     password: 'Manager@TayiGrand2026!',
     icon: Briefcase,
     badgeColor: 'bg-purple-100 text-purple-900 border-purple-300',
-    scope: 'Operations • Reservations • Housekeeping • Staff • Reports',
+    scopeEn: 'Operations • Reservations • Housekeeping • Staff • Reports',
+    scopeTe: 'కార్యకలాపాలు • రిజర్వేషన్లు • గదుల శుభ్రత • సిబ్బంది • నివేదికలు',
   },
   {
     roleId: 'STAFF',
     roleLabel: 'Front Desk Staff',
+    roleLabelTe: 'రిసెప్షన్ సిబ్బంది',
     name: 'Sri Tayi Grand Staff',
     email: 'staff@sritayigrand.com',
     password: 'Staff@TayiGrand2026!',
     icon: Users,
     badgeColor: 'bg-blue-100 text-blue-900 border-blue-300',
-    scope: 'Reception • Check-In / Walk-In • Room Board • RFID Keycards',
+    scopeEn: 'Reception • Check-In / Walk-In • Room Board • RFID Keycards',
+    scopeTe: 'రిసెప్షన్ • చెక్-ఇన్ / వాక్-ఇన్ • రూమ్ బోర్డు • RFID కీకార్డులు',
   },
 ];
 
@@ -67,6 +75,7 @@ function AdminLoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectPath = searchParams.get('redirect') || '/admin/dashboard';
+  const { t, isTelugu } = useAdminLanguage();
 
   const [email, setEmail] = useState('admin@sritayigrand.com');
   const [password, setPassword] = useState('SuperAdmin@TayiGrand2026!');
@@ -120,7 +129,7 @@ function AdminLoginContent() {
 
       const data = await res.json();
       if (!res.ok || !data.success) {
-        throw new Error(data.error || 'Authentication failed. Please check credentials.');
+        throw new Error(data.error || t('auth.invalidCredentials', 'Authentication failed. Please check credentials.'));
       }
 
       // Persist authenticated session claims using sessionStorage (with optional rememberMe)
@@ -138,55 +147,70 @@ function AdminLoginContent() {
 
       setLoginSuccess(true);
       window.location.href = redirectPath;
-    } catch (err: any) {
-      setError(err.message || 'Login failed. Please verify credentials.');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : t('auth.invalidCredentials', 'An unexpected authentication error occurred'));
+    } finally {
       setLoading(false);
-      setLoginSuccess(false);
     }
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    performLogin(email, password);
+    await performLogin(email, password);
   };
 
-  const selectPreset = (preset: typeof PRESET_ACCOUNTS[0]) => {
+  const selectPreset = (preset: (typeof PRESET_ACCOUNTS)[0]) => {
     setEmail(preset.email);
     setPassword(preset.password);
     setActivePreset(preset.roleId);
     setError(null);
   };
 
-  const fastLoginAs = (preset: typeof PRESET_ACCOUNTS[0]) => {
+  const fastLoginAs = async (preset: (typeof PRESET_ACCOUNTS)[0]) => {
     setEmail(preset.email);
     setPassword(preset.password);
     setActivePreset(preset.roleId);
-    performLogin(preset.email, preset.password);
+    await performLogin(preset.email, preset.password);
   };
 
   return (
-    <div className="min-h-[100dvh] bg-[#21180F] flex flex-col justify-start sm:justify-center items-center p-3 xs:p-4 sm:p-6 py-6 sm:py-12 overflow-y-auto selection:bg-[#D8AD56]">
+    <div className="min-h-screen bg-linear-to-b from-[#180F08] via-[#241912] to-[#120B06] flex flex-col justify-center items-center px-4 py-8 sm:px-6 relative overflow-hidden">
       {/* Background Ambience */}
-      <div className="fixed inset-0 bg-radial-gradient from-[#382216]/60 via-[#21180F]/90 to-[#140D08] pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-[#B18A4A]/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="w-full max-w-xl relative z-10 my-auto">
-        {/* Brand Card Header with Official Emblem */}
-        <div className="text-center mb-5 sm:mb-6">
-          <div className="relative w-16 h-16 sm:w-20 sm:h-20 mx-auto mb-2.5 sm:mb-3 flex items-center justify-center">
+      {/* Floating Top Bar with Language Selector and Back Link */}
+      <div className="w-full max-w-xl flex items-center justify-between mb-4 z-10 px-1">
+        <NextLink
+          href="/"
+          className="text-xs text-[#E6D9C5]/80 hover:text-white flex items-center gap-1.5 transition-colors"
+        >
+          <span>&larr;</span>
+          <span>{isTelugu ? 'పబ్లిక్ వెబ్‌సైట్' : 'Public Website'}</span>
+        </NextLink>
+
+        {/* Premium Language Switcher: EN | తెలుగు */}
+        <AdminLanguageSwitcher />
+      </div>
+
+      <div className="w-full max-w-xl relative z-10">
+        {/* Hotel Brand Header */}
+        <div className="text-center mb-6">
+          <div className="inline-block relative w-16 h-16 sm:w-20 sm:h-20 rounded-full border-2 border-[#D8AD56] p-1.5 bg-black/50 shadow-2xl mb-3">
             <Image
               src="/images/hotel/tayi-grand-logo.png"
-              alt="Sri Tayi Grand Official Logo"
+              alt="Sri Tayi Grand Emblem"
               fill
-              sizes="(max-width: 640px) 64px, 80px"
-              className="object-contain drop-shadow-xl"
+              className="object-contain drop-shadow-xl p-1"
               priority
             />
           </div>
           <h1 className="font-serif text-2xl sm:text-3xl font-bold text-white tracking-wide">
-            SRI TAYI GRAND
+            {isTelugu ? 'శ్రీ తాయి గ్రాండ్' : 'SRI TAYI GRAND'}
           </h1>
           <p className="text-[10px] sm:text-[11px] uppercase tracking-[0.25em] text-[#D8AD56] font-semibold mt-1">
-            HOTEL MANAGEMENT &bull; ENTERPRISE RBAC PORTAL
+            {isTelugu
+              ? 'హోటల్ మేనేజ్‌మెంట్ • ఎంటర్‌ప్రైజ్ PMS పోర్టల్'
+              : 'HOTEL MANAGEMENT • ENTERPRISE RBAC PORTAL'}
           </p>
         </div>
 
@@ -195,10 +219,10 @@ function AdminLoginContent() {
           <div className="flex flex-wrap items-center justify-between gap-1.5 mb-2.5">
             <div className="flex items-center gap-1.5 text-xs text-[#D8AD56] font-semibold">
               <Sparkles className="w-3.5 h-3.5 shrink-0" />
-              <span>Select Role Profile (One-Tap Fast Login)</span>
+              <span>{t('auth.fastRoleSelect', 'Select Role Profile (One-Tap Fast Login)')}</span>
             </div>
             <span className="text-[10px] text-white/60 uppercase tracking-widest font-mono">
-              3 Roles Verified
+              {isTelugu ? '3 పాత్రలు అందుబాటులో ఉన్నాయి' : '3 Roles Verified'}
             </span>
           </div>
 
@@ -230,7 +254,7 @@ function AdminLoginContent() {
                       <div className="flex items-center gap-1.5 min-w-0">
                         <Icon className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-[#D8AD56]' : 'text-white/70'}`} />
                         <span className="text-xs font-bold text-white tracking-tight truncate">
-                          {preset.roleLabel}
+                          {isTelugu ? preset.roleLabelTe : preset.roleLabel}
                         </span>
                       </div>
                       {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#D8AD56] shrink-0 ml-1" />}
@@ -243,7 +267,7 @@ function AdminLoginContent() {
 
                   <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between gap-2">
                     <span className="text-[10px] uppercase font-bold text-[#D8AD56]">
-                      {isSelected ? 'Active' : 'Tap to fill'}
+                      {isSelected ? (isTelugu ? 'సక్రియం' : 'Active') : (isTelugu ? 'ఎంచుకోండి' : 'Tap to fill')}
                     </span>
                     <button
                       type="button"
@@ -254,7 +278,7 @@ function AdminLoginContent() {
                       }}
                       className="text-[10px] px-2.5 py-1 rounded-md bg-white/20 hover:bg-[#D8AD56] hover:text-[#21180F] text-white font-semibold transition-all cursor-pointer disabled:opacity-50 shrink-0 min-h-[28px] flex items-center"
                     >
-                      Instant Enter &rarr;
+                      {isTelugu ? 'తక్షణ ప్రవేశం →' : 'Instant Enter →'}
                     </button>
                   </div>
                 </div>
@@ -268,15 +292,15 @@ function AdminLoginContent() {
           <div className="flex items-center justify-between border-b border-[#EFE3D6] pb-3.5 gap-2">
             <div>
               <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#241912] leading-tight">
-                Staff Authentication
+                {t('auth.loginTitle', 'Staff Authentication')}
               </h2>
               <p className="text-xs text-[#786B61] mt-0.5">
-                Role-Based Access Control verified by Edge security middleware.
+                {t('auth.loginSubtitle', 'Role-Based Access Control verified by Edge security middleware.')}
               </p>
             </div>
             <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              RBAC Protected
+              {isTelugu ? 'RBAC రక్షితం' : 'RBAC Protected'}
             </span>
           </div>
 
@@ -298,16 +322,16 @@ function AdminLoginContent() {
                   htmlFor="staff-email-input"
                   className="block text-xs font-semibold text-[#241912] uppercase tracking-wider"
                 >
-                  Staff Email Address
+                  {t('auth.email', 'Staff Email Address')}
                 </label>
                 <span className="text-[10px] text-[#786B61] font-mono truncate">
                   {email === 'admin@sritayigrand.com'
-                    ? 'Super Admin Account'
+                    ? (isTelugu ? 'సూపర్ అడ్మిన్ ఖాతా' : 'Super Admin Account')
                     : email === 'manager@sritayigrand.com'
-                    ? 'Manager Account'
+                    ? (isTelugu ? 'మేనేజర్ ఖాతా' : 'Manager Account')
                     : email === 'staff@sritayigrand.com'
-                    ? 'Front Desk Account'
-                    : 'Custom Account'}
+                    ? (isTelugu ? 'రిసెప్షన్ ఖాతా' : 'Front Desk Account')
+                    : (isTelugu ? 'ఖాతా' : 'Account')}
                 </span>
               </div>
               <div className="relative">
@@ -331,7 +355,7 @@ function AdminLoginContent() {
                   htmlFor="staff-password-input"
                   className="block text-xs font-semibold text-[#241912] uppercase tracking-wider"
                 >
-                  Password
+                  {t('auth.password', 'Password')}
                 </label>
               </div>
               <div className="relative">
@@ -369,81 +393,44 @@ function AdminLoginContent() {
                   onChange={(e) => setRememberMe(e.target.checked)}
                   className="w-4 h-4 rounded text-[#43001F] border-stone-300 focus:ring-[#D8AD56] cursor-pointer"
                 />
-                <span>Remember on this terminal (persistent)</span>
+                <span>{t('auth.rememberMe', 'Remember on this terminal (persistent)')}</span>
               </label>
               <span className="text-[10px] text-stone-400 hidden sm:inline">
-                {rememberMe ? 'Persistent session' : 'Tab session only'}
+                {rememberMe ? (isTelugu ? 'శాశ్వత సెషన్' : 'Persistent session') : (isTelugu ? 'టాబ్ సెషన్ మాత్రమే' : 'Tab session only')}
               </span>
-            </div>
-
-            {/* Quick credentials reference table */}
-            <div className="p-3 sm:p-3.5 bg-[#F8F3E9] rounded-xl border border-[#E6D9C5] text-xs text-[#786B61] space-y-2">
-              <div className="font-semibold text-[#43001F] flex items-center justify-between">
-                <span className="flex items-center gap-1.5">
-                  <KeyRound className="w-3.5 h-3.5 text-[#B18A4A]" />
-                  <span>Verified Credentials Reference</span>
-                </span>
-                <span className="text-[10px] text-[#B18A4A] font-normal hidden sm:inline">
-                  Constant-time HMAC validated
-                </span>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 font-mono text-[11px]">
-                {PRESET_ACCOUNTS.map((item) => (
-                  <button
-                    key={item.roleId}
-                    type="button"
-                    disabled={loading}
-                    onClick={() => selectPreset(item)}
-                    className="bg-white hover:bg-stone-50 p-2 rounded-lg border border-[#E6D9C5]/80 text-left transition-colors cursor-pointer disabled:opacity-50"
-                  >
-                    <span className="text-[#43001F] font-bold block text-xs">{item.roleLabel}</span>
-                    <span className="text-stone-500 block truncate">{item.email}</span>
-                    <span className="text-stone-700 block truncate font-sans text-[10px] text-[#B18A4A]">
-                      Click to load
-                    </span>
-                  </button>
-                ))}
-              </div>
             </div>
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full py-3.5 rounded-xl bg-[#43001F] hover:bg-[#2E0015] active:bg-[#20000E] text-white font-bold text-xs uppercase tracking-wider transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer min-h-[46px]"
+              disabled={loading || loginSuccess}
+              className="w-full py-3.5 px-4 rounded-xl bg-linear-to-r from-[#8D672F] via-[#B18A4A] to-[#8D672F] hover:from-[#6D4E21] hover:to-[#6D4E21] text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 active:scale-99 disabled:opacity-50 cursor-pointer min-h-[48px]"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin text-[#D8AD56]" />
-                  <span>Authenticating Role...</span>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>{t('auth.authenticating', 'Authenticating Credentials...')}</span>
                 </>
               ) : loginSuccess ? (
                 <>
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span>Access Granted! Opening Dashboard...</span>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-300" />
+                  <span>{isTelugu ? 'ధృవీకరణ పూర్తయింది! ప్రవేశిస్తోంది...' : 'Authenticated! Redirecting...'}</span>
                 </>
               ) : (
                 <>
-                  <span>
-                    Sign In as{' '}
-                    {activePreset === 'CUSTOM'
-                      ? 'Staff Member'
-                      : activePreset.replace('_', ' ')}
-                  </span>
+                  <span>{t('auth.signIn', 'Sign In to Management Console')}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
             </button>
           </form>
-        </div>
 
-        {/* Return to Guest Portal Link */}
-        <div className="text-center mt-5 sm:mt-6">
-          <NextLink
-            href="/"
-            className="text-xs text-[#EFE3D6]/80 hover:text-[#D8AD56] transition-colors inline-flex items-center gap-1.5 py-1 px-2 rounded"
-          >
-            <span>&larr; Return to Guest Portal &amp; Reservations</span>
-          </NextLink>
+          {/* Security Notice Footer */}
+          <div className="pt-2 border-t border-[#EFE3D6] text-center">
+            <p className="text-[11px] text-[#786B61] flex items-center justify-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+              <span>{t('auth.securityNotice', 'Secured via Cryptographic JWT & Supabase Row-Level Security.')}</span>
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -454,8 +441,8 @@ export default function AdminLoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-[100dvh] bg-[#21180F] flex items-center justify-center text-[#D8AD56] text-xs font-mono">
-          Loading authentication portal...
+        <div className="min-h-screen bg-[#241912] flex items-center justify-center text-[#D8AD56]">
+          <Loader2 className="w-8 h-8 animate-spin" />
         </div>
       }
     >

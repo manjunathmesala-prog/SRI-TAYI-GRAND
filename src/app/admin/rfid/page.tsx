@@ -13,6 +13,7 @@ import {
   RFID_BRIDGE_URL,
   playChimeSound,
 } from '@/lib/rfid/bridge-client';
+import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 import {
   KeyRound,
   Radio,
@@ -40,6 +41,7 @@ import {
 } from 'lucide-react';
 
 export default function RFIDAdminPage() {
+  const { t, formatCurrency, formatDate, translateStatus, isTelugu } = useAdminLanguage();
   const [activeTab, setActiveTab] = useState<'roles' | 'hardware' | 'cards' | 'devices' | 'logs'>('roles');
   const [floorFilter, setFloorFilter] = useState<'all' | 'floor1' | 'floor2' | 'floor3' | 'infrastructure'>('all');
 
@@ -778,10 +780,10 @@ export default function RFIDAdminPage() {
           </span>
           <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-0.5 flex items-center gap-2">
             <KeyRound className="w-6 h-6 text-[#D8AD56]" />
-            <span>RFID Smart Room Key Integration</span>
+            <span>{t('rfid.title', 'RFID Smart Room Key Integration')}</span>
           </h1>
           <p className="text-xs text-[#786B61] mt-0.5">
-            Super Admin lifetime keys, Cleaner dual-tap turnover tracking, Customer room keys with extra time extension, and live audit telemetry.
+            {t('rfid.subtitle', 'Super Admin lifetime keys, Cleaner dual-tap turnover tracking, Customer room keys with extra time extension, and live audit telemetry.')}
           </p>
         </div>
 
@@ -791,7 +793,7 @@ export default function RFIDAdminPage() {
             className="px-3.5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
           >
             <Crown className="w-4 h-4" />
-            <span>+ Super Admin Card</span>
+            <span>{t('rfid.issueSuperAdminCard', '+ Super Admin Card')}</span>
           </button>
 
           <button
@@ -799,7 +801,7 @@ export default function RFIDAdminPage() {
             className="px-3.5 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
           >
             <Sparkles className="w-4 h-4" />
-            <span>+ Cleaner Card</span>
+            <span>{t('rfid.issueCleanerCard', '+ Cleaner Card')}</span>
           </button>
 
           <button
@@ -811,7 +813,7 @@ export default function RFIDAdminPage() {
             className="px-4 py-2.5 rounded-xl bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-bold transition-colors flex items-center gap-2 shadow-sm cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>+ Issue Customer Card</span>
+            <span>{t('rfid.issueCustomerCard', '+ Issue Customer Card')}</span>
           </button>
         </div>
       </div>
@@ -925,7 +927,7 @@ export default function RFIDAdminPage() {
           }`}
         >
           <Crown className="w-3.5 h-3.5 text-amber-500" />
-          <span>Card Roles &amp; Master Keys</span>
+          <span>{isTelugu ? 'పాత్రల మాస్టర్ కీలు' : 'Card Roles & Master Keys'}</span>
           <span className="px-1.5 py-0.2 rounded-full text-[9px] bg-amber-100 text-amber-800 font-bold">
             {superAdminCards.length + cleanerCards.length}
           </span>

@@ -6,8 +6,11 @@ import { RoomCategory } from '@/types';
 import { Layers, Plus, Edit, Check, X, ShieldCheck, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import { authStorage } from '@/lib/auth-storage';
+import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 
 export default function RoomCategoriesAdminPage() {
+  const { t, formatCurrency, isTelugu } = useAdminLanguage();
+
   const [categories, setCategories] = useState<RoomCategory[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingCategory, setEditingCategory] = useState<RoomCategory | null>(null);
@@ -82,7 +85,11 @@ export default function RoomCategoriesAdminPage() {
         throw new Error(data.error || 'Failed to update category');
       }
 
-      setToast(`Category ${name} updated successfully!`);
+      setToast(
+        isTelugu
+          ? `గది రకం "${name}" విజయవంతంగా నవీకరించబడింది!`
+          : `Category "${name}" updated successfully!`
+      );
       setTimeout(() => setToast(null), 4000);
       setEditingCategory(null);
       await fetchCategories();
@@ -99,23 +106,25 @@ export default function RoomCategoriesAdminPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
         <div>
           <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
-            CATALOG CONFIGURATION
+            {isTelugu ? 'కేటలాగ్ కాన్ఫిగరేషన్' : 'CATALOG CONFIGURATION'}
           </span>
           <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-0.5 flex items-center gap-2">
             <Layers className="w-6 h-6 text-[#D8AD56]" />
-            <span>Room Category Management</span>
+            <span>{t('nav.roomCategories', 'Room Category Management')}</span>
           </h1>
           <p className="text-xs text-[#786B61] mt-0.5">
-            Configure rates per night, bed types, guest limits, descriptions, and active status.
+            {isTelugu
+              ? 'రాత్రికి ధరలు, పడకల రకాలు, గరిష్ట అతిథుల పరిమితి, వివరణలు మరియు స్థితిని నిర్వహించండి.'
+              : 'Configure rates per night, bed types, guest limits, descriptions, and active status.'}
           </p>
         </div>
 
         <button
           onClick={() => fetchCategories()}
-          className="px-3.5 py-2 rounded-xl border border-[#D8AD56]/40 hover:bg-[#FAF7F2] text-xs font-semibold text-[#382216] transition-colors flex items-center gap-1.5 shadow-xs"
+          className="px-3.5 py-2 rounded-xl border border-[#D8AD56]/40 hover:bg-[#FAF7F2] text-xs font-semibold text-[#382216] transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-          <span>Refresh</span>
+          <span>{t('common.refresh', 'Refresh')}</span>
         </button>
       </div>
 
@@ -141,42 +150,55 @@ export default function RoomCategoriesAdminPage() {
                 className="object-cover"
               />
               <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-[#25150F]/80 backdrop-blur-sm text-[#D8AD56] text-xs font-bold">
-                ₹ {cat.base_price_per_night.toLocaleString('en-IN')} / night
+                {formatCurrency(cat.base_price_per_night)} / {isTelugu ? 'రాత్రికి' : 'night'}
               </div>
             </div>
 
             <div className="p-6 flex-1 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between">
-                  <h3 className="font-serif text-xl font-bold text-[#241912]">
-                    {cat.name}
-                  </h3>
-                  <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                    cat.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                  }`}>
-                    {cat.is_active ? 'ACTIVE' : 'INACTIVE'}
+                  <h3 className="font-serif text-xl font-bold text-[#241912]">{cat.name}</h3>
+                  <span
+                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                      cat.is_active
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : 'bg-stone-100 text-stone-600'
+                    }`}
+                  >
+                    {cat.is_active ? t('common.active', 'Active') : t('common.inactive', 'Inactive')}
                   </span>
                 </div>
 
-                <p className="text-xs text-[#786B61] mt-2 leading-relaxed">
+                <p className="text-xs text-[#786B61] mt-2 line-clamp-2">
                   {cat.short_description}
                 </p>
 
-                <div className="mt-4 pt-3 border-t border-[#EFE3D6] grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs text-[#241912]">
-                  <div>Bed: <strong className="block truncate">{cat.bed_type}</strong></div>
-                  <div>Included: <strong className="block">{cat.included_occupancy || 2} Persons</strong></div>
-                  <div>Extra Person: <strong className="block">₹300 (Max {cat.max_occupancy})</strong></div>
-                  <div>Inventory: <strong className="block">{cat.total_physical_rooms} Rooms</strong></div>
+                <div className="mt-4 pt-4 border-t border-[#EFE3D6] grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <span className="text-[10px] uppercase tracking-wider text-[#786B61] block">
+                      {isTelugu ? 'పడక రకం' : 'Bed Configuration'}
+                    </span>
+                    <span className="font-semibold text-[#241912]">{cat.bed_type}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase tracking-wider text-[#786B61] block">
+                      {isTelugu ? 'గరిష్ట అతిథులు' : 'Max Guests'}
+                    </span>
+                    <span className="font-semibold text-[#241912]">
+                      {cat.max_occupancy} {isTelugu ? 'మంది' : 'Guests'}
+                    </span>
+                  </div>
                 </div>
               </div>
 
-              <div className="mt-6 pt-3 border-t border-[#EFE3D6] flex justify-end">
+              <div className="mt-6 pt-4 border-t border-[#EFE3D6] flex justify-end">
                 <button
+                  type="button"
                   onClick={() => handleOpenEdit(cat)}
-                  className="px-4 py-2 rounded-lg bg-[#382216] hover:bg-[#25150F] text-[#EFE3D6] text-xs font-semibold transition-colors flex items-center gap-1.5"
+                  className="px-4 py-2 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <Edit className="w-3.5 h-3.5 text-[#D8AD56]" />
-                  <span>Edit Category & Pricing</span>
+                  <Edit className="w-3.5 h-3.5" />
+                  <span>{t('rooms.editRoom', 'Edit Category')}</span>
                 </button>
               </div>
             </div>
@@ -184,16 +206,20 @@ export default function RoomCategoriesAdminPage() {
         ))}
       </div>
 
-      {/* EDIT MODAL */}
+      {/* Edit Category Modal */}
       {editingCategory && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-[#D8AD56]/40 p-6 sm:p-7 max-w-lg w-full shadow-2xl space-y-5">
+          <div className="bg-white rounded-2xl border border-[#D8AD56]/40 p-6 max-w-lg w-full shadow-2xl space-y-4">
             <div className="flex items-center justify-between border-b border-[#EFE3D6] pb-3">
               <div>
-                <span className="text-[10px] uppercase font-semibold text-[#D8AD56]">CATEGORY EDITOR</span>
-                <h3 className="font-serif text-lg font-bold text-[#241912]">Edit {editingCategory.name}</h3>
+                <span className="text-[10px] uppercase font-semibold text-[#D8AD56]">
+                  {isTelugu ? 'వర్గం సవరణ' : 'CATEGORY OVERRIDE'}
+                </span>
+                <h3 className="font-serif text-lg font-bold text-[#241912]">
+                  {isTelugu ? `సవరించండి: ${editingCategory.name}` : `Edit ${editingCategory.name}`}
+                </h3>
               </div>
-              <button onClick={() => setEditingCategory(null)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => setEditingCategory(null)} className="text-gray-400 hover:text-gray-600 cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -201,87 +227,85 @@ export default function RoomCategoriesAdminPage() {
             <form onSubmit={handleSaveCategory} className="space-y-4">
               <div>
                 <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
-                  Category Name
+                  {t('rooms.category', 'Category Name')}
                 </label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6]"
+                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
+                  {isTelugu ? 'వివరణ' : 'Short Description'}
+                </label>
+                <textarea
+                  rows={2}
+                  value={shortDesc}
+                  onChange={(e) => setShortDesc(e.target.value)}
+                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
-                    Base Price / Night (₹)
+                    {t('rooms.pricePerNight', 'Base Rate (₹) / Night')}
                   </label>
                   <input
                     type="number"
+                    min="500"
+                    step="50"
                     required
                     value={price}
                     onChange={(e) => setPrice(Number(e.target.value))}
-                    className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6]"
+                    className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
                   />
                 </div>
-                <div>
-                  <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
-                    Bed Configuration
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={bedType}
-                    onChange={(e) => setBedType(e.target.value)}
-                    className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6]"
-                  />
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
-                    Max Occupancy (Guests)
+                    {isTelugu ? 'గరిష్ట అతిథులు' : 'Max Occupancy'}
                   </label>
                   <input
                     type="number"
                     min="1"
-                    max="6"
+                    max="10"
                     required
                     value={maxOccupancy}
                     onChange={(e) => setMaxOccupancy(Number(e.target.value))}
-                    className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6]"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
-                    Status
-                  </label>
-                  <LuxurySelect
-                    size="md"
-                    variant="admin"
-                    value={isActive ? 'true' : 'false'}
-                    onChange={(val) => setIsActive(val === 'true')}
-                    options={[
-                      { value: 'true', label: 'Active (Bookable)' },
-                      { value: 'false', label: 'Inactive (Hidden)' },
-                    ]}
+                    className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
                   />
                 </div>
               </div>
 
               <div>
                 <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
-                  Short Description
+                  {isTelugu ? 'పడక రకం' : 'Bed Type'}
                 </label>
-                <textarea
-                  rows={2}
+                <input
+                  type="text"
                   required
-                  value={shortDesc}
-                  onChange={(e) => setShortDesc(e.target.value)}
-                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6]"
+                  value={bedType}
+                  onChange={(e) => setBedType(e.target.value)}
+                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
                 />
+              </div>
+
+              <div className="flex items-center gap-2 pt-1">
+                <input
+                  type="checkbox"
+                  id="cat-active"
+                  checked={isActive}
+                  onChange={(e) => setIsActive(e.target.checked)}
+                  className="w-4 h-4 rounded text-[#43001F] focus:ring-[#D8AD56]"
+                />
+                <label htmlFor="cat-active" className="text-xs text-[#241912] font-semibold cursor-pointer">
+                  {isTelugu ? 'వెబ్‌సైట్ మరియు బుకింగ్స్‌లో సక్రియం' : 'Active for Online & Walk-In Reservations'}
+                </label>
               </div>
 
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#EFE3D6]">
@@ -289,17 +313,17 @@ export default function RoomCategoriesAdminPage() {
                   type="button"
                   disabled={isSubmitting}
                   onClick={() => setEditingCategory(null)}
-                  className="px-4 py-2 rounded-lg border border-gray-300 text-xs text-gray-700"
+                  className="px-4 py-2 rounded-lg border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 cursor-pointer"
                 >
-                  Cancel
+                  {t('common.cancel', 'Cancel')}
                 </button>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2 rounded-lg bg-[#43001F] text-white text-xs font-bold hover:bg-[#2E0015] disabled:opacity-50 flex items-center gap-1.5"
+                  className="px-5 py-2 rounded-lg bg-[#43001F] text-white text-xs font-bold hover:bg-[#2E0015] disabled:opacity-50 flex items-center gap-1.5 cursor-pointer"
                 >
                   {isSubmitting && <RefreshCw className="w-3 h-3 animate-spin" />}
-                  <span>{isSubmitting ? 'Saving...' : 'Save Changes'}</span>
+                  <span>{isSubmitting ? (isTelugu ? 'భద్రపరుస్తోంది...' : 'Saving...') : (isTelugu ? 'మార్పులను భద్రపరచండి' : 'Save Changes')}</span>
                 </button>
               </div>
             </form>

@@ -50,8 +50,10 @@ import { RfidHistoryTable } from '@/components/admin/RfidHistoryTable';
 import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
 import { Booking, BookingStatus, PhysicalRoom, RoomCategory, FolioCharge } from '@/types';
 import { toast } from '@/components/ui/Toast';
+import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 
 export default function BookingsAdminPage() {
+  const { t, formatCurrency, formatDate, translateStatus, isTelugu } = useAdminLanguage();
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [physicalRooms, setPhysicalRooms] = useState<PhysicalRoom[]>([]);
   const [categories, setCategories] = useState<RoomCategory[]>([]);
@@ -313,10 +315,10 @@ export default function BookingsAdminPage() {
       ].join(',');
     });
 
-    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows].join('\n');
-    const encodedUri = encodeURI(csvContent);
+    const csvHeaders = isTelugu ? ['బుకింగ్ రిఫరెన్స్', 'అతిథి పేరు', 'ఫోన్', 'ఈమెయిల్', 'గది రకం', 'కేటాయించిన గది', 'చెక్-ఇన్ తేదీ', 'చెక్-అవుట్ తేదీ', 'రాత్రులు', 'మొత్తం (రూ)', 'చెల్లించినది (రూ)', 'బకాయి (రూ)', 'బుకింగ్ స్థితి', 'చెల్లింపు స్థితి', 'బుకింగ్ మార్గం'] : headers;
+    const csvContent = 'data:text/csv;charset=utf-8,%EF%BB%BF' + encodeURIComponent([csvHeaders.join(','), ...rows].join('\n'));
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
+    link.setAttribute('href', csvContent);
     link.setAttribute('download', `Sri_Tayi_Grand_Reservations_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
@@ -615,10 +617,10 @@ export default function BookingsAdminPage() {
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-serif text-[#33271D] font-bold">
-            Guest Reservations & In-House Folios
+            {t('bookings.title', 'Guest Reservations & In-House Folios')}
           </h1>
           <p className="text-xs text-[#786A5B] mt-0.5">
-            Manage online bookings, front desk walk-ins, arrivals, in-house guests, and departures.
+            {t('bookings.subtitle', 'Manage online bookings, front desk walk-ins, arrivals, in-house guests, and departures.')}
           </p>
         </div>
 
@@ -628,7 +630,7 @@ export default function BookingsAdminPage() {
             className="flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-xl bg-[#21180F] hover:bg-black text-[#FAF6EE] text-xs uppercase tracking-wider font-bold border border-[#B18A4A]/50 shadow-md transition-all flex items-center space-x-1.5 min-h-[42px] cursor-pointer"
           >
             <Globe className="w-3.5 h-3.5 text-[#B18A4A]" />
-            <span>+ Record OTA Booking</span>
+            <span>{t('bookings.recordOta', '+ Record OTA Booking')}</span>
           </button>
 
           <Link
@@ -636,7 +638,7 @@ export default function BookingsAdminPage() {
             className="flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-xl bg-[#8D672F] hover:bg-[#6D4E21] text-white text-xs uppercase tracking-wider font-semibold shadow-md transition-all flex items-center space-x-1.5 min-h-[42px] cursor-pointer"
           >
             <Zap className="w-3.5 h-3.5 text-amber-300" />
-            <span>New Walk-In</span>
+            <span>{t('bookings.newBooking', 'New Walk-In')}</span>
           </Link>
 
           <button
@@ -644,7 +646,7 @@ export default function BookingsAdminPage() {
             className="flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-white text-xs font-semibold text-[#33271D] hover:bg-[#F8F3E9] shadow-sm transition-all flex items-center space-x-1.5 min-h-[42px] cursor-pointer"
           >
             <Download className="w-3.5 h-3.5 text-[#B18A4A]" />
-            <span>Export CSV</span>
+            <span>{t('common.exportCsv', 'Export CSV')}</span>
           </button>
 
           <Link

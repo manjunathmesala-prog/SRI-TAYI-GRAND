@@ -39,6 +39,7 @@ import {
 } from 'lucide-react';
 import { useRealtimeSync } from '@/lib/realtime-client';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
+import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 
 const SEATING_LAYOUTS: {
   id: SeatingLayoutType;
@@ -122,6 +123,7 @@ const CATERING_PACKAGES: {
 ];
 
 export default function ConventionHallAdminPage() {
+  const { t, formatCurrency, formatDate, isTelugu } = useAdminLanguage();
   const [activeTab, setActiveTab] = useState<'quotes' | 'builder' | 'enquiries'>('builder');
   const [searchQuery, setSearchQuery] = useState('');
   const [enquiries, setEnquiries] = useState<HallEnquiry[]>([]);

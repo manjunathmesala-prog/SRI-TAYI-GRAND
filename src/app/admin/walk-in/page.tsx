@@ -40,6 +40,7 @@ import {
   playChimeSound,
 } from '@/lib/rfid/bridge-client';
 import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
+import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 
 interface AdditionalServiceItem {
   id: string;
@@ -54,6 +55,7 @@ const DEFAULT_ADDITIONAL_SERVICES: AdditionalServiceItem[] = [
 ];
 
 export default function AnanthaWalkInPage() {
+  const { t, formatCurrency, formatDate, translateStatus, isTelugu } = useAdminLanguage();
   const todayStr = new Date().toISOString().split('T')[0];
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
@@ -470,10 +472,10 @@ export default function AnanthaWalkInPage() {
             <span>Front Desk PMS Operations</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#33271D]">
-            Walk-In Guest Registration & Check-In
+            {t('walkIn.title', 'Walk-In Guest Registration & Check-In')}
           </h1>
           <p className="text-xs sm:text-sm text-[#786A5B] mt-0.5">
-            Direct counter check-in, real-time physical room assignment, ID compliance, and instantaneous folio billing.
+            {t('walkIn.subtitle', 'Direct counter check-in, real-time physical room assignment, ID compliance, and instantaneous folio billing.')}
           </p>
         </div>
 
@@ -492,7 +494,7 @@ export default function AnanthaWalkInPage() {
             className="flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-xl border border-[#8D672F]/50 bg-[#F8F3E9] text-xs font-semibold text-[#8D672F] hover:bg-[#8D672F] hover:text-white transition-all flex items-center space-x-1.5 shadow-xs min-h-[42px] cursor-pointer"
           >
             <QrCode className="w-3.5 h-3.5" />
-            <span>Print Desk Standee QR</span>
+            <span>{t('walkIn.printStandee', 'Print Desk Standee QR')}</span>
           </button>
 
           <button
