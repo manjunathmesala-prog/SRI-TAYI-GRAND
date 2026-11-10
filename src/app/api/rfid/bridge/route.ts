@@ -47,7 +47,8 @@ function autoSpawnHardwareBridge(): boolean {
  */
 export async function GET(req: Request) {
   const url = new URL(req.url);
-  const targetHost = url.searchParams.get('host') || DEFAULT_BRIDGE_URL;
+  const rawHost = url.searchParams.get('host') || DEFAULT_BRIDGE_URL;
+  const targetHost = rawHost.trim().replace(/\/+$/, '');
   const isLocalHost = targetHost.includes('127.0.0.1') || targetHost.includes('localhost');
 
   // Attempt 1: Check if bridge is currently reachable
@@ -129,7 +130,8 @@ export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { endpoint, payload, staffUser = 'Front Desk' } = body;
-    const targetHost = body.targetHost || DEFAULT_BRIDGE_URL;
+    const rawHost = body.targetHost || DEFAULT_BRIDGE_URL;
+    const targetHost = rawHost.trim().replace(/\/+$/, '');
     const isLocalHost = targetHost.includes('127.0.0.1') || targetHost.includes('localhost');
 
     const targetEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;

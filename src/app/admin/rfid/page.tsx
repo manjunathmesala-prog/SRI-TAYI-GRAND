@@ -168,7 +168,11 @@ export default function RFIDAdminPage() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('stg_rfid_bridge_url');
-      if (saved) setCustomHost(saved);
+      if (saved) {
+        const clean = saved.trim().replace(/\/+$/, '');
+        localStorage.setItem('stg_rfid_bridge_url', clean);
+        setCustomHost(clean);
+      }
     }
   }, []);
 
@@ -237,13 +241,15 @@ export default function RFIDAdminPage() {
   // Save host configuration
   const handleSaveHost = (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanHost = customHost.trim().replace(/\/+$/, '');
+    setCustomHost(cleanHost);
     if (typeof window !== 'undefined') {
-      localStorage.setItem('stg_rfid_bridge_url', customHost.trim());
+      localStorage.setItem('stg_rfid_bridge_url', cleanHost);
     }
     setShowHostModal(false);
     checkBridgeHealth().then(setBridgeStatus);
     setHardwareMessage({
-      text: `Bridge host updated to ${customHost.trim()}. Active across all sessions.`,
+      text: `Bridge host updated to ${cleanHost}. Active across all sessions.`,
       type: 'success',
     });
   };
