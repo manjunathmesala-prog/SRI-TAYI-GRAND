@@ -35,10 +35,23 @@ import {
   CalendarRange,
   TrendingUp,
   MessageSquare,
+  FileText,
+  MailCheck,
 } from 'lucide-react';
 import { useRealtimeSync, cashbookClient } from '@/lib/realtime-client';
 import { canAccessRoute } from '@/lib/rbac/types';
 import { authStorage } from '@/lib/auth-storage';
+
+interface NavSection {
+  title: string;
+  items: {
+    label: string;
+    href: string;
+    icon: any;
+    highlight?: boolean;
+    badge?: string;
+  }[];
+}
 
 export function AdminSidebar() {
   const pathname = usePathname();
@@ -89,39 +102,94 @@ export function AdminSidebar() {
     }
   }, []);
 
-  // If on login page, don't show admin sidebar
+  // Lock body scroll when mobile drawer is open
+  useEffect(() => {
+    if (mobileOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileOpen]);
+
+  // Close drawer on path change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   if (pathname === '/admin/login') {
     return null;
   }
 
-  const menuItems = [
-    { label: 'Dashboard Overview', href: '/admin/dashboard', icon: LayoutDashboard },
-    { label: 'Analytics', href: '/admin/analytics', icon: BarChart3, badge: 'Executive' },
-    { label: 'Front Desk / Reception', href: '/admin/front-desk', icon: ConciergeBell, highlight: true },
-    { label: 'Walk-In Registration', href: '/admin/walk-in', icon: UserCheck, badge: 'Counter' },
-    { label: 'Room Tape Chart', href: '/admin/rooms/board', icon: CalendarRange, badge: 'Matrix' },
+  const navSections: NavSection[] = [
+    {
+      title: 'A. OVERVIEW',
+      items: [
+        { label: 'Dashboard Overview', href: '/admin/dashboard', icon: LayoutDashboard },
+        { label: 'Analytics', href: '/admin/analytics', icon: BarChart3, badge: 'Executive' },
+        { label: 'Reports Center', href: '/admin/reports', icon: FileText },
+      ],
+    },
+    {
+      title: 'B. HOTEL OPERATIONS',
+      items: [
+        { label: 'Front Desk / Reception', href: '/admin/front-desk', icon: ConciergeBell, highlight: true },
+        { label: 'Walk-In Registration', href: '/admin/walk-in', icon: UserCheck, badge: 'Counter' },
+        { label: 'Reservations & Bookings', href: '/admin/bookings', icon: CalendarCheck },
+        { label: 'Room Tape Chart', href: '/admin/rooms/board', icon: CalendarRange, badge: 'Matrix' },
+        { label: 'Room Inventory', href: '/admin/rooms/inventory', icon: BedDouble },
+        { label: 'Room Categories', href: '/admin/rooms/categories', icon: Layers },
+        { label: 'Guest Directory (CRM)', href: '/admin/guests', icon: Users },
+        { label: 'Housekeeping Matrix', href: '/admin/housekeeping', icon: Sparkles },
+        { label: 'Maintenance & OOO', href: '/admin/maintenance', icon: Wrench, badge: 'OOO' },
+        { label: 'Convention Hall', href: '/admin/convention-hall', icon: Building, highlight: true },
+        { label: 'Enquiries Pipeline', href: '/admin/enquiries', icon: MessageSquare, badge: 'Leads' },
+        { label: 'RFID Door Keycards', href: '/admin/rfid', icon: KeyRound, badge: 'Hardware' },
+      ],
+    },
+    {
+      title: 'C. FINANCIAL MANAGEMENT',
+      items: [
+        { label: 'Payments & Revenue', href: '/admin/payments', icon: CreditCard },
+        { label: 'Cashbook & Drawer', href: '/admin/cashbook', icon: Wallet, highlight: true, badge: 'Live' },
+        { label: 'Operating Expenses', href: '/admin/expenses', icon: TrendingDown },
+        { label: 'General Ledger ERP', href: '/admin/accounting', icon: Calculator, badge: 'GL' },
+        { label: 'Night Audit & Closing', href: '/admin/daily-closing', icon: Lock },
+      ],
+    },
+    {
+      title: 'D. BUSINESS MANAGEMENT',
+      items: [
+        { label: 'Staff Attendance', href: '/admin/staff/attendance', icon: UserCheck, badge: 'Roster' },
+        { label: 'Staff & Roles', href: '/admin/staff', icon: UserCog },
+      ],
+    },
+    {
+      title: 'E. WEBSITE MANAGEMENT',
+      items: [
+        { label: 'Dynamic Pricing', href: '/admin/pricing', icon: TrendingUp, badge: 'Yield' },
+        { label: 'Channel Manager (OTAs)', href: '/admin/channels', icon: Globe, badge: '2-Way' },
+        { label: 'Guest Reviews', href: '/admin/reviews', icon: MessageSquareQuote },
+        { label: 'Website CMS', href: '/admin/content', icon: Globe },
+        { label: 'Hotel Settings', href: '/admin/settings', icon: Settings },
+      ],
+    },
+    {
+      title: 'F. SYSTEM MANAGEMENT',
+      items: [
+        { label: 'System Audit Logs', href: '/admin/audit-logs', icon: ShieldCheck, badge: 'Audit' },
+      ],
+    },
+  ];
+
+  const bottomBarItems = [
+    { label: 'Overview', href: '/admin/dashboard', icon: LayoutDashboard },
+    { label: 'Front Desk', href: '/admin/front-desk', icon: ConciergeBell, highlight: true },
     { label: 'Bookings', href: '/admin/bookings', icon: CalendarCheck },
-    { label: 'Enquiries Pipeline', href: '/admin/enquiries', icon: MessageSquare, badge: 'Leads' },
-    { label: 'OTA Channel Manager', href: '/admin/channels', icon: Globe, badge: '2-Way' },
-    { label: 'Dynamic Pricing', href: '/admin/pricing', icon: TrendingUp, badge: 'Yield' },
-    { label: 'Cashbook & Drawer', href: '/admin/cashbook', icon: Wallet, badge: 'Live' },
-    { label: 'Operating Expenses', href: '/admin/expenses', icon: TrendingDown },
-    { label: 'Night Audit & Closing', href: '/admin/daily-closing', icon: Lock },
-    { label: 'General Ledger ERP', href: '/admin/accounting', icon: Calculator, badge: 'GL' },
-    { label: 'Room Inventory', href: '/admin/rooms/inventory', icon: BedDouble },
-    { label: 'Room Categories', href: '/admin/rooms/categories', icon: Layers },
-    { label: 'Housekeeping', href: '/admin/housekeeping', icon: Sparkles },
-    { label: 'Maintenance & OOO', href: '/admin/maintenance', icon: Wrench, badge: 'OOO' },
-    { label: 'Guests', href: '/admin/guests', icon: Users },
-    { label: 'Payments & Revenue', href: '/admin/payments', icon: CreditCard },
-    { label: 'Convention Hall Enquiries', href: '/admin/convention-hall', icon: Building },
-    { label: 'RFID Door Keycards', href: '/admin/rfid', icon: KeyRound, badge: 'Hardware' },
-    { label: 'Guest Reviews', href: '/admin/reviews', icon: MessageSquareQuote },
-    { label: 'Staff Attendance', href: '/admin/staff/attendance', icon: UserCheck, badge: 'Roster' },
-    { label: 'Staff & Roles', href: '/admin/staff', icon: UserCog },
-    { label: 'System Audit Logs', href: '/admin/audit-logs', icon: ShieldCheck, badge: 'Audit' },
-    { label: 'Reports & Analytics', href: '/admin/reports', icon: BarChart3 },
-    { label: 'Settings', href: '/admin/settings', icon: Settings },
+    { label: 'Cashbook', href: '/admin/cashbook', icon: Wallet },
+    { label: 'Closing', href: '/admin/daily-closing', icon: Lock },
   ];
 
   const handleLogout = async () => {
@@ -134,194 +202,356 @@ export function AdminSidebar() {
 
   return (
     <>
-      {/* Mobile Top Header */}
-      <div className="lg:hidden bg-[#25150F] text-white px-4 py-3 flex items-center justify-between border-b border-[#D8AD56]/20 fixed top-0 left-0 right-0 z-40">
-        <div className="flex items-center gap-2">
-          <div className="relative w-8 h-8 flex items-center justify-center shrink-0">
-            <Image
-              src="/images/hotel/tayi-grand-logo.png"
-              alt="Sri Tayi Grand Logo"
-              fill
-              sizes="32px"
-              className="object-contain drop-shadow-sm"
-            />
-          </div>
-          <span className="font-serif font-bold text-sm tracking-wide">Sri Tayi Grand Admin</span>
-        </div>
-        <div className="flex items-center gap-3">
-          <span
-            className={`w-2 h-2 rounded-full ${
-              isConnected ? 'bg-green-500 animate-pulse' : 'bg-amber-500'
-            }`}
-            title={`Real-Time Sync: ${status}`}
-          />
-          <button
-            onClick={() => setMobileOpen(!mobileOpen)}
-            className="p-1.5 rounded text-[#D8AD56] hover:bg-white/10"
-          >
-            {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
-        </div>
-      </div>
-
-      {/* Main Sidebar */}
-      <aside
-        className={`fixed top-0 bottom-0 left-0 z-50 w-64 bg-[#25150F] text-[#EFE3D6] flex flex-col justify-between border-r border-[#D8AD56]/20 transition-transform duration-300 ${
-          mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
-        }`}
-      >
-        {/* Brand Header */}
-        <div>
-          <div className="p-5 border-b border-white/10 flex items-center justify-between">
-            <NextLink href="/admin/dashboard" prefetch={false} className="flex items-center gap-3 group">
-              <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
+      {/* ------------------------------------------------------------- */}
+      {/* DESKTOP SIDEBAR (Visible on md and above: w-72)                */}
+      {/* ------------------------------------------------------------- */}
+      <aside className="hidden md:flex w-72 bg-[#21180F] text-[#F8F3E9] p-5 flex-col justify-between shrink-0 shadow-2xl border-r border-[#3a2c1f] fixed top-0 bottom-0 left-0 z-50 h-screen overflow-y-auto scrollbar-thin scrollbar-thumb-stone-800">
+        <div className="space-y-5">
+          {/* Logo / Brand Header */}
+          <div className="pb-4 border-b border-[#3a2c1f] space-y-3">
+            <NextLink href="/admin/dashboard" prefetch={false} className="flex items-center space-x-3 group">
+              <div className="relative w-10 h-10 rounded-full border border-[#D8AD56]/80 p-1 bg-black/40 shadow-sm flex items-center justify-center shrink-0 transition-transform group-hover:scale-105">
                 <Image
                   src="/images/hotel/tayi-grand-logo.png"
-                  alt="Sri Tayi Grand Logo"
-                  fill
-                  sizes="40px"
-                  className="object-contain drop-shadow-sm"
+                  alt="Sri Tayi Grand Official Emblem"
+                  width={30}
+                  height={30}
+                  className="object-contain"
                 />
               </div>
               <div>
-                <span className="font-serif font-bold text-base text-white tracking-wide block leading-none">
-                  Sri Tayi Grand
-                </span>
-                <span className="text-[9px] uppercase tracking-[0.2em] text-[#D8AD56] font-semibold mt-1 block">
-                  HOTEL MANAGEMENT SAAS
-                </span>
+                <div className="text-sm font-serif font-bold text-[#B18A4A] tracking-wider uppercase leading-none">
+                  SRI TAYI GRAND
+                </div>
+                <div className="text-[9px] text-[#E6D9C5]/80 tracking-widest uppercase font-semibold mt-1">
+                  HOTEL &bull; PMS &bull; KADIRI
+                </div>
               </div>
             </NextLink>
 
-            <button
-              onClick={() => setMobileOpen(false)}
-              className="lg:hidden text-white/60 hover:text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Real-time Status Indicator Pill */}
-          <div className="px-4 pt-3 pb-1 space-y-1.5">
-            <div
-              className={`flex items-center justify-between px-3 py-1.5 rounded-lg text-[10px] font-semibold border ${
-                isConnected
-                  ? 'bg-green-950/40 text-green-300 border-green-800/60'
-                  : status === 'reconnecting'
-                  ? 'bg-amber-950/40 text-amber-300 border-amber-800/60'
-                  : 'bg-red-950/40 text-red-300 border-red-800/60'
-              }`}
-            >
-              <div className="flex items-center gap-1.5">
+            {/* Realtime & Drawer Status Badges */}
+            <div className="flex items-center justify-between gap-2 pt-1">
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-medium tracking-wide">
                 <span
-                  className={`w-2 h-2 rounded-full ${
-                    isConnected ? 'bg-green-400 animate-pulse' : 'bg-amber-400'
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
                   }`}
                 />
-                <span>
-                  {isConnected
-                    ? 'Real-Time Sync Active'
-                    : status === 'reconnecting'
-                    ? 'Reconnecting Stream...'
-                    : 'Sync Connecting...'}
-                </span>
+                <span>{isConnected ? 'LIVE PMS' : 'SYNCING'}</span>
               </div>
-              <Radio className="w-3 h-3 opacity-60" />
-            </div>
 
-            {cashBalance !== null && (
-              <NextLink
-                href="/admin/cashbook"
-                prefetch={false}
-                className="flex items-center justify-between px-3 py-1.5 rounded-lg text-[10px] font-semibold bg-[#382216]/60 border border-[#D8AD56]/30 text-[#D8AD56] hover:bg-[#382216] transition-colors"
-                title="Front Desk Cash Drawer Balance"
-              >
-                <div className="flex items-center gap-1.5">
-                  <Wallet className="w-3 h-3 text-[#D8AD56]" />
-                  <span>Drawer Balance</span>
-                </div>
-                <span className="font-mono font-bold">₹{cashBalance.toLocaleString('en-IN')}</span>
-              </NextLink>
-            )}
+              {cashBalance !== null && (
+                <NextLink
+                  href="/admin/cashbook"
+                  prefetch={false}
+                  className="px-2 py-0.5 rounded-full bg-[#B18A4A]/15 hover:bg-[#B18A4A]/25 border border-[#B18A4A]/30 text-[#E6D9C5] text-[10px] font-mono font-medium flex items-center gap-1 transition-colors"
+                  title="Front Desk Cash Float"
+                >
+                  <Wallet className="w-3 h-3 text-[#B18A4A]" />
+                  <span>₹{cashBalance.toLocaleString('en-IN')}</span>
+                </NextLink>
+              )}
+            </div>
           </div>
 
-          {/* Navigation Items filtered dynamically by RBAC role */}
-          <nav className="p-3 space-y-1 max-h-[calc(100vh-220px)] overflow-y-auto">
-            {menuItems
-              .filter((item) => canAccessRoute(userRole, item.href))
-              .map((item) => {
-              const isActive =
-                pathname === item.href || (item.href !== '/admin/dashboard' && pathname.startsWith(item.href));
-              const Icon = item.icon;
-              return (
-                <NextLink
-                  key={item.href}
-                  href={item.href}
-                  prefetch={false}
-                  onClick={() => setMobileOpen(false)}
-                  className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-medium transition-all ${
-                    isActive
-                      ? 'bg-[#382216] text-[#D8AD56] font-semibold shadow-sm border border-[#D8AD56]/30'
-                      : 'text-[#EFE3D6]/80 hover:text-white hover:bg-white/5'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <Icon className={`w-4 h-4 ${isActive ? 'text-[#D8AD56]' : 'text-white/60'}`} />
-                    <span>{item.label}</span>
-                  </div>
+          {/* Grouped Navigation */}
+          <nav className="space-y-5">
+            {navSections.map((section) => {
+              const visibleItems = section.items.filter((item) => canAccessRoute(userRole, item.href));
+              if (visibleItems.length === 0) return null;
 
-                  {item.badge && (
-                    <span className="px-1.5 py-0.5 rounded text-[9px] font-semibold bg-[#D8AD56]/20 text-[#D8AD56] border border-[#D8AD56]/30">
-                      {item.badge}
-                    </span>
-                  )}
-                  {item.highlight && !isActive && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#D8AD56]" />
-                  )}
-                </NextLink>
+              return (
+                <div key={section.title} className="space-y-1">
+                  <div className="text-[10px] uppercase font-bold tracking-widest text-[#B18A4A]/70 px-2 py-1">
+                    {section.title}
+                  </div>
+                  <div className="space-y-0.5">
+                    {visibleItems.map((item) => {
+                      const Icon = item.icon;
+                      const isActive =
+                        pathname === item.href ||
+                        (item.href !== '/admin/dashboard' && pathname.startsWith(item.href));
+
+                      return (
+                        <NextLink
+                          key={item.href}
+                          href={item.href}
+                          prefetch={false}
+                          className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs uppercase tracking-wider font-medium transition-all ${
+                            isActive
+                              ? 'bg-[#8D672F] text-white shadow-md font-semibold'
+                              : item.highlight
+                              ? 'bg-[#B18A4A]/15 text-[#E6D9C5] border border-[#B18A4A]/30 hover:bg-[#B18A4A]/25 font-semibold'
+                              : 'text-[#E6D9C5]/80 hover:bg-white/5 hover:text-white'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-2.5 truncate">
+                            <Icon
+                              className={`w-4 h-4 shrink-0 ${
+                                isActive
+                                  ? 'text-white'
+                                  : item.highlight
+                                  ? 'text-amber-400'
+                                  : 'text-[#B18A4A]'
+                              }`}
+                            />
+                            <span className="truncate">{item.label}</span>
+                          </div>
+
+                          {item.badge && (
+                            <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold uppercase">
+                              {item.badge}
+                            </span>
+                          )}
+                        </NextLink>
+                      );
+                    })}
+                  </div>
+                </div>
               );
             })}
           </nav>
         </div>
 
-        {/* Footer: Public Site Link & User Profile */}
-        <div className="p-4 border-t border-white/10 space-y-3 bg-[#1D100B]">
-          <NextLink
-            href="/"
-            prefetch={false}
-            target="_blank"
-            className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/5 hover:bg-white/10 text-xs text-[#EFE3D6]/80 transition-colors"
-          >
-            <span className="flex items-center gap-2">
-              <Globe className="w-3.5 h-3.5 text-[#D8AD56]" />
-              <span>Public Website</span>
-            </span>
-            <ExternalLink className="w-3 h-3 text-white/50" />
-          </NextLink>
+        {/* Desktop Footer / User Profile & Logout */}
+        <div className="pt-4 border-t border-[#3a2c1f] space-y-3 mt-4">
+          <div className="text-[11px] text-[#E6D9C5]/60 truncate">
+            Logged in as <span className="text-white font-medium">{userName}</span>
+            <span className="text-[10px] text-[#B18A4A] block">{userRole}</span>
+          </div>
 
-          <div className="flex items-center justify-between pt-1">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full bg-[#382216] border border-[#D8AD56]/50 flex items-center justify-center text-[11px] font-bold text-[#D8AD56]">
-                {userName.slice(0, 2).toUpperCase()}
-              </div>
-              <div className="truncate max-w-[120px]">
-                <span className="text-xs font-semibold text-white block leading-tight truncate">
-                  {userName}
-                </span>
-                <span className="text-[10px] text-[#D8AD56] block truncate">{userRole}</span>
-              </div>
-            </div>
+          <div className="flex items-center justify-between text-xs">
+            <NextLink
+              href="/"
+              prefetch={false}
+              target="_blank"
+              className="text-[11px] text-[#B18A4A] hover:underline flex items-center gap-1"
+            >
+              <span>Public Website</span>
+              <ExternalLink className="w-3 h-3" />
+            </NextLink>
 
             <button
               onClick={handleLogout}
-              className="p-1.5 rounded text-white/50 hover:text-red-400 transition-colors"
+              className="text-xs text-rose-300 hover:text-rose-100 flex items-center space-x-1 p-1 rounded hover:bg-rose-500/10 transition-colors cursor-pointer"
               title="Logout"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Logout</span>
             </button>
           </div>
         </div>
       </aside>
+
+      {/* ------------------------------------------------------------- */}
+      {/* MOBILE STICKY TOP HEADER (< md)                                */}
+      {/* ------------------------------------------------------------- */}
+      <header className="md:hidden sticky top-0 z-40 bg-[#21180F] text-[#F8F3E9] border-b border-[#3a2c1f] px-3 h-14 flex items-center justify-between shadow-md gap-2 w-full max-w-full">
+        <div className="flex items-center space-x-2 min-w-0">
+          <button
+            type="button"
+            onClick={() => setMobileOpen(true)}
+            aria-label="Open Admin Menu"
+            className="w-9 h-9 rounded-xl bg-white/5 hover:bg-white/10 active:scale-95 text-[#E6D9C5] flex items-center justify-center shrink-0 border border-white/10"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+
+          <NextLink href="/admin/dashboard" prefetch={false} className="flex items-center space-x-2 min-w-0">
+            <div className="relative w-8 h-8 rounded-full border border-[#D8AD56]/80 p-0.5 bg-black/40 shadow-sm flex items-center justify-center shrink-0">
+              <Image
+                src="/images/hotel/tayi-grand-logo.png"
+                alt="Sri Tayi Grand"
+                width={22}
+                height={22}
+                className="object-contain"
+              />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[11px] font-serif font-bold text-[#B18A4A] tracking-wider uppercase truncate">
+                SRI TAYI GRAND
+              </div>
+              <div className="text-[9px] text-[#E6D9C5]/80 font-medium truncate uppercase tracking-widest -mt-0.5">
+                PMS CONSOLE
+              </div>
+            </div>
+          </NextLink>
+        </div>
+
+        {/* Quick Mobile Action Shortcuts */}
+        <div className="flex items-center space-x-1.5 shrink-0">
+          {cashBalance !== null && (
+            <NextLink
+              href="/admin/cashbook"
+              prefetch={false}
+              className="px-2 py-1 rounded-lg bg-black/40 text-amber-300 border border-amber-400/20 text-[10px] font-mono font-semibold max-w-[85px] truncate"
+              title="Front Desk Cash Float"
+            >
+              ₹{cashBalance.toLocaleString('en-IN')}
+            </NextLink>
+          )}
+          <NextLink
+            href="/admin/front-desk"
+            prefetch={false}
+            className="px-2.5 py-1.5 rounded-lg bg-[#8D672F] active:bg-[#6D4E21] text-white text-[10px] uppercase tracking-wider font-semibold shadow-sm flex items-center space-x-1 shrink-0"
+          >
+            <ConciergeBell className="w-3.5 h-3.5" />
+            <span className="hidden xs:inline">Front Desk</span>
+          </NextLink>
+        </div>
+      </header>
+
+      {/* ------------------------------------------------------------- */}
+      {/* MOBILE DRAWER MODAL OVERLAY (< md)                             */}
+      {/* ------------------------------------------------------------- */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 md:hidden flex">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm transition-opacity"
+            onClick={() => setMobileOpen(false)}
+            aria-hidden="true"
+          />
+
+          {/* Drawer Content */}
+          <div className="relative w-4/5 max-w-xs bg-[#21180F] text-[#F8F3E9] p-5 pb-12 safe-area-bottom flex flex-col justify-between shadow-2xl h-full z-10 overflow-y-auto">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between pb-3 border-b border-[#3a2c1f]">
+                <div className="flex items-center space-x-2">
+                  <Image
+                    src="/images/hotel/tayi-grand-logo.png"
+                    alt="Sri Tayi Grand"
+                    width={28}
+                    height={28}
+                    className="object-contain"
+                  />
+                  <div>
+                    <div className="text-xs font-serif font-bold text-[#B18A4A] tracking-wider uppercase">
+                      SRI TAYI GRAND
+                    </div>
+                    <div className="text-[9px] text-[#E6D9C5]/80 uppercase tracking-widest font-semibold">
+                      KADIRI PMS
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setMobileOpen(false)}
+                  className="p-1 rounded-lg text-[#E6D9C5]/80 hover:text-white"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Grouped Navigation in Drawer */}
+              <nav className="space-y-4">
+                {navSections.map((section) => {
+                  const visibleItems = section.items.filter((item) => canAccessRoute(userRole, item.href));
+                  if (visibleItems.length === 0) return null;
+
+                  return (
+                    <div key={section.title} className="space-y-1">
+                      <div className="text-[10px] uppercase font-bold tracking-widest text-[#B18A4A]/70 px-2 py-1">
+                        {section.title}
+                      </div>
+                      <div className="space-y-0.5">
+                        {visibleItems.map((item) => {
+                          const Icon = item.icon;
+                          const isActive =
+                            pathname === item.href ||
+                            (item.href !== '/admin/dashboard' && pathname.startsWith(item.href));
+
+                          return (
+                            <NextLink
+                              key={item.href}
+                              href={item.href}
+                              prefetch={false}
+                              onClick={() => setMobileOpen(false)}
+                              className={`flex items-center space-x-3 px-3 py-2 rounded-xl text-xs uppercase tracking-wider font-medium transition-all ${
+                                isActive
+                                  ? 'bg-[#8D672F] text-white shadow-md font-semibold'
+                                  : item.highlight
+                                  ? 'bg-[#B18A4A]/20 text-[#E6D9C5] border border-[#B18A4A]/40 font-semibold'
+                                  : 'text-[#E6D9C5]/80 hover:bg-white/5 hover:text-white'
+                              }`}
+                            >
+                              <Icon
+                                className={`w-4 h-4 shrink-0 ${
+                                  item.highlight ? 'text-amber-400' : 'text-[#B18A4A]'
+                                }`}
+                              />
+                              <span className="truncate">{item.label}</span>
+                            </NextLink>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </nav>
+            </div>
+
+            {/* Drawer Bottom Actions */}
+            <div className="pt-4 border-t border-[#3a2c1f] space-y-3">
+              <div className="text-[11px] text-[#E6D9C5]/60 truncate">
+                Logged in as <span className="text-white font-medium">{userName}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs pt-1">
+                <NextLink
+                  href="/"
+                  prefetch={false}
+                  target="_blank"
+                  className="text-[11px] text-[#B18A4A] flex items-center gap-1"
+                >
+                  <span>Public Site</span>
+                  <ExternalLink className="w-3 h-3" />
+                </NextLink>
+                <button
+                  onClick={handleLogout}
+                  className="text-xs text-rose-300 flex items-center space-x-1 cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* MOBILE BOTTOM NAVIGATION BAR (< md)                            */}
+      {/* ------------------------------------------------------------- */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#21180F]/95 backdrop-blur-md border-t border-[#3a2c1f] min-h-[3.75rem] px-2 py-1 flex items-center justify-around shadow-2xl safe-area-bottom">
+        {bottomBarItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = pathname === item.href;
+          return (
+            <NextLink
+              key={item.href}
+              href={item.href}
+              prefetch={false}
+              className={`flex flex-col items-center justify-center flex-1 min-h-[44px] py-1 text-[10px] tracking-tight transition-all active:scale-95 ${
+                isActive
+                  ? 'text-[#B18A4A] font-bold'
+                  : item.highlight
+                  ? 'text-amber-300 font-semibold'
+                  : 'text-[#E6D9C5]/70 active:text-white'
+              }`}
+            >
+              <Icon
+                className={`w-4 h-4 mb-0.5 ${
+                  isActive
+                    ? 'text-[#B18A4A]'
+                    : item.highlight
+                    ? 'text-amber-300'
+                    : 'text-[#E6D9C5]/70'
+                }`}
+              />
+              <span className="truncate max-w-[64px]">{item.label}</span>
+            </NextLink>
+          );
+        })}
+      </nav>
     </>
   );
 }

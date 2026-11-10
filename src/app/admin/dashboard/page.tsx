@@ -84,10 +84,10 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-8 max-w-7xl mx-auto">
       {/* Top Welcome & Kadiri Hotel Time */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
+            <span className="text-xs uppercase tracking-widest text-[#8D672F] font-semibold mb-1">
               HOTEL OPERATIONS HQ
             </span>
             <span
@@ -99,10 +99,10 @@ export default function AdminDashboardPage() {
               {isConnected ? 'Real-Time Sync Active' : `Sync: ${status}`}
             </span>
           </div>
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-0.5">
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#33271D]">
             Operational Overview
           </h1>
-          <p className="text-xs text-[#786B61] mt-0.5">
+          <p className="text-xs text-[#786A5B] mt-0.5">
             Live metrics for Sri Tayi Grand, Kadiri · Local Time:{' '}
             {new Date().toLocaleDateString('en-IN', {
               weekday: 'long',
@@ -122,7 +122,7 @@ export default function AdminDashboardPage() {
               className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                 filterPeriod === period
                   ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
-                  : 'bg-white text-[#786B61] hover:text-[#241912] border border-[#EFE3D6]'
+                  : 'bg-white text-[#786A5B] hover:text-[#33271D] border border-[#E6D9C5]'
               }`}
             >
               {period}
@@ -130,7 +130,7 @@ export default function AdminDashboardPage() {
           ))}
           <button
             onClick={fetchDashboardData}
-            className="p-1.5 rounded-lg bg-white border border-[#EFE3D6] text-[#786B61] hover:bg-[#FAF7F2]"
+            className="p-1.5 rounded-lg bg-white border border-[#E6D9C5] text-[#786A5B] hover:bg-[#FAF7F2]"
             title="Refresh"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
@@ -141,9 +141,9 @@ export default function AdminDashboardPage() {
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
         {/* Card 1: Occupancy Rate */}
-        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-5 shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-2xl border border-[#E6D9C5] p-5 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] uppercase tracking-wider font-semibold text-[#786B61]">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-[#786A5B]">
               Occupancy Rate
             </span>
             <div className="w-8 h-8 rounded-lg bg-[#FAF7F2] text-[#D8AD56] flex items-center justify-center">
@@ -151,7 +151,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="font-serif text-3xl font-bold text-[#241912]">{occupancyRate}%</span>
+            <span className="font-serif text-3xl font-bold text-[#33271D]">{occupancyRate}%</span>
             <span className="text-xs text-[#2E7D32] font-semibold">
               {occupiedRooms + reservedRooms} / {totalRooms} Rooms
             </span>
@@ -165,9 +165,9 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Card 2: Active Stays */}
-        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-5 shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-2xl border border-[#E6D9C5] p-5 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] uppercase tracking-wider font-semibold text-[#786B61]">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-[#786A5B]">
               Checked-In Guests
             </span>
             <div className="w-8 h-8 rounded-lg bg-[#FAF7F2] text-[#1565C0] flex items-center justify-center">
@@ -175,18 +175,18 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="font-serif text-3xl font-bold text-[#241912]">{checkedInCount}</span>
-            <span className="text-xs text-[#786B61]">Rooms Occupied</span>
+            <span className="font-serif text-3xl font-bold text-[#33271D]">{checkedInCount}</span>
+            <span className="text-xs text-[#786A5B]">Rooms Occupied</span>
           </div>
-          <p className="text-[11px] text-[#786B61] mt-2">
+          <p className="text-[11px] text-[#786A5B] mt-2">
             {confirmedCount} upcoming confirmed arrivals today
           </p>
         </div>
 
         {/* Card 3: Revenue */}
-        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-5 shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-2xl border border-[#E6D9C5] p-5 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] uppercase tracking-wider font-semibold text-[#786B61]">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-[#786A5B]">
               Total Bookings Revenue
             </span>
             <div className="w-8 h-8 rounded-lg bg-[#FAF7F2] text-[#2E7D32] flex items-center justify-center">
@@ -194,7 +194,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="font-serif text-2xl sm:text-3xl font-bold text-[#241912]">
+            <span className="font-serif text-2xl sm:text-3xl font-bold text-[#33271D]">
               ₹ {totalRevenue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
             </span>
           </div>
@@ -204,9 +204,9 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Card 4: Housekeeping Status */}
-        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-5 shadow-sm hover:shadow-md transition-shadow">
+        <div className="bg-white rounded-2xl border border-[#E6D9C5] p-5 shadow-sm hover:shadow-md transition-shadow">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] uppercase tracking-wider font-semibold text-[#786B61]">
+            <span className="text-[11px] uppercase tracking-wider font-semibold text-[#786A5B]">
               Room Inventory Ready
             </span>
             <div className="w-8 h-8 rounded-lg bg-[#FAF7F2] text-[#E65100] flex items-center justify-center">
@@ -214,10 +214,10 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="font-serif text-3xl font-bold text-[#241912]">{availableRooms}</span>
-            <span className="text-xs text-[#786B61]">Clean & Available</span>
+            <span className="font-serif text-3xl font-bold text-[#33271D]">{availableRooms}</span>
+            <span className="text-xs text-[#786A5B]">Clean & Available</span>
           </div>
-          <p className="text-[11px] text-[#786B61] mt-2">
+          <p className="text-[11px] text-[#786A5B] mt-2">
             {cleaningRooms} in cleaning turnover · {maintenanceRooms} in maintenance
           </p>
         </div>
@@ -225,15 +225,15 @@ export default function AdminDashboardPage() {
 
       {/* Middle Grid: Operational Room Matrix & Front Desk Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left: 18 Physical Rooms Status Grid */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-[#D8AD56]/30 p-6 shadow-sm">
+        {/* Left: 24 Physical Rooms Status Grid */}
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-[#E6D9C5] p-6 shadow-sm">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
             <div>
-              <h3 className="font-serif text-lg font-bold text-[#241912]">
+              <h3 className="font-serif text-lg font-bold text-[#33271D]">
                 Physical Room Operational Matrix
               </h3>
-              <p className="text-xs text-[#786B61]">
-                Live state of all 18 guest rooms across Floors 2 & 3
+              <p className="text-xs text-[#786A5B]">
+                Live state of all 24 guest rooms across Floors 1, 2 & 3
               </p>
             </div>
             <NextLink
@@ -245,7 +245,7 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Color Legend */}
-          <div className="flex flex-wrap gap-4 text-xs text-[#786B61] mb-6 pb-4 border-b border-[#EFE3D6]">
+          <div className="flex flex-wrap gap-4 text-xs text-[#786A5B] mb-6 pb-4 border-b border-[#E6D9C5]">
             <div className="flex items-center gap-1.5">
               <span className="w-3 h-3 rounded-md bg-[#2E7D32]" />
               <span>Available ({availableRooms})</span>
@@ -296,19 +296,19 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Right: Quick Operational Shortcuts */}
-        <div className="bg-[#FAF7F2] rounded-2xl border border-[#EFE3D6] p-6 shadow-sm flex flex-col justify-between">
+        <div className="bg-[#FAF7F2] rounded-2xl border border-[#E6D9C5] p-6 shadow-sm flex flex-col justify-between">
           <div>
-            <h3 className="font-serif text-lg font-bold text-[#241912] mb-1">
+            <h3 className="font-serif text-lg font-bold text-[#33271D] mb-1">
               Front Desk Shortcuts
             </h3>
-            <p className="text-xs text-[#786B61] mb-5">
+            <p className="text-xs text-[#786A5B] mb-5">
               Rapid access to everyday hotel desk operations
             </p>
 
             <div className="space-y-3">
               <NextLink
                 href="/admin/front-desk"
-                className="w-full p-3.5 rounded-xl bg-white border border-[#EFE3D6] hover:border-[#D8AD56] text-xs font-semibold text-[#241912] flex items-center justify-between shadow-xs group transition-all"
+                className="w-full p-3.5 rounded-xl bg-white border border-[#E6D9C5] hover:border-[#D8AD56] text-xs font-semibold text-[#33271D] flex items-center justify-between shadow-xs group transition-all"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-[#FAF7F2] text-[#D8AD56] flex items-center justify-center group-hover:bg-[#D8AD56] group-hover:text-[#25150F] transition-colors">
@@ -316,15 +316,15 @@ export default function AdminDashboardPage() {
                   </div>
                   <div className="text-left">
                     <span className="block font-bold">Walk-In & Check-In Desk</span>
-                    <span className="text-[10px] text-[#786B61]">Keycard encoding & folios</span>
+                    <span className="text-[10px] text-[#786A5B]">Keycard encoding & folios</span>
                   </div>
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-[#786B61] group-hover:text-[#D8AD56]" />
+                <ArrowUpRight className="w-4 h-4 text-[#786A5B] group-hover:text-[#D8AD56]" />
               </NextLink>
 
               <NextLink
                 href="/admin/payments"
-                className="w-full p-3.5 rounded-xl bg-white border border-[#EFE3D6] hover:border-[#D8AD56] text-xs font-semibold text-[#241912] flex items-center justify-between shadow-xs group transition-all"
+                className="w-full p-3.5 rounded-xl bg-white border border-[#E6D9C5] hover:border-[#D8AD56] text-xs font-semibold text-[#33271D] flex items-center justify-between shadow-xs group transition-all"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-[#FAF7F2] text-[#2E7D32] flex items-center justify-center group-hover:bg-[#2E7D32] group-hover:text-white transition-colors">
@@ -332,15 +332,15 @@ export default function AdminDashboardPage() {
                   </div>
                   <div className="text-left">
                     <span className="block font-bold">Financial Ledger & Expenses</span>
-                    <span className="text-[10px] text-[#786B61]">Collections & disbursements</span>
+                    <span className="text-[10px] text-[#786A5B]">Collections & disbursements</span>
                   </div>
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-[#786B61] group-hover:text-[#2E7D32]" />
+                <ArrowUpRight className="w-4 h-4 text-[#786A5B] group-hover:text-[#2E7D32]" />
               </NextLink>
 
               <NextLink
                 href="/admin/reports"
-                className="w-full p-3.5 rounded-xl bg-white border border-[#EFE3D6] hover:border-[#D8AD56] text-xs font-semibold text-[#241912] flex items-center justify-between shadow-xs group transition-all"
+                className="w-full p-3.5 rounded-xl bg-white border border-[#E6D9C5] hover:border-[#D8AD56] text-xs font-semibold text-[#33271D] flex items-center justify-between shadow-xs group transition-all"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-[#FAF7F2] text-[#1565C0] flex items-center justify-center group-hover:bg-[#1565C0] group-hover:text-white transition-colors">
@@ -348,15 +348,15 @@ export default function AdminDashboardPage() {
                   </div>
                   <div className="text-left">
                     <span className="block font-bold">Night Audit & Daily Closing</span>
-                    <span className="text-[10px] text-[#786B61]">Shift reconcile & lock day</span>
+                    <span className="text-[10px] text-[#786A5B]">Shift reconcile & lock day</span>
                   </div>
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-[#786B61] group-hover:text-[#1565C0]" />
+                <ArrowUpRight className="w-4 h-4 text-[#786A5B] group-hover:text-[#1565C0]" />
               </NextLink>
 
               <NextLink
                 href="/admin/housekeeping"
-                className="w-full p-3.5 rounded-xl bg-white border border-[#EFE3D6] hover:border-[#D8AD56] text-xs font-semibold text-[#241912] flex items-center justify-between shadow-xs group transition-all"
+                className="w-full p-3.5 rounded-xl bg-white border border-[#E6D9C5] hover:border-[#D8AD56] text-xs font-semibold text-[#33271D] flex items-center justify-between shadow-xs group transition-all"
               >
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-[#FAF7F2] text-[#E65100] flex items-center justify-center group-hover:bg-[#E65100] group-hover:text-white transition-colors">
@@ -364,10 +364,10 @@ export default function AdminDashboardPage() {
                   </div>
                   <div className="text-left">
                     <span className="block font-bold">Housekeeping Turnover</span>
-                    <span className="text-[10px] text-[#786B61]">Sanitization tracking</span>
+                    <span className="text-[10px] text-[#786A5B]">Sanitization tracking</span>
                   </div>
                 </div>
-                <ArrowUpRight className="w-4 h-4 text-[#786B61] group-hover:text-[#E65100]" />
+                <ArrowUpRight className="w-4 h-4 text-[#786A5B] group-hover:text-[#E65100]" />
               </NextLink>
             </div>
           </div>
@@ -375,13 +375,13 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Recent Bookings Activity Table */}
-      <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-6 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#E6D9C5] p-6 shadow-sm overflow-hidden">
         <div className="flex items-center justify-between mb-5">
           <div>
-            <h3 className="font-serif text-lg font-bold text-[#241912]">
+            <h3 className="font-serif text-lg font-bold text-[#33271D]">
               Recent Booking Activity
             </h3>
-            <p className="text-xs text-[#786B61]">Latest guest reservations and arrivals</p>
+            <p className="text-xs text-[#786A5B]">Latest guest reservations and arrivals</p>
           </div>
           <NextLink
             href="/admin/bookings"
@@ -393,7 +393,7 @@ export default function AdminDashboardPage() {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#FAF7F2] text-[#786B61] uppercase tracking-wider text-[10px] border-b border-[#EFE3D6]">
+            <thead className="bg-[#FAF7F2] text-[#786A5B] uppercase tracking-wider text-[10px] border-b border-[#E6D9C5]">
               <tr>
                 <th className="py-3 px-4 font-semibold">Reference</th>
                 <th className="py-3 px-4 font-semibold">Guest</th>
@@ -404,7 +404,7 @@ export default function AdminDashboardPage() {
                 <th className="py-3 px-4 font-semibold">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#EFE3D6] text-[#241912]">
+            <tbody className="divide-y divide-[#EFE3D6] text-[#33271D]">
               {recentBookings.map((b) => (
                 <tr key={b.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
                   <td className="py-3.5 px-4 font-mono font-bold text-[#382216]">
@@ -412,7 +412,7 @@ export default function AdminDashboardPage() {
                   </td>
                   <td className="py-3.5 px-4">
                     <div className="font-semibold">{b.guest_name}</div>
-                    <div className="text-[10px] text-[#786B61]">{b.guest_phone}</div>
+                    <div className="text-[10px] text-[#786A5B]">{b.guest_phone}</div>
                   </td>
                   <td className="py-3.5 px-4">{b.category_name}</td>
                   <td className="py-3.5 px-4">
@@ -420,7 +420,7 @@ export default function AdminDashboardPage() {
                   </td>
                   <td className="py-3.5 px-4">
                     {b.assigned_room_number ? (
-                      <span className="px-2 py-0.5 rounded bg-[#FAF7F2] border border-[#EFE3D6] font-bold text-[#241912]">
+                      <span className="px-2 py-0.5 rounded bg-[#FAF7F2] border border-[#E6D9C5] font-bold text-[#33271D]">
                         Room {b.assigned_room_number}
                       </span>
                     ) : (
