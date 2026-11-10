@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { PhysicalRoom, HousekeepingStatus, StaffMember, HousekeepingTurnaroundChecklist } from '@/types';
 import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
-import { authStorage } from '@/lib/auth';
+import { authStorage } from '@/lib/auth-storage';
 import {
   Sparkles,
   CheckCircle2,
@@ -47,8 +47,9 @@ export default function HousekeepingAdminPage() {
   const [chkFloorDustbin, setChkFloorDustbin] = useState(false);
   const [inspectionNotes, setInspectionNotes] = useState('');
   const [inspectorName, setInspectorName] = useState(() => {
-    const session = authStorage.getSession();
-    return session?.name ? `${session.name} (${session.role})` : 'G. Mohan Kumar (Hotel Manager)';
+    const name = authStorage.getUserName();
+    const role = authStorage.getRole();
+    return name ? `${name} (${role || 'Supervisor'})` : 'G. Mohan Kumar (Hotel Manager)';
   });
   const [isSubmittingInspection, setIsSubmittingInspection] = useState(false);
   const [toast, setToast] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
