@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { ReceptionStandeeModal } from '@/components/admin/ReceptionStandeeModal';
-import { Booking, PhysicalRoom } from '@/types';
-import { issuePhysicalKeycard, checkoutPhysicalCard, playChimeSound } from '@/lib/rfid/bridge-client';
+import { StatutoryWalkInModal } from '@/components/admin/StatutoryWalkInModal';
+import { Booking, PhysicalRoom, RoomCategory } from '@/types';
+import { issuePhysicalKeycard, checkoutPhysicalCard, playChimeSound, checkBridgeHealth } from '@/lib/rfid/bridge-client';
 import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
 import {
   ConciergeBell,
@@ -22,28 +23,66 @@ import {
   Plus,
   AlertCircle,
   Radio,
+  UserCheck,
+  ShieldCheck,
   Phone,
   Zap,
   Banknote,
 } from 'lucide-react';
+import { LuxurySelect } from '@/components/ui/LuxurySelect';
 
 export default function FrontDeskPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [rooms, setRooms] = useState<PhysicalRoom[]>([]);
+  const [categories, setCategories] = useState<RoomCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   // Modals state
   const [checkInModalBooking, setCheckInModalBooking] = useState<Booking | null>(null);
   const [checkOutModalBooking, setCheckOutModalBooking] = useState<Booking | null>(null);
+  const [showStatutoryModal, setShowStatutoryModal] = useState(false);
+  const [statutoryInitialData, setStatutoryInitialData] = useState<any>(null);
 
   // Check-in form fields
   const [selectedRoomId, setSelectedRoomId] = useState('');
   const [issueRfid, setIssueRfid] = useState(true);
+  const [checkInError, setCheckInError] = useState<string | null>(null);
+  const [isSubmittingCheckIn, setIsSubmittingCheckIn] = useState(false);
+  const [checkOutError, setCheckOutError] = useState<string | null>(null);
+  const [isSubmittingCheckOut, setIsSubmittingCheckOut] = useState(false);
+
+  // Expected arrival statutory check-in fields
+  const [arrivalIdType, setArrivalIdType] = useState('Aadhaar Card');
+  const [arrivalIdNumber, setArrivalIdNumber] = useState('');
+  const [arrivalNationality, setArrivalNationality] = useState<'Indian' | 'Foreigner'>('Indian');
+  const [arrivalCity, setArrivalCity] = useState('Kadiri');
+  const [arrivalPurpose, setArrivalPurpose] = useState('Pilgrimage / Temple Darshan');
 
   // Check-out form fields
   const [additionalCharges, setAdditionalCharges] = useState<number>(0);
   const [chargeDescription, setChargeDescription] = useState('Extra Mineral Water & Tea');
+  const [rfidOnline, setRfidOnline] = useState<boolean>(true);
+  const [isCheckingRfid, setIsCheckingRfid] = useState(false);
+
+  const handleRecheckRfid = useCallback(async (manual = false) => {
+    setIsCheckingRfid(true);
+    try {
+      const res = await checkBridgeHealth();
+      setRfidOnline(res.isOnline);
+      if (manual) playChimeSound(res.isOnline);
+    } catch {
+      setRfidOnline(false);
+    } finally {
+      setIsCheckingRfid(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    handleRecheckRfid(false);
+    const interval = setInterval(() => handleRecheckRfid(false), 20000);
+    return () => clearInterval(interval);
+  }, [handleRecheckRfid]);
   const [settlementMethod, setSettlementMethod] = useState<'cash' | 'upi' | 'card'>('cash');
   const [checkOutSuccessRef, setCheckOutSuccessRef] = useState<string | null>(null);
 
@@ -65,6 +104,7 @@ export default function FrontDeskPage() {
       if (data.success) {
         setBookings(data.bookings || []);
         setRooms(data.rooms || []);
+        if (data.categories) setCategories(data.categories);
       }
     } catch {
       // Ignored
@@ -169,18 +209,47 @@ export default function FrontDeskPage() {
         (b.assigned_room_number && b.assigned_room_number.includes(searchQuery)))
   );
 
-  // Available clean rooms for check-in assignment
+  // Available clean rooms for walk-in modal
   const availableRooms = rooms.filter(
     (r) => r.operational_status === 'available' && r.housekeeping_status === 'clean'
   );
 
+  // Selectable clean rooms for check-in assignment:
+  // Includes available clean rooms PLUS any room already assigned/reserved for the currently selected check-in guest
+  const selectableRoomsForCheckIn = rooms.filter((r) => {
+    if (r.housekeeping_status !== 'clean') return false;
+    if (r.operational_status === 'available') return true;
+    if (
+      checkInModalBooking &&
+      (r.id === checkInModalBooking.assigned_room_id ||
+        r.room_number === checkInModalBooking.assigned_room_number ||
+        (r.current_booking_ref &&
+          r.current_booking_ref.toLowerCase() === checkInModalBooking.booking_reference.toLowerCase()))
+    ) {
+      return true;
+    }
+    return false;
+  });
+
   // Execute Authoritative Check-In
   const handleConfirmCheckIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!checkInModalBooking || !selectedRoomId) return;
+    if (!checkInModalBooking) return;
 
-    const assignedRoom = rooms.find((r) => r.id === selectedRoomId);
-    if (!assignedRoom) return;
+    setCheckInError(null);
+
+    if (!selectedRoomId) {
+      setCheckInError('Please select a clean physical room to assign before confirming check-in.');
+      return;
+    }
+
+    const assignedRoom = rooms.find((r) => r.id === selectedRoomId || r.room_number === selectedRoomId);
+    if (!assignedRoom) {
+      setCheckInError(`Selected room (${selectedRoomId}) could not be found. Please select an available clean room.`);
+      return;
+    }
+
+    setIsSubmittingCheckIn(true);
 
     try {
       await adminOperations.checkIn({
@@ -188,6 +257,11 @@ export default function FrontDeskPage() {
         roomId: assignedRoom.id,
         roomNumber: assignedRoom.room_number,
         issueRfid,
+        idProofType: arrivalIdType,
+        idProofNumber: arrivalIdNumber.trim() || undefined,
+        nationality: arrivalNationality,
+        cityOfOrigin: arrivalCity.trim() || undefined,
+        purposeOfVisit: arrivalPurpose,
         staffName: 'Front Desk Reception',
       });
 
@@ -199,12 +273,20 @@ export default function FrontDeskPage() {
         }).catch(() => {});
       }
 
+      const guestName = checkInModalBooking.guest_name;
+      const roomNum = assignedRoom.room_number;
+
       setCheckInModalBooking(null);
       setSelectedRoomId('');
+      setCheckInError(null);
+      setWalkInAlert({ type: 'success', message: `Guest ${guestName} checked into Room ${roomNum} successfully.` });
       await fetchLiveState();
       await fetchWalkInQueue();
     } catch (err: any) {
-      alert(err.message || 'Check-in failed');
+      setCheckInError(err.message || 'Check-in failed. Please verify room status and permissions.');
+      setWalkInAlert({ type: 'error', message: err.message || 'Check-in failed' });
+    } finally {
+      setIsSubmittingCheckIn(false);
     }
   };
 
@@ -212,6 +294,9 @@ export default function FrontDeskPage() {
   const handleConfirmCheckOut = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!checkOutModalBooking) return;
+
+    setCheckOutError(null);
+    setIsSubmittingCheckOut(true);
 
     try {
       await adminOperations.checkOut({
@@ -226,13 +311,22 @@ export default function FrontDeskPage() {
         checkoutPhysicalCard(checkOutModalBooking.assigned_room_number, 'Front Desk Reception').catch(() => {});
       }
 
-      setCheckOutSuccessRef(checkOutModalBooking.booking_reference);
+      const ref = checkOutModalBooking.booking_reference;
+      setCheckOutSuccessRef(ref);
+      setWalkInAlert({
+        type: 'success',
+        message: `Folio ${ref} checked out and room marked for housekeeping.`,
+      });
       setCheckOutModalBooking(null);
       setAdditionalCharges(0);
+      setCheckOutError(null);
       await fetchLiveState();
       await fetchWalkInQueue();
     } catch (err: any) {
-      alert(err.message || 'Check-out failed');
+      setCheckOutError(err.message || 'Check-out failed');
+      setWalkInAlert({ type: 'error', message: err.message || 'Check-out failed' });
+    } finally {
+      setIsSubmittingCheckOut(false);
     }
   };
 
@@ -265,16 +359,30 @@ export default function FrontDeskPage() {
           </p>
         </div>
 
-        {/* Search */}
-        <div className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 text-[#786B61] absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search guest, phone, room, or ref..."
-            className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-[#EFE3D6] bg-white text-[#241912] focus:border-[#D8AD56] focus:outline-none shadow-sm"
-          />
+        {/* Action Buttons & Search */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
+          <button
+            type="button"
+            onClick={() => {
+              setStatutoryInitialData(null);
+              setShowStatutoryModal(true);
+            }}
+            className="px-4 py-2.5 rounded-xl bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer shrink-0"
+          >
+            <UserCheck className="w-4 h-4 text-[#D8AD56]" />
+            <span>+ Statutory Walk-In Check-In</span>
+          </button>
+
+          <div className="relative w-full sm:w-64">
+            <Search className="w-4 h-4 text-[#786B61] absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search guest, phone, room, or ref..."
+              className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-[#EFE3D6] bg-white text-[#241912] focus:border-[#D8AD56] focus:outline-none shadow-sm"
+            />
+          </div>
         </div>
       </div>
 
@@ -385,11 +493,8 @@ export default function FrontDeskPage() {
                             {item.guest_name}
                           </span>
                         </div>
-                        <p className="text-[11px] text-[#786B61] mt-0.5 flex items-center gap-1.5">
-                          <Phone className="w-3.5 h-3.5 text-[#786B61] shrink-0" />
-                          <span>{item.guest_phone}</span>
-                          <span>&bull;</span>
-                          <span>{item.category_name}</span>
+                        <p className="text-[11px] text-[#786B61] mt-0.5">
+                          <span className="inline-flex items-center gap-1"><Phone className="w-3 h-3 text-[#D8AD56]" /><span>{item.guest_phone}</span></span> &bull; {item.category_name}
                         </p>
                       </div>
 
@@ -407,60 +512,79 @@ export default function FrontDeskPage() {
                       <label className="text-[10px] font-bold text-[#786B61] uppercase tracking-wider block">
                         Select Physical Clean Room:
                       </label>
-                      <select
+                      <LuxurySelect
+                        size="sm"
+                        variant="admin"
                         value={currentSelectedRoom}
-                        onChange={(e) =>
+                        placeholder={cleanRoomsList.length === 0 ? "No clean rooms available" : "Select clean room..."}
+                        onChange={(val) =>
                           setSelectedWalkInRooms((prev) => ({
                             ...prev,
-                            [item.booking_reference]: e.target.value,
+                            [item.booking_reference]: String(val),
                           }))
                         }
-                        className="w-full p-2 text-xs font-bold rounded-md border border-[#EFE3D6] bg-white text-[#241912]"
-                      >
-                        {cleanRoomsList.length === 0 ? (
-                          <option value="">No clean rooms available</option>
-                        ) : (
-                          cleanRoomsList.map((r) => (
-                            <option key={r.id} value={r.room_number}>
-                              Room {r.room_number} &bull; Floor {r.floor_number} &bull; {r.category_name || 'Standard'} (Clean)
-                            </option>
-                          ))
-                        )}
-                      </select>
+                        options={cleanRoomsList.map((r) => ({
+                          value: r.room_number,
+                          label: `Room ${r.room_number} • Floor ${r.floor_number} • ${r.category_name || 'Standard'} (Clean)`,
+                        }))}
+                      />
                     </div>
                   </div>
 
-                  {/* 1-Click Encode & Issue CTA */}
-                  <button
-                    type="button"
-                    disabled={isEncoding || !currentSelectedRoom}
-                    onClick={() => handleAssignAndEncodeWalkIn(item)}
-                    className="w-full py-2.5 px-3 rounded-lg bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 cursor-pointer"
-                  >
-                    {isEncoding ? (
-                      <>
-                        <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#D8AD56]" />
-                        <span>Programming Be-Tech Keycard...</span>
-                      </>
-                    ) : (
-                      <>
-                        <KeyRound className="w-3.5 h-3.5 text-[#D8AD56]" />
-                        <span>
-                          {isPaid ? (
-                            <span className="inline-flex items-center gap-1">
-                              <Zap className="w-3.5 h-3.5" />
-                              <span>1-Click Encode & Issue Room {currentSelectedRoom}</span>
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1">
-                              <Banknote className="w-3.5 h-3.5" />
-                              <span>Collect ₹{item.total_amount} & Issue Room {currentSelectedRoom}</span>
-                            </span>
-                          )}
-                        </span>
-                      </>
-                    )}
-                  </button>
+                  <div className="space-y-1.5">
+                    {/* 1-Click Encode & Issue CTA */}
+                    <button
+                      type="button"
+                      disabled={isEncoding || !currentSelectedRoom}
+                      onClick={() => handleAssignAndEncodeWalkIn(item)}
+                      className="w-full py-2 px-3 rounded-lg bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm disabled:opacity-50 cursor-pointer"
+                    >
+                      {isEncoding ? (
+                        <>
+                          <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#D8AD56]" />
+                          <span>Programming Be-Tech Keycard...</span>
+                        </>
+                      ) : (
+                        <>
+                          <KeyRound className="w-3.5 h-3.5 text-[#D8AD56]" />
+                          <span>
+                            {isPaid
+                              ? (
+                                <span className="inline-flex items-center gap-1">
+                                  <Zap className="w-3.5 h-3.5 text-[#D8AD56]" />
+                                  <span>1-Click Encode & Issue Room {currentSelectedRoom || ''}</span>
+                                </span>
+                              )
+                              : (
+                                <span className="inline-flex items-center gap-1">
+                                  <Banknote className="w-3.5 h-3.5 text-[#D8AD56]" />
+                                  <span>Collect ₹{item.total_amount} & Issue Room {currentSelectedRoom || ''}</span>
+                                </span>
+                              )}
+                          </span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setStatutoryInitialData({
+                          guestName: item.guest_name,
+                          guestPhone: item.guest_phone,
+                          guestEmail: item.guest_email,
+                          categoryId: item.category_id,
+                          roomNumber: currentSelectedRoom,
+                          bookingReference: item.booking_reference,
+                        });
+                        setShowStatutoryModal(true);
+                      }}
+                      className="w-full py-1.5 px-3 rounded-lg bg-[#FAF7F2] hover:bg-[#EFE3D6] border border-[#D8AD56]/40 text-[#382216] text-[11px] font-bold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                    >
+                      <ShieldCheck className="w-3.5 h-3.5 text-[#D8AD56]" />
+                      <span>Statutory Registration & Tariff Form</span>
+                    </button>
+                  </div>
                 </div>
               );
             })}
@@ -521,9 +645,28 @@ export default function FrontDeskPage() {
                     </span>
                     <button
                       onClick={() => {
+                        setCheckInError(null);
                         setCheckInModalBooking(b);
-                        const match = availableRooms.find((r) => r.category_id === b.category_id);
-                        setSelectedRoomId(match ? match.id : (availableRooms[0]?.id || ''));
+                        const preAssigned = rooms.find(
+                          (r) =>
+                            (b.assigned_room_id && r.id === b.assigned_room_id) ||
+                            (b.assigned_room_number && r.room_number === b.assigned_room_number) ||
+                            (r.current_booking_ref && r.current_booking_ref.toLowerCase() === b.booking_reference.toLowerCase())
+                        );
+                        if (preAssigned && preAssigned.housekeeping_status === 'clean') {
+                          setSelectedRoomId(preAssigned.id);
+                        } else {
+                          const match = rooms.find(
+                            (r) => r.operational_status === 'available' && r.housekeeping_status === 'clean' && r.category_id === b.category_id
+                          );
+                          const anyClean = rooms.find((r) => r.operational_status === 'available' && r.housekeeping_status === 'clean');
+                          setSelectedRoomId(match ? match.id : (anyClean ? anyClean.id : ''));
+                        }
+                        setArrivalIdType(b.id_proof_type || 'Aadhaar Card');
+                        setArrivalIdNumber(b.id_proof_number || '');
+                        setArrivalNationality((b.nationality as any) || 'Indian');
+                        setArrivalCity(b.city_of_origin || 'Kadiri');
+                        setArrivalPurpose(b.purpose_of_visit || 'Pilgrimage / Temple Darshan');
                       }}
                       className="px-3.5 py-1.5 rounded-lg bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm"
                     >
@@ -611,16 +754,32 @@ export default function FrontDeskPage() {
       {/* CHECK-IN MODAL */}
       {checkInModalBooking && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-[#D8AD56]/40 p-6 sm:p-7 max-w-lg w-full shadow-2xl space-y-5">
+          <div className="bg-white rounded-2xl border border-[#D8AD56]/40 p-6 sm:p-7 max-w-lg w-full shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-[#EFE3D6] pb-3">
               <div>
                 <span className="text-[10px] uppercase font-semibold text-[#D8AD56]">RECEPTION CHECK-IN</span>
                 <h3 className="font-serif text-lg font-bold text-[#241912]">Check In {checkInModalBooking.guest_name}</h3>
               </div>
-              <button onClick={() => setCheckInModalBooking(null)} className="text-gray-400 hover:text-gray-600">
+              <button
+                onClick={() => {
+                  setCheckInModalBooking(null);
+                  setCheckInError(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
+
+            {checkInError && (
+              <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-start gap-2 shadow-xs">
+                <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="font-bold">Check-in could not be completed</p>
+                  <p className="text-[11px] mt-0.5 leading-relaxed">{checkInError}</p>
+                </div>
+              </div>
+            )}
 
             <form onSubmit={handleConfirmCheckIn} className="space-y-4">
               <div className="p-3 rounded-lg bg-[#FAF7F2] text-xs space-y-1">
@@ -633,19 +792,113 @@ export default function FrontDeskPage() {
                 <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
                   Assign Physical Room (Clean & Ready) *
                 </label>
-                <select
-                  required
+                <LuxurySelect
+                  size="md"
+                  variant="admin"
                   value={selectedRoomId}
-                  onChange={(e) => setSelectedRoomId(e.target.value)}
-                  className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912] focus:border-[#D8AD56]"
-                >
-                  <option value="">Select a ready clean room...</option>
-                  {availableRooms.map((r) => (
-                    <option key={r.id} value={r.id}>
-                      Room {r.room_number} (Floor {r.floor_number} - {r.category_name})
-                    </option>
-                  ))}
-                </select>
+                  placeholder="Select a ready clean room..."
+                  onChange={(val) => {
+                    setSelectedRoomId(String(val));
+                    setCheckInError(null);
+                  }}
+                  options={selectableRoomsForCheckIn.map((r) => {
+                    const isPreAssigned =
+                      checkInModalBooking &&
+                      (r.id === checkInModalBooking.assigned_room_id ||
+                        r.room_number === checkInModalBooking.assigned_room_number ||
+                        (r.current_booking_ref &&
+                          r.current_booking_ref.toLowerCase() === checkInModalBooking.booking_reference.toLowerCase()));
+                    return {
+                      value: r.id,
+                      label: `Room ${r.room_number} (Floor ${r.floor_number} - ${r.category_name})${isPreAssigned ? ' • Pre-Assigned' : ''}`,
+                    };
+                  })}
+                />
+                {selectableRoomsForCheckIn.length === 0 && (
+                  <p className="text-[11px] text-amber-700 mt-1.5 flex items-center gap-1 font-medium">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    No clean rooms currently available for this category. Please check Housekeeping status.
+                  </p>
+                )}
+              </div>
+
+              {/* Statutory Guest Identity & Origin (Form C Norms) */}
+              <div className="p-3 rounded-xl bg-[#FAF7F2] border border-[#EFE3D6] space-y-2.5">
+                <div className="flex items-center gap-1.5 text-[10px] uppercase font-bold text-[#D8AD56]">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                  <span>Indian Statutory Identity Verification</span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-0.5">Govt ID Type *</label>
+                    <LuxurySelect
+                      size="sm"
+                      variant="admin"
+                      value={arrivalIdType}
+                      onChange={(val) => setArrivalIdType(String(val))}
+                      options={[
+                        { value: 'Aadhaar Card', label: 'Aadhaar Card' },
+                        { value: 'Passport', label: 'Passport' },
+                        { value: 'Driving License', label: 'Driving License' },
+                        { value: 'Voter ID', label: 'Voter ID' },
+                      ]}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-0.5">Govt ID Number *</label>
+                    <input
+                      type="text"
+                      required
+                      value={arrivalIdNumber}
+                      onChange={(e) => setArrivalIdNumber(e.target.value)}
+                      placeholder="e.g. 5482 1928 3847"
+                      className="w-full p-2 text-xs font-mono font-bold rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-0.5">Nationality</label>
+                    <LuxurySelect
+                      size="sm"
+                      variant="admin"
+                      value={arrivalNationality}
+                      onChange={(val) => setArrivalNationality(val as any)}
+                      options={[
+                        { value: 'Indian', label: 'Indian Citizen' },
+                        { value: 'Foreigner', label: 'Foreign National' },
+                      ]}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-0.5">City of Origin</label>
+                    <input
+                      type="text"
+                      value={arrivalCity}
+                      onChange={(e) => setArrivalCity(e.target.value)}
+                      placeholder="e.g. Bengaluru"
+                      className="w-full p-2 text-xs rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                    />
+                  </div>
+
+                  <div className="col-span-2">
+                    <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-0.5">Purpose of Visit</label>
+                    <LuxurySelect
+                      size="sm"
+                      variant="admin"
+                      value={arrivalPurpose}
+                      onChange={(val) => setArrivalPurpose(String(val))}
+                      options={[
+                        { value: 'Pilgrimage / Temple Darshan', label: 'Pilgrimage / Temple Darshan' },
+                        { value: 'Business', label: 'Business' },
+                        { value: 'Transit', label: 'Transit' },
+                        { value: 'Personal / Family', label: 'Personal / Family' },
+                      ]}
+                    />
+                  </div>
+                </div>
               </div>
 
               <div className="p-3 rounded-lg border border-[#EFE3D6] flex items-center justify-between bg-white">
@@ -664,17 +917,28 @@ export default function FrontDeskPage() {
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#EFE3D6]">
                 <button
                   type="button"
-                  onClick={() => setCheckInModalBooking(null)}
-                  className="px-4 py-2 rounded-lg border border-gray-300 text-xs text-gray-700"
+                  disabled={isSubmittingCheckIn}
+                  onClick={() => {
+                    setCheckInModalBooking(null);
+                    setCheckInError(null);
+                  }}
+                  className="px-4 py-2 rounded-lg border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={!selectedRoomId}
-                  className="px-5 py-2 rounded-lg bg-[#43001F] text-white text-xs font-bold hover:bg-[#2E0015] disabled:opacity-50"
+                  disabled={!selectedRoomId || isSubmittingCheckIn}
+                  className="px-5 py-2 rounded-lg bg-[#43001F] text-white text-xs font-bold hover:bg-[#2E0015] disabled:opacity-50 flex items-center gap-2 shadow-sm transition-all"
                 >
-                  Confirm Check-in
+                  {isSubmittingCheckIn ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Checking In...</span>
+                    </>
+                  ) : (
+                    <span>Confirm Check-in</span>
+                  )}
                 </button>
               </div>
             </form>
@@ -685,16 +949,32 @@ export default function FrontDeskPage() {
       {/* CHECK-OUT & SETTLEMENT MODAL */}
       {checkOutModalBooking && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl border border-[#D8AD56]/40 p-6 sm:p-7 max-w-lg w-full shadow-2xl space-y-5">
+          <div className="bg-white rounded-2xl border border-[#D8AD56]/40 p-6 sm:p-7 max-w-lg w-full shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-[#EFE3D6] pb-3">
               <div>
                 <span className="text-[10px] uppercase font-semibold text-[#D8AD56]">RECEPTION CHECK-OUT</span>
                 <h3 className="font-serif text-lg font-bold text-[#241912]">Checkout Room {checkOutModalBooking.assigned_room_number}</h3>
               </div>
-              <button onClick={() => setCheckOutModalBooking(null)} className="text-gray-400 hover:text-gray-600">
+              <button
+                onClick={() => {
+                  setCheckOutModalBooking(null);
+                  setCheckOutError(null);
+                }}
+                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100 transition-colors"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
+
+            {checkOutError && (
+              <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-start gap-2 shadow-xs">
+                <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="font-bold">Checkout could not be completed</p>
+                  <p className="text-[11px] mt-0.5 leading-relaxed">{checkOutError}</p>
+                </div>
+              </div>
+            )}
 
             <form onSubmit={handleConfirmCheckOut} className="space-y-4">
               <div className="p-3 rounded-lg bg-[#FAF7F2] text-xs space-y-1.5">
@@ -773,16 +1053,28 @@ export default function FrontDeskPage() {
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-[#EFE3D6]">
                 <button
                   type="button"
-                  onClick={() => setCheckOutModalBooking(null)}
-                  className="px-4 py-2 rounded-lg border border-gray-300 text-xs text-gray-700"
+                  disabled={isSubmittingCheckOut}
+                  onClick={() => {
+                    setCheckOutModalBooking(null);
+                    setCheckOutError(null);
+                  }}
+                  className="px-4 py-2 rounded-lg border border-gray-300 text-xs text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-lg bg-[#43001F] text-white text-xs font-bold hover:bg-[#2E0015]"
+                  disabled={isSubmittingCheckOut}
+                  className="px-5 py-2 rounded-lg bg-[#43001F] text-white text-xs font-bold hover:bg-[#2E0015] disabled:opacity-50 flex items-center gap-2 shadow-sm transition-all"
                 >
-                  Complete Checkout & Settle
+                  {isSubmittingCheckOut ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Checking Out...</span>
+                    </>
+                  ) : (
+                    <span>Complete Checkout & Settle</span>
+                  )}
                 </button>
               </div>
             </form>
@@ -790,6 +1082,24 @@ export default function FrontDeskPage() {
         </div>
       )}
       <ReceptionStandeeModal isOpen={showStandeeModal} onClose={() => setShowStandeeModal(false)} />
+      <StatutoryWalkInModal
+        isOpen={showStatutoryModal}
+        onClose={() => {
+          setShowStatutoryModal(false);
+          setStatutoryInitialData(null);
+        }}
+        availableRooms={availableRooms}
+        categories={categories}
+        initialData={statutoryInitialData}
+        onSuccess={async (booking, roomNum) => {
+          setWalkInAlert({
+            message: `Walk-in guest ${booking.guest_name} registered and checked into Room ${roomNum}! Smart keycard encoded.`,
+            type: 'success',
+          });
+          await fetchLiveState();
+          await fetchWalkInQueue();
+        }}
+      />
     </div>
   );
 }
