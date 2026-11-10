@@ -17,13 +17,13 @@ function getPgPool() {
     const { Pool } = require('pg');
     pgPoolInstance = new Pool({
       host: process.env.SUPABASE_DB_HOST || 'aws-0-ap-northeast-1.pooler.supabase.com',
-      port: Number(process.env.SUPABASE_DB_PORT) || 5432,
+      port: Number(process.env.SUPABASE_DB_PORT) || 6543,
       database: process.env.SUPABASE_DB_NAME || 'postgres',
       user: process.env.SUPABASE_DB_USER || 'postgres.wercvaimozbbkbwmuoct',
       password: process.env.SUPABASE_DB_PASSWORD || 'Vaynex@2026',
       ssl: { rejectUnauthorized: false },
-      max: 10,
-      idleTimeoutMillis: 30000,
+      max: 3,
+      idleTimeoutMillis: 10000,
       connectionTimeoutMillis: 8000,
     });
 
