@@ -78,10 +78,11 @@ export function PrintGstInvoiceModal({
   };
 
   // Base stay room calculations
-  const baseRoomTariff = booking.room_charges_amount || booking.subtotal_amount;
-  const roomCgst = Math.round((booking.tax_amount / 2) * 100) / 100;
-  const roomSgst = Math.round((booking.tax_amount - roomCgst) * 100) / 100;
-  const roomTotal = Math.round((baseRoomTariff + booking.tax_amount) * 100) / 100;
+  const baseRoomTariff = Number(booking.room_charges_amount || booking.subtotal_amount || 0);
+  const taxAmount = Number(booking.tax_amount || 0);
+  const roomCgst = Math.round((taxAmount / 2) * 100) / 100;
+  const roomSgst = Math.round((taxAmount - roomCgst) * 100) / 100;
+  const roomTotal = Math.round((baseRoomTariff + taxAmount) * 100) / 100;
 
   // Filter charges for this booking
   const charges = folioCharges.filter(

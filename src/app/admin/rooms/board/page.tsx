@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import NextLink from 'next/link';
 import { PhysicalRoom, Booking, RoomCategory } from '@/types';
 import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
 import {
@@ -29,22 +30,37 @@ import {
   ShieldCheck,
   Wrench,
   Check,
+  ExternalLink,
+  LogOut,
+  LogIn,
+  Users,
+  Calendar,
+  DollarSign,
+  AlertTriangle,
 } from 'lucide-react';
 import { RfidHistoryTable } from '@/components/admin/RfidHistoryTable';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
 
+// Timezone-safe local date string helper (YYYY-MM-DD)
+function formatDateIso(d: Date): string {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export default function RoomTapeChartPage() {
   const [rooms, setRooms] = useState<PhysicalRoom[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [rfidAuditRoom, setRfidAuditRoom] = useState<string | null>(null);
   const [categories, setCategories] = useState<RoomCategory[]>([]);
+  const [rfidAuditRoom, setRfidAuditRoom] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   // 14-day timeline start date (defaults to 2 days before today to show current stays)
   const [startDateStr, setStartDateStr] = useState<string>(() => {
     const d = new Date();
     d.setDate(d.getDate() - 2);
-    return d.toISOString().split('T')[0];
+    return formatDateIso(d);
   });
 
   // Filters
@@ -59,6 +75,10 @@ export default function RoomTapeChartPage() {
     room: PhysicalRoom;
     dateStr: string;
   } | null>(null);
+
+  // Direct actions inside modal
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionFeedback, setActionFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   // New reservation form in modal
   const [newResGuestName, setNewResGuestName] = useState('');
@@ -128,13 +148,13 @@ export default function RoomTapeChartPage() {
   const handleShiftDays = (days: number) => {
     const current = new Date(`${startDateStr}T12:00:00`);
     current.setDate(current.getDate() + days);
-    setStartDateStr(current.toISOString().split('T')[0]);
+    setStartDateStr(formatDateIso(current));
   };
 
   const handleSetToday = () => {
     const d = new Date();
     d.setDate(d.getDate() - 2);
-    setStartDateStr(d.toISOString().split('T')[0]);
+    setStartDateStr(formatDateIso(d));
   };
 
   // Filtered rooms
@@ -175,20 +195,104 @@ export default function RoomTapeChartPage() {
   }, [filteredRooms]);
 
   // Find booking active for a given room on a given calendar day
-  const getBookingForRoomDate = (room: PhysicalRoom, date: Date) => {
-    const dateIso = date.toISOString().split('T')[0];
-    return bookings.find((b) => {
-      if (b.status === 'cancelled') return false;
-      const isAssigned =
-        b.assigned_room_id === room.id ||
-        b.assigned_room_number === room.room_number ||
-        b.room_number === room.room_number;
-      if (!isAssigned) return false;
+  const getBookingForRoomDate = useCallback(
+    (room: PhysicalRoom, date: Date) => {
+      const dateIso = formatDateIso(date);
+      return bookings.find((b) => {
+        if (b.status === 'cancelled') return false;
+        const isAssigned =
+          b.assigned_room_id === room.id ||
+          b.assigned_room_number === room.room_number ||
+          b.room_number === room.room_number;
+        if (!isAssigned) return false;
 
-      // Active stay covers check_in_date <= dateIso < check_out_date
-      return b.check_in_date <= dateIso && b.check_out_date > dateIso;
+        // Active stay covers check_in_date <= dateIso < check_out_date
+        return b.check_in_date <= dateIso && b.check_out_date > dateIso;
+      });
+    },
+    [bookings]
+  );
+
+  // Find booking checking OUT of a room on a given date (for turnaround display)
+  const getCheckOutForRoomDate = useCallback(
+    (room: PhysicalRoom, date: Date) => {
+      const dateIso = formatDateIso(date);
+      return bookings.find((b) => {
+        if (b.status === 'cancelled') return false;
+        const isAssigned =
+          b.assigned_room_id === room.id ||
+          b.assigned_room_number === room.room_number ||
+          b.room_number === room.room_number;
+        if (!isAssigned) return false;
+        return b.check_out_date === dateIso;
+      });
+    },
+    [bookings]
+  );
+
+  // Find booking checking IN to a room on a given date
+  const getCheckInForRoomDate = useCallback(
+    (room: PhysicalRoom, date: Date) => {
+      const dateIso = formatDateIso(date);
+      return bookings.find((b) => {
+        if (b.status === 'cancelled') return false;
+        const isAssigned =
+          b.assigned_room_id === room.id ||
+          b.assigned_room_number === room.room_number ||
+          b.room_number === room.room_number;
+        if (!isAssigned) return false;
+        return b.check_in_date === dateIso;
+      });
+    },
+    [bookings]
+  );
+
+  // Daily Occupancy Statistics across all 25 rooms
+  const dailyOccupancyMap = useMemo(() => {
+    const map = new Map<string, { count: number; percent: number }>();
+    const totalCount = rooms.length || 25;
+
+    timelineDates.forEach((d) => {
+      const dateIso = formatDateIso(d);
+      let occ = 0;
+      rooms.forEach((r) => {
+        const hasStay = bookings.some((b) => {
+          if (b.status === 'cancelled') return false;
+          const isAssigned =
+            b.assigned_room_id === r.id ||
+            b.assigned_room_number === r.room_number ||
+            b.room_number === r.room_number;
+          return isAssigned && b.check_in_date <= dateIso && b.check_out_date > dateIso;
+        });
+        if (hasStay) occ++;
+      });
+      map.set(dateIso, {
+        count: occ,
+        percent: Math.round((occ / totalCount) * 100),
+      });
     });
-  };
+
+    return map;
+  }, [rooms, bookings, timelineDates]);
+
+  // Operational Summary Metrics for Today
+  const todayIso = useMemo(() => formatDateIso(new Date()), []);
+
+  const metrics = useMemo(() => {
+    const total = rooms.length || 25;
+    const occupied = rooms.filter((r) => r.operational_status === 'occupied').length;
+    const reserved = rooms.filter((r) => r.operational_status === 'reserved').length;
+    const availableClean = rooms.filter(
+      (r) => r.operational_status === 'available' && r.housekeeping_status === 'clean'
+    ).length;
+    const cleaningDirty = rooms.filter(
+      (r) => r.housekeeping_status === 'dirty' || r.operational_status === 'cleaning'
+    ).length;
+    const maintenance = rooms.filter((r) => r.operational_status === 'maintenance').length;
+    const occupancyRate = total > 0 ? Math.round(((occupied + reserved) / total) * 100) : 0;
+
+    return { total, occupied, reserved, availableClean, cleaningDirty, maintenance, occupancyRate };
+  }, [rooms]);
 
   // Update room operational or housekeeping status
   const handleUpdateRoomStatus = async (
@@ -197,25 +301,15 @@ export default function RoomTapeChartPage() {
     housekeepingStatus: string
   ) => {
     try {
-      const res = await fetch('/api/admin/operations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-staff-role': 'Super Admin',
-        },
-        body: JSON.stringify({
-          action: 'housekeeping',
-          roomId,
-          operationalStatus,
-          housekeepingStatus,
-        }),
+      await adminOperations.updateHousekeeping({
+        roomId,
+        operationalStatus,
+        housekeepingStatus,
+        staffName: 'Room Matrix Console',
       });
-      const data = await res.json();
-      if (data.success) {
-        fetchData(false);
-        setModalFeedback('Room status updated successfully.');
-        setTimeout(() => setModalFeedback(null), 3000);
-      }
+      fetchData(false);
+      setModalFeedback('Room status updated successfully.');
+      setTimeout(() => setModalFeedback(null), 3000);
     } catch (err: any) {
       setModalFeedback(`Error: ${err.message}`);
     }
@@ -227,7 +321,7 @@ export default function RoomTapeChartPage() {
     setNewResCheckIn(dateStr);
     const nextDay = new Date(`${dateStr}T12:00:00`);
     nextDay.setDate(nextDay.getDate() + 1);
-    setNewResCheckOut(nextDay.toISOString().split('T')[0]);
+    setNewResCheckOut(formatDateIso(nextDay));
     setNewResGuestName('');
     setNewResPhone('');
     setNewResEmail('');
@@ -247,8 +341,8 @@ export default function RoomTapeChartPage() {
       const category = categories.find((c) => c.id === room.category_id);
       const basePrice = category ? category.base_price_per_night : 1800;
 
-      const checkInDate = new Date(newResCheckIn);
-      const checkOutDate = new Date(newResCheckOut);
+      const checkInDate = new Date(`${newResCheckIn}T12:00:00`);
+      const checkOutDate = new Date(`${newResCheckOut}T12:00:00`);
       const nights = Math.max(
         1,
         Math.round((checkOutDate.getTime() - checkInDate.getTime()) / (1000 * 60 * 60 * 24))
@@ -258,41 +352,33 @@ export default function RoomTapeChartPage() {
       const taxAmount = Math.round(subtotal * 0.12 * 100) / 100;
       const totalAmount = subtotal + taxAmount;
 
-      const res = await fetch('/api/admin/operations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-staff-role': 'Super Admin',
+      const data = await adminOperations.createBooking(
+        {
+          guest_name: newResGuestName,
+          guest_phone: newResPhone,
+          guest_email: newResEmail || `${newResGuestName.toLowerCase().replace(/\s+/g, '')}@guest.sritayigrand.com`,
+          category_id: room.category_id,
+          category_name: room.category_name || category?.name || 'Standard Room',
+          assigned_room_id: room.id,
+          assigned_room_number: room.room_number,
+          check_in_date: newResCheckIn,
+          check_out_date: newResCheckOut,
+          adults_count: Number(newResAdults),
+          children_count: Number(newResChildren),
+          rooms_count: 1,
+          status: 'confirmed',
+          payment_status: 'pay_at_hotel',
+          payment_method: 'pay_at_hotel',
+          subtotal_amount: subtotal,
+          tax_amount: taxAmount,
+          additional_charges_amount: 0,
+          total_amount: totalAmount,
+          paid_amount: 0,
+          special_requests: `Created from Interactive Tape Chart Matrix for Room ${room.room_number}.`,
         },
-        body: JSON.stringify({
-          action: 'create_booking',
-          bookingData: {
-            guest_name: newResGuestName,
-            guest_phone: newResPhone,
-            guest_email: newResEmail || `${newResGuestName.toLowerCase().replace(/\s+/g, '')}@guest.com`,
-            category_id: room.category_id,
-            category_name: room.category_name || category?.name || 'Standard Room',
-            assigned_room_id: room.id,
-            assigned_room_number: room.room_number,
-            check_in_date: newResCheckIn,
-            check_out_date: newResCheckOut,
-            adults_count: Number(newResAdults),
-            children_count: Number(newResChildren),
-            rooms_count: 1,
-            status: 'confirmed',
-            payment_status: 'pay_at_hotel',
-            payment_method: 'pay_at_hotel',
-            subtotal_amount: subtotal,
-            tax_amount: taxAmount,
-            additional_charges_amount: 0,
-            total_amount: totalAmount,
-            paid_amount: 0,
-            special_requests: `Created from Interactive Tape Chart Matrix for Room ${room.room_number}.`,
-          },
-        }),
-      });
+        'Front Desk Matrix'
+      );
 
-      const data = await res.json();
       if (data.success) {
         setModalFeedback(`Reservation ${data.booking?.booking_reference} confirmed!`);
         fetchData(false);
@@ -306,6 +392,54 @@ export default function RoomTapeChartPage() {
       setModalFeedback(`Error: ${err.message}`);
     } finally {
       setNewResSubmitting(false);
+    }
+  };
+
+  // Direct Check-In from Matrix
+  const handleDirectCheckIn = async (booking: Booking) => {
+    setActionLoading(true);
+    setActionFeedback(null);
+    try {
+      const roomNum = booking.assigned_room_number || booking.room_number;
+      await adminOperations.checkIn({
+        bookingReference: booking.booking_reference,
+        roomId: booking.assigned_room_id,
+        roomNumber: roomNum,
+        staffName: 'Front Desk Matrix',
+      });
+      setActionFeedback({ type: 'success', message: `Guest ${booking.guest_name} successfully checked into Room ${roomNum}!` });
+      fetchData(false);
+      setTimeout(() => {
+        setSelectedBooking(null);
+        setActionFeedback(null);
+      }, 1600);
+    } catch (err: any) {
+      setActionFeedback({ type: 'error', message: err.message || 'Check-in failed' });
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Direct Checkout from Matrix
+  const handleDirectCheckOut = async (booking: Booking) => {
+    setActionLoading(true);
+    setActionFeedback(null);
+    try {
+      await adminOperations.checkOut({
+        bookingReference: booking.booking_reference,
+        settlementMethod: 'cash',
+        staffName: 'Front Desk Matrix',
+      });
+      setActionFeedback({ type: 'success', message: `Guest ${booking.guest_name} checked out. Room released for turnaround!` });
+      fetchData(false);
+      setTimeout(() => {
+        setSelectedBooking(null);
+        setActionFeedback(null);
+      }, 1600);
+    } catch (err: any) {
+      setActionFeedback({ type: 'error', message: err.message || 'Checkout failed' });
+    } finally {
+      setActionLoading(false);
     }
   };
 
@@ -351,8 +485,6 @@ export default function RoomTapeChartPage() {
     }
   };
 
-  const todayIso = new Date().toISOString().split('T')[0];
-
   return (
     <div className="space-y-6 max-w-[1600px] mx-auto pb-16">
       {/* Top Banner */}
@@ -393,7 +525,7 @@ export default function RoomTapeChartPage() {
             <button
               onClick={() => fetchData(true)}
               disabled={loading}
-              className="px-4 py-2.5 rounded-xl border border-[#D8AD56]/30 bg-[#382216]/70 hover:bg-[#382216] text-[#D8AD56] font-medium text-xs flex items-center gap-2 transition-all shadow-sm"
+              className="px-4 py-2.5 rounded-xl border border-[#D8AD56]/30 bg-[#382216]/70 hover:bg-[#382216] text-[#D8AD56] font-medium text-xs flex items-center gap-2 transition-all shadow-sm active:scale-95 cursor-pointer"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
               <span>Refresh Matrix</span>
@@ -402,14 +534,79 @@ export default function RoomTapeChartPage() {
         </div>
       </div>
 
+      {/* Live Operational Metrics Summary Strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="bg-white rounded-xl p-3 border border-[#D8AD56]/20 shadow-xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-[#FAF7F2] border border-[#D8AD56]/30 flex items-center justify-center text-[#8A5A2B] shrink-0 font-bold">
+            {metrics.total}
+          </div>
+          <div>
+            <span className="text-[10px] uppercase font-mono tracking-wider text-stone-500 block">Total Rooms</span>
+            <span className="text-sm font-bold text-[#241912]">3 Floors</span>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl p-3 border border-blue-200/60 shadow-xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700 shrink-0 font-bold">
+            {metrics.occupied}
+          </div>
+          <div>
+            <span className="text-[10px] uppercase font-mono tracking-wider text-stone-500 block">Occupied</span>
+            <span className="text-sm font-bold text-blue-900">In-House Stays</span>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl p-3 border border-amber-200/60 shadow-xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 shrink-0 font-bold">
+            {metrics.reserved}
+          </div>
+          <div>
+            <span className="text-[10px] uppercase font-mono tracking-wider text-stone-500 block">Reserved</span>
+            <span className="text-sm font-bold text-amber-900">Expected Today</span>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl p-3 border border-emerald-200/60 shadow-xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shrink-0 font-bold">
+            {metrics.availableClean}
+          </div>
+          <div>
+            <span className="text-[10px] uppercase font-mono tracking-wider text-stone-500 block">Clean Ready</span>
+            <span className="text-sm font-bold text-emerald-900">Immediate Walk-In</span>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl p-3 border border-yellow-200/60 shadow-xs flex items-center gap-3">
+          <div className="w-9 h-9 rounded-lg bg-yellow-50 border border-yellow-200 flex items-center justify-center text-yellow-700 shrink-0 font-bold">
+            {metrics.cleaningDirty}
+          </div>
+          <div>
+            <span className="text-[10px] uppercase font-mono tracking-wider text-stone-500 block">Housekeeping</span>
+            <span className="text-sm font-bold text-yellow-900">Turnaround Dirty</span>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl p-3 border border-[#D8AD56]/40 shadow-xs flex items-center gap-3 bg-gradient-to-br from-white to-[#FAF7F2]">
+          <div className="w-9 h-9 rounded-lg bg-[#382216] border border-[#D8AD56]/40 flex items-center justify-center text-[#D8AD56] shrink-0 font-bold">
+            {metrics.occupancyRate}%
+          </div>
+          <div>
+            <span className="text-[10px] uppercase font-mono tracking-wider text-stone-500 block">Occupancy Rate</span>
+            <span className="text-sm font-bold text-[#8A5A2B]">
+              {metrics.occupied + metrics.reserved} / {metrics.total} Active
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* Control Bar: Timeline Navigation & Filters */}
       <div className="bg-white rounded-2xl border border-[#D8AD56]/20 shadow-sm p-4 space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           {/* 14-Day Date Navigation */}
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => handleShiftDays(-7)}
-              className="p-2 rounded-xl border border-stone-200 hover:border-[#D8AD56] hover:bg-[#FAF7F2] text-stone-700 transition-colors"
+              className="p-2 rounded-xl border border-stone-200 hover:border-[#D8AD56] hover:bg-[#FAF7F2] text-stone-700 transition-colors cursor-pointer"
               title="Previous 7 Days"
             >
               <ChevronLeft className="w-4 h-4" />
@@ -417,30 +614,30 @@ export default function RoomTapeChartPage() {
 
             <button
               onClick={handleSetToday}
-              className="px-3 py-2 rounded-xl border border-[#D8AD56]/40 bg-[#FAF7F2] hover:bg-[#FAF7F2]/80 text-[#8A5A2B] font-semibold text-xs transition-colors"
+              className="px-3.5 py-2 rounded-xl border border-[#D8AD56]/40 bg-[#FAF7F2] hover:bg-[#FAF7F2]/80 text-[#8A5A2B] font-semibold text-xs transition-colors cursor-pointer shadow-2xs"
             >
               Today
             </button>
 
             <button
               onClick={() => handleShiftDays(7)}
-              className="p-2 rounded-xl border border-stone-200 hover:border-[#D8AD56] hover:bg-[#FAF7F2] text-stone-700 transition-colors"
+              className="p-2 rounded-xl border border-stone-200 hover:border-[#D8AD56] hover:bg-[#FAF7F2] text-stone-700 transition-colors cursor-pointer"
               title="Next 7 Days"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
 
-            <div className="flex items-center gap-2 ml-2 pl-3 border-l border-stone-200">
-              <span className="text-xs text-stone-500 font-medium">Jump to Date:</span>
+            <div className="flex items-center gap-2 ml-1 sm:ml-2 pl-2 sm:pl-3 border-l border-stone-200">
+              <span className="text-xs text-stone-500 font-medium hidden sm:inline">Jump to Date:</span>
               <input
                 type="date"
                 value={startDateStr}
                 onChange={(e) => setStartDateStr(e.target.value)}
-                className="text-xs px-2.5 py-1.5 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56]"
+                className="text-xs px-2.5 py-1.5 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56] bg-stone-50/50"
               />
             </div>
 
-            <div className="ml-2 px-3 py-1.5 rounded-lg bg-[#FAF7F2] border border-[#D8AD56]/20 text-xs font-mono font-semibold text-[#241912]">
+            <div className="ml-1 sm:ml-2 px-3 py-1.5 rounded-lg bg-[#FAF7F2] border border-[#D8AD56]/20 text-xs font-mono font-semibold text-[#241912]">
               {timelineDates[0]?.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })} –{' '}
               {timelineDates[13]?.toLocaleDateString('en-IN', {
                 month: 'short',
@@ -459,7 +656,7 @@ export default function RoomTapeChartPage() {
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-blue-600" />
-              <span className="text-stone-600">Occupied (Checked In)</span>
+              <span className="text-stone-600">Occupied (In-House)</span>
             </div>
             <div className="flex items-center gap-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-amber-600" />
@@ -485,7 +682,7 @@ export default function RoomTapeChartPage() {
               <button
                 key={f}
                 onClick={() => setFloorFilter(f)}
-                className={`px-2.5 py-1 rounded-lg font-medium transition-colors ${
+                className={`px-2.5 py-1 rounded-lg font-medium transition-colors cursor-pointer ${
                   floorFilter === f
                     ? 'bg-[#382216] text-[#D8AD56] font-semibold'
                     : 'bg-stone-100 text-stone-600 hover:bg-stone-200'
@@ -497,9 +694,9 @@ export default function RoomTapeChartPage() {
           </div>
 
           {/* Category Filter */}
-          <div className="flex items-center gap-1.5 ml-2">
+          <div className="flex items-center gap-1.5 ml-1 sm:ml-2">
             <span className="text-stone-500 font-medium">Category:</span>
-            <div className="min-w-[140px]">
+            <div className="min-w-[150px]">
               <LuxurySelect
                 size="sm"
                 variant="admin"
@@ -514,9 +711,9 @@ export default function RoomTapeChartPage() {
           </div>
 
           {/* Status Filter */}
-          <div className="flex items-center gap-1.5 ml-2">
+          <div className="flex items-center gap-1.5 ml-1 sm:ml-2">
             <span className="text-stone-500 font-medium">Status:</span>
-            <div className="min-w-[130px]">
+            <div className="min-w-[140px]">
               <LuxurySelect
                 size="sm"
                 variant="admin"
@@ -535,14 +732,14 @@ export default function RoomTapeChartPage() {
           </div>
 
           {/* Search Box */}
-          <div className="relative flex-1 min-w-[200px] ml-auto">
+          <div className="relative flex-1 min-w-[220px] ml-auto">
             <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               placeholder="Search Room Number or Guest Name..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-stone-200 text-xs focus:outline-none focus:border-[#D8AD56]"
+              className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-stone-200 text-xs focus:outline-none focus:border-[#D8AD56] bg-stone-50/50"
             />
           </div>
         </div>
@@ -565,15 +762,16 @@ export default function RoomTapeChartPage() {
 
                 {/* 14 Calendar Date Columns */}
                 {timelineDates.map((date, idx) => {
-                  const dateIso = date.toISOString().split('T')[0];
+                  const dateIso = formatDateIso(date);
                   const isToday = dateIso === todayIso;
                   const dayOfWeek = date.getDay();
                   const isWeekend = dayOfWeek === 5 || dayOfWeek === 6; // Friday, Saturday
+                  const dayStats = dailyOccupancyMap.get(dateIso) || { count: 0, percent: 0 };
 
                   return (
                     <th
                       key={idx}
-                      className={`min-w-[96px] w-24 p-2 text-center border-r border-[#382216] transition-colors ${
+                      className={`min-w-[100px] w-24 p-2 text-center border-r border-[#382216] transition-colors ${
                         isToday
                           ? 'bg-[#382216] text-[#D8AD56] font-bold'
                           : isWeekend
@@ -587,11 +785,27 @@ export default function RoomTapeChartPage() {
                       <div className="text-sm font-bold mt-0.5">
                         {date.getDate()} {date.toLocaleDateString('en-IN', { month: 'short' })}
                       </div>
-                      {isToday && (
-                        <span className="inline-block px-1.5 py-0.2 rounded text-[8px] uppercase tracking-wider font-bold bg-[#D8AD56] text-[#241912]">
-                          Today
-                        </span>
-                      )}
+
+                      <div className="mt-1 flex items-center justify-center gap-1">
+                        {isToday ? (
+                          <span className="px-1.5 py-0.2 rounded text-[8px] uppercase tracking-wider font-bold bg-[#D8AD56] text-[#241912]">
+                            Today
+                          </span>
+                        ) : (
+                          <span
+                            className={`px-1.5 py-0.2 rounded text-[8px] font-mono font-semibold ${
+                              dayStats.percent >= 80
+                                ? 'bg-rose-950/80 text-rose-300 border border-rose-800'
+                                : dayStats.percent >= 40
+                                ? 'bg-amber-950/80 text-amber-300 border border-amber-800'
+                                : 'bg-emerald-950/80 text-emerald-300 border border-emerald-800'
+                            }`}
+                            title={`${dayStats.count} / ${rooms.length || 25} rooms booked (${dayStats.percent}%)`}
+                          >
+                            {dayStats.count}/{rooms.length || 25} Occ
+                          </span>
+                        )}
+                      </div>
                     </th>
                   );
                 })}
@@ -601,7 +815,7 @@ export default function RoomTapeChartPage() {
             {/* Matrix Body: Rooms grouped by Floor */}
             <tbody className="divide-y divide-stone-100">
               {floorGroups.map(({ floor, rooms: floorRooms }) => (
-                <div key={floor} className="contents">
+                <React.Fragment key={floor}>
                   {/* Floor Header Bar */}
                   <tr className="bg-[#FAF7F2] font-semibold text-[#8A5A2B] border-y border-[#D8AD56]/20">
                     <td
@@ -633,7 +847,7 @@ export default function RoomTapeChartPage() {
 
                             <button
                               onClick={() => openQuickModal(room, startDateStr)}
-                              className="text-stone-400 hover:text-[#D8AD56] p-1 rounded hover:bg-stone-100"
+                              className="text-stone-400 hover:text-[#D8AD56] p-1 rounded hover:bg-stone-100 cursor-pointer"
                               title="Room Details & New Reservation"
                             >
                               <Plus className="w-3.5 h-3.5" />
@@ -650,16 +864,27 @@ export default function RoomTapeChartPage() {
 
                         {/* 14 Timeline Day Cells */}
                         {timelineDates.map((date, dateIdx) => {
-                          const dateIso = date.toISOString().split('T')[0];
+                          const dateIso = formatDateIso(date);
                           const isToday = dateIso === todayIso;
                           const dayOfWeek = date.getDay();
                           const isWeekend = dayOfWeek === 5 || dayOfWeek === 6;
 
                           const booking = getBookingForRoomDate(room, date);
+                          const checkoutBooking = !booking ? getCheckOutForRoomDate(room, date) : null;
+                          const checkinBooking = getCheckInForRoomDate(room, date);
 
-                          // Check if booking starts today
-                          const isStart = booking && booking.check_in_date === dateIso;
-                          const isEnd = booking && booking.check_out_date === dateIso;
+                          // Gantt ribbon positioning flags
+                          const isStayStart = Boolean(booking && booking.check_in_date === dateIso);
+                          const isStayEnd = Boolean(
+                            booking &&
+                              timelineDates[dateIdx + 1] &&
+                              formatDateIso(timelineDates[dateIdx + 1]) === booking.check_out_date
+                          );
+
+                          // Turnaround scenario: One guest checks out on dateIso, another checks in on dateIso
+                          const isTurnaround = Boolean(
+                            checkinBooking && checkoutBooking && checkinBooking.id !== checkoutBooking.id
+                          );
 
                           return (
                             <td
@@ -667,38 +892,104 @@ export default function RoomTapeChartPage() {
                               onClick={() => {
                                 if (booking) {
                                   setSelectedBooking(booking);
+                                } else if (checkoutBooking) {
+                                  setSelectedBooking(checkoutBooking);
                                 } else {
                                   openQuickModal(room, dateIso);
                                 }
                               }}
-                              className={`h-14 p-1 border-r border-b border-stone-100 text-center relative cursor-pointer transition-all ${
+                              className={`h-14 p-0.5 border-r border-b border-stone-100 text-center relative cursor-pointer transition-all ${
                                 isToday ? 'bg-amber-50/40' : isWeekend ? 'bg-stone-50/40' : ''
                               } hover:bg-amber-100/50`}
                             >
-                              {booking ? (
+                              {isTurnaround && checkinBooking && checkoutBooking ? (
+                                // Turnaround Split Cell
+                                <div className="w-full h-full flex flex-col gap-0.5 justify-between p-0.5">
+                                  <div
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedBooking(checkoutBooking);
+                                    }}
+                                    className="bg-stone-700 text-white rounded px-1 py-0.5 text-[9px] truncate text-left border-l-2 border-stone-300 font-mono"
+                                    title={`Departs: ${checkoutBooking.guest_name}`}
+                                  >
+                                    ⇥ {checkoutBooking.guest_name.split(' ')[0]}
+                                  </div>
+                                  <div
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedBooking(checkinBooking);
+                                    }}
+                                    className="bg-blue-800 text-white rounded px-1 py-0.5 text-[9px] truncate text-left border-l-2 border-blue-300 font-mono"
+                                    title={`Arrives: ${checkinBooking.guest_name}`}
+                                  >
+                                    ➔ {checkinBooking.guest_name.split(' ')[0]}
+                                  </div>
+                                </div>
+                              ) : booking ? (
+                                // Continuous Gantt Stay Ribbon
                                 <div
-                                  className={`w-full h-full rounded-md p-1.5 flex flex-col justify-between text-left text-[11px] shadow-sm transition-transform hover:scale-[1.02] ${
+                                  className={`w-full h-full p-1.5 flex flex-col justify-between text-left text-[11px] shadow-2xs transition-all ${
+                                    isStayStart && isStayEnd
+                                      ? 'rounded-lg'
+                                      : isStayStart
+                                      ? 'rounded-l-lg rounded-r-none'
+                                      : isStayEnd
+                                      ? 'rounded-r-lg rounded-l-none'
+                                      : 'rounded-none'
+                                  } ${
                                     booking.status === 'checked_in'
-                                      ? 'bg-gradient-to-r from-emerald-800 to-teal-900 text-white border-l-4 border-l-emerald-400'
+                                      ? 'bg-gradient-to-r from-emerald-800 to-teal-900 text-white border-y border-emerald-700/60'
                                       : booking.status === 'confirmed'
-                                      ? 'bg-gradient-to-r from-blue-800 to-indigo-900 text-white border-l-4 border-l-blue-400'
-                                      : 'bg-gradient-to-r from-[#382216] to-[#5a3622] text-[#D8AD56] border-l-4 border-l-[#D8AD56]'
+                                      ? 'bg-gradient-to-r from-blue-800 to-indigo-900 text-white border-y border-blue-700/60'
+                                      : 'bg-gradient-to-r from-[#382216] to-[#5a3622] text-[#D8AD56] border-y border-[#D8AD56]/40'
+                                  } ${isStayStart ? 'border-l-4 border-l-[#D8AD56]' : ''} ${
+                                    isStayEnd ? 'border-r-2 border-r-white/40' : ''
                                   }`}
-                                  title={`${booking.guest_name} (${booking.booking_reference}) - ${booking.check_in_date} to ${booking.check_out_date}`}
+                                  title={`${booking.guest_name} (${booking.booking_reference}) | ${booking.check_in_date} to ${booking.check_out_date}`}
                                 >
-                                  <div className="font-bold truncate text-[10px] leading-tight">
-                                    {booking.guest_name}
-                                  </div>
-                                  <div className="flex items-center justify-between text-[9px] opacity-80 font-mono">
-                                    <span>
-                                      {booking.status === 'checked_in'
-                                        ? 'In-House'
-                                        : booking.status === 'confirmed'
-                                        ? 'Confirmed'
-                                        : 'Reserved'}
-                                    </span>
-                                    <span>{booking.adults_count}A</span>
-                                  </div>
+                                  {isStayStart ? (
+                                    <>
+                                      <div className="font-bold truncate text-[10px] leading-tight flex items-center gap-1">
+                                        <User className="w-2.5 h-2.5 shrink-0 opacity-80" />
+                                        <span className="truncate">{booking.guest_name}</span>
+                                      </div>
+                                      <div className="flex items-center justify-between text-[9px] opacity-80 font-mono">
+                                        <span>
+                                          {booking.status === 'checked_in'
+                                            ? 'In-House'
+                                            : booking.status === 'confirmed'
+                                            ? 'Confirmed'
+                                            : 'Reserved'}
+                                        </span>
+                                        <span>{booking.adults_count}A</span>
+                                      </div>
+                                    </>
+                                  ) : isStayEnd ? (
+                                    <>
+                                      <div className="text-[9px] truncate font-medium opacity-90 text-right">
+                                        Dep: {booking.check_out_date.slice(5)}
+                                      </div>
+                                      <div className="text-[9px] text-right opacity-70 font-mono">
+                                        {booking.guest_name.split(' ')[0]}
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center opacity-40">
+                                      <span className="w-6 h-0.5 bg-white/40 rounded-full" />
+                                    </div>
+                                  )}
+                                </div>
+                              ) : checkoutBooking ? (
+                                // Departure Morning Indicator
+                                <div
+                                  className="w-full h-full rounded bg-stone-100 border border-dashed border-stone-300 p-1 flex flex-col justify-between text-left text-[9px] text-stone-600 hover:bg-stone-200 transition-colors"
+                                  title={`Departure: ${checkoutBooking.guest_name} checked out on this date`}
+                                >
+                                  <span className="font-mono text-[8px] text-stone-400">Departed</span>
+                                  <span className="truncate font-semibold text-stone-700">
+                                    {checkoutBooking.guest_name.split(' ')[0]}
+                                  </span>
                                 </div>
                               ) : room.operational_status === 'maintenance' ? (
                                 <div className="w-full h-full rounded bg-rose-50 border border-rose-200 text-rose-700 flex items-center justify-center text-[10px] font-semibold gap-1">
@@ -716,21 +1007,21 @@ export default function RoomTapeChartPage() {
                       </tr>
                     );
                   })}
-                </div>
+                </React.Fragment>
               ))}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Booking Details Modal */}
+      {/* Booking Details & Stay Action Modal */}
       {selectedBooking && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
           <div className="bg-white rounded-2xl border border-[#D8AD56]/40 shadow-2xl max-w-lg w-full overflow-hidden">
             <div className="bg-[#241912] text-[#FAF7F2] p-5 flex items-center justify-between border-b border-[#D8AD56]/30">
               <div>
                 <span className="text-[10px] uppercase font-mono tracking-wider text-[#D8AD56]">
-                  Reservation Overview
+                  Reservation Overview & Actions
                 </span>
                 <h3 className="font-serif font-bold text-lg text-white">
                   {selectedBooking.guest_name}
@@ -738,13 +1029,31 @@ export default function RoomTapeChartPage() {
               </div>
               <button
                 onClick={() => setSelectedBooking(null)}
-                className="text-stone-400 hover:text-white p-1 rounded-lg"
+                className="text-stone-400 hover:text-white p-1 rounded-lg cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="p-6 space-y-4 text-xs">
+              {/* Action feedback */}
+              {actionFeedback && (
+                <div
+                  className={`p-3 rounded-lg border font-medium flex items-center gap-2 ${
+                    actionFeedback.type === 'success'
+                      ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                      : 'bg-rose-50 text-rose-800 border-rose-200'
+                  }`}
+                >
+                  {actionFeedback.type === 'success' ? (
+                    <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
+                  )}
+                  <span>{actionFeedback.message}</span>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-3 p-3 rounded-xl bg-[#FAF7F2] border border-[#D8AD56]/20">
                 <div>
                   <span className="text-stone-500 font-medium block">Booking Reference:</span>
@@ -753,14 +1062,24 @@ export default function RoomTapeChartPage() {
                   </span>
                 </div>
                 <div>
-                  <span className="text-stone-500 font-medium block">Status:</span>
-                  <span className="font-semibold text-emerald-800">
+                  <span className="text-stone-500 font-medium block">Stay Status:</span>
+                  <span
+                    className={`font-bold px-2 py-0.5 rounded text-[10px] inline-block mt-0.5 ${
+                      selectedBooking.status === 'checked_in'
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : selectedBooking.status === 'confirmed'
+                        ? 'bg-blue-100 text-blue-800'
+                        : selectedBooking.status === 'checked_out'
+                        ? 'bg-stone-100 text-stone-700'
+                        : 'bg-amber-100 text-amber-800'
+                    }`}
+                  >
                     {selectedBooking.status.toUpperCase()}
                   </span>
                 </div>
                 <div>
-                  <span className="text-stone-500 font-medium block">Room Number:</span>
-                  <span className="font-mono font-bold text-[#241912]">
+                  <span className="text-stone-500 font-medium block">Assigned Room:</span>
+                  <span className="font-mono font-bold text-[#241912] text-sm">
                     Room {selectedBooking.assigned_room_number || selectedBooking.room_number || 'Unassigned'}
                   </span>
                 </div>
@@ -784,7 +1103,16 @@ export default function RoomTapeChartPage() {
                 <div className="flex items-center gap-2 text-stone-700">
                   <CalendarRange className="w-3.5 h-3.5 text-[#8A5A2B]" />
                   <span>
-                    {selectedBooking.check_in_date} ➔ {selectedBooking.check_out_date}
+                    {selectedBooking.check_in_date} ➔ {selectedBooking.check_out_date} (
+                    {Math.max(
+                      1,
+                      Math.round(
+                        (new Date(selectedBooking.check_out_date).getTime() -
+                          new Date(selectedBooking.check_in_date).getTime()) /
+                          (1000 * 60 * 60 * 24)
+                      )
+                    )}{' '}
+                    Nights)
                   </span>
                 </div>
                 <div className="flex items-center gap-2 text-stone-700">
@@ -803,24 +1131,62 @@ export default function RoomTapeChartPage() {
                 </div>
               )}
 
-              <div className="pt-3 border-t border-stone-100 flex items-center justify-between gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const b = selectedBooking;
-                    setSelectedBooking(null);
-                    setRfidAuditRoom(b.assigned_room_number || b.room_number || null);
-                  }}
-                  className="px-3 py-1.5 rounded-lg border border-[#D8AD56]/60 bg-[#FAF5EB] text-[#8a6a2a] text-xs font-bold hover:bg-[#E2D5BE]/60 transition-colors flex items-center gap-1.5 cursor-pointer"
-                >
-                  <Key className="w-3.5 h-3.5 text-[#9b7a3e]" />
-                  <span>RFID Tap History</span>
-                </button>
+              {/* Direct Stay Actions Bar */}
+              <div className="pt-3 border-t border-stone-200 space-y-2">
+                <span className="text-stone-500 font-semibold block">Front Desk Operations:</span>
+                <div className="grid grid-cols-2 gap-2">
+                  {selectedBooking.status === 'confirmed' && (
+                    <button
+                      type="button"
+                      disabled={actionLoading}
+                      onClick={() => handleDirectCheckIn(selectedBooking)}
+                      className="py-2 px-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer"
+                    >
+                      <LogIn className="w-3.5 h-3.5" />
+                      <span>{actionLoading ? 'Processing...' : 'Quick Check-In'}</span>
+                    </button>
+                  )}
 
+                  {selectedBooking.status === 'checked_in' && (
+                    <button
+                      type="button"
+                      disabled={actionLoading}
+                      onClick={() => handleDirectCheckOut(selectedBooking)}
+                      className="py-2 px-3 rounded-xl bg-stone-800 hover:bg-stone-900 text-[#D8AD56] font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer"
+                    >
+                      <LogOut className="w-3.5 h-3.5" />
+                      <span>{actionLoading ? 'Processing...' : 'Checkout & Settle'}</span>
+                    </button>
+                  )}
+
+                  <NextLink
+                    href={`/admin/bookings?search=${encodeURIComponent(selectedBooking.booking_reference)}`}
+                    className="py-2 px-3 rounded-xl border border-stone-300 hover:border-[#D8AD56] bg-stone-50 text-stone-800 font-semibold text-xs flex items-center justify-center gap-1.5 transition-colors"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>View Folio / Invoice</span>
+                  </NextLink>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const b = selectedBooking;
+                      setSelectedBooking(null);
+                      setRfidAuditRoom(b.assigned_room_number || b.room_number || null);
+                    }}
+                    className="py-2 px-3 rounded-xl border border-[#D8AD56]/60 bg-[#FAF5EB] text-[#8a6a2a] text-xs font-bold hover:bg-[#E2D5BE]/60 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Key className="w-3.5 h-3.5 text-[#9b7a3e]" />
+                    <span>RFID Tap History</span>
+                  </button>
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-stone-100 flex items-center justify-end">
                 <button
                   type="button"
                   onClick={() => setSelectedBooking(null)}
-                  className="px-4 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-medium"
+                  className="px-5 py-2 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-700 font-semibold cursor-pointer"
                 >
                   Close
                 </button>
@@ -851,7 +1217,7 @@ export default function RoomTapeChartPage() {
               </div>
               <button
                 onClick={() => setQuickRoomModal(null)}
-                className="text-stone-400 hover:text-white p-1 rounded-lg"
+                className="text-stone-400 hover:text-white p-1 rounded-lg cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -860,7 +1226,13 @@ export default function RoomTapeChartPage() {
             <div className="p-5 space-y-4 text-xs">
               {/* Feedback Alert */}
               {modalFeedback && (
-                <div className="p-3 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
+                <div
+                  className={`p-3 rounded-lg border font-medium ${
+                    modalFeedback.startsWith('Error')
+                      ? 'bg-rose-50 text-rose-800 border-rose-200'
+                      : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                  }`}
+                >
                   {modalFeedback}
                 </div>
               )}
@@ -876,7 +1248,7 @@ export default function RoomTapeChartPage() {
                     onClick={() =>
                       handleUpdateRoomStatus(quickRoomModal.room.id, 'available', 'clean')
                     }
-                    className="py-2 px-2.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 font-semibold hover:bg-emerald-100 transition-colors flex items-center justify-center gap-1.5"
+                    className="py-2 px-2.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 font-semibold hover:bg-emerald-100 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <CheckCircle2 className="w-3.5 h-3.5" />
                     <span>Set Clean</span>
@@ -887,7 +1259,7 @@ export default function RoomTapeChartPage() {
                     onClick={() =>
                       handleUpdateRoomStatus(quickRoomModal.room.id, 'cleaning', 'dirty')
                     }
-                    className="py-2 px-2.5 rounded-lg border border-yellow-200 bg-yellow-50 text-yellow-800 font-semibold hover:bg-yellow-100 transition-colors flex items-center justify-center gap-1.5"
+                    className="py-2 px-2.5 rounded-lg border border-yellow-200 bg-yellow-50 text-yellow-800 font-semibold hover:bg-yellow-100 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Clock className="w-3.5 h-3.5" />
                     <span>Set Dirty</span>
@@ -898,7 +1270,7 @@ export default function RoomTapeChartPage() {
                     onClick={() =>
                       handleUpdateRoomStatus(quickRoomModal.room.id, 'maintenance', 'dirty')
                     }
-                    className="py-2 px-2.5 rounded-lg border border-rose-200 bg-rose-50 text-rose-800 font-semibold hover:bg-rose-100 transition-colors flex items-center justify-center gap-1.5"
+                    className="py-2 px-2.5 rounded-lg border border-rose-200 bg-rose-50 text-rose-800 font-semibold hover:bg-rose-100 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     <Wrench className="w-3.5 h-3.5" />
                     <span>Mark OOO</span>
@@ -936,7 +1308,7 @@ export default function RoomTapeChartPage() {
                         placeholder="e.g. Ramesh Kumar"
                         value={newResGuestName}
                         onChange={(e) => setNewResGuestName(e.target.value)}
-                        className="w-full px-3 py-1.5 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56]"
+                        className="w-full px-3 py-1.5 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56] bg-stone-50/50"
                       />
                     </div>
                     <div>
@@ -947,7 +1319,7 @@ export default function RoomTapeChartPage() {
                         placeholder="e.g. 9848012345"
                         value={newResPhone}
                         onChange={(e) => setNewResPhone(e.target.value)}
-                        className="w-full px-3 py-1.5 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56]"
+                        className="w-full px-3 py-1.5 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56] bg-stone-50/50"
                       />
                     </div>
                   </div>
@@ -960,7 +1332,7 @@ export default function RoomTapeChartPage() {
                         required
                         value={newResCheckIn}
                         onChange={(e) => setNewResCheckIn(e.target.value)}
-                        className="w-full px-3 py-1.5 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56]"
+                        className="w-full px-3 py-1.5 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56] bg-stone-50/50"
                       />
                     </div>
                     <div>
@@ -970,7 +1342,7 @@ export default function RoomTapeChartPage() {
                         required
                         value={newResCheckOut}
                         onChange={(e) => setNewResCheckOut(e.target.value)}
-                        className="w-full px-3 py-1.5 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56]"
+                        className="w-full px-3 py-1.5 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56] bg-stone-50/50"
                       />
                     </div>
                   </div>
@@ -984,7 +1356,7 @@ export default function RoomTapeChartPage() {
                         max="4"
                         value={newResAdults}
                         onChange={(e) => setNewResAdults(Number(e.target.value))}
-                        className="w-full px-3 py-1.5 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56]"
+                        className="w-full px-3 py-1.5 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56] bg-stone-50/50"
                       />
                     </div>
                     <div>
@@ -995,7 +1367,7 @@ export default function RoomTapeChartPage() {
                         max="3"
                         value={newResChildren}
                         onChange={(e) => setNewResChildren(Number(e.target.value))}
-                        className="w-full px-3 py-1.5 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56]"
+                        className="w-full px-3 py-1.5 rounded-lg border border-stone-300 focus:outline-none focus:border-[#D8AD56] bg-stone-50/50"
                       />
                     </div>
                   </div>
@@ -1003,7 +1375,7 @@ export default function RoomTapeChartPage() {
                   <button
                     type="submit"
                     disabled={newResSubmitting}
-                    className="w-full mt-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#D8AD56] to-[#b3883b] hover:from-[#e0b761] hover:to-[#c49744] text-[#241912] font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all"
+                    className="w-full mt-2 py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#D8AD56] to-[#b3883b] hover:from-[#e0b761] hover:to-[#c49744] text-[#241912] font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer"
                   >
                     <Check className={`w-3.5 h-3.5 ${newResSubmitting ? 'animate-spin' : ''}`} />
                     <span>
@@ -1037,7 +1409,7 @@ export default function RoomTapeChartPage() {
               </div>
               <button
                 onClick={() => setRfidAuditRoom(null)}
-                className="text-stone-400 hover:text-stone-700 p-1.5 rounded-lg hover:bg-stone-100 transition-colors"
+                className="text-stone-400 hover:text-stone-700 p-1.5 rounded-lg hover:bg-stone-100 transition-colors cursor-pointer"
                 title="Close Audit Trail"
               >
                 <X className="w-5 h-5" />
