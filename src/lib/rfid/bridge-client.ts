@@ -151,7 +151,7 @@ export async function readPhysicalCard(staffUser: string = 'Front Desk'): Promis
   // Try direct hardware post (with 25s timeout for physical card encoder)
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
 
     const res = await fetch(`${host}/api/read-card`, {
       method: 'POST',
@@ -199,7 +199,9 @@ export async function readPhysicalCard(staffUser: string = 'Front Desk'): Promis
 }
 
 /**
- * Encode and activate a Mifare keycard for a guest room
+ * Encode and activate a Mifare keycard for a guest room.
+ * Strictly enforces perpetual lifetime access (beginTime: 0001010000, endTime: 9912312359)
+ * for absolute reliability on Be-Tech physical door hardware.
  */
 export async function issuePhysicalKeycard(params: {
   roomNumber: string;
@@ -207,37 +209,40 @@ export async function issuePhysicalKeycard(params: {
   checkInDate?: Date;
   checkOutDate?: Date;
   staffUser?: string;
+  bookingRef?: string;
 }): Promise<RfidCardResult> {
   const host = getSavedBridgeHost();
 
-  const formatTime = (d: Date) => {
-    const yy = String(d.getFullYear()).slice(-2);
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    const hh = String(d.getHours()).padStart(2, '0');
-    const mi = String(d.getMinutes()).padStart(2, '0');
-    return `${yy}${mm}${dd}${hh}${mi}`;
-  };
-
-  const payload: {
-    roomNumber: string;
-    guestName?: string;
-    staffUser: string;
-    beginTime?: string;
-    endTime?: string;
-  } = {
+  const payload = {
     roomNumber: params.roomNumber,
     guestName: params.guestName || 'Front Desk Guest',
     staffUser: params.staffUser || 'Front Desk',
+    beginTime: '0001010000',
+    endTime: '9912312359',
   };
 
-  payload.beginTime = params.checkInDate ? formatTime(params.checkInDate) : '0001010000';
-  payload.endTime = params.checkOutDate ? formatTime(params.checkOutDate) : '9912312359';
+  const autoPersistSuccess = (resData: RfidCardResult) => {
+    if (typeof window !== 'undefined' && resData.success) {
+      const cardUid = resData.cardNo ? `BT-57-${resData.cardNo}` : (resData.guestSN ? `BT-57-${resData.guestSN}` : undefined);
+      fetch('/api/rfid/cards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create_guest',
+          roomNumber: params.roomNumber,
+          guestName: params.guestName || 'Front Desk Guest',
+          issuedBy: params.staffUser || 'Front Desk',
+          cardUid,
+          bookingRef: params.bookingRef || `TG-${Date.now().toString().slice(-4)}`,
+        }),
+      }).catch(() => {});
+    }
+  };
 
   // Try direct hardware post (with 25s timeout for physical card write)
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
 
     const res = await fetch(`${host}/api/issue-card`, {
       method: 'POST',
@@ -251,11 +256,15 @@ export async function issuePhysicalKeycard(params: {
     clearTimeout(timeoutId);
 
     const data = await res.json();
-    return {
+    const result: RfidCardResult = {
       ...data,
       error: !data.success ? formatRfidErrorMessage(data.code, data.error) : undefined,
       source: 'hardware',
     };
+    if (result.success) {
+      autoPersistSuccess(result);
+    }
+    return result;
   } catch {
     // Fall back to multi-device proxy
   }
@@ -272,10 +281,14 @@ export async function issuePhysicalKeycard(params: {
       }),
     });
     const data = await res.json();
-    return {
+    const result: RfidCardResult = {
       ...data,
       error: !data.success ? formatRfidErrorMessage(data.code, data.error) : undefined,
     };
+    if (result.success) {
+      autoPersistSuccess(result);
+    }
+    return result;
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Bridge unreachable';
     return {
@@ -295,10 +308,24 @@ export async function checkoutPhysicalCard(
 ): Promise<RfidCardResult> {
   const host = getSavedBridgeHost();
 
+  const autoDeactivateSuccess = () => {
+    if (typeof window !== 'undefined') {
+      fetch('/api/rfid/cards', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'toggle_status',
+          roomNumber,
+          status: 'inactive',
+        }),
+      }).catch(() => {});
+    }
+  };
+
   // Try direct hardware post (with 25s timeout for card deactivation)
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 4000);
+    const timeoutId = setTimeout(() => controller.abort(), 25000);
 
     const res = await fetch(`${host}/api/checkout-card`, {
       method: 'POST',
@@ -312,11 +339,15 @@ export async function checkoutPhysicalCard(
     clearTimeout(timeoutId);
 
     const data = await res.json();
-    return {
+    const result: RfidCardResult = {
       ...data,
       error: !data.success ? formatRfidErrorMessage(data.code, data.error) : undefined,
       source: 'hardware',
     };
+    if (result.success) {
+      autoDeactivateSuccess();
+    }
+    return result;
   } catch {
     // Fall back to multi-device proxy
   }
@@ -333,10 +364,14 @@ export async function checkoutPhysicalCard(
       }),
     });
     const data = await res.json();
-    return {
+    const result: RfidCardResult = {
       ...data,
       error: !data.success ? formatRfidErrorMessage(data.code, data.error) : undefined,
     };
+    if (result.success) {
+      autoDeactivateSuccess();
+    }
+    return result;
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Bridge unreachable';
     return {

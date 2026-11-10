@@ -1,5 +1,73 @@
 [
   {
+    "id": "crd-1794338992132",
+    "card_uid": "BT-57-EXP-1794338992132",
+    "card_label": "Guest Card (Room 104)",
+    "card_type": "guest",
+    "assigned_room_number": "104",
+    "booking_reference": "STG-EXP",
+    "guest_name": "Departed Guest",
+    "holder_name": "Departed Guest",
+    "status": "expired",
+    "activated_at": "2026-11-10T19:29:52.132Z",
+    "expires_at": "2026-11-10T18:29:52.132Z",
+    "issued_by_name": "Staff",
+    "notes": "Customer Keycard for Room 104 (Stay: STG-EXP)",
+    "created_at": "2026-11-10T19:29:52.132Z"
+  },
+  {
+    "id": "crd-sa-1794338992125",
+    "card_uid": "SA-LIFETIME-477",
+    "card_label": "Managing Director Key",
+    "card_type": "super_admin",
+    "is_lifetime": true,
+    "holder_name": "Managing Director",
+    "holder_role": "Super Admin",
+    "status": "active",
+    "activated_at": "2026-11-10T19:29:52.125Z",
+    "expires_at": "2099-12-31T23:59:59.000Z",
+    "issued_by_name": "System Root",
+    "notes": "Lifetime Activation - Universal Master Clearance across all rooms and facilities",
+    "created_at": "2026-11-10T19:29:52.125Z",
+    "last_tap_at": "2026-11-10T19:29:52.129Z",
+    "last_tap_room": "308"
+  },
+  {
+    "id": "crd-1794338992111",
+    "card_uid": "BT-57-REP-738296",
+    "card_label": "Guest Card (Room 104)",
+    "card_type": "guest",
+    "assigned_room_number": "104",
+    "booking_reference": "TG-TEST-RFID-1794338992009",
+    "guest_name": "Sri V. Ramachandra",
+    "holder_name": "Sri V. Ramachandra",
+    "status": "active",
+    "activated_at": "2026-11-10T19:29:52.111Z",
+    "expires_at": "2026-11-11T23:29:52.046Z",
+    "issued_by_name": "Front Desk Supervisor",
+    "notes": "Replacement Keycard for revoked UID BT-57-TST-130817 (Physical Mifare Demagnetized)",
+    "created_at": "2026-11-10T19:29:52.111Z",
+    "last_tap_at": "2026-11-10T19:29:52.120Z",
+    "last_tap_room": "104"
+  },
+  {
+    "id": "crd-1794338992046",
+    "card_uid": "BT-57-TST-130817",
+    "card_label": "Guest Card (Room 104)",
+    "card_type": "guest",
+    "assigned_room_number": "104",
+    "booking_reference": "TG-TEST-RFID-1794338992009",
+    "guest_name": "Sri V. Ramachandra",
+    "holder_name": "Sri V. Ramachandra",
+    "status": "inactive",
+    "activated_at": "2026-11-10T19:29:52.059Z",
+    "expires_at": "2026-11-11T23:29:52.046Z",
+    "issued_by_name": "Front Desk Staff",
+    "notes": "Customer Keycard for Room 104 (Stay: TG-TEST-RFID-1794338992009) | Deactivated on replacement by BT-57-REP-738296 (Physical Mifare Demagnetized)",
+    "created_at": "2026-11-10T19:29:52.046Z",
+    "deactivated_at": "2026-11-10T19:29:52.111Z"
+  },
+  {
     "id": "crd-cln-1794238670334",
     "card_uid": "BT-57-1000020528",
     "card_label": "Housekeeping Supervisor Master",
@@ -12,8 +80,8 @@
     "issued_by_name": "Front Desk",
     "notes": "Post-checkout turnover cleaning card (dual-tap in-and-out logic)",
     "created_at": "2026-11-09T15:37:50.334Z",
-    "last_tap_at": "2026-11-09T15:37:50.504Z",
-    "last_tap_room": "204"
+    "last_tap_at": "2026-11-10T19:21:21.283Z",
+    "last_tap_room": "104"
   },
   {
     "id": "crd-sa-1794238670292",
@@ -29,7 +97,7 @@
     "issued_by_name": "System Root",
     "notes": "Lifetime Activation - Universal Master Clearance across all rooms and facilities",
     "created_at": "2026-11-09T15:37:50.292Z",
-    "last_tap_at": "2026-11-09T15:37:50.417Z",
+    "last_tap_at": "2026-11-10T19:21:21.334Z",
     "last_tap_room": "104"
   },
   {

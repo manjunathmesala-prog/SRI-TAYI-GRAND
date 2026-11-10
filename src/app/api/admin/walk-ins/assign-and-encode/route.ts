@@ -86,12 +86,7 @@ export async function POST(request: NextRequest) {
           guestName: result.booking.guest_name,
           staffUser: staff,
           beginTime: '0001010000',
-          endTime: result.card.expires_at
-            ? String(new Date(result.card.expires_at).getFullYear()).slice(-2) +
-              String(new Date(result.card.expires_at).getMonth() + 1).padStart(2, '0') +
-              String(new Date(result.card.expires_at).getDate()).padStart(2, '0') +
-              '1100'
-            : '9912312359',
+          endTime: '9912312359',
         }),
         signal: controller.signal,
       }).catch(() => null);

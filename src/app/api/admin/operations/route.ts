@@ -126,12 +126,36 @@ export async function POST(req: NextRequest) {
         if (issueRfid && updatedBooking?.assigned_room_number) {
           const checkOutDateStr = updatedBooking.check_out_date || new Date(Date.now() + 86400000).toISOString().split('T')[0];
           const expiryIso = new Date(`${checkOutDateStr}T11:00:00+05:30`).toISOString();
+
+          // Attempt hardware bridge programming if Be-Tech encoder is connected on Port 8989
+          let bridgeCardNo: number | undefined;
+          try {
+            const bridgeRes = await fetch('http://127.0.0.1:8989/api/issue-card', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'X-Staff-User': staffName },
+              body: JSON.stringify({
+                roomNumber: updatedBooking.assigned_room_number,
+                guestName: updatedBooking.guest_name,
+                staffUser: staffName,
+                beginTime: '0001010000',
+                endTime: '9912312359',
+              }),
+              signal: AbortSignal.timeout(4000),
+            }).catch(() => null);
+            if (bridgeRes && bridgeRes.ok) {
+              const bData = await bridgeRes.json();
+              if (bData.cardNo) bridgeCardNo = bData.cardNo;
+            }
+          } catch {}
+
+          const customCardUid = bridgeCardNo ? `BT-57-${bridgeCardNo}` : (body.cardUid || body.card_uid || undefined);
           issuedCard = repo.issueRFIDCard(
             updatedBooking.assigned_room_number,
             updatedBooking.booking_reference,
             updatedBooking.guest_name,
             staffName,
-            expiryIso
+            expiryIso,
+            customCardUid
           );
           updatedBooking.keycard_issued_at = new Date().toISOString();
           updatedBooking.keycard_uid = issuedCard.card_uid;
@@ -213,6 +237,20 @@ export async function POST(req: NextRequest) {
           );
           booking.paid_amount = booking.total_amount;
           booking.payment_status = 'successful';
+        }
+
+        // Deactivate card on hardware bridge if connected
+        const targetRoomNumber = booking.assigned_room_number || booking.room_number;
+        if (targetRoomNumber) {
+          fetch('http://127.0.0.1:8989/api/checkout-card', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-Staff-User': staffName },
+            body: JSON.stringify({
+              roomNumber: targetRoomNumber,
+              staffUser: staffName,
+            }),
+            signal: AbortSignal.timeout(3000),
+          }).catch(() => {});
         }
 
         // Update status to checked_out and mark room dirty

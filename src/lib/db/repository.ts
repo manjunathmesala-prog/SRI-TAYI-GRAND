@@ -986,13 +986,16 @@ export class HotelRepository {
         if (room) {
           const roomCards = this.rfidCards.filter(
             (c) =>
-              (c.assigned_room_number === room.room_number || c.room_number === room.room_number) &&
+              (c.assigned_room_number === room.room_number || c.room_number === room.room_number || c.booking_reference === booking.booking_reference) &&
               c.card_type === 'guest'
           );
           for (const card of roomCards) {
             card.status = 'inactive';
             card.deactivated_at = new Date().toISOString();
             syncCardToSupabase(card);
+          }
+          if (roomCards.length > 0) {
+            savePersistedCards(this.rfidCards);
           }
         }
       }
@@ -1037,13 +1040,16 @@ export class HotelRepository {
         room.current_guest_name = booking.guest_name;
         const roomCards = this.rfidCards.filter(
           (c) =>
-            (c.assigned_room_number === room.room_number || c.room_number === room.room_number) &&
+            (c.assigned_room_number === room.room_number || c.room_number === room.room_number || c.booking_reference === booking.booking_reference) &&
             c.card_type === 'guest'
         );
         for (const card of roomCards) {
           card.status = 'active';
           card.deactivated_at = undefined;
           syncCardToSupabase(card);
+        }
+        if (roomCards.length > 0) {
+          savePersistedCards(this.rfidCards);
         }
       }
     }

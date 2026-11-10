@@ -129,28 +129,46 @@ export async function POST(request: Request) {
 
       case 'toggle_status': {
         const cardId = body.cardId || body.card_id || body.cardUid || body.card_uid;
+        const roomNumber = body.roomNumber || body.room_number;
         const status = body.status;
 
-        if (!cardId) {
+        if (!cardId && !roomNumber) {
           return NextResponse.json(
-            { success: false, error: 'Card ID or Card UID is required' },
+            { success: false, error: 'Card ID, Card UID, or Room Number is required' },
             { status: 400 }
           );
         }
 
-        const updated = repo.toggleRFIDCardStatus(cardId, status);
-        if (!updated) {
-          return NextResponse.json(
-            { success: false, error: 'Card not found' },
-            { status: 404 }
-          );
+        if (cardId) {
+          const updated = repo.toggleRFIDCardStatus(cardId, status);
+          if (updated) {
+            return NextResponse.json({
+              success: true,
+              message: `Card ${updated.card_label} is now ${updated.status.toUpperCase()}`,
+              card: updated,
+            });
+          }
         }
 
-        return NextResponse.json({
-          success: true,
-          message: `Card ${updated.card_label} is now ${updated.status.toUpperCase()}`,
-          card: updated,
-        });
+        if (roomNumber) {
+          const allCards = repo.getRFIDCards();
+          const targetCards = allCards.filter(
+            (c) => (c.assigned_room_number === roomNumber || c.room_number === roomNumber)
+          );
+          for (const c of targetCards) {
+            repo.toggleRFIDCardStatus(c.card_uid, status || 'inactive');
+          }
+          return NextResponse.json({
+            success: true,
+            message: `Keycards for Room ${roomNumber} updated to ${status || 'inactive'}`,
+            count: targetCards.length,
+          });
+        }
+
+        return NextResponse.json(
+          { success: false, error: 'Card not found' },
+          { status: 404 }
+        );
       }
 
       case 'delete_card': {

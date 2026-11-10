@@ -439,11 +439,11 @@ export default function AnanthaWalkInPage() {
         `${checkOutDate || createdReservation?.check_out_date || new Date().toISOString().split('T')[0]}T11:00:00+05:30`
       );
 
-      // 1. Issue physical keycard through Be-Tech hardware bridge
+      // 1. Issue physical keycard through Be-Tech hardware bridge (strictly perpetual lifetime)
       const cardResult = await issuePhysicalKeycard({
         roomNumber: rfidSelectedRoom,
         guestName: targetGuestName,
-        checkOutDate: targetExpiryDate,
+        bookingRef: targetBookingRef,
         staffUser: 'Front Desk Walk-In Desk',
       });
 

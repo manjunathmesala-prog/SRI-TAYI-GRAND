@@ -5,6 +5,7 @@ import { Booking, PhysicalRoom, RoomTransferReasonCategory, RoomTransferRecord }
 import { adminOperations } from '@/lib/realtime-client';
 import {
   issuePhysicalKeycard,
+  checkoutPhysicalCard,
   playChimeSound,
   checkBridgeHealth,
 } from '@/lib/rfid/bridge-client';
@@ -223,6 +224,12 @@ export function ChangeRoomModal({
         createMaintenanceTicket,
         oldRoomAction: createMaintenanceTicket ? 'maintenance' : 'cleaning',
       });
+
+      // Revoke and deactivate previous room keycard
+      const oldRoomNumber = booking.assigned_room_number || currentRoomNumber;
+      if (oldRoomNumber) {
+        checkoutPhysicalCard(oldRoomNumber, 'Front Desk Transfer').catch(() => {});
+      }
 
       // If physical encoder is requested and bridge is online, encode new keycard
       if (encodeKeyNow && isRfidOnline) {

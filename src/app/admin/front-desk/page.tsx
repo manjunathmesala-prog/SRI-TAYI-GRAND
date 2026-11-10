@@ -369,6 +369,7 @@ export default function FrontDeskPage() {
             roomNumber: assignedRoom.room_number,
             guestName: checkInModalBooking.guest_name,
             staffUser: 'Front Desk Reception',
+            bookingRef: checkInModalBooking.booking_reference,
           });
         } catch {
           // Non-blocking bridge warning

@@ -49,6 +49,7 @@ import { ChangeRoomModal } from '@/components/admin/ChangeRoomModal';
 import { GuestFolioModal } from '@/components/admin/GuestFolioModal';
 import { PrintGstInvoiceModal } from '@/components/admin/PrintGstInvoiceModal';
 import { RfidHistoryTable } from '@/components/admin/RfidHistoryTable';
+import { issuePhysicalKeycard, checkoutPhysicalCard, playChimeSound } from '@/lib/rfid/bridge-client';
 import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
 import { Booking, BookingStatus, PhysicalRoom, RoomCategory, FolioCharge } from '@/types';
 import { toast } from '@/components/ui/Toast';
@@ -420,6 +421,22 @@ export default function BookingsAdminPage() {
       });
 
       if (res.success) {
+        if (issueRfidCard) {
+          try {
+            const hwRes = await issuePhysicalKeycard({
+              roomNumber: selectedRoomNumber,
+              guestName: checkInTarget.guest_name,
+              staffUser: 'Front Desk Duty Officer',
+              bookingRef: checkInTarget.booking_reference,
+            });
+            if (hwRes.success) {
+              playChimeSound(true);
+            }
+          } catch (hwErr) {
+            console.warn('[HARDWARE RFID NON-BLOCKING NOTICE]:', hwErr);
+          }
+        }
+
         toast.success(
           `Guest ${checkInTarget.guest_name} checked in to Room #${selectedRoomNumber}.${
             issueRfidCard ? ' RFID Keycard activated.' : ''
@@ -452,9 +469,14 @@ export default function BookingsAdminPage() {
       });
 
       if (res.success) {
+        const targetRoom = checkOutTarget.assigned_room_number || checkOutTarget.room_number;
+        if (targetRoom) {
+          checkoutPhysicalCard(targetRoom, 'Front Desk Duty Officer').catch(() => {});
+        }
+
         toast.success(
           `Guest checked out. Room #${
-            checkOutTarget.assigned_room_number || checkOutTarget.room_number || 'Room'
+            targetRoom || 'Room'
           } is now marked as Vacant Dirty for Housekeeping. Keycards deactivated.`
         );
         setCheckOutTarget(null);

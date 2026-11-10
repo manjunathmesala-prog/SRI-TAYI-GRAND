@@ -86,6 +86,47 @@ export async function POST(req: Request) {
       }`,
     });
 
+    // Synchronize card active/inactive status in repository and database on hardware events
+    if (isGranted && event_type === 'TAP_ACTIVATE' && room_number && room_number !== 'N/A') {
+      try {
+        const allCards = repo.getRFIDCards();
+        const existing = allCards.find((c) => c.card_uid === effectiveUid);
+        if (existing) {
+          existing.status = 'active';
+          existing.assigned_room_number = room_number;
+          if (holder_name) existing.guest_name = holder_name;
+          repo.toggleRFIDCardStatus(effectiveUid, 'active');
+        } else {
+          repo.issueRFIDCard(
+            room_number,
+            `TG-ENC-${Date.now().toString().slice(-4)}`,
+            holder_name || 'Valued Guest',
+            staff_user || 'Front Desk',
+            undefined,
+            effectiveUid
+          );
+        }
+      } catch (syncErr) {
+        console.error('[TAP_ACTIVATE AUTO SYNC ERROR]', syncErr);
+      }
+    } else if (isGranted && event_type === 'TAP_DEACTIVATE') {
+      try {
+        if (effectiveUid) {
+          repo.toggleRFIDCardStatus(effectiveUid, 'inactive');
+        }
+        if (room_number && room_number !== 'N/A') {
+          const roomCards = repo.getRFIDCards().filter(
+            (c) => (c.assigned_room_number === room_number || c.room_number === room_number) && c.status === 'active'
+          );
+          for (const rc of roomCards) {
+            repo.toggleRFIDCardStatus(rc.card_uid, 'inactive');
+          }
+        }
+      } catch (syncErr) {
+        console.error('[TAP_DEACTIVATE AUTO SYNC ERROR]', syncErr);
+      }
+    }
+
     // Also persist into asynchronous safe tap logger & Supabase tap table
     if (room_number && room_number !== 'N/A') {
       recordRfidTapAsync({
