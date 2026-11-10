@@ -601,6 +601,42 @@ export const INITIAL_STAFF: StaffMember[] = [
       can_manage_inventory: true
     }
   },
+  {
+    id: 'stf-07',
+    full_name: 'M. Anjaneyulu',
+    email: 'anjaneyulu.hk@sritayigrand.com',
+    phone: '9440187654',
+    role: 'Housekeeping',
+    department: 'Housekeeping & Facilities',
+    is_active: true,
+    last_login: '2026-11-09T08:00:00+05:30',
+    permissions: {
+      can_override_rates: false,
+      can_process_refunds: false,
+      can_view_accounting: false,
+      can_encode_rfid: false,
+      can_run_night_audit: false,
+      can_manage_inventory: true
+    }
+  },
+  {
+    id: 'stf-08',
+    full_name: 'P. Parvathamma',
+    email: 'parvathi.hk@sritayigrand.com',
+    phone: '9848198765',
+    role: 'Housekeeping',
+    department: 'Housekeeping & Facilities',
+    is_active: true,
+    last_login: '2026-11-09T08:30:00+05:30',
+    permissions: {
+      can_override_rates: false,
+      can_process_refunds: false,
+      can_view_accounting: false,
+      can_encode_rfid: false,
+      can_run_night_audit: false,
+      can_manage_inventory: true
+    }
+  },
 ];
 
 export const INITIAL_RFID_DEVICES: RFIDDevice[] = [
