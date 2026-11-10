@@ -48,10 +48,10 @@
 
 ## 4. CLOUDFLARE HTTPS TUNNEL ARCHITECTURE (LIFETIME FREE)
 - **Currently Active Production Tunnel:**
-  - **Live URL**: `https://pavilion-divine-oliver-frames.trycloudflare.com`
-  - **Local Target**: `http://127.0.0.1:8989` (Be-Tech USB BIS 5.7 Mifare Encoder Bridge)
+  - **Live URL**: `https://time-representations-examines-sum.trycloudflare.com`
+  - **Local Target**: `http://127.0.0.1:8990` (or `8989` with dynamic port discovery)
   - **Status File**: `latest_production_tunnel_url.txt`
-  - **Verification**: `GET https://pavilion-divine-oliver-frames.trycloudflare.com/api/status` returns `{"status":"ok","service":"SriTayiGrand-RFID-Bridge","port":1,"readerType":4}`.
+  - **Verification**: `GET https://time-representations-examines-sum.trycloudflare.com/api/status` returns `{"status":"ok","isOnline":true,"hardwareConnected":true,"service":"SriTayiGrand-RFID-Bridge","port":1,"readerType":4,"message":"ACR120 USB (Proprietary Mode) Ready on Port 1"}`.
 - **Why Cloudflare Tunnel is Used:**
   - Browsers enforce a strict **Mixed Content Policy**: when front desk staff open `https://sritayigrand.com` (secure HTTPS), the browser strictly blocks direct requests to unencrypted `http://127.0.0.1:8989`.
   - Cloudflare Tunnel creates an encrypted HTTPS tunnel directly to local port 8989, allowing the cloud dashboard to safely issue, read, and write physical keycards.

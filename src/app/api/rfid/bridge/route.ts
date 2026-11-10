@@ -93,23 +93,40 @@ export async function GET(req: Request) {
   let bridgeData: any = null;
   let effectiveHost = targetHost;
 
-  // 1. Attempt connection to targetHost (direct or user configured)
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 2000);
+  // 1. Attempt connection to targetHost, checking active port file or candidate ports if localhost
+  const localCandidates = [targetHost];
+  if (isLocalHost) {
+    try {
+      const portFile = path.join(process.cwd(), 'rfid-bridge', 'bin', 'bridge_active_port.txt');
+      if (fs.existsSync(portFile)) {
+        const p = fs.readFileSync(portFile, 'utf8').trim();
+        if (p) localCandidates.unshift(`http://127.0.0.1:${p}`);
+      }
+    } catch {}
+    if (!localCandidates.includes('http://127.0.0.1:8989')) localCandidates.push('http://127.0.0.1:8989');
+    if (!localCandidates.includes('http://127.0.0.1:8990')) localCandidates.push('http://127.0.0.1:8990');
+  }
 
-    const res = await fetch(`${targetHost}/api/status`, {
-      method: 'GET',
-      signal: controller.signal,
-    });
-    clearTimeout(timeout);
+  for (const candHost of Array.from(new Set(localCandidates))) {
+    if (isOnline) break;
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 1500);
 
-    if (res.ok) {
-      bridgeData = await res.json();
-      isOnline = (bridgeData.status === 'ok' || bridgeData.isOnline === true) && bridgeData.hardwareConnected !== false;
+      const res = await fetch(`${candHost}/api/status`, {
+        method: 'GET',
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
+
+      if (res.ok) {
+        bridgeData = await res.json();
+        isOnline = (bridgeData.status === 'ok' || bridgeData.isOnline === true) && bridgeData.hardwareConnected !== false;
+        effectiveHost = candHost;
+      }
+    } catch {
+      // Direct connection to candidate host failed
     }
-  } catch {
-    // Direct targetHost connection failed
   }
 
   // 2. If targetHost failed and we have an active secure tunnel, check the tunnel
@@ -212,6 +229,16 @@ export async function POST(req: Request) {
     let targetHost = rawHost.trim().replace(/\/+$/, '');
     const isLocalHost = targetHost.includes('127.0.0.1') || targetHost.includes('localhost');
     const tunnelUrl = await getResolvedTunnelUrl();
+
+    if (isLocalHost && process.platform === 'win32') {
+      try {
+        const portFile = path.join(process.cwd(), 'rfid-bridge', 'bin', 'bridge_active_port.txt');
+        if (fs.existsSync(portFile)) {
+          const p = fs.readFileSync(portFile, 'utf8').trim();
+          if (p) targetHost = `http://127.0.0.1:${p}`;
+        }
+      } catch {}
+    }
 
     // If targetHost is localhost/127.0.0.1 and tunnel is available, prioritize tunnel on cloud server
     if (isLocalHost && tunnelUrl && (process.env.NODE_ENV === 'production' || process.platform !== 'win32')) {

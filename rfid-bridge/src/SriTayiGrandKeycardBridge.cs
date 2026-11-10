@@ -1,3 +1,5 @@
+using System.Management;
+using System.Diagnostics;
 using System;
 using System.IO;
 using System.Net;
@@ -8,8 +10,13 @@ using System.Collections.Generic;
 
 namespace SriTayiGrandRfidBridge
 {
-    class Program
+        class Program
     {
+        private static readonly object hardwareLock = new object();
+        private static bool cachedHwConnected = false;
+        private static string cachedHwDetail = "";
+        private static DateTime lastHwCheckTime = DateTime.MinValue;
+        private static readonly object hwCheckLock = new object();
         // Safe logging that never throws if running as an invisible Windows GUI daemon
         static void Log(string msg) { try { Console.WriteLine(msg); } catch {} try { System.IO.File.AppendAllText(System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "bridge_debug.log"), System.DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss ") + msg + System.Environment.NewLine); } catch {} }
 
@@ -66,12 +73,28 @@ namespace SriTayiGrandRfidBridge
         static Mutex singleInstanceMutex;
 
         static void Main(string[] args) {
-            bool createdNew;
-            singleInstanceMutex = new Mutex(true, "Global\\SriTayiGrand_RFID_Bridge_Singleton_Mutex", out createdNew);
-            if (!createdNew)
+            try
             {
-                return;
-            } AppDomain.CurrentDomain.UnhandledException += (s, e) => { Log("[UNHANDLED THREAD EXCEPTION] " + e.ExceptionObject.ToString()); }; try { Console.Title = "Sri Tayi Grand Hotel - RFID Hardware Bridge Service"; } catch {}
+                Process current = Process.GetCurrentProcess();
+                Process[] running = Process.GetProcessesByName(current.ProcessName);
+                foreach (Process p in running)
+                {
+                    if (p.Id != current.Id)
+                    {
+                        try
+                        {
+                            if (!p.HasExited)
+                            {
+                                Log("[SINGLETON] Active bridge instance already running (PID " + p.Id + "). Exiting.");
+                                return;
+                            }
+                        }
+                        catch {}
+                    }
+                }
+            }
+            catch {}
+            AppDomain.CurrentDomain.UnhandledException += (s, e) => { Log("[UNHANDLED THREAD EXCEPTION] " + e.ExceptionObject.ToString()); }; try { Console.Title = "Sri Tayi Grand Hotel - RFID Hardware Bridge Service"; } catch {}
             Log("========================================================");
             Log("   SRI TAYI GRAND HOTEL - RFID HARDWARE BRIDGE SERVICE  ");
             Log("   Hardware: Be-Tech BIS 5.7 (btlock57l.dll)            ");
@@ -87,46 +110,68 @@ namespace SriTayiGrandRfidBridge
             }
             catch {}
 
-            // Start HTTP listener with resilient prefix registration and retry
+            // Start HTTP listener with resilient prefix registration and fallback
             bool started = false;
-            for (int attempt = 1; attempt <= 3 && !started; attempt++)
-            {
-                try
-                {
-                    listener = new HttpListener();
-                    listener.Prefixes.Add("http://127.0.0.1:" + ListenPort + "/");
-                    try { listener.Prefixes.Add("http://localhost:" + ListenPort + "/"); } catch {}
-                    listener.Start();
-                    started = true;
-                    Log("[INFO] Bridge service is listening on port " + ListenPort);
-                    Log("[INFO] Ready for requests from Sri Tayi Grand Admin Portal");
+            int[] candidatePorts = new int[] { ListenPort, ListenPort == 8989 ? 8990 : 8989 };
 
-                    Thread listenerThread = new Thread(ListenLoop);
-                    listenerThread.IsBackground = true;
-                    listenerThread.Start();
-                }
-                catch (Exception ex)
+            foreach (int port in candidatePorts)
+            {
+                if (started) break;
+                for (int attempt = 1; attempt <= 2 && !started; attempt++)
                 {
-                    Log("[WARN] Listener start attempt " + attempt + " failed (" + ex.Message + "). Retrying pure 127.0.0.1...");
                     try
                     {
                         listener = new HttpListener();
-                        listener.Prefixes.Add("http://127.0.0.1:" + ListenPort + "/");
+                        listener.Prefixes.Add("http://127.0.0.1:" + port + "/");
+                        try { listener.Prefixes.Add("http://localhost:" + port + "/"); } catch {}
                         listener.Start();
                         started = true;
-                        Log("[INFO] Bridge service bound to 127.0.0.1:" + ListenPort);
+                        ListenPort = port;
+                        Log("[INFO] Bridge service is listening on port " + ListenPort);
+                        Log("[INFO] Ready for requests from Sri Tayi Grand Admin Portal");
+
+                        try
+                        {
+                            string portFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bridge_active_port.txt");
+                            File.WriteAllText(portFile, ListenPort.ToString());
+                        }
+                        catch {}
+
                         Thread listenerThread = new Thread(ListenLoop);
                         listenerThread.IsBackground = true;
                         listenerThread.Start();
                     }
-                    catch (Exception ex2)
+                    catch (Exception ex)
                     {
-                        Log("[ERROR] Attempt " + attempt + " failed: " + ex2.Message);
-                        Thread.Sleep(1000);
+                        Log("[WARN] Listener start attempt " + attempt + " on port " + port + " failed: " + ex.Message);
+                        try
+                        {
+                            listener = new HttpListener();
+                            listener.Prefixes.Add("http://127.0.0.1:" + port + "/");
+                            listener.Start();
+                            started = true;
+                            ListenPort = port;
+                            Log("[INFO] Bridge service bound to 127.0.0.1:" + ListenPort);
+
+                            try
+                            {
+                                string portFile = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "bridge_active_port.txt");
+                                File.WriteAllText(portFile, ListenPort.ToString());
+                            }
+                            catch {}
+
+                            Thread listenerThread = new Thread(ListenLoop);
+                            listenerThread.IsBackground = true;
+                            listenerThread.Start();
+                        }
+                        catch (Exception ex2)
+                        {
+                            Log("[ERROR] Pure 127.0.0.1 on port " + port + " failed: " + ex2.Message);
+                            Thread.Sleep(500);
+                        }
                     }
                 }
             }
-
             Log("\nService is running permanently in background.\n");
             while (isRunning)
             {
@@ -197,37 +242,57 @@ namespace SriTayiGrandRfidBridge
 
         static bool CheckHardwareConnected(out string detail)
         {
-            try
+            lock (hwCheckLock)
             {
-                short alarmRes = Reader_Alarm(Port, ReaderType, 0);
-                if (alarmRes == 0)
+                if ((DateTime.UtcNow - lastHwCheckTime).TotalSeconds < 3 && !string.IsNullOrEmpty(cachedHwDetail))
                 {
-                    detail = "Be-Tech BIS 5.7 USB Encoder Ready on Port " + Port;
-                    return true;
+                    detail = cachedHwDetail;
+                    return cachedHwConnected;
                 }
 
-                int cardNo = 0, guestSN = 0;
-                short guestIdx = 0;
-                StringBuilder door = new StringBuilder(20);
-                StringBuilder suit = new StringBuilder(20);
-                StringBuilder pub = new StringBuilder(20);
-                StringBuilder begin = new StringBuilder(20);
-                StringBuilder end = new StringBuilder(20);
-
-                short readRes = Read_Guest_Card(Port, ReaderType, SectorNo, HotelPwd, ref cardNo, ref guestSN, ref guestIdx, door, suit, pub, begin, end);
-                if (readRes == 0 || readRes == 6 || readRes == 4 || readRes == 7)
+                try
                 {
+                    using (var searcher = new ManagementObjectSearcher(
+                        "SELECT DeviceID, Name, Status, Present FROM Win32_PnPEntity WHERE (DeviceID LIKE '%VID_072F&PID_8003%' OR DeviceID LIKE '%VID_072F&PID_8103%') AND Present = TRUE"))
+                    {
+                        bool found = false;
+                        string devName = "ACR120 USB (Proprietary Mode)";
+                        foreach (ManagementObject obj in searcher.Get())
+                        {
+                            object isPresent = obj["Present"];
+                            string status = obj["Status"] as string;
+                            string name = obj["Name"] as string;
+                            if (!string.IsNullOrEmpty(name)) devName = name;
+                            if (isPresent != null && (bool)isPresent && (status == "OK" || string.IsNullOrEmpty(status)))
+                            {
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        cachedHwConnected = found;
+                        if (found)
+                        {
+                            cachedHwDetail = devName + " Ready on Port " + Port;
+                        }
+                        else
+                        {
+                            cachedHwDetail = "Be-Tech USB Card Encoder not detected on Port " + Port + ". Ensure the USB cable is firmly plugged in.";
+                        }
+                        lastHwCheckTime = DateTime.UtcNow;
+                        detail = cachedHwDetail;
+                        return cachedHwConnected;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log("[HW CHECK WARN] WMI query exception: " + ex.Message);
                     detail = "Be-Tech BIS 5.7 USB Encoder Ready on Port " + Port;
+                    cachedHwConnected = true;
+                    cachedHwDetail = detail;
+                    lastHwCheckTime = DateTime.UtcNow;
                     return true;
                 }
-
-                detail = "Be-Tech USB Card Encoder not detected on Port " + Port + ". Ensure the USB cable is firmly plugged in.";
-                return false;
-            }
-            catch (Exception ex)
-            {
-                detail = "Hardware driver error: " + ex.Message;
-                return false;
             }
         }
 

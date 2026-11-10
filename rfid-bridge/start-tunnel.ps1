@@ -7,23 +7,35 @@ Write-Host "  Connecting Be-Tech BIS 5.7 USB Encoder to sritayigrand.com  " -For
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host ""
 
-# 1. Ensure local RFID bridge service is running on port 8989
+# 1. Ensure local RFID bridge service is running
 $bridgeRunning = $false
-try {
-    $res = Invoke-RestMethod -Uri "http://127.0.0.1:8989/api/status" -TimeoutSec 2 -ErrorAction SilentlyContinue
-    if ($res.status -eq "ok") {
-        $bridgeRunning = $true
-        Write-Host "[1/3] Local Be-Tech RFID Bridge is ALIVE on port 8989 (Port 1 ACR120 Mifare)." -ForegroundColor Green
-    }
-} catch {}
+$bridgePort = 8989
+$workspaceDir = Split-Path -Parent $PSScriptRoot
+$portFile = Join-Path $workspaceDir "rfid-bridge\bin\bridge_active_port.txt"
+if (Test-Path $portFile) {
+    $p = (Get-Content $portFile -Raw).Trim()
+    if ($p -match "^\d+$") { $bridgePort = [int]$p }
+}
+
+foreach ($testP in @($bridgePort, 8989, 8990)) {
+    if ($bridgeRunning) { break }
+    try {
+        $res = Invoke-RestMethod -Uri "http://127.0.0.1:$testP/api/status" -TimeoutSec 2 -ErrorAction SilentlyContinue
+        if ($res.status -eq "ok" -or $res.isOnline -eq $true) {
+            $bridgeRunning = $true
+            $bridgePort = $testP
+            Write-Host "[1/3] Local Be-Tech RFID Bridge is ALIVE on port $bridgePort (Port 1 ACR120 Mifare)." -ForegroundColor Green
+        }
+    } catch {}
+}
 
 if (-not $bridgeRunning) {
     Write-Host "[1/3] Starting local RFID Bridge service..." -ForegroundColor Yellow
     $appDataExe = "C:\Users\M S T C\AppData\Local\SriTayiGrand\RFIDBridge\SriTayiGrandKeycardBridge.exe"
-    $localExe = Join-Path (Split-Path -Parent $PSScriptRoot) "rfid-bridge\bin\SriTayiGrandKeycardBridge.exe"
+    $localExe = Join-Path $workspaceDir "rfid-bridge\bin\SriTayiGrandKeycardBridge.exe"
     $exeToStart = if (Test-Path $appDataExe) { $appDataExe } else { $localExe }
 
-    Start-Process -FilePath $exeToStart -WindowStyle Minimized
+    Start-Process -FilePath $exeToStart -WorkingDirectory (Split-Path -Parent $exeToStart) -WindowStyle Minimized
     Start-Sleep -Seconds 2
     Write-Host "  [OK] Local bridge started." -ForegroundColor Green
 }
@@ -72,7 +84,7 @@ if (-not $existingTunnelLive) {
     }
     $cloudflaredArgs = @(
         "tunnel",
-        "--url", "http://127.0.0.1:8989",
+        "--url", "http://127.0.0.1:$bridgePort",
         "--logfile", $logFile
     )
     $process = Start-Process -FilePath $cloudflaredCmd -ArgumentList $cloudflaredArgs -PassThru -WindowStyle Minimized
