@@ -18,3 +18,8 @@
 [2026-11-11 00:43:10] Event: TAP_READ | Room: 207 | Card: 1000020557 | Valid: 2611110011 to 2611112200 | Staff: Front Desk | Status: SUCCESS
 [2026-11-11 00:43:22] Event: TAP_ACTIVATE | Room: 207 | Card: 1000020516 | Valid: 0001010000 to 9912312359 | Staff: Front Desk | Status: SUCCESS
 [2026-11-11 00:43:32] Event: TAP_READ | Room: 207 | Card: 1000020516 | Valid: 0001010000 to 9912312359 | Staff: Front Desk | Status: SUCCESS
+[2026-11-11 01:14:05] Event: TAP_DEACTIVATE | Room: 104 | Card: 0 | Valid: 2611110114 to 2611110114 | Staff: Front Desk | Status: SUCCESS
+[2026-11-11 01:14:08] Event: TAP_ACTIVATE | Room: 104 | Card: 1000020517 | Valid: 0001010000 to 9912312359 | Staff: Front Desk | Status: SUCCESS
+[2026-11-11 01:17:30] Event: TAP_DEACTIVATE | Room: 104 | Card: 0 | Valid: 2611110117 to 2611110117 | Staff: Front Desk | Status: SUCCESS
+[2026-11-11 01:18:02] Event: TAP_DEACTIVATE | Room: 104 | Card: 0 | Valid: 2611110118 to 2611110118 | Staff: Front Desk | Status: SUCCESS
+[2026-11-11 01:18:06] Event: TAP_ACTIVATE | Room: 104 | Card: 1000020518 | Valid: 0001010000 to 9912312359 | Staff: Front Desk | Status: SUCCESS

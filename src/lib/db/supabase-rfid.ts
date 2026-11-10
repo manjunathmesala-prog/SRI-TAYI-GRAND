@@ -208,3 +208,72 @@ export async function syncTapHistoryToSupabase(record: {
   }
 }
 
+/**
+ * Production Live Supabase Sync for RFID Bridge Tunnel Configuration
+ * Persists the active Cloudflare / HTTPS tunnel URL to Supabase integrations table
+ */
+export async function saveRegisteredBridgeTunnelUrl(tunnelUrl: string): Promise<boolean> {
+  if (!isServerEnvironment() || !tunnelUrl) return false;
+  const pool = getPgPool();
+  if (!pool) return false;
+  try {
+    const cleanUrl = tunnelUrl.trim().replace(/\/+$/, '');
+    const query = `
+      INSERT INTO integrations (
+        id, service_name, config, is_enabled, health_status, last_health_check_at, updated_at
+      ) VALUES (
+        'e0000000-0000-0000-0000-000000000001',
+        'rfid_bridge',
+        $1::jsonb,
+        true,
+        'online',
+        NOW(),
+        NOW()
+      )
+      ON CONFLICT (service_name) DO UPDATE SET
+        config = EXCLUDED.config,
+        is_enabled = true,
+        health_status = 'online',
+        last_health_check_at = NOW(),
+        updated_at = NOW();
+    `;
+    const config = JSON.stringify({
+      tunnel_url: cleanUrl,
+      mode: 'hardware',
+      port: 1,
+      reader_type: 4,
+      updated_at: new Date().toISOString(),
+    });
+    await pool.query(query, [config]);
+    console.log(`[SUPABASE CLOUD SYNC] Registered RFID hardware bridge tunnel: ${cleanUrl}`);
+    return true;
+  } catch (err: any) {
+    console.warn('[SUPABASE RFID BRIDGE SAVE WARN]', err.message);
+    return false;
+  }
+}
+
+/**
+ * Fetch the active production bridge tunnel URL from Supabase integrations table
+ */
+export async function getRegisteredBridgeTunnelUrl(): Promise<string | null> {
+  if (!isServerEnvironment()) return null;
+  const pool = getPgPool();
+  if (!pool) return null;
+  try {
+    const res = await pool.query(`
+      SELECT config FROM integrations WHERE service_name = 'rfid_bridge' LIMIT 1
+    `);
+    if (res.rows.length > 0 && res.rows[0].config?.tunnel_url) {
+      const url = String(res.rows[0].config.tunnel_url).trim().replace(/\/+$/, '');
+      if (url.startsWith('https://') || url.startsWith('http://')) {
+        return url;
+      }
+    }
+  } catch (err: any) {
+    console.warn('[SUPABASE RFID BRIDGE GET WARN]', err.message);
+  }
+  return null;
+}
+
+

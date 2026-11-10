@@ -209,22 +209,22 @@ namespace SriTayiGrandRfidBridge
                     return;
                 }
 
-                string rawUrl = req.RawUrl.ToLower();
+                string path = req.Url != null ? req.Url.AbsolutePath.ToLower() : req.RawUrl.ToLower();
                 string responseJson = "";
 
-                if (rawUrl.StartsWith("/api/status"))
+                if (path.StartsWith("/api/status"))
                 {
-                    responseJson = "{\"status\":\"ok\",\"service\":\"SriTayiGrand-RFID-Bridge\",\"port\":" + Port + ",\"readerType\":" + ReaderType + "}";
+                    responseJson = "{\"status\":\"ok\",\"isOnline\":true,\"service\":\"SriTayiGrand-RFID-Bridge\",\"port\":" + Port + ",\"readerType\":" + ReaderType + "}";
                 }
-                else if (rawUrl.StartsWith("/api/read-card"))
+                else if (path.StartsWith("/api/read-card"))
                 {
                     responseJson = HandleReadCard(req);
                 }
-                else if (rawUrl.StartsWith("/api/issue-card"))
+                else if (path.StartsWith("/api/issue-card"))
                 {
                     responseJson = HandleIssueCard(req);
                 }
-                else if (rawUrl.StartsWith("/api/checkout-card"))
+                else if (path.StartsWith("/api/checkout-card"))
                 {
                     responseJson = HandleCheckoutCard(req);
                 }
@@ -457,11 +457,9 @@ namespace SriTayiGrandRfidBridge
                 return "{\"success\":false,\"error\":\"roomNumber is required\"}";
             }
 
-            // Remove valid from and valid until time restrictions (Default: Perpetual / Lifetime validity 2000-2099)
-            if (string.IsNullOrEmpty(beginTime) || beginTime == "unlimited" || beginTime == "none")
-                beginTime = "0001010000";
-            if (string.IsNullOrEmpty(endTime) || endTime == "unlimited" || endTime == "none")
-                endTime = "9912312359";
+            // Always strictly enforce Perpetual / Lifetime validity (0001010000 / 9912312359) for physical Be-Tech door locks
+            beginTime = "0001010000";
+            endTime = "9912312359";
 
             string strLockID = roomNumber.PadLeft(6, '0');
             string strSuitDoor = "0000"; // Exactly 4 characters for Be-Tech lock firmware

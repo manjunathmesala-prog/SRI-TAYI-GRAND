@@ -219,6 +219,9 @@ export default function RFIDAdminPage() {
     const check = async () => {
       const status = await checkBridgeHealth();
       setBridgeStatus(status);
+      if (status.isOnline && status.host) {
+        setCustomHost((prev) => (prev !== status.host ? status.host! : prev));
+      }
     };
 
     check();

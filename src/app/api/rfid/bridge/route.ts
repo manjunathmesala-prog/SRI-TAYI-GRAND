@@ -1,14 +1,48 @@
 import { NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
+import { getRegisteredBridgeTunnelUrl, saveRegisteredBridgeTunnelUrl } from '@/lib/db/supabase-rfid';
 import path from 'path';
 import fs from 'fs';
 import { spawn } from 'child_process';
 
 const DEFAULT_BRIDGE_URL = process.env.RFID_BRIDGE_URL || 'http://127.0.0.1:8989';
 
+let cachedTunnelUrl: string | null = null;
+let lastTunnelFetchTime = 0;
+const TUNNEL_CACHE_TTL = 10000; // 10 seconds cache
+
+async function getResolvedTunnelUrl(forceFresh: boolean = false): Promise<string | null> {
+  const now = Date.now();
+  if (!forceFresh && cachedTunnelUrl && now - lastTunnelFetchTime < TUNNEL_CACHE_TTL) {
+    return cachedTunnelUrl;
+  }
+
+  try {
+    const supabaseUrl = await getRegisteredBridgeTunnelUrl();
+    if (supabaseUrl) {
+      cachedTunnelUrl = supabaseUrl;
+      lastTunnelFetchTime = now;
+      return supabaseUrl;
+    }
+  } catch {}
+
+  try {
+    const tunnelFile = path.join(process.cwd(), 'latest_production_tunnel_url.txt');
+    if (fs.existsSync(tunnelFile)) {
+      const url = fs.readFileSync(tunnelFile, 'utf8').trim().replace(/\/+$/, '');
+      if (url.startsWith('https://')) {
+        cachedTunnelUrl = url;
+        lastTunnelFetchTime = now;
+        return url;
+      }
+    }
+  } catch {}
+
+  return cachedTunnelUrl;
+}
+
 /**
  * Auto-Spawns the Be-Tech C# Hardware Bridge Service in the background if it is stopped.
- * This ensures the front desk reception never needs to manually run any batch or installer file.
  */
 function autoSpawnHardwareBridge(): boolean {
   if (process.platform !== 'win32') return false;
@@ -24,7 +58,6 @@ function autoSpawnHardwareBridge(): boolean {
 
     const workingDir = path.dirname(exePath);
 
-    // Spawn detached and hidden in the background
     const child = spawn(exePath, [], {
       cwd: workingDir,
       detached: true,
@@ -42,19 +75,23 @@ function autoSpawnHardwareBridge(): boolean {
 
 /**
  * Universal Production RFID Hardware Bridge Gateway
- * Proxies requests directly to the Be-Tech BIS 5.7 hardware bridge daemon.
- * Features automated self-healing and background startup on Windows reception terminals.
+ * Automatically bridges local USB Be-Tech encoder with sritayigrand.com production cloud.
  */
 export async function GET(req: Request) {
   const url = new URL(req.url);
   const rawHost = url.searchParams.get('host') || DEFAULT_BRIDGE_URL;
   const targetHost = rawHost.trim().replace(/\/+$/, '');
   const isLocalHost = targetHost.includes('127.0.0.1') || targetHost.includes('localhost');
+  const tunnelUrl = await getResolvedTunnelUrl();
 
-  // Attempt 1: Check if bridge is currently reachable
+  let isOnline = false;
+  let bridgeData: any = null;
+  let effectiveHost = targetHost;
+
+  // 1. Attempt connection to targetHost (direct or user configured)
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 1500);
+    const timeout = setTimeout(() => controller.abort(), 2000);
 
     const res = await fetch(`${targetHost}/api/status`, {
       method: 'GET',
@@ -63,57 +100,72 @@ export async function GET(req: Request) {
     clearTimeout(timeout);
 
     if (res.ok) {
-      const data = await res.json();
-      return NextResponse.json({
-        isOnline: data.status === 'ok',
-        mode: 'hardware',
-        service: data.service || 'Be-Tech BIS 5.7 Hardware Bridge (Production)',
-        port: data.port || 1,
-        readerType: data.readerType || 4,
-        host: targetHost,
-        devicesCount: repo.getRFIDDevices().length,
-      });
+      bridgeData = await res.json();
+      isOnline = bridgeData.status === 'ok' || bridgeData.isOnline === true;
     }
   } catch {
-    // Initial connection failed
+    // Direct targetHost connection failed
   }
 
-  // Attempt 2: If on local Windows machine, auto-recover by launching the bridge
-  if (isLocalHost && process.platform === 'win32') {
-    const spawned = autoSpawnHardwareBridge();
-    if (spawned) {
-      // Give bridge 1000ms to bind to port 8989
-      await new Promise((r) => setTimeout(r, 1000));
+  // 2. If targetHost failed and we have an active secure tunnel, check the tunnel
+  if (!isOnline && tunnelUrl && tunnelUrl !== targetHost) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000);
 
-      try {
-        const controller2 = new AbortController();
-        const timeout2 = setTimeout(() => controller2.abort(), 1500);
+      const res = await fetch(`${tunnelUrl}/api/status`, {
+        method: 'GET',
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
 
-        const res2 = await fetch(`${targetHost}/api/status`, {
-          method: 'GET',
-          signal: controller2.signal,
-        });
-        clearTimeout(timeout2);
-
-        if (res2.ok) {
-          const data2 = await res2.json();
-          return NextResponse.json({
-            isOnline: data2.status === 'ok',
-            mode: 'hardware',
-            service: data2.service || 'Be-Tech BIS 5.7 Hardware Bridge (Auto-Recovered)',
-            port: data2.port || 1,
-            readerType: data2.readerType || 4,
-            host: targetHost,
-            devicesCount: repo.getRFIDDevices().length,
-          });
-        }
-      } catch {
-        // Still initializing or reader not plugged in
+      if (res.ok) {
+        bridgeData = await res.json();
+        isOnline = bridgeData.status === 'ok' || bridgeData.isOnline === true;
+        effectiveHost = tunnelUrl;
+      } else {
+        cachedTunnelUrl = null;
       }
+    } catch {
+      cachedTunnelUrl = null;
     }
   }
 
-  // Clean diagnostic status when hardware encoder is disconnected
+  // 3. If on Windows and local, attempt auto-spawn
+  if (!isOnline && isLocalHost && process.platform === 'win32') {
+    const spawned = autoSpawnHardwareBridge();
+    if (spawned) {
+      await new Promise((r) => setTimeout(r, 1000));
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 2000);
+        const res = await fetch(`${targetHost}/api/status`, {
+          method: 'GET',
+          signal: controller.signal,
+        });
+        clearTimeout(timeout);
+        if (res.ok) {
+          bridgeData = await res.json();
+          isOnline = bridgeData.status === 'ok' || bridgeData.isOnline === true;
+        }
+      } catch {}
+    }
+  }
+
+  if (isOnline && bridgeData) {
+    return NextResponse.json({
+      isOnline: true,
+      mode: 'hardware',
+      service: bridgeData.service || 'Be-Tech BIS 5.7 Hardware Bridge (Production)',
+      port: bridgeData.port || 1,
+      readerType: bridgeData.readerType || 4,
+      host: effectiveHost,
+      tunnelUrl: tunnelUrl || effectiveHost,
+      devicesCount: repo.getRFIDDevices().length,
+    });
+  }
+
+  // Fallback diagnostic status
   return NextResponse.json({
     isOnline: false,
     mode: 'hardware',
@@ -121,6 +173,7 @@ export async function GET(req: Request) {
     port: 1,
     readerType: 4,
     host: targetHost,
+    tunnelUrl: tunnelUrl || undefined,
     devicesCount: repo.getRFIDDevices().length,
     error: 'Be-Tech USB RFID reader is not detected or bridge is initializing. Ensure the USB cable is firmly plugged in and click Recheck Connection.',
   });
@@ -129,18 +182,43 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+
+    // Support registering dynamic tunnel URL from front-desk PC
+    if (body.action === 'register_tunnel' && body.tunnelUrl) {
+      const cleanUrl = String(body.tunnelUrl).trim().replace(/\/+$/, '');
+      cachedTunnelUrl = cleanUrl;
+      lastTunnelFetchTime = Date.now();
+      try {
+        fs.writeFileSync(path.join(process.cwd(), 'latest_production_tunnel_url.txt'), cleanUrl, 'utf8');
+      } catch {}
+      try {
+        await saveRegisteredBridgeTunnelUrl(cleanUrl);
+      } catch {}
+      return NextResponse.json({
+        success: true,
+        message: 'Production hardware tunnel registered successfully',
+        tunnelUrl: cleanUrl,
+      });
+    }
+
     const { endpoint, payload, staffUser = 'Front Desk' } = body;
     const rawHost = body.targetHost || DEFAULT_BRIDGE_URL;
-    const targetHost = rawHost.trim().replace(/\/+$/, '');
+    let targetHost = rawHost.trim().replace(/\/+$/, '');
     const isLocalHost = targetHost.includes('127.0.0.1') || targetHost.includes('localhost');
+    const tunnelUrl = await getResolvedTunnelUrl();
+
+    // If targetHost is localhost/127.0.0.1 and tunnel is available, prioritize tunnel on cloud server
+    if (isLocalHost && tunnelUrl && (process.env.NODE_ENV === 'production' || process.platform !== 'win32')) {
+      targetHost = tunnelUrl;
+    }
 
     const targetEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
 
-    const executeHardwareCommand = async () => {
+    const executeHardwareCommand = async (hostUrl: string) => {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 25000);
 
-      const res = await fetch(`${targetHost}${targetEndpoint}`, {
+      const res = await fetch(`${hostUrl}${targetEndpoint}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -153,9 +231,16 @@ export async function POST(req: Request) {
       return res;
     };
 
-    // Send command directly to the physical Be-Tech hardware bridge
+    // Attempt hardware command on targetHost
     try {
-      const res = await executeHardwareCommand();
+      let res = await executeHardwareCommand(targetHost);
+
+      // If local failed and tunnel is available, retry on tunnel
+      if (!res.ok && tunnelUrl && targetHost !== tunnelUrl) {
+        try {
+          res = await executeHardwareCommand(tunnelUrl);
+        } catch {}
+      }
 
       if (res.ok) {
         const hardwareResult = await res.json();
@@ -172,26 +257,22 @@ export async function POST(req: Request) {
         );
       }
     } catch (fetchErr: unknown) {
-      // If offline on Windows host, attempt auto-spawn and retry once
-      if (isLocalHost && process.platform === 'win32') {
-        const spawned = autoSpawnHardwareBridge();
-        if (spawned) {
-          await new Promise((r) => setTimeout(r, 1200));
-          try {
-            const retryRes = await executeHardwareCommand();
-            if (retryRes.ok) {
-              const hardwareResult = await retryRes.json();
-              return NextResponse.json({ ...hardwareResult, source: 'hardware' });
-            }
-          } catch {}
-        }
+      // If direct call threw and tunnel is available, try tunnel
+      if (tunnelUrl && targetHost !== tunnelUrl) {
+        try {
+          const tunnelRes = await executeHardwareCommand(tunnelUrl);
+          if (tunnelRes.ok) {
+            const hardwareResult = await tunnelRes.json();
+            return NextResponse.json({ ...hardwareResult, source: 'hardware' });
+          }
+        } catch {}
       }
 
       const errMsg = fetchErr instanceof Error ? fetchErr.message : 'Connection failed';
       return NextResponse.json(
         {
           success: false,
-          error: `Hardware encoder bridge unreachable at ${targetHost} (${errMsg}). Ensure the Be-Tech USB cable is plugged into this computer and click Recheck RFID Connection.`,
+          error: `Hardware encoder bridge unreachable (${errMsg}). Ensure the Be-Tech USB cable is plugged into this computer and click Recheck RFID Connection.`,
           source: 'hardware',
         },
         { status: 503 }
