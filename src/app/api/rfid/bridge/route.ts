@@ -101,7 +101,7 @@ export async function GET(req: Request) {
 
     if (res.ok) {
       bridgeData = await res.json();
-      isOnline = bridgeData.status === 'ok' || bridgeData.isOnline === true;
+      isOnline = (bridgeData.status === 'ok' || bridgeData.isOnline === true) && bridgeData.hardwareConnected !== false;
     }
   } catch {
     // Direct targetHost connection failed
@@ -121,7 +121,7 @@ export async function GET(req: Request) {
 
       if (res.ok) {
         bridgeData = await res.json();
-        isOnline = bridgeData.status === 'ok' || bridgeData.isOnline === true;
+        isOnline = (bridgeData.status === 'ok' || bridgeData.isOnline === true) && bridgeData.hardwareConnected !== false;
         effectiveHost = tunnelUrl;
       } else {
         cachedTunnelUrl = null;
@@ -146,7 +146,7 @@ export async function GET(req: Request) {
         clearTimeout(timeout);
         if (res.ok) {
           bridgeData = await res.json();
-          isOnline = bridgeData.status === 'ok' || bridgeData.isOnline === true;
+          isOnline = (bridgeData.status === 'ok' || bridgeData.isOnline === true) && bridgeData.hardwareConnected !== false;
         }
       } catch {}
     }
@@ -175,7 +175,7 @@ export async function GET(req: Request) {
     host: targetHost,
     tunnelUrl: tunnelUrl || undefined,
     devicesCount: repo.getRFIDDevices().length,
-    error: 'Be-Tech USB RFID reader is not detected or bridge is initializing. Ensure the USB cable is firmly plugged in and click Recheck Connection.',
+    error: bridgeData?.error || 'Be-Tech USB RFID reader is not detected on USB Port 1. Ensure the USB cable is firmly plugged into this computer and click Recheck Connection.',
   });
 }
 

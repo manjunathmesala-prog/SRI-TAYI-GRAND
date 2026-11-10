@@ -63,8 +63,15 @@ namespace SriTayiGrandRfidBridge
 
         static HttpListener listener;
         static bool isRunning = true;
+        static Mutex singleInstanceMutex;
 
-        static void Main(string[] args) { AppDomain.CurrentDomain.UnhandledException += (s, e) => { Log("[UNHANDLED THREAD EXCEPTION] " + e.ExceptionObject.ToString()); }; try { Console.Title = "Sri Tayi Grand Hotel - RFID Hardware Bridge Service"; } catch {}
+        static void Main(string[] args) {
+            bool createdNew;
+            singleInstanceMutex = new Mutex(true, "Global\\SriTayiGrand_RFID_Bridge_Singleton_Mutex", out createdNew);
+            if (!createdNew)
+            {
+                return;
+            } AppDomain.CurrentDomain.UnhandledException += (s, e) => { Log("[UNHANDLED THREAD EXCEPTION] " + e.ExceptionObject.ToString()); }; try { Console.Title = "Sri Tayi Grand Hotel - RFID Hardware Bridge Service"; } catch {}
             Log("========================================================");
             Log("   SRI TAYI GRAND HOTEL - RFID HARDWARE BRIDGE SERVICE  ");
             Log("   Hardware: Be-Tech BIS 5.7 (btlock57l.dll)            ");
@@ -188,6 +195,42 @@ namespace SriTayiGrandRfidBridge
             }
         }
 
+        static bool CheckHardwareConnected(out string detail)
+        {
+            try
+            {
+                short alarmRes = Reader_Alarm(Port, ReaderType, 0);
+                if (alarmRes == 0)
+                {
+                    detail = "Be-Tech BIS 5.7 USB Encoder Ready on Port " + Port;
+                    return true;
+                }
+
+                int cardNo = 0, guestSN = 0;
+                short guestIdx = 0;
+                StringBuilder door = new StringBuilder(20);
+                StringBuilder suit = new StringBuilder(20);
+                StringBuilder pub = new StringBuilder(20);
+                StringBuilder begin = new StringBuilder(20);
+                StringBuilder end = new StringBuilder(20);
+
+                short readRes = Read_Guest_Card(Port, ReaderType, SectorNo, HotelPwd, ref cardNo, ref guestSN, ref guestIdx, door, suit, pub, begin, end);
+                if (readRes == 0 || readRes == 6 || readRes == 4 || readRes == 7)
+                {
+                    detail = "Be-Tech BIS 5.7 USB Encoder Ready on Port " + Port;
+                    return true;
+                }
+
+                detail = "Be-Tech USB Card Encoder not detected on Port " + Port + ". Ensure the USB cable is firmly plugged in.";
+                return false;
+            }
+            catch (Exception ex)
+            {
+                detail = "Hardware driver error: " + ex.Message;
+                return false;
+            }
+        }
+
         static void ProcessRequest(HttpListenerContext context)
         {
             HttpListenerRequest req = context.Request;
@@ -214,7 +257,16 @@ namespace SriTayiGrandRfidBridge
 
                 if (path.StartsWith("/api/status"))
                 {
-                    responseJson = "{\"status\":\"ok\",\"isOnline\":true,\"service\":\"SriTayiGrand-RFID-Bridge\",\"port\":" + Port + ",\"readerType\":" + ReaderType + "}";
+                    string hwDetail;
+                    bool isHwConnected = CheckHardwareConnected(out hwDetail);
+                    if (isHwConnected)
+                    {
+                        responseJson = "{\"status\":\"ok\",\"isOnline\":true,\"hardwareConnected\":true,\"service\":\"SriTayiGrand-RFID-Bridge\",\"port\":" + Port + ",\"readerType\":" + ReaderType + ",\"message\":\"" + hwDetail.Replace("\"", "\\\"") + "\"}";
+                    }
+                    else
+                    {
+                        responseJson = "{\"status\":\"hardware_offline\",\"isOnline\":false,\"hardwareConnected\":false,\"service\":\"SriTayiGrand-RFID-Bridge\",\"port\":" + Port + ",\"readerType\":" + ReaderType + ",\"error\":\"" + hwDetail.Replace("\"", "\\\"") + "\"}";
+                    }
                 }
                 else if (path.StartsWith("/api/read-card"))
                 {

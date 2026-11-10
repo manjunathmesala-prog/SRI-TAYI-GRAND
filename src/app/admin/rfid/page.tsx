@@ -1031,13 +1031,18 @@ export default function RFIDAdminPage() {
               >
                 {bridgeStatus.isOnline
                   ? '🟢 Hardware Online (USB Port 1)'
-                  : '🔴 Hardware Offline'}
+                  : '🔴 Hardware Offline (USB Disconnected)'}
               </span>
             </div>
 
             <p className="text-xs text-[#EFE3D6]/80 mt-1">
               Active Host: <code className="text-[#D8AD56] font-mono">{customHost}</code> · Master Cards: <strong className="text-amber-400">{superAdminCards.length} Lifetime</strong> · Cleaners: <strong className="text-cyan-400">{cleanerCards.length} Active</strong> · Enrolled Locks: <strong className="text-emerald-400">{devices.length} Devices Online</strong>
             </p>
+            {bridgeStatus.error && !bridgeStatus.isOnline && (
+              <p className="text-xs text-rose-300 mt-1.5 flex items-center gap-1 font-medium bg-rose-950/50 border border-rose-800/50 px-2.5 py-1 rounded-lg">
+                <span>⚠️</span> <span>{bridgeStatus.error}</span>
+              </p>
+            )}
           </div>
         </div>
 

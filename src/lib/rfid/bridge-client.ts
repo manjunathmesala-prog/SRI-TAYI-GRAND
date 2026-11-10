@@ -151,6 +151,7 @@ export async function checkBridgeHealth(): Promise<BridgeHealthStatus> {
         readerType: data.readerType,
         devicesCount: data.devicesCount,
         host: data.host,
+        error: data.error,
       };
     }
   } catch (err: unknown) {
