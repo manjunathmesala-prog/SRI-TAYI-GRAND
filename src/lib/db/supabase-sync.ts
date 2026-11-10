@@ -137,7 +137,7 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
       }
 
       // 3. Upsert into Supabase bookings table
-      await client.query(
+      const bRes = await client.query(
         `INSERT INTO bookings (
           booking_reference,
           guest_id,
@@ -188,7 +188,8 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
           category_id = COALESCE(EXCLUDED.category_id, bookings.category_id),
           category_name = COALESCE(EXCLUDED.category_name, bookings.category_name),
           keycard_uid = COALESCE(EXCLUDED.keycard_uid, bookings.keycard_uid),
-          updated_at = NOW();`,
+          updated_at = NOW()
+        RETURNING id;`,
         [
           booking.booking_reference,
           guestId,
@@ -221,6 +222,115 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
           booking.created_at || null,
         ]
       );
+
+      const bookingUuid = bRes?.rows?.[0]?.id;
+
+      if (bookingUuid) {
+        // 4. Upsert Primary Guest in booking_guests
+        const bgCheck = await client.query(
+          `SELECT id FROM booking_guests WHERE booking_id = $1 AND is_primary = true LIMIT 1;`,
+          [bookingUuid]
+        );
+        if (bgCheck.rows.length === 0) {
+          await client.query(
+            `INSERT INTO booking_guests (booking_id, guest_name, age, gender, is_primary)
+             VALUES ($1, $2, $3, $4, true);`,
+            [bookingUuid, guestName, 32, 'Not Specified']
+          );
+        } else {
+          await client.query(
+            `UPDATE booking_guests SET guest_name = $1 WHERE id = $2;`,
+            [guestName, bgCheck.rows[0].id]
+          );
+        }
+
+        // 5. Upsert booking_rooms
+        let catUuid: string | null = null;
+        if (booking.category_name || booking.category_id) {
+          const catRes = await client.query(
+            `SELECT id FROM room_categories WHERE name ILIKE $1 OR slug ILIKE $1 OR id::text = $2 LIMIT 1;`,
+            [booking.category_name || '', booking.category_id || '']
+          );
+          if (catRes.rows.length > 0) catUuid = catRes.rows[0].id;
+        }
+        if (!catUuid) {
+          const defaultCat = await client.query(`SELECT id FROM room_categories LIMIT 1;`);
+          if (defaultCat.rows.length > 0) catUuid = defaultCat.rows[0].id;
+        }
+
+        let roomUuid: string | null = null;
+        if (booking.assigned_room_number || booking.assigned_room_id) {
+          const rmRes = await client.query(
+            `SELECT id FROM rooms WHERE room_number = $1 OR id::text = $2 LIMIT 1;`,
+            [booking.assigned_room_number || '', booking.assigned_room_id || '']
+          );
+          if (rmRes.rows.length > 0) roomUuid = rmRes.rows[0].id;
+        }
+
+        const brCheck = await client.query(
+          `SELECT id FROM booking_rooms WHERE booking_id = $1 LIMIT 1;`,
+          [bookingUuid]
+        );
+        const pricePerNight = Number(booking.subtotal_amount || booking.total_amount || 1800);
+        if (brCheck.rows.length === 0 && catUuid) {
+          await client.query(
+            `INSERT INTO booking_rooms (booking_id, category_id, assigned_room_id, price_per_night, created_at)
+             VALUES ($1, $2, $3, $4, NOW());`,
+            [bookingUuid, catUuid, roomUuid, pricePerNight]
+          );
+        } else if (brCheck.rows.length > 0) {
+          await client.query(
+            `UPDATE booking_rooms 
+             SET assigned_room_id = COALESCE($1, assigned_room_id),
+                 category_id = COALESCE($2, category_id),
+                 price_per_night = COALESCE($3, price_per_night)
+             WHERE id = $4;`,
+            [roomUuid, catUuid, pricePerNight, brCheck.rows[0].id]
+          );
+        }
+
+        // 6. Append to booking_status_history
+        const bshCheck = await client.query(
+          `SELECT to_status FROM booking_status_history WHERE booking_id = $1 ORDER BY created_at DESC LIMIT 1;`,
+          [bookingUuid]
+        );
+        if (bshCheck.rows.length === 0) {
+          await client.query(
+            `INSERT INTO booking_status_history (booking_id, from_status, to_status, notes, created_at)
+             VALUES ($1, null, $2, 'Initial booking created', NOW());`,
+            [bookingUuid, booking.status || 'confirmed']
+          );
+        } else if (bshCheck.rows[0].to_status !== booking.status) {
+          await client.query(
+            `INSERT INTO booking_status_history (booking_id, from_status, to_status, notes, created_at)
+             VALUES ($1, $2, $3, $4, NOW());`,
+            [bookingUuid, bshCheck.rows[0].to_status, booking.status, `Status changed to ${booking.status}`]
+          );
+        }
+
+        // 7. Upsert Invoices
+        const invCheck = await client.query(
+          `SELECT id FROM invoices WHERE booking_id = $1 LIMIT 1;`,
+          [bookingUuid]
+        );
+        if (invCheck.rows.length === 0) {
+          const rawRef = (booking.booking_reference || '').replace(/[^0-9]/g, '');
+          const invNum = `INV-STG-2026-${rawRef.slice(-4) || Math.floor(1000 + Math.random() * 9000)}`;
+          await client.query(
+            `INSERT INTO invoices (invoice_number, booking_id, subtotal, tax_amount, additional_charges, total_amount, created_at)
+             VALUES ($1, $2, $3, $4, $5, $6, NOW())
+             ON CONFLICT (invoice_number) DO NOTHING;`,
+            [
+              invNum,
+              bookingUuid,
+              Number(booking.subtotal_amount || booking.total_amount || 0),
+              Number(booking.tax_amount || 0),
+              Number(booking.additional_charges_amount || 0),
+              Number(booking.total_amount || 0),
+            ]
+          );
+        }
+      }
     } finally {
       client.release();
     }
