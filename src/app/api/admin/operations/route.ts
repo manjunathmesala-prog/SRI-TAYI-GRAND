@@ -3,6 +3,7 @@ import { repo } from '@/lib/db/repository';
 import { notifySuperAdmin } from '@/lib/notifications/engine';
 import { verifyStaffRole } from '@/lib/auth';
 import { BookingStatus, HousekeepingStatus, OperationalStatus, PaymentMethod } from '@/types';
+import { syncBookingToSupabase } from '@/lib/db/supabase-sync';
 
 export const dynamic = 'force-dynamic';
 
@@ -117,6 +118,10 @@ export async function POST(req: NextRequest) {
           updatedBooking.keycard_uid = issuedCard.card_uid;
         }
 
+        if (updatedBooking) {
+          syncBookingToSupabase(updatedBooking);
+        }
+
         notifySuperAdmin({
           eventType: 'EVENT_CHECK_IN',
           payload: {
@@ -194,6 +199,10 @@ export async function POST(req: NextRequest) {
         // Update status to checked_out and mark room dirty
         const updatedBooking = repo.updateBookingStatus(bookingReference, 'checked_out', undefined, staffName);
 
+        if (updatedBooking) {
+          syncBookingToSupabase(updatedBooking);
+        }
+
         notifySuperAdmin({
           eventType: 'EVENT_CHECK_OUT',
           payload: {
@@ -240,6 +249,10 @@ export async function POST(req: NextRequest) {
 
         const staffName = auth.session?.name || body.staffName || 'Front Desk';
         const updatedBooking = repo.cancelCheckout(bookingReference, staffName);
+
+        if (updatedBooking) {
+          syncBookingToSupabase(updatedBooking);
+        }
 
         notifySuperAdmin({
           eventType: 'EVENT_CHECK_IN',

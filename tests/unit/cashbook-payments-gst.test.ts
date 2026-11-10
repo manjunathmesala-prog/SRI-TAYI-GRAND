@@ -69,7 +69,7 @@ describe('Payments, Cashbook Register & GST Invoicing Rules', () => {
     const expense = repo.createExpense(
       {
         title: 'Morning Cleaning Detergent & Disinfectant',
-        category: 'cleaning_supplies',
+        category: 'maintenance',
         amount: 350,
         payment_method: 'cash',
         expense_date: new Date().toISOString().split('T')[0],
