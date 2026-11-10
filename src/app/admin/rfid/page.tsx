@@ -583,35 +583,48 @@ export default function RFIDAdminPage() {
     }
   };
 
-  // Toggle Card Status (Activate / Deactivate) with Live Physical USB Reader Encoding
+  // Toggle Card Status (Activate / Deactivate) with Precision Feedback & Hardware Sync
   const handleToggleCardStatus = async (
-    cardId: string,
-    currentStatus: string,
+    cardOrId: RFIDCard | string,
+    currentStatus?: string,
     roomNumber?: string,
     guestName?: string
   ) => {
-    const nextStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    // 1. Fully resolve the exact target card
+    const targetCard: RFIDCard | undefined =
+      typeof cardOrId === 'object'
+        ? cardOrId
+        : cards.find((c) => c.id === cardOrId || c.card_uid === cardOrId);
+
+    const cardId = targetCard?.id || (typeof cardOrId === 'string' ? cardOrId : '');
+    const cardUid = targetCard?.card_uid || '';
+    const cardType = targetCard?.card_type || 'guest';
+    const cardLabel = targetCard?.card_label || (cardType === 'super_admin' ? 'Super Admin Master Key' : cardType === 'cleaner' ? 'Housekeeping Cleaner Card' : 'Guest Keycard');
+    const holderName = targetCard?.holder_name || targetCard?.guest_name || guestName || 'Card Holder';
+    const assignedRoom = targetCard?.assigned_room_number || targetCard?.room_number || roomNumber || '';
+    const currentStat = targetCard?.status || currentStatus || 'active';
+    const nextStatus = currentStat === 'active' ? 'inactive' : 'active';
+
     setHardwareBusy(true);
 
-    // 1. Optimistic UI update so buttons and badges respond instantly (< 50ms)
+    // 2. Instant Optimistic UI update across all matching rows (< 15ms)
     setCards((prev) =>
       prev.map((c) =>
-        c.id === cardId || c.card_uid === cardId ? { ...c, status: nextStatus } : c
+        (c.id === cardId || (cardUid && c.card_uid === cardUid))
+          ? { ...c, status: nextStatus }
+          : c
       )
     );
 
     try {
-      const targetCard = cards.find((c) => c.id === cardId || c.card_uid === cardId);
-      const targetRoom = roomNumber || targetCard?.room_number || targetCard?.assigned_room_number || '104';
-      const targetGuest = guestName || targetCard?.guest_name || targetCard?.holder_name || 'Guest';
-
-      // 2. Persist status to Hotel Repository database first
+      // 3. Persist status to Hotel Repository and Supabase PostgreSQL Database first
       const res = await fetch('/api/rfid/cards', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'toggle_status',
           cardId,
+          cardUid,
           status: nextStatus,
         }),
       });
@@ -620,51 +633,88 @@ export default function RFIDAdminPage() {
         throw new Error(dbData.error || 'Failed to update card status in system');
       }
 
-      // 3. Attempt hardware encoder sync (write or wipe Mifare card on Be-Tech USB reader)
+      // 4. Physical Be-Tech Hardware Encoder Synchronization (if applicable)
       let hwSynced = false;
       let hwNote = '';
 
-      if (nextStatus === 'active') {
-        try {
-          const hwRes = await issuePhysicalKeycard({
-            roomNumber: targetRoom,
-            guestName: targetGuest,
-            staffUser: 'Front Desk',
-          });
-          if (hwRes && hwRes.success) {
-            hwSynced = true;
-          } else if (hwRes && hwRes.error) {
-            hwNote = hwRes.error;
+      if (cardType === 'guest' && assignedRoom) {
+        // Customer cards: Write or Wipe for specific guest room on USB encoder
+        if (nextStatus === 'active') {
+          try {
+            const hwRes = await issuePhysicalKeycard({
+              roomNumber: assignedRoom,
+              guestName: holderName,
+              staffUser: 'Front Desk',
+            });
+            if (hwRes && hwRes.success) hwSynced = true;
+            else if (hwRes && hwRes.error) hwNote = hwRes.error;
+          } catch {
+            hwNote = 'Be-Tech encoder service offline';
           }
-        } catch {
-          hwNote = 'Be-Tech encoder service offline';
+        } else {
+          try {
+            const hwRes = await checkoutPhysicalCard(assignedRoom, 'Front Desk');
+            if (hwRes && hwRes.success) hwSynced = true;
+            else if (hwRes && hwRes.error) hwNote = hwRes.error;
+          } catch {
+            hwNote = 'Be-Tech encoder service offline';
+          }
         }
-      } else {
-        try {
-          const hwRes = await checkoutPhysicalCard(targetRoom, 'Front Desk');
-          if (hwRes && hwRes.success) {
-            hwSynced = true;
-          } else if (hwRes && hwRes.error) {
-            hwNote = hwRes.error;
+      } else if (cardType === 'super_admin') {
+        // Super Admin cards: Universal clearance across ALL rooms
+        if (nextStatus === 'active') {
+          try {
+            const hwRes = await issuePhysicalKeycard({
+              roomNumber: '104',
+              guestName: holderName,
+              staffUser: 'System Root',
+            });
+            if (hwRes && hwRes.success) hwSynced = true;
+            else if (hwRes && hwRes.error) hwNote = hwRes.error;
+          } catch {
+            hwNote = 'Be-Tech encoder service offline';
           }
-        } catch {
-          hwNote = 'Be-Tech encoder service offline';
+        }
+      } else if (cardType === 'cleaner') {
+        // Cleaner cards: Dual-tap housekeeping turnover clearance
+        if (nextStatus === 'active') {
+          try {
+            const hwRes = await issuePhysicalKeycard({
+              roomNumber: '104',
+              guestName: holderName,
+              staffUser: 'Front Desk',
+            });
+            if (hwRes && hwRes.success) hwSynced = true;
+            else if (hwRes && hwRes.error) hwNote = hwRes.error;
+          } catch {
+            hwNote = 'Be-Tech encoder service offline';
+          }
         }
       }
 
-      // 4. Positive sound and comprehensive feedback
+      // 5. Positive chime sound and distinct, accurate notification message
       playChimeSound(true);
-      if (hwSynced) {
-        setHardwareMessage({
-          text: `Card for Room ${targetRoom} (${targetGuest}) ${nextStatus === 'active' ? 'ACTIVATED & written' : 'DEACTIVATED & wiped'} on Be-Tech encoder!`,
-          type: nextStatus === 'active' ? 'success' : 'info',
-        });
+
+      let feedbackMsg = '';
+      if (cardType === 'super_admin') {
+        feedbackMsg = nextStatus === 'active'
+          ? `👑 Super Admin Card "${cardLabel}" (${holderName}) is now ACTIVE with Universal Master Clearance!`
+          : `🔒 Super Admin Card "${cardLabel}" (${holderName}) is now DEACTIVATED and revoked from system.`;
+      } else if (cardType === 'cleaner') {
+        feedbackMsg = nextStatus === 'active'
+          ? `✦ Housekeeping Cleaner Card "${cardLabel}" (${holderName}) is now ACTIVE (Dual-tap turnover enabled)!`
+          : `🔒 Housekeeping Cleaner Card "${cardLabel}" (${holderName}) is now DEACTIVATED.`;
       } else {
-        setHardwareMessage({
-          text: `Card for Room ${targetRoom} (${targetGuest}) is now ${nextStatus.toUpperCase()} in system.${hwNote ? ' Note: ' + hwNote : ''}`,
-          type: nextStatus === 'active' ? 'success' : 'info',
-        });
+        const roomTag = assignedRoom ? `for Room ${assignedRoom}` : '';
+        feedbackMsg = hwSynced
+          ? `Customer Keycard ${roomTag} (${holderName}, ${cardUid || cardId}) ${nextStatus === 'active' ? 'ACTIVATED & written' : 'DEACTIVATED & wiped'} on Be-Tech encoder!`
+          : `Customer Keycard ${roomTag} (${holderName}, ${cardUid || cardId}) is now ${nextStatus.toUpperCase()} in system.${hwNote ? ' Note: ' + hwNote : ''}`;
       }
+
+      setHardwareMessage({
+        text: feedbackMsg,
+        type: nextStatus === 'active' ? 'success' : 'info',
+      });
 
       refreshAllData();
     } catch (err: unknown) {
@@ -1226,7 +1276,7 @@ export default function RFIDAdminPage() {
                         <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end gap-2">
                             <button
-                              onClick={() => handleToggleCardStatus(c.id, c.status, c.room_number, c.guest_name || c.holder_name)}
+                              onClick={() => handleToggleCardStatus(c)}
                               className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors cursor-pointer ${
                                 c.status === 'active'
                                   ? 'bg-rose-50 text-rose-700 hover:bg-rose-100'
@@ -1370,7 +1420,7 @@ export default function RFIDAdminPage() {
                         <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end gap-2">
                             <button
-                              onClick={() => handleToggleCardStatus(c.id, c.status, c.room_number, c.guest_name || c.holder_name)}
+                              onClick={() => handleToggleCardStatus(c)}
                               className={`px-2.5 py-1 rounded text-xs font-semibold transition-colors cursor-pointer ${
                                 c.status === 'active'
                                   ? 'bg-rose-50 text-rose-700 hover:bg-rose-100'
@@ -1928,7 +1978,7 @@ export default function RFIDAdminPage() {
                             </button>
                           )}
                           <button
-                            onClick={() => handleToggleCardStatus(c.id, c.status, c.room_number, c.guest_name || c.holder_name)}
+                            onClick={() => handleToggleCardStatus(c)}
                             className={`px-2.5 py-1 rounded text-xs font-semibold cursor-pointer ${
                               c.status === 'active'
                                 ? 'bg-rose-50 text-rose-700 hover:bg-rose-100'

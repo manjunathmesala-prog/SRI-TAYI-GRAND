@@ -2778,13 +2778,13 @@ export class HotelRepository {
       card_type: card.card_type || 'guest',
       card_label: card.card_label,
       device_name: 'Admin-Dashboard',
-      room_number: card.assigned_room_number || 'N/A',
+      room_number: card.assigned_room_number || card.room_number || (card.card_type === 'super_admin' ? 'ALL' : card.card_type === 'cleaner' ? 'ALL-CLEANING' : 'N/A'),
       event_type: nextStatus === 'active' ? 'access_granted' : 'access_denied',
       action_type: nextStatus === 'active' ? 'door_unlock' : 'door_lock',
       holder_name: card.holder_name || card.guest_name,
       booking_reference: card.booking_reference,
       source: 'encoder',
-      reason: `Keycard manually set to ${nextStatus.toUpperCase()} by System Administrator`,
+      reason: `Keycard ${card.card_label} (${card.card_uid}) status changed to ${nextStatus.toUpperCase()}`,
     });
 
     return card;
