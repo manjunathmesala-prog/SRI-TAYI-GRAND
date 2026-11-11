@@ -1,0 +1,75 @@
+[
+  {
+    "name": "no auth",
+    "route": "/api/admin/expenses",
+    "expected": 403,
+    "actual": 403,
+    "status": "PASS"
+  },
+  {
+    "name": "forged staff header",
+    "route": "/api/admin/expenses",
+    "expected": 403,
+    "actual": 403,
+    "status": "PASS"
+  },
+  {
+    "name": "unsigned token",
+    "route": "/api/admin/expenses",
+    "expected": 403,
+    "actual": 403,
+    "status": "PASS"
+  },
+  {
+    "name": "expired signed token",
+    "route": "/api/admin/auth",
+    "expected": 401,
+    "actual": 401,
+    "status": "PASS"
+  },
+  {
+    "name": "Front Desk can read settings",
+    "route": "/api/admin/settings",
+    "expected": 200,
+    "actual": 200,
+    "status": "PASS"
+  },
+  {
+    "name": "Front Desk can read expenses",
+    "route": "/api/admin/expenses",
+    "expected": 200,
+    "actual": 200,
+    "status": "PASS"
+  },
+  {
+    "name": "Hotel Manager can read reports",
+    "route": "/api/admin/reports",
+    "expected": 200,
+    "actual": 200,
+    "status": "PASS"
+  },
+  {
+    "name": "missing cookie",
+    "actual": 307,
+    "location": "/admin/login?redirect=%2Fadmin%2Fdashboard",
+    "status": "PASS"
+  },
+  {
+    "name": "forged page session",
+    "actual": 307,
+    "location": "/admin/login?redirect=%2Fadmin%2Fdashboard",
+    "status": "PASS"
+  },
+  {
+    "name": "expired page session",
+    "actual": 307,
+    "location": "/admin/login?redirect=%2Fadmin%2Fdashboard",
+    "status": "PASS"
+  },
+  {
+    "name": "Front Desk cannot edit settings",
+    "expected": 403,
+    "actual": 403,
+    "status": "PASS"
+  }
+]

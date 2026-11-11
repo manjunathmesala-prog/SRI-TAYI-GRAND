@@ -1,0 +1,34 @@
+[
+  {
+    "route": "expenses",
+    "acknowledgedBeforeRestart": true,
+    "recordsBefore": 1,
+    "recordsAfter": 0,
+    "status": "FAIL",
+    "scope": "Durability across real isolated Next.js process restart with unavailable database"
+  },
+  {
+    "route": "maintenance",
+    "acknowledgedBeforeRestart": true,
+    "recordsBefore": 1,
+    "recordsAfter": 0,
+    "status": "FAIL",
+    "scope": "Durability across real isolated Next.js process restart with unavailable database"
+  },
+  {
+    "route": "convention-hall",
+    "acknowledgedBeforeRestart": true,
+    "recordsBefore": 1,
+    "recordsAfter": 0,
+    "status": "FAIL",
+    "scope": "Durability across real isolated Next.js process restart with unavailable database"
+  },
+  {
+    "route": "accounting",
+    "acknowledgedBeforeRestart": true,
+    "recordsBefore": 1,
+    "recordsAfter": 0,
+    "status": "FAIL",
+    "scope": "Durability across real isolated Next.js process restart with unavailable database"
+  }
+]

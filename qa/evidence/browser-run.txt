@@ -1,0 +1,10 @@
+page.goto: Timeout 10000ms exceeded.
+Call log:
+  - navigating to "http://127.0.0.1:3006/admin/login", waiting until "load"
+
+    at C:\Users\malle\Downloads\sri tayi grand\qa\browser-run.cjs:10:12 {
+  log: [
+    '  - navigating to "http://127.0.0.1:3006/admin/login", waiting until "load"'
+  ],
+  name: 'TimeoutError'
+}

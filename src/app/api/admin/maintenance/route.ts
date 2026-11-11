@@ -57,9 +57,11 @@ export async function POST(req: NextRequest) {
     const { room_number, issue_title, description, category, priority, assigned_to, estimated_cost, room_blocked } =
       body;
 
-    if (!room_number || !issue_title) {
+    if (!room_number || typeof issue_title !== 'string' || !issue_title.trim() ||
+        !repo.getRooms().some(room => room.room_number === String(room_number)) ||
+        (estimated_cost !== undefined && (!Number.isFinite(Number(estimated_cost)) || Number(estimated_cost) < 0))) {
       return NextResponse.json(
-        { success: false, error: 'room_number and issue_title are required.' },
+        { success: false, error: 'An existing room, non-empty issue title, and valid non-negative cost are required.' },
         { status: 400 }
       );
     }

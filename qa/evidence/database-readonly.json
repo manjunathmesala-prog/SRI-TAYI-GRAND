@@ -1,0 +1,5173 @@
+{
+  "testedAt": "2026-11-11T09:43:57.636Z",
+  "mode": "READ ONLY; no writes or migrations",
+  "tables": [
+    {
+      "name": "additional_charges",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "amenities",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "audit_logs",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "booking_guests",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "booking_holds",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "booking_rooms",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "booking_status_history",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "bookings",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "cancellation_policies",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "cash_shifts",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "cash_transactions",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "contact_enquiries",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "convention_halls",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "convention_quotes",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "daily_closings",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "expenses",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "gallery_images",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "guests",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "hall_bookings",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "hall_enquiries",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "hall_payments",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "hotel_settings",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "integrations",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "invoices",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "notifications",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "payments",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "permissions",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "profiles",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "reception_kiosk_tokens",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "refunds",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "reviews",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "rfid_access_events",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "rfid_cards",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "rfid_devices",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "rfid_tap_history",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "role_permissions",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "roles",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "room_amenities",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "room_categories",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "room_cleaning_sessions",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "room_housekeeping",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "room_images",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "room_maintenance",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "room_transfers",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "rooms",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "staff_assignments",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "staff_attendance",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "super_admin_notifications",
+      "rls": true,
+      "force_rls": false
+    },
+    {
+      "name": "website_content",
+      "rls": true,
+      "force_rls": false
+    }
+  ],
+  "columns": [
+    {
+      "table_name": "additional_charges",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "additional_charges",
+      "column_name": "booking_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "additional_charges",
+      "column_name": "charge_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "additional_charges",
+      "column_name": "amount",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "additional_charges",
+      "column_name": "recorded_by",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "additional_charges",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "additional_charges",
+      "column_name": "booking_reference",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "additional_charges",
+      "column_name": "category",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "additional_charges",
+      "column_name": "description",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "additional_charges",
+      "column_name": "tax_rate",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "additional_charges",
+      "column_name": "tax_amount",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "additional_charges",
+      "column_name": "total_amount",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "additional_charges",
+      "column_name": "posted_by",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "additional_charges",
+      "column_name": "charge_id",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "amenities",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "amenities",
+      "column_name": "code",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "amenities",
+      "column_name": "name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "amenities",
+      "column_name": "icon_name",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "amenities",
+      "column_name": "description",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "amenities",
+      "column_name": "is_featured",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "amenities",
+      "column_name": "is_active",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "amenities",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "user_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "action",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "entity_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "entity_id",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "old_state",
+      "data_type": "jsonb",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "new_state",
+      "data_type": "jsonb",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "ip_address",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "user_name",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "user_role",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "category",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "details",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "audit_logs",
+      "column_name": "log_id",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "booking_guests",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "booking_guests",
+      "column_name": "booking_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "booking_guests",
+      "column_name": "guest_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "booking_guests",
+      "column_name": "age",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "booking_guests",
+      "column_name": "gender",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "booking_guests",
+      "column_name": "is_primary",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "booking_holds",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "booking_holds",
+      "column_name": "session_id",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "booking_holds",
+      "column_name": "category_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "booking_holds",
+      "column_name": "room_quantity",
+      "data_type": "integer",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "booking_holds",
+      "column_name": "check_in_date",
+      "data_type": "date",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "booking_holds",
+      "column_name": "check_out_date",
+      "data_type": "date",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "booking_holds",
+      "column_name": "expires_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "booking_holds",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "booking_rooms",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "booking_rooms",
+      "column_name": "booking_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "booking_rooms",
+      "column_name": "category_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "booking_rooms",
+      "column_name": "assigned_room_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "booking_rooms",
+      "column_name": "price_per_night",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "booking_rooms",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "booking_status_history",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "booking_status_history",
+      "column_name": "booking_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "booking_status_history",
+      "column_name": "from_status",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "booking_status_history",
+      "column_name": "to_status",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "booking_status_history",
+      "column_name": "changed_by",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "booking_status_history",
+      "column_name": "notes",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "booking_status_history",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "booking_reference",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "guest_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "check_in_date",
+      "data_type": "date",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "check_out_date",
+      "data_type": "date",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "adults_count",
+      "data_type": "integer",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "children_count",
+      "data_type": "integer",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "rooms_count",
+      "data_type": "integer",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "status",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "payment_status",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "payment_method",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "subtotal_amount",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "tax_amount",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "additional_charges_amount",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "total_amount",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "paid_amount",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "special_requests",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "early_check_in_requested",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "late_check_out_requested",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "checked_in_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "checked_out_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "cancelled_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "cancellation_reason",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "internal_notes",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "booking_source",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "walk_in_token",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "pickup_code",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "room_assigned_by",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "keycard_issued_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "keycard_uid",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "id_proof_type",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "id_proof_number",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "assigned_room_id",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "assigned_room_number",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "category_id",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "bookings",
+      "column_name": "category_name",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "cancellation_policies",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "cancellation_policies",
+      "column_name": "title",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "cancellation_policies",
+      "column_name": "hours_before_checkin",
+      "data_type": "integer",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "cancellation_policies",
+      "column_name": "refund_percentage",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "cancellation_policies",
+      "column_name": "description",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "cancellation_policies",
+      "column_name": "is_active",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "cancellation_policies",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "cash_shifts",
+      "column_name": "id",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "cash_shifts",
+      "column_name": "shift_number",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "cash_shifts",
+      "column_name": "cashier_id",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "cash_shifts",
+      "column_name": "cashier_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "cash_shifts",
+      "column_name": "opened_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "cash_shifts",
+      "column_name": "closed_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "cash_shifts",
+      "column_name": "opening_float",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "cash_shifts",
+      "column_name": "closing_cash_counted",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "cash_shifts",
+      "column_name": "expected_closing_cash",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "cash_shifts",
+      "column_name": "discrepancy",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "cash_shifts",
+      "column_name": "notes",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "cash_shifts",
+      "column_name": "status",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "cash_shifts",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "cash_transactions",
+      "column_name": "id",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "cash_transactions",
+      "column_name": "shift_id",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "cash_transactions",
+      "column_name": "type",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "cash_transactions",
+      "column_name": "category",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "cash_transactions",
+      "column_name": "amount",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "cash_transactions",
+      "column_name": "reason",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "cash_transactions",
+      "column_name": "booking_reference",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "cash_transactions",
+      "column_name": "receipt_ref",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "cash_transactions",
+      "column_name": "performed_by",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "cash_transactions",
+      "column_name": "performed_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "cash_transactions",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "contact_enquiries",
+      "column_name": "id",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "contact_enquiries",
+      "column_name": "name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "contact_enquiries",
+      "column_name": "phone",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "contact_enquiries",
+      "column_name": "email",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "contact_enquiries",
+      "column_name": "subject",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "contact_enquiries",
+      "column_name": "message",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "contact_enquiries",
+      "column_name": "check_in_date",
+      "data_type": "date",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "contact_enquiries",
+      "column_name": "check_out_date",
+      "data_type": "date",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "contact_enquiries",
+      "column_name": "room_type",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "contact_enquiries",
+      "column_name": "adults_count",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "contact_enquiries",
+      "column_name": "status",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "contact_enquiries",
+      "column_name": "source",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "contact_enquiries",
+      "column_name": "admin_notes",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "contact_enquiries",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "contact_enquiries",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "convention_halls",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_halls",
+      "column_name": "name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_halls",
+      "column_name": "description",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_halls",
+      "column_name": "capacity_min",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "convention_halls",
+      "column_name": "capacity_max",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "convention_halls",
+      "column_name": "features",
+      "data_type": "jsonb",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "convention_halls",
+      "column_name": "base_rate_per_day",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "convention_halls",
+      "column_name": "cover_image_url",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "convention_halls",
+      "column_name": "is_active",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "convention_halls",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "id",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "quote_number",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "enquiry_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "client_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "client_phone",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "client_email",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "event_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "event_date",
+      "data_type": "date",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "seating_layout",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "guest_count",
+      "data_type": "integer",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "catering_package",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "catering_rate_per_plate",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "hall_rental_charge",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "av_sound_lighting",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "stage_decoration",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "generator_diesel",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "subtotal",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "gst_rate",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "gst_amount",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "total_amount",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "status",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "created_by",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "convention_quotes",
+      "column_name": "valid_until",
+      "data_type": "date",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "id",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "closing_date",
+      "data_type": "date",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "total_revenue",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "room_revenue",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "hall_revenue",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "other_revenue",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "cash_collected",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "upi_collected",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "card_collected",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "online_collected",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "total_expenses",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "cash_expenses",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "expected_cash_in_drawer",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "actual_cash_counted",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "discrepancy",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "notes",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "closed_by_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "closed_by_role",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "status",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "closed_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "daily_closings",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "expenses",
+      "column_name": "id",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "expenses",
+      "column_name": "category",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "expenses",
+      "column_name": "title",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "expenses",
+      "column_name": "description",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "expenses",
+      "column_name": "amount",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "expenses",
+      "column_name": "payment_method",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "expenses",
+      "column_name": "recorded_by",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "expenses",
+      "column_name": "expense_date",
+      "data_type": "date",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "expenses",
+      "column_name": "receipt_ref",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "expenses",
+      "column_name": "status",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "expenses",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "expenses",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "gallery_images",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "gallery_images",
+      "column_name": "title",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "gallery_images",
+      "column_name": "category",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "gallery_images",
+      "column_name": "image_url",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "gallery_images",
+      "column_name": "display_order",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "gallery_images",
+      "column_name": "is_active",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "gallery_images",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "guests",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "guests",
+      "column_name": "full_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "guests",
+      "column_name": "phone",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "guests",
+      "column_name": "email",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "guests",
+      "column_name": "address",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "guests",
+      "column_name": "city",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "guests",
+      "column_name": "state",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "guests",
+      "column_name": "country",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "guests",
+      "column_name": "id_type",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "guests",
+      "column_name": "id_number",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "guests",
+      "column_name": "total_stays",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "guests",
+      "column_name": "notes",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "guests",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "guests",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hall_bookings",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hall_bookings",
+      "column_name": "booking_reference",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hall_bookings",
+      "column_name": "enquiry_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hall_bookings",
+      "column_name": "client_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hall_bookings",
+      "column_name": "phone",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hall_bookings",
+      "column_name": "email",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hall_bookings",
+      "column_name": "event_date",
+      "data_type": "date",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hall_bookings",
+      "column_name": "event_type",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hall_bookings",
+      "column_name": "quoted_amount",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hall_bookings",
+      "column_name": "advance_amount",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hall_bookings",
+      "column_name": "balance_amount",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hall_bookings",
+      "column_name": "status",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hall_bookings",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hall_bookings",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hall_enquiries",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hall_enquiries",
+      "column_name": "enquiry_reference",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hall_enquiries",
+      "column_name": "name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hall_enquiries",
+      "column_name": "phone",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hall_enquiries",
+      "column_name": "email",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hall_enquiries",
+      "column_name": "event_type",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hall_enquiries",
+      "column_name": "event_date",
+      "data_type": "date",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hall_enquiries",
+      "column_name": "expected_guests",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hall_enquiries",
+      "column_name": "requirements",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hall_enquiries",
+      "column_name": "message",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hall_enquiries",
+      "column_name": "status",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hall_enquiries",
+      "column_name": "admin_notes",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hall_enquiries",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hall_enquiries",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hall_payments",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hall_payments",
+      "column_name": "hall_booking_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hall_payments",
+      "column_name": "amount",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hall_payments",
+      "column_name": "payment_method",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hall_payments",
+      "column_name": "reference_number",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hall_payments",
+      "column_name": "notes",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hall_payments",
+      "column_name": "recorded_by",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hall_payments",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hotel_settings",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hotel_settings",
+      "column_name": "hotel_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hotel_settings",
+      "column_name": "tagline",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hotel_settings",
+      "column_name": "address",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hotel_settings",
+      "column_name": "road",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hotel_settings",
+      "column_name": "phone",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "hotel_settings",
+      "column_name": "whatsapp",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hotel_settings",
+      "column_name": "email",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hotel_settings",
+      "column_name": "currency",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hotel_settings",
+      "column_name": "timezone",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hotel_settings",
+      "column_name": "check_in_time",
+      "data_type": "time without time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hotel_settings",
+      "column_name": "check_out_time",
+      "data_type": "time without time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hotel_settings",
+      "column_name": "tax_percentage",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hotel_settings",
+      "column_name": "allow_pay_at_hotel",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hotel_settings",
+      "column_name": "require_advance_payment",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hotel_settings",
+      "column_name": "advance_percentage",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hotel_settings",
+      "column_name": "hold_timeout_minutes",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "hotel_settings",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "integrations",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "integrations",
+      "column_name": "service_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "integrations",
+      "column_name": "config",
+      "data_type": "jsonb",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "integrations",
+      "column_name": "is_enabled",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "integrations",
+      "column_name": "last_health_check_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "integrations",
+      "column_name": "health_status",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "integrations",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "invoices",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "invoices",
+      "column_name": "invoice_number",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "invoices",
+      "column_name": "booking_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "invoices",
+      "column_name": "subtotal",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "invoices",
+      "column_name": "tax_amount",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "invoices",
+      "column_name": "additional_charges",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "invoices",
+      "column_name": "total_amount",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "invoices",
+      "column_name": "pdf_url",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "invoices",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "notifications",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "notifications",
+      "column_name": "recipient_type",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "notifications",
+      "column_name": "recipient_address",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "notifications",
+      "column_name": "channel",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "notifications",
+      "column_name": "template_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "notifications",
+      "column_name": "payload",
+      "data_type": "jsonb",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "notifications",
+      "column_name": "status",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "notifications",
+      "column_name": "sent_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "notifications",
+      "column_name": "error_message",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "payments",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "payments",
+      "column_name": "payment_reference",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "payments",
+      "column_name": "booking_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "payments",
+      "column_name": "amount",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "payments",
+      "column_name": "currency",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "payments",
+      "column_name": "payment_method",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "payments",
+      "column_name": "gateway_order_id",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "payments",
+      "column_name": "gateway_payment_id",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "payments",
+      "column_name": "gateway_signature",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "payments",
+      "column_name": "status",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "payments",
+      "column_name": "gateway_response",
+      "data_type": "jsonb",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "payments",
+      "column_name": "paid_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "payments",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "payments",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "payments",
+      "column_name": "booking_reference",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "payments",
+      "column_name": "guest_name",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "payments",
+      "column_name": "notes",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "permissions",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "permissions",
+      "column_name": "code",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "permissions",
+      "column_name": "module",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "permissions",
+      "column_name": "description",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "permissions",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "profiles",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "profiles",
+      "column_name": "role_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "profiles",
+      "column_name": "full_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "profiles",
+      "column_name": "phone",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "profiles",
+      "column_name": "avatar_url",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "profiles",
+      "column_name": "is_active",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "profiles",
+      "column_name": "last_login_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "profiles",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "profiles",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "profiles",
+      "column_name": "preferred_language",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "reception_kiosk_tokens",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "reception_kiosk_tokens",
+      "column_name": "kiosk_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "reception_kiosk_tokens",
+      "column_name": "secret_token",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "reception_kiosk_tokens",
+      "column_name": "is_active",
+      "data_type": "boolean",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "reception_kiosk_tokens",
+      "column_name": "allow_counter_payment",
+      "data_type": "boolean",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "reception_kiosk_tokens",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "reception_kiosk_tokens",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "refunds",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "refunds",
+      "column_name": "payment_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "refunds",
+      "column_name": "booking_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "refunds",
+      "column_name": "amount",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "refunds",
+      "column_name": "gateway_refund_id",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "refunds",
+      "column_name": "reason",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "refunds",
+      "column_name": "status",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "refunds",
+      "column_name": "processed_by",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "refunds",
+      "column_name": "processed_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "id",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "hotel_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "reviewer_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "rating",
+      "data_type": "integer",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "rating_label",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "review_date_display",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "retrieval_date",
+      "data_type": "date",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "excerpt",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "full_text",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "is_rating_only",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "is_translated",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "source_platform",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "source_url",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "is_featured",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "is_published",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "display_order",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_access_events",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "rfid_access_events",
+      "column_name": "card_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_access_events",
+      "column_name": "device_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_access_events",
+      "column_name": "room_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_access_events",
+      "column_name": "event_type",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "rfid_access_events",
+      "column_name": "reason",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_access_events",
+      "column_name": "source",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_access_events",
+      "column_name": "occurred_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_access_events",
+      "column_name": "card_type",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_access_events",
+      "column_name": "action_type",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_access_events",
+      "column_name": "holder_name",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_access_events",
+      "column_name": "booking_reference",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_access_events",
+      "column_name": "room_number",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_access_events",
+      "column_name": "device_name",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "card_uid",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "card_label",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "assigned_room_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "booking_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "status",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "activated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "expires_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "deactivated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "issued_by",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "card_type",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "is_lifetime",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "holder_name",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "holder_role",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "staff_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "last_tap_room",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "last_tap_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_cards",
+      "column_name": "notes",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_devices",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "rfid_devices",
+      "column_name": "device_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "rfid_devices",
+      "column_name": "device_type",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "rfid_devices",
+      "column_name": "room_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_devices",
+      "column_name": "ip_address",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_devices",
+      "column_name": "mac_address",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_devices",
+      "column_name": "status",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_devices",
+      "column_name": "firmware_version",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_devices",
+      "column_name": "last_ping_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_devices",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_tap_history",
+      "column_name": "id",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "rfid_tap_history",
+      "column_name": "card_uid",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "rfid_tap_history",
+      "column_name": "card_type",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "rfid_tap_history",
+      "column_name": "room_number",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "rfid_tap_history",
+      "column_name": "booking_id",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_tap_history",
+      "column_name": "customer_id",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_tap_history",
+      "column_name": "customer_name",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_tap_history",
+      "column_name": "access_result",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "rfid_tap_history",
+      "column_name": "door_status",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "rfid_tap_history",
+      "column_name": "reason",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_tap_history",
+      "column_name": "metadata",
+      "data_type": "jsonb",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rfid_tap_history",
+      "column_name": "tapped_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "rfid_tap_history",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "role_permissions",
+      "column_name": "role_id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "role_permissions",
+      "column_name": "permission_id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "role_permissions",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "roles",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "roles",
+      "column_name": "name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "roles",
+      "column_name": "description",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "roles",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "roles",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_amenities",
+      "column_name": "category_id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_amenities",
+      "column_name": "amenity_id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_categories",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_categories",
+      "column_name": "slug",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_categories",
+      "column_name": "name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_categories",
+      "column_name": "short_description",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_categories",
+      "column_name": "full_description",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_categories",
+      "column_name": "base_price_per_night",
+      "data_type": "numeric",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_categories",
+      "column_name": "max_adults",
+      "data_type": "integer",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_categories",
+      "column_name": "max_children",
+      "data_type": "integer",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_categories",
+      "column_name": "max_occupancy",
+      "data_type": "integer",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_categories",
+      "column_name": "bed_type",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_categories",
+      "column_name": "room_size_sqft",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_categories",
+      "column_name": "cover_image_url",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_categories",
+      "column_name": "is_active",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_categories",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_categories",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_cleaning_sessions",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_cleaning_sessions",
+      "column_name": "room_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_cleaning_sessions",
+      "column_name": "room_number",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_cleaning_sessions",
+      "column_name": "cleaner_card_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_cleaning_sessions",
+      "column_name": "cleaner_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_cleaning_sessions",
+      "column_name": "started_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_cleaning_sessions",
+      "column_name": "completed_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_cleaning_sessions",
+      "column_name": "duration_minutes",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_cleaning_sessions",
+      "column_name": "status",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_cleaning_sessions",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_housekeeping",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_housekeeping",
+      "column_name": "room_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_housekeeping",
+      "column_name": "task_type",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_housekeeping",
+      "column_name": "status",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_housekeeping",
+      "column_name": "assigned_to",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_housekeeping",
+      "column_name": "started_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_housekeeping",
+      "column_name": "completed_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_housekeeping",
+      "column_name": "notes",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_housekeeping",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_housekeeping",
+      "column_name": "room_number",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_housekeeping",
+      "column_name": "housekeeper_name",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_housekeeping",
+      "column_name": "priority",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_housekeeping",
+      "column_name": "checklist",
+      "data_type": "jsonb",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_housekeeping",
+      "column_name": "task_id",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_images",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_images",
+      "column_name": "category_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_images",
+      "column_name": "image_url",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_images",
+      "column_name": "alt_text",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_images",
+      "column_name": "display_order",
+      "data_type": "integer",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_images",
+      "column_name": "is_primary",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_images",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "room_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "issue_description",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "start_date",
+      "data_type": "date",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "estimated_end_date",
+      "data_type": "date",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "resolved_date",
+      "data_type": "date",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "status",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "assigned_technician",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "created_by",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "room_number",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "category",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "priority",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "reported_by",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "cost",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "notes",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "ticket_id",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "room_blocked",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "issue_title",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "estimated_cost",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "actual_cost",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_maintenance",
+      "column_name": "resolution_notes",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_transfers",
+      "column_name": "id",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_transfers",
+      "column_name": "booking_reference",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_transfers",
+      "column_name": "from_room_number",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_transfers",
+      "column_name": "to_room_number",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_transfers",
+      "column_name": "from_room_id",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_transfers",
+      "column_name": "to_room_id",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_transfers",
+      "column_name": "reason_category",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_transfers",
+      "column_name": "reason_notes",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_transfers",
+      "column_name": "actor",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "room_transfers",
+      "column_name": "old_room_status",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_transfers",
+      "column_name": "maintenance_ticket_id",
+      "data_type": "character varying",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_transfers",
+      "column_name": "transferred_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "room_transfers",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rooms",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "rooms",
+      "column_name": "room_number",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "rooms",
+      "column_name": "category_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rooms",
+      "column_name": "floor_number",
+      "data_type": "integer",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "rooms",
+      "column_name": "operational_status",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "rooms",
+      "column_name": "housekeeping_status",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "rooms",
+      "column_name": "notes",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rooms",
+      "column_name": "is_active",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rooms",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "rooms",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "staff_assignments",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "staff_assignments",
+      "column_name": "profile_id",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "staff_assignments",
+      "column_name": "shift_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "staff_assignments",
+      "column_name": "shift_date",
+      "data_type": "date",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "staff_assignments",
+      "column_name": "notes",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "staff_assignments",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "staff_attendance",
+      "column_name": "id",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "staff_attendance",
+      "column_name": "staff_id",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "staff_attendance",
+      "column_name": "staff_name",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "staff_attendance",
+      "column_name": "role",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "staff_attendance",
+      "column_name": "date",
+      "data_type": "date",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "staff_attendance",
+      "column_name": "shift",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "staff_attendance",
+      "column_name": "clock_in",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "staff_attendance",
+      "column_name": "clock_out",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "staff_attendance",
+      "column_name": "status",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "staff_attendance",
+      "column_name": "work_hours",
+      "data_type": "numeric",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "staff_attendance",
+      "column_name": "notes",
+      "data_type": "text",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "staff_attendance",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "super_admin_notifications",
+      "column_name": "id",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "super_admin_notifications",
+      "column_name": "recipient_id",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "super_admin_notifications",
+      "column_name": "type",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "super_admin_notifications",
+      "column_name": "severity",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "super_admin_notifications",
+      "column_name": "title",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "super_admin_notifications",
+      "column_name": "message",
+      "data_type": "text",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "super_admin_notifications",
+      "column_name": "metadata",
+      "data_type": "jsonb",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "super_admin_notifications",
+      "column_name": "is_read",
+      "data_type": "boolean",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "super_admin_notifications",
+      "column_name": "read_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "super_admin_notifications",
+      "column_name": "created_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "website_content",
+      "column_name": "id",
+      "data_type": "uuid",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "website_content",
+      "column_name": "key",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "website_content",
+      "column_name": "section",
+      "data_type": "character varying",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "website_content",
+      "column_name": "content_value",
+      "data_type": "jsonb",
+      "is_nullable": "NO"
+    },
+    {
+      "table_name": "website_content",
+      "column_name": "updated_by",
+      "data_type": "uuid",
+      "is_nullable": "YES"
+    },
+    {
+      "table_name": "website_content",
+      "column_name": "updated_at",
+      "data_type": "timestamp with time zone",
+      "is_nullable": "YES"
+    }
+  ],
+  "policies": [
+    {
+      "tablename": "room_transfers",
+      "policyname": "Service role full access to room_transfers",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "room_transfers",
+      "policyname": "Staff full access to room_transfers",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "profiles",
+      "policyname": "Service role full access to profiles",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "profiles",
+      "policyname": "Staff can update own profile",
+      "roles": "{authenticated}",
+      "cmd": "UPDATE",
+      "qual": "(auth.uid() = id)",
+      "with_check": null
+    },
+    {
+      "tablename": "profiles",
+      "policyname": "Staff can view profiles",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "roles",
+      "policyname": "Service role full access to roles",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "roles",
+      "policyname": "Staff can view roles",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "permissions",
+      "policyname": "Service role full access to permissions",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "permissions",
+      "policyname": "Staff can view permissions",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "role_permissions",
+      "policyname": "Service role full access to role_permissions",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "role_permissions",
+      "policyname": "Staff can view role_permissions",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "room_maintenance",
+      "policyname": "Service role full access to room_maintenance",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "room_maintenance",
+      "policyname": "Staff full access to room_maintenance",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "room_housekeeping",
+      "policyname": "Service role full access to room_housekeeping",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "room_housekeeping",
+      "policyname": "Staff full access to room_housekeeping",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "booking_holds",
+      "policyname": "Service role full access to booking_holds",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "booking_holds",
+      "policyname": "Staff full access to booking_holds",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "booking_status_history",
+      "policyname": "Service role full access to booking_status_history",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "booking_status_history",
+      "policyname": "Staff full access to booking_status_history",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "invoices",
+      "policyname": "Service role full access to invoices",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "invoices",
+      "policyname": "Staff full access to invoices",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "refunds",
+      "policyname": "Service role full access to refunds",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "refunds",
+      "policyname": "Staff full access to refunds",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "additional_charges",
+      "policyname": "Service role full access to additional_charges",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "additional_charges",
+      "policyname": "Staff full access to additional_charges",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "notifications",
+      "policyname": "Service role full access to notifications",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "notifications",
+      "policyname": "Staff view notifications",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "staff_assignments",
+      "policyname": "Service role full access to staff_assignments",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "staff_assignments",
+      "policyname": "Staff full access to staff_assignments",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "hall_bookings",
+      "policyname": "Service role full access to hall_bookings",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "hall_bookings",
+      "policyname": "Staff full access to hall_bookings",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "hall_payments",
+      "policyname": "Service role full access to hall_payments",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "hall_payments",
+      "policyname": "Staff full access to hall_payments",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "audit_logs",
+      "policyname": "Service role full access to audit_logs",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "audit_logs",
+      "policyname": "Staff view audit_logs",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "integrations",
+      "policyname": "Service role full access to integrations",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "integrations",
+      "policyname": "Staff view integrations",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "rfid_cards",
+      "policyname": "Service role full access to rfid_cards",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "rfid_cards",
+      "policyname": "Staff full access to rfid_cards",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "rfid_devices",
+      "policyname": "Service role full access to rfid_devices",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "rfid_devices",
+      "policyname": "Staff full access to rfid_devices",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "room_categories",
+      "policyname": "Public can view active room categories",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(is_active = true)",
+      "with_check": null
+    },
+    {
+      "tablename": "room_categories",
+      "policyname": "Staff full access to categories",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "rooms",
+      "policyname": "Staff full access to rooms",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "room_images",
+      "policyname": "Public can view active room images",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "amenities",
+      "policyname": "Public can view active amenities",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(is_active = true)",
+      "with_check": null
+    },
+    {
+      "tablename": "room_amenities",
+      "policyname": "Public can view room amenities",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "hotel_settings",
+      "policyname": "Public can view hotel settings",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "gallery_images",
+      "policyname": "Public can view active gallery",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(is_active = true)",
+      "with_check": null
+    },
+    {
+      "tablename": "convention_halls",
+      "policyname": "Public can view convention hall info",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(is_active = true)",
+      "with_check": null
+    },
+    {
+      "tablename": "website_content",
+      "policyname": "Public can view website content",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "cancellation_policies",
+      "policyname": "Public can view cancellation policies",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "(is_active = true)",
+      "with_check": null
+    },
+    {
+      "tablename": "guests",
+      "policyname": "Staff full access to guests",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "hall_enquiries",
+      "policyname": "Public can create hall enquiry",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "true"
+    },
+    {
+      "tablename": "reception_kiosk_tokens",
+      "policyname": "Service role full access to reception_kiosk_tokens",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "reception_kiosk_tokens",
+      "policyname": "Staff view reception_kiosk_tokens",
+      "roles": "{authenticated}",
+      "cmd": "SELECT",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "payments",
+      "policyname": "Staff full access to payments",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "bookings",
+      "policyname": "Staff full access to bookings",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "expenses",
+      "policyname": "Service role full access to expenses",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "expenses",
+      "policyname": "Staff full access to expenses",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "cash_shifts",
+      "policyname": "Service role full access to cash_shifts",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "cash_shifts",
+      "policyname": "Staff full access to cash_shifts",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "cash_transactions",
+      "policyname": "Service role full access to cash_transactions",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "cash_transactions",
+      "policyname": "Staff full access to cash_transactions",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "rfid_access_events",
+      "policyname": "Service role full access to rfid_access_events",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "rfid_access_events",
+      "policyname": "Staff full access to rfid_access_events",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "room_cleaning_sessions",
+      "policyname": "Service role full access to room_cleaning_sessions",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "room_cleaning_sessions",
+      "policyname": "Staff full access to room_cleaning_sessions",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "super_admin_notifications",
+      "policyname": "Authenticated users access to super_admin_notifications",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "super_admin_notifications",
+      "policyname": "Service role full access to super_admin_notifications",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "rfid_tap_history",
+      "policyname": "Public full access to rfid_tap_history",
+      "roles": "{public}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "daily_closings",
+      "policyname": "Service role full access to daily_closings",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "daily_closings",
+      "policyname": "Staff full access to daily_closings",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "staff_attendance",
+      "policyname": "Service role full access to staff_attendance",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "staff_attendance",
+      "policyname": "Staff full access to staff_attendance",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "convention_quotes",
+      "policyname": "Service role full access to convention_quotes",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "convention_quotes",
+      "policyname": "Staff full access to convention_quotes",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "contact_enquiries",
+      "policyname": "Public can submit contact enquiry",
+      "roles": "{public}",
+      "cmd": "INSERT",
+      "qual": null,
+      "with_check": "true"
+    },
+    {
+      "tablename": "contact_enquiries",
+      "policyname": "Service role full access to contact_enquiries",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "contact_enquiries",
+      "policyname": "Staff full access to contact_enquiries",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "reviews",
+      "policyname": "Public can view reviews",
+      "roles": "{public}",
+      "cmd": "SELECT",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "reviews",
+      "policyname": "Service role full access to reviews",
+      "roles": "{service_role}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    },
+    {
+      "tablename": "reviews",
+      "policyname": "Staff full access to reviews",
+      "roles": "{authenticated}",
+      "cmd": "ALL",
+      "qual": "true",
+      "with_check": null
+    }
+  ],
+  "constraints": [
+    {
+      "table_name": "room_transfers",
+      "name": "room_transfers_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "profiles",
+      "name": "profiles_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "profiles",
+      "name": "profiles_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "profiles",
+      "name": "profiles_role_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (role_id) REFERENCES roles(id)"
+    },
+    {
+      "table_name": "roles",
+      "name": "roles_name_key",
+      "type": "u",
+      "definition": "UNIQUE (name)"
+    },
+    {
+      "table_name": "roles",
+      "name": "roles_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "permissions",
+      "name": "permissions_code_key",
+      "type": "u",
+      "definition": "UNIQUE (code)"
+    },
+    {
+      "table_name": "permissions",
+      "name": "permissions_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "role_permissions",
+      "name": "role_permissions_permission_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (permission_id) REFERENCES permissions(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "role_permissions",
+      "name": "role_permissions_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (role_id, permission_id)"
+    },
+    {
+      "table_name": "role_permissions",
+      "name": "role_permissions_role_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (role_id) REFERENCES roles(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "room_maintenance",
+      "name": "room_maintenance_created_by_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (created_by) REFERENCES profiles(id)"
+    },
+    {
+      "table_name": "room_maintenance",
+      "name": "room_maintenance_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "room_maintenance",
+      "name": "room_maintenance_room_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "room_maintenance",
+      "name": "room_maintenance_status_check",
+      "type": "c",
+      "definition": "CHECK (((status)::text = ANY ((ARRAY['open'::character varying, 'reported'::character varying, 'in_progress'::character varying, 'resolved'::character varying, 'cancelled'::character varying, 'closed'::character varying])::text[])))"
+    },
+    {
+      "table_name": "room_housekeeping",
+      "name": "room_housekeeping_assigned_to_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (assigned_to) REFERENCES profiles(id)"
+    },
+    {
+      "table_name": "room_housekeeping",
+      "name": "room_housekeeping_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "room_housekeeping",
+      "name": "room_housekeeping_room_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "room_housekeeping",
+      "name": "room_housekeeping_status_check",
+      "type": "c",
+      "definition": "CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'in_progress'::character varying, 'completed'::character varying, 'verified'::character varying])::text[])))"
+    },
+    {
+      "table_name": "room_housekeeping",
+      "name": "room_housekeeping_task_type_check",
+      "type": "c",
+      "definition": "CHECK (((task_type)::text = ANY ((ARRAY['routine_cleaning'::character varying, 'checkout_cleaning'::character varying, 'deep_cleaning'::character varying, 'inspection'::character varying])::text[])))"
+    },
+    {
+      "table_name": "booking_holds",
+      "name": "booking_holds_category_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (category_id) REFERENCES room_categories(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "booking_holds",
+      "name": "booking_holds_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "booking_guests",
+      "name": "booking_guests_booking_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "booking_guests",
+      "name": "booking_guests_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "booking_status_history",
+      "name": "booking_status_history_booking_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "booking_status_history",
+      "name": "booking_status_history_changed_by_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (changed_by) REFERENCES profiles(id)"
+    },
+    {
+      "table_name": "booking_status_history",
+      "name": "booking_status_history_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "invoices",
+      "name": "invoices_booking_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "invoices",
+      "name": "invoices_invoice_number_key",
+      "type": "u",
+      "definition": "UNIQUE (invoice_number)"
+    },
+    {
+      "table_name": "invoices",
+      "name": "invoices_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "refunds",
+      "name": "refunds_booking_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "refunds",
+      "name": "refunds_payment_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (payment_id) REFERENCES payments(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "refunds",
+      "name": "refunds_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "refunds",
+      "name": "refunds_processed_by_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (processed_by) REFERENCES profiles(id)"
+    },
+    {
+      "table_name": "refunds",
+      "name": "refunds_status_check",
+      "type": "c",
+      "definition": "CHECK (((status)::text = ANY ((ARRAY['initiated'::character varying, 'processed'::character varying, 'failed'::character varying])::text[])))"
+    },
+    {
+      "table_name": "additional_charges",
+      "name": "additional_charges_booking_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "additional_charges",
+      "name": "additional_charges_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "additional_charges",
+      "name": "additional_charges_recorded_by_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (recorded_by) REFERENCES profiles(id)"
+    },
+    {
+      "table_name": "notifications",
+      "name": "notifications_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "notifications",
+      "name": "notifications_status_check",
+      "type": "c",
+      "definition": "CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'sent'::character varying, 'failed'::character varying])::text[])))"
+    },
+    {
+      "table_name": "staff_assignments",
+      "name": "staff_assignments_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "staff_assignments",
+      "name": "staff_assignments_profile_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (profile_id) REFERENCES profiles(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "hall_bookings",
+      "name": "hall_bookings_booking_reference_key",
+      "type": "u",
+      "definition": "UNIQUE (booking_reference)"
+    },
+    {
+      "table_name": "hall_bookings",
+      "name": "hall_bookings_enquiry_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (enquiry_id) REFERENCES hall_enquiries(id)"
+    },
+    {
+      "table_name": "hall_bookings",
+      "name": "hall_bookings_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "hall_bookings",
+      "name": "hall_bookings_status_check",
+      "type": "c",
+      "definition": "CHECK (((status)::text = ANY ((ARRAY['confirmed'::character varying, 'completed'::character varying, 'cancelled'::character varying])::text[])))"
+    },
+    {
+      "table_name": "hall_payments",
+      "name": "hall_payments_hall_booking_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (hall_booking_id) REFERENCES hall_bookings(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "hall_payments",
+      "name": "hall_payments_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "hall_payments",
+      "name": "hall_payments_recorded_by_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (recorded_by) REFERENCES profiles(id)"
+    },
+    {
+      "table_name": "audit_logs",
+      "name": "audit_logs_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "audit_logs",
+      "name": "audit_logs_user_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (user_id) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "integrations",
+      "name": "integrations_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "integrations",
+      "name": "integrations_service_name_key",
+      "type": "u",
+      "definition": "UNIQUE (service_name)"
+    },
+    {
+      "table_name": "rfid_cards",
+      "name": "rfid_cards_assigned_room_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (assigned_room_id) REFERENCES rooms(id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "rfid_cards",
+      "name": "rfid_cards_booking_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "rfid_cards",
+      "name": "rfid_cards_card_type_check",
+      "type": "c",
+      "definition": "CHECK (((card_type)::text = ANY ((ARRAY['super_admin'::character varying, 'cleaner'::character varying, 'guest'::character varying])::text[])))"
+    },
+    {
+      "table_name": "rfid_cards",
+      "name": "rfid_cards_card_uid_key",
+      "type": "u",
+      "definition": "UNIQUE (card_uid)"
+    },
+    {
+      "table_name": "rfid_cards",
+      "name": "rfid_cards_issued_by_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (issued_by) REFERENCES profiles(id)"
+    },
+    {
+      "table_name": "rfid_cards",
+      "name": "rfid_cards_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "rfid_cards",
+      "name": "rfid_cards_staff_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (staff_id) REFERENCES profiles(id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "rfid_cards",
+      "name": "rfid_cards_status_check",
+      "type": "c",
+      "definition": "CHECK (((status)::text = ANY ((ARRAY['active'::character varying, 'inactive'::character varying, 'lost'::character varying, 'damaged'::character varying, 'expired'::character varying])::text[])))"
+    },
+    {
+      "table_name": "rfid_devices",
+      "name": "rfid_devices_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "rfid_devices",
+      "name": "rfid_devices_room_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "rfid_devices",
+      "name": "rfid_devices_status_check",
+      "type": "c",
+      "definition": "CHECK (((status)::text = ANY ((ARRAY['online'::character varying, 'offline'::character varying, 'error'::character varying, 'maintenance'::character varying])::text[])))"
+    },
+    {
+      "table_name": "room_categories",
+      "name": "room_categories_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "room_categories",
+      "name": "room_categories_slug_key",
+      "type": "u",
+      "definition": "UNIQUE (slug)"
+    },
+    {
+      "table_name": "rooms",
+      "name": "rooms_category_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (category_id) REFERENCES room_categories(id) ON DELETE RESTRICT"
+    },
+    {
+      "table_name": "rooms",
+      "name": "rooms_housekeeping_status_check",
+      "type": "c",
+      "definition": "CHECK (((housekeeping_status)::text = ANY ((ARRAY['clean'::character varying, 'dirty'::character varying, 'in_progress'::character varying, 'inspected'::character varying])::text[])))"
+    },
+    {
+      "table_name": "rooms",
+      "name": "rooms_operational_status_check",
+      "type": "c",
+      "definition": "CHECK (((operational_status)::text = ANY ((ARRAY['available'::character varying, 'occupied'::character varying, 'reserved'::character varying, 'cleaning'::character varying, 'maintenance'::character varying, 'out_of_service'::character varying])::text[])))"
+    },
+    {
+      "table_name": "rooms",
+      "name": "rooms_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "rooms",
+      "name": "rooms_room_number_key",
+      "type": "u",
+      "definition": "UNIQUE (room_number)"
+    },
+    {
+      "table_name": "room_images",
+      "name": "room_images_category_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (category_id) REFERENCES room_categories(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "room_images",
+      "name": "room_images_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "amenities",
+      "name": "amenities_code_key",
+      "type": "u",
+      "definition": "UNIQUE (code)"
+    },
+    {
+      "table_name": "amenities",
+      "name": "amenities_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "room_amenities",
+      "name": "room_amenities_amenity_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (amenity_id) REFERENCES amenities(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "room_amenities",
+      "name": "room_amenities_category_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (category_id) REFERENCES room_categories(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "room_amenities",
+      "name": "room_amenities_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (category_id, amenity_id)"
+    },
+    {
+      "table_name": "hotel_settings",
+      "name": "hotel_settings_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "gallery_images",
+      "name": "gallery_images_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "convention_halls",
+      "name": "convention_halls_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "website_content",
+      "name": "website_content_key_key",
+      "type": "u",
+      "definition": "UNIQUE (key)"
+    },
+    {
+      "table_name": "website_content",
+      "name": "website_content_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "website_content",
+      "name": "website_content_updated_by_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (updated_by) REFERENCES profiles(id)"
+    },
+    {
+      "table_name": "cancellation_policies",
+      "name": "cancellation_policies_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "booking_rooms",
+      "name": "booking_rooms_assigned_room_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (assigned_room_id) REFERENCES rooms(id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "booking_rooms",
+      "name": "booking_rooms_booking_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "booking_rooms",
+      "name": "booking_rooms_category_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (category_id) REFERENCES room_categories(id) ON DELETE RESTRICT"
+    },
+    {
+      "table_name": "booking_rooms",
+      "name": "booking_rooms_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "guests",
+      "name": "guests_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "hall_enquiries",
+      "name": "hall_enquiries_enquiry_reference_key",
+      "type": "u",
+      "definition": "UNIQUE (enquiry_reference)"
+    },
+    {
+      "table_name": "hall_enquiries",
+      "name": "hall_enquiries_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "hall_enquiries",
+      "name": "hall_enquiries_status_check",
+      "type": "c",
+      "definition": "CHECK (((status)::text = ANY ((ARRAY['new'::character varying, 'contacted'::character varying, 'quotation_sent'::character varying, 'pending_approval'::character varying, 'confirmed'::character varying, 'completed'::character varying, 'cancelled'::character varying])::text[])))"
+    },
+    {
+      "table_name": "reception_kiosk_tokens",
+      "name": "reception_kiosk_tokens_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "reception_kiosk_tokens",
+      "name": "reception_kiosk_tokens_secret_token_key",
+      "type": "u",
+      "definition": "UNIQUE (secret_token)"
+    },
+    {
+      "table_name": "payments",
+      "name": "payments_booking_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (booking_id) REFERENCES bookings(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "payments",
+      "name": "payments_payment_reference_key",
+      "type": "u",
+      "definition": "UNIQUE (payment_reference)"
+    },
+    {
+      "table_name": "payments",
+      "name": "payments_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "payments",
+      "name": "payments_status_check",
+      "type": "c",
+      "definition": "CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'successful'::character varying, 'failed'::character varying, 'refunded'::character varying])::text[])))"
+    },
+    {
+      "table_name": "bookings",
+      "name": "bookings_booking_reference_key",
+      "type": "u",
+      "definition": "UNIQUE (booking_reference)"
+    },
+    {
+      "table_name": "bookings",
+      "name": "bookings_guest_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (guest_id) REFERENCES guests(id) ON DELETE RESTRICT"
+    },
+    {
+      "table_name": "bookings",
+      "name": "bookings_payment_status_check",
+      "type": "c",
+      "definition": "CHECK (((payment_status)::text = ANY ((ARRAY['pending'::character varying, 'successful'::character varying, 'failed'::character varying, 'refunded'::character varying, 'partially_refunded'::character varying, 'pay_at_hotel'::character varying])::text[])))"
+    },
+    {
+      "table_name": "bookings",
+      "name": "bookings_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "bookings",
+      "name": "bookings_status_check",
+      "type": "c",
+      "definition": "CHECK (((status)::text = ANY ((ARRAY['pending'::character varying, 'confirmed'::character varying, 'checked_in'::character varying, 'checked_out'::character varying, 'cancelled'::character varying, 'no_show'::character varying])::text[])))"
+    },
+    {
+      "table_name": "bookings",
+      "name": "valid_dates",
+      "type": "c",
+      "definition": "CHECK ((check_out_date > check_in_date))"
+    },
+    {
+      "table_name": "expenses",
+      "name": "expenses_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "cash_shifts",
+      "name": "cash_shifts_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "cash_shifts",
+      "name": "cash_shifts_shift_number_key",
+      "type": "u",
+      "definition": "UNIQUE (shift_number)"
+    },
+    {
+      "table_name": "cash_transactions",
+      "name": "cash_transactions_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "cash_transactions",
+      "name": "cash_transactions_type_check",
+      "type": "c",
+      "definition": "CHECK (((type)::text = ANY ((ARRAY['cash_in'::character varying, 'cash_out'::character varying])::text[])))"
+    },
+    {
+      "table_name": "rfid_access_events",
+      "name": "rfid_access_events_card_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (card_id) REFERENCES rfid_cards(id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "rfid_access_events",
+      "name": "rfid_access_events_device_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (device_id) REFERENCES rfid_devices(id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "rfid_access_events",
+      "name": "rfid_access_events_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "rfid_access_events",
+      "name": "rfid_access_events_room_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "room_cleaning_sessions",
+      "name": "room_cleaning_sessions_cleaner_card_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (cleaner_card_id) REFERENCES rfid_cards(id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "room_cleaning_sessions",
+      "name": "room_cleaning_sessions_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "room_cleaning_sessions",
+      "name": "room_cleaning_sessions_room_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "room_cleaning_sessions",
+      "name": "room_cleaning_sessions_status_check",
+      "type": "c",
+      "definition": "CHECK (((status)::text = ANY ((ARRAY['in_progress'::character varying, 'completed'::character varying, 'aborted'::character varying])::text[])))"
+    },
+    {
+      "table_name": "super_admin_notifications",
+      "name": "super_admin_notifications_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "rfid_tap_history",
+      "name": "rfid_tap_history_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "daily_closings",
+      "name": "daily_closings_closing_date_key",
+      "type": "u",
+      "definition": "UNIQUE (closing_date)"
+    },
+    {
+      "table_name": "daily_closings",
+      "name": "daily_closings_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "staff_attendance",
+      "name": "staff_attendance_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "convention_quotes",
+      "name": "convention_quotes_enquiry_id_fkey",
+      "type": "f",
+      "definition": "FOREIGN KEY (enquiry_id) REFERENCES hall_enquiries(id) ON DELETE SET NULL"
+    },
+    {
+      "table_name": "convention_quotes",
+      "name": "convention_quotes_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "convention_quotes",
+      "name": "convention_quotes_quote_number_key",
+      "type": "u",
+      "definition": "UNIQUE (quote_number)"
+    },
+    {
+      "table_name": "contact_enquiries",
+      "name": "contact_enquiries_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "reviews",
+      "name": "reviews_pkey",
+      "type": "p",
+      "definition": "PRIMARY KEY (id)"
+    }
+  ],
+  "counts": {
+    "additional_charges": 0,
+    "amenities": 11,
+    "audit_logs": 1,
+    "booking_guests": 2,
+    "booking_holds": 0,
+    "booking_rooms": 2,
+    "booking_status_history": 2,
+    "bookings": 2,
+    "cancellation_policies": 3,
+    "cash_shifts": 0,
+    "cash_transactions": 1,
+    "contact_enquiries": 0,
+    "convention_halls": 1,
+    "convention_quotes": 0,
+    "daily_closings": 0,
+    "expenses": 0,
+    "gallery_images": 27,
+    "guests": 2,
+    "hall_bookings": 0,
+    "hall_enquiries": 0,
+    "hall_payments": 0,
+    "hotel_settings": 1,
+    "integrations": 1,
+    "invoices": 2,
+    "notifications": 0,
+    "payments": 1,
+    "permissions": 0,
+    "profiles": 3,
+    "reception_kiosk_tokens": 1,
+    "refunds": 0,
+    "reviews": 44,
+    "rfid_access_events": 0,
+    "rfid_cards": 7,
+    "rfid_devices": 84,
+    "rfid_tap_history": 0,
+    "role_permissions": 0,
+    "roles": 6,
+    "room_amenities": 24,
+    "room_categories": 4,
+    "room_cleaning_sessions": 0,
+    "room_housekeeping": 0,
+    "room_images": 10,
+    "room_maintenance": 0,
+    "room_transfers": 0,
+    "rooms": 24,
+    "staff_assignments": 0,
+    "staff_attendance": 0,
+    "super_admin_notifications": 0,
+    "website_content": 3
+  },
+  "status": "PASS"
+}

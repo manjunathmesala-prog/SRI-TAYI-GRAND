@@ -37,6 +37,14 @@ export default function HousekeepingAdminPage() {
   const [filterFloor, setFilterFloor] = useState<number | 'all'>('all');
   const [filterAttendant, setFilterAttendant] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [printTimestamp, setPrintTimestamp] = useState('');
+
+  useEffect(() => {
+    const updatePrintTimestamp = () => setPrintTimestamp(new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }));
+    updatePrintTimestamp();
+    window.addEventListener('beforeprint', updatePrintTimestamp);
+    return () => window.removeEventListener('beforeprint', updatePrintTimestamp);
+  }, []);
 
   // Turnaround Inspection Modal State
   const [inspectionRoom, setInspectionRoom] = useState<PhysicalRoom | null>(null);
@@ -711,7 +719,7 @@ export default function HousekeepingAdminPage() {
             </div>
             <div className="text-right text-xs">
               <p className="font-bold">HOUSEKEEPING DAILY TURNAROUND WORKSHEET</p>
-              <p>Printed: {new Date().toLocaleString('en-IN')}</p>
+              <p>Printed: {printTimestamp}</p>
             </div>
           </div>
         </div>

@@ -1,0 +1,4 @@
+﻿Booking Reference,Guest Name,Phone,Email,Room Category,Room Number,Check-in Date,Check-out Date,Nights,Total Amount (INR),Paid Amount (INR),Balance Due (INR),Status,Payment Status,Source
+"STG-20261105-3921","P. Sudhakar Reddy","9440123890","sudhakar.reddy@yahoo.com","Suite Room","206","2026-11-05","2026-11-07",2,11197.76,0,11197.76,"confirmed","pay_at_hotel","website"
+"STG-20261104-8142","K. Venkatesh Rao","9848022331","venkatesh.rao@gmail.com","Double Bed Room","202","2026-11-04","2026-11-06",2,6717.76,6717.76,0,"checked_in","successful","website"
+"STG-20261103-1189","Dr. Anand Raman","9989011223","dr.anand@apollo.org","Suite Room","306","2026-11-03","2026-11-05",2,11647.76,11197.76,450,"checked_in","successful","website"

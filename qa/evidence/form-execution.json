@@ -1,0 +1,1028 @@
+{
+  "environment": "isolated app, no production database or hardware calls",
+  "forms": [
+    {
+      "page": "expenses",
+      "button": "/record new expense/i",
+      "status": "PASS",
+      "headings": [
+        "Property Operating Expense Vouchers",
+        "Record New Hotel Operating Expense"
+      ],
+      "formCount": 1,
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Linen & Laundry"
+        },
+        {
+          "tag": "INPUT",
+          "type": "date",
+          "placeholder": null,
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "e.g. Linen Laundry Batch 40 sheets, 20L Diesel for Generator",
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "placeholder": null,
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Cash (Auto-deducts from Drawer)"
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "e.g. INV-2026-981 or Vendor Bill #",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": null,
+          "placeholder": "Items delivered, warranty info, vendor contact details...",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Cancel"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "submit",
+          "placeholder": null,
+          "name": "Authorize & Record Expense"
+        }
+      ],
+      "emptySubmission": {
+        "invalidFields": 1,
+        "requests": [],
+        "status": "PASS"
+      },
+      "cancelStatus": "PASS"
+    },
+    {
+      "page": "maintenance",
+      "button": "/new work order/i",
+      "status": "PASS",
+      "headings": [
+        "Active Work Orders & Maintenance History",
+        "New Maintenance Work Order"
+      ],
+      "formCount": 1,
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Select option"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Urgent (Immediate Fix Needed)"
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "e.g. AC cooling low / Remote control faulty",
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Air Conditioning (HVAC)"
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "placeholder": "0",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "e.g. Suresh (HVAC Tech) / External Plumber",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": null,
+          "placeholder": "Describe the issue, location in the room, guest report details...",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "placeholder": null,
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Cancel"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "submit",
+          "placeholder": null,
+          "name": "CREATE WORK ORDER"
+        }
+      ],
+      "emptySubmission": {
+        "invalidFields": 1,
+        "requests": [],
+        "status": "PASS"
+      },
+      "cancelStatus": "PASS"
+    },
+    {
+      "page": "bookings",
+      "button": "/record ota booking/i",
+      "status": "PASS",
+      "headings": [
+        "Record Aggregator / OTA Booking",
+        "Guest Details from Voucher",
+        "Financial Tariff & OTA Commission BreakdownTaxes included"
+      ],
+      "formCount": 1,
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "MakeMyTrip\nMMT"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Goibibo\nGoibibo"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Booking.com\nBooking.com"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Agoda\nAgoda"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Airbnb\nAirbnb"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Expedia\nExpedia"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Other OTA / Agent\nOTA"
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "e.g. MMT-8942109",
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "placeholder": null,
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "date",
+          "placeholder": null,
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "date",
+          "placeholder": null,
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "SELECT",
+          "type": null,
+          "placeholder": null,
+          "required": false,
+          "name": "Auto-Assign at Check-In"
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "e.g. Rajesh Vardhan",
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "tel",
+          "placeholder": "+91 98765 43210",
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "email",
+          "placeholder": "guest@example.com (optional)",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "placeholder": null,
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "placeholder": null,
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "placeholder": "Total on OTA Voucher",
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "placeholder": null,
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "radio",
+          "placeholder": null,
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "radio",
+          "placeholder": null,
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "placeholder": null,
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": null,
+          "placeholder": "e.g. Non-smoking room, extra towels requested on MakeMyTrip voucher",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Cancel"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "submit",
+          "placeholder": null,
+          "name": "RECORD & BLOCK INVENTORY"
+        }
+      ],
+      "emptySubmission": {
+        "invalidFields": 4,
+        "requests": [],
+        "status": "PASS"
+      },
+      "cancelStatus": "PASS"
+    },
+    {
+      "page": "accounting",
+      "button": "/new journal entry/i",
+      "status": "FAIL",
+      "headings": [
+        "Post Double-Entry Journal Transaction"
+      ],
+      "formCount": 1,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "type": "date",
+          "placeholder": null,
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "e.g. SHIFT-20261107 or INV-104",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "e.g. Recognition of room tariff and petty cash drawer replenishment",
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Add Account Line"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Select option"
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "Optional note",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "placeholder": "Debit (₹)",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "placeholder": "Credit (₹)",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Select option"
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "Optional note",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "placeholder": "Debit (₹)",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "placeholder": "Credit (₹)",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Cancel"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "submit",
+          "placeholder": null,
+          "name": "Post & Balance Transaction"
+        }
+      ],
+      "error": "locator.click: Timeout 20000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('form').last().locator('button[type=submit]')\u001b[22m\n\u001b[2m    - locator resolved to <button disabled type=\"submit\" class=\"px-6 py-2.5 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white font-semibold text-xs tracking-wide shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 border border-[#D8AD56]/40\">…</button>\u001b[22m\n\u001b[2m  - attempting click action\u001b[22m\n\u001b[2m  "
+    },
+    {
+      "page": "cashbook",
+      "button": "/open new cash shift/i",
+      "status": "PASS",
+      "headings": [
+        "Shift Cash Transactions Ledger",
+        "Shift History & Drawer Audits",
+        "Open Cash Drawer Shift"
+      ],
+      "formCount": 1,
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Use Note Counter"
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "placeholder": null,
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "₹2,000"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "₹5,000"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "₹10,000"
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": null,
+          "placeholder": "e.g. 10x500 notes, verified with outgoing cashier.",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Cancel"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "submit",
+          "placeholder": null,
+          "name": "Confirm & Open Shift"
+        }
+      ],
+      "cancelStatus": "PASS"
+    },
+    {
+      "page": "staff/attendance",
+      "button": "/^clock-in staff$/i",
+      "status": "PASS",
+      "headings": [
+        "Quick Staff Clock-In"
+      ],
+      "formCount": 1,
+      "controls": [
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Select staff member..."
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Morning (06:00 - 14:00)"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Evening (14:00 - 22:00)"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Night (22:00 - 06:00)"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "General (09:00 - 18:00)"
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "e.g. Front Desk Terminal 1, Floor 2 Housekeeping",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Cancel"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "submit",
+          "placeholder": null,
+          "name": "Confirm Clock-In"
+        }
+      ],
+      "cancelStatus": "PASS"
+    },
+    {
+      "page": "pricing",
+      "button": "/create pricing rule/i",
+      "status": "PASS",
+      "headings": [
+        "Effective Rate Calculator & Simulator",
+        "Configured Pricing Rules & Automated Surges",
+        "Create Dynamic Pricing Rule"
+      ],
+      "formCount": 1,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "e.g. Diwali & Karthika Masam Surge",
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "e.g. 25% festive peak holiday tariff adjustment",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Weekend Surge"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Percentage (%)"
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "placeholder": null,
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "All Room Categories"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Sun"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Mon"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Tue"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Wed"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Thu"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Fri"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Sat"
+        },
+        {
+          "tag": "INPUT",
+          "type": "date",
+          "placeholder": null,
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "date",
+          "placeholder": null,
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "checkbox",
+          "placeholder": null,
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Cancel"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "submit",
+          "placeholder": null,
+          "name": "Deploy Rule"
+        }
+      ],
+      "emptySubmission": {
+        "invalidFields": 1,
+        "requests": [],
+        "status": "PASS"
+      },
+      "cancelStatus": "PASS"
+    },
+    {
+      "page": "enquiries",
+      "button": "/record new enquiry/i",
+      "status": "PASS",
+      "headings": [
+        "No enquiries found",
+        "Record New Customer Enquiry"
+      ],
+      "formCount": 1,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "e.g. Ramesh Naidu",
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "tel",
+          "placeholder": "e.g. +91 98490 12345",
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "email",
+          "placeholder": "guest@gmail.com",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Direct Phone Call"
+        },
+        {
+          "tag": "INPUT",
+          "type": "date",
+          "placeholder": null,
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "placeholder": null,
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "e.g. Group Stay for Narasimha Swamy Temple Pilgrimage",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": null,
+          "placeholder": "Details of rooms needed, event duration, special dietary preferences...",
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Cancel"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "submit",
+          "placeholder": null,
+          "name": "Save Lead to Pipeline"
+        }
+      ],
+      "emptySubmission": {
+        "invalidFields": 3,
+        "requests": [],
+        "status": "PASS"
+      },
+      "cancelStatus": "PASS"
+    },
+    {
+      "page": "reviews",
+      "button": "/import pasted review/i",
+      "status": "PASS",
+      "headings": [
+        "Import Pasted Google Review"
+      ],
+      "formCount": 1,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "e.g. Ramesh Naidu",
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Written Experience\nGuest left written comments"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Rating Only (5★)\nRating without text remarks"
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": null,
+          "placeholder": "Paste exact review as written on Google...",
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "e.g. a month ago, 3 weeks ago, 2 months ago",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "url",
+          "placeholder": "https://www.google.com/travel/...",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Cancel"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "submit",
+          "placeholder": null,
+          "name": "Save & Publish"
+        }
+      ],
+      "emptySubmission": {
+        "invalidFields": 2,
+        "requests": [],
+        "status": "PASS"
+      },
+      "cancelStatus": "PASS"
+    },
+    {
+      "page": "payments",
+      "button": "/record collection/i",
+      "status": "PASS",
+      "headings": [
+        "Record Customer Payment"
+      ],
+      "formCount": 1,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "e.g. STG-20261106-1234",
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "Guest Full Name",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "placeholder": null,
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Cash"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Cancel"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "submit",
+          "placeholder": null,
+          "name": "Commit Payment"
+        }
+      ],
+      "emptySubmission": {
+        "invalidFields": 1,
+        "requests": [],
+        "status": "PASS"
+      },
+      "cancelStatus": "PASS"
+    },
+    {
+      "page": "payments",
+      "button": "/record expense/i",
+      "status": "PASS",
+      "headings": [
+        "Record Operational Expense"
+      ],
+      "formCount": 1,
+      "controls": [
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "e.g. Laundry Dry Cleaning, Welcome Kit",
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Laundry"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Cash (Drawer)"
+        },
+        {
+          "tag": "INPUT",
+          "type": "number",
+          "placeholder": null,
+          "required": true,
+          "name": ""
+        },
+        {
+          "tag": "INPUT",
+          "type": "text",
+          "placeholder": "e.g. INV-4921",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "TEXTAREA",
+          "type": null,
+          "placeholder": "Details of goods, services, or vendor",
+          "required": false,
+          "name": ""
+        },
+        {
+          "tag": "BUTTON",
+          "type": "button",
+          "placeholder": null,
+          "name": "Cancel"
+        },
+        {
+          "tag": "BUTTON",
+          "type": "submit",
+          "placeholder": null,
+          "name": "Commit Expense"
+        }
+      ],
+      "emptySubmission": {
+        "invalidFields": 1,
+        "requests": [],
+        "status": "PASS"
+      },
+      "cancelStatus": "PASS"
+    }
+  ],
+  "workflow": {
+    "name": "Expense create → API → refresh",
+    "title": "QA ISOLATED PERSISTENCE 1794391912724",
+    "body": {
+      "success": true,
+      "message": "Expense 'QA ISOLATED PERSISTENCE 1794391912724' for ₹1 recorded.",
+      "expense": {
+        "category": "laundry",
+        "title": "QA ISOLATED PERSISTENCE 1794391912724",
+        "amount": 1,
+        "payment_method": "cash",
+        "recorded_by": "Sri Tayi Grand Admin",
+        "expense_date": "2026-11-11",
+        "status": "approved",
+        "id": "exp-1794391913621-902",
+        "created_at": "2026-11-11T10:11:53.621Z"
+      }
+    },
+    "database": "FAIL: configured database is unreachable, yet API reports success",
+    "acceptance": "FAIL",
+    "visibleAfterCreate": true,
+    "visibleAfterRefresh": true
+  },
+  "errors": []
+}

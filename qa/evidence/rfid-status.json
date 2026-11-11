@@ -1,0 +1,14 @@
+[
+  {
+    "url": "http://127.0.0.1:8989/api/status",
+    "status": 200,
+    "ms": 94,
+    "body": "{\"status\":\"ok\",\"service\":\"SriTayiGrand-RFID-Bridge\",\"port\":1,\"readerType\":4}"
+  },
+  {
+    "url": "https://time-representations-examines-sum.trycloudflare.com/api/status",
+    "status": 200,
+    "ms": 1086,
+    "body": "{\"status\":\"ok\",\"isOnline\":true,\"hardwareConnected\":true,\"service\":\"SriTayiGrand-RFID-Bridge\",\"port\":1,\"readerType\":4,\"message\":\"ACR120 USB (Proprietary Mode) Ready on Port 1\"}"
+  }
+]

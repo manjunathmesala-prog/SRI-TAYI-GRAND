@@ -1,0 +1,6 @@
+Time,Type,Category,Description / Reason,Reference,Staff,Amount (INR)
+"11/11/2026, 3:24:02 pm","CASH_OUT","expense payout","Expense Payout: QA invalid enum (invented)","-","Sri Tayi Grand Admin",-1
+"11/11/2026, 3:24:02 pm","CASH_OUT","expense payout","Expense Payout:  (other)","-","Sri Tayi Grand Admin",-1
+"11/11/2026, 2:24:02 pm","CASH_IN","front desk advance","Advance deposit for Banquet Booking","HALL-2026-041","Bhavani Shankar",1500
+"11/11/2026, 1:24:02 pm","CASH_OUT","vendor payout","Emergency Reception Stationery & Key Card Sleeves","VND-STAT-09","Bhavani Shankar",-850
+"11/11/2026, 11:24:02 am","CASH_IN","guest payment","Room 204 Walk-In Stay Cash Settlement","STG-2026-89120","Bhavani Shankar",3200

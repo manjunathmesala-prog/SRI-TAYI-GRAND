@@ -1,0 +1,108 @@
+
+ RUN  v5.1.0 C:/Users/malle/Downloads/sri tayi grand
+
+ ❯ qa/auth-security.test.ts (6 tests | 4 failed) 55ms
+   ❯ Staff session trust boundary (no database or hardware) (6)
+     × rejects an unsigned privileged session 12ms
+     × rejects caller supplied staff role headers 35ms
+     × rejects unauthenticated requests in development and test too 1ms
+     × rejects non-numeric expirations 1ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  qa/auth-security.test.ts > Staff session trust boundary (no database or hardware) > rejects an unsigned privileged session
+AssertionError: expected { userId: 'qa-user', name: 'QA', …(4) } to be null
+
+- Expected:
+null
+
++ Received:
+{
+  "email": "qa@example.invalid",
+  "expiresAt": 1794390162565,
+  "name": "QA",
+  "role": "Super Admin",
+  "token": "eyJ1c2VySWQiOiJxYS11c2VyIiwiZW1haWwiOiJxYUBleGFtcGxlLmludmFsaWQiLCJuYW1lIjoiUUEiLCJyb2xlIjoiU3VwZXIgQWRtaW4iLCJleHAiOjE3OTQzOTAxNjI1NjV9",
+  "userId": "qa-user",
+}
+
+ ❯ qa/auth-security.test.ts:8:88
+      6| describe('Staff session trust boundary (no database or hardware)', () …
+      7|   it('rejects an unsigned privileged session', () => {
+      8|     expect(verifySessionToken(Buffer.from(JSON.stringify(claims)).toSt…
+       |                                                                                        ^
+      9|   });
+     10|   it('rejects caller supplied staff role headers', () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
+
+ FAIL  qa/auth-security.test.ts > Staff session trust boundary (no database or hardware) > rejects caller supplied staff role headers
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ qa/auth-security.test.ts:11:138
+      9|   });
+     10|   it('rejects caller supplied staff role headers', () => {
+     11|     expect(verifyStaffRole(new Request('https://example.invalid/api/ad…
+       |                                                                                                                                          ^
+     12|   });
+     13|   it('rejects unauthenticated requests in development and test too', (…
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+
+ FAIL  qa/auth-security.test.ts > Staff session trust boundary (no database or hardware) > rejects unauthenticated requests in development and test too
+AssertionError: expected true to be false // Object.is equality
+
+- Expected
++ Received
+
+- false
++ true
+
+ ❯ qa/auth-security.test.ts:14:90
+     12|   });
+     13|   it('rejects unauthenticated requests in development and test too', (…
+     14|     expect(verifyStaffRole(new Request('https://example.invalid/api/ad…
+       |                                                                                          ^
+     15|   });
+     16|   it('accepts correctly signed sessions with unchanged claims', () => {
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+
+ FAIL  qa/auth-security.test.ts > Staff session trust boundary (no database or hardware) > rejects non-numeric expirations
+AssertionError: expected { userId: 'qa-user', name: 'QA', …(4) } to be null
+
+- Expected:
+null
+
++ Received:
+{
+  "email": "qa@example.invalid",
+  "expiresAt": "never",
+  "name": "QA",
+  "role": "Super Admin",
+  "token": "eyJ1c2VySWQiOiJxYS11c2VyIiwiZW1haWwiOiJxYUBleGFtcGxlLmludmFsaWQiLCJuYW1lIjoiUUEiLCJyb2xlIjoiU3VwZXIgQWRtaW4iLCJleHAiOiJuZXZlciJ9.2XtMTKtGIOLQKlSJLcDycm0ljH30z5PnXchSgia4iZY",
+  "userId": "qa-user",
+}
+
+ ❯ qa/auth-security.test.ts:24:81
+     22|   });
+     23|   it('rejects non-numeric expirations', () => {
+     24|     expect(verifySessionToken(signSessionPayload({ ...claims, exp: 'ne…
+       |                                                                                 ^
+     25|   });
+     26| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  4 failed | 2 passed (6)
+   Start at  15:11:41
+   Duration  890ms (transform 60%, import 16%, tests 16%, worker 9%)
+

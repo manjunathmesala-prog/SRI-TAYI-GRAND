@@ -1,0 +1,15 @@
+{"page":"dashboard","status":"PASS","actions":3,"controls":12,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":4561}
+{"page":"analytics","status":"PASS","actions":5,"controls":7,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":6541}
+{"page":"reports","status":"PASS","actions":1,"controls":6,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":2802}
+{"page":"front-desk","status":"PASS","actions":0,"controls":4,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":3228}
+{"page":"walk-in","status":"PASS","actions":0,"controls":27,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":4487}
+{"page":"bookings","status":"PASS","actions":5,"controls":11,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":8255}
+{"page":"rooms/board","status":"PASS","actions":5,"controls":12,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":4112}
+{"page":"rooms/inventory","status":"PASS","actions":2,"controls":3,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":3448}
+{"page":"rooms/categories","status":"PASS","actions":1,"controls":1,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":2393}
+{"page":"guests","status":"PASS","actions":3,"controls":8,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":3287}
+{"page":"housekeeping","status":"PASS","actions":4,"controls":8,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":2961}
+{"page":"maintenance","status":"PASS","actions":0,"controls":6,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":3679}
+{"page":"convention-hall","status":"PASS","actions":0,"controls":16,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":8229}
+{"page":"enquiries","status":"PASS","actions":0,"controls":7,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":5516}
+{"page":"rfid","status":"PASS","actions":1,"controls":16,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":8440}

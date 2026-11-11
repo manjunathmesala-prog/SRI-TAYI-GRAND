@@ -64,7 +64,7 @@ export default function AnalyticsAdminPage() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
-  const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
+  const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
 
   const fetchAnalytics = useCallback(async (range: TimeRange = selectedRange) => {
     try {
@@ -274,25 +274,25 @@ export default function AnalyticsAdminPage() {
           <div className="flex items-center justify-between text-[#786A5B] mb-2">
             <span className="text-xs font-semibold uppercase tracking-wider">Rooms Inventory</span>
             <span className="text-xs font-bold text-[#43001F]">
-              {analytics?.kpis.totalRooms || 25} Total
+              {analytics?.kpis.totalRooms ?? '—'} Total
             </span>
           </div>
           <div className="grid grid-cols-3 gap-2 mt-2 pt-1 border-t border-[#E6D9C5]/50 text-center">
             <div className="bg-emerald-50 rounded-lg p-1.5 border border-emerald-200">
               <div className="text-sm font-bold text-emerald-800">
-                {analytics?.kpis.availableRooms ?? 18}
+                {analytics?.kpis.availableRooms ?? '—'}
               </div>
               <div className="text-[10px] text-emerald-600 font-semibold uppercase">Clean</div>
             </div>
             <div className="bg-[#43001F]/5 rounded-lg p-1.5 border border-[#43001F]/20">
               <div className="text-sm font-bold text-[#43001F]">
-                {analytics?.kpis.occupiedRooms ?? 5}
+                {analytics?.kpis.occupiedRooms ?? '—'}
               </div>
               <div className="text-[10px] text-[#43001F]/80 font-semibold uppercase">Occupied</div>
             </div>
             <div className="bg-amber-50 rounded-lg p-1.5 border border-amber-200">
               <div className="text-sm font-bold text-amber-800">
-                {analytics?.kpis.maintenanceRooms ?? 2}
+                {analytics?.kpis.maintenanceRooms ?? '—'}
               </div>
               <div className="text-[10px] text-amber-600 font-semibold uppercase">OOO / Mnt</div>
             </div>
@@ -319,21 +319,14 @@ export default function AnalyticsAdminPage() {
 
             {/* Visual share bar */}
             <div className="w-full h-3 rounded-full overflow-hidden flex bg-gray-100 mb-6 shadow-inner">
-              <div
-                style={{ width: '58%' }}
-                className="bg-[#43001F] h-full"
-                title="Front Desk Direct (58%)"
-              />
-              <div
-                style={{ width: '25%' }}
-                className="bg-[#D8AD56] h-full"
-                title="MakeMyTrip & Goibibo (25%)"
-              />
-              <div
-                style={{ width: '17%' }}
-                className="bg-[#786A5B] h-full"
-                title="Booking.com & Agoda (17%)"
-              />
+              {analytics?.channelBreakdown.map((channel, index) => (
+                <div
+                  key={channel.name}
+                  style={{ width: `${Math.max(0, Math.min(100, channel.percentage))}%` }}
+                  className={['bg-[#43001F] h-full', 'bg-[#D8AD56] h-full', 'bg-[#786A5B] h-full'][index % 3]}
+                  title={`${channel.name} (${channel.percentage}%)`}
+                />
+              ))}
             </div>
 
             {/* Channel Cards */}
@@ -522,7 +515,7 @@ export default function AnalyticsAdminPage() {
       <div className="flex flex-col sm:flex-row items-center justify-between text-xs text-[#786A5B] pt-4 border-t border-[#E6D9C5]">
         <span>Sri Tayi Grand Hotel Management Software • Analytics Engine</span>
         <span>
-          Last updated: {lastRefreshed.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+          Last updated: {lastRefreshed?.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit' }) ?? 'Awaiting data'}
         </span>
       </div>
     </div>

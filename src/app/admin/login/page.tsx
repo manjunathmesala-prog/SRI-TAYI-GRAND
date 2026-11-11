@@ -39,7 +39,6 @@ const PRESET_ACCOUNTS = [
     roleLabelTe: 'సూపర్ అడ్మిన్',
     name: 'Sri Tayi Grand Admin',
     email: 'admin@sritayigrand.com',
-    password: 'SuperAdmin@TayiGrand2026!',
     icon: Crown,
     badgeColor: 'bg-amber-100 text-amber-900 border-amber-300',
     scopeEn: 'Full Unrestricted Access • Settings • Audit Logs • P&L',
@@ -51,7 +50,6 @@ const PRESET_ACCOUNTS = [
     roleLabelTe: 'హోటల్ మేనేజర్',
     name: 'G. Mohan Kumar',
     email: 'manager@sritayigrand.com',
-    password: 'Manager@TayiGrand2026!',
     icon: Briefcase,
     badgeColor: 'bg-purple-100 text-purple-900 border-purple-300',
     scopeEn: 'Operations • Reservations • Housekeeping • Staff • Reports',
@@ -63,7 +61,6 @@ const PRESET_ACCOUNTS = [
     roleLabelTe: 'రిసెప్షన్ సిబ్బంది',
     name: 'Sri Tayi Grand Staff',
     email: 'staff@sritayigrand.com',
-    password: 'Staff@TayiGrand2026!',
     icon: Users,
     badgeColor: 'bg-blue-100 text-blue-900 border-blue-300',
     scopeEn: 'Reception • Check-In / Walk-In • Room Board • RFID Keycards',
@@ -74,11 +71,13 @@ const PRESET_ACCOUNTS = [
 function AdminLoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectPath = searchParams.get('redirect') || '/admin/dashboard';
+  const requestedRedirect = searchParams.get('redirect') || '';
+  const redirectPath = /^\/admin(?:\/[a-zA-Z0-9_-]+)*$/.test(requestedRedirect) && requestedRedirect !== '/admin/login'
+    ? requestedRedirect : '/admin/dashboard';
   const { t, isTelugu } = useAdminLanguage();
 
-  const [email, setEmail] = useState('admin@sritayigrand.com');
-  const [password, setPassword] = useState('SuperAdmin@TayiGrand2026!');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -161,16 +160,9 @@ function AdminLoginContent() {
 
   const selectPreset = (preset: (typeof PRESET_ACCOUNTS)[0]) => {
     setEmail(preset.email);
-    setPassword(preset.password);
+    setPassword('');
     setActivePreset(preset.roleId);
     setError(null);
-  };
-
-  const fastLoginAs = async (preset: (typeof PRESET_ACCOUNTS)[0]) => {
-    setEmail(preset.email);
-    setPassword(preset.password);
-    setActivePreset(preset.roleId);
-    await performLogin(preset.email, preset.password);
   };
 
   return (
@@ -219,10 +211,10 @@ function AdminLoginContent() {
           <div className="flex flex-wrap items-center justify-between gap-1.5 mb-2.5">
             <div className="flex items-center gap-1.5 text-xs text-[#D8AD56] font-semibold">
               <Sparkles className="w-3.5 h-3.5 shrink-0" />
-              <span>{t('auth.fastRoleSelect', 'Select Role Profile (One-Tap Fast Login)')}</span>
+              <span>{isTelugu ? 'ఖాతాను ఎంచుకోండి' : 'Select Staff Account'}</span>
             </div>
             <span className="text-[10px] text-white/60 uppercase tracking-widest font-mono">
-              {isTelugu ? '3 పాత్రలు అందుబాటులో ఉన్నాయి' : '3 Roles Verified'}
+              {isTelugu ? '3 పాత్రలు అందుబాటులో ఉన్నాయి' : 'Password required'}
             </span>
           </div>
 
@@ -274,11 +266,11 @@ function AdminLoginContent() {
                       disabled={loading}
                       onClick={(e) => {
                         e.stopPropagation();
-                        fastLoginAs(preset);
+                        selectPreset(preset);
                       }}
                       className="text-[10px] px-2.5 py-1 rounded-md bg-white/20 hover:bg-[#D8AD56] hover:text-[#21180F] text-white font-semibold transition-all cursor-pointer disabled:opacity-50 shrink-0 min-h-[28px] flex items-center"
                     >
-                      {isTelugu ? 'తక్షణ ప్రవేశం →' : 'Instant Enter →'}
+                      {isTelugu ? 'ఎంచుకోండి' : 'Select Account'}
                     </button>
                   </div>
                 </div>

@@ -1,0 +1,4 @@
+﻿Booking Reference,Guest Name,Phone,Category,Check In,Check Out,Total,Status
+"STG-20261105-3921","P. Sudhakar Reddy","9440123890","Suite Room","2026-11-05","2026-11-07",11197.76,"confirmed"
+"STG-20261104-8142","K. Venkatesh Rao","9848022331","Double Bed Room","2026-11-04","2026-11-06",6717.76,"checked_in"
+"STG-20261103-1189","Dr. Anand Raman","9989011223","Suite Room","2026-11-03","2026-11-05",11647.76,"checked_in"

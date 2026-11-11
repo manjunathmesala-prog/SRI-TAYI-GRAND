@@ -1,0 +1,16 @@
+{"route":"/","status":"PASS","http":200}
+{"route":"/about","status":"PASS","http":200}
+{"route":"/amenities","status":"PASS","http":200}
+{"route":"/availability","status":"PASS","http":200}
+{"route":"/booking","status":"PASS","http":200}
+{"route":"/booking/checkout","status":"PASS","http":200}
+{"route":"/booking/confirmation","status":"PASS","http":200}
+{"route":"/booking/pickup","status":"PASS","http":200}
+{"route":"/contact","status":"PASS","http":200}
+{"route":"/convention-hall","status":"PASS","http":200}
+{"route":"/gallery","status":"PASS","http":200}
+{"route":"/policies","status":"PASS","http":200}
+{"route":"/rooms","status":"PASS","http":200}
+{"route":"/testimonials","status":"PASS","http":200}
+{"route":"/walk-in","status":"PASS","http":200}
+PUBLIC QA COMPLETE

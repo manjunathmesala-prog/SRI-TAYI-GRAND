@@ -1,0 +1,75 @@
+{
+  "scope": "Isolated local app; external requests and images blocked; no valid business submissions",
+  "routes": [
+    {
+      "route": "/rooms/double-room",
+      "expected": "/Double/i",
+      "http": 200,
+      "headings": [
+        "About This Room",
+        "Double Room",
+        "Explore Other Accommodations"
+      ],
+      "status": "PASS"
+    },
+    {
+      "route": "/rooms/qa-does-not-exist",
+      "expected": "/404|not found/i",
+      "http": 404,
+      "headings": [
+        "Page Not Found"
+      ],
+      "status": "PASS"
+    },
+    {
+      "route": "/booking/confirmation/QA-NONEXISTENT",
+      "expected": "/404|not found/i",
+      "http": 200,
+      "headings": [
+        "Page Not Found"
+      ],
+      "status": "PASS"
+    },
+    {
+      "route": "/booking/pickup/QA-NONEXISTENT",
+      "expected": "/not found|could not|invalid|unavailable/i",
+      "http": 200,
+      "headings": [
+        "Key Pass Not Found"
+      ],
+      "status": "PASS"
+    }
+  ],
+  "checks": [
+    {
+      "route": "/contact",
+      "name": "Empty form submission 0",
+      "scope": "Required fields block business writes; background availability POST is read-only",
+      "invalidFields": 3,
+      "writes": [],
+      "status": "PASS"
+    },
+    {
+      "route": "/convention-hall",
+      "name": "Empty form submission 0",
+      "scope": "Required fields block business writes; background availability POST is read-only",
+      "invalidFields": 2,
+      "writes": [],
+      "status": "PASS"
+    },
+    {
+      "route": "/booking/checkout",
+      "name": "Empty form submission 0",
+      "scope": "Required fields block business writes; background availability POST is read-only",
+      "invalidFields": 3,
+      "writes": [],
+      "status": "PASS"
+    },
+    {
+      "route": "/admin/login",
+      "name": "Invalid password rejected",
+      "http": 401,
+      "status": "PASS"
+    }
+  ]
+}

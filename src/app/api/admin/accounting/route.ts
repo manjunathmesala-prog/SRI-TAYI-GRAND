@@ -74,17 +74,17 @@ export async function POST(req: NextRequest) {
       let totalCredit = 0;
 
       for (const line of lines) {
-        if (!line.accountCode) {
+        if (!line || !repo.getChartOfAccounts().some(account => account.code === line.accountCode && account.is_active)) {
           return NextResponse.json(
             { success: false, error: 'Every journal line must specify a valid account code.' },
             { status: 400 }
           );
         }
 
-        const debit = Number(line.debit) || 0;
-        const credit = Number(line.credit) || 0;
+        const debit = Number(line.debit ?? 0);
+        const credit = Number(line.credit ?? 0);
 
-        if (debit < 0 || credit < 0) {
+        if (!Number.isFinite(debit) || !Number.isFinite(credit) || debit < 0 || credit < 0 || (debit > 0 && credit > 0)) {
           return NextResponse.json(
             { success: false, error: 'Debit and credit values must be non-negative.' },
             { status: 400 }

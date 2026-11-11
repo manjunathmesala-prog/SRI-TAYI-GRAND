@@ -1,0 +1,9 @@
+
+ RUN  v5.1.0 C:/Users/malle/Downloads/sri tayi grand
+
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  15:16:08
+   Duration  2.21s (transform 43%, import 24%, tests 23%, worker 10%)
+

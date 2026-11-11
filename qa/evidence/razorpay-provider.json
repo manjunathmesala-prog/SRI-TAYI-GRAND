@@ -1,0 +1,16 @@
+{
+  "at": "2026-11-11T10:14:57.660Z",
+  "scope": "Razorpay test-mode order creation and fetch only; no payment authorized/captured, no hotel database write",
+  "http": 200,
+  "ms": 668,
+  "order": {
+    "id": "order_Typcb93mbE2vRw",
+    "status": "created",
+    "amount": 100,
+    "amount_paid": 0,
+    "currency": "INR"
+  },
+  "fetchStatus": 200,
+  "verified": true,
+  "status": "PASS"
+}

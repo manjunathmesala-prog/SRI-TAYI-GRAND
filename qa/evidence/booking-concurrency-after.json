@@ -1,0 +1,25 @@
+{
+  "scope": "Local isolated HTTP concurrency; no physical hardware, no cloud writes",
+  "responses": [
+    {
+      "status": 409,
+      "success": false,
+      "error": "Conflict: Room 101 is already booked or occupied."
+    },
+    {
+      "status": 200,
+      "success": true,
+      "reference": "STG-20261111-3898"
+    }
+  ],
+  "remaining": [
+    {
+      "reference": "STG-20261111-3898",
+      "room": "101",
+      "status": "confirmed"
+    }
+  ],
+  "status": "PASS",
+  "database": "NOT TESTED: staging unavailable",
+  "rootCause": ""
+}

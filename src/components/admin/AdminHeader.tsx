@@ -37,7 +37,6 @@ export function AdminHeader() {
   const [userRole, setUserRole] = useState<string>('Super Admin');
   const [userEmail, setUserEmail] = useState<string>('admin@sritayigrand.com');
   const [profileOpen, setProfileOpen] = useState(false);
-  const [switching, setSwitching] = useState(false);
 
   const fetchCashBalance = async (force = false) => {
     try {
@@ -157,32 +156,6 @@ export function AdminHeader() {
       .join(' ');
   };
 
-  const switchAccount = async (targetEmail: string, targetPass: string) => {
-    setSwitching(true);
-    try {
-      const res = await fetch('/api/admin/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: targetEmail, password: targetPass }),
-      });
-      const data = await res.json();
-      if (data.success && data.session) {
-        authStorage.setSession({
-          token: data.session.token,
-          role: data.session.role,
-          name: data.session.name,
-          email: targetEmail,
-        });
-        setProfileOpen(false);
-        window.location.reload();
-      }
-    } catch (err) {
-      console.error('Account switch failed:', err);
-    } finally {
-      setSwitching(false);
-    }
-  };
-
   const handleLogout = async () => {
     try {
       await fetch('/api/admin/auth', { method: 'DELETE' });
@@ -206,7 +179,7 @@ export function AdminHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-[#FAF6EE]/95 backdrop-blur-md border-b border-[#E6D9C5] px-4 sm:px-6 py-2.5 flex items-center justify-between shadow-xs">
+    <header className="sticky top-0 z-30 bg-[#FAF6EE]/95 backdrop-blur-md border-b border-[#E6D9C5] px-4 sm:px-6 py-2.5 flex flex-wrap gap-2 items-center justify-between shadow-xs">
       {/* Left: Breadcrumbs & Page Title */}
       <div className="flex items-center space-x-3">
         <div>
@@ -220,7 +193,7 @@ export function AdminHeader() {
       </div>
 
       {/* Right: Live Telemetry, Language Switcher, Cash Float & Quick Action Shortcuts */}
-      <div className="flex items-center space-x-2 sm:space-x-3">
+      <div className="flex flex-wrap min-w-0 items-center gap-2 sm:gap-3">
         {/* Realtime Status Indicator */}
         <div
           className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold tracking-wide border transition-all ${
@@ -323,82 +296,6 @@ export function AdminHeader() {
                 <div className="text-[11px] text-[#786B61] font-mono truncate">
                   {userEmail}
                 </div>
-              </div>
-
-              {/* Fast Role Switching Section */}
-              <div className="space-y-1 mb-2.5">
-                <div className="px-2 py-1 text-[10px] uppercase tracking-widest text-[#786B61] font-bold">
-                  {t('header.switchRole', 'Switch Active Role (Instant Test)')}
-                </div>
-
-                {/* 1. Super Admin Switch */}
-                <button
-                  type="button"
-                  disabled={switching || userRole === 'Super Admin'}
-                  onClick={() => switchAccount('admin@sritayigrand.com', 'SuperAdmin@TayiGrand2026!')}
-                  className={`w-full flex items-center justify-between p-2 rounded-xl text-left text-xs transition-all cursor-pointer ${
-                    userRole === 'Super Admin'
-                      ? 'bg-amber-50 text-amber-900 border border-amber-200 font-bold'
-                      : 'hover:bg-[#F8F3E9] text-[#241912]'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Crown className="w-3.5 h-3.5 text-amber-600" />
-                    <div>
-                      <span className="block leading-tight">{t('header.superAdmin', 'Super Admin')}</span>
-                      <span className="text-[9px] text-[#786B61] block">admin@sritayigrand.com</span>
-                    </div>
-                  </div>
-                  {userRole === 'Super Admin' && (
-                    <CheckCircle2 className="w-3.5 h-3.5 text-amber-600" />
-                  )}
-                </button>
-
-                {/* 2. Hotel Manager Switch */}
-                <button
-                  type="button"
-                  disabled={switching || userRole === 'Hotel Manager'}
-                  onClick={() => switchAccount('manager@sritayigrand.com', 'Manager@TayiGrand2026!')}
-                  className={`w-full flex items-center justify-between p-2 rounded-xl text-left text-xs transition-all cursor-pointer ${
-                    userRole === 'Hotel Manager'
-                      ? 'bg-purple-50 text-purple-900 border border-purple-200 font-bold'
-                      : 'hover:bg-[#F8F3E9] text-[#241912]'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Briefcase className="w-3.5 h-3.5 text-purple-600" />
-                    <div>
-                      <span className="block leading-tight">{t('header.hotelManager', 'Hotel Manager')}</span>
-                      <span className="text-[9px] text-[#786B61] block">manager@sritayigrand.com</span>
-                    </div>
-                  </div>
-                  {userRole === 'Hotel Manager' && (
-                    <CheckCircle2 className="w-3.5 h-3.5 text-purple-600" />
-                  )}
-                </button>
-
-                {/* 3. Front Desk Staff Switch */}
-                <button
-                  type="button"
-                  disabled={switching || (userRole !== 'Super Admin' && userRole !== 'Hotel Manager')}
-                  onClick={() => switchAccount('staff@sritayigrand.com', 'Staff@TayiGrand2026!')}
-                  className={`w-full flex items-center justify-between p-2 rounded-xl text-left text-xs transition-all cursor-pointer ${
-                    userRole !== 'Super Admin' && userRole !== 'Hotel Manager'
-                      ? 'bg-blue-50 text-blue-900 border border-blue-200 font-bold'
-                      : 'hover:bg-[#F8F3E9] text-[#241912]'
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Users className="w-3.5 h-3.5 text-blue-600" />
-                    <div>
-                      <span className="block leading-tight">{t('header.frontDeskStaff', 'Front Desk Staff')}</span>
-                      <span className="text-[9px] text-[#786B61] block">staff@sritayigrand.com</span>
-                    </div>
-                  </div>
-                  {userRole !== 'Super Admin' && userRole !== 'Hotel Manager' && (
-                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
-                  )}
-                </button>
               </div>
 
               {/* Sign Out Button */}

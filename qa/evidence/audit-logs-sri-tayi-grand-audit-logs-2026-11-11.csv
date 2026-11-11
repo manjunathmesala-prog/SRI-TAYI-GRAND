@@ -1,0 +1,6 @@
+Timestamp,Action,Entity Type,Entity ID,Actor Name,Actor Role,Details
+"2026-11-11T09:54:04.130Z","CREATE_JOURNAL_ENTRY","accounting","je-1794390844130","Sri Tayi Grand Admin","Admin","Posted Journal Entry JE-2026-0002: ₹10 (QA invalid accounts)"
+"2026-11-11T09:54:03.695Z","CREATE_BANQUET_QUOTE","booking","cq-1794390843694","Sri Tayi Grand Admin","Event Manager","Created convention banquet quote STG-QT-2026-003 for QA isolated (₹0)"
+"2026-11-11T07:54:02.486Z","CHECK_IN_GUEST","booking","BK-102","Raghavendra Rao","Front Desk","Guest checked in to Room 102. Physical RFID keycard issued."
+"2026-11-11T04:54:02.486Z","DAILY_CLOSING_LOCK","accounting","close-20261104","Lakshmi Narayana","Accounts","Daily closing register audited and locked. Drawer balanced without discrepancy."
+"2026-11-10T21:54:02.487Z","PRICING_RULE_ACTIVATED","pricing","rule-weekend","Super Admin","Super Admin","Weekend Dynamic Surge rule activated across all room inventory."

@@ -1,0 +1,30 @@
+{
+  "scope": "Local isolated HTTP concurrency; no physical hardware, no cloud writes",
+  "responses": [
+    {
+      "status": 200,
+      "success": true,
+      "reference": "STG-20261111-4707"
+    },
+    {
+      "status": 400,
+      "success": false,
+      "error": "Conflict: Room 101 is already booked for overlapping dates."
+    }
+  ],
+  "remaining": [
+    {
+      "reference": "STG-20261111-2932",
+      "room": "101",
+      "status": "confirmed"
+    },
+    {
+      "reference": "STG-20261111-4707",
+      "room": "101",
+      "status": "confirmed"
+    }
+  ],
+  "status": "FAIL",
+  "database": "NOT TESTED: staging unavailable",
+  "rootCause": "Repository inserts booking before room assignment validation and does not roll back insertion on conflict"
+}

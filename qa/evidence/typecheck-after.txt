@@ -1,0 +1,3 @@
+scratch/qa-runtime/src/lib/db/repository.ts(4051,7): error TS2403: Subsequent variable declarations must have the same type.  Variable '__hotelRepo' must be of type 'HotelRepository | undefined', but here has type 'HotelRepository | undefined'.
+scratch/qa-runtime/src/lib/db/repository.ts(4065,3): error TS2322: Type 'import("C:/Users/malle/Downloads/sri tayi grand/scratch/qa-runtime/src/lib/db/repository").HotelRepository' is not assignable to type 'import("C:/Users/malle/Downloads/sri tayi grand/src/lib/db/repository").HotelRepository'.
+  Types have separate declarations of a private property 'settings'.

@@ -1,0 +1,93 @@
+[
+  {
+    "action": "configured local login",
+    "status": 200,
+    "success": true
+  },
+  {
+    "route": "expenses",
+    "input": {
+      "category": "other",
+      "title": "QA invalid number",
+      "amount": "not-a-number"
+    },
+    "status": 500,
+    "success": false,
+    "error": "Expense amount must be a positive number. Received: NaN",
+    "result": "FAIL",
+    "expectation": "invalid input must be rejected before repository mutation",
+    "originalHarnessClassification": "PASS",
+    "correction": "HTTP 500 is not valid client-input rejection; expected a 4xx status."
+  },
+  {
+    "route": "expenses",
+    "input": {
+      "category": "other",
+      "title": " ",
+      "amount": 1
+    },
+    "status": 200,
+    "success": true,
+    "result": "FAIL",
+    "expectation": "invalid input must be rejected before repository mutation"
+  },
+  {
+    "route": "expenses",
+    "input": {
+      "category": "invented",
+      "title": "QA invalid enum",
+      "amount": 1
+    },
+    "status": 200,
+    "success": true,
+    "result": "FAIL",
+    "expectation": "invalid input must be rejected before repository mutation"
+  },
+  {
+    "route": "maintenance",
+    "input": {
+      "room_number": "99999",
+      "issue_title": "QA invalid room",
+      "room_blocked": false
+    },
+    "status": 200,
+    "success": true,
+    "result": "FAIL",
+    "expectation": "invalid input must be rejected before repository mutation"
+  },
+  {
+    "route": "convention-hall",
+    "input": {
+      "action": "create_quote",
+      "client_name": "QA isolated",
+      "client_phone": "invalid",
+      "event_name": "QA",
+      "event_date": "not-a-date",
+      "guest_count": -1
+    },
+    "status": 200,
+    "success": true,
+    "result": "FAIL",
+    "expectation": "invalid input must be rejected before repository mutation"
+  },
+  {
+    "route": "accounting",
+    "input": {
+      "description": "QA invalid accounts",
+      "lines": [
+        {
+          "accountCode": "invalid1",
+          "debit": 10
+        },
+        {
+          "accountCode": "invalid2",
+          "credit": 10
+        }
+      ]
+    },
+    "status": 200,
+    "success": true,
+    "result": "FAIL",
+    "expectation": "invalid input must be rejected before repository mutation"
+  }
+]

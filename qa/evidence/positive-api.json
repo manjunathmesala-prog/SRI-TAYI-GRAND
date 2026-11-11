@@ -1,0 +1,49 @@
+{
+  "marker": "QA-POSITIVE-1794392511877",
+  "results": [
+    {
+      "route": "expenses",
+      "status": 200,
+      "success": true,
+      "inMemoryMatches": 1,
+      "ids": [
+        "exp-1794392520931-211"
+      ],
+      "softwareRegression": "PASS",
+      "persistence": "FAIL: database unreachable; no durable transaction verified"
+    },
+    {
+      "route": "maintenance",
+      "status": 200,
+      "success": true,
+      "inMemoryMatches": 1,
+      "ids": [
+        "maint-1794392538496"
+      ],
+      "softwareRegression": "PASS",
+      "persistence": "FAIL: database unreachable; no durable transaction verified"
+    },
+    {
+      "route": "convention-hall",
+      "status": 200,
+      "success": true,
+      "inMemoryMatches": 1,
+      "ids": [
+        "cq-1794392544095"
+      ],
+      "softwareRegression": "PASS",
+      "persistence": "FAIL: database unreachable; no durable transaction verified"
+    },
+    {
+      "route": "accounting",
+      "status": 200,
+      "success": true,
+      "inMemoryMatches": 1,
+      "ids": [
+        "je-1794392545128"
+      ],
+      "softwareRegression": "PASS",
+      "persistence": "FAIL: database unreachable; no durable transaction verified"
+    }
+  ]
+}

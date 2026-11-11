@@ -1,0 +1,42 @@
+[
+  {
+    "file": "src/app/admin/rfid/page.tsx",
+    "hash": "d2fa61330451158bb083d5f29c2e3634a93b84dbb70c05d4ca5588fb18d7ab8b"
+  },
+  {
+    "file": "src/app/api/rfid/cards/route.ts",
+    "hash": "76cfa59a641d8c162a1466a26641813a88639aced7a4519b3001ecbf2b0c9bee"
+  },
+  {
+    "file": "src/app/api/rfid/bridge/route.ts",
+    "hash": "9c9a0b5209749ffb98ab8b8b178a394fa5981943e0d919a191986f62f130d0dc"
+  },
+  {
+    "file": "src/app/api/rfid/devices/route.ts",
+    "hash": "fd07daf7ed99cc0dc66bff3d468175bc31585337ceafe915e00fde84fe41cb5c"
+  },
+  {
+    "file": "src/app/api/admin/rfid-logs/route.ts",
+    "hash": "5aa015a7622df6745d4d7bc3f2698501eeeb9192b695d64d30060c7ca26d5cd5"
+  },
+  {
+    "file": "src/lib/db/card-storage.ts",
+    "hash": "ff17d98a3b2e348d0a73b34376deaae48eaf0083f2dd17222e8acb113ee5a4ee"
+  },
+  {
+    "file": "src/lib/db/repository.ts",
+    "hash": "b2abeda132aac5a31d97b3d5a7d44d7da584446df620437a071c7e33e162f6fd"
+  },
+  {
+    "file": "data/cards.json",
+    "hash": "c9d763c0c3ff7bdb557882df52e1f99f81b7a00012fd3622e79208b0cd117ec0"
+  },
+  {
+    "file": "rfid-bridge/src/SriTayiGrandKeycardBridge.cs",
+    "hash": "12ce24f46e45c996068600a1b7c33d8762825b0f2668f20cf5f78c6a93a19f78"
+  },
+  {
+    "file": "rfid-bridge/bin/SriTayiGrandKeycardBridge.exe",
+    "hash": "9519d35e3ce56c14153f210409c1612951a48e9411b15150a58aeb38026a0d51"
+  }
+]

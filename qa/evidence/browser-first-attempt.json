@@ -1,0 +1,3667 @@
+{
+  "environment": "isolated local copy; PostgreSQL unavailable; browser external services blocked; no physical RFID operations",
+  "pages": [
+    {
+      "page": "dashboard",
+      "status": "PASS",
+      "actions": [
+        {
+          "page": "dashboard",
+          "action": "Today",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": []
+        },
+        {
+          "page": "dashboard",
+          "action": "Last 7 Days",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": []
+        },
+        {
+          "page": "dashboard",
+          "action": "This Month",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": []
+        }
+      ],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "button",
+          "name": "Today",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 1,
+          "tag": "button",
+          "name": "Last 7 Days",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 2,
+          "tag": "button",
+          "name": "This Month",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 3,
+          "tag": "button",
+          "name": "Refresh",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 4,
+          "tag": "button",
+          "name": "+ New Walk-In",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 5,
+          "tag": "a",
+          "name": "View Full Board",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 6,
+          "tag": "a",
+          "name": "Front Desk Operations\nKeycard encoding & guest folios",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 7,
+          "tag": "a",
+          "name": "Room Status & Tape Chart\nLive tape chart across all floors",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 8,
+          "tag": "a",
+          "name": "RFID Management\nIssue guest cards & verify bridge",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 9,
+          "tag": "a",
+          "name": "Housekeeping & Room Sanitation\nSanitization tracking & turnover",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 10,
+          "tag": "a",
+          "name": "Guests\nStatutory ID verification & CRM",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 11,
+          "tag": "a",
+          "name": "All Bookings (0) →",
+          "type": null,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 4561,
+      "url": "http://127.0.0.1:3006/admin/dashboard",
+      "headings": [
+        "Executive Dashboard",
+        "Executive Hotel Overview",
+        "Room Inventory & Housekeeping Board",
+        "Quick Actions",
+        "Recent Activities"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    },
+    {
+      "page": "analytics",
+      "status": "PASS",
+      "actions": [
+        {
+          "page": "analytics",
+          "action": "Today",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": [
+            {
+              "page": "http://127.0.0.1:3006/admin/analytics",
+              "path": "/api/admin/cashbook",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/analytics",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/analytics",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/analytics",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/analytics",
+              "path": "/api/admin/reports",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/analytics",
+              "path": "/api/admin/reports",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/analytics",
+              "path": "/api/admin/notifications/stream",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/analytics",
+              "path": "/api/realtime/stream",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/analytics",
+              "path": "/api/admin/profile/language",
+              "method": "GET",
+              "status": 200
+            }
+          ]
+        },
+        {
+          "page": "analytics",
+          "action": "7 Days",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": [
+            {
+              "page": "http://127.0.0.1:3006/admin/analytics",
+              "path": "/api/admin/reports",
+              "method": "GET",
+              "status": 200
+            }
+          ]
+        },
+        {
+          "page": "analytics",
+          "action": "30 Days",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": [
+            {
+              "page": "http://127.0.0.1:3006/admin/analytics",
+              "path": "/api/admin/reports",
+              "method": "GET",
+              "status": 200
+            }
+          ]
+        },
+        {
+          "page": "analytics",
+          "action": "90 Days",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": [
+            {
+              "page": "http://127.0.0.1:3006/admin/analytics",
+              "path": "/api/admin/reports",
+              "method": "GET",
+              "status": 200
+            }
+          ]
+        },
+        {
+          "page": "analytics",
+          "action": "Year-to-Date",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": [
+            {
+              "page": "http://127.0.0.1:3006/admin/analytics",
+              "path": "/api/admin/reports",
+              "method": "GET",
+              "status": 200
+            }
+          ]
+        }
+      ],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "button",
+          "name": "Today",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 1,
+          "tag": "button",
+          "name": "7 Days",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 2,
+          "tag": "button",
+          "name": "30 Days",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 3,
+          "tag": "button",
+          "name": "90 Days",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 4,
+          "tag": "button",
+          "name": "Year-to-Date",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 5,
+          "tag": "button",
+          "name": "Refresh analytics data",
+          "type": null,
+          "disabled": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 6,
+          "tag": "button",
+          "name": "Export CSV Report",
+          "type": null,
+          "disabled": true,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 6541,
+      "url": "http://127.0.0.1:3006/admin/analytics",
+      "headings": [
+        "Analytics",
+        "Hospitality Revenue & Business Intelligence",
+        "Distribution Channel Mix",
+        "Revenue & Occupancy Trajectory",
+        "Room Category Yield & Inventory Performance"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    },
+    {
+      "page": "reports",
+      "status": "PASS",
+      "actions": [
+        {
+          "page": "reports",
+          "action": "Export CSV",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": [
+            {
+              "page": "http://127.0.0.1:3006/admin/reports",
+              "path": "/api/admin/cashbook",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/reports",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/reports",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/reports",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/reports",
+              "path": "/api/admin/operations",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/reports",
+              "path": "/api/realtime/stream",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/reports",
+              "path": "/api/admin/notifications/stream",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/reports",
+              "path": "/api/admin/daily-closing",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/reports",
+              "path": "/api/admin/profile/language",
+              "method": "GET",
+              "status": 200
+            }
+          ]
+        }
+      ],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "button",
+          "name": "Refresh",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 1,
+          "tag": "button",
+          "name": "Export CSV",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 2,
+          "tag": "form",
+          "name": "PHYSICAL CASH COUNTED IN DRAWER (₹) *\nCALCULATED VARIANCE / DISCREPANCY\nExact Match (₹0)\nEXECUTE NIGHT AUDIT & CLOSE DAY\nAUDIT NOTES & SHIFT DISCREPANCY EXPLANATION",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 3,
+          "tag": "input",
+          "name": "",
+          "type": "number",
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 4,
+          "tag": "button",
+          "name": "EXECUTE NIGHT AUDIT & CLOSE DAY",
+          "type": "submit",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 5,
+          "tag": "input",
+          "name": "e.g. Petty cash balanced, morning handover verified.",
+          "type": "text",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 2802,
+      "url": "http://127.0.0.1:3006/admin/reports",
+      "headings": [
+        "Reports & Analytics",
+        "Financial Reports & Performance Analytics",
+        "Shift Reconcile & Cash Drawer Verification",
+        "Historical Night Audit Records"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    },
+    {
+      "page": "front-desk",
+      "status": "PASS",
+      "actions": [],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "a",
+          "name": "Walk-In Registration Desk",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 1,
+          "tag": "input",
+          "name": "Search guest, phone, room, or ref...",
+          "type": "text",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 2,
+          "tag": "button",
+          "name": "Print Desk Standee QR",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 3,
+          "tag": "a",
+          "name": "Open Walk-In Form",
+          "type": null,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 3228,
+      "url": "http://127.0.0.1:3006/admin/front-desk",
+      "headings": [
+        "Front Desk",
+        "Front Desk & Reception",
+        "Reception QR Walk-In Counter Queue",
+        "Expected Arrivals (0)",
+        "In-House Active Stays (0)"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    },
+    {
+      "page": "walk-in",
+      "status": "PASS",
+      "actions": [],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "a",
+          "name": "Room Tape Chart",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 1,
+          "tag": "button",
+          "name": "Print Reception Standee",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 2,
+          "tag": "button",
+          "name": "Refresh Room Matrix",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 3,
+          "tag": "form",
+          "name": "1\nRoom Category & Physical Room Allocation\nCHECK-IN\n11 Nov 2026\nCHECK-OUT\n12 Nov 2026\nDuration\n1 Night(s)\nRoom Category\nPhysical Room Number (Mandatory for Walk-In)\n0 Room(s) available on floor\nNo clean rooms currently available for this category. Please clean a dirty room in the Tape Chart or select another category.\nAdults (Age 12+)\n2 Adults\nChildren (Age 0-11)\n0 Children\n2\nGuest Identification & Statutory Compliance\nGuest Full Name *\nMobile Phone *\nEmail (Optional)\nOrigin City / State\nStatutory Government ID Verification (Police Compliance)\nID Proof Type *\nAadhaar Card (UIDAI)\nID Proof Number / Document Ref *\nResidential Address\n3\nRate Override, Services & Front-Desk Discounts\nCustom Nightly Rate (₹)\nLeave blank to use base rate.\nSpecial Discount (₹)\nDiscount Reason\nOptional Services\nTraditional Temple Breakfast\n₹250\nKadiri Railway / Bus Station Pickup\n₹300\nExtra Mineral Water & Fresh Linen Set\n₹150\nFront Desk Operational Notes\nFRONT DESK BILLING\nWalk-In Stay Folio\nINR (₹)\nRoom Charge (1 Night)\n₹2,100\nStatutory GST (5%)\n₹105\nTOTAL PAYABLE\n₹2,205\nPAYMENT COLLECTION METHOD *\nBill Total: ₹2,205\nCASH\nUPI / QR\nCARD (POS)\nAmount Collected at Counter (₹) *\nCounter Cash Register Collection\n\nCollect physical Indian currency in front desk cash drawer\n\n₹0\nCASH TENDERED BY GUEST (₹)\nExact ₹0\n₹0\nCHANGE TO RETURN TO GUEST:\n₹ 0\nReady to deposit ₹0 in cash register\nCheck In Immediately\nAssign Room #... as occupied now & register arrival timestamp.\nCOMPLETE WALK-IN & CHECK-IN",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 4,
+          "tag": "button",
+          "name": "2 Adults",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 5,
+          "tag": "button",
+          "name": "0 Children",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 6,
+          "tag": "input",
+          "name": "e.g. Rajesh Kumar Sharma",
+          "type": "text",
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 7,
+          "tag": "input",
+          "name": "+91 98765 43210",
+          "type": "tel",
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 8,
+          "tag": "input",
+          "name": "guest@example.com",
+          "type": "email",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 9,
+          "tag": "input",
+          "name": "e.g. Bangalore, Karnataka",
+          "type": "text",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 10,
+          "tag": "button",
+          "name": "Aadhaar Card (UIDAI)",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 11,
+          "tag": "input",
+          "name": "e.g. 5482 1928 3847",
+          "type": "text",
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 12,
+          "tag": "input",
+          "name": "Permanent Address as per ID Proof",
+          "type": "text",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 13,
+          "tag": "input",
+          "name": "Rack: ₹2100",
+          "type": "number",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 14,
+          "tag": "input",
+          "name": "0",
+          "type": "number",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 15,
+          "tag": "input",
+          "name": "e.g. GM Courtesy / Corporate",
+          "type": "text",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 16,
+          "tag": "textarea",
+          "name": "e.g. Late departure requested, vegetarian breakfast preference, early morning call at 6 AM.",
+          "type": null,
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 17,
+          "tag": "button",
+          "name": "CASH",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 18,
+          "tag": "button",
+          "name": "UPI / QR",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 19,
+          "tag": "button",
+          "name": "CARD (POS)",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 20,
+          "tag": "input",
+          "name": "0",
+          "type": "number",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 21,
+          "tag": "input",
+          "name": "e.g. 2500",
+          "type": "number",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 22,
+          "tag": "button",
+          "name": "Exact ₹0",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 23,
+          "tag": "button",
+          "name": "₹0",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 24,
+          "tag": "input",
+          "name": "instantCheckIn",
+          "type": "checkbox",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 25,
+          "tag": "button",
+          "name": "COMPLETE WALK-IN & CHECK-IN",
+          "type": "submit",
+          "disabled": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 26,
+          "tag": "button",
+          "name": "Check In #...",
+          "type": "button",
+          "disabled": true,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 4487,
+      "url": "http://127.0.0.1:3006/admin/walk-in",
+      "headings": [
+        "Walk-in QR & Kiosk",
+        "Walk-in Guest QR & Reception Kiosk",
+        "Room Category & Physical Room Allocation",
+        "Guest Identification & Statutory Compliance",
+        "Rate Override, Services & Front-Desk Discounts",
+        "Walk-In Stay Folio"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    },
+    {
+      "page": "bookings",
+      "status": "PASS",
+      "actions": [
+        {
+          "page": "bookings",
+          "action": "Export CSV",
+          "status": "FAIL",
+          "error": "page.waitForEvent: Timeout 10000ms exceeded while waiting for event \"download\"\n=========================== logs ===========================\nwaiting for event \"download\"\n============================================================"
+        },
+        {
+          "page": "bookings",
+          "action": "All Sources",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": []
+        },
+        {
+          "page": "bookings",
+          "action": "Walk-In",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": []
+        },
+        {
+          "page": "bookings",
+          "action": "Website",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": []
+        },
+        {
+          "page": "bookings",
+          "action": "MakeMyTrip & OTAs",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": []
+        }
+      ],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "button",
+          "name": "+ RECORD OTA BOOKING",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 1,
+          "tag": "a",
+          "name": "+ NEW WALK-IN GUEST",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 2,
+          "tag": "button",
+          "name": "Export CSV",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 3,
+          "tag": "a",
+          "name": "Tape Chart",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 4,
+          "tag": "button",
+          "name": "All Sources",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 5,
+          "tag": "button",
+          "name": "Walk-In",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 6,
+          "tag": "button",
+          "name": "Website",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 7,
+          "tag": "button",
+          "name": "MakeMyTrip & OTAs",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 8,
+          "tag": "input",
+          "name": "Search reference, guest name, phone...",
+          "type": "text",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 9,
+          "tag": "button",
+          "name": "Search",
+          "type": "button",
+          "disabled": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 10,
+          "tag": "button",
+          "name": "All Lifecycle Statuses",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 8255,
+      "url": "http://127.0.0.1:3006/admin/bookings",
+      "headings": [
+        "Bookings",
+        "Room Bookings & Reservations"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    },
+    {
+      "page": "rooms/board",
+      "status": "PASS",
+      "actions": [
+        {
+          "page": "rooms/board",
+          "action": "Today",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": [
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/board",
+              "path": "/api/admin/cashbook",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/board",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/board",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/board",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/board",
+              "path": "/api/admin/operations",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/board",
+              "path": "/api/realtime/stream",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/board",
+              "path": "/api/admin/notifications/stream",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/board",
+              "path": "/api/admin/profile/language",
+              "method": "GET",
+              "status": 200
+            }
+          ]
+        },
+        {
+          "page": "rooms/board",
+          "action": "All Floors",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": []
+        },
+        {
+          "page": "rooms/board",
+          "action": "Floor 1",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": []
+        },
+        {
+          "page": "rooms/board",
+          "action": "Floor 2",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": []
+        },
+        {
+          "page": "rooms/board",
+          "action": "Floor 3",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": []
+        }
+      ],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "button",
+          "name": "Refresh Matrix",
+          "type": null,
+          "disabled": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 1,
+          "tag": "button",
+          "name": "Previous 7 Days",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 2,
+          "tag": "button",
+          "name": "Today",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 3,
+          "tag": "button",
+          "name": "Next 7 Days",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 4,
+          "tag": "input",
+          "name": "",
+          "type": "date",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 5,
+          "tag": "button",
+          "name": "All Floors",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 6,
+          "tag": "button",
+          "name": "Floor 1",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 7,
+          "tag": "button",
+          "name": "Floor 2",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 8,
+          "tag": "button",
+          "name": "Floor 3",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 9,
+          "tag": "button",
+          "name": "All Categories",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 10,
+          "tag": "button",
+          "name": "All Statuses",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 11,
+          "tag": "input",
+          "name": "Search Room Number or Guest Name...",
+          "type": "text",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 4112,
+      "url": "http://127.0.0.1:3006/admin/rooms/board",
+      "headings": [
+        "Room Tape Chart",
+        "Visual Room Tape Chart & Dynamic Matrix"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    },
+    {
+      "page": "rooms/inventory",
+      "status": "PASS",
+      "actions": [
+        {
+          "page": "rooms/inventory",
+          "action": "Refresh",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": [
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+              "path": "/api/admin/cashbook",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+              "path": "/api/admin/operations",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+              "path": "/api/realtime/stream",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+              "path": "/api/admin/notifications/stream",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+              "path": "/api/admin/profile/language",
+              "method": "GET",
+              "status": 200
+            }
+          ]
+        },
+        {
+          "page": "rooms/inventory",
+          "action": "All Floors",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": []
+        }
+      ],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "button",
+          "name": "Refresh",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 1,
+          "tag": "button",
+          "name": "All Floors",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 2,
+          "tag": "button",
+          "name": "All Statuses",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 3448,
+      "url": "http://127.0.0.1:3006/admin/rooms/inventory",
+      "headings": [
+        "Room Inventory",
+        "Room Inventory & Housekeeping Board"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    },
+    {
+      "page": "rooms/categories",
+      "status": "PASS",
+      "actions": [
+        {
+          "page": "rooms/categories",
+          "action": "Refresh",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": [
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/categories",
+              "path": "/api/admin/cashbook",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/categories",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/categories",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/categories",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/categories",
+              "path": "/api/admin/rooms/categories",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/categories",
+              "path": "/api/admin/rooms/categories",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/categories",
+              "path": "/api/admin/notifications/stream",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/categories",
+              "path": "/api/realtime/stream",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rooms/categories",
+              "path": "/api/admin/profile/language",
+              "method": "GET",
+              "status": 200
+            }
+          ]
+        }
+      ],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "button",
+          "name": "Refresh",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 2393,
+      "url": "http://127.0.0.1:3006/admin/rooms/categories",
+      "headings": [
+        "Room Categories",
+        "Room Categories"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    },
+    {
+      "page": "guests",
+      "status": "PASS",
+      "actions": [
+        {
+          "page": "guests",
+          "action": "Export CSV",
+          "status": "FAIL",
+          "error": "page.waitForEvent: Timeout 10000ms exceeded while waiting for event \"download\"\n=========================== logs ===========================\nwaiting for event \"download\"\n============================================================"
+        },
+        {
+          "page": "guests",
+          "action": "Silver (0)",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": [
+            {
+              "page": "http://127.0.0.1:3006/admin/guests",
+              "path": "/api/admin/profile/language",
+              "method": "GET",
+              "status": 200
+            }
+          ]
+        },
+        {
+          "page": "guests",
+          "action": "Blacklisted (0)",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": []
+        }
+      ],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "input",
+          "name": "Search guest name, phone, preference...",
+          "type": "text",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 1,
+          "tag": "button",
+          "name": "Export Guest Directory to CSV",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 2,
+          "tag": "button",
+          "name": "All Guests (0)",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 3,
+          "tag": "button",
+          "name": "Platinum VIP (0)",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 4,
+          "tag": "button",
+          "name": "Gold (0)",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 5,
+          "tag": "button",
+          "name": "Silver (0)",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 6,
+          "tag": "button",
+          "name": "Regular (0)",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 7,
+          "tag": "button",
+          "name": "Blacklisted (0)",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 3287,
+      "url": "http://127.0.0.1:3006/admin/guests",
+      "headings": [
+        "Guests",
+        "Guest Profiles & Lifetime Stays"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    },
+    {
+      "page": "housekeeping",
+      "status": "PASS",
+      "actions": [
+        {
+          "page": "housekeeping",
+          "action": "All Floors",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": [
+            {
+              "page": "http://127.0.0.1:3006/admin/housekeeping",
+              "path": "/api/admin/cashbook",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/housekeeping",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/housekeeping",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/housekeeping",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/housekeeping",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/housekeeping",
+              "path": "/api/admin/housekeeping",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/housekeeping",
+              "path": "/api/admin/housekeeping",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/housekeeping",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/housekeeping",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/housekeeping",
+              "path": "/api/realtime/stream",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/housekeeping",
+              "path": "/api/admin/notifications/stream",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/housekeeping",
+              "path": "/api/admin/profile/language",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/housekeeping",
+              "path": "/api/admin/profile/language",
+              "method": "GET",
+              "status": 200
+            }
+          ]
+        },
+        {
+          "page": "housekeeping",
+          "action": "Floor 1",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": []
+        },
+        {
+          "page": "housekeeping",
+          "action": "Floor 2",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": []
+        },
+        {
+          "page": "housekeeping",
+          "action": "Floor 3",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": []
+        }
+      ],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "button",
+          "name": "Print Morning Turnaround Worksheet",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 1,
+          "tag": "button",
+          "name": "Refresh Housekeeping Data",
+          "type": null,
+          "disabled": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 2,
+          "tag": "button",
+          "name": "All Floors",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 3,
+          "tag": "button",
+          "name": "Floor 1",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 4,
+          "tag": "button",
+          "name": "Floor 2",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 5,
+          "tag": "button",
+          "name": "Floor 3",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 6,
+          "tag": "button",
+          "name": "All Attendants",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 7,
+          "tag": "input",
+          "name": "Search room number or attendant...",
+          "type": "text",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 2961,
+      "url": "http://127.0.0.1:3006/admin/housekeeping",
+      "headings": [
+        "Housekeeping",
+        "Housekeeping Turnaround & Inspections",
+        "Turnaround Required",
+        "Cleaning In Progress",
+        "Clean & Certified Ready",
+        "SRI TAYI GRAND"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    },
+    {
+      "page": "maintenance",
+      "status": "PASS",
+      "actions": [],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "button",
+          "name": "Refresh",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 1,
+          "tag": "button",
+          "name": "+ NEW WORK ORDER",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 2,
+          "tag": "input",
+          "name": "Search room, issue, technician...",
+          "type": "text",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 3,
+          "tag": "button",
+          "name": "All Categories",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 4,
+          "tag": "button",
+          "name": "All Priorities",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 5,
+          "tag": "button",
+          "name": "All Statuses",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 3679,
+      "url": "http://127.0.0.1:3006/admin/maintenance",
+      "headings": [
+        "Maintenance",
+        "Property Maintenance & Out-of-Order (OOO) Blocks",
+        "Active Work Orders & Maintenance History"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    },
+    {
+      "page": "convention-hall",
+      "status": "PASS",
+      "actions": [],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "input",
+          "name": "Search quote ref, client, event...",
+          "type": "text",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 1,
+          "tag": "button",
+          "name": "Interactive Quotation Builder",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 2,
+          "tag": "button",
+          "name": "Generated Quotations (0)",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 3,
+          "tag": "button",
+          "name": "Incoming Enquiries (0)",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 4,
+          "tag": "form",
+          "name": "1\nClient & Event Schedule\nCLIENT FULL NAME *\nPHONE NUMBER (WHATSAPP) *\nEMAIL (FOR PROPOSAL PDF)\nEVENT OCCASION NAME *\nEVENT DATE *\nEXPECTED GUEST COUNT (PAX) *\n2\nSeating Layout Visualizer\nSelect arrangement scheme\nTheater Style\nUp to 500 Pax\n\nRow-based audience seating facing main stage. Ideal for conventions and talks.\n\nCluster / Round Table\nUp to 350 Pax\n\nRound banquet tables of 6-8 pax. Ideal for receptions and dinners.\n\nClassroom Style\nUp to 250 Pax\n\nParallel desks and chairs facing projector. Ideal for seminars and training.\n\nU-Shape Boardroom\nUp to 150 Pax\n\nOpen horseshoe layout for interactive executive discussions and summits.\n\n3\nAndhra Catering & Banquet F&B Package\nVeg Andhra Thali\n₹350 / plate\n\nTraditional Rayalaseema & Andhra banana-leaf meal\n\nGongura Pachadi & Ghee\nSambar & Rasam\nTwo Curries & Fry\nPoori & Sweet Payasam\nDeluxe Buffet\n₹550 / plate\n\nLavish multi-cuisine vegetarian spread with live counters\n\nPaneer Tikka Live Counter\nDum Biryani & Mirchi Ka Salan\nChinese Starter\n3 Desserts & Ice Cream\nSELECTED (300 PLATES = ₹1,65,000)\nRoyal Feast\n₹800 / plate\n\nGrand royal banquet with premium artisanal preparations\n\nWelcome Mocktails & Soups\nMughlai & Andhra Specialties\nAssorted Naan/Roti Live\nRasmalai, Gulab Jamun, Paan\nHigh Tea Spread\n₹180 / plate\n\nEvening snacks & hot beverages for meetings\n\nMirchi Bajji & Mysore Bonda\nVegetable Cutlets\nFilter Coffee & Masala Tea\nDry Fruit Cookies\nHall Rental Only\nNo Food\n\nVenue rental without catering (client arranges external F&B)\n\nOutside catering kitchen access\nPantry staging area\nCleaning fee applies\n4\nAV, Stage Decor & Amenities Checklist\nLED Screen / Projector\n16x9 4K Display with switcher\n₹ 15,000\nSound System & Mics\nJBL Line Array + 4 Cordless Mics\n₹ 8,000\nStage Floral Decoration\nFresh Marigold & Jasmine arch\n₹ 20,000\nDG Generator Backup\nContinuous 125 kVA diesel power\n₹ 5,000\nLIVE QUOTATION CALCULATION\nEvent Cost Breakdown\nHall Rental Charge:\n₹ 45,000\nCatering (300 x ₹550):\n₹ 1,65,000\nLED Display Projector:\n₹ 15,000\nSound System & Mics:\n₹ 8,000\nStage Floral Decoration:\n₹ 20,000\nDG Generator Diesel:\n₹ 5,000\nSubtotal Amount:\n₹ 2,58,000\n18% Banquet GST:\n+ ₹ 46,440\nTOTAL PAYABLE\nAll Taxes & GST Included\n₹ 3,04,440\nGENERATE OFFICIAL QUOTE",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 5,
+          "tag": "input",
+          "name": "e.g. Dr. K. Venkata Reddy",
+          "type": "text",
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 6,
+          "tag": "input",
+          "name": "+91 98480 12345",
+          "type": "text",
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 7,
+          "tag": "input",
+          "name": "client@gmail.com",
+          "type": "email",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 8,
+          "tag": "input",
+          "name": "e.g. Marriage Reception, Sangeet, Annual Conference",
+          "type": "text",
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 9,
+          "tag": "input",
+          "name": "",
+          "type": "date",
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 10,
+          "tag": "input",
+          "name": "",
+          "type": "number",
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 11,
+          "tag": "input",
+          "name": "",
+          "type": "checkbox",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 12,
+          "tag": "input",
+          "name": "",
+          "type": "checkbox",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 13,
+          "tag": "input",
+          "name": "",
+          "type": "checkbox",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 14,
+          "tag": "input",
+          "name": "",
+          "type": "checkbox",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 15,
+          "tag": "button",
+          "name": "GENERATE OFFICIAL QUOTE",
+          "type": "submit",
+          "disabled": false,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 8229,
+      "url": "http://127.0.0.1:3006/admin/convention-hall",
+      "headings": [
+        "Convention Hall",
+        "Sri Tayi Grand Convention Hall",
+        "Client & Event Schedule",
+        "Seating Layout Visualizer",
+        "Andhra Catering & Banquet F&B Package",
+        "AV, Stage Decor & Amenities Checklist",
+        "Event Cost Breakdown"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    },
+    {
+      "page": "enquiries",
+      "status": "PASS",
+      "actions": [],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "button",
+          "name": "Refresh pipeline",
+          "type": null,
+          "disabled": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 1,
+          "tag": "button",
+          "name": "Record New Enquiry",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 2,
+          "tag": "button",
+          "name": "Convention & Banquet Enquiries\n0",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 3,
+          "tag": "button",
+          "name": "General & Room Enquiries\n0",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 4,
+          "tag": "input",
+          "name": "Search by name, phone, ref...",
+          "type": "text",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 5,
+          "tag": "button",
+          "name": "All Statuses",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 6,
+          "tag": "button",
+          "name": "Reset active filters",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 5516,
+      "url": "http://127.0.0.1:3006/admin/enquiries",
+      "headings": [
+        "Enquiries",
+        "Customer Enquiries & Banquet Leads",
+        "No enquiries found"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    },
+    {
+      "page": "rfid",
+      "status": "PASS",
+      "actions": [
+        {
+          "page": "rfid",
+          "action": "Refresh Cards",
+          "status": "PASS",
+          "scope": "UI action executed; no persistence assertion",
+          "requests": [
+            {
+              "page": "http://127.0.0.1:3006/admin/rfid",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rfid",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rfid",
+              "path": "/api/admin/notifications",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rfid",
+              "path": "/api/admin/cashbook",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rfid",
+              "path": "/api/admin/rfid-logs",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rfid",
+              "path": "/api/rfid/cards",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rfid",
+              "path": "/api/rfid/cards",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rfid",
+              "path": "/api/admin/rfid-logs",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rfid",
+              "path": "/api/realtime/stream",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rfid",
+              "path": "/api/rfid/devices",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rfid",
+              "path": "/api/rfid/devices",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/rfid",
+              "path": "/api/admin/notifications/stream",
+              "method": "GET",
+              "status": 200
+            }
+          ]
+        }
+      ],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "button",
+          "name": "+ Super Admin Card",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 1,
+          "tag": "button",
+          "name": "+ Cleaner Card",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 2,
+          "tag": "button",
+          "name": "+ Issue Customer Card",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 3,
+          "tag": "button",
+          "name": "Recheck Be-Tech USB reader connection",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 4,
+          "tag": "button",
+          "name": "Refresh card registry and enrolled locks",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 5,
+          "tag": "button",
+          "name": "Configure Bridge Host IP",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 6,
+          "tag": "button",
+          "name": "Card Roles & Master Keys\n0",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 7,
+          "tag": "button",
+          "name": "Hardware Encoder Station",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 8,
+          "tag": "button",
+          "name": "Customer & All Keycards (0)",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 9,
+          "tag": "button",
+          "name": "Enrolled Door Locks (0)\n0 Active",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 10,
+          "tag": "button",
+          "name": "Access Tap Stream & Telemetry (0)",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 11,
+          "tag": "button",
+          "name": "Issue Super Admin Card",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 12,
+          "tag": "button",
+          "name": "Issue Cleaner Card",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 13,
+          "tag": "select",
+          "name": "",
+          "type": null,
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 14,
+          "tag": "select",
+          "name": "No cards registered yet",
+          "type": null,
+          "disabled": true,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 15,
+          "tag": "button",
+          "name": "Issue a Card to Test Tap",
+          "type": "button",
+          "disabled": true,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 8440,
+      "url": "http://127.0.0.1:3006/admin/rfid",
+      "headings": [
+        "RFID Management",
+        "RFID Keycards & Be-Tech Hardware Bridge",
+        "Super Admin Cards",
+        "Housekeeping Cleaning Cards"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    }
+  ],
+  "actions": [
+    {
+      "page": "login",
+      "action": "empty password and removed instant enter",
+      "status": "PASS"
+    },
+    {
+      "page": "login",
+      "action": "invalid password",
+      "status": "PASS"
+    },
+    {
+      "page": "login",
+      "action": "valid configured credentials",
+      "status": "PASS"
+    },
+    {
+      "page": "dashboard",
+      "action": "Today",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": []
+    },
+    {
+      "page": "dashboard",
+      "action": "Last 7 Days",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": []
+    },
+    {
+      "page": "dashboard",
+      "action": "This Month",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": []
+    },
+    {
+      "page": "analytics",
+      "action": "Today",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": [
+        {
+          "page": "http://127.0.0.1:3006/admin/analytics",
+          "path": "/api/admin/cashbook",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/analytics",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/analytics",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/analytics",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/analytics",
+          "path": "/api/admin/reports",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/analytics",
+          "path": "/api/admin/reports",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/analytics",
+          "path": "/api/admin/notifications/stream",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/analytics",
+          "path": "/api/realtime/stream",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/analytics",
+          "path": "/api/admin/profile/language",
+          "method": "GET",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "page": "analytics",
+      "action": "7 Days",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": [
+        {
+          "page": "http://127.0.0.1:3006/admin/analytics",
+          "path": "/api/admin/reports",
+          "method": "GET",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "page": "analytics",
+      "action": "30 Days",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": [
+        {
+          "page": "http://127.0.0.1:3006/admin/analytics",
+          "path": "/api/admin/reports",
+          "method": "GET",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "page": "analytics",
+      "action": "90 Days",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": [
+        {
+          "page": "http://127.0.0.1:3006/admin/analytics",
+          "path": "/api/admin/reports",
+          "method": "GET",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "page": "analytics",
+      "action": "Year-to-Date",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": [
+        {
+          "page": "http://127.0.0.1:3006/admin/analytics",
+          "path": "/api/admin/reports",
+          "method": "GET",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "page": "reports",
+      "action": "Export CSV",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": [
+        {
+          "page": "http://127.0.0.1:3006/admin/reports",
+          "path": "/api/admin/cashbook",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/reports",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/reports",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/reports",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/reports",
+          "path": "/api/admin/operations",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/reports",
+          "path": "/api/realtime/stream",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/reports",
+          "path": "/api/admin/notifications/stream",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/reports",
+          "path": "/api/admin/daily-closing",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/reports",
+          "path": "/api/admin/profile/language",
+          "method": "GET",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "page": "bookings",
+      "action": "Export CSV",
+      "status": "FAIL",
+      "error": "page.waitForEvent: Timeout 10000ms exceeded while waiting for event \"download\"\n=========================== logs ===========================\nwaiting for event \"download\"\n============================================================"
+    },
+    {
+      "page": "bookings",
+      "action": "All Sources",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": []
+    },
+    {
+      "page": "bookings",
+      "action": "Walk-In",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": []
+    },
+    {
+      "page": "bookings",
+      "action": "Website",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": []
+    },
+    {
+      "page": "bookings",
+      "action": "MakeMyTrip & OTAs",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": []
+    },
+    {
+      "page": "rooms/board",
+      "action": "Today",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": [
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/board",
+          "path": "/api/admin/cashbook",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/board",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/board",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/board",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/board",
+          "path": "/api/admin/operations",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/board",
+          "path": "/api/realtime/stream",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/board",
+          "path": "/api/admin/notifications/stream",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/board",
+          "path": "/api/admin/profile/language",
+          "method": "GET",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "page": "rooms/board",
+      "action": "All Floors",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": []
+    },
+    {
+      "page": "rooms/board",
+      "action": "Floor 1",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": []
+    },
+    {
+      "page": "rooms/board",
+      "action": "Floor 2",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": []
+    },
+    {
+      "page": "rooms/board",
+      "action": "Floor 3",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": []
+    },
+    {
+      "page": "rooms/inventory",
+      "action": "Refresh",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": [
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+          "path": "/api/admin/cashbook",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+          "path": "/api/admin/operations",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+          "path": "/api/realtime/stream",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+          "path": "/api/admin/notifications/stream",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+          "path": "/api/admin/profile/language",
+          "method": "GET",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "page": "rooms/inventory",
+      "action": "All Floors",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": []
+    },
+    {
+      "page": "rooms/categories",
+      "action": "Refresh",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": [
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/categories",
+          "path": "/api/admin/cashbook",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/categories",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/categories",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/categories",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/categories",
+          "path": "/api/admin/rooms/categories",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/categories",
+          "path": "/api/admin/rooms/categories",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/categories",
+          "path": "/api/admin/notifications/stream",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/categories",
+          "path": "/api/realtime/stream",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rooms/categories",
+          "path": "/api/admin/profile/language",
+          "method": "GET",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "page": "guests",
+      "action": "Export CSV",
+      "status": "FAIL",
+      "error": "page.waitForEvent: Timeout 10000ms exceeded while waiting for event \"download\"\n=========================== logs ===========================\nwaiting for event \"download\"\n============================================================"
+    },
+    {
+      "page": "guests",
+      "action": "Silver (0)",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": [
+        {
+          "page": "http://127.0.0.1:3006/admin/guests",
+          "path": "/api/admin/profile/language",
+          "method": "GET",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "page": "guests",
+      "action": "Blacklisted (0)",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": []
+    },
+    {
+      "page": "housekeeping",
+      "action": "All Floors",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": [
+        {
+          "page": "http://127.0.0.1:3006/admin/housekeeping",
+          "path": "/api/admin/cashbook",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/housekeeping",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/housekeeping",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/housekeeping",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/housekeeping",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/housekeeping",
+          "path": "/api/admin/housekeeping",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/housekeeping",
+          "path": "/api/admin/housekeeping",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/housekeeping",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/housekeeping",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/housekeeping",
+          "path": "/api/realtime/stream",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/housekeeping",
+          "path": "/api/admin/notifications/stream",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/housekeeping",
+          "path": "/api/admin/profile/language",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/housekeeping",
+          "path": "/api/admin/profile/language",
+          "method": "GET",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "page": "housekeeping",
+      "action": "Floor 1",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": []
+    },
+    {
+      "page": "housekeeping",
+      "action": "Floor 2",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": []
+    },
+    {
+      "page": "housekeeping",
+      "action": "Floor 3",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": []
+    },
+    {
+      "page": "rfid",
+      "action": "Refresh Cards",
+      "status": "PASS",
+      "scope": "UI action executed; no persistence assertion",
+      "requests": [
+        {
+          "page": "http://127.0.0.1:3006/admin/rfid",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rfid",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rfid",
+          "path": "/api/admin/notifications",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rfid",
+          "path": "/api/admin/cashbook",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rfid",
+          "path": "/api/admin/rfid-logs",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rfid",
+          "path": "/api/rfid/cards",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rfid",
+          "path": "/api/rfid/cards",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rfid",
+          "path": "/api/admin/rfid-logs",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rfid",
+          "path": "/api/realtime/stream",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rfid",
+          "path": "/api/rfid/devices",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rfid",
+          "path": "/api/rfid/devices",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/rfid",
+          "path": "/api/admin/notifications/stream",
+          "method": "GET",
+          "status": 200
+        }
+      ]
+    }
+  ],
+  "network": [
+    {
+      "page": "http://127.0.0.1:3006/admin/login",
+      "path": "/api/admin/profile/language",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/login",
+      "path": "/api/admin/auth",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/login",
+      "path": "/api/admin/auth",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/dashboard",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/dashboard",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/dashboard",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/dashboard",
+      "path": "/api/admin/operations",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/dashboard",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/dashboard",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/dashboard",
+      "path": "/api/admin/operations",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/dashboard",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/dashboard",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/dashboard",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/analytics",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/analytics",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/analytics",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/analytics",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/analytics",
+      "path": "/api/admin/reports",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/analytics",
+      "path": "/api/admin/reports",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/analytics",
+      "path": "/api/admin/notifications/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/analytics",
+      "path": "/api/realtime/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/analytics",
+      "path": "/api/admin/profile/language",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/analytics",
+      "path": "/api/admin/reports",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/analytics",
+      "path": "/api/admin/reports",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/analytics",
+      "path": "/api/admin/reports",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/analytics",
+      "path": "/api/admin/reports",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/reports",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/reports",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/reports",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/reports",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/reports",
+      "path": "/api/admin/operations",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/reports",
+      "path": "/api/realtime/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/reports",
+      "path": "/api/admin/notifications/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/reports",
+      "path": "/api/admin/daily-closing",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/reports",
+      "path": "/api/admin/profile/language",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/front-desk",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/front-desk",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/front-desk",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/front-desk",
+      "path": "/api/admin/operations",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/front-desk",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/walk-in",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/walk-in",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/walk-in",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/walk-in",
+      "path": "/api/admin/operations",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/walk-in",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/bookings",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/bookings",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/bookings",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/bookings",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/bookings",
+      "path": "/api/admin/operations",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/bookings",
+      "path": "/api/realtime/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/bookings",
+      "path": "/api/admin/notifications/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/bookings",
+      "path": "/api/admin/profile/language",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/board",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/board",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/board",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/board",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/board",
+      "path": "/api/admin/operations",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/board",
+      "path": "/api/realtime/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/board",
+      "path": "/api/admin/notifications/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/board",
+      "path": "/api/admin/profile/language",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+      "path": "/api/admin/operations",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+      "path": "/api/realtime/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+      "path": "/api/admin/notifications/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/inventory",
+      "path": "/api/admin/profile/language",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/categories",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/categories",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/categories",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/categories",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/categories",
+      "path": "/api/admin/rooms/categories",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/categories",
+      "path": "/api/admin/rooms/categories",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/categories",
+      "path": "/api/admin/notifications/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/categories",
+      "path": "/api/realtime/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rooms/categories",
+      "path": "/api/admin/profile/language",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/guests",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/guests",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/guests",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/guests",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/guests",
+      "path": "/api/admin/guests",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/guests",
+      "path": "/api/realtime/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/guests",
+      "path": "/api/admin/notifications/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/guests",
+      "path": "/api/admin/profile/language",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/admin/housekeeping",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/admin/housekeeping",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/realtime/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/admin/notifications/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/admin/profile/language",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/admin/profile/language",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/maintenance",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/maintenance",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/maintenance",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/maintenance",
+      "path": "/api/admin/maintenance",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/maintenance",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/convention-hall",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/convention-hall",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/convention-hall",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/convention-hall",
+      "path": "/api/admin/convention-hall",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/convention-hall",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/enquiries",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/enquiries",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/enquiries",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/enquiries",
+      "path": "/api/admin/enquiries",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/enquiries",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/admin/rfid-logs",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/rfid/cards",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/rfid/cards",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/admin/rfid-logs",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/realtime/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/rfid/devices",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/rfid/devices",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/admin/notifications/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/admin/rfid-logs",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/rfid/cards",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/rfid/bridge",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/rfid/devices",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/rfid/bridge",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/rfid/cards",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/admin/rfid-logs",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/rfid/devices",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/rfid/bridge",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/admin/profile/language",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/rfid/cards",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/admin/rfid-logs",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/rfid/devices",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/rfid",
+      "path": "/api/rfid/bridge",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "errors": [
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "message": "Hydration failed because the server rendered text didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:\n\n- A server/client branch `if (typeof window !== 'undefined')`.\n- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.\n- Date formatting in a user's locale which doesn't match the server.\n- External changing data without sending a snapshot of it along with the HTML.\n- Invalid HTML tag nesting.\n\nIt can also happen if the client has a browser extension installed which messes with the HTML before React loaded.\n\nhttps://react.dev/link/hydration-mismatch\n\n  ...\n    <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>\n      <RedirectBoundary>\n        <RedirectErrorBoundary router={{...}}>\n          <InnerLayoutRouter url=\"/admin/hou...\" tree={[...]} cacheNode={{lazyData:null, ...}} segmentPath={[...]}>\n            <SegmentViewNode type=\"page\" pagePath=\"admin/hous...\">\n              <SegmentTrieNode>\n              <ClientPageRoot Component={function HousekeepingAdminPage} searchParams={{}} params={{}}>\n                <HousekeepingAdminPage params={Promise} searchParams={Promise}>\n                  <div className=\"space-y-6 ...\">\n                    <div>\n                    <div>\n                    <div>\n                    <div>\n                    <div className=\"hidden pri...\">\n                      <div className=\"border-b-2...\">\n                        <div className=\"flex items...\">\n                          <div>\n                          <div className=\"text-right...\">\n                            <p>\n                            <p>\n+                             11/11/2026, 3:30:44 pm\n-                             11/11/2026, 3:30:43 pm\n                      ...\n            ...\n          ...\n"
+    }
+  ]
+}

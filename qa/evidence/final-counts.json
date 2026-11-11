@@ -1,0 +1,32 @@
+{
+  "updatedAt": "2026-11-11T10:39:19.873Z",
+  "sourcePages": 52,
+  "apiRoutes": 61,
+  "controls": 1221,
+  "tags": {
+    "NextLink": 75,
+    "button": 621,
+    "input": 245,
+    "div": 50,
+    "form": 53,
+    "LuxurySelect": 68,
+    "tr": 1,
+    "Link": 15,
+    "a": 47,
+    "select": 16,
+    "textarea": 20,
+    "td": 1,
+    "LuxuryDateRangePicker": 3,
+    "LuxuryDatePicker": 5,
+    "h4": 1
+  },
+  "rows": 1577,
+  "counts": {
+    "NOT TESTED": 1330,
+    "PASS": 177,
+    "PARTIALLY CONNECTED": 56,
+    "FAIL": 6,
+    "BLOCKED": 8
+  },
+  "frozenFilesUnchanged": true
+}

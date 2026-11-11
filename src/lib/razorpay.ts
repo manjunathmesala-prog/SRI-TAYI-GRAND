@@ -21,7 +21,8 @@ export interface RazorpayOrderResult {
  * Mitigates IEEE 754 floating-point rounding errors (e.g. 10.50 -> 1050, 1800 -> 180000).
  */
 export function inrToPaise(amountInRupees: number): number {
-  if (typeof amountInRupees !== 'number' || isNaN(amountInRupees) || amountInRupees < 0) {
+  if (typeof amountInRupees !== 'number' || !Number.isFinite(amountInRupees) || amountInRupees < 0 ||
+      !Number.isSafeInteger(Math.round(amountInRupees * 100))) {
     throw new Error(`[FINTECH INTEGRITY ERROR] Invalid amount in Rupees: ${amountInRupees}`);
   }
   return Math.round(Number((amountInRupees * 100).toFixed(2)));
@@ -31,7 +32,8 @@ export function inrToPaise(amountInRupees: number): number {
  * Converts subunits (Paise) back to INR (Rupees).
  */
 export function paiseToInr(amountInPaise: number): number {
-  if (typeof amountInPaise !== 'number' || isNaN(amountInPaise) || amountInPaise < 0) {
+  if (typeof amountInPaise !== 'number' || !Number.isFinite(amountInPaise) || amountInPaise < 0 ||
+      !Number.isSafeInteger(Math.round(amountInPaise))) {
     throw new Error(`[FINTECH INTEGRITY ERROR] Invalid amount in Paise: ${amountInPaise}`);
   }
   return Math.round(amountInPaise) / 100;
@@ -75,11 +77,7 @@ export async function createRazorpayOrder(
   }
 
   const key_id = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-  const isPlaceholderOrTest =
-    !key_id ||
-    key_id === 'rzp_test_placeholder_key' ||
-    key_id.startsWith('rzp_test_placeholder') ||
-    process.env.NODE_ENV === 'test';
+  const isPlaceholderOrTest = process.env.NODE_ENV === 'test';
 
   if (isPlaceholderOrTest) {
     return {
@@ -89,6 +87,10 @@ export async function createRazorpayOrder(
       receipt: options.receipt.substring(0, 40),
       status: 'created',
     };
+  }
+
+  if (!key_id || key_id.startsWith('rzp_test_placeholder')) {
+    throw new Error('[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order.');
   }
 
   const razorpay = getRazorpayClient();

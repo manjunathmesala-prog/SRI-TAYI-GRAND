@@ -1,0 +1,161 @@
+
+> sri-tayi-grand@1.0.0 build
+> next build
+
+   ▲ Next.js 15.5.29
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 22.2s
+   Linting and checking validity of types ...
+
+./src/app/admin/walk-in/page.tsx
+249:6  Warning: React Hook useEffect has a missing dependency: 'fetchData'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+299:6  Warning: React Hook useEffect has a missing dependency: 'amountPaid'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/components/admin/SuperAdminNotificationBell.tsx
+77:6  Warning: React Hook useCallback has a missing dependency: 'activeTab'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+141:6  Warning: React Hook useEffect has a missing dependency: 'fetchNotifications'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+./src/lib/realtime-client.ts
+221:6  Warning: React Hook useEffect has a missing dependency: 'filterTypes'. Either include it or remove the dependency array.  react-hooks/exhaustive-deps
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules
+   Collecting page data ...
+   Generating static pages (0/67) ...
+   Generating static pages (16/67) 
+   Generating static pages (33/67) 
+   Generating static pages (50/67) 
+ ✓ Generating static pages (67/67)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                   Size  First Load JS
+┌ ƒ /                                        11 kB         132 kB
+├ ○ /_not-found                              293 B         103 kB
+├ ○ /about                                   138 B         119 kB
+├ ○ /admin                                   293 B         103 kB
+├ ○ /admin/403                             2.39 kB         109 kB
+├ ○ /admin/accounting                      12.7 kB         118 kB
+├ ○ /admin/analytics                       5.53 kB         111 kB
+├ ○ /admin/audit-logs                      5.73 kB         111 kB
+├ ○ /admin/bookings                          188 B         172 kB
+├ ○ /admin/cashbook                        12.7 kB         131 kB
+├ ○ /admin/channels                        7.34 kB         116 kB
+├ ○ /admin/content                          3.4 kB         106 kB
+├ ○ /admin/convention-hall                 13.7 kB         132 kB
+├ ○ /admin/daily-closing                   9.22 kB         115 kB
+├ ○ /admin/dashboard                       16.7 kB         156 kB
+├ ○ /admin/enquiries                       6.41 kB         115 kB
+├ ○ /admin/expenses                        7.87 kB         113 kB
+├ ○ /admin/front-desk                      14.4 kB         179 kB
+├ ○ /admin/guests                          7.37 kB         126 kB
+├ ○ /admin/housekeeping                    10.2 kB         116 kB
+├ ○ /admin/login                           6.91 kB         131 kB
+├ ○ /admin/maintenance                     12.9 kB         131 kB
+├ ○ /admin/payments                        8.75 kB         131 kB
+├ ○ /admin/pricing                         10.1 kB         115 kB
+├ ○ /admin/reports                         6.47 kB         125 kB
+├ ○ /admin/reservations                      187 B         172 kB
+├ ○ /admin/reviews                         7.05 kB         115 kB
+├ ○ /admin/rfid                            23.3 kB         139 kB
+├ ○ /admin/rfid/standee                    3.43 kB         110 kB
+├ ○ /admin/rooms                             293 B         103 kB
+├ ○ /admin/rooms/board                     13.1 kB         127 kB
+├ ○ /admin/rooms/categories                4.92 kB         126 kB
+├ ○ /admin/rooms/inventory                 7.08 kB         125 kB
+├ ○ /admin/settings                        4.76 kB         120 kB
+├ ○ /admin/staff                           5.39 kB         127 kB
+├ ○ /admin/staff/attendance                6.34 kB         115 kB
+├ ○ /admin/walk-in                         22.2 kB         153 kB
+├ ○ /amenities                               138 B         119 kB
+├ ƒ /api/admin/accounting                    293 B         103 kB
+├ ƒ /api/admin/audit-logs                    293 B         103 kB
+├ ƒ /api/admin/auth                          293 B         103 kB
+├ ƒ /api/admin/bookings                      293 B         103 kB
+├ ƒ /api/admin/bookings/[id]/charges         293 B         103 kB
+├ ƒ /api/admin/cashbook                      293 B         103 kB
+├ ƒ /api/admin/channels                      293 B         103 kB
+├ ƒ /api/admin/convention-hall               293 B         103 kB
+├ ƒ /api/admin/daily-closing                 293 B         103 kB
+├ ƒ /api/admin/enquiries                     293 B         103 kB
+├ ƒ /api/admin/enquiries/[id]                293 B         103 kB
+├ ƒ /api/admin/expenses                      293 B         103 kB
+├ ƒ /api/admin/guests                        293 B         103 kB
+├ ƒ /api/admin/housekeeping                  293 B         103 kB
+├ ƒ /api/admin/maintenance                   293 B         103 kB
+├ ƒ /api/admin/notifications                 293 B         103 kB
+├ ƒ /api/admin/notifications/stream          293 B         103 kB
+├ ƒ /api/admin/operations                    293 B         103 kB
+├ ƒ /api/admin/payments                      293 B         103 kB
+├ ƒ /api/admin/payments/[id]/refund          293 B         103 kB
+├ ƒ /api/admin/payments/create-request       293 B         103 kB
+├ ƒ /api/admin/payments/reconciliation       293 B         103 kB
+├ ƒ /api/admin/pricing                       293 B         103 kB
+├ ƒ /api/admin/profile/language              293 B         103 kB
+├ ƒ /api/admin/reports                       293 B         103 kB
+├ ƒ /api/admin/reservations                  293 B         103 kB
+├ ƒ /api/admin/reservations/ota              293 B         103 kB
+├ ƒ /api/admin/rfid-logs                     293 B         103 kB
+├ ƒ /api/admin/rooms                         293 B         103 kB
+├ ƒ /api/admin/rooms/categories              293 B         103 kB
+├ ƒ /api/admin/rooms/inventory               293 B         103 kB
+├ ƒ /api/admin/settings                      293 B         103 kB
+├ ƒ /api/admin/staff                         293 B         103 kB
+├ ƒ /api/admin/staff/attendance              293 B         103 kB
+├ ƒ /api/admin/walk-ins/assign-and-encode    293 B         103 kB
+├ ƒ /api/admin/walk-ins/queue                293 B         103 kB
+├ ƒ /api/availability/check                  293 B         103 kB
+├ ƒ /api/bookings/cancel                     293 B         103 kB
+├ ƒ /api/bookings/create                     293 B         103 kB
+├ ƒ /api/bookings/reschedule                 293 B         103 kB
+├ ƒ /api/bookings/verify                     293 B         103 kB
+├ ƒ /api/contact                             293 B         103 kB
+├ ƒ /api/convention-hall/enquiry             293 B         103 kB
+├ ƒ /api/newsletter                          293 B         103 kB
+├ ƒ /api/payments/webhook                    293 B         103 kB
+├ ƒ /api/razorpay/create-order               293 B         103 kB
+├ ƒ /api/razorpay/verify-payment             293 B         103 kB
+├ ƒ /api/razorpay/webhook                    293 B         103 kB
+├ ƒ /api/realtime/stream                     293 B         103 kB
+├ ƒ /api/reviews                             293 B         103 kB
+├ ƒ /api/rfid/bridge                         293 B         103 kB
+├ ƒ /api/rfid/cards                          293 B         103 kB
+├ ƒ /api/rfid/devices                        293 B         103 kB
+├ ƒ /api/rfid/download-setup                 293 B         103 kB
+├ ƒ /api/rfid/history                        293 B         103 kB
+├ ƒ /api/rfid/tap                            293 B         103 kB
+├ ƒ /api/rooms/[roomNumber]/rfid-history     293 B         103 kB
+├ ƒ /api/walk-in/book                        293 B         103 kB
+├ ƒ /api/walk-in/pickup-status               293 B         103 kB
+├ ƒ /api/walk-in/standee-qr                  293 B         103 kB
+├ ƒ /api/walk-in/verify-token                293 B         103 kB
+├ ○ /availability                          3.45 kB         125 kB
+├ ○ /booking                               2.96 kB         119 kB
+├ ○ /booking/checkout                      5.74 kB         121 kB
+├ ○ /booking/confirmation                    293 B         103 kB
+├ ƒ /booking/confirmation/[reference]      7.28 kB         123 kB
+├ ○ /booking/pickup                          293 B         103 kB
+├ ƒ /booking/pickup/[code]                  4.9 kB         117 kB
+├ ○ /contact                               8.16 kB         124 kB
+├ ○ /convention-hall                        5.4 kB         127 kB
+├ ○ /gallery                               2.94 kB         126 kB
+├ ○ /manifest.webmanifest                    293 B         103 kB
+├ ○ /policies                              1.05 kB         117 kB
+├ ƒ /rooms                                 4.86 kB         123 kB
+├ ƒ /rooms/[slug]                          6.76 kB         135 kB
+├ ○ /testimonials                          5.43 kB         124 kB
+└ ○ /walk-in                                9.6 kB         117 kB
++ First Load JS shared by all               103 kB
+  ├ chunks/1255-d8a1861c775d9bcc.js        46.3 kB
+  ├ chunks/4bd1b696-100b9d70ed4e49c1.js    54.2 kB
+  └ other shared chunks (total)            2.01 kB
+
+
+ƒ Middleware                               35.1 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

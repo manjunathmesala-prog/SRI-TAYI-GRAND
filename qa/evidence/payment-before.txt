@@ -1,0 +1,54 @@
+
+ RUN  v5.1.0 C:/Users/malle/Downloads/sri tayi grand
+
+ ❯ qa/payment-boundaries.test.ts (2 tests | 2 failed) 26ms
+   ❯ Payment configuration and numeric boundaries (2)
+     × rejects non-finite and unsafe payment amounts 10ms
+     × does not fabricate a provider order when production credentials are missing 11ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  qa/payment-boundaries.test.ts > Payment configuration and numeric boundaries > rejects non-finite and unsafe payment amounts
+AssertionError: expected [Function] to throw an error
+ ❯ qa/payment-boundaries.test.ts:6:40
+      4| describe('Payment configuration and numeric boundaries', () => {
+      5|   it('rejects non-finite and unsafe payment amounts', () => {
+      6|     expect(() => inrToPaise(Infinity)).toThrow();
+       |                                        ^
+      7|     expect(() => inrToPaise(Number.MAX_SAFE_INTEGER)).toThrow();
+      8|     expect(() => paiseToInr(Infinity)).toThrow();
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  qa/payment-boundaries.test.ts > Payment configuration and numeric boundaries > does not fabricate a provider order when production credentials are missing
+AssertionError: promise resolved "{ …(5) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "amount": 100,
++   "currency": "INR",
++   "id": "order_test_1794391134436_jvcii",
++   "receipt": "isolated-config-check",
++   "status": "created",
+  }
+
+ ❯ qa/payment-boundaries.test.ts:16:89
+     14|     vi.stubEnv('RAZORPAY_KEY_SECRET', '');
+     15|     try {
+     16|       await expect(createRazorpayOrder({ amount: 1, receipt: 'isolated…
+       |                                                                                         ^
+     17|     } finally { vi.unstubAllEnvs(); }
+     18|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed (2)
+   Start at  15:28:53
+   Duration  983ms (import 67%, transform 21%, worker 6%, tests 6%)
+

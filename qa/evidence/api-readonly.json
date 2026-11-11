@@ -1,0 +1,803 @@
+[
+  {
+    "route": "/api/admin/accounting",
+    "authenticated": false,
+    "status": 403,
+    "ms": 521,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/accounting",
+    "authenticated": true,
+    "status": 200,
+    "ms": 307,
+    "success": true,
+    "keys": [
+      "success",
+      "glAccounts",
+      "journalEntries",
+      "pnl",
+      "balanceSheet"
+    ],
+    "counts": {
+      "glAccounts": 14,
+      "journalEntries": 1
+    }
+  },
+  {
+    "route": "/api/admin/audit-logs",
+    "authenticated": false,
+    "status": 403,
+    "ms": 372,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/audit-logs",
+    "authenticated": true,
+    "status": 200,
+    "ms": 308,
+    "success": true,
+    "keys": [
+      "success",
+      "logs",
+      "total",
+      "limit"
+    ],
+    "counts": {
+      "logs": 1
+    }
+  },
+  {
+    "route": "/api/admin/bookings",
+    "authenticated": false,
+    "status": 403,
+    "ms": 294,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/bookings",
+    "authenticated": true,
+    "status": 200,
+    "ms": 378,
+    "success": true,
+    "keys": [
+      "success",
+      "bookings",
+      "metrics"
+    ],
+    "counts": {
+      "bookings": 5
+    }
+  },
+  {
+    "route": "/api/admin/cashbook",
+    "authenticated": false,
+    "status": 403,
+    "ms": 304,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/cashbook",
+    "authenticated": true,
+    "status": 200,
+    "ms": 1316,
+    "success": true,
+    "keys": [
+      "success",
+      "activeShift",
+      "balance",
+      "openingFloat",
+      "totalCashIn",
+      "totalCashOut",
+      "shifts",
+      "transactions"
+    ],
+    "counts": {
+      "shifts": 1,
+      "transactions": 1
+    }
+  },
+  {
+    "route": "/api/admin/channels",
+    "authenticated": false,
+    "status": 403,
+    "ms": 312,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/channels",
+    "authenticated": true,
+    "status": 200,
+    "ms": 284,
+    "success": true,
+    "keys": [
+      "success",
+      "stats",
+      "channels",
+      "syncLogs",
+      "categories"
+    ],
+    "counts": {
+      "channels": 5,
+      "syncLogs": 2,
+      "categories": 4
+    }
+  },
+  {
+    "route": "/api/admin/convention-hall",
+    "authenticated": false,
+    "status": 403,
+    "ms": 470,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/convention-hall",
+    "authenticated": true,
+    "status": 200,
+    "ms": 280,
+    "success": true,
+    "keys": [
+      "success",
+      "enquiries",
+      "quotes"
+    ],
+    "counts": {
+      "enquiries": 2,
+      "quotes": 2
+    }
+  },
+  {
+    "route": "/api/admin/daily-closing",
+    "authenticated": false,
+    "status": 403,
+    "ms": 319,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/daily-closing",
+    "authenticated": true,
+    "status": 200,
+    "ms": 431,
+    "success": true,
+    "keys": [
+      "success",
+      "summary",
+      "history"
+    ],
+    "counts": {
+      "history": 1
+    }
+  },
+  {
+    "route": "/api/admin/enquiries",
+    "authenticated": false,
+    "status": 403,
+    "ms": 313,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/enquiries",
+    "authenticated": true,
+    "status": 200,
+    "ms": 429,
+    "success": true,
+    "keys": [
+      "success",
+      "enquiries",
+      "contactEnquiries",
+      "counts"
+    ],
+    "counts": {
+      "enquiries": 5,
+      "contactEnquiries": 3
+    }
+  },
+  {
+    "route": "/api/admin/expenses",
+    "authenticated": false,
+    "status": 403,
+    "ms": 300,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/expenses",
+    "authenticated": true,
+    "status": 200,
+    "ms": 295,
+    "success": true,
+    "keys": [
+      "success",
+      "count",
+      "totalAmount",
+      "byCategory",
+      "expenses"
+    ],
+    "counts": {
+      "expenses": 3
+    }
+  },
+  {
+    "route": "/api/admin/guests",
+    "authenticated": false,
+    "status": 403,
+    "ms": 305,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/guests",
+    "authenticated": true,
+    "status": 200,
+    "ms": 300,
+    "success": true,
+    "keys": [
+      "success",
+      "guests",
+      "count"
+    ],
+    "counts": {
+      "guests": 3
+    }
+  },
+  {
+    "route": "/api/admin/housekeeping",
+    "authenticated": false,
+    "status": 403,
+    "ms": 352,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/housekeeping",
+    "authenticated": true,
+    "status": 200,
+    "ms": 308,
+    "success": true,
+    "keys": [
+      "success",
+      "rooms",
+      "housekeepingStaff"
+    ],
+    "counts": {
+      "rooms": 24,
+      "housekeepingStaff": 3
+    }
+  },
+  {
+    "route": "/api/admin/maintenance",
+    "authenticated": false,
+    "status": 403,
+    "ms": 287,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/maintenance",
+    "authenticated": true,
+    "status": 200,
+    "ms": 450,
+    "success": true,
+    "keys": [
+      "success",
+      "stats",
+      "tickets",
+      "rooms"
+    ],
+    "counts": {
+      "tickets": 3,
+      "rooms": 24
+    }
+  },
+  {
+    "route": "/api/admin/operations",
+    "authenticated": false,
+    "status": 403,
+    "ms": 314,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/operations",
+    "authenticated": true,
+    "status": 200,
+    "ms": 302,
+    "success": true,
+    "keys": [
+      "success",
+      "timestamp",
+      "currentEventId",
+      "rooms",
+      "categories",
+      "bookings",
+      "payments",
+      "expenses",
+      "dailyClosings",
+      "cashShifts",
+      "cashTransactions",
+      "cashBalance",
+      "maintenanceTickets",
+      "rfidCards",
+      "rfidDevices",
+      "rfidEvents",
+      "otaChannels",
+      "channelSyncLogs",
+      "pricingRules",
+      "glAccounts",
+      "journalEntries",
+      "auditLogs",
+      "staffAttendance",
+      "settings"
+    ],
+    "counts": {
+      "rooms": 24,
+      "categories": 4,
+      "bookings": 5,
+      "payments": 3,
+      "expenses": 3,
+      "dailyClosings": 1,
+      "cashShifts": 1,
+      "cashTransactions": 1,
+      "maintenanceTickets": 3,
+      "rfidCards": 36,
+      "rfidDevices": 27,
+      "rfidEvents": 100,
+      "otaChannels": 5,
+      "channelSyncLogs": 2,
+      "pricingRules": 3,
+      "glAccounts": 14,
+      "journalEntries": 1,
+      "auditLogs": 1,
+      "staffAttendance": 3
+    }
+  },
+  {
+    "route": "/api/admin/payments/reconciliation",
+    "authenticated": false,
+    "status": 403,
+    "ms": 277,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/payments/reconciliation",
+    "authenticated": true,
+    "status": 200,
+    "ms": 287,
+    "success": true,
+    "keys": [
+      "success",
+      "reconciledCount",
+      "unreconciledCount",
+      "totalReconciledAmount",
+      "payments"
+    ],
+    "counts": {
+      "payments": 3
+    }
+  },
+  {
+    "route": "/api/admin/payments",
+    "authenticated": false,
+    "status": 403,
+    "ms": 303,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/payments",
+    "authenticated": true,
+    "status": 200,
+    "ms": 281,
+    "success": true,
+    "keys": [
+      "success",
+      "payments",
+      "metrics"
+    ],
+    "counts": {
+      "payments": 3
+    }
+  },
+  {
+    "route": "/api/admin/pricing",
+    "authenticated": false,
+    "status": 403,
+    "ms": 367,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/pricing",
+    "authenticated": true,
+    "status": 200,
+    "ms": 289,
+    "success": true,
+    "keys": [
+      "success",
+      "stats",
+      "rules",
+      "categories",
+      "effectiveRate"
+    ],
+    "counts": {
+      "rules": 3,
+      "categories": 4
+    }
+  },
+  {
+    "route": "/api/admin/profile/language",
+    "authenticated": false,
+    "status": 200,
+    "ms": 380,
+    "success": true,
+    "keys": [
+      "success",
+      "preferred_language"
+    ],
+    "counts": {}
+  },
+  {
+    "route": "/api/admin/profile/language",
+    "authenticated": true,
+    "status": 200,
+    "ms": 507,
+    "success": true,
+    "keys": [
+      "success",
+      "preferred_language"
+    ],
+    "counts": {}
+  },
+  {
+    "route": "/api/admin/reports",
+    "authenticated": false,
+    "status": 403,
+    "ms": 298,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/reports",
+    "authenticated": true,
+    "status": 200,
+    "ms": 381,
+    "success": true,
+    "keys": [
+      "success",
+      "range",
+      "kpis",
+      "channelBreakdown",
+      "categoryYield",
+      "monthlyTrajectory",
+      "data"
+    ],
+    "counts": {
+      "channelBreakdown": 3,
+      "categoryYield": 4,
+      "monthlyTrajectory": 6
+    }
+  },
+  {
+    "route": "/api/admin/reservations",
+    "authenticated": false,
+    "status": 403,
+    "ms": 332,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/reservations",
+    "authenticated": true,
+    "status": 200,
+    "ms": 481,
+    "success": true,
+    "keys": [
+      "success",
+      "reservations",
+      "bookings"
+    ],
+    "counts": {
+      "reservations": 5,
+      "bookings": 5
+    }
+  },
+  {
+    "route": "/api/admin/rooms/categories",
+    "authenticated": false,
+    "status": 200,
+    "ms": 355,
+    "success": true,
+    "keys": [
+      "success",
+      "categories"
+    ],
+    "counts": {
+      "categories": 4
+    }
+  },
+  {
+    "route": "/api/admin/rooms/categories",
+    "authenticated": true,
+    "status": 200,
+    "ms": 311,
+    "success": true,
+    "keys": [
+      "success",
+      "categories"
+    ],
+    "counts": {
+      "categories": 4
+    }
+  },
+  {
+    "route": "/api/admin/rooms/inventory",
+    "authenticated": false,
+    "status": 403,
+    "ms": 304,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/rooms/inventory",
+    "authenticated": true,
+    "status": 200,
+    "ms": 330,
+    "success": true,
+    "keys": [
+      "success",
+      "rooms"
+    ],
+    "counts": {
+      "rooms": 24
+    }
+  },
+  {
+    "route": "/api/admin/rooms",
+    "authenticated": false,
+    "status": 403,
+    "ms": 289,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/rooms",
+    "authenticated": true,
+    "status": 200,
+    "ms": 428,
+    "success": true,
+    "keys": [
+      "success",
+      "rooms",
+      "totalRooms"
+    ],
+    "counts": {
+      "rooms": 24
+    }
+  },
+  {
+    "route": "/api/admin/settings",
+    "authenticated": false,
+    "status": 403,
+    "ms": 347,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/settings",
+    "authenticated": true,
+    "status": 200,
+    "ms": 301,
+    "success": true,
+    "keys": [
+      "success",
+      "settings"
+    ],
+    "counts": {}
+  },
+  {
+    "route": "/api/admin/staff/attendance",
+    "authenticated": false,
+    "status": 403,
+    "ms": 407,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/staff/attendance",
+    "authenticated": true,
+    "status": 200,
+    "ms": 300,
+    "success": true,
+    "keys": [
+      "success",
+      "date",
+      "attendance",
+      "staff",
+      "stats"
+    ],
+    "counts": {
+      "attendance": 3,
+      "staff": 9
+    }
+  },
+  {
+    "route": "/api/admin/staff",
+    "authenticated": false,
+    "status": 403,
+    "ms": 286,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/staff",
+    "authenticated": true,
+    "status": 200,
+    "ms": 373,
+    "success": true,
+    "keys": [
+      "success",
+      "staff",
+      "count"
+    ],
+    "counts": {
+      "staff": 9
+    }
+  },
+  {
+    "route": "/api/admin/walk-ins/queue",
+    "authenticated": false,
+    "status": 403,
+    "ms": 299,
+    "success": false,
+    "keys": [
+      "success",
+      "error"
+    ],
+    "counts": {},
+    "error": "Unauthorized: Valid staff session required"
+  },
+  {
+    "route": "/api/admin/walk-ins/queue",
+    "authenticated": true,
+    "status": 200,
+    "ms": 423,
+    "success": true,
+    "keys": [
+      "success",
+      "count",
+      "queue",
+      "clean_rooms",
+      "clean_rooms_by_category",
+      "total_clean_rooms",
+      "total_occupied_rooms"
+    ],
+    "counts": {
+      "queue": 2,
+      "clean_rooms": 23
+    }
+  }
+]

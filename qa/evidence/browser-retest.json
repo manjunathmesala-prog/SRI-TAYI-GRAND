@@ -1,0 +1,2753 @@
+{
+  "environment": "isolated local copy; PostgreSQL unavailable; browser external services blocked; no physical RFID operations",
+  "pages": [
+    {
+      "page": "housekeeping",
+      "status": "PASS",
+      "actions": [
+        {
+          "page": "housekeeping",
+          "action": "All Floors",
+          "status": "PARTIALLY CONNECTED",
+          "scope": "Click executed; business result requires separate assertion",
+          "requests": [
+            {
+              "page": "http://127.0.0.1:3006/admin/housekeeping",
+              "path": "/api/admin/profile/language",
+              "method": "GET",
+              "status": 200
+            }
+          ]
+        },
+        {
+          "page": "housekeeping",
+          "action": "Floor 1",
+          "status": "PARTIALLY CONNECTED",
+          "scope": "Click executed; business result requires separate assertion",
+          "requests": []
+        },
+        {
+          "page": "housekeeping",
+          "action": "Floor 2",
+          "status": "PARTIALLY CONNECTED",
+          "scope": "Click executed; business result requires separate assertion",
+          "requests": []
+        },
+        {
+          "page": "housekeeping",
+          "action": "Floor 3",
+          "status": "PARTIALLY CONNECTED",
+          "scope": "Click executed; business result requires separate assertion",
+          "requests": []
+        }
+      ],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "button",
+          "name": "Print Morning Turnaround Worksheet",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 1,
+          "tag": "button",
+          "name": "Refresh Housekeeping Data",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 2,
+          "tag": "button",
+          "name": "All Floors",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 3,
+          "tag": "button",
+          "name": "Floor 1",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 4,
+          "tag": "button",
+          "name": "Floor 2",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 5,
+          "tag": "button",
+          "name": "Floor 3",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 6,
+          "tag": "button",
+          "name": "All Attendants",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 7,
+          "tag": "input",
+          "name": "Search room number or attendant...",
+          "type": "text",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 8,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 9,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 10,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 11,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 12,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 13,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 14,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 15,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 16,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 17,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 18,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 19,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 20,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 21,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 22,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 23,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 24,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 25,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 26,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 27,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 28,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 29,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 30,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 31,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 32,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 33,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 34,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 35,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 36,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 37,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 38,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 39,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 40,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 41,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 42,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 43,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 44,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 45,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 46,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 47,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 48,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 49,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 50,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 51,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 52,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 53,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 54,
+          "tag": "button",
+          "name": "Re-Inspect",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 55,
+          "tag": "button",
+          "name": "Mark room dirty for re-cleaning",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 16940,
+      "url": "http://127.0.0.1:3006/admin/housekeeping",
+      "headings": [
+        "Housekeeping",
+        "Housekeeping Turnaround & Inspections",
+        "Turnaround Required",
+        "Cleaning In Progress",
+        "Clean & Certified Ready",
+        "SRI TAYI GRAND"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    },
+    {
+      "page": "reviews",
+      "status": "PASS",
+      "actions": [],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "button",
+          "name": "Refresh reviews",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 1,
+          "tag": "a",
+          "name": "View Public Page",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 2,
+          "tag": "button",
+          "name": "Import Pasted Review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 3,
+          "tag": "input",
+          "name": "Search by reviewer name, excerpt text, or ID...",
+          "type": "text",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 4,
+          "tag": "button",
+          "name": "All (44)",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 5,
+          "tag": "button",
+          "name": "Featured (6)",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 6,
+          "tag": "button",
+          "name": "Published (44)",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 7,
+          "tag": "button",
+          "name": "Hidden (0)",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 8,
+          "tag": "button",
+          "name": "Rating Only (18)",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 9,
+          "tag": "button",
+          "name": "Click to unfeature",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 10,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 11,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 12,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 13,
+          "tag": "button",
+          "name": "Click to unfeature",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 14,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 15,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 16,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 17,
+          "tag": "button",
+          "name": "Click to unfeature",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 18,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 19,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 20,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 21,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 22,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 23,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 24,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 25,
+          "tag": "button",
+          "name": "Click to unfeature",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 26,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 27,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 28,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 29,
+          "tag": "button",
+          "name": "Click to unfeature",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 30,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 31,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 32,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 33,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 34,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 35,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 36,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 37,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 38,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 39,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 40,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 41,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 42,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 43,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 44,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 45,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 46,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 47,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 48,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 49,
+          "tag": "button",
+          "name": "Click to unfeature",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 50,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 51,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 52,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 53,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 54,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 55,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 56,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 57,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 58,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 59,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 60,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 61,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 62,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 63,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 64,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 65,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 66,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 67,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 68,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 69,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 70,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 71,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 72,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 73,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 74,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 75,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 76,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 77,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 78,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 79,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 80,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 81,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 82,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 83,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 84,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 85,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 86,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 87,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 88,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 89,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 90,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 91,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 92,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 93,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 94,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 95,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 96,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 97,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 98,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 99,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 100,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 101,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 102,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 103,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 104,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 105,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 106,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 107,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 108,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 109,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 110,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 111,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 112,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 113,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 114,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 115,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 116,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 117,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 118,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 119,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 120,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 121,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 122,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 123,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 124,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 125,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 126,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 127,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 128,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 129,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 130,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 131,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 132,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 133,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 134,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 135,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 136,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 137,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 138,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 139,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 140,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 141,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 142,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 143,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 144,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 145,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 146,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 147,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 148,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 149,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 150,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 151,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 152,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 153,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 154,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 155,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 156,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 157,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 158,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 159,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 160,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 161,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 162,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 163,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 164,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 165,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 166,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 167,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 168,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 169,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 170,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 171,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 172,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 173,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 174,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 175,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 176,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 177,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 178,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 179,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 180,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 181,
+          "tag": "button",
+          "name": "Click to feature on homepage",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 182,
+          "tag": "button",
+          "name": "Click to unpublish",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 183,
+          "tag": "a",
+          "name": "Verify original review on Google",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 184,
+          "tag": "button",
+          "name": "Delete review",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 18537,
+      "url": "http://127.0.0.1:3006/admin/reviews",
+      "headings": [
+        "Google Reviews",
+        "Guest Reviews & Experiences"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    },
+    {
+      "page": "content",
+      "status": "PASS",
+      "actions": [],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "form",
+          "name": "OFFICIAL HOTEL BRAND NAME\nHERO TAGLINE / SUBTITLE\nOFFICIAL CONTACT PHONE\nOFFICIAL WHATSAPP NUMBER\nOFFICIAL EMAIL ADDRESS\nHOTEL FULL POSTAL ADDRESS\nCORRIDOR / LANDMARK ROAD\nSave & Publish Live Changes",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 1,
+          "tag": "input",
+          "name": "",
+          "type": "text",
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 2,
+          "tag": "input",
+          "name": "",
+          "type": "text",
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 3,
+          "tag": "input",
+          "name": "",
+          "type": "text",
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 4,
+          "tag": "input",
+          "name": "",
+          "type": "text",
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 5,
+          "tag": "input",
+          "name": "",
+          "type": "email",
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 6,
+          "tag": "textarea",
+          "name": "",
+          "type": null,
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 7,
+          "tag": "input",
+          "name": "",
+          "type": "text",
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 8,
+          "tag": "button",
+          "name": "Save & Publish Live Changes",
+          "type": "submit",
+          "disabled": false,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 13317,
+      "url": "http://127.0.0.1:3006/admin/content",
+      "headings": [
+        "Website Content",
+        "Website Content Management"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    },
+    {
+      "page": "settings",
+      "status": "PASS",
+      "actions": [],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "button",
+          "name": "Switch to English",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 1,
+          "tag": "button",
+          "name": "తెలుగు భాషకు మారండి",
+          "type": "button",
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 2,
+          "tag": "form",
+          "name": "STANDARD CHECK-IN TIME\nSTANDARD CHECK-OUT TIME\nROOM TAX RATE (%)\nCHECKOUT HOLD LEASE DURATION (MINUTES)\nAllow Pay-at-Hotel\nAllow guests to confirm reservations online and settle payment upon arrival.\nSave Settings",
+          "type": null,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 3,
+          "tag": "input",
+          "name": "",
+          "type": "time",
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 4,
+          "tag": "input",
+          "name": "",
+          "type": "time",
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 5,
+          "tag": "input",
+          "name": "",
+          "type": "number",
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 6,
+          "tag": "input",
+          "name": "",
+          "type": "number",
+          "disabled": false,
+          "required": true,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 7,
+          "tag": "input",
+          "name": "",
+          "type": "checkbox",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 8,
+          "tag": "button",
+          "name": "Save Settings",
+          "type": "submit",
+          "disabled": false,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 10419,
+      "url": "http://127.0.0.1:3006/admin/settings",
+      "headings": [
+        "Settings",
+        "Property & System Settings",
+        "Administrator Language Preference"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    },
+    {
+      "page": "audit-logs",
+      "status": "PASS",
+      "actions": [
+        {
+          "page": "audit-logs",
+          "action": "Refresh Trail",
+          "status": "PARTIALLY CONNECTED",
+          "scope": "Click executed; business result requires separate assertion",
+          "requests": [
+            {
+              "page": "http://127.0.0.1:3006/admin/audit-logs",
+              "path": "/api/admin/audit-logs",
+              "method": "GET",
+              "status": 200
+            },
+            {
+              "page": "http://127.0.0.1:3006/admin/audit-logs",
+              "path": "/api/admin/profile/language",
+              "method": "GET",
+              "status": 200
+            }
+          ]
+        },
+        {
+          "page": "audit-logs",
+          "action": "Export CSV",
+          "status": "PASS",
+          "scope": "download received and saved",
+          "requests": []
+        },
+        {
+          "page": "audit-logs",
+          "action": "All Events",
+          "status": "PARTIALLY CONNECTED",
+          "scope": "Click executed; business result requires separate assertion",
+          "requests": []
+        }
+      ],
+      "controls": [
+        {
+          "index": 0,
+          "tag": "button",
+          "name": "Refresh Trail",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 1,
+          "tag": "button",
+          "name": "Export CSV",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 2,
+          "tag": "button",
+          "name": "All Events",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 3,
+          "tag": "button",
+          "name": "Bookings",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 4,
+          "tag": "button",
+          "name": "Payments",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 5,
+          "tag": "button",
+          "name": "Cashbook",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 6,
+          "tag": "button",
+          "name": "Accounting",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 7,
+          "tag": "button",
+          "name": "Pricing",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 8,
+          "tag": "button",
+          "name": "Rooms",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 9,
+          "tag": "button",
+          "name": "Maintenance",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 10,
+          "tag": "button",
+          "name": "Staff",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 11,
+          "tag": "input",
+          "name": "Search actor, action, entity ID, details...",
+          "type": "text",
+          "disabled": false,
+          "required": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 12,
+          "tag": "button",
+          "name": "Inspect full audit record",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 13,
+          "tag": "button",
+          "name": "Inspect full audit record",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 14,
+          "tag": "button",
+          "name": "Inspect full audit record",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 15,
+          "tag": "button",
+          "name": "Inspect full audit record",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        },
+        {
+          "index": 16,
+          "tag": "button",
+          "name": "Inspect full audit record",
+          "type": null,
+          "disabled": false,
+          "status": "NOT TESTED"
+        }
+      ],
+      "ms": 13585,
+      "url": "http://127.0.0.1:3006/admin/audit-logs",
+      "headings": [
+        "Audit Logs",
+        "System Audit & Activity Trail"
+      ],
+      "mobile": {
+        "viewport": 390,
+        "documentWidth": 390,
+        "overflow": false
+      }
+    }
+  ],
+  "actions": [
+    {
+      "page": "login",
+      "action": "empty password and removed instant enter",
+      "status": "PASS"
+    },
+    {
+      "page": "login",
+      "action": "invalid password",
+      "status": "PASS"
+    },
+    {
+      "page": "login",
+      "action": "valid configured credentials",
+      "status": "PASS"
+    },
+    {
+      "page": "housekeeping",
+      "action": "All Floors",
+      "status": "PARTIALLY CONNECTED",
+      "scope": "Click executed; business result requires separate assertion",
+      "requests": [
+        {
+          "page": "http://127.0.0.1:3006/admin/housekeeping",
+          "path": "/api/admin/profile/language",
+          "method": "GET",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "page": "housekeeping",
+      "action": "Floor 1",
+      "status": "PARTIALLY CONNECTED",
+      "scope": "Click executed; business result requires separate assertion",
+      "requests": []
+    },
+    {
+      "page": "housekeeping",
+      "action": "Floor 2",
+      "status": "PARTIALLY CONNECTED",
+      "scope": "Click executed; business result requires separate assertion",
+      "requests": []
+    },
+    {
+      "page": "housekeeping",
+      "action": "Floor 3",
+      "status": "PARTIALLY CONNECTED",
+      "scope": "Click executed; business result requires separate assertion",
+      "requests": []
+    },
+    {
+      "page": "audit-logs",
+      "action": "Refresh Trail",
+      "status": "PARTIALLY CONNECTED",
+      "scope": "Click executed; business result requires separate assertion",
+      "requests": [
+        {
+          "page": "http://127.0.0.1:3006/admin/audit-logs",
+          "path": "/api/admin/audit-logs",
+          "method": "GET",
+          "status": 200
+        },
+        {
+          "page": "http://127.0.0.1:3006/admin/audit-logs",
+          "path": "/api/admin/profile/language",
+          "method": "GET",
+          "status": 200
+        }
+      ]
+    },
+    {
+      "page": "audit-logs",
+      "action": "Export CSV",
+      "status": "PASS",
+      "scope": "download received and saved",
+      "requests": []
+    },
+    {
+      "page": "audit-logs",
+      "action": "All Events",
+      "status": "PARTIALLY CONNECTED",
+      "scope": "Click executed; business result requires separate assertion",
+      "requests": []
+    }
+  ],
+  "network": [
+    {
+      "page": "http://127.0.0.1:3006/admin/login",
+      "path": "/api/admin/profile/language",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/login",
+      "path": "/api/admin/auth",
+      "method": "POST",
+      "status": 401
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/login",
+      "path": "/api/admin/auth",
+      "method": "POST",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/dashboard",
+      "path": "/api/admin/operations",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/dashboard",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/dashboard",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/dashboard",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/dashboard",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/dashboard",
+      "path": "/api/realtime/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/dashboard",
+      "path": "/api/admin/notifications/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/dashboard",
+      "path": "/api/admin/profile/language",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/admin/housekeeping",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/admin/notifications/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/realtime/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/housekeeping",
+      "path": "/api/admin/profile/language",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/reviews",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/reviews",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/reviews",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/reviews",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/reviews",
+      "path": "/api/reviews",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/reviews",
+      "path": "/api/realtime/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/reviews",
+      "path": "/api/admin/notifications/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/reviews",
+      "path": "/api/admin/profile/language",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/content",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/content",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/content",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/content",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/content",
+      "path": "/api/admin/settings",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/content",
+      "path": "/api/realtime/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/content",
+      "path": "/api/admin/notifications/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/content",
+      "path": "/api/admin/profile/language",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/settings",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/settings",
+      "path": "/api/admin/settings",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/settings",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/settings",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/settings",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/settings",
+      "path": "/api/realtime/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/settings",
+      "path": "/api/admin/notifications/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/settings",
+      "path": "/api/admin/profile/language",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/audit-logs",
+      "path": "/api/admin/cashbook",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/audit-logs",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/audit-logs",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/audit-logs",
+      "path": "/api/admin/notifications",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/audit-logs",
+      "path": "/api/admin/notifications/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/audit-logs",
+      "path": "/api/realtime/stream",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/audit-logs",
+      "path": "/api/admin/audit-logs",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/audit-logs",
+      "path": "/api/admin/audit-logs",
+      "method": "GET",
+      "status": 200
+    },
+    {
+      "page": "http://127.0.0.1:3006/admin/audit-logs",
+      "path": "/api/admin/profile/language",
+      "method": "GET",
+      "status": 200
+    }
+  ],
+  "errors": [
+    {
+      "page": "http://127.0.0.1:3006/admin/audit-logs",
+      "message": "Event"
+    }
+  ]
+}

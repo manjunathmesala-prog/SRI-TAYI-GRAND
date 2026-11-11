@@ -12,13 +12,10 @@ export interface AuthSession {
 }
 
 // Cryptographic signing secret for JWT/Session tokens
-const AUTH_SECRET =
-  process.env.ADMIN_JWT_SECRET ||
-  process.env.ADMIN_MASTER_PASSWORD ||
-  'SriTayiGrand_SecureStaffAuth_Secret2026_Minimum32Chars!';
+const AUTH_SECRET = process.env.ADMIN_JWT_SECRET || 'sri_tayi_grand_secure_default_hmac_jwt_secret_kadiri_2026_enterprise';
 
 // Fixed master password for staff operations (checked securely via timing-safe comparison)
-const MASTER_PASSWORD = process.env.ADMIN_MASTER_PASSWORD || 'GrandHotel@Kadiri2026!';
+const MASTER_PASSWORD = process.env.ADMIN_MASTER_PASSWORD || '';
 
 /**
  * PRODUCTION ROLE CREDENTIAL CONFIGURATION
@@ -27,7 +24,7 @@ const MASTER_PASSWORD = process.env.ADMIN_MASTER_PASSWORD || 'GrandHotel@Kadiri2
 export const DEFAULT_CREDENTIALS = {
   superAdmin: {
     email: 'admin@sritayigrand.com',
-    password: process.env.SUPER_ADMIN_PASSWORD || 'SuperAdmin@TayiGrand2026!',
+    password: process.env.SUPER_ADMIN_PASSWORD || '',
     role: 'Super Admin' as StaffRole,
     name: 'Sri Tayi Grand Admin',
     badge: 'Super Admin',
@@ -35,7 +32,7 @@ export const DEFAULT_CREDENTIALS = {
   },
   manager: {
     email: 'manager@sritayigrand.com',
-    password: process.env.MANAGER_PASSWORD || 'Manager@TayiGrand2026!',
+    password: process.env.MANAGER_PASSWORD || '',
     role: 'Hotel Manager' as StaffRole,
     name: 'G. Mohan Kumar',
     badge: 'Hotel Manager',
@@ -43,7 +40,7 @@ export const DEFAULT_CREDENTIALS = {
   },
   staff: {
     email: 'staff@sritayigrand.com',
-    password: process.env.STAFF_PASSWORD || 'Staff@TayiGrand2026!',
+    password: process.env.STAFF_PASSWORD || '',
     role: 'Front Desk' as StaffRole,
     name: 'Sri Tayi Grand Staff',
     badge: 'Front Desk Staff',
@@ -54,19 +51,19 @@ export const DEFAULT_CREDENTIALS = {
 export const ROLE_CREDENTIALS: Record<string, { role: StaffRole; expectedPassword: string }> = {
   'admin@sritayigrand.com': {
     role: 'Super Admin',
-    expectedPassword: process.env.SUPER_ADMIN_PASSWORD || 'SuperAdmin@TayiGrand2026!',
+    expectedPassword: process.env.SUPER_ADMIN_PASSWORD || '',
   },
   'manager@sritayigrand.com': {
     role: 'Hotel Manager',
-    expectedPassword: process.env.MANAGER_PASSWORD || 'Manager@TayiGrand2026!',
+    expectedPassword: process.env.MANAGER_PASSWORD || '',
   },
   'staff@sritayigrand.com': {
     role: 'Front Desk',
-    expectedPassword: process.env.STAFF_PASSWORD || 'Staff@TayiGrand2026!',
+    expectedPassword: process.env.STAFF_PASSWORD || '',
   },
   'frontdesk@sritayigrand.com': {
     role: 'Front Desk',
-    expectedPassword: process.env.STAFF_PASSWORD || 'Staff@TayiGrand2026!',
+    expectedPassword: process.env.STAFF_PASSWORD || '',
   },
 };
 
@@ -74,6 +71,7 @@ export const ROLE_CREDENTIALS: Record<string, { role: StaffRole; expectedPasswor
  * Creates a cryptographically signed session token: <dataB64url>.<hmacSignature>
  */
 export function signSessionPayload(payload: object): string {
+  if (AUTH_SECRET.length < 32) throw new Error('Staff authentication signing secret is not configured');
   const dataB64 = Buffer.from(JSON.stringify(payload)).toString('base64url');
   const signature = crypto
     .createHmac('sha256', AUTH_SECRET)
@@ -89,7 +87,7 @@ export function authenticateStaff(
   email: string,
   password: string
 ): { success: boolean; session?: AuthSession; error?: string } {
-  if (!email || !password) {
+  if (typeof email !== 'string' || typeof password !== 'string' || !email || !password) {
     return { success: false, error: 'Email and password are required' };
   }
 
@@ -105,10 +103,12 @@ export function authenticateStaff(
     return inputBuf.length === expectedBuf.length && crypto.timingSafeEqual(inputBuf, expectedBuf);
   };
 
-  // Check specific account credential or universal fallback
+  if (AUTH_SECRET.length < 32) return { success: false, error: 'Staff authentication is not configured' };
+
+  // Check explicitly configured account credentials
   const roleCred = ROLE_CREDENTIALS[staff.email.toLowerCase()];
-  const isDedicatedMatch = roleCred ? verifyPasswordMatch(password, roleCred.expectedPassword) : false;
-  const isMasterMatch = verifyPasswordMatch(password, MASTER_PASSWORD);
+  const isDedicatedMatch = roleCred?.expectedPassword ? verifyPasswordMatch(password, roleCred.expectedPassword) : false;
+  const isMasterMatch = Boolean(MASTER_PASSWORD) && verifyPasswordMatch(password, MASTER_PASSWORD);
 
   if (!isDedicatedMatch && !isMasterMatch) {
     return { success: false, error: 'Invalid password. Please check your credentials.' };
@@ -142,7 +142,7 @@ export function authenticateStaff(
  * Verifies and decodes an HMAC-signed session token from Authorization header or cookie
  */
 export function verifySessionToken(tokenString: string | null | undefined): AuthSession | null {
-  if (!tokenString) return null;
+  if (!tokenString || AUTH_SECRET.length < 32) return null;
 
   try {
     const raw = tokenString.startsWith('Bearer ') ? tokenString.slice(7) : tokenString;
@@ -170,7 +170,7 @@ export function verifySessionToken(tokenString: string | null | undefined): Auth
         return null;
       }
 
-      if (Date.now() > data.exp) {
+      if (typeof data.exp !== 'number' || !Number.isFinite(data.exp) || Date.now() >= data.exp) {
         return null; // Expired
       }
 
@@ -184,26 +184,7 @@ export function verifySessionToken(tokenString: string | null | undefined): Auth
       };
     }
 
-    // Graceful backward-compatibility fallback during active deployment migration
-    const jsonStr = Buffer.from(raw, 'base64').toString('utf8');
-    const data = JSON.parse(jsonStr);
-
-    if (!data.userId || !data.email || !data.role || !data.exp) {
-      return null;
-    }
-
-    if (Date.now() > data.exp) {
-      return null;
-    }
-
-    return {
-      userId: data.userId,
-      name: data.name,
-      email: data.email,
-      role: data.role,
-      token: raw,
-      expiresAt: data.exp,
-    };
+    return null; // Unsigned legacy tokens are never authenticated.
   } catch {
     return null;
   }
@@ -253,31 +234,6 @@ export function verifyStaffRole(
   }
 
   let session = verifySessionToken(token);
-
-  // Fallback: If no valid session from token/cookie, check for trusted staff role header or dev fallback
-  if (!session) {
-    const fallbackRole = (req.headers.get('x-staff-role') || '') as StaffRole;
-    if (fallbackRole && ['Super Admin', 'Hotel Manager', 'Front Desk', 'Accounts', 'Receptionist', 'Housekeeping'].includes(fallbackRole)) {
-      session = {
-        userId: 'usr-admin-default',
-        name: 'Sri Tayi Grand Staff',
-        email: 'staff@sritayigrand.com',
-        role: fallbackRole,
-        token: 'dev-fallback-token',
-        expiresAt: Date.now() + 86400000,
-      };
-    } else if (process.env.NODE_ENV !== 'production') {
-      // In development mode, default to Super Admin to ensure front desk operations never block
-      session = {
-        userId: 'usr-admin-01',
-        name: DEFAULT_CREDENTIALS.superAdmin.name,
-        email: DEFAULT_CREDENTIALS.superAdmin.email,
-        role: 'Super Admin',
-        token: 'dev-super-admin-token',
-        expiresAt: Date.now() + 86400000,
-      };
-    }
-  }
 
   if (!session) {
     return { authorized: false, session: null, error: 'Unauthorized: Valid staff session required' };

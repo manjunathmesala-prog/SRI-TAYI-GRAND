@@ -38,10 +38,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
     }
 
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== 'object') {
+      return NextResponse.json({ success: false, error: 'A JSON expense object is required.' }, { status: 400 });
+    }
     const { category, title, description, amount, payment_method, expense_date, receipt_ref } = body;
 
-    if (!category || !title || !amount || Number(amount) <= 0) {
+    const categories = ['laundry', 'maintenance', 'fnb_supplies', 'utilities', 'staff_welfare', 'repairs', 'marketing', 'other'];
+    const methods = ['cash', 'upi', 'card', 'online', 'pay_at_hotel'];
+    if (!categories.includes(category) || typeof title !== 'string' || !title.trim() ||
+        !['number', 'string'].includes(typeof amount) || !Number.isFinite(Number(amount)) || Number(amount) <= 0 ||
+        (payment_method !== undefined && !methods.includes(payment_method)) ||
+        (expense_date && (!/^\d{4}-\d{2}-\d{2}$/.test(expense_date) ||
+          !Number.isFinite(Date.parse(expense_date)) || new Date(expense_date).toISOString().slice(0, 10) !== expense_date))) {
       return NextResponse.json(
         { success: false, error: 'category, title, and valid positive amount are required.' },
         { status: 400 }

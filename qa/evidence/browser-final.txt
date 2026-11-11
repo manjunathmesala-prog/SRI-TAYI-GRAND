@@ -1,0 +1,29 @@
+{"page":"dashboard","status":"PASS","actions":3,"controls":36,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":9532}
+{"page":"analytics","status":"PASS","actions":6,"controls":7,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":15906}
+{"page":"reports","status":"PASS","actions":1,"controls":6,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":12433}
+{"page":"front-desk","status":"PASS","actions":0,"controls":18,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":16213}
+{"page":"walk-in","status":"PASS","actions":0,"controls":52,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":13093}
+{"page":"bookings","status":"PASS","actions":5,"controls":55,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":14324}
+{"page":"rooms/board","status":"PASS","actions":6,"controls":36,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":14256}
+{"page":"rooms/inventory","status":"PASS","actions":2,"controls":27,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":11030}
+{"page":"rooms/categories","status":"PASS","actions":1,"controls":5,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":13214}
+{"page":"guests","status":"PASS","actions":7,"controls":20,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":15878}
+{"page":"housekeeping","status":"PASS","actions":4,"controls":8,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":4272}
+{"page":"maintenance","status":"PASS","actions":0,"controls":18,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":15448}
+{"page":"convention-hall","status":"PASS","actions":0,"controls":16,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":16665}
+{"page":"enquiries","status":"PASS","actions":0,"controls":16,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":16515}
+{"page":"rfid","status":"PASS","actions":1,"controls":16,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":15499}
+{"page":"payments","status":"PASS","actions":0,"controls":9,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":19184}
+{"page":"cashbook","status":"PASS","actions":2,"controls":10,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":19363}
+{"page":"expenses","status":"PASS","actions":1,"controls":9,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":14898}
+{"page":"accounting","status":"PASS","actions":1,"controls":13,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":14377}
+{"page":"daily-closing","status":"PASS","actions":0,"controls":10,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":16860}
+{"page":"staff/attendance","status":"PASS","actions":7,"controls":15,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":22324}
+{"page":"staff","status":"PASS","actions":1,"controls":17,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":22240}
+{"page":"pricing","status":"PASS","actions":6,"controls":16,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":28102}
+{"page":"channels","status":"PASS","actions":1,"controls":32,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":34850}
+{"page":"reviews","status":"FAIL","actions":0,"controls":185,"ms":28186,"error":"page.evaluate: Execution context was destroyed, most likely because of a navigation"}
+{"page":"content","status":"FAIL","actions":0,"controls":0,"error":"page.goto: Navigation to \"http://127.0.0.1:3006/admin/content\" is interrupted by another navigation to \"http://127.0.0.1:3006/admin/reviews\"\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3006/admin/content\", waiting until \"load\"\u001b[22m\n"}
+{"page":"settings","status":"FAIL","actions":0,"controls":0,"error":"page.goto: Navigation to \"http://127.0.0.1:3006/admin/settings\" is interrupted by another navigation to \"http://127.0.0.1:3006/admin/content\"\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3006/admin/settings\", waiting until \"load\"\u001b[22m\n"}
+{"page":"audit-logs","status":"FAIL","actions":0,"controls":0,"error":"page.goto: Navigation to \"http://127.0.0.1:3006/admin/audit-logs\" is interrupted by another navigation to \"http://127.0.0.1:3006/admin/settings\"\nCall log:\n\u001b[2m  - navigating to \"http://127.0.0.1:3006/admin/audit-logs\", waiting until \"load\"\u001b[22m\n"}
+BROWSER QA COMPLETE

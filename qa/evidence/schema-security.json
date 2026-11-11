@@ -1,0 +1,476 @@
+{
+  "rfidHistoryGrants": {
+    "can_read": true,
+    "can_insert": true,
+    "can_update": true,
+    "can_delete": true
+  },
+  "testMarkerBookings": 0,
+  "indexes": [
+    {
+      "tablename": "room_transfers",
+      "indexname": "room_transfers_pkey",
+      "indexdef": "CREATE UNIQUE INDEX room_transfers_pkey ON public.room_transfers USING btree (id)"
+    },
+    {
+      "tablename": "room_transfers",
+      "indexname": "idx_room_transfers_ref",
+      "indexdef": "CREATE INDEX idx_room_transfers_ref ON public.room_transfers USING btree (booking_reference)"
+    },
+    {
+      "tablename": "room_transfers",
+      "indexname": "idx_room_transfers_transferred",
+      "indexdef": "CREATE INDEX idx_room_transfers_transferred ON public.room_transfers USING btree (transferred_at DESC)"
+    },
+    {
+      "tablename": "profiles",
+      "indexname": "profiles_pkey",
+      "indexdef": "CREATE UNIQUE INDEX profiles_pkey ON public.profiles USING btree (id)"
+    },
+    {
+      "tablename": "roles",
+      "indexname": "roles_pkey",
+      "indexdef": "CREATE UNIQUE INDEX roles_pkey ON public.roles USING btree (id)"
+    },
+    {
+      "tablename": "roles",
+      "indexname": "roles_name_key",
+      "indexdef": "CREATE UNIQUE INDEX roles_name_key ON public.roles USING btree (name)"
+    },
+    {
+      "tablename": "permissions",
+      "indexname": "permissions_pkey",
+      "indexdef": "CREATE UNIQUE INDEX permissions_pkey ON public.permissions USING btree (id)"
+    },
+    {
+      "tablename": "permissions",
+      "indexname": "permissions_code_key",
+      "indexdef": "CREATE UNIQUE INDEX permissions_code_key ON public.permissions USING btree (code)"
+    },
+    {
+      "tablename": "role_permissions",
+      "indexname": "role_permissions_pkey",
+      "indexdef": "CREATE UNIQUE INDEX role_permissions_pkey ON public.role_permissions USING btree (role_id, permission_id)"
+    },
+    {
+      "tablename": "room_maintenance",
+      "indexname": "room_maintenance_pkey",
+      "indexdef": "CREATE UNIQUE INDEX room_maintenance_pkey ON public.room_maintenance USING btree (id)"
+    },
+    {
+      "tablename": "room_housekeeping",
+      "indexname": "room_housekeeping_pkey",
+      "indexdef": "CREATE UNIQUE INDEX room_housekeeping_pkey ON public.room_housekeeping USING btree (id)"
+    },
+    {
+      "tablename": "booking_holds",
+      "indexname": "booking_holds_pkey",
+      "indexdef": "CREATE UNIQUE INDEX booking_holds_pkey ON public.booking_holds USING btree (id)"
+    },
+    {
+      "tablename": "booking_holds",
+      "indexname": "idx_booking_holds_expires",
+      "indexdef": "CREATE INDEX idx_booking_holds_expires ON public.booking_holds USING btree (expires_at)"
+    },
+    {
+      "tablename": "booking_guests",
+      "indexname": "booking_guests_pkey",
+      "indexdef": "CREATE UNIQUE INDEX booking_guests_pkey ON public.booking_guests USING btree (id)"
+    },
+    {
+      "tablename": "booking_status_history",
+      "indexname": "booking_status_history_pkey",
+      "indexdef": "CREATE UNIQUE INDEX booking_status_history_pkey ON public.booking_status_history USING btree (id)"
+    },
+    {
+      "tablename": "invoices",
+      "indexname": "invoices_pkey",
+      "indexdef": "CREATE UNIQUE INDEX invoices_pkey ON public.invoices USING btree (id)"
+    },
+    {
+      "tablename": "invoices",
+      "indexname": "invoices_invoice_number_key",
+      "indexdef": "CREATE UNIQUE INDEX invoices_invoice_number_key ON public.invoices USING btree (invoice_number)"
+    },
+    {
+      "tablename": "refunds",
+      "indexname": "refunds_pkey",
+      "indexdef": "CREATE UNIQUE INDEX refunds_pkey ON public.refunds USING btree (id)"
+    },
+    {
+      "tablename": "additional_charges",
+      "indexname": "additional_charges_pkey",
+      "indexdef": "CREATE UNIQUE INDEX additional_charges_pkey ON public.additional_charges USING btree (id)"
+    },
+    {
+      "tablename": "notifications",
+      "indexname": "notifications_pkey",
+      "indexdef": "CREATE UNIQUE INDEX notifications_pkey ON public.notifications USING btree (id)"
+    },
+    {
+      "tablename": "staff_assignments",
+      "indexname": "staff_assignments_pkey",
+      "indexdef": "CREATE UNIQUE INDEX staff_assignments_pkey ON public.staff_assignments USING btree (id)"
+    },
+    {
+      "tablename": "hall_bookings",
+      "indexname": "hall_bookings_pkey",
+      "indexdef": "CREATE UNIQUE INDEX hall_bookings_pkey ON public.hall_bookings USING btree (id)"
+    },
+    {
+      "tablename": "hall_bookings",
+      "indexname": "hall_bookings_booking_reference_key",
+      "indexdef": "CREATE UNIQUE INDEX hall_bookings_booking_reference_key ON public.hall_bookings USING btree (booking_reference)"
+    },
+    {
+      "tablename": "hall_payments",
+      "indexname": "hall_payments_pkey",
+      "indexdef": "CREATE UNIQUE INDEX hall_payments_pkey ON public.hall_payments USING btree (id)"
+    },
+    {
+      "tablename": "audit_logs",
+      "indexname": "audit_logs_pkey",
+      "indexdef": "CREATE UNIQUE INDEX audit_logs_pkey ON public.audit_logs USING btree (id)"
+    },
+    {
+      "tablename": "audit_logs",
+      "indexname": "idx_audit_logs_created",
+      "indexdef": "CREATE INDEX idx_audit_logs_created ON public.audit_logs USING btree (created_at DESC)"
+    },
+    {
+      "tablename": "integrations",
+      "indexname": "integrations_pkey",
+      "indexdef": "CREATE UNIQUE INDEX integrations_pkey ON public.integrations USING btree (id)"
+    },
+    {
+      "tablename": "integrations",
+      "indexname": "integrations_service_name_key",
+      "indexdef": "CREATE UNIQUE INDEX integrations_service_name_key ON public.integrations USING btree (service_name)"
+    },
+    {
+      "tablename": "rfid_cards",
+      "indexname": "rfid_cards_pkey",
+      "indexdef": "CREATE UNIQUE INDEX rfid_cards_pkey ON public.rfid_cards USING btree (id)"
+    },
+    {
+      "tablename": "rfid_cards",
+      "indexname": "rfid_cards_card_uid_key",
+      "indexdef": "CREATE UNIQUE INDEX rfid_cards_card_uid_key ON public.rfid_cards USING btree (card_uid)"
+    },
+    {
+      "tablename": "rfid_cards",
+      "indexname": "idx_rfid_cards_type_status",
+      "indexdef": "CREATE INDEX idx_rfid_cards_type_status ON public.rfid_cards USING btree (card_type, status)"
+    },
+    {
+      "tablename": "rfid_devices",
+      "indexname": "rfid_devices_pkey",
+      "indexdef": "CREATE UNIQUE INDEX rfid_devices_pkey ON public.rfid_devices USING btree (id)"
+    },
+    {
+      "tablename": "room_categories",
+      "indexname": "room_categories_pkey",
+      "indexdef": "CREATE UNIQUE INDEX room_categories_pkey ON public.room_categories USING btree (id)"
+    },
+    {
+      "tablename": "room_categories",
+      "indexname": "room_categories_slug_key",
+      "indexdef": "CREATE UNIQUE INDEX room_categories_slug_key ON public.room_categories USING btree (slug)"
+    },
+    {
+      "tablename": "rooms",
+      "indexname": "rooms_pkey",
+      "indexdef": "CREATE UNIQUE INDEX rooms_pkey ON public.rooms USING btree (id)"
+    },
+    {
+      "tablename": "rooms",
+      "indexname": "rooms_room_number_key",
+      "indexdef": "CREATE UNIQUE INDEX rooms_room_number_key ON public.rooms USING btree (room_number)"
+    },
+    {
+      "tablename": "rooms",
+      "indexname": "idx_rooms_operational_status",
+      "indexdef": "CREATE INDEX idx_rooms_operational_status ON public.rooms USING btree (operational_status)"
+    },
+    {
+      "tablename": "rooms",
+      "indexname": "idx_rooms_category_id",
+      "indexdef": "CREATE INDEX idx_rooms_category_id ON public.rooms USING btree (category_id)"
+    },
+    {
+      "tablename": "room_images",
+      "indexname": "room_images_pkey",
+      "indexdef": "CREATE UNIQUE INDEX room_images_pkey ON public.room_images USING btree (id)"
+    },
+    {
+      "tablename": "amenities",
+      "indexname": "amenities_pkey",
+      "indexdef": "CREATE UNIQUE INDEX amenities_pkey ON public.amenities USING btree (id)"
+    },
+    {
+      "tablename": "amenities",
+      "indexname": "amenities_code_key",
+      "indexdef": "CREATE UNIQUE INDEX amenities_code_key ON public.amenities USING btree (code)"
+    },
+    {
+      "tablename": "room_amenities",
+      "indexname": "room_amenities_pkey",
+      "indexdef": "CREATE UNIQUE INDEX room_amenities_pkey ON public.room_amenities USING btree (category_id, amenity_id)"
+    },
+    {
+      "tablename": "hotel_settings",
+      "indexname": "hotel_settings_pkey",
+      "indexdef": "CREATE UNIQUE INDEX hotel_settings_pkey ON public.hotel_settings USING btree (id)"
+    },
+    {
+      "tablename": "gallery_images",
+      "indexname": "gallery_images_pkey",
+      "indexdef": "CREATE UNIQUE INDEX gallery_images_pkey ON public.gallery_images USING btree (id)"
+    },
+    {
+      "tablename": "convention_halls",
+      "indexname": "convention_halls_pkey",
+      "indexdef": "CREATE UNIQUE INDEX convention_halls_pkey ON public.convention_halls USING btree (id)"
+    },
+    {
+      "tablename": "website_content",
+      "indexname": "website_content_pkey",
+      "indexdef": "CREATE UNIQUE INDEX website_content_pkey ON public.website_content USING btree (id)"
+    },
+    {
+      "tablename": "website_content",
+      "indexname": "website_content_key_key",
+      "indexdef": "CREATE UNIQUE INDEX website_content_key_key ON public.website_content USING btree (key)"
+    },
+    {
+      "tablename": "cancellation_policies",
+      "indexname": "cancellation_policies_pkey",
+      "indexdef": "CREATE UNIQUE INDEX cancellation_policies_pkey ON public.cancellation_policies USING btree (id)"
+    },
+    {
+      "tablename": "booking_rooms",
+      "indexname": "booking_rooms_pkey",
+      "indexdef": "CREATE UNIQUE INDEX booking_rooms_pkey ON public.booking_rooms USING btree (id)"
+    },
+    {
+      "tablename": "booking_rooms",
+      "indexname": "idx_booking_rooms_assigned",
+      "indexdef": "CREATE INDEX idx_booking_rooms_assigned ON public.booking_rooms USING btree (assigned_room_id)"
+    },
+    {
+      "tablename": "guests",
+      "indexname": "guests_pkey",
+      "indexdef": "CREATE UNIQUE INDEX guests_pkey ON public.guests USING btree (id)"
+    },
+    {
+      "tablename": "hall_enquiries",
+      "indexname": "hall_enquiries_pkey",
+      "indexdef": "CREATE UNIQUE INDEX hall_enquiries_pkey ON public.hall_enquiries USING btree (id)"
+    },
+    {
+      "tablename": "hall_enquiries",
+      "indexname": "hall_enquiries_enquiry_reference_key",
+      "indexdef": "CREATE UNIQUE INDEX hall_enquiries_enquiry_reference_key ON public.hall_enquiries USING btree (enquiry_reference)"
+    },
+    {
+      "tablename": "reception_kiosk_tokens",
+      "indexname": "reception_kiosk_tokens_pkey",
+      "indexdef": "CREATE UNIQUE INDEX reception_kiosk_tokens_pkey ON public.reception_kiosk_tokens USING btree (id)"
+    },
+    {
+      "tablename": "reception_kiosk_tokens",
+      "indexname": "reception_kiosk_tokens_secret_token_key",
+      "indexdef": "CREATE UNIQUE INDEX reception_kiosk_tokens_secret_token_key ON public.reception_kiosk_tokens USING btree (secret_token)"
+    },
+    {
+      "tablename": "payments",
+      "indexname": "payments_pkey",
+      "indexdef": "CREATE UNIQUE INDEX payments_pkey ON public.payments USING btree (id)"
+    },
+    {
+      "tablename": "payments",
+      "indexname": "payments_payment_reference_key",
+      "indexdef": "CREATE UNIQUE INDEX payments_payment_reference_key ON public.payments USING btree (payment_reference)"
+    },
+    {
+      "tablename": "payments",
+      "indexname": "idx_payments_booking_id",
+      "indexdef": "CREATE INDEX idx_payments_booking_id ON public.payments USING btree (booking_id)"
+    },
+    {
+      "tablename": "bookings",
+      "indexname": "bookings_pkey",
+      "indexdef": "CREATE UNIQUE INDEX bookings_pkey ON public.bookings USING btree (id)"
+    },
+    {
+      "tablename": "bookings",
+      "indexname": "bookings_booking_reference_key",
+      "indexdef": "CREATE UNIQUE INDEX bookings_booking_reference_key ON public.bookings USING btree (booking_reference)"
+    },
+    {
+      "tablename": "bookings",
+      "indexname": "idx_bookings_dates",
+      "indexdef": "CREATE INDEX idx_bookings_dates ON public.bookings USING btree (check_in_date, check_out_date)"
+    },
+    {
+      "tablename": "bookings",
+      "indexname": "idx_bookings_status",
+      "indexdef": "CREATE INDEX idx_bookings_status ON public.bookings USING btree (status)"
+    },
+    {
+      "tablename": "bookings",
+      "indexname": "idx_bookings_ref",
+      "indexdef": "CREATE INDEX idx_bookings_ref ON public.bookings USING btree (booking_reference)"
+    },
+    {
+      "tablename": "bookings",
+      "indexname": "idx_bookings_walk_in_queue",
+      "indexdef": "CREATE INDEX idx_bookings_walk_in_queue ON public.bookings USING btree (status, booking_source, created_at DESC)"
+    },
+    {
+      "tablename": "expenses",
+      "indexname": "expenses_pkey",
+      "indexdef": "CREATE UNIQUE INDEX expenses_pkey ON public.expenses USING btree (id)"
+    },
+    {
+      "tablename": "cash_shifts",
+      "indexname": "cash_shifts_pkey",
+      "indexdef": "CREATE UNIQUE INDEX cash_shifts_pkey ON public.cash_shifts USING btree (id)"
+    },
+    {
+      "tablename": "cash_shifts",
+      "indexname": "cash_shifts_shift_number_key",
+      "indexdef": "CREATE UNIQUE INDEX cash_shifts_shift_number_key ON public.cash_shifts USING btree (shift_number)"
+    },
+    {
+      "tablename": "cash_transactions",
+      "indexname": "cash_transactions_pkey",
+      "indexdef": "CREATE UNIQUE INDEX cash_transactions_pkey ON public.cash_transactions USING btree (id)"
+    },
+    {
+      "tablename": "rfid_access_events",
+      "indexname": "rfid_access_events_pkey",
+      "indexdef": "CREATE UNIQUE INDEX rfid_access_events_pkey ON public.rfid_access_events USING btree (id)"
+    },
+    {
+      "tablename": "rfid_access_events",
+      "indexname": "idx_rfid_access_occurred",
+      "indexdef": "CREATE INDEX idx_rfid_access_occurred ON public.rfid_access_events USING btree (occurred_at DESC)"
+    },
+    {
+      "tablename": "rfid_access_events",
+      "indexname": "idx_rfid_access_events_room_time",
+      "indexdef": "CREATE INDEX idx_rfid_access_events_room_time ON public.rfid_access_events USING btree (room_number, occurred_at DESC)"
+    },
+    {
+      "tablename": "room_cleaning_sessions",
+      "indexname": "room_cleaning_sessions_pkey",
+      "indexdef": "CREATE UNIQUE INDEX room_cleaning_sessions_pkey ON public.room_cleaning_sessions USING btree (id)"
+    },
+    {
+      "tablename": "room_cleaning_sessions",
+      "indexname": "idx_cleaning_sessions_room_status",
+      "indexdef": "CREATE INDEX idx_cleaning_sessions_room_status ON public.room_cleaning_sessions USING btree (room_number, status)"
+    },
+    {
+      "tablename": "super_admin_notifications",
+      "indexname": "super_admin_notifications_pkey",
+      "indexdef": "CREATE UNIQUE INDEX super_admin_notifications_pkey ON public.super_admin_notifications USING btree (id)"
+    },
+    {
+      "tablename": "super_admin_notifications",
+      "indexname": "idx_sa_notifs_recip_read_time",
+      "indexdef": "CREATE INDEX idx_sa_notifs_recip_read_time ON public.super_admin_notifications USING btree (recipient_id, is_read, created_at DESC)"
+    },
+    {
+      "tablename": "rfid_tap_history",
+      "indexname": "rfid_tap_history_pkey",
+      "indexdef": "CREATE UNIQUE INDEX rfid_tap_history_pkey ON public.rfid_tap_history USING btree (id)"
+    },
+    {
+      "tablename": "rfid_tap_history",
+      "indexname": "idx_rfid_tap_history_room_time",
+      "indexdef": "CREATE INDEX idx_rfid_tap_history_room_time ON public.rfid_tap_history USING btree (room_number, tapped_at DESC)"
+    },
+    {
+      "tablename": "rfid_tap_history",
+      "indexname": "idx_rfid_tap_history_card",
+      "indexdef": "CREATE INDEX idx_rfid_tap_history_card ON public.rfid_tap_history USING btree (card_uid)"
+    },
+    {
+      "tablename": "daily_closings",
+      "indexname": "daily_closings_pkey",
+      "indexdef": "CREATE UNIQUE INDEX daily_closings_pkey ON public.daily_closings USING btree (id)"
+    },
+    {
+      "tablename": "daily_closings",
+      "indexname": "daily_closings_closing_date_key",
+      "indexdef": "CREATE UNIQUE INDEX daily_closings_closing_date_key ON public.daily_closings USING btree (closing_date)"
+    },
+    {
+      "tablename": "staff_attendance",
+      "indexname": "staff_attendance_pkey",
+      "indexdef": "CREATE UNIQUE INDEX staff_attendance_pkey ON public.staff_attendance USING btree (id)"
+    },
+    {
+      "tablename": "convention_quotes",
+      "indexname": "convention_quotes_pkey",
+      "indexdef": "CREATE UNIQUE INDEX convention_quotes_pkey ON public.convention_quotes USING btree (id)"
+    },
+    {
+      "tablename": "convention_quotes",
+      "indexname": "convention_quotes_quote_number_key",
+      "indexdef": "CREATE UNIQUE INDEX convention_quotes_quote_number_key ON public.convention_quotes USING btree (quote_number)"
+    },
+    {
+      "tablename": "contact_enquiries",
+      "indexname": "contact_enquiries_pkey",
+      "indexdef": "CREATE UNIQUE INDEX contact_enquiries_pkey ON public.contact_enquiries USING btree (id)"
+    },
+    {
+      "tablename": "reviews",
+      "indexname": "reviews_pkey",
+      "indexdef": "CREATE UNIQUE INDEX reviews_pkey ON public.reviews USING btree (id)"
+    }
+  ],
+  "triggers": [],
+  "functions": [],
+  "storageBuckets": [
+    {
+      "name": "hotel-assets",
+      "public": true,
+      "file_size_limit": "10485760",
+      "allowed_mime_types": null
+    },
+    {
+      "name": "room-images",
+      "public": true,
+      "file_size_limit": "10485760",
+      "allowed_mime_types": null
+    },
+    {
+      "name": "gallery-images",
+      "public": true,
+      "file_size_limit": "10485760",
+      "allowed_mime_types": null
+    },
+    {
+      "name": "branding-assets",
+      "public": true,
+      "file_size_limit": "10485760",
+      "allowed_mime_types": null
+    },
+    {
+      "name": "guest-documents",
+      "public": false,
+      "file_size_limit": "10485760",
+      "allowed_mime_types": null
+    },
+    {
+      "name": "invoices",
+      "public": false,
+      "file_size_limit": "10485760",
+      "allowed_mime_types": null
+    }
+  ]
+}

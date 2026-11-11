@@ -1,0 +1,6 @@
+{"page":"housekeeping","status":"PASS","actions":4,"controls":56,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":16940}
+{"page":"reviews","status":"PASS","actions":0,"controls":185,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":18537}
+{"page":"content","status":"PASS","actions":0,"controls":9,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":13317}
+{"page":"settings","status":"PASS","actions":0,"controls":9,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":10419}
+{"page":"audit-logs","status":"PASS","actions":3,"controls":17,"mobile":{"viewport":390,"documentWidth":390,"overflow":false},"ms":13585}
+BROWSER QA COMPLETE

@@ -1,0 +1,177 @@
+   ▲ Next.js 15.5.29
+   - Local:        http://127.0.0.1:3006
+   - Network:      http://127.0.0.1:3006
+   - Environments: .env.local
+   - Experiments (use with caution):
+     · optimizePackageImports
+
+ ✓ Starting...
+ ✓ Ready in 5.5s
+ ○ Compiling /api/admin/expenses ...
+ ✓ Compiled /api/admin/expenses in 1174ms (323 modules)
+ GET /api/admin/expenses 200 in 1880ms
+[SUPABASE LOAD BOOKINGS WARN] connect ECONNREFUSED 127.0.0.1:9
+[SUPABASE LOAD CATEGORIES WARN] connect ECONNREFUSED 127.0.0.1:9
+[SUPABASE LOAD ROOMS WARN] connect ECONNREFUSED 127.0.0.1:9
+[SUPABASE LOAD PAYMENTS WARN] connect ECONNREFUSED 127.0.0.1:9
+[SUPABASE LOAD SETTINGS WARN] connect ECONNREFUSED 127.0.0.1:9
+[SUPABASE LOAD EXPENSES WARN] connect ECONNREFUSED 127.0.0.1:9
+[SUPABASE LOAD HALL ENQUIRIES WARN] connect ECONNREFUSED 127.0.0.1:9
+[SUPABASE LOAD CONVENTION QUOTES WARN] connect ECONNREFUSED 127.0.0.1:9
+[SUPABASE LOAD MAINTENANCE WARN] connect ECONNREFUSED 127.0.0.1:9
+[SUPABASE LOAD CASH SHIFTS WARN] connect ECONNREFUSED 127.0.0.1:9
+[SUPABASE LOAD CASH TX WARN] connect ECONNREFUSED 127.0.0.1:9
+[SUPABASE LOAD DAILY CLOSINGS WARN] connect ECONNREFUSED 127.0.0.1:9
+[SUPABASE LOAD ATTENDANCE WARN] connect ECONNREFUSED 127.0.0.1:9
+[SUPABASE LOAD CONTACT ENQUIRIES WARN] connect ECONNREFUSED 127.0.0.1:9
+[SUPABASE LOAD FOLIO CHARGES WARN] connect ECONNREFUSED 127.0.0.1:9
+[SUPABASE LOAD AUDIT LOGS WARN] connect ECONNREFUSED 127.0.0.1:9
+[SUPABASE LOAD REVIEWS WARN] connect ECONNREFUSED 127.0.0.1:9
+ ○ Compiling /api/admin/maintenance ...
+ ✓ Compiled /api/admin/maintenance in 1908ms (325 modules)
+[SUPABASE LOAD MAINTENANCE WARN] connect ECONNREFUSED 127.0.0.1:9
+ GET /api/admin/maintenance 200 in 2930ms
+ ✓ Compiled /api/admin/convention-hall in 265ms (327 modules)
+ GET /api/admin/convention-hall 200 in 477ms
+ ✓ Compiled /api/admin/accounting in 273ms (329 modules)
+ GET /api/admin/accounting 200 in 447ms
+ ○ Compiling / ...
+ ✓ Compiled / in 8s (902 modules)
+ ✓ Compiled in 2.3s (334 modules)
+ GET / 200 in 10577ms
+ ○ Compiling /about ...
+ ✓ Compiled /about in 1139ms (895 modules)
+ GET /about 200 in 1948ms
+ ○ Compiling /amenities ...
+ ✓ Compiled /amenities in 874ms (880 modules)
+ GET /amenities 200 in 1964ms
+ ○ Compiling /availability ...
+ ✓ Compiled /availability in 1241ms (907 modules)
+ GET /availability 200 in 2164ms
+ ○ Compiling /booking ...
+ ✓ Compiled /booking in 2s (940 modules)
+ POST /api/availability/check 200 in 2366ms
+ GET /booking 200 in 3258ms
+ ○ Compiling /booking/checkout ...
+ ✓ Compiled /booking/checkout in 1614ms (957 modules)
+ GET /booking/checkout 200 in 2302ms
+ POST /api/availability/check 200 in 183ms
+ ○ Compiling /booking/confirmation ...
+ ✓ Compiled /booking/confirmation in 1642ms (967 modules)
+ GET /booking/confirmation 307 in 2516ms
+ GET /booking 200 in 341ms
+ ○ Compiling /booking/pickup ...
+ ✓ Compiled /booking/pickup in 1016ms (969 modules)
+ GET /booking/pickup 307 in 1777ms
+ ○ Compiling /walk-in ...
+ ✓ Compiled /walk-in in 1624ms (996 modules)
+ GET /walk-in 200 in 2311ms
+ ○ Compiling /contact ...
+ ✓ Compiled /contact in 3.1s (1013 modules)
+ GET /api/walk-in/verify-token?token=STG_RECEPT_DESK_SEC_7749 200 in 3346ms
+ GET /contact 200 in 3953ms
+ ○ Compiling /convention-hall ...
+ ✓ Compiled /convention-hall in 1835ms (1022 modules)
+ GET /convention-hall 200 in 2567ms
+ ○ Compiling /gallery ...
+ ✓ Compiled /gallery in 1587ms (1031 modules)
+ GET /gallery 200 in 2291ms
+ ○ Compiling /policies ...
+ ✓ Compiled /policies in 2.5s (1039 modules)
+ GET /policies 200 in 3327ms
+ ○ Compiling /rooms ...
+ ✓ Compiled /rooms in 2.1s (1049 modules)
+ GET /rooms 200 in 3345ms
+ ○ Compiling /testimonials ...
+ ✓ Compiled /testimonials in 2.2s (1058 modules)
+ GET /testimonials 200 in 3198ms
+ ○ Compiling /api/reviews ...
+ ✓ Compiled /api/reviews in 3.3s (1061 modules)
+ GET /api/reviews 200 in 3585ms
+ GET /walk-in 200 in 3877ms
+ GET /api/walk-in/verify-token?token=STG_RECEPT_DESK_SEC_7749 200 in 100ms
+ ✓ Compiled /middleware in 258ms (117 modules)
+ ○ Compiling /admin/login ...
+ ✓ Compiled /admin/login in 3.2s (1168 modules)
+ GET /admin/login 200 in 4370ms
+ ○ Compiling /api/admin/auth ...
+ ✓ Compiled /api/admin/auth in 4s (1217 modules)
+ GET /api/admin/profile/language 200 in 4625ms
+ POST /api/admin/auth 200 in 4402ms
+ ○ Compiling /admin/dashboard ...
+ ✓ Compiled /admin/dashboard in 2.8s (1334 modules)
+ GET /admin/dashboard 200 in 4480ms
+ ○ Compiling /api/admin/operations ...
+ ✓ Compiled /api/admin/operations in 3.5s (1297 modules)
+ GET /api/admin/notifications?category=all&limit=50 200 in 4132ms
+ GET /api/admin/notifications?category=all&limit=50 200 in 4131ms
+ GET /api/admin/notifications?category=all&limit=50 200 in 4127ms
+ GET /api/admin/operations 200 in 4192ms
+[SUPABASE LOAD CASH SHIFTS WARN] connect ECONNREFUSED 127.0.0.1:9
+[SUPABASE LOAD CASH TX WARN] connect ECONNREFUSED 127.0.0.1:9
+ GET /api/admin/cashbook 200 in 4297ms
+ DELETE /api/admin/auth 200 in 160ms
+ ○ Compiling /api/admin/notifications/stream ...
+ ✓ Compiled /api/admin/notifications/stream in 3.3s (1301 modules)
+ GET /admin/login 200 in 3715ms
+ GET /api/admin/notifications/stream?token=eyJ1c2VySWQiOiJzdGYtMDEiLCJuYW1lIjoiU3JpIFRheWkgR3JhbmQgQWRtaW4iLCJlbWFpbCI6ImFkbWluQHNyaXRheWlncmFuZC5jb20iLCJyb2xlIjoiU3VwZXIgQWRtaW4iLCJleHAiOjE3OTQ0NzkzNjM0MDl9.fuMkTH0ucbnQqhLRXI-i0wm-1FRyyPQlp0nf9BKeW-4 200 in 4152ms
+ GET /api/realtime/stream?lastEventId=0 200 in 5581ms
+ GET /api/admin/profile/language 200 in 9910ms
+ GET /admin/login?redirect=%2Fadmin%2Fdashboard 200 in 1175ms
+ ○ Compiling /rooms/[slug] ...
+ ✓ Compiled /rooms/[slug] in 2.6s (1041 modules)
+ GET /rooms/double-room 200 in 5700ms
+ GET /rooms/qa-does-not-exist 404 in 231ms
+ ○ Compiling /booking/confirmation/[reference] ...
+ ✓ Compiled /booking/confirmation/[reference] in 2.1s (1052 modules)
+ GET /booking/confirmation/QA-NONEXISTENT 200 in 4600ms
+ ○ Compiling /api/bookings/verify ...
+ ✓ Compiled /api/bookings/verify in 1908ms (1221 modules)
+[SUPABASE GET BOOKING WARN] connect ECONNREFUSED 127.0.0.1:9
+ GET /api/bookings/verify?reference=QA-NONEXISTENT 404 in 2610ms
+ ○ Compiling /booking/pickup/[code] ...
+ ✓ Compiled /booking/pickup/[code] in 1954ms (1232 modules)
+ GET /booking/pickup/QA-NONEXISTENT 200 in 4459ms
+ ○ Compiling /api/walk-in/pickup-status ...
+ ✓ Compiled /api/walk-in/pickup-status in 1137ms (1234 modules)
+[SUPABASE GET BOOKING WARN] connect ECONNREFUSED 127.0.0.1:9
+ GET /api/walk-in/pickup-status?code=QA-NONEXISTENT&ref= 404 in 1415ms
+ GET /contact 200 in 773ms
+ ○ Compiling /convention-hall ...
+ ✓ Compiled /convention-hall in 1010ms (754 modules)
+ GET /convention-hall 200 in 1747ms
+ ○ Compiling /booking/checkout ...
+ ✓ Compiled /booking/checkout in 1001ms (762 modules)
+ GET /booking/checkout 200 in 1628ms
+ ○ Compiling /api/availability/check ...
+ ✓ Compiled /walk-in in 1094ms (765 modules)
+ ✓ Compiled (778 modules)
+ POST /api/availability/check 200 in 2603ms
+ GET /walk-in 200 in 2555ms
+ ○ Compiling /admin/login ...
+ ✓ Compiled /admin/login in 2.1s (780 modules)
+ ✓ Compiled (838 modules)
+ GET /api/walk-in/verify-token?token=STG_RECEPT_DESK_SEC_7749 200 in 4807ms
+ GET /admin/login 200 in 5540ms
+ ○ Compiling /api/admin/auth ...
+ ✓ Compiled /api/admin/auth in 1613ms (841 modules)
+ ✓ Compiled (844 modules)
+ GET /api/admin/profile/language 200 in 3154ms
+ POST /api/admin/auth 401 in 2936ms
+ GET /rooms/double-room 200 in 846ms
+ GET /rooms/qa-does-not-exist 404 in 226ms
+ GET /booking/confirmation/QA-NONEXISTENT 200 in 232ms
+[SUPABASE GET BOOKING WARN] connect ECONNREFUSED 127.0.0.1:9
+ GET /api/bookings/verify?reference=QA-NONEXISTENT 404 in 272ms
+ GET /booking/pickup/QA-NONEXISTENT 200 in 267ms
+[SUPABASE GET BOOKING WARN] connect ECONNREFUSED 127.0.0.1:9
+ GET /api/walk-in/pickup-status?code=QA-NONEXISTENT&ref= 404 in 114ms
+ GET /contact 200 in 289ms
+ GET /convention-hall 200 in 288ms
+ GET /booking/checkout 200 in 312ms
+ POST /api/availability/check 200 in 103ms
+ GET /walk-in 200 in 189ms
+ GET /api/walk-in/verify-token?token=STG_RECEPT_DESK_SEC_7749 200 in 100ms
+ GET /admin/login 200 in 457ms
+ GET /api/admin/profile/language 200 in 93ms
+ POST /api/admin/auth 401 in 70ms

@@ -1,0 +1,96 @@
+[
+  {
+    "action": "configured local login",
+    "status": 200,
+    "success": true
+  },
+  {
+    "route": "expenses",
+    "input": {
+      "category": "other",
+      "title": "QA invalid number",
+      "amount": "not-a-number"
+    },
+    "status": 400,
+    "success": false,
+    "error": "category, title, and valid positive amount are required.",
+    "result": "PASS",
+    "expectation": "invalid input must be rejected before repository mutation"
+  },
+  {
+    "route": "expenses",
+    "input": {
+      "category": "other",
+      "title": " ",
+      "amount": 1
+    },
+    "status": 400,
+    "success": false,
+    "error": "category, title, and valid positive amount are required.",
+    "result": "PASS",
+    "expectation": "invalid input must be rejected before repository mutation"
+  },
+  {
+    "route": "expenses",
+    "input": {
+      "category": "invented",
+      "title": "QA invalid enum",
+      "amount": 1
+    },
+    "status": 400,
+    "success": false,
+    "error": "category, title, and valid positive amount are required.",
+    "result": "PASS",
+    "expectation": "invalid input must be rejected before repository mutation"
+  },
+  {
+    "route": "maintenance",
+    "input": {
+      "room_number": "99999",
+      "issue_title": "QA invalid room",
+      "room_blocked": false
+    },
+    "status": 400,
+    "success": false,
+    "error": "An existing room, non-empty issue title, and valid non-negative cost are required.",
+    "result": "PASS",
+    "expectation": "invalid input must be rejected before repository mutation"
+  },
+  {
+    "route": "convention-hall",
+    "input": {
+      "action": "create_quote",
+      "client_name": "QA isolated",
+      "client_phone": "invalid",
+      "event_name": "QA",
+      "event_date": "not-a-date",
+      "guest_count": -1
+    },
+    "status": 400,
+    "success": false,
+    "error": "client_name, client_phone, event_name, event_date, and guest_count are required.",
+    "result": "PASS",
+    "expectation": "invalid input must be rejected before repository mutation"
+  },
+  {
+    "route": "accounting",
+    "input": {
+      "description": "QA invalid accounts",
+      "lines": [
+        {
+          "accountCode": "invalid1",
+          "debit": 10
+        },
+        {
+          "accountCode": "invalid2",
+          "credit": 10
+        }
+      ]
+    },
+    "status": 400,
+    "success": false,
+    "error": "Every journal line must specify a valid account code.",
+    "result": "PASS",
+    "expectation": "invalid input must be rejected before repository mutation"
+  }
+]

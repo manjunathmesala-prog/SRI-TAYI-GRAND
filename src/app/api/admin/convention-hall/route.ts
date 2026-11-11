@@ -59,7 +59,15 @@ export async function POST(req: NextRequest) {
         valid_until,
       } = body;
 
-      if (!client_name || !client_phone || !event_name || !event_date || !guest_count) {
+      const validDate = typeof event_date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(event_date) &&
+        Number.isFinite(Date.parse(event_date)) && new Date(event_date).toISOString().slice(0, 10) === event_date;
+      const amounts = [catering_rate_per_plate, hall_rental_charge, av_sound_lighting, stage_decoration,
+        generator_diesel, subtotal, gst_rate, gst_amount, total_amount];
+      if (typeof client_name !== 'string' || !client_name.trim() ||
+          typeof client_phone !== 'string' || !/^\+?[\d\s()-]{7,20}$/.test(client_phone) ||
+          typeof event_name !== 'string' || !event_name.trim() || !validDate ||
+          !Number.isInteger(Number(guest_count)) || Number(guest_count) <= 0 ||
+          amounts.some(value => value !== undefined && (!Number.isFinite(Number(value)) || Number(value) < 0))) {
         return NextResponse.json(
           { success: false, error: 'client_name, client_phone, event_name, event_date, and guest_count are required.' },
           { status: 400 }

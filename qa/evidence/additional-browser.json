@@ -1,0 +1,164 @@
+{
+  "routes": [
+    {
+      "route": "/admin",
+      "status": 200,
+      "destination": "/admin/dashboard",
+      "headings": [
+        "Executive Dashboard",
+        "Executive Hotel Overview"
+      ],
+      "result": "PASS"
+    },
+    {
+      "route": "/admin/reservations",
+      "status": 200,
+      "destination": "/admin/reservations",
+      "headings": [
+        "Reservations",
+        "Room Bookings & Reservations"
+      ],
+      "result": "PASS"
+    },
+    {
+      "route": "/admin/rooms",
+      "status": 200,
+      "destination": "/admin/rooms/board",
+      "headings": [
+        "Room Tape Chart",
+        "Visual Room Tape Chart & Dynamic Matrix"
+      ],
+      "result": "PASS"
+    },
+    {
+      "route": "/admin/403",
+      "status": 200,
+      "destination": "/admin/403",
+      "headings": [
+        "Restricted Permission Area"
+      ],
+      "result": "PASS"
+    },
+    {
+      "route": "/admin/rfid/standee",
+      "status": 200,
+      "destination": "/admin/rfid/standee",
+      "headings": [
+        "Reception Walk-In QR Standee"
+      ],
+      "result": "PASS"
+    },
+    {
+      "route": "/",
+      "status": 200,
+      "destination": "/",
+      "headings": [
+        "Sri Tayi Grand",
+        "Celebrated Guests at Sri Tayi Grand",
+        "Rooms for Every Journey",
+        "Convention Hall for Every Occasion",
+        "Everything You Need, Elevated",
+        "Experience Tayi Grand",
+        "The Trust of Our Guests",
+        "Convenient Location in Kadiri",
+        "Plan Your Stay at Sri Tayi Grand"
+      ],
+      "result": "PASS"
+    },
+    {
+      "route": "/about",
+      "status": 200,
+      "destination": "/about",
+      "headings": [
+        "Hospitality & Heritage",
+        "A Landmark of Care & Serenity"
+      ],
+      "result": "PASS"
+    },
+    {
+      "route": "/amenities",
+      "status": 200,
+      "destination": "/amenities",
+      "headings": [
+        "Hotel Amenities",
+        "Fully AC Rooms",
+        "Car Parking",
+        "Convention Hall",
+        "High-Speed Wi-Fi",
+        "Room Service",
+        "Lift Access",
+        "24/7 Security",
+        "Smart TV",
+        "Crafted for Restful Stays"
+      ],
+      "result": "PASS"
+    },
+    {
+      "route": "/availability",
+      "status": 200,
+      "destination": "/availability",
+      "headings": [
+        "Available Sanctuaries"
+      ],
+      "result": "PASS"
+    },
+    {
+      "route": "/booking",
+      "status": 200,
+      "destination": "/booking",
+      "headings": [
+        "Manage Your Reservation",
+        "Find Existing Booking",
+        "Reserve a New Stay"
+      ],
+      "result": "PASS"
+    },
+    {
+      "route": "/booking/checkout",
+      "status": 200,
+      "destination": "/booking/checkout",
+      "headings": [
+        "Guest Details & Confirmation",
+        "Primary Guest Details",
+        "Stay Preferences (Optional)",
+        "Payment Option"
+      ],
+      "result": "PASS"
+    },
+    {
+      "route": "/booking/confirmation",
+      "status": 200,
+      "destination": "/booking",
+      "headings": [
+        "Manage Your Reservation",
+        "Find Existing Booking",
+        "Reserve a New Stay"
+      ],
+      "result": "PASS"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Mobile header controls fit 390px",
+      "status": "PASS",
+      "clipped": []
+    },
+    {
+      "name": "Mobile admin menu opens",
+      "status": "PASS"
+    },
+    {
+      "name": "Empty journal submission disabled",
+      "status": "PASS"
+    },
+    {
+      "name": "Journal modal cancel removes form",
+      "status": "PASS"
+    },
+    {
+      "name": "Housekeeping hydration after reload",
+      "status": "PASS"
+    }
+  ],
+  "errors": []
+}

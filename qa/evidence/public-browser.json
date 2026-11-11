@@ -1,0 +1,772 @@
+{
+  "scope": "Public and missing-input route rendering; external embeds and images blocked to bound QA resource usage",
+  "routes": [
+    {
+      "route": "/",
+      "http": 200,
+      "destination": "/",
+      "headings": [
+        "Sri Tayi Grand",
+        "Celebrated Guests at Sri Tayi Grand",
+        "Rooms for Every Journey",
+        "Convention Hall for Every Occasion",
+        "Everything You Need, Elevated",
+        "Experience Tayi Grand",
+        "The Trust of Our Guests",
+        "Convenient Location in Kadiri",
+        "Plan Your Stay at Sri Tayi Grand"
+      ],
+      "controls": [
+        {
+          "type": null,
+          "name": "Toggle navigation menu"
+        },
+        {
+          "type": "submit",
+          "name": "FIND YOUR STAY"
+        },
+        {
+          "type": "button",
+          "name": "Rotate previous"
+        },
+        {
+          "type": "button",
+          "name": "Rotate next"
+        },
+        {
+          "type": "button",
+          "name": "Jump to photo 1"
+        },
+        {
+          "type": "button",
+          "name": "Jump to photo 2"
+        },
+        {
+          "type": "button",
+          "name": "Jump to photo 3"
+        },
+        {
+          "type": "button",
+          "name": "Jump to photo 4"
+        },
+        {
+          "type": "button",
+          "name": "Jump to photo 5"
+        },
+        {
+          "type": "button",
+          "name": "Jump to photo 6"
+        },
+        {
+          "type": "button",
+          "name": "Jump to photo 7"
+        },
+        {
+          "type": "button",
+          "name": "Jump to photo 8"
+        },
+        {
+          "type": "button",
+          "name": "Go to review slide 1"
+        },
+        {
+          "type": "button",
+          "name": "Go to review slide 2"
+        },
+        {
+          "type": "button",
+          "name": "Go to review slide 3"
+        },
+        {
+          "type": "button",
+          "name": "Go to review slide 4"
+        },
+        {
+          "type": "button",
+          "name": "Previous testimonials"
+        },
+        {
+          "type": "button",
+          "name": "Next testimonials"
+        },
+        {
+          "type": null,
+          "name": "Scroll to top"
+        },
+        {
+          "type": "button",
+          "name": "Install App↓"
+        },
+        {
+          "type": null,
+          "name": "Back to Top"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "route": "/about",
+      "http": 200,
+      "destination": "/about",
+      "headings": [
+        "Hospitality & Heritage",
+        "A Landmark of Care & Serenity"
+      ],
+      "controls": [
+        {
+          "type": null,
+          "name": "Toggle navigation menu"
+        },
+        {
+          "type": null,
+          "name": "Scroll to top"
+        },
+        {
+          "type": "button",
+          "name": "Install App↓"
+        },
+        {
+          "type": null,
+          "name": "Back to Top"
+        },
+        {
+          "type": null,
+          "name": "Open Next.js Dev Tools"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "route": "/amenities",
+      "http": 200,
+      "destination": "/amenities",
+      "headings": [
+        "Hotel Amenities",
+        "Fully AC Rooms",
+        "Car Parking",
+        "Convention Hall",
+        "High-Speed Wi-Fi",
+        "Room Service",
+        "Lift Access",
+        "24/7 Security",
+        "Smart TV",
+        "Crafted for Restful Stays"
+      ],
+      "controls": [
+        {
+          "type": null,
+          "name": "Toggle navigation menu"
+        },
+        {
+          "type": null,
+          "name": "Scroll to top"
+        },
+        {
+          "type": "button",
+          "name": "Install App↓"
+        },
+        {
+          "type": null,
+          "name": "Back to Top"
+        },
+        {
+          "type": null,
+          "name": "Open Next.js Dev Tools"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "route": "/availability",
+      "http": 200,
+      "destination": "/availability",
+      "headings": [
+        "Available Sanctuaries"
+      ],
+      "controls": [
+        {
+          "type": null,
+          "name": "Toggle navigation menu"
+        },
+        {
+          "type": "button",
+          "name": "11-11-2026"
+        },
+        {
+          "type": "button",
+          "name": "12-11-2026"
+        },
+        {
+          "type": "button",
+          "name": "2 Adults"
+        },
+        {
+          "type": "button",
+          "name": "0 Children"
+        },
+        {
+          "type": null,
+          "name": "Update Search"
+        },
+        {
+          "type": "button",
+          "name": "Install App↓"
+        },
+        {
+          "type": null,
+          "name": "Back to Top"
+        },
+        {
+          "type": null,
+          "name": "Open Next.js Dev Tools"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "route": "/booking",
+      "http": 200,
+      "destination": "/booking",
+      "headings": [
+        "Manage Your Reservation",
+        "Find Existing Booking",
+        "Reserve a New Stay"
+      ],
+      "controls": [
+        {
+          "type": null,
+          "name": "Toggle navigation menu"
+        },
+        {
+          "type": "text",
+          "name": "e.g. STG-20261109-5431",
+          "required": false
+        },
+        {
+          "type": "submit",
+          "name": "Find Reservation"
+        },
+        {
+          "type": "button",
+          "name": "Install App↓"
+        },
+        {
+          "type": null,
+          "name": "Back to Top"
+        },
+        {
+          "type": null,
+          "name": "Open Next.js Dev Tools"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "route": "/booking/checkout",
+      "http": 200,
+      "destination": "/booking/checkout",
+      "headings": [
+        "Guest Details & Confirmation",
+        "Primary Guest Details",
+        "Stay Preferences (Optional)",
+        "Payment Option"
+      ],
+      "controls": [
+        {
+          "type": null,
+          "name": "Toggle navigation menu"
+        },
+        {
+          "type": "text",
+          "name": "As per Government ID",
+          "required": true
+        },
+        {
+          "type": "tel",
+          "name": "For confirmation SMS & WhatsApp",
+          "required": true
+        },
+        {
+          "type": "email",
+          "name": "For receipt & digital key access",
+          "required": true
+        },
+        {
+          "type": "text",
+          "name": "e.g. Bengaluru / Hyderabad / Kadiri",
+          "required": false
+        },
+        {
+          "type": "text",
+          "name": null,
+          "required": false
+        },
+        {
+          "type": "checkbox",
+          "name": null,
+          "required": false
+        },
+        {
+          "type": "checkbox",
+          "name": null,
+          "required": false
+        },
+        {
+          "type": null,
+          "name": "Quiet floor, travel details, or extra bedding...",
+          "required": false
+        },
+        {
+          "type": "radio",
+          "name": null,
+          "required": false
+        },
+        {
+          "type": "radio",
+          "name": null,
+          "required": false
+        },
+        {
+          "type": "submit",
+          "name": "Confirm Reservation"
+        },
+        {
+          "type": "button",
+          "name": "Install App↓"
+        },
+        {
+          "type": null,
+          "name": "Back to Top"
+        },
+        {
+          "type": null,
+          "name": "Open Next.js Dev Tools"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "route": "/booking/confirmation",
+      "http": 200,
+      "destination": "/booking",
+      "headings": [
+        "Manage Your Reservation",
+        "Find Existing Booking",
+        "Reserve a New Stay"
+      ],
+      "controls": [
+        {
+          "type": null,
+          "name": "Toggle navigation menu"
+        },
+        {
+          "type": "text",
+          "name": "e.g. STG-20261109-5431",
+          "required": false
+        },
+        {
+          "type": "submit",
+          "name": "Find Reservation"
+        },
+        {
+          "type": "button",
+          "name": "Install App↓"
+        },
+        {
+          "type": null,
+          "name": "Back to Top"
+        },
+        {
+          "type": null,
+          "name": "Open Next.js Dev Tools"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "route": "/booking/pickup",
+      "http": 200,
+      "destination": "/walk-in",
+      "headings": [
+        "Connecting to Sri Tayi Grand Front Desk..."
+      ],
+      "controls": [
+        {
+          "type": null,
+          "name": "Open Next.js Dev Tools"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "route": "/contact",
+      "http": 200,
+      "destination": "/contact",
+      "headings": [
+        "Contact & Location",
+        "Sri Tayi Grand"
+      ],
+      "controls": [
+        {
+          "type": null,
+          "name": "Toggle navigation menu"
+        },
+        {
+          "type": "text",
+          "name": "Your full name",
+          "required": true
+        },
+        {
+          "type": "tel",
+          "name": "10-digit mobile number",
+          "required": true
+        },
+        {
+          "type": "email",
+          "name": "yourname@domain.com",
+          "required": false
+        },
+        {
+          "type": "button",
+          "name": "Room Booking Enquiry"
+        },
+        {
+          "type": null,
+          "name": "Tell us about your dates, number of guests, or special requirements...",
+          "required": true
+        },
+        {
+          "type": "submit",
+          "name": "Send Message"
+        },
+        {
+          "type": null,
+          "name": "Scroll to top"
+        },
+        {
+          "type": "button",
+          "name": "Install App↓"
+        },
+        {
+          "type": null,
+          "name": "Back to Top"
+        },
+        {
+          "type": null,
+          "name": "Open Next.js Dev Tools"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "route": "/convention-hall",
+      "http": 200,
+      "destination": "/convention-hall",
+      "headings": [
+        "Grandeur in Every Celebration.",
+        "An Exquisite Setting"
+      ],
+      "controls": [
+        {
+          "type": null,
+          "name": "Toggle navigation menu"
+        },
+        {
+          "type": "text",
+          "name": "e.g. Ramesh Kumar",
+          "required": true
+        },
+        {
+          "type": "tel",
+          "name": "10-digit Mobile",
+          "required": true
+        },
+        {
+          "type": "email",
+          "name": "name@email.com",
+          "required": false
+        },
+        {
+          "type": "button",
+          "name": "Wedding Reception"
+        },
+        {
+          "type": "number",
+          "name": "e.g. 400",
+          "required": false
+        },
+        {
+          "type": "button",
+          "name": "Select event date"
+        },
+        {
+          "type": null,
+          "name": "Stage decoration, dining requirements, catering preferences...",
+          "required": false
+        },
+        {
+          "type": "submit",
+          "name": "Submit Proposal Request"
+        },
+        {
+          "type": null,
+          "name": "Scroll to top"
+        },
+        {
+          "type": "button",
+          "name": "Install App↓"
+        },
+        {
+          "type": null,
+          "name": "Back to Top"
+        },
+        {
+          "type": null,
+          "name": "Open Next.js Dev Tools"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "route": "/gallery",
+      "http": 200,
+      "destination": "/gallery",
+      "headings": [
+        "Property Gallery"
+      ],
+      "controls": [
+        {
+          "type": null,
+          "name": "Toggle navigation menu"
+        },
+        {
+          "type": null,
+          "name": "All Photos"
+        },
+        {
+          "type": null,
+          "name": "Hotel & Facade"
+        },
+        {
+          "type": null,
+          "name": "Rooms & Suites"
+        },
+        {
+          "type": null,
+          "name": "Convention Hall"
+        },
+        {
+          "type": null,
+          "name": "Reception & Lobby"
+        },
+        {
+          "type": null,
+          "name": "Scroll to top"
+        },
+        {
+          "type": "button",
+          "name": "Install App↓"
+        },
+        {
+          "type": null,
+          "name": "Back to Top"
+        },
+        {
+          "type": null,
+          "name": "Open Next.js Dev Tools"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "route": "/policies",
+      "http": 200,
+      "destination": "/policies",
+      "headings": [
+        "Policies & Terms",
+        "Check-In & Check-Out",
+        "Cancellation & Refunds",
+        "Privacy & Data Security"
+      ],
+      "controls": [
+        {
+          "type": null,
+          "name": "Toggle navigation menu"
+        },
+        {
+          "type": "button",
+          "name": "Install App↓"
+        },
+        {
+          "type": null,
+          "name": "Back to Top"
+        },
+        {
+          "type": null,
+          "name": "Open Next.js Dev Tools"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "route": "/rooms",
+      "http": 200,
+      "destination": "/rooms",
+      "headings": [
+        "Rooms & Suites",
+        "All Rooms Include"
+      ],
+      "controls": [
+        {
+          "type": null,
+          "name": "Toggle navigation menu"
+        },
+        {
+          "type": "submit",
+          "name": "CHECK AVAILABILITY"
+        },
+        {
+          "type": null,
+          "name": "Scroll to top"
+        },
+        {
+          "type": "button",
+          "name": "Install App↓"
+        },
+        {
+          "type": null,
+          "name": "Back to Top"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "route": "/testimonials",
+      "http": 200,
+      "destination": "/testimonials",
+      "headings": [
+        "Guest Testimonials"
+      ],
+      "controls": [
+        {
+          "type": null,
+          "name": "Toggle navigation menu"
+        },
+        {
+          "type": null,
+          "name": "All Reviews (44)"
+        },
+        {
+          "type": null,
+          "name": "Detailed Reviews (26)"
+        },
+        {
+          "type": null,
+          "name": "Star Ratings (18)"
+        },
+        {
+          "type": null,
+          "name": null
+        },
+        {
+          "type": null,
+          "name": null
+        },
+        {
+          "type": null,
+          "name": "Scroll to top"
+        },
+        {
+          "type": "button",
+          "name": "Install App↓"
+        },
+        {
+          "type": null,
+          "name": "Back to Top"
+        },
+        {
+          "type": null,
+          "name": "Open Next.js Dev Tools"
+        }
+      ],
+      "status": "PASS"
+    },
+    {
+      "route": "/walk-in",
+      "http": 200,
+      "destination": "/walk-in",
+      "headings": [
+        "Sri Tayi Grand",
+        "Welcome to Sri Tayi Grand Hotel"
+      ],
+      "controls": [
+        {
+          "type": "button",
+          "name": "View Room Images"
+        },
+        {
+          "type": "button",
+          "name": "View Room Images"
+        },
+        {
+          "type": "button",
+          "name": "View Room Images"
+        },
+        {
+          "type": "button",
+          "name": "View Room Images"
+        },
+        {
+          "type": "text",
+          "name": "e.g. Ramesh Naidu",
+          "required": true
+        },
+        {
+          "type": "tel",
+          "name": "10-digit mobile number",
+          "required": true
+        },
+        {
+          "type": "email",
+          "name": "name@example.com (for digital tax invoice)",
+          "required": false
+        },
+        {
+          "type": null,
+          "name": "Aadhaar Card (12 Digits)Driving Licence (DL No)Passport (8 Characters)Voter ID / EPIC CardPAN Card (10 Characters)",
+          "required": false
+        },
+        {
+          "type": "text",
+          "name": "12-digit Aadhaar Number",
+          "required": true
+        },
+        {
+          "type": null,
+          "name": "1 Night2 Nights3 Nights5 Nights",
+          "required": false
+        },
+        {
+          "type": null,
+          "name": "Pay Cash/UPI at CounterPay Online (Instant UPI/Cards)",
+          "required": false
+        },
+        {
+          "type": "submit",
+          "name": "Confirm Check-In & Get Key Pass"
+        },
+        {
+          "type": null,
+          "name": "Open Next.js Dev Tools"
+        }
+      ],
+      "status": "PASS"
+    }
+  ],
+  "checks": [
+    {
+      "name": "Logout followed by direct dashboard request returns login",
+      "status": "PASS"
+    }
+  ]
+}

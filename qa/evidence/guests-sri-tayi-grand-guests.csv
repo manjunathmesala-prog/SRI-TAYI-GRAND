@@ -1,0 +1,4 @@
+ID,Full Name,Phone,Email,VIP Tier,Total Stays,Total Spend (INR),City,State,Blacklisted,Preferences
+"gst-01","K. Venkatesh Rao","9848022331","venkatesh.rao@gmail.com","gold",3,20153.28,"Anantapur","Andhra Pradesh",NO,"Ground Floor Room, Extra Pillows, Late Checkout"
+"gst-02","P. Sudhakar Reddy","9440123890","sudhakar.reddy@yahoo.com","regular",1,4480,"Pulivendula","Andhra Pradesh",NO,"Quiet Wing"
+"gst-03","Dr. Anand Raman","9989011223","dr.anand@apollo.org","vip_platinum",4,44791.04,"Bengaluru","Karnataka",NO,"King Suite Preferred, Non-smoking floor, High-speed WiFi"
