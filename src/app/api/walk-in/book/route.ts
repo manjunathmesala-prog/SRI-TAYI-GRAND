@@ -3,6 +3,7 @@ import { repo } from '@/lib/db/repository';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limiter';
 import { createRazorpayOrder } from '@/lib/razorpay';
 import { notifySuperAdmin } from '@/lib/notifications/engine';
+import { syncBookingToSupabase } from '@/lib/db/supabase-sync';
 
 export const dynamic = 'force-dynamic';
 
@@ -147,6 +148,7 @@ export async function POST(request: Request) {
       walkInToken,
       specialRequests: specialRequests || special_requests,
     });
+    await syncBookingToSupabase(booking);
 
     // If online payment is requested, generate an authoritative Razorpay order
     let razorpayOrder = null;
