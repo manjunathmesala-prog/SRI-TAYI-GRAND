@@ -1378,12 +1378,13 @@ export async function syncCashShiftToSupabase(shift: CashShift): Promise<void> {
     try {
       await client.query(
         `INSERT INTO cash_shifts (
-          id, shift_number, cashier_id, cashier_name, opened_at, closed_at,
+          id, shift_number, cashier_id, cashier_name, opened_by_name, opened_at, closed_at,
           opening_float, closing_cash_counted, expected_closing_cash, discrepancy, notes, status, created_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
         ON CONFLICT (shift_number) DO UPDATE SET
           cashier_id = EXCLUDED.cashier_id,
           cashier_name = EXCLUDED.cashier_name,
+          opened_by_name = EXCLUDED.opened_by_name,
           opened_at = EXCLUDED.opened_at,
           closed_at = EXCLUDED.closed_at,
           opening_float = EXCLUDED.opening_float,
@@ -1397,6 +1398,7 @@ export async function syncCashShiftToSupabase(shift: CashShift): Promise<void> {
           shift.shift_number,
           shift.cashier_id,
           shift.cashier_name,
+          shift.cashier_name || 'Front Desk Staff',
           shift.opened_at,
           shift.closed_at || null,
           Number(shift.opening_float || 0),
@@ -1428,7 +1430,7 @@ export async function loadCashShiftsFromSupabase(): Promise<CashShift[]> {
     try {
       const res = await client.query(`
         SELECT 
-          id, shift_number, cashier_id, cashier_name, opened_at, closed_at,
+          id, shift_number, cashier_id, cashier_name, opened_by_name, opened_at, closed_at,
           opening_float::float as opening_float,
           closing_cash_counted::float as closing_cash_counted,
           expected_closing_cash::float as expected_closing_cash,
