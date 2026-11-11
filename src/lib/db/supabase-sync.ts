@@ -19,6 +19,8 @@ import {
   AuditLogEntry,
   GoogleReview,
   RoomTransferRecord,
+  JournalEntry,
+  JournalLine,
 } from '@/types';
 
 /**
@@ -2283,6 +2285,148 @@ export async function loadRoomTransfersFromSupabase(): Promise<RoomTransferRecor
     }
   } catch (err: unknown) {
     console.warn('[SUPABASE LOAD ROOM TRANSFERS WARN]', err instanceof Error ? err.message : String(err));
+    return [];
+  }
+}
+
+// ==============================================================================
+// 19. GENERAL LEDGER ACCOUNTING SYNCHRONIZATION
+// ==============================================================================
+
+export async function syncJournalEntryToSupabase(entry: JournalEntry): Promise<void> {
+  if (typeof window !== 'undefined' || !entry) return;
+
+  const db = getSupabasePgPool();
+  if (!db) return;
+
+  try {
+    const client = await db.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query(
+        `INSERT INTO journal_entries (
+          id, entry_number, date, reference, description, total_debit, total_credit,
+          is_balanced, is_posted, created_by, created_at, updated_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
+        ON CONFLICT (id) DO UPDATE SET
+          entry_number = EXCLUDED.entry_number,
+          date = EXCLUDED.date,
+          reference = EXCLUDED.reference,
+          description = EXCLUDED.description,
+          total_debit = EXCLUDED.total_debit,
+          total_credit = EXCLUDED.total_credit,
+          is_balanced = EXCLUDED.is_balanced,
+          is_posted = EXCLUDED.is_posted,
+          updated_at = NOW();`,
+        [
+          entry.id,
+          entry.entry_number,
+          entry.date,
+          entry.reference || null,
+          entry.description,
+          Number(entry.total_debit || 0),
+          Number(entry.total_credit || 0),
+          entry.is_balanced,
+          entry.is_posted,
+          entry.created_by || 'Admin',
+          entry.created_at || new Date().toISOString(),
+        ]
+      );
+
+      // Refresh line items
+      await client.query('DELETE FROM journal_lines WHERE entry_id = $1;', [entry.id]);
+
+      if (Array.isArray(entry.lines)) {
+        for (let i = 0; i < entry.lines.length; i++) {
+          const line = entry.lines[i];
+          const lineId = `${entry.id}-line-${i + 1}`;
+          await client.query(
+            `INSERT INTO journal_lines (
+              id, entry_id, account_code, account_name, debit, credit, description, created_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW());`,
+            [
+              lineId,
+              entry.id,
+              line.accountCode,
+              line.accountName,
+              Number(line.debit || 0),
+              Number(line.credit || 0),
+              line.description || null,
+            ]
+          );
+        }
+      }
+      await client.query('COMMIT');
+    } catch (err: unknown) {
+      await client.query('ROLLBACK').catch(() => {});
+      console.warn(`[SUPABASE JOURNAL SYNC WARN] (${entry.id}):`, err instanceof Error ? err.message : String(err));
+    } finally {
+      client.release();
+    }
+  } catch (err: unknown) {
+    console.warn(`[SUPABASE JOURNAL SYNC POOL WARN] (${entry.id}):`, err instanceof Error ? err.message : String(err));
+  }
+}
+
+export async function loadJournalEntriesFromSupabase(): Promise<JournalEntry[]> {
+  if (typeof window !== 'undefined') return [];
+
+  const db = getSupabasePgPool();
+  if (!db) return [];
+
+  try {
+    const client = await db.connect();
+    try {
+      const entriesRes = await client.query(`
+        SELECT id, entry_number, date::text as date, reference, description,
+               total_debit::float as total_debit, total_credit::float as total_credit,
+               is_balanced, is_posted, created_by, created_at
+        FROM journal_entries
+        ORDER BY date DESC, created_at DESC;
+      `);
+
+      if (!entriesRes.rows || entriesRes.rows.length === 0) return [];
+
+      const linesRes = await client.query(`
+        SELECT id, entry_id, account_code, account_name, debit::float as debit,
+               credit::float as credit, description
+        FROM journal_lines
+        ORDER BY id ASC;
+      `);
+
+      const linesByEntry = new Map<string, JournalLine[]>();
+      for (const row of linesRes.rows) {
+        if (!linesByEntry.has(row.entry_id)) {
+          linesByEntry.set(row.entry_id, []);
+        }
+        linesByEntry.get(row.entry_id)!.push({
+          accountCode: row.account_code,
+          accountName: row.account_name,
+          debit: Number(row.debit) || 0,
+          credit: Number(row.credit) || 0,
+          description: row.description || undefined,
+        });
+      }
+
+      return entriesRes.rows.map((r: any) => ({
+        id: r.id,
+        entry_number: r.entry_number,
+        date: r.date,
+        reference: r.reference || '',
+        description: r.description,
+        lines: linesByEntry.get(r.id) || [],
+        total_debit: Number(r.total_debit) || 0,
+        total_credit: Number(r.total_credit) || 0,
+        is_balanced: Boolean(r.is_balanced),
+        is_posted: Boolean(r.is_posted),
+        created_by: r.created_by,
+        created_at: r.created_at,
+      }));
+    } finally {
+      client.release();
+    }
+  } catch (err: unknown) {
+    console.warn('[SUPABASE LOAD JOURNAL ENTRIES WARN]', err instanceof Error ? err.message : String(err));
     return [];
   }
 }

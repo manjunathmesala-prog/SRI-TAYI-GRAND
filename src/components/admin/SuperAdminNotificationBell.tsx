@@ -55,7 +55,7 @@ export function SuperAdminNotificationBell() {
   };
 
   // Fetch initial notifications
-  const fetchNotifications = useCallback(async (category = activeTab) => {
+  const fetchNotifications = useCallback(async (category: string = 'all') => {
     try {
       const token = authStorage.getToken();
       const res = await fetch(`/api/admin/notifications?category=${category}&limit=50`, {
@@ -138,12 +138,7 @@ export function SuperAdminNotificationBell() {
       if (reconnectTimer) clearTimeout(reconnectTimer);
       if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     };
-  }, []);
-
-  // Re-fetch on filter change
-  useEffect(() => {
-    fetchNotifications(activeTab);
-  }, [activeTab, fetchNotifications]);
+  }, [fetchNotifications]);
 
   // Mark all as read
   const handleMarkAllRead = async () => {

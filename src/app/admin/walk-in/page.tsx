@@ -202,7 +202,7 @@ export default function AnanthaWalkInPage() {
   }, [checkRfidStatus]);
 
   // Load walk-in queue
-  const loadWalkInQueue = async () => {
+  const loadWalkInQueue = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/walk-ins/queue');
       if (res.ok) {
@@ -210,10 +210,10 @@ export default function AnanthaWalkInPage() {
         setWalkInQueue(data.queue || []);
       }
     } catch {}
-  };
+  }, []);
 
   // Fetch all live data
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoadingInitial(true);
       const res = await fetch('/api/admin/operations?action=get_full_state');
@@ -224,14 +224,18 @@ export default function AnanthaWalkInPage() {
         setCategories(cats);
         setPhysicalRooms(rms);
 
-        if (cats.length > 0 && !selectedCategoryId) {
-          setSelectedCategoryId(cats[0].id);
-          const availPhys = rms.filter(
-            (pr) => pr.category_id === cats[0].id && pr.operational_status === 'available' && pr.housekeeping_status === 'clean'
-          );
-          if (availPhys.length > 0) {
-            setSelectedRoomNumber(availPhys[0].room_number);
-          }
+        if (cats.length > 0) {
+          setSelectedCategoryId((prev) => {
+            if (prev) return prev;
+            const initialCat = cats[0].id;
+            const availPhys = rms.filter(
+              (pr) => pr.category_id === initialCat && pr.operational_status === 'available' && pr.housekeeping_status === 'clean'
+            );
+            if (availPhys.length > 0) {
+              setSelectedRoomNumber(availPhys[0].room_number);
+            }
+            return initialCat;
+          });
         }
       }
     } catch {
@@ -239,14 +243,14 @@ export default function AnanthaWalkInPage() {
     } finally {
       setLoadingInitial(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchData();
     loadWalkInQueue();
     const interval = setInterval(loadWalkInQueue, 8000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchData, loadWalkInQueue]);
 
   // When room category changes, pick first available physical room
   const handleRoomTypeChange = (catId: string) => {
@@ -293,9 +297,7 @@ export default function AnanthaWalkInPage() {
 
   // Auto-fill paid amount when total changes if empty or previously matching
   useEffect(() => {
-    if (!amountPaid || Number(amountPaid) === 0) {
-      setAmountPaid(totalAmountInr.toString());
-    }
+    setAmountPaid((prev) => (!prev || Number(prev) === 0 ? totalAmountInr.toString() : prev));
   }, [totalAmountInr]);
 
   const paidAmountNum = Math.min(totalAmountInr, Math.max(0, Number(amountPaid) || 0));

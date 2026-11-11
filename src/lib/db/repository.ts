@@ -55,6 +55,7 @@ import {
 } from '@/types';
 
 import { syncCardToSupabase, syncEventToSupabase, deleteCardFromSupabase } from './supabase-rfid';
+import { loadPersistedData, savePersistedData } from './operational-storage';
 import {
   syncBookingToSupabase,
   loadBookingsFromSupabase,
@@ -96,6 +97,8 @@ import {
   loadReviewsFromSupabase,
   syncWebsiteContentToSupabase,
   loadWebsiteContentFromSupabase,
+  syncJournalEntryToSupabase,
+  loadJournalEntriesFromSupabase,
 } from './supabase-sync';
 import {
   loadPersistedCards,
@@ -177,6 +180,38 @@ export class HotelRepository {
   private eventListeners: Set<(msg: RealtimeMessage) => void> = new Set();
 
   constructor() {
+    // 1. Synchronous disk-backed persistence hydration (ensures zero-downtime durability across process restarts)
+    const pBookings = loadPersistedData<Booking>('bookings.json');
+    if (pBookings.length > 0) this.bookings = pBookings;
+    const pGuests = loadPersistedData<Guest>('guests.json');
+    if (pGuests.length > 0) this.guests = pGuests;
+    const pPayments = loadPersistedData<PaymentRecord>('payments.json');
+    if (pPayments.length > 0) this.payments = pPayments;
+    const pExpenses = loadPersistedData<Expense>('expenses.json');
+    if (pExpenses.length > 0) this.expenses = pExpenses;
+    const pMaintenance = loadPersistedData<MaintenanceTicket>('maintenance.json');
+    if (pMaintenance.length > 0) this.maintenanceTickets = pMaintenance;
+    const pShifts = loadPersistedData<CashShift>('cash_shifts.json');
+    if (pShifts.length > 0) this.cashShifts = pShifts;
+    const pTransactions = loadPersistedData<CashTransaction>('cash_transactions.json');
+    if (pTransactions.length > 0) this.cashTransactions = pTransactions;
+    const pClosings = loadPersistedData<DailyClosing>('daily_closings.json');
+    if (pClosings.length > 0) this.dailyClosings = pClosings;
+    const pEnquiries = loadPersistedData<HallEnquiry>('hall_enquiries.json');
+    if (pEnquiries.length > 0) this.hallEnquiries = pEnquiries;
+    const pQuotes = loadPersistedData<ConventionQuote>('convention_quotes.json');
+    if (pQuotes.length > 0) this.conventionQuotes = pQuotes;
+    const pJournals = loadPersistedData<JournalEntry>('journal_entries.json');
+    if (pJournals.length > 0) this.journalEntries = pJournals;
+    const pAttendance = loadPersistedData<StaffAttendance>('staff_attendance.json');
+    if (pAttendance.length > 0) this.staffAttendance = pAttendance;
+    const pFolios = loadPersistedData<FolioCharge>('folio_charges.json');
+    if (pFolios.length > 0) this.folioCharges = pFolios;
+    const pAudit = loadPersistedData<AuditLogEntry>('audit_logs.json');
+    if (pAudit.length > 0) this.auditLogs = pAudit;
+    const pContact = loadPersistedData<ContactEnquiry>('contact_enquiries.json');
+    if (pContact.length > 0) this.contactEnquiries = pContact;
+
     const loadedCards = loadPersistedCards();
     this.rfidCards = loadedCards.length > 0 ? loadedCards : JSON.parse(JSON.stringify(INITIAL_RFID_CARDS));
     const loadedEvents = loadPersistedEvents();
@@ -184,7 +219,7 @@ export class HotelRepository {
     // Hydrate all operational state from live Supabase PostgreSQL
     loadBookingsFromSupabase().then((pgBookings) => {
       if (pgBookings && pgBookings.length > 0) {
-        for (const pgB of pgBookings) {
+                for (const pgB of pgBookings) {
           const index = this.bookings.findIndex((b) => b.booking_reference === pgB.booking_reference);
           if (index !== -1) {
             this.bookings[index] = { ...this.bookings[index], ...pgB };
@@ -192,6 +227,7 @@ export class HotelRepository {
             this.bookings.push(pgB);
           }
         }
+        savePersistedData('bookings.json', this.bookings);
       }
     }).catch(() => {});
 
@@ -225,12 +261,13 @@ export class HotelRepository {
 
     loadPaymentsFromSupabase().then((pgPayments) => {
       if (pgPayments && pgPayments.length > 0) {
-        for (const pgP of pgPayments) {
+                for (const pgP of pgPayments) {
           const exists = this.payments.some((p) => p.payment_reference === pgP.payment_reference);
           if (!exists) {
             this.payments.unshift(pgP);
           }
         }
+        savePersistedData('payments.json', this.payments);
       }
     }).catch(() => {});
 
@@ -241,35 +278,35 @@ export class HotelRepository {
     }).catch(() => {});
 
     loadExpensesFromSupabase().then((pgExpenses: any) => {
-      if (pgExpenses && pgExpenses.length > 0) this.expenses = pgExpenses;
+      if (pgExpenses && pgExpenses.length > 0) { this.expenses = pgExpenses; savePersistedData('expenses.json', this.expenses); }
     }).catch(() => {});
 
     loadHallEnquiriesFromSupabase().then((pgHE: any) => {
-      if (pgHE && pgHE.length > 0) this.hallEnquiries = pgHE;
+      if (pgHE && pgHE.length > 0) { this.hallEnquiries = pgHE; savePersistedData('hall_enquiries.json', this.hallEnquiries); }
     }).catch(() => {});
 
     loadConventionQuotesFromSupabase().then((pgCQ: any) => {
-      if (pgCQ && pgCQ.length > 0) this.conventionQuotes = pgCQ;
+      if (pgCQ && pgCQ.length > 0) { this.conventionQuotes = pgCQ; savePersistedData('convention_quotes.json', this.conventionQuotes); }
     }).catch(() => {});
 
     loadMaintenanceTicketsFromSupabase().then((pgMT: any) => {
-      if (pgMT && pgMT.length > 0) this.maintenanceTickets = pgMT;
+      if (pgMT && pgMT.length > 0) { this.maintenanceTickets = pgMT; savePersistedData('maintenance.json', this.maintenanceTickets); }
     }).catch(() => {});
 
     loadCashShiftsFromSupabase().then((pgCS: any) => {
-      if (pgCS && pgCS.length > 0) this.cashShifts = pgCS;
+      if (pgCS && pgCS.length > 0) { this.cashShifts = pgCS; savePersistedData('cash_shifts.json', this.cashShifts); }
     }).catch(() => {});
 
     loadCashTransactionsFromSupabase().then((pgCT: any) => {
-      if (pgCT && pgCT.length > 0) this.cashTransactions = pgCT;
+      if (pgCT && pgCT.length > 0) { this.cashTransactions = pgCT; savePersistedData('cash_transactions.json', this.cashTransactions); }
     }).catch(() => {});
 
     loadDailyClosingsFromSupabase().then((pgDC: any) => {
-      if (pgDC && pgDC.length > 0) this.dailyClosings = pgDC;
+      if (pgDC && pgDC.length > 0) { this.dailyClosings = pgDC; savePersistedData('daily_closings.json', this.dailyClosings); }
     }).catch(() => {});
 
     loadStaffAttendanceFromSupabase().then((pgSA: any) => {
-      if (pgSA && pgSA.length > 0) this.staffAttendance = pgSA;
+      if (pgSA && pgSA.length > 0) { this.staffAttendance = pgSA; savePersistedData('staff_attendance.json', this.staffAttendance); }
     }).catch(() => {});
 
     loadContactEnquiriesFromSupabase().then((pgCE: any) => {
@@ -277,11 +314,18 @@ export class HotelRepository {
     }).catch(() => {});
 
     loadFolioChargesFromSupabase().then((pgFC: any) => {
-      if (pgFC && pgFC.length > 0) this.folioCharges = pgFC;
+      if (pgFC && pgFC.length > 0) { this.folioCharges = pgFC; savePersistedData('folio_charges.json', this.folioCharges); }
     }).catch(() => {});
 
     loadAuditLogsFromSupabase().then((pgAL: any) => {
-      if (pgAL && pgAL.length > 0) this.auditLogs = pgAL;
+      if (pgAL && pgAL.length > 0) { this.auditLogs = pgAL; savePersistedData('audit_logs.json', this.auditLogs); }
+    }).catch(() => {});
+
+    loadJournalEntriesFromSupabase().then((pgJE: any) => {
+      if (pgJE && pgJE.length > 0) {
+        this.journalEntries = pgJE;
+        savePersistedData('journal_entries.json', this.journalEntries);
+      }
     }).catch(() => {});
 
     loadReviewsFromSupabase().then((pgRev: any) => {
@@ -800,6 +844,7 @@ export class HotelRepository {
         created_at: new Date().toISOString(),
       };
       this.guests.push(guest);
+      savePersistedData('guests.json', this.guests);
     }
 
     // Allocate & occupy physical room
@@ -903,6 +948,30 @@ export class HotelRepository {
 
     const requestedCount = bookingData.rooms_count || 1;
 
+    // Concurrency conflict guard: verify requested room is not already occupied or reserved
+    if (bookingData.assigned_room_id || bookingData.assigned_room_number) {
+      const roomTarget = this.rooms.find(
+        (r) => r.id === bookingData.assigned_room_id || r.room_number === (bookingData.assigned_room_number || bookingData.assigned_room_id)
+      );
+      if (roomTarget) {
+        if (!roomTarget.is_active) {
+          throw new Error(`Room ${roomTarget.room_number} is currently out of service.`);
+        }
+        const hasOverlap = this.bookings.some((b) => {
+          if (b.status === 'cancelled' || b.status === 'checked_out') return false;
+          const matches = b.assigned_room_id === roomTarget.id || b.assigned_room_number === roomTarget.room_number;
+          if (!matches) return false;
+          if (checkIn && checkOut && b.check_in_date && b.check_out_date) {
+            return b.check_in_date < checkOut && b.check_out_date > checkIn;
+          }
+          return false;
+        });
+        if (hasOverlap) {
+          throw new Error(`Conflict: Room ${roomTarget.room_number} is already booked or occupied.`);
+        }
+      }
+    }
+
     if (availableRooms.length < requestedCount) {
       throw new Error(
         `Overbooking Prevention: Category has only ${availableRooms.length} room(s) available for these dates, but ${requestedCount} was requested.`
@@ -922,6 +991,7 @@ export class HotelRepository {
     };
 
     this.bookings.unshift(newBooking);
+    savePersistedData('bookings.json', this.bookings);
 
     // Update guest record or create one
     let guest = this.guests.find(
@@ -942,14 +1012,24 @@ export class HotelRepository {
       this.guests.push(guest);
     }
 
-    // If an assigned physical room was specified, reserve it atomically
+    // If an assigned physical room was specified, reserve it atomically with rollback safeguard
     if (newBooking.assigned_room_id) {
-      this.assignRoomToBooking(
-        newBooking.assigned_room_id,
-        bookingReference,
-        newBooking.guest_name,
-        actor
-      );
+      try {
+        this.assignRoomToBooking(
+          newBooking.assigned_room_id,
+          bookingReference,
+          newBooking.guest_name,
+          actor
+        );
+      } catch (assignErr) {
+        // Rollback booking from memory and persistence to prevent phantom bookings
+        const rbIdx = this.bookings.findIndex((b) => b.booking_reference === bookingReference);
+        if (rbIdx !== -1) {
+          this.bookings.splice(rbIdx, 1);
+          savePersistedData('bookings.json', this.bookings);
+        }
+        throw assignErr;
+      }
     }
 
     // Broadcast new booking in real-time
@@ -970,6 +1050,7 @@ export class HotelRepository {
 
     booking.status = status;
     if (notes) booking.internal_notes = notes;
+    savePersistedData('bookings.json', this.bookings);
     syncBookingToSupabase(booking);
 
     if (status === 'checked_in') {
@@ -1360,6 +1441,7 @@ export class HotelRepository {
       created_at: new Date().toISOString(),
     };
     this.payments.unshift(newPayment);
+    savePersistedData('payments.json', this.payments);
 
     // Update booking paid amount
     const booking = this.getBookingByReference(record.booking_reference);
@@ -1564,28 +1646,28 @@ export class HotelRepository {
 
     const cashCollected = todayPayments
       .filter((p) => p.payment_method === 'cash')
-      .reduce((sum, p) => sum + p.amount, 0);
+      .reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
     const upiCollected = todayPayments
       .filter((p) => p.payment_method === 'upi')
-      .reduce((sum, p) => sum + p.amount, 0);
+      .reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
     const cardCollected = todayPayments
       .filter((p) => p.payment_method === 'card')
-      .reduce((sum, p) => sum + p.amount, 0);
+      .reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
     const onlineCollected = todayPayments
       .filter((p) => p.payment_method === 'online')
-      .reduce((sum, p) => sum + p.amount, 0);
+      .reduce((sum, p) => sum + Number(p.amount || 0), 0);
 
     const totalCollected = cashCollected + upiCollected + cardCollected + onlineCollected;
 
     // Filter expenses recorded on this date
     const todayExpenses = this.expenses.filter((e) => e.expense_date === targetDate && e.status !== 'rejected');
-    const totalExpenses = todayExpenses.reduce((sum, e) => sum + e.amount, 0);
+    const totalExpenses = todayExpenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
     const cashExpenses = todayExpenses
       .filter((e) => e.payment_method === 'cash')
-      .reduce((sum, e) => sum + e.amount, 0);
+      .reduce((sum, e) => sum + Number(e.amount || 0), 0);
 
     // Expected cash in drawer = Cash receipts - Cash disbursements
     const expectedCashInDrawer = Math.max(0, cashCollected - cashExpenses);

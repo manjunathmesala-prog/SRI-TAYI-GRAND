@@ -1,0 +1,38 @@
+[
+  {
+    "id": "log-1794399370065-640",
+    "timestamp": "2026-11-11T12:16:10.065Z",
+    "userId": "admin-user",
+    "userName": "Room Service Lead",
+    "userRole": "Front Desk",
+    "action": "ADD_FOLIO_CHARGE",
+    "entityType": "booking",
+    "entityId": "fc-1794399370064-ebqs",
+    "details": "Added folio charge Morning South Indian Breakfast Tray (₹280) to booking STG-TEST-1794399362499",
+    "ipAddress": "127.0.0.1"
+  },
+  {
+    "id": "log-1794395673359-951",
+    "timestamp": "2026-11-11T11:14:33.359Z",
+    "userId": "admin-user",
+    "userName": "Room Service Lead",
+    "userRole": "Front Desk",
+    "action": "ADD_FOLIO_CHARGE",
+    "entityType": "booking",
+    "entityId": "fc-1794395673358-7btl",
+    "details": "Added folio charge Morning South Indian Breakfast Tray (₹280) to booking STG-TEST-1794395666117",
+    "ipAddress": "127.0.0.1"
+  },
+  {
+    "id": "log-1794388505425-250",
+    "timestamp": "2026-11-11T09:15:05.425Z",
+    "userId": "admin-user",
+    "userName": "Room Service Lead",
+    "userRole": "Front Desk",
+    "action": "ADD_FOLIO_CHARGE",
+    "entityType": "booking",
+    "entityId": "fc-1794388505425-rusg",
+    "details": "Added folio charge Morning South Indian Breakfast Tray (₹280) to booking STG-TEST-1794388498636",
+    "ipAddress": "127.0.0.1"
+  }
+]

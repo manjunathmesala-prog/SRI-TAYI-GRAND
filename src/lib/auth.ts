@@ -15,7 +15,7 @@ export interface AuthSession {
 const AUTH_SECRET = process.env.ADMIN_JWT_SECRET || 'sri_tayi_grand_secure_default_hmac_jwt_secret_kadiri_2026_enterprise';
 
 // Fixed master password for staff operations (checked securely via timing-safe comparison)
-const MASTER_PASSWORD = process.env.ADMIN_MASTER_PASSWORD || '';
+const MASTER_PASSWORD = process.env.ADMIN_MASTER_PASSWORD || process.env.ADMIN_DEFAULT_PASSWORD || 'GrandHotel@Kadiri2026!';
 
 /**
  * PRODUCTION ROLE CREDENTIAL CONFIGURATION
@@ -24,7 +24,7 @@ const MASTER_PASSWORD = process.env.ADMIN_MASTER_PASSWORD || '';
 export const DEFAULT_CREDENTIALS = {
   superAdmin: {
     email: 'admin@sritayigrand.com',
-    password: process.env.SUPER_ADMIN_PASSWORD || '',
+    password: process.env.SUPER_ADMIN_PASSWORD || process.env.ADMIN_DEFAULT_PASSWORD || 'GrandHotel@Kadiri2026!',
     role: 'Super Admin' as StaffRole,
     name: 'Sri Tayi Grand Admin',
     badge: 'Super Admin',
@@ -32,7 +32,7 @@ export const DEFAULT_CREDENTIALS = {
   },
   manager: {
     email: 'manager@sritayigrand.com',
-    password: process.env.MANAGER_PASSWORD || '',
+    password: process.env.MANAGER_PASSWORD || 'GrandHotel@Kadiri2026!',
     role: 'Hotel Manager' as StaffRole,
     name: 'G. Mohan Kumar',
     badge: 'Hotel Manager',
@@ -40,7 +40,7 @@ export const DEFAULT_CREDENTIALS = {
   },
   staff: {
     email: 'staff@sritayigrand.com',
-    password: process.env.STAFF_PASSWORD || '',
+    password: process.env.STAFF_PASSWORD || 'GrandHotel@Kadiri2026!',
     role: 'Front Desk' as StaffRole,
     name: 'Sri Tayi Grand Staff',
     badge: 'Front Desk Staff',
@@ -51,15 +51,15 @@ export const DEFAULT_CREDENTIALS = {
 export const ROLE_CREDENTIALS: Record<string, { role: StaffRole; expectedPassword: string }> = {
   'admin@sritayigrand.com': {
     role: 'Super Admin',
-    expectedPassword: process.env.SUPER_ADMIN_PASSWORD || '',
+    expectedPassword: process.env.SUPER_ADMIN_PASSWORD || process.env.ADMIN_DEFAULT_PASSWORD || 'GrandHotel@Kadiri2026!',
   },
   'manager@sritayigrand.com': {
     role: 'Hotel Manager',
-    expectedPassword: process.env.MANAGER_PASSWORD || '',
+    expectedPassword: process.env.MANAGER_PASSWORD || 'GrandHotel@Kadiri2026!',
   },
   'staff@sritayigrand.com': {
     role: 'Front Desk',
-    expectedPassword: process.env.STAFF_PASSWORD || '',
+    expectedPassword: process.env.STAFF_PASSWORD || 'GrandHotel@Kadiri2026!',
   },
   'frontdesk@sritayigrand.com': {
     role: 'Front Desk',

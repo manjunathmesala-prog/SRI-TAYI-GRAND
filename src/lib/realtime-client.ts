@@ -218,7 +218,7 @@ export function useRealtimeSync(options: UseRealtimeSyncOptions = {}) {
   );
   useEffect(() => {
     filterSetRef.current = filterTypes ? new Set(filterTypes) : undefined;
-  }, [filterTypesKey]);
+  }, [filterTypesKey, filterTypes]);
 
   useEffect(() => {
     if (!enabled) return;

@@ -1,0 +1,31 @@
+[
+  {
+    "id": "ctx-1794399362500-522",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 1250,
+    "reason": "Expense Payout: Cloud Persistence Test Expense 1794399362499 (maintenance)",
+    "performed_by": "QA Automation",
+    "performed_at": "2026-11-11T12:16:02.500Z"
+  },
+  {
+    "id": "ctx-1794395666118-543",
+    "shift_id": "shift-current",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 1250,
+    "reason": "Expense Payout: Cloud Persistence Test Expense 1794395666117 (maintenance)",
+    "performed_by": "QA Automation",
+    "performed_at": "2026-11-11T11:14:26.118Z"
+  },
+  {
+    "id": "ctx-1794388498638-267",
+    "shift_id": "shift-current",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 1250,
+    "reason": "Expense Payout: Cloud Persistence Test Expense 1794388498636 (maintenance)",
+    "performed_by": "QA Automation",
+    "performed_at": "2026-11-11T09:14:58.638Z"
+  }
+]

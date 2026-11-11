@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { AuditLogEntry, AuditActionCategory } from '@/types';
 import { useRealtimeSync } from '@/lib/realtime-client';
+import { authStorage } from '@/lib/auth-storage';
 import {
   ShieldCheck,
   Search,
@@ -49,8 +50,12 @@ export default function AdminAuditLogsPage() {
           ? '/api/admin/audit-logs'
           : `/api/admin/audit-logs?category=${categoryFilter}`;
 
+      const token = authStorage.getToken();
       const res = await fetch(url, {
-        headers: { 'x-staff-role': 'Super Admin' },
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          'x-staff-role': 'Super Admin',
+        },
       });
       if (res.ok) {
         const data = await res.json();

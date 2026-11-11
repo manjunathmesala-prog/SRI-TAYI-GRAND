@@ -1,0 +1,18 @@
+[
+  {
+    "id": "maint-101",
+    "room_number": "104",
+    "issue_title": "AC Cooling Coil Freezing & Fan Noise",
+    "category": "ac_climate",
+    "priority": "high",
+    "description": "Split inverter unit compressor vibrating heavily and insufficient airflow in Room 104.",
+    "status": "resolved",
+    "reported_by": "Anjaneyulu (Housekeeper)",
+    "created_at": "2026-11-10T10:04:24.113Z",
+    "assigned_to": "Srinivasulu M (Maintenance)",
+    "estimated_cost": 1800,
+    "actual_cost": 1800,
+    "room_blocked": false,
+    "resolution_notes": "Work completed and tested."
+  }
+]
