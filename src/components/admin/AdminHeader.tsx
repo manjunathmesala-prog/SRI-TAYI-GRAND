@@ -22,6 +22,7 @@ import {
 import { useRealtimeSync, cashbookClient } from '@/lib/realtime-client';
 import { SuperAdminNotificationBell } from '@/components/admin/SuperAdminNotificationBell';
 import { AdminLanguageSwitcher } from '@/components/admin/AdminLanguageSwitcher';
+import { OfflineSyncBadge } from '@/components/sync/OfflineSyncBadge';
 import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 import { authStorage } from '@/lib/auth-storage';
 
@@ -212,6 +213,9 @@ export function AdminHeader() {
             {isConnected ? t('common.live', 'LIVE SSE') : t('common.reconnecting', 'RECONNECTING')}
           </span>
         </div>
+
+        {/* Offline & Sync Queue Status Badge */}
+        <OfflineSyncBadge />
 
         {/* Live Cash Drawer Counter */}
         {cashBalance !== null && (

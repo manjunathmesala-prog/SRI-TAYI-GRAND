@@ -928,4 +928,67 @@ export interface ConventionQuote {
 
 export * from './rfid-history';
 
+// ==============================================================================
+// OFFLINE SYNCHRONIZATION & LOCAL DATABASE TYPES
+// ==============================================================================
+
+export type SyncOperationStatus =
+  | 'pending'
+  | 'syncing'
+  | 'synced'
+  | 'failed_retryable'
+  | 'conflict'
+  | 'rejected'
+  | 'needs_review';
+
+export type SyncEntityType =
+  | 'booking'
+  | 'walk_in'
+  | 'room_status'
+  | 'housekeeping'
+  | 'maintenance'
+  | 'payment'
+  | 'cash_shift'
+  | 'expense'
+  | 'attendance'
+  | 'guest_form'
+  | 'convention_enquiry';
+
+export type SyncOperationType = 'create' | 'update' | 'delete';
+
+export interface SyncOperation {
+  operation_id: string; // Idempotency key
+  user_id: string;
+  device_id: string;
+  entity_type: SyncEntityType;
+  entity_id: string;
+  operation_type: SyncOperationType;
+  timestamp: string;
+  payload: any;
+  retry_count: number;
+  sync_status: SyncOperationStatus;
+  server_ack?: {
+    acked_at: string;
+    server_entity_id?: string;
+    message?: string;
+    response?: any;
+  };
+  error_message?: string;
+  conflict_details?: {
+    server_version?: any;
+    resolution_strategy?: 'server_wins' | 'client_wins' | 'manual_review';
+    resolved_at?: string;
+  };
+}
+
+export interface OfflineBookingDraft {
+  draft_id: string;
+  created_at: string;
+  updated_at: string;
+  data: any;
+  is_pending_sync: boolean;
+  notes?: string;
+}
+
+
 
