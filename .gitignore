@@ -42,3 +42,6 @@ latest_production_tunnel_url.txt
 bridge_active_port.txt
 *.old.exe
 scratch/
+
+.vercel
+.env*
