@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
           (r) => r.category_id === category_id && r.operational_status === 'available' && r.is_active
         );
 
-        const booking = repo.createBooking(
+        const booking = await repo.createBooking(
           {
             guest_id: `gst-ota-${Date.now()}`,
             guest_name,

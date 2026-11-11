@@ -1,5 +1,36 @@
 [
   {
+    "id": "ctx-1794407926837-727",
+    "shift_id": "shift-1794407673600",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 350,
+    "reason": "Expense Payout: Morning Cleaning Detergent & Disinfectant (maintenance)",
+    "performed_by": "A. Ramanjaneyulu",
+    "performed_at": "2026-11-11T14:38:46.837Z"
+  },
+  {
+    "id": "ctx-1794401624318-128",
+    "shift_id": "shift-1794401609712",
+    "type": "cash_in",
+    "category": "guest_payment",
+    "amount": 1800,
+    "reason": "Guest Payment: undefined (STG-20261111-9118)",
+    "booking_reference": "STG-20261111-9118",
+    "receipt_ref": "PAY-STG-624316-590",
+    "performed_by": "Front Desk Staff",
+    "performed_at": "2026-11-11T12:53:44.318Z"
+  },
+  {
+    "id": "ctx-1794401589758-889",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 500,
+    "reason": "Expense Payout: Persist Test Expense 1794401589756 (maintenance)",
+    "performed_by": "QA",
+    "performed_at": "2026-11-11T12:53:09.758Z"
+  },
+  {
     "id": "ctx-1794399362500-522",
     "type": "cash_out",
     "category": "expense_payout",
@@ -27,5 +58,127 @@
     "reason": "Expense Payout: Cloud Persistence Test Expense 1794388498636 (maintenance)",
     "performed_by": "QA Automation",
     "performed_at": "2026-11-11T09:14:58.638Z"
+  },
+  {
+    "id": "ctx-1794411362670-625",
+    "shift_id": "shift-1794411359985",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 350,
+    "reason": "Expense Payout: Morning Cleaning Detergent & Disinfectant (maintenance)",
+    "performed_by": "A. Ramanjaneyulu",
+    "performed_at": "2026-11-11T15:36:02.670Z"
+  },
+  {
+    "id": "ctx-1794411359991-480",
+    "shift_id": "shift-1794411359985",
+    "type": "cash_in",
+    "category": "guest_payment",
+    "amount": 2016,
+    "reason": "Guest Payment: V. Krishna Murthy (TEST-STG-CASH-01)",
+    "booking_reference": "TEST-STG-CASH-01",
+    "receipt_ref": "PAY-STG-359990-607",
+    "performed_by": "A. Ramanjaneyulu",
+    "performed_at": "2026-11-11T15:35:59.991Z"
+  },
+  {
+    "id": "ctx-1794410817664-366",
+    "shift_id": "shift-1794410815408",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 350,
+    "reason": "Expense Payout: Morning Cleaning Detergent & Disinfectant (maintenance)",
+    "performed_by": "A. Ramanjaneyulu",
+    "performed_at": "2026-11-11T15:26:57.664Z"
+  },
+  {
+    "id": "ctx-1794410815412-580",
+    "shift_id": "shift-1794410815408",
+    "type": "cash_in",
+    "category": "guest_payment",
+    "amount": 2016,
+    "reason": "Guest Payment: V. Krishna Murthy (TEST-STG-CASH-01)",
+    "booking_reference": "TEST-STG-CASH-01",
+    "receipt_ref": "PAY-STG-815412-641",
+    "performed_by": "A. Ramanjaneyulu",
+    "performed_at": "2026-11-11T15:26:55.412Z"
+  },
+  {
+    "id": "ctx-1794410762343-381",
+    "shift_id": "shift-1794410760064",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 350,
+    "reason": "Expense Payout: Morning Cleaning Detergent & Disinfectant (maintenance)",
+    "performed_by": "A. Ramanjaneyulu",
+    "performed_at": "2026-11-11T15:26:02.343Z"
+  },
+  {
+    "id": "ctx-1794410760067-145",
+    "shift_id": "shift-1794410760064",
+    "type": "cash_in",
+    "category": "guest_payment",
+    "amount": 2016,
+    "reason": "Guest Payment: V. Krishna Murthy (TEST-STG-CASH-01)",
+    "booking_reference": "TEST-STG-CASH-01",
+    "receipt_ref": "PAY-STG-760067-477",
+    "performed_by": "A. Ramanjaneyulu",
+    "performed_at": "2026-11-11T15:26:00.067Z"
+  },
+  {
+    "id": "ctx-1794410440732-504",
+    "shift_id": "shift-1794409435152",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 350,
+    "reason": "Expense Payout: Morning Cleaning Detergent & Disinfectant (maintenance)",
+    "performed_by": "A. Ramanjaneyulu",
+    "performed_at": "2026-11-11T15:20:40.732Z"
+  },
+  {
+    "id": "ctx-1794410438572-381",
+    "shift_id": "shift-1794410438569",
+    "type": "cash_in",
+    "category": "guest_payment",
+    "amount": 2016,
+    "reason": "Guest Payment: V. Krishna Murthy (TEST-STG-CASH-01)",
+    "booking_reference": "TEST-STG-CASH-01",
+    "receipt_ref": "PAY-STG-438572-534",
+    "performed_by": "A. Ramanjaneyulu",
+    "performed_at": "2026-11-11T15:20:38.572Z"
+  },
+  {
+    "id": "ctx-1794410255816-487",
+    "shift_id": "shift-1794410255807",
+    "type": "cash_in",
+    "category": "guest_payment",
+    "amount": 2016,
+    "reason": "Guest Payment: V. Krishna Murthy (TEST-STG-CASH-01)",
+    "booking_reference": "TEST-STG-CASH-01",
+    "receipt_ref": "PAY-STG-255816-740",
+    "performed_by": "A. Ramanjaneyulu",
+    "performed_at": "2026-11-11T15:17:35.816Z"
+  },
+  {
+    "id": "ctx-1794409437583-376",
+    "shift_id": "shift-1794409435152",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 350,
+    "reason": "Expense Payout: Morning Cleaning Detergent & Disinfectant (maintenance)",
+    "performed_by": "A. Ramanjaneyulu",
+    "performed_at": "2026-11-11T15:03:57.583Z"
+  },
+  {
+    "id": "ctx-1794409435157-962",
+    "shift_id": "shift-1794409435152",
+    "type": "cash_in",
+    "category": "guest_payment",
+    "amount": 2016,
+    "reason": "Guest Payment: V. Krishna Murthy (TEST-STG-CASH-01)",
+    "booking_reference": "TEST-STG-CASH-01",
+    "receipt_ref": "PAY-STG-435156-317",
+    "performed_by": "A. Ramanjaneyulu",
+    "performed_at": "2026-11-11T15:03:55.157Z"
   }
 ]

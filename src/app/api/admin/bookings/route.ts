@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
     const search = (searchParams.get('search') || '').toLowerCase().trim();
     const date = searchParams.get('date');
 
+    await repo.ensureBookingsLoaded();
     let bookings = repo.getBookings();
 
     if (status && status !== 'all') {
@@ -103,7 +104,7 @@ export async function POST(req: NextRequest) {
       body.assigned_room_number = room.room_number;
     }
 
-    const newBooking = repo.createBooking(body, staffName);
+    const newBooking = await repo.createBooking(body, staffName);
 
     return NextResponse.json({
       success: true,
@@ -111,6 +112,13 @@ export async function POST(req: NextRequest) {
       message: `Booking ${newBooking.booking_reference} registered successfully.`,
     });
   } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message || 'Failed to create booking' }, { status: 400 });
+    const isConflict = err?.code === '23P01' ||
+      String(err?.message || '').toLowerCase().includes('exclusion constraint') ||
+      String(err?.message || '').toLowerCase().includes('already booked') ||
+      String(err?.message || '').toLowerCase().includes('conflict');
+    return NextResponse.json(
+      { success: false, error: err.message || 'Failed to create booking' },
+      { status: isConflict ? 409 : 400 }
+    );
   }
 }

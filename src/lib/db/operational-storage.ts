@@ -39,7 +39,7 @@ export function loadPersistedData<T>(filename: string): T[] {
 }
 
 export function savePersistedData<T>(filename: string, items: T[]): void {
-  if (!isServerEnvironment()) return;
+  if (!isServerEnvironment() || process.env.VITEST || process.env.NODE_ENV === 'test') return;
   const dir = getDataDir();
   if (!dir) return;
 

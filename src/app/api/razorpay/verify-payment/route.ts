@@ -90,7 +90,7 @@ export async function POST(request: Request) {
       method: body.method || 'online',
     });
 
-    const paymentRecord = repo.recordPayment({
+    const paymentRecord = await repo.recordPayment({
       booking_reference: bookingReference || orderId,
       guest_name: booking?.guest_name || orderRecord?.guest_name || 'Online Guest',
       amount: amountRupees,

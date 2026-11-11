@@ -2,11 +2,11 @@ import { describe, it, expect } from 'vitest';
 import { repo } from '@/lib/db/repository';
 
 describe('Payments, Cashbook Register & GST Invoicing Rules', () => {
-  it('manages cash shift lifecycle and accurately tracks drawer balance', () => {
+  it('manages cash shift lifecycle and accurately tracks drawer balance', async () => {
     // If a shift was already open from previous state, close it first for a clean test
     const existing = repo.getActiveCashShift();
     if (existing) {
-      repo.closeCashShift({
+      await repo.closeCashShift({
         shiftId: existing.id,
         closingCashCounted: repo.getCashBalance(existing.id).currentBalance,
         closedByName: 'System Test',
@@ -44,7 +44,7 @@ describe('Payments, Cashbook Register & GST Invoicing Rules', () => {
     expect(initBalance.currentBalance).toBe(5000);
 
     // 4. Record a Cash Payment (e.g. ₹2,016 walk-in collection)
-    const payment = repo.recordPayment(
+    const payment = await repo.recordPayment(
       {
         booking_reference: 'TEST-STG-CASH-01',
         guest_name: 'V. Krishna Murthy',
@@ -66,7 +66,7 @@ describe('Payments, Cashbook Register & GST Invoicing Rules', () => {
     expect(balanceAfterCashPayment.currentBalance).toBe(5000 + balanceAfterCashPayment.totalCashIn - balanceAfterCashPayment.totalCashOut);
 
     // 6. Record a cash expense (e.g. ₹350 milk and laundry supplies)
-    const expense = repo.createExpense(
+    const expense = await repo.createExpense(
       {
         title: 'Morning Cleaning Detergent & Disinfectant',
         category: 'maintenance',
@@ -86,7 +86,7 @@ describe('Payments, Cashbook Register & GST Invoicing Rules', () => {
 
     // 8. Close shift with exact counted cash
     const expectedClosing = balanceAfterExpense.currentBalance;
-    const closedShift = repo.closeCashShift(
+        const closedShift = repo.closeCashShift(
       {
         shiftId: shift.id,
         closingCashCounted: expectedClosing,
@@ -117,12 +117,12 @@ describe('Payments, Cashbook Register & GST Invoicing Rules', () => {
     }
   });
 
-  it('performs daily closing and records discrepancy audit trail', () => {
+  it('performs daily closing and records discrepancy audit trail', async () => {
     const today = new Date().toISOString().split('T')[0];
     const summary = repo.getTodayClosingSummary(today);
 
     const actualCounted = summary.expectedCashInDrawer + 50; // ₹50 surplus
-    const closing = repo.performDailyClosing({
+    const closing = await repo.performDailyClosing({
       closingDate: today,
       actualCashCounted: actualCounted,
       notes: 'Night register closing audit with ₹50 surplus coin float',

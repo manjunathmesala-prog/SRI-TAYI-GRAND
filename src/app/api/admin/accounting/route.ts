@@ -123,7 +123,7 @@ export async function POST(req: NextRequest) {
       }
 
       const actor = body.actor || auth.session?.name || 'Accounts Auditor';
-      const entry = repo.createJournalEntry(
+      const entry = await repo.createJournalEntry(
         {
           date: date || new Date().toISOString().split('T')[0],
           reference: reference || `MANUAL-${Date.now().toString().slice(-4)}`,

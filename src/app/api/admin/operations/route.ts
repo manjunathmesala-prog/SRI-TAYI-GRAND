@@ -91,7 +91,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Update status to checked_in
-        const updatedBooking = repo.updateBookingStatus(bookingReference, 'checked_in', undefined, staffName);
+        const updatedBooking = await repo.updateBookingStatus(bookingReference, 'checked_in', undefined, staffName);
 
         // Update statutory guest registration fields if provided
         if (updatedBooking) {
@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
         if (body.collectPayment && Number(body.paymentAmount) > 0 && updatedBooking) {
           const payAmt = Number(body.paymentAmount);
           const payMethod = (body.paymentMethod as PaymentMethod) || 'cash';
-          repo.recordPayment(
+          await repo.recordPayment(
             {
               booking_reference: updatedBooking.booking_reference,
               guest_name: updatedBooking.guest_name,
@@ -223,7 +223,7 @@ export async function POST(req: NextRequest) {
         const pendingBalance = booking.total_amount - booking.paid_amount;
         let settlementPayment = null;
         if (pendingBalance > 0) {
-          settlementPayment = repo.recordPayment(
+          settlementPayment = await repo.recordPayment(
             {
               booking_reference: booking.booking_reference,
               guest_name: booking.guest_name,
@@ -254,7 +254,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Update status to checked_out and mark room dirty
-        const updatedBooking = repo.updateBookingStatus(bookingReference, 'checked_out', undefined, staffName);
+        const updatedBooking = await repo.updateBookingStatus(bookingReference, 'checked_out', undefined, staffName);
 
         if (updatedBooking) {
           syncBookingToSupabase(updatedBooking);
@@ -362,7 +362,7 @@ export async function POST(req: NextRequest) {
 
         const staffName = auth.session?.name || body.staffName || 'Front Desk';
         try {
-          const room = repo.assignRoomToBooking(roomId, bookingReference, guestName || booking.guest_name || 'Guest', staffName);
+          const room = await repo.assignRoomToBooking(roomId, bookingReference, guestName || booking.guest_name || 'Guest', staffName);
           return NextResponse.json({
             success: true,
             message: `Room ${room.room_number} assigned to booking ${bookingReference}.`,
@@ -526,7 +526,7 @@ export async function POST(req: NextRequest) {
         }
 
         const staffName = auth.session?.name || body.staffName || 'Staff';
-        const updated = repo.updateBookingStatus(bookingReference, status as BookingStatus, notes, staffName);
+        const updated = await repo.updateBookingStatus(bookingReference, status as BookingStatus, notes, staffName);
         if (!updated) {
           return NextResponse.json({ success: false, error: 'Booking reference not found' }, { status: 404 });
         }
@@ -558,7 +558,7 @@ export async function POST(req: NextRequest) {
         }
 
         const staffName = auth.session?.name || body.staffName || 'Accounts';
-        const payment = repo.recordPayment(
+        const payment = await repo.recordPayment(
           {
             booking_reference: bookingReference,
             guest_name: guestName || booking.guest_name || 'Valued Guest',
@@ -589,7 +589,7 @@ export async function POST(req: NextRequest) {
         }
 
         try {
-          const booking = repo.createBooking(bookingData, body.actor || 'Website Guest');
+          const booking = await repo.createBooking(bookingData, body.actor || 'Website Guest');
           return NextResponse.json({
             success: true,
             message: `Booking ${booking.booking_reference} confirmed.`,
@@ -649,7 +649,7 @@ export async function POST(req: NextRequest) {
         const staffName = auth.session?.name || body.staffName || 'Front Desk Reception';
 
         try {
-          const result = repo.createFrontDeskWalkIn({
+          const result = await repo.createFrontDeskWalkIn({
             guestName,
             guestPhone,
             guestEmail,

@@ -1,1 +1,25 @@
-[]
+[
+  {
+    "id": "close-20261111",
+    "closing_date": "2026-11-11",
+    "total_revenue": 61560,
+    "room_revenue": 61560,
+    "hall_revenue": 0,
+    "other_revenue": 0,
+    "cash_collected": 27360,
+    "upi_collected": 7200,
+    "card_collected": 0,
+    "online_collected": 27000,
+    "total_expenses": 2800,
+    "cash_expenses": 2800,
+    "expected_cash_in_drawer": 24560,
+    "actual_cash_counted": 24610,
+    "discrepancy": 50,
+    "notes": "Night register closing audit with ₹50 surplus coin float",
+    "closed_by_name": "G. Mohan Kumar",
+    "closed_by_role": "Hotel Manager",
+    "status": "closed",
+    "closed_at": "2026-11-11T15:20:40.750Z",
+    "created_at": "2026-11-11T14:34:38.586Z"
+  }
+]

@@ -12,10 +12,11 @@ export interface AuthSession {
 }
 
 // Cryptographic signing secret for JWT/Session tokens
-const AUTH_SECRET = process.env.ADMIN_JWT_SECRET || 'sri_tayi_grand_secure_default_hmac_jwt_secret_kadiri_2026_enterprise';
+const isProduction = process.env.NODE_ENV === 'production';
+const AUTH_SECRET = process.env.ADMIN_JWT_SECRET || (isProduction ? '' : 'sri_tayi_grand_secure_default_hmac_jwt_secret_kadiri_2026_enterprise');
 
 // Fixed master password for staff operations (checked securely via timing-safe comparison)
-const MASTER_PASSWORD = process.env.ADMIN_MASTER_PASSWORD || process.env.ADMIN_DEFAULT_PASSWORD || 'GrandHotel@Kadiri2026!';
+const MASTER_PASSWORD = process.env.ADMIN_MASTER_PASSWORD || process.env.ADMIN_DEFAULT_PASSWORD || (isProduction ? '' : 'GrandHotel@Kadiri2026!');
 
 /**
  * PRODUCTION ROLE CREDENTIAL CONFIGURATION
@@ -24,7 +25,7 @@ const MASTER_PASSWORD = process.env.ADMIN_MASTER_PASSWORD || process.env.ADMIN_D
 export const DEFAULT_CREDENTIALS = {
   superAdmin: {
     email: 'admin@sritayigrand.com',
-    password: process.env.SUPER_ADMIN_PASSWORD || process.env.ADMIN_DEFAULT_PASSWORD || 'GrandHotel@Kadiri2026!',
+    password: process.env.SUPER_ADMIN_PASSWORD || process.env.ADMIN_DEFAULT_PASSWORD || (isProduction ? '' : 'GrandHotel@Kadiri2026!'),
     role: 'Super Admin' as StaffRole,
     name: 'Sri Tayi Grand Admin',
     badge: 'Super Admin',
@@ -32,7 +33,7 @@ export const DEFAULT_CREDENTIALS = {
   },
   manager: {
     email: 'manager@sritayigrand.com',
-    password: process.env.MANAGER_PASSWORD || 'GrandHotel@Kadiri2026!',
+    password: process.env.MANAGER_PASSWORD || (isProduction ? '' : 'GrandHotel@Kadiri2026!'),
     role: 'Hotel Manager' as StaffRole,
     name: 'G. Mohan Kumar',
     badge: 'Hotel Manager',
@@ -40,7 +41,7 @@ export const DEFAULT_CREDENTIALS = {
   },
   staff: {
     email: 'staff@sritayigrand.com',
-    password: process.env.STAFF_PASSWORD || 'GrandHotel@Kadiri2026!',
+    password: process.env.STAFF_PASSWORD || (isProduction ? '' : 'GrandHotel@Kadiri2026!'),
     role: 'Front Desk' as StaffRole,
     name: 'Sri Tayi Grand Staff',
     badge: 'Front Desk Staff',
@@ -51,15 +52,15 @@ export const DEFAULT_CREDENTIALS = {
 export const ROLE_CREDENTIALS: Record<string, { role: StaffRole; expectedPassword: string }> = {
   'admin@sritayigrand.com': {
     role: 'Super Admin',
-    expectedPassword: process.env.SUPER_ADMIN_PASSWORD || process.env.ADMIN_DEFAULT_PASSWORD || 'GrandHotel@Kadiri2026!',
+    expectedPassword: process.env.SUPER_ADMIN_PASSWORD || process.env.ADMIN_DEFAULT_PASSWORD || (isProduction ? '' : 'GrandHotel@Kadiri2026!'),
   },
   'manager@sritayigrand.com': {
     role: 'Hotel Manager',
-    expectedPassword: process.env.MANAGER_PASSWORD || 'GrandHotel@Kadiri2026!',
+    expectedPassword: process.env.MANAGER_PASSWORD || (isProduction ? '' : 'GrandHotel@Kadiri2026!'),
   },
   'staff@sritayigrand.com': {
     role: 'Front Desk',
-    expectedPassword: process.env.STAFF_PASSWORD || 'GrandHotel@Kadiri2026!',
+    expectedPassword: process.env.STAFF_PASSWORD || (isProduction ? '' : 'GrandHotel@Kadiri2026!'),
   },
   'frontdesk@sritayigrand.com': {
     role: 'Front Desk',
@@ -222,16 +223,7 @@ export function verifyStaffRole(
     }
   }
 
-  // Check URL query param fallback
-  if (!token) {
-    try {
-      const url = new URL(req.url);
-      const queryToken = url.searchParams.get('token');
-      if (queryToken && queryToken !== 'null' && queryToken !== 'undefined') {
-        token = queryToken;
-      }
-    } catch {}
-  }
+// Query string token authentication removed for security compliance
 
   let session = verifySessionToken(token);
 

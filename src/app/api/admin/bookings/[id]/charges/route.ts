@@ -72,7 +72,7 @@ export async function POST(
 
     const postedBy = auth.session?.name || 'Authorized Staff';
 
-    const newCharge = repo.addFolioCharge({
+    const newCharge = await repo.addFolioCharge({
       booking_id: booking.id,
       booking_reference: booking.booking_reference,
       category: category as FolioChargeCategory,
@@ -121,7 +121,7 @@ export async function DELETE(
       return NextResponse.json({ success: false, error: 'chargeId parameter is required' }, { status: 400 });
     }
 
-    const deleted = repo.deleteFolioCharge(chargeId);
+    const deleted = await repo.deleteFolioCharge(chargeId);
     if (!deleted) {
       return NextResponse.json({ success: false, error: `Folio charge ${chargeId} not found` }, { status: 404 });
     }

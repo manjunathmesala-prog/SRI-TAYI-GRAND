@@ -24,7 +24,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const enquiry = repo.createHallEnquiry({
+    const enquiry = await repo.createHallEnquiry({
       name: name.trim(),
       phone: phone.trim(),
       email: email ? email.trim().toLowerCase() : '',

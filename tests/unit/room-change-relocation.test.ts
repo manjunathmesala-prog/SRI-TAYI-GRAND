@@ -1,9 +1,10 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterAll } from 'vitest';
 import { repo } from '@/lib/db/repository';
+import { getSupabasePgPool } from '@/lib/db/supabase-sync';
 
 describe('Guest Room Change & Relocation Flow (AC / Water / Defect Scenario)', () => {
-  beforeEach(() => {
-    // Reset room operational states
+  beforeEach(async () => {
+    // Reset room operational states in memory
     const r101 = repo.getRooms().find((r) => r.room_number === '101');
     if (r101) {
       r101.operational_status = 'available';
@@ -18,11 +19,35 @@ describe('Guest Room Change & Relocation Flow (AC / Water / Defect Scenario)', (
       r102.current_booking_ref = undefined;
       r102.current_guest_name = undefined;
     }
+    repo.getBookings().forEach((b) => {
+      if ((b.assigned_room_number === '101' || b.assigned_room_number === '102') && (b.guest_name === 'Bhavani Shankar' || b.guest_name === 'Suresh Kumar')) {
+        b.status = 'cancelled';
+      }
+    });
+
+    // Reset database stays in PostgreSQL so GiST exclusion constraints don't block subsequent runs
+    try {
+      const pool = getSupabasePgPool();
+      if (pool) {
+        await pool.query("UPDATE bookings SET status = 'cancelled' WHERE assigned_room_number IN ('101', '102') AND status IN ('confirmed', 'checked_in')");
+        await pool.query("UPDATE rooms SET operational_status = 'available' WHERE room_number IN ('101', '102')");
+      }
+    } catch {}
   });
 
-  it('successfully relocates a checked-in guest due to AC failure, creates maintenance ticket, and locks old room', () => {
+  afterAll(async () => {
+    try {
+      const pool = getSupabasePgPool();
+      if (pool) {
+        await pool.query("UPDATE bookings SET status = 'cancelled' WHERE assigned_room_number IN ('101', '102') AND status IN ('confirmed', 'checked_in')");
+        await pool.query("UPDATE rooms SET operational_status = 'available' WHERE room_number IN ('101', '102')");
+      }
+    } catch {}
+  });
+
+  it('successfully relocates a checked-in guest due to AC failure, creates maintenance ticket, and locks old room', async () => {
     // 1. Create walk-in / regular booking
-    const booking = repo.createBooking(
+    const booking = await repo.createBooking(
       {
         guest_id: 'gst-test-101',
         guest_name: 'Bhavani Shankar',
@@ -45,8 +70,8 @@ describe('Guest Room Change & Relocation Flow (AC / Water / Defect Scenario)', (
     );
 
     // 2. Guest checks in to Room 101
-    repo.assignRoomToBooking('101', booking.booking_reference, booking.guest_name, 'Front Desk');
-    repo.updateBookingStatus(booking.booking_reference, 'checked_in', undefined, 'Front Desk');
+    await repo.assignRoomToBooking('101', booking.booking_reference, booking.guest_name, 'Front Desk');
+    await repo.updateBookingStatus(booking.booking_reference, 'checked_in', undefined, 'Front Desk');
 
     const room101Before = repo.getRooms().find((r) => r.room_number === '101');
     expect(room101Before?.operational_status).toBe('occupied');
@@ -100,8 +125,8 @@ describe('Guest Room Change & Relocation Flow (AC / Water / Defect Scenario)', (
     expect(room102After?.current_guest_name).toBe('Bhavani Shankar');
   });
 
-  it('rejects room transfer if target room is already occupied or the same room', () => {
-    const booking = repo.createBooking(
+  it('rejects room transfer if target room is already occupied or the same room', async () => {
+    const booking = await repo.createBooking(
       {
         guest_id: 'gst-test-102',
         guest_name: 'Suresh Kumar',
@@ -123,8 +148,8 @@ describe('Guest Room Change & Relocation Flow (AC / Water / Defect Scenario)', (
       'Front Desk'
     );
 
-    repo.assignRoomToBooking('101', booking.booking_reference, booking.guest_name, 'Front Desk');
-    repo.updateBookingStatus(booking.booking_reference, 'checked_in', undefined, 'Front Desk');
+    await repo.assignRoomToBooking('101', booking.booking_reference, booking.guest_name, 'Front Desk');
+    await repo.updateBookingStatus(booking.booking_reference, 'checked_in', undefined, 'Front Desk');
 
     // Attempt transfer to same room
     expect(() =>

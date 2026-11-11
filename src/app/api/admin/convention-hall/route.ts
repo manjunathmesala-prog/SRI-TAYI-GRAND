@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
     }
 
+    await repo.ensureEnquiriesLoaded();
     const enquiries = repo.getHallEnquiries();
     const quotes = repo.getConventionQuotes();
 
@@ -76,7 +77,7 @@ export async function POST(req: NextRequest) {
 
       const createdBy = auth.session?.name || body.created_by || 'V. Naresh Reddy (Event Manager)';
 
-      const quote = repo.createConventionQuote({
+      const quote = await repo.createConventionQuote({
         enquiry_id,
         client_name,
         client_phone,
@@ -112,7 +113,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ success: false, error: 'Enquiry id is required' }, { status: 400 });
       }
 
-      const enq = repo.updateHallEnquiryStatus(
+      const enq = await repo.updateHallEnquiryStatus(
         id,
         status as HallEnquiryStatus,
         admin_notes,

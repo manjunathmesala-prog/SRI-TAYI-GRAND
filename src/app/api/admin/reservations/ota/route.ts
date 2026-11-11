@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
     const subtotal = Math.round(totalAmount / 1.12);
     const tax = totalAmount - subtotal;
 
-    const newBooking = repo.createBooking(
+    const newBooking = await repo.createBooking(
       {
         guest_id: `guest_${Date.now()}`,
         guest_name: body.guestName.trim(),
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
     // If specific physical room assigned
     if (body.assignedRoomNumber) {
       try {
-        repo.assignRoomToBooking(
+        await repo.assignRoomToBooking(
           String(body.assignedRoomNumber).trim(),
           newBooking.booking_reference,
           newBooking.guest_name,

@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
 
     const actor = auth.session?.name || body.staffName || 'Accounts Admin';
 
-    const newPayment = repo.recordPayment(
+    const newPayment = await repo.recordPayment(
       {
         booking_reference: bookingReference,
         guest_name: guestName || 'Walk-in / Direct Guest',

@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "id": "shift-1794409435152",
+    "shift_number": "SH-20261111-01",
+    "cashier_id": "stf-test-01",
+    "cashier_name": "A. Ramanjaneyulu",
+    "opened_at": "2026-11-11T15:35:59.985Z",
+    "closed_at": "2026-11-11T15:36:02.671Z",
+    "opening_float": 5000,
+    "closing_cash_counted": 6666,
+    "expected_closing_cash": 6666,
+    "discrepancy": 0,
+    "notes": "Morning shift opening float | Close: End of shift reconciliation perfect match",
+    "status": "closed"
+  }
+]

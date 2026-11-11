@@ -78,7 +78,7 @@ export async function POST(request: Request) {
 
     // 3. Create Booking Record
     const isPayAtHotel = paymentMethod === 'pay_at_hotel';
-    const booking = repo.createBooking({
+    const booking = await repo.createBooking({
       guest_id: 'temp-id',
       guest_name: guestName.trim(),
       guest_phone: guestPhone.trim(),
@@ -174,6 +174,10 @@ export async function POST(request: Request) {
   } catch (err: unknown) {
     console.error('Booking creation error:', err);
     const message = err instanceof Error ? err.message : 'Internal booking error';
-    return NextResponse.json({ error: message }, { status: 500 });
+    const isConflict = (err as any)?.code === '23P01' ||
+      String(message).toLowerCase().includes('exclusion constraint') ||
+      String(message).toLowerCase().includes('already booked') ||
+      String(message).toLowerCase().includes('conflict');
+    return NextResponse.json({ error: message }, { status: isConflict ? 409 : 500 });
   }
 }

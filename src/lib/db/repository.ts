@@ -294,11 +294,28 @@ export class HotelRepository {
     }).catch(() => {});
 
     loadCashShiftsFromSupabase().then((pgCS: any) => {
-      if (pgCS && pgCS.length > 0) { this.cashShifts = pgCS; savePersistedData('cash_shifts.json', this.cashShifts); }
+      if (pgCS && pgCS.length > 0) {
+        for (const s of pgCS) {
+          const idx = this.cashShifts.findIndex((cs) => cs.id === s.id || cs.shift_number === s.shift_number);
+          if (idx !== -1) {
+            const localId = this.cashShifts[idx].id;
+            this.cashShifts[idx] = { ...s, ...this.cashShifts[idx], id: localId };
+          } else {
+            this.cashShifts.push(s);
+          }
+        }
+        savePersistedData('cash_shifts.json', this.cashShifts);
+      }
     }).catch(() => {});
 
     loadCashTransactionsFromSupabase().then((pgCT: any) => {
-      if (pgCT && pgCT.length > 0) { this.cashTransactions = pgCT; savePersistedData('cash_transactions.json', this.cashTransactions); }
+      if (pgCT && pgCT.length > 0) {
+        for (const tx of pgCT) {
+          const exists = this.cashTransactions.some((t) => t.id === tx.id);
+          if (!exists) this.cashTransactions.push(tx);
+        }
+        savePersistedData('cash_transactions.json', this.cashTransactions);
+      }
     }).catch(() => {});
 
     loadDailyClosingsFromSupabase().then((pgDC: any) => {
@@ -569,12 +586,12 @@ export class HotelRepository {
   }
 
   // Atomically check availability and assign room with race-condition prevention
-  assignRoomToBooking(
+  async assignRoomToBooking(
     roomId: string,
     bookingRef: string,
     guestName: string,
     actor?: string
-  ): PhysicalRoom {
+  ): Promise<PhysicalRoom> {
     const index = this.rooms.findIndex((r) => r.id === roomId || r.room_number === roomId);
     if (index === -1) {
       throw new Error(`Room identifier '${roomId}' was not found.`);
@@ -663,8 +680,8 @@ export class HotelRepository {
       actor
     );
 
-    syncBookingToSupabase(booking);
-    syncRoomStatusToSupabase({
+    await await syncBookingToSupabase(booking);
+    await syncRoomStatusToSupabase({
       roomNumber: room.room_number,
       operationalStatus: room.operational_status,
       housekeepingStatus: room.housekeeping_status,
@@ -706,7 +723,7 @@ export class HotelRepository {
     }
   }
 
-  createFrontDeskWalkIn(params: {
+  async createFrontDeskWalkIn(params: {
     guestName: string;
     guestPhone: string;
     guestEmail?: string;
@@ -731,12 +748,12 @@ export class HotelRepository {
     cardUid?: string;
     specialRequests?: string;
     staffName?: string;
-  }): {
+  }): Promise<{
     booking: Booking;
     room: PhysicalRoom;
     card?: RFIDCard;
     payment?: PaymentRecord;
-  } {
+  }> {
     const staffName = params.staffName || 'Front Desk Reception';
     const category =
       this.categories.find((c) => c.id === params.categoryId || c.slug === params.categoryId) ||
@@ -856,7 +873,7 @@ export class HotelRepository {
     // Record payment if collected
     let payment: PaymentRecord | undefined;
     if (paidAmount > 0) {
-      payment = this.recordPayment(
+      payment = await this.recordPayment(
         {
           booking_reference: booking.booking_reference,
           guest_name: booking.guest_name,
@@ -916,10 +933,10 @@ export class HotelRepository {
     }
   }
 
-  createBooking(
+  async createBooking(
     bookingData: Omit<Booking, 'id' | 'booking_reference' | 'created_at'>,
     actor?: string
-  ): Booking {
+  ): Promise<Booking> {
     const normalizedCatId = normalizeCategoryId(bookingData.category_id);
     // Concurrency & Overbooking check: verify capacity in requested category
     const catRooms = this.rooms.filter(
@@ -990,6 +1007,10 @@ export class HotelRepository {
       created_at: new Date().toISOString(),
     };
 
+    // 1. Authoritative PostgreSQL persistence first (enforces exclusion constraints, concurrency, and durability)
+    await syncBookingToSupabase(newBooking);
+
+    // 2. Only after successful commit, update local memory and cache
     this.bookings.unshift(newBooking);
     savePersistedData('bookings.json', this.bookings);
 
@@ -1012,46 +1033,35 @@ export class HotelRepository {
       this.guests.push(guest);
     }
 
-    // If an assigned physical room was specified, reserve it atomically with rollback safeguard
+    // If an assigned physical room was specified, reserve it atomically
     if (newBooking.assigned_room_id) {
-      try {
-        this.assignRoomToBooking(
-          newBooking.assigned_room_id,
-          bookingReference,
-          newBooking.guest_name,
-          actor
-        );
-      } catch (assignErr) {
-        // Rollback booking from memory and persistence to prevent phantom bookings
-        const rbIdx = this.bookings.findIndex((b) => b.booking_reference === bookingReference);
-        if (rbIdx !== -1) {
-          this.bookings.splice(rbIdx, 1);
-          savePersistedData('bookings.json', this.bookings);
-        }
-        throw assignErr;
-      }
+      await this.assignRoomToBooking(
+        newBooking.assigned_room_id,
+        bookingReference,
+        newBooking.guest_name,
+        actor
+      );
     }
 
-    // Broadcast new booking in real-time
+    // 3. Broadcast new booking in real-time ONLY after successful commit
     this.broadcastEvent('booking_created', newBooking, actor);
-    syncBookingToSupabase(newBooking);
 
     return newBooking;
   }
 
-  updateBookingStatus(
+  async updateBookingStatus(
     bookingReference: string,
     status: BookingStatus,
     notes?: string,
     actor?: string
-  ): Booking | null {
+  ): Promise<Booking | null> {
     const booking = this.getBookingByReference(bookingReference);
     if (!booking) return null;
 
     booking.status = status;
     if (notes) booking.internal_notes = notes;
+    await syncBookingToSupabase(booking);
     savePersistedData('bookings.json', this.bookings);
-    syncBookingToSupabase(booking);
 
     if (status === 'checked_in') {
       booking.checked_in_at = new Date().toISOString();
@@ -1418,10 +1428,10 @@ export class HotelRepository {
     );
   }
 
-  recordPayment(
+  async recordPayment(
     record: Omit<PaymentRecord, 'id' | 'payment_reference' | 'created_at'> & { payment_reference?: string },
     actor?: string
-  ): PaymentRecord {
+  ): Promise<PaymentRecord> {
     if (!record.amount || isNaN(record.amount) || record.amount <= 0) {
       throw new Error(`Payment amount must be a positive number. Received: ${record.amount}`);
     }
@@ -1475,12 +1485,12 @@ export class HotelRepository {
       }
     }
 
-    this.broadcastEvent('payment_recorded', { payment: newPayment, booking }, actor);
-
-    syncPaymentToSupabase(newPayment);
+    await syncPaymentToSupabase(newPayment);
     if (booking) {
-      syncBookingToSupabase(booking);
+      await syncBookingToSupabase(booking);
     }
+
+    this.broadcastEvent('payment_recorded', { payment: newPayment, booking }, actor);
 
     return newPayment;
   }
@@ -1839,7 +1849,7 @@ export class HotelRepository {
     },
     actor?: string
   ): CashShift {
-    const shift = this.cashShifts.find((s) => s.id === params.shiftId);
+    const shift = this.cashShifts.find((s) => s.id === params.shiftId || s.shift_number === params.shiftId) || (!params.shiftId ? this.getActiveCashShift() : null);
     if (!shift) throw new Error('Cash shift not found.');
     if (shift.status === 'closed') throw new Error('Shift is already closed.');
 
@@ -2231,10 +2241,10 @@ export class HotelRepository {
     );
   }
 
-  createJournalEntry(
+  async createJournalEntry(
     data: Omit<JournalEntry, 'id' | 'entry_number' | 'created_at' | 'is_balanced'>,
     actor?: string
-  ): JournalEntry {
+  ): Promise<JournalEntry> {
     const totalDebit = data.lines.reduce((sum, l) => sum + (Number(l.debit) || 0), 0);
     const totalCredit = data.lines.reduce((sum, l) => sum + (Number(l.credit) || 0), 0);
     const isBalanced = Math.abs(totalDebit - totalCredit) < 0.01;
@@ -2265,7 +2275,9 @@ export class HotelRepository {
       }
     }
 
+    await syncJournalEntryToSupabase(newEntry);
     this.journalEntries.unshift(newEntry);
+    savePersistedData('journal_entries.json', this.journalEntries);
     this.broadcastEvent('journal_entry_created', newEntry, actor);
     this.recordAuditLog({
       action: 'CREATE_JOURNAL_ENTRY',
@@ -2456,9 +2468,9 @@ export class HotelRepository {
     );
   }
 
-  createHallEnquiry(
+  async createHallEnquiry(
     data: Omit<HallEnquiry, 'id' | 'enquiry_reference' | 'status' | 'created_at'>
-  ): HallEnquiry {
+  ): Promise<HallEnquiry> {
     const dateStr = new Date().toISOString().slice(0, 7).replace('-', '');
     const randCode = Math.floor(1000 + Math.random() * 9000);
     const enquiry: HallEnquiry = {
@@ -2468,8 +2480,9 @@ export class HotelRepository {
       status: 'new',
       created_at: new Date().toISOString(),
     };
+    await syncHallEnquiryToSupabase(enquiry);
     this.hallEnquiries.unshift(enquiry);
-    syncHallEnquiryToSupabase(enquiry);
+    savePersistedData('hall_enquiries.json', this.hallEnquiries);
     this.broadcastEvent('full_sync', { enquiry });
     return enquiry;
   }
@@ -3381,7 +3394,7 @@ export class HotelRepository {
     );
   }
 
-  public addFolioCharge(charge: Omit<FolioCharge, 'id' | 'created_at'>): FolioCharge {
+  public async addFolioCharge(charge: Omit<FolioCharge, 'id' | 'created_at'>): Promise<FolioCharge> {
     const id = 'fc-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
     const tax_rate = typeof charge.tax_rate === 'number' ? charge.tax_rate : 0.12;
     const tax_amount = Math.round(charge.amount * tax_rate * 100) / 100;
@@ -3396,8 +3409,9 @@ export class HotelRepository {
       created_at: new Date().toISOString(),
     };
 
+    await syncFolioChargeToSupabase(newCharge);
     this.folioCharges.push(newCharge);
-    syncFolioChargeToSupabase(newCharge);
+    savePersistedData('folio_charges.json', this.folioCharges);
 
     // Update corresponding booking's additional charges and total amount
     const booking = this.bookings.find(
@@ -3423,16 +3437,17 @@ export class HotelRepository {
     return newCharge;
   }
 
-  public addIncidentalCharge(charge: any): FolioCharge {
-    return this.addFolioCharge(charge);
+  public async addIncidentalCharge(charge: any): Promise<FolioCharge> {
+    return await this.addFolioCharge(charge);
   }
 
-  public deleteFolioCharge(id: string): boolean {
+  public async deleteFolioCharge(id: string): Promise<boolean> {
     const idx = this.folioCharges.findIndex((c) => c.id === id);
     if (idx === -1) return false;
 
+    await deleteFolioChargeFromSupabase(id);
     const [deleted] = this.folioCharges.splice(idx, 1);
-    deleteFolioChargeFromSupabase(id);
+    savePersistedData('folio_charges.json', this.folioCharges);
     const booking = this.bookings.find(
       (b) => b.id === deleted.booking_id || b.booking_reference === deleted.booking_reference
     );
@@ -4070,13 +4085,81 @@ export class HotelRepository {
   // CONVENTION HALL BANQUET QUOTES
   // ==============================================================================
 
+
+  async ensureBookingsLoaded(): Promise<void> {
+    try {
+      const pgB = await loadBookingsFromSupabase();
+      if (pgB && pgB.length > 0) {
+        this.bookings = pgB;
+      }
+    } catch (err) {
+      console.warn('[ENSURE BOOKINGS LOAD WARN]', err);
+    }
+  }
+
+  async ensurePaymentsLoaded(): Promise<void> {
+    try {
+      const pgP = await loadPaymentsFromSupabase();
+      if (pgP && pgP.length > 0) {
+        this.payments = pgP;
+      }
+    } catch (err) {
+      console.warn('[ENSURE PAYMENTS LOAD WARN]', err);
+    }
+  }
+
+  async ensureExpensesLoaded(): Promise<void> {
+    try {
+      const pgE = await loadExpensesFromSupabase();
+      if (pgE && pgE.length > 0) {
+        this.expenses = pgE;
+      }
+    } catch (err) {
+      console.warn('[ENSURE EXPENSES LOAD WARN]', err);
+    }
+  }
+
+  async ensureJournalsLoaded(): Promise<void> {
+    try {
+      const pgJ = await loadJournalEntriesFromSupabase();
+      if (pgJ && pgJ.length > 0) {
+        this.journalEntries = pgJ;
+      }
+    } catch (err) {
+      console.warn('[ENSURE JOURNALS LOAD WARN]', err);
+    }
+  }
+
+  async ensureEnquiriesLoaded(): Promise<void> {
+    try {
+      const pgH = await loadHallEnquiriesFromSupabase();
+      if (pgH && pgH.length > 0) {
+        this.hallEnquiries = pgH;
+      }
+    } catch (err) {
+      console.warn('[ENSURE ENQUIRIES LOAD WARN]', err);
+    }
+  }
+
+  async ensureAllLoaded(): Promise<void> {
+    await Promise.allSettled([
+      this.ensureBookingsLoaded(),
+      this.ensurePaymentsLoaded(),
+      this.ensureExpensesLoaded(),
+      this.ensureCashbookLoaded(),
+      this.ensureMaintenanceLoaded(),
+      this.ensureJournalsLoaded(),
+      this.ensureEnquiriesLoaded(),
+    ]);
+  }
+
   public getConventionQuotes(): ConventionQuote[] {
     return [...this.conventionQuotes];
   }
 
-  public createConventionQuote(
+  public async createConventionQuote(
     quote: Omit<ConventionQuote, 'id' | 'quote_number' | 'created_at'>
-  ): ConventionQuote {
+  ): Promise<ConventionQuote> {
     const id = 'cq-' + Date.now();
     const quote_number = 'STG-QT-' + new Date().getFullYear() + '-' + (this.conventionQuotes.length + 1).toString().padStart(3, '0');
 
@@ -4087,8 +4170,9 @@ export class HotelRepository {
       created_at: new Date().toISOString(),
     };
 
+    await syncConventionQuoteToSupabase(newQuote);
     this.conventionQuotes.unshift(newQuote);
-    syncConventionQuoteToSupabase(newQuote);
+    savePersistedData('convention_quotes.json', this.conventionQuotes);
 
     // If linked to an enquiry, update the enquiry status
     if (quote.enquiry_id) {

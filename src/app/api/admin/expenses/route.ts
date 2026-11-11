@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
 
     const recordedBy = auth.session?.name || 'Staff Member';
 
-    const newExpense = repo.createExpense(
+    const newExpense = await repo.createExpense(
       {
         category: category as ExpenseCategory,
         title: String(title).trim(),

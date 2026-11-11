@@ -51,10 +51,14 @@ export function getSupabasePgPool(): any {
     const user = process.env.SUPABASE_DB_USER || 'postgres.wercvaimozbbkbwmuoct';
     const password = process.env.SUPABASE_DB_PASSWORD || 'Vaynex@2026';
 
-    const connectionString =
+    let connectionString =
       process.env.DATABASE_URL ||
       process.env.SUPABASE_DATABASE_URL ||
       `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${host}:${port}/${database}`;
+
+    if (connectionString.includes('db.wercvaimozbbkbwmuoct.supabase.co')) {
+      connectionString = `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${host}:${port}/${database}`;
+    }
 
     poolInstance = new Pool({
       connectionString,
@@ -202,8 +206,15 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
           Number(booking.adults_count || 1),
           Number(booking.children_count || 0),
           Number(booking.rooms_count || 1),
-          booking.status || 'confirmed',
-          booking.payment_status || 'pending',
+          (() => {
+            const st = booking.status || 'confirmed';
+            return ['pending', 'confirmed', 'checked_in', 'checked_out', 'cancelled', 'no_show'].includes(st) ? st : 'confirmed';
+          })(),
+          (() => {
+            const ps = (booking.payment_status as any) || 'pending';
+            if (ps === 'paid' || ps === 'completed') return 'successful';
+            return ['pending', 'successful', 'failed', 'refunded', 'partially_refunded', 'pay_at_hotel'].includes(ps) ? ps : 'pending';
+          })(),
           booking.payment_method || 'online',
           Number(booking.subtotal_amount || booking.total_amount || 0),
           Number(booking.tax_amount || 0),
@@ -339,10 +350,11 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
       client.release();
     }
   } catch (err: unknown) {
-    console.warn(
-      `[SUPABASE BOOKING SYNC WARN] (${booking.booking_reference}):`,
+    console.error(
+      `[SUPABASE BOOKING SYNC ERROR] (${booking.booking_reference}):`,
       err instanceof Error ? err.message : String(err)
     );
+    throw err;
   }
 }
 
@@ -602,7 +614,11 @@ export async function syncPaymentToSupabase(payment: PaymentRecord): Promise<voi
           payment.gateway_order_id || null,
           payment.gateway_payment_id || null,
           (payment as any).gateway_signature || null,
-          payment.status || 'successful',
+          (() => {
+            const st = (payment.status as any) || 'successful';
+            if (st === 'paid' || st === 'completed' || st === 'success') return 'successful';
+            return ['pending', 'successful', 'failed', 'refunded'].includes(st) ? st : 'successful';
+          })(),
           (payment as any).notes || payment.payment_reference || null,
           payment.paid_at || new Date().toISOString(),
         ]
@@ -888,7 +904,8 @@ export async function syncExpenseToSupabase(expense: Expense): Promise<void> {
       client.release();
     }
   } catch (err: unknown) {
-    console.warn(`[SUPABASE EXPENSE SYNC WARN] (${expense.id}):`, err instanceof Error ? err.message : String(err));
+    console.error(`[SUPABASE EXPENSE SYNC ERROR] (${expense.id}):`, err instanceof Error ? err.message : String(err));
+    throw err;
   }
 }
 
@@ -1000,7 +1017,8 @@ export async function syncHallEnquiryToSupabase(enquiry: HallEnquiry): Promise<v
       client.release();
     }
   } catch (err: unknown) {
-    console.warn(`[SUPABASE HALL ENQUIRY SYNC WARN] (${enquiry.id}):`, err instanceof Error ? err.message : String(err));
+    console.error(`[SUPABASE HALL ENQUIRY SYNC ERROR] (${enquiry.id}):`, err instanceof Error ? err.message : String(err));
+    throw err;
   }
 }
 
@@ -1087,14 +1105,14 @@ export async function syncConventionQuoteToSupabase(quote: ConventionQuote): Pro
         [
           quote.id,
           quote.quote_number,
-          quote.client_name,
-          quote.client_phone,
+          quote.client_name || (quote as any).customer_name || (quote as any).name || 'Client',
+          quote.client_phone || (quote as any).customer_phone || (quote as any).phone || '0000000000',
           quote.client_email || null,
-          quote.event_name,
-          quote.event_date,
-          quote.seating_layout,
+          quote.event_name || (quote as any).name || 'Convention Event',
+          quote.event_date || new Date().toISOString().split('T')[0],
+          quote.seating_layout || 'theater',
           Number(quote.guest_count || 100),
-          quote.catering_package,
+          quote.catering_package || 'none',
           Number(quote.catering_rate_per_plate || 0),
           Number(quote.hall_rental_charge || 0),
           Number(quote.av_sound_lighting || 0),
@@ -1114,7 +1132,8 @@ export async function syncConventionQuoteToSupabase(quote: ConventionQuote): Pro
       client.release();
     }
   } catch (err: unknown) {
-    console.warn(`[SUPABASE CONVENTION QUOTE SYNC WARN] (${quote.quote_number}):`, err instanceof Error ? err.message : String(err));
+    console.error(`[SUPABASE CONVENTION QUOTE SYNC ERROR] (${quote.quote_number}):`, err instanceof Error ? err.message : String(err));
+    throw err;
   }
 }
 
@@ -1218,7 +1237,11 @@ export async function syncMaintenanceTicketToSupabase(ticket: MaintenanceTicket)
             ticket.description || ticket.issue_title,
             ticket.category,
             ticket.priority || 'normal',
-            ticket.status,
+            (() => {
+            const st = (ticket.status as any) || 'open';
+            if (st === 'active' || st === 'pending') return 'open';
+            return ['open', 'reported', 'in_progress', 'resolved', 'cancelled', 'closed'].includes(st) ? st : 'open';
+          })(),
             ticket.assigned_to || null,
             ticket.reported_by || 'Staff',
             estimatedCost,
@@ -1357,8 +1380,12 @@ export async function syncCashShiftToSupabase(shift: CashShift): Promise<void> {
           id, shift_number, cashier_id, cashier_name, opened_at, closed_at,
           opening_float, closing_cash_counted, expected_closing_cash, discrepancy, notes, status, created_at
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-        ON CONFLICT (id) DO UPDATE SET
+        ON CONFLICT (shift_number) DO UPDATE SET
+          cashier_id = EXCLUDED.cashier_id,
+          cashier_name = EXCLUDED.cashier_name,
+          opened_at = EXCLUDED.opened_at,
           closed_at = EXCLUDED.closed_at,
+          opening_float = EXCLUDED.opening_float,
           closing_cash_counted = EXCLUDED.closing_cash_counted,
           expected_closing_cash = EXCLUDED.expected_closing_cash,
           discrepancy = EXCLUDED.discrepancy,
@@ -1384,7 +1411,8 @@ export async function syncCashShiftToSupabase(shift: CashShift): Promise<void> {
       client.release();
     }
   } catch (err: unknown) {
-    console.warn(`[SUPABASE CASH SHIFT SYNC WARN] (${shift.id}):`, err instanceof Error ? err.message : String(err));
+    console.error(`[SUPABASE CASH SHIFT SYNC ERROR] (${shift.id}):`, err instanceof Error ? err.message : String(err));
+    throw err;
   }
 }
 
@@ -1455,7 +1483,7 @@ export async function syncCashTransactionToSupabase(tx: CashTransaction): Promis
           tx.type,
           tx.category,
           Number(tx.amount || 0),
-          tx.reason,
+          tx.reason || (tx as any).description || 'Cash Transaction',
           tx.booking_reference || null,
           tx.receipt_ref || null,
           tx.performed_by,
@@ -1676,7 +1704,8 @@ export async function syncStaffAttendanceToSupabase(attendance: StaffAttendance)
       client.release();
     }
   } catch (err: unknown) {
-    console.warn(`[SUPABASE ATTENDANCE SYNC WARN] (${attendance.id}):`, err instanceof Error ? err.message : String(err));
+    console.error(`[SUPABASE ATTENDANCE SYNC ERROR] (${attendance.id}):`, err instanceof Error ? err.message : String(err));
+    throw err;
   }
 }
 
@@ -1819,35 +1848,46 @@ export async function syncFolioChargeToSupabase(charge: FolioCharge): Promise<vo
   if (typeof window !== 'undefined' || !charge) return;
 
   const db = getSupabasePgPool();
-  if (!db) return;
+  if (!db) throw new Error('Database pool not available for folio charge persistence');
 
   try {
     const client = await db.connect();
     try {
+      let bookingUuid: string | null = null;
+      if (charge.booking_reference) {
+        const bRes = await client.query('SELECT id FROM bookings WHERE booking_reference = $1 OR id::text = $1 LIMIT 1;', [charge.booking_reference]);
+        if (bRes.rows.length > 0) bookingUuid = bRes.rows[0].id;
+      }
+
+      const chargeName = charge.description || (charge as any).charge_name || (charge as any).item_name || 'Room Charge';
+      const desc = charge.description || chargeName;
+
       await client.query(
         `INSERT INTO additional_charges (
-          charge_id, booking_reference, charge_name, description, category,
+          id, booking_id, charge_id, booking_reference, charge_name, description, category,
           amount, tax_rate, tax_amount, total_amount, posted_by, created_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11);`,
+        ) VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);`,
         [
+          bookingUuid,
           charge.id,
           charge.booking_reference,
-          charge.description,
-          charge.description,
-          charge.category,
+          chargeName,
+          desc,
+          charge.category || 'other',
           Number(charge.amount || 0),
           Number(charge.tax_rate || 0.12),
           Number(charge.tax_amount || 0),
           Number(charge.total_amount || 0),
-          charge.posted_by,
-          charge.created_at,
+          charge.posted_by || 'Staff',
+          charge.created_at || new Date().toISOString(),
         ]
       );
     } finally {
       client.release();
     }
   } catch (err: unknown) {
-    console.warn(`[SUPABASE FOLIO CHARGE SYNC WARN] (${charge.id}):`, err instanceof Error ? err.message : String(err));
+    console.error(`[SUPABASE FOLIO CHARGE SYNC ERROR] (${charge.id}):`, err instanceof Error ? err.message : String(err));
+    throw err;
   }
 }
 
@@ -1950,7 +1990,8 @@ export async function syncAuditLogToSupabase(log: AuditLogEntry): Promise<void> 
       client.release();
     }
   } catch (err: unknown) {
-    console.warn(`[SUPABASE AUDIT LOG SYNC WARN] (${log.id}):`, err instanceof Error ? err.message : String(err));
+    console.error(`[SUPABASE AUDIT LOG SYNC ERROR] (${log.id}):`, err instanceof Error ? err.message : String(err));
+    throw err;
   }
 }
 
@@ -2359,12 +2400,14 @@ export async function syncJournalEntryToSupabase(entry: JournalEntry): Promise<v
       await client.query('COMMIT');
     } catch (err: unknown) {
       await client.query('ROLLBACK').catch(() => {});
-      console.warn(`[SUPABASE JOURNAL SYNC WARN] (${entry.id}):`, err instanceof Error ? err.message : String(err));
+      console.error(`[SUPABASE JOURNAL SYNC ERROR] (${entry.id}):`, err instanceof Error ? err.message : String(err));
+      throw err;
     } finally {
       client.release();
     }
   } catch (err: unknown) {
-    console.warn(`[SUPABASE JOURNAL SYNC POOL WARN] (${entry.id}):`, err instanceof Error ? err.message : String(err));
+    console.error(`[SUPABASE JOURNAL SYNC POOL ERROR] (${entry.id}):`, err instanceof Error ? err.message : String(err));
+    throw err;
   }
 }
 

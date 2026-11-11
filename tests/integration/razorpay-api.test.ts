@@ -11,14 +11,14 @@ describe('Integration Tests: Razorpay Endpoints & Ledger Operations', () => {
 
   let testBookingRef: string;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Seed a clean test booking
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const dayAfter = new Date();
     dayAfter.setDate(dayAfter.getDate() + 2);
 
-    const booking = repo.createBooking({
+    const booking = await repo.createBooking({
       guest_id: 'guest_test_integration',
       guest_name: 'Manjunath Mesala',
       guest_phone: '9876543210',
