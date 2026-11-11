@@ -64,9 +64,9 @@ export function getSupabasePgPool(): any {
     poolInstance = new Pool({
       connectionString,
       ssl: { rejectUnauthorized: false },
-      max: 3,
+      max: 10,
       idleTimeoutMillis: 10000,
-      connectionTimeoutMillis: 8000,
+      connectionTimeoutMillis: 15000,
     });
 
     poolInstance.on('error', (err: any) => {
