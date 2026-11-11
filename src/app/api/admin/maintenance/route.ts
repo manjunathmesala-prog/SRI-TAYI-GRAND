@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
 import { verifyStaffRole } from '@/lib/auth';
 import { MaintenanceCategory, MaintenancePriority, MaintenanceStatus } from '@/types';
+import { syncMaintenanceTicketToSupabase } from '@/lib/db/supabase-sync';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,6 +83,7 @@ export async function POST(req: NextRequest) {
       },
       staffName
     );
+    await syncMaintenanceTicketToSupabase(ticket);
 
     return NextResponse.json({
       success: true,
