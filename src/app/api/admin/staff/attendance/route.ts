@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const attendance = repo.clockInStaff(
+      const attendance = await repo.clockInStaff(
         {
           staffId,
           shift: shift as ShiftType,
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      const attendance = repo.clockOutStaff(attendanceId, actor);
+      const attendance = await repo.clockOutStaff(attendanceId, actor);
 
       return NextResponse.json({
         success: true,

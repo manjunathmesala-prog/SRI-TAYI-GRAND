@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
 
     await repo.ensureCashbookLoaded();
 
-    const closing = repo.performDailyClosing({
+    const closing = await repo.performDailyClosing({
       closingDate: targetDate,
       actualCashCounted: Number(actualCashCounted),
       notes: notes || 'Register balanced and closed.',

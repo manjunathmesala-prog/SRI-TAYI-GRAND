@@ -1740,7 +1740,7 @@ export class HotelRepository {
     };
   }
 
-  performDailyClosing(params: {
+  async performDailyClosing(params: {
     closingDate: string;
     actualCashCounted: number;
     notes?: string;
@@ -2401,7 +2401,7 @@ export class HotelRepository {
     return this.staffAttendance.filter((a) => a.date === targetDate);
   }
 
-  clockInStaff(params: { staffId: string; shift?: ShiftType; notes?: string }, actor?: string): StaffAttendance {
+  async clockInStaff(params: { staffId: string; shift?: ShiftType; notes?: string }, actor?: string): Promise<StaffAttendance> {
     const staff = this.staff.find((s) => s.id === params.staffId);
     if (!staff) throw new Error('Staff member not found.');
 
@@ -2438,7 +2438,7 @@ export class HotelRepository {
     return attendance;
   }
 
-  clockOutStaff(attendanceId: string, actor?: string): StaffAttendance {
+  async clockOutStaff(attendanceId: string, actor?: string): Promise<StaffAttendance> {
     const record = this.staffAttendance.find((a) => a.id === attendanceId);
     if (!record) throw new Error('Attendance record not found.');
     if (record.clock_out) throw new Error('Staff member is already clocked out.');
@@ -2449,7 +2449,8 @@ export class HotelRepository {
       const diffMs = new Date(clockOutTime).getTime() - new Date(record.clock_in).getTime();
       record.work_hours = Math.round((diffMs / (3600 * 1000)) * 10) / 10;
     }
-    syncStaffAttendanceToSupabase(record);
+    await syncStaffAttendanceToSupabase(record);
+    savePersistedData('staff_attendance.json', this.staffAttendance);
     this.broadcastEvent('attendance_recorded', record, actor);
     this.recordAuditLog({
       action: 'STAFF_CLOCK_OUT',

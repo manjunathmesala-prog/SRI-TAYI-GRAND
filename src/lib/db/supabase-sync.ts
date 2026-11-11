@@ -1,4 +1,5 @@
 import {
+  Guest,
   Booking,
   PaymentRecord,
   PhysicalRoom,
@@ -2471,5 +2472,101 @@ export async function loadJournalEntriesFromSupabase(): Promise<JournalEntry[]> 
   } catch (err: unknown) {
     console.warn('[SUPABASE LOAD JOURNAL ENTRIES WARN]', err instanceof Error ? err.message : String(err));
     return [];
+  }
+}
+
+
+export async function syncGuestToSupabase(guest: Partial<Guest>): Promise<void> {
+  const db = getSupabasePgPool();
+  if (!db) return;
+  const client = await db.connect();
+  try {
+    const isUuid = guest.id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(guest.id);
+    if (isUuid) {
+      await client.query(
+        `UPDATE guests
+         SET full_name = COALESCE($1, full_name),
+             phone = COALESCE($2, phone),
+             email = COALESCE($3, email),
+             address = COALESCE($4, address),
+             city = COALESCE($5, city),
+             state = COALESCE($6, state),
+             id_type = COALESCE($7, id_type),
+             id_number = COALESCE($8, id_number),
+             notes = COALESCE($9, notes),
+             updated_at = NOW()
+         WHERE id = $10;`,
+        [
+          guest.full_name || null,
+          guest.phone || null,
+          guest.email || null,
+          guest.address || null,
+          guest.city || null,
+          guest.state || null,
+          guest.id_type || null,
+          guest.id_number || null,
+          guest.notes || null,
+          guest.id,
+        ]
+      );
+    } else {
+      const res = await client.query(
+        `INSERT INTO guests (full_name, phone, email, address, city, state, country, id_type, id_number, total_stays, notes)
+         VALUES ($1, $2, $3, $4, $5, $6, 'India', $7, $8, 0, $9)
+         RETURNING id;`,
+        [
+          guest.full_name || 'Guest',
+          guest.phone || null,
+          guest.email || null,
+          guest.address || null,
+          guest.city || null,
+          guest.state || null,
+          guest.id_type || null,
+          guest.id_number || null,
+          guest.notes || null,
+        ]
+      );
+      if (res.rows.length > 0 && guest) {
+        guest.id = res.rows[0].id;
+      }
+    }
+  } catch (err: any) {
+    console.error('[SUPABASE GUEST SYNC ERROR]:', err.message);
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
+export async function loadGuestsFromSupabase(): Promise<Guest[]> {
+  const db = getSupabasePgPool();
+  if (!db) return [];
+  const client = await db.connect();
+  try {
+    const res = await client.query(`SELECT * FROM guests ORDER BY updated_at DESC LIMIT 500;`);
+    return res.rows.map((r: any) => ({
+      id: r.id,
+      full_name: r.full_name,
+      phone: r.phone || '',
+      email: r.email || '',
+      address: r.address || '',
+      city: r.city || '',
+      state: r.state || '',
+      country: r.country || 'India',
+      id_type: r.id_type || '',
+      id_number: r.id_number || '',
+      total_stays: Number(r.total_stays) || 0,
+      total_spend: 0,
+      vip_tier: 'regular',
+      is_blacklisted: false,
+      notes: r.notes || '',
+      created_at: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
+      updated_at: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
+    }));
+  } catch (err: any) {
+    console.warn('[SUPABASE LOAD GUESTS WARN]', err.message);
+    return [];
+  } finally {
+    client.release();
   }
 }

@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === 'update_profile' || updates) {
-      const guest = repo.updateGuestProfile(id, updates || body);
+      const guest = await repo.updateGuestProfile(id, updates || body);
       if (!guest) {
         return NextResponse.json({ success: false, error: 'Guest not found' }, { status: 404 });
       }
