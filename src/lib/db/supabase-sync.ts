@@ -1268,7 +1268,7 @@ export async function syncMaintenanceTicketToSupabase(ticket: MaintenanceTicket)
             ticket.description || ticket.issue_title,
             ticket.category,
             ticket.priority || 'normal',
-            ticket.status,
+            (['open', 'in_progress', 'resolved', 'cancelled'].includes(ticket.status as string) ? ticket.status : 'open'),
             createdAt.split('T')[0],
             ticket.assigned_to || null,
             ticket.reported_by || 'Staff',
