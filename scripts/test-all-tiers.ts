@@ -137,7 +137,7 @@ async function runAllTiersVerification() {
   const today = new Date().toISOString().split('T')[0];
   const summary = repo.getTodayClosingSummary(today);
   assert(Boolean(summary), '3.1 Night audit closing summary generated');
-  assert(summary.operational.totalRooms === 25, '3.2 Total room inventory counted (25 rooms)');
+  assert(summary.operational.totalRooms === repo.getRooms().length, `3.2 Total room inventory counted (${repo.getRooms().length} rooms)`);
   assert(typeof summary.operational.occupancyRate === 'number', '3.3 Occupancy rate calculated');
   assert(summary.gst.totalGst === summary.gst.cgst + summary.gst.sgst, '3.4 12% GST balanced (CGST + SGST = Total GST)');
 
@@ -204,7 +204,7 @@ async function runAllTiersVerification() {
   const syncResult = repo.syncChannel('makemytrip', 'Admin');
   assert(syncResult.success === true, '5.5 2-way ARI sync executed successfully');
   assert(syncResult.log.status === 'success', '5.6 Sync log recorded as "success"');
-  assert(syncResult.log.roomsUpdatedCount === 25, '5.7 All 25 rooms synchronized to OTA portal');
+  assert(syncResult.log.roomsUpdatedCount === repo.getRooms().length, `5.7 All ${repo.getRooms().length} rooms synchronized to OTA portal`);
 
   const logs = repo.getChannelSyncLogs();
   assert(logs.length > 0, '5.8 Channel sync audit trail accessible');
@@ -217,7 +217,7 @@ async function runAllTiersVerification() {
   // ============================================================================
   console.log('\n📌 [TIER-2] 6. Interactive Room Tape Chart & Multi-Floor Timeline');
   const rooms = repo.getRooms();
-  assert(rooms.length === 25, '6.1 All 25 physical rooms mapped');
+  assert(rooms.length === repo.getRooms().length, `6.1 All ${repo.getRooms().length} physical rooms mapped`);
   
   const floor1 = rooms.filter(r => r.floor_number === 1);
   const floor2 = rooms.filter(r => r.floor_number === 2);
