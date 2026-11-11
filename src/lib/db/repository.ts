@@ -1746,7 +1746,7 @@ export class HotelRepository {
     notes?: string;
     closedByName: string;
     closedByRole: StaffRole;
-  }): DailyClosing {
+  }): Promise<DailyClosing> {
     if (params.actualCashCounted < 0 || isNaN(params.actualCashCounted)) {
       throw new Error(`Actual cash counted cannot be negative or invalid: ${params.actualCashCounted}`);
     }
