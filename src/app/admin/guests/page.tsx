@@ -23,7 +23,7 @@ import {
   CheckCircle2,
   Download,
 } from 'lucide-react';
-import { useRealtimeSync } from '@/lib/realtime-client';
+import { useRealtimeSync, getAdminHeaders } from '@/lib/realtime-client';
 import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 
 const COMMON_PREFERENCES = [
@@ -71,7 +71,7 @@ export default function GuestsAdminPage() {
   const fetchGuests = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/guests', {
-        headers: { 'x-staff-role': 'Super Admin' },
+        headers: getAdminHeaders(),
       });
       if (res.ok) {
         const data = await res.json();
@@ -107,10 +107,9 @@ export default function GuestsAdminPage() {
     try {
       const res = await fetch('/api/admin/guests', {
         method: 'POST',
-        headers: {
+        headers: getAdminHeaders({
           'Content-Type': 'application/json',
-          'x-staff-role': 'Super Admin',
-        },
+        }),
         body: JSON.stringify({
           action: 'toggle_blacklist',
           id: blacklistModalGuest.id,
@@ -168,10 +167,9 @@ export default function GuestsAdminPage() {
     try {
       const res = await fetch('/api/admin/guests', {
         method: 'POST',
-        headers: {
+        headers: getAdminHeaders({
           'Content-Type': 'application/json',
-          'x-staff-role': 'Super Admin',
-        },
+        }),
         body: JSON.stringify({
           action: 'update_profile',
           id: editModalGuest.id,

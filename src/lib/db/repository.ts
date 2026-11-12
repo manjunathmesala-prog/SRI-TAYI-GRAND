@@ -103,6 +103,7 @@ import {
   loadWebsiteContentFromSupabase,
   syncJournalEntryToSupabase,
   loadJournalEntriesFromSupabase,
+  loadGuestsFromSupabase,
 } from './supabase-sync';
 import {
   loadPersistedCards,
@@ -4324,9 +4325,70 @@ export class HotelRepository {
     }
   }
 
+  async ensureCategoriesLoaded(): Promise<void> {
+    try {
+      const pgCategories = await loadCategoriesFromSupabase();
+      if (pgCategories && pgCategories.length > 0) {
+        for (const pgC of pgCategories) {
+          const canonicalId = normalizeCategoryId(pgC.id || pgC.slug);
+          const index = this.categories.findIndex(
+            (c) => c.id === canonicalId || c.id === pgC.id || c.slug === pgC.slug || c.name.toLowerCase() === pgC.name.toLowerCase()
+          );
+          if (index !== -1) {
+            const preservedId = this.categories[index].id || canonicalId;
+            this.categories[index] = { ...this.categories[index], ...pgC, id: preservedId };
+          } else {
+            this.categories.push({ ...pgC, id: canonicalId });
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('[ENSURE CATEGORIES LOAD WARN]', err);
+    }
+  }
+
+  async ensureRoomsLoaded(): Promise<void> {
+    try {
+      const pgRooms = await loadRoomsFromSupabase();
+      if (pgRooms && pgRooms.length > 0) {
+        for (const pgR of pgRooms) {
+          const r = this.rooms.find((rm) => rm.room_number === pgR.room_number);
+          if (r) {
+            r.operational_status = pgR.operational_status;
+            if (pgR.housekeeping_status) r.housekeeping_status = pgR.housekeeping_status;
+            if (pgR.notes) r.notes = pgR.notes;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('[ENSURE ROOMS LOAD WARN]', err);
+    }
+  }
+
+  async ensureSettingsLoaded(): Promise<void> {
+    try {
+      const pgSettings = await loadSettingsFromSupabase();
+      if (pgSettings) {
+        this.settings = { ...this.settings, ...pgSettings };
+      }
+    } catch (err) {
+      console.warn('[ENSURE SETTINGS LOAD WARN]', err);
+    }
+  }
+
+  async ensureReviewsLoaded(): Promise<void> {
+    try {
+      const pgRev = await loadReviewsFromSupabase();
+      if (pgRev && pgRev.length > 0) {
+        this.reviews = pgRev;
+      }
+    } catch (err) {
+      console.warn('[ENSURE REVIEWS LOAD WARN]', err);
+    }
+  }
+
   async ensureGuestsLoaded(): Promise<void> {
     try {
-      const { loadGuestsFromSupabase } = await import('./supabase-sync');
       const pgG = await loadGuestsFromSupabase();
       if (pgG && pgG.length > 0) {
         this.guests = pgG;
@@ -4387,6 +4449,9 @@ export class HotelRepository {
 
   async ensureAllLoaded(): Promise<void> {
     await Promise.allSettled([
+      this.ensureCategoriesLoaded(),
+      this.ensureRoomsLoaded(),
+      this.ensureSettingsLoaded(),
       this.ensureBookingsLoaded(),
       this.ensurePaymentsLoaded(),
       this.ensureExpensesLoaded(),
@@ -4401,6 +4466,7 @@ export class HotelRepository {
       this.ensureContactEnquiriesLoaded(),
       this.ensureFolioChargesLoaded(),
       this.ensureAuditLogsLoaded(),
+      this.ensureReviewsLoaded(),
     ]);
   }
 

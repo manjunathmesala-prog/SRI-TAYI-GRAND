@@ -18,6 +18,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
     }
 
+    await repo.ensureJournalsLoaded();
     const glAccounts = repo.getChartOfAccounts();
     const journalEntries = repo.getJournalEntries();
     const pnl = repo.getPnL();

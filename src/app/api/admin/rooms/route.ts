@@ -22,6 +22,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
+    await repo.ensureRoomsLoaded();
     const rooms = repo.getRooms();
     return NextResponse.json({
       success: true,

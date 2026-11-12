@@ -1,1 +1,116 @@
-[]
+[
+  {
+    "id": "ctx-1794483431097-748",
+    "type": "cash_in",
+    "category": "guest_payment",
+    "amount": 1890,
+    "reason": "Guest Payment: balu (TG-FD-20261112-9963)",
+    "booking_reference": "TG-FD-20261112-9963",
+    "receipt_ref": "FD-COLLECTED-₹1890",
+    "performed_by": "Sri Tayi Grand Admin",
+    "performed_at": "2026-11-12T11:37:11.097Z"
+  },
+  {
+    "id": "ctx-1794483270251-244",
+    "type": "cash_in",
+    "category": "guest_payment",
+    "amount": 1785,
+    "reason": "Guest Payment: balu (TG-FD-20261112-6500)",
+    "booking_reference": "TG-FD-20261112-6500",
+    "receipt_ref": "FD-COLLECTED-₹1785",
+    "performed_by": "Sri Tayi Grand Admin",
+    "performed_at": "2026-11-12T11:34:30.251Z"
+  },
+  {
+    "id": "ctx-1794482932260-937",
+    "type": "cash_in",
+    "category": "guest_payment",
+    "amount": 1800,
+    "reason": "Guest Payment: Manjunath Mesala (STG-20261112-2314)",
+    "booking_reference": "STG-20261112-2314",
+    "receipt_ref": "PAY-STG-932259-835",
+    "performed_by": "Sri Tayi Grand Admin",
+    "performed_at": "2026-11-12T11:28:52.260Z"
+  },
+  {
+    "id": "ctx-1794482461704-855",
+    "shift_id": "shift-1794482461413",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 350,
+    "reason": "Expense Payout: Morning Cleaning Detergent & Disinfectant (maintenance)",
+    "performed_by": "A. Ramanjaneyulu",
+    "performed_at": "2026-11-12T11:21:01.704Z"
+  },
+  {
+    "id": "ctx-003",
+    "shift_id": "shift-20261112-morn",
+    "type": "cash_out",
+    "category": "petty_cash",
+    "amount": 950,
+    "reason": "Duty Staff Meals & Tea Allowance",
+    "performed_by": "Sri Tayi Grand Staff",
+    "performed_at": "2026-11-12T10:54:23.938Z"
+  },
+  {
+    "id": "ctx-1794479898021-980",
+    "shift_id": "shift-1794479897810",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 350,
+    "reason": "Expense Payout: Morning Cleaning Detergent & Disinfectant (maintenance)",
+    "performed_by": "A. Ramanjaneyulu",
+    "performed_at": "2026-11-12T10:38:18.021Z"
+  },
+  {
+    "id": "ctx-1794479885636-416",
+    "shift_id": "shift-1794479884731",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 350,
+    "reason": "Expense Payout: Morning Cleaning Detergent & Disinfectant (maintenance)",
+    "performed_by": "A. Ramanjaneyulu",
+    "performed_at": "2026-11-12T10:38:05.636Z"
+  },
+  {
+    "id": "ctx-1794479839013-755",
+    "shift_id": "shift-1794479838830",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 350,
+    "reason": "Expense Payout: Morning Cleaning Detergent & Disinfectant (maintenance)",
+    "performed_by": "A. Ramanjaneyulu",
+    "performed_at": "2026-11-12T10:37:19.013Z"
+  },
+  {
+    "id": "ctx-1794479748972-830",
+    "shift_id": "shift-1794479748586",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 350,
+    "reason": "Expense Payout: Morning Cleaning Detergent & Disinfectant (maintenance)",
+    "performed_by": "A. Ramanjaneyulu",
+    "performed_at": "2026-11-12T10:35:48.972Z"
+  },
+  {
+    "id": "ctx-001",
+    "shift_id": "shift-20261112-morn",
+    "type": "cash_in",
+    "category": "guest_payment",
+    "amount": 4199,
+    "reason": "Room 301 Walk-In Check-In Cash Tariff Payment",
+    "booking_reference": "STG-20261112-3011",
+    "performed_by": "Sri Tayi Grand Staff",
+    "performed_at": "2026-11-12T09:54:23.938Z"
+  },
+  {
+    "id": "ctx-002",
+    "shift_id": "shift-20261112-morn",
+    "type": "cash_out",
+    "category": "operational_expense",
+    "amount": 3800,
+    "reason": "Diesel Generator Fuel Fill (40L)",
+    "performed_by": "Sri Tayi Grand Staff",
+    "performed_at": "2026-11-12T08:54:23.938Z"
+  }
+]

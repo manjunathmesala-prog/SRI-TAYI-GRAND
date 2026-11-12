@@ -1,1 +1,32 @@
-[]
+[
+  {
+    "id": "STG-HAL-2026-001",
+    "enquiry_reference": "STG-HAL-2026-001",
+    "name": "Dr. V. Sudhakar Reddy",
+    "phone": "+919440123456",
+    "email": "sudhakar.reddy@gmail.com",
+    "event_type": "Wedding Reception & Banquet",
+    "event_date": "2026-12-18",
+    "expected_guests": 450,
+    "requirements": "AC convention hall with grand stage lighting, banquet seating, and Royal Buffet setup.",
+    "message": "",
+    "status": "quote_sent",
+    "admin_notes": "Quotation STG-QT-2026-001 generated for ₹2,75,625.",
+    "created_at": "2026-11-12T11:52:31.694Z"
+  },
+  {
+    "id": "STG-HAL-2026-002",
+    "enquiry_reference": "STG-HAL-2026-002",
+    "name": "M. Anjaneyulu",
+    "phone": "+919848011223",
+    "email": "anjaneyulu.m@yahoo.com",
+    "event_type": "Sreemantham & Family Celebration",
+    "event_date": "2026-11-26",
+    "expected_guests": 150,
+    "requirements": "Half-day morning function with traditional vegetarian South Indian lunch.",
+    "message": "",
+    "status": "pending",
+    "admin_notes": "Client requested callback regarding stage flower decoration.",
+    "created_at": "2026-11-12T11:52:31.694Z"
+  }
+]

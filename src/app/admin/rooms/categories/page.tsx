@@ -37,7 +37,9 @@ export default function RoomCategoriesAdminPage() {
 
   const fetchCategories = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/rooms/categories');
+      const res = await fetch('/api/admin/rooms/categories', {
+        headers: authStorage.getAuthHeaders(),
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.categories) {

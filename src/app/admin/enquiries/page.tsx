@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { UnifiedEnquiry, EnquiryStatus, EnquiryType } from '@/types';
 import { useRealtimeSync } from '@/lib/realtime-client';
+import { getAdminHeaders } from '@/lib/auth-storage';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
 
 export default function EnquiriesPipelinePage() {
@@ -69,7 +70,9 @@ export default function EnquiriesPipelinePage() {
   const fetchEnquiries = useCallback(async () => {
     try {
       setIsLoading(true);
-      const res = await fetch('/api/admin/enquiries');
+      const res = await fetch('/api/admin/enquiries', {
+        headers: getAdminHeaders(),
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.success) {
@@ -115,7 +118,7 @@ export default function EnquiriesPipelinePage() {
       setIsSubmitting(true);
       const res = await fetch(`/api/admin/enquiries/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ status: newStatus }),
       });
       if (res.ok) {
@@ -136,7 +139,7 @@ export default function EnquiriesPipelinePage() {
       setIsSubmitting(true);
       const res = await fetch(`/api/admin/enquiries/${notesModalEnquiry.id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ admin_notes: currentNotes }),
       });
       if (res.ok) {
@@ -157,7 +160,7 @@ export default function EnquiriesPipelinePage() {
       setIsSubmitting(true);
       const res = await fetch('/api/admin/enquiries', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify(newForm),
       });
       if (res.ok) {

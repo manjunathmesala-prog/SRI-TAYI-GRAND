@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { OtaChannel, ChannelSyncLog } from '@/types';
 import { useRealtimeSync } from '@/lib/realtime-client';
+import { getAdminHeaders } from '@/lib/auth-storage';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import {
   Globe,
@@ -88,7 +89,7 @@ export default function AdminChannelsPage() {
     if (showSpinner) setLoading(true);
     try {
       const res = await fetch('/api/admin/channels', {
-        headers: { 'x-staff-role': 'Super Admin' },
+        headers: getAdminHeaders(),
       });
       const data = await res.json();
       if (data.success) {
@@ -113,10 +114,9 @@ export default function AdminChannelsPage() {
     try {
       const res = await fetch('/api/admin/channels', {
         method: 'POST',
-        headers: {
+        headers: getAdminHeaders({
           'Content-Type': 'application/json',
-          'x-staff-role': 'Super Admin',
-        },
+        }),
         body: JSON.stringify({
           action: 'sync_channel',
           channelId,
@@ -142,10 +142,9 @@ export default function AdminChannelsPage() {
     try {
       const res = await fetch('/api/admin/channels', {
         method: 'POST',
-        headers: {
+        headers: getAdminHeaders({
           'Content-Type': 'application/json',
-          'x-staff-role': 'Super Admin',
-        },
+        }),
         body: JSON.stringify({
           action: 'sync_all',
         }),
@@ -168,10 +167,9 @@ export default function AdminChannelsPage() {
     try {
       const res = await fetch('/api/admin/channels', {
         method: 'POST',
-        headers: {
+        headers: getAdminHeaders({
           'Content-Type': 'application/json',
-          'x-staff-role': 'Super Admin',
-        },
+        }),
         body: JSON.stringify({
           action: 'update_channel',
           channelId: channel.id,
@@ -198,10 +196,9 @@ export default function AdminChannelsPage() {
     try {
       const res = await fetch('/api/admin/channels', {
         method: 'POST',
-        headers: {
+        headers: getAdminHeaders({
           'Content-Type': 'application/json',
-          'x-staff-role': 'Super Admin',
-        },
+        }),
         body: JSON.stringify({
           action: 'update_channel',
           channelId,
@@ -228,10 +225,9 @@ export default function AdminChannelsPage() {
     try {
       const res = await fetch('/api/admin/channels', {
         method: 'POST',
-        headers: {
+        headers: getAdminHeaders({
           'Content-Type': 'application/json',
-          'x-staff-role': 'Super Admin',
-        },
+        }),
         body: JSON.stringify({
           action: 'simulate_ota_booking',
           channelId: simChannelId,

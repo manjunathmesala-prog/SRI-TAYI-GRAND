@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(req: NextRequest) {
   try {
+    await repo.ensureCategoriesLoaded();
     const categories = repo.getCategories();
     return NextResponse.json({
       success: true,

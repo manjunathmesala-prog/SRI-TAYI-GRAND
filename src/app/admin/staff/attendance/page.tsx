@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { StaffAttendance, StaffMember, ShiftType, AttendanceStatus } from '@/types';
 import { useRealtimeSync } from '@/lib/realtime-client';
+import { getAdminHeaders } from '@/lib/auth-storage';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import {
   UserCheck,
@@ -67,7 +68,7 @@ export default function AdminStaffAttendancePage() {
     try {
       setLoading(true);
       const res = await fetch(`/api/admin/staff/attendance?date=${selectedDate}`, {
-        headers: { 'x-staff-role': 'Super Admin' },
+        headers: getAdminHeaders(),
       });
       if (res.ok) {
         const data = await res.json();
@@ -135,10 +136,9 @@ export default function AdminStaffAttendancePage() {
       setSubmitting(true);
       const res = await fetch('/api/admin/staff/attendance', {
         method: 'POST',
-        headers: {
+        headers: getAdminHeaders({
           'Content-Type': 'application/json',
-          'x-staff-role': 'Super Admin',
-        },
+        }),
         body: JSON.stringify({
           action: 'clock_in',
           staffId: clockInStaffId,
@@ -168,10 +168,9 @@ export default function AdminStaffAttendancePage() {
       setClockingOutId(attendanceId);
       const res = await fetch('/api/admin/staff/attendance', {
         method: 'POST',
-        headers: {
+        headers: getAdminHeaders({
           'Content-Type': 'application/json',
-          'x-staff-role': 'Super Admin',
-        },
+        }),
         body: JSON.stringify({
           action: 'clock_out',
           attendanceId,

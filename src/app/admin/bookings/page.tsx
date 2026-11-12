@@ -51,7 +51,7 @@ import { GuestFolioModal } from '@/components/admin/GuestFolioModal';
 import { PrintGstInvoiceModal } from '@/components/admin/PrintGstInvoiceModal';
 import { RfidHistoryTable } from '@/components/admin/RfidHistoryTable';
 import { issuePhysicalKeycard, checkoutPhysicalCard, playChimeSound } from '@/lib/rfid/bridge-client';
-import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
+import { useRealtimeSync, adminOperations, getAdminHeaders } from '@/lib/realtime-client';
 import { Booking, BookingStatus, PhysicalRoom, RoomCategory, FolioCharge } from '@/types';
 import { toast } from '@/components/ui/Toast';
 import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
@@ -536,7 +536,7 @@ export default function BookingsAdminPage() {
     try {
       const response = await fetch('/api/admin/payments/create-request', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           reservationId: res.id,
           bookingReference: res.booking_reference,
@@ -626,7 +626,7 @@ export default function BookingsAdminPage() {
     try {
       const res = await fetch('/api/admin/payments', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           bookingReference: ref,
           amount: totalAmount,

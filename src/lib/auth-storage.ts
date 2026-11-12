@@ -98,27 +98,20 @@ export const authStorage = {
    * Primary destination is always sessionStorage (secure, tab-isolated, shared-reception safe).
    * If rememberMe is true, also replicates to localStorage for persistent device sessions.
    */
-  setSession(claims: AdminSessionClaims, rememberMe = false): void {
+  setSession(claims: AdminSessionClaims, rememberMe = true): void {
     if (typeof window === 'undefined') return;
     try {
-      // Always write to active tab's sessionStorage
+      // Write to active tab's sessionStorage
       sessionStorage.setItem(TOKEN_KEY, claims.token);
       sessionStorage.setItem(ROLE_KEY, claims.role);
       sessionStorage.setItem(USER_KEY, claims.name);
       if (claims.email) sessionStorage.setItem(EMAIL_KEY, claims.email);
 
-      if (rememberMe) {
-        localStorage.setItem(TOKEN_KEY, claims.token);
-        localStorage.setItem(ROLE_KEY, claims.role);
-        localStorage.setItem(USER_KEY, claims.name);
-        if (claims.email) localStorage.setItem(EMAIL_KEY, claims.email);
-      } else {
-        // Purge persistent storage to prevent leakage across shared workstation shifts
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(ROLE_KEY);
-        localStorage.removeItem(USER_KEY);
-        localStorage.removeItem(EMAIL_KEY);
-      }
+      // Replicate to localStorage for persistent device sessions and cross-tab reliability
+      localStorage.setItem(TOKEN_KEY, claims.token);
+      localStorage.setItem(ROLE_KEY, claims.role);
+      localStorage.setItem(USER_KEY, claims.name);
+      if (claims.email) localStorage.setItem(EMAIL_KEY, claims.email);
     } catch (err) {
       console.warn('Storage write failed:', err);
     }

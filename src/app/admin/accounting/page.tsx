@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { GLAccount, JournalEntry, JournalLine, AccountCategory } from '@/types';
 import { useRealtimeSync } from '@/lib/realtime-client';
+import { getAdminHeaders } from '@/lib/auth-storage';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import {
   Calculator,
@@ -95,7 +96,7 @@ export default function AdminAccountingPage() {
     try {
       setLoading(true);
       const res = await fetch('/api/admin/accounting', {
-        headers: { 'x-staff-role': 'Super Admin' },
+        headers: getAdminHeaders(),
       });
       if (res.ok) {
         const data = await res.json();
@@ -294,10 +295,9 @@ export default function AdminAccountingPage() {
 
       const res = await fetch('/api/admin/accounting', {
         method: 'POST',
-        headers: {
+        headers: getAdminHeaders({
           'Content-Type': 'application/json',
-          'x-staff-role': 'Super Admin',
-        },
+        }),
         body: JSON.stringify({
           action: 'create_journal_entry',
           date: entryDate,

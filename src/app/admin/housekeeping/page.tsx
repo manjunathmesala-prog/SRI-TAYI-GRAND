@@ -69,7 +69,9 @@ export default function HousekeepingAdminPage() {
 
   const fetchHousekeepingData = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/housekeeping');
+      const res = await fetch('/api/admin/housekeeping', {
+        headers: authStorage.getAuthHeaders(),
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.rooms) setRooms(data.rooms);

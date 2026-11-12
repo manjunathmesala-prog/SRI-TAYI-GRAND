@@ -48,7 +48,7 @@ import {
   checkoutPhysicalCard,
   playChimeSound,
 } from '@/lib/rfid/bridge-client';
-import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
+import { useRealtimeSync, adminOperations, getAdminHeaders } from '@/lib/realtime-client';
 import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 import { normalizeCategoryId } from '@/lib/pricing';
 
@@ -211,7 +211,9 @@ export default function AnanthaWalkInPage() {
   // Load walk-in queue
   const loadWalkInQueue = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/walk-ins/queue');
+      const res = await fetch('/api/admin/walk-ins/queue', {
+        headers: getAdminHeaders(),
+      });
       if (res.ok) {
         const data = await res.json();
         setWalkInQueue(data.queue || []);
@@ -223,7 +225,9 @@ export default function AnanthaWalkInPage() {
   const fetchData = useCallback(async () => {
     try {
       setLoadingInitial(true);
-      const res = await fetch('/api/admin/operations?action=get_full_state');
+      const res = await fetch('/api/admin/operations?action=get_full_state', {
+        headers: getAdminHeaders(),
+      });
       const data = await res.json();
       if (data.success) {
         const cats: RoomCategory[] = data.categories || [];
@@ -465,7 +469,7 @@ export default function AnanthaWalkInPage() {
       try {
         const regRes = await fetch('/api/rfid/cards', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
           body: JSON.stringify({
             action: 'create_guest',
             roomNumber: rfidSelectedRoom,
@@ -565,7 +569,7 @@ export default function AnanthaWalkInPage() {
     try {
       const res = await fetch('/api/rfid/tap', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           cardUid: targetCardUid,
           roomNumber: rfidSelectedRoom,
@@ -605,7 +609,7 @@ export default function AnanthaWalkInPage() {
     try {
       await fetch('/api/rfid/cards', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           action: 'toggle_status',
           cardUid: targetCardUid,
@@ -666,7 +670,7 @@ export default function AnanthaWalkInPage() {
       setAssigningKey(true);
       const res = await fetch('/api/admin/walk-ins/assign-and-encode', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           bookingReference: selectedQueueItem.booking_reference,
           roomNumber: assignRoomNumber,

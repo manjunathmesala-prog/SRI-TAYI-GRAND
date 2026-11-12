@@ -22,7 +22,7 @@ import {
   BedDouble,
   Search,
 } from 'lucide-react';
-import { useRealtimeSync } from '@/lib/realtime-client';
+import { useRealtimeSync, getAdminHeaders } from '@/lib/realtime-client';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 
@@ -64,7 +64,7 @@ export default function StaffAdminPage() {
   const fetchStaff = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/staff', {
-        headers: { 'x-staff-role': 'Super Admin' },
+        headers: getAdminHeaders(),
       });
       if (res.ok) {
         const data = await res.json();
@@ -128,10 +128,9 @@ export default function StaffAdminPage() {
     try {
       const res = await fetch('/api/admin/staff', {
         method: 'POST',
-        headers: {
+        headers: getAdminHeaders({
           'Content-Type': 'application/json',
-          'x-staff-role': 'Super Admin',
-        },
+        }),
         body: JSON.stringify({
           id: selectedStaff.id,
           permissions,

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { DailyClosing } from '@/types';
 import { useRealtimeSync } from '@/lib/realtime-client';
+import { getAdminHeaders } from '@/lib/auth-storage';
 import {
   Lock,
   Unlock,
@@ -82,7 +83,9 @@ export default function AdminDailyClosingPage() {
   const fetchClosingData = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch(`/api/admin/daily-closing?date=${businessDate}`);
+      const res = await fetch(`/api/admin/daily-closing?date=${businessDate}`, {
+        headers: getAdminHeaders(),
+      });
       const data = await res.json();
       if (data.success) {
         setSummary(data.summary);
@@ -130,10 +133,9 @@ export default function AdminDailyClosingPage() {
       setFeedback(null);
       const res = await fetch('/api/admin/daily-closing', {
         method: 'POST',
-        headers: {
+        headers: getAdminHeaders({
           'Content-Type': 'application/json',
-          'x-staff-role': 'Super Admin',
-        },
+        }),
         body: JSON.stringify({
           closingDate: businessDate,
           actualCashCounted: cashVal,

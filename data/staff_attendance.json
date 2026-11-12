@@ -1,1 +1,62 @@
-[]
+[
+  {
+    "id": "att-004",
+    "staff_id": "stf-hk-01",
+    "staff_name": "K. Ramanjaneyulu",
+    "role": "Housekeeping",
+    "date": "2026-11-12",
+    "shift": "Morning Shift (08:00 - 16:00)",
+    "status": "present",
+    "work_hours": 0,
+    "notes": "Floor 1 & 2 room turnaround",
+    "created_at": "2026-11-12T11:54:24.482Z"
+  },
+  {
+    "id": "att-003",
+    "staff_id": "stf-frontdesk-01",
+    "staff_name": "Sri Tayi Grand Staff",
+    "role": "Front Desk",
+    "date": "2026-11-12",
+    "shift": "Morning Shift (07:00 - 15:30)",
+    "status": "present",
+    "work_hours": 0,
+    "notes": "Front desk reception duty",
+    "created_at": "2026-11-12T11:54:24.347Z"
+  },
+  {
+    "id": "att-002",
+    "staff_id": "stf-manager-01",
+    "staff_name": "G. Mohan Kumar",
+    "role": "Hotel Manager",
+    "date": "2026-11-12",
+    "shift": "Morning Shift (07:00 - 15:30)",
+    "status": "present",
+    "work_hours": 0,
+    "notes": "Operations duty & vendor sign-offs",
+    "created_at": "2026-11-12T11:54:24.210Z"
+  },
+  {
+    "id": "att-001",
+    "staff_id": "stf-super-admin-01",
+    "staff_name": "Sri Tayi Grand Admin",
+    "role": "Super Admin",
+    "date": "2026-11-12",
+    "shift": "General Shift (09:00 - 18:00)",
+    "status": "present",
+    "work_hours": 0,
+    "notes": "Executive oversight & audits",
+    "created_at": "2026-11-12T11:54:24.073Z"
+  },
+  {
+    "id": "att-test-01",
+    "staff_id": "stf-001",
+    "staff_name": "Sri Tayi Grand Staff",
+    "role": "Front Desk",
+    "date": "2026-11-12",
+    "shift": "Morning Shift (07:00 - 15:00)",
+    "status": "present",
+    "work_hours": 0,
+    "notes": "On-time duty reporting at reception desk",
+    "created_at": "2026-11-12T10:45:44.979Z"
+  }
+]

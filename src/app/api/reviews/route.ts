@@ -39,6 +39,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Retrieve either all (admin) or published only (public)
+    await repo.ensureReviewsLoaded();
     let reviews: GoogleReview[] = repo.getReviews(!all);
 
     // Optional category filtering

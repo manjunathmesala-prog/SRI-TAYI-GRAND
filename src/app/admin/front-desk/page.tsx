@@ -15,7 +15,7 @@ import {
   playChimeSound,
   checkBridgeHealth,
 } from '@/lib/rfid/bridge-client';
-import { useRealtimeSync, adminOperations, cashbookClient } from '@/lib/realtime-client';
+import { useRealtimeSync, adminOperations, cashbookClient, getAdminHeaders } from '@/lib/realtime-client';
 import {
   ConciergeBell,
   Search,
@@ -146,7 +146,9 @@ export default function FrontDeskPage() {
 
   const fetchWalkInQueue = useCallback(async () => {
     try {
-      const res = await fetch('/api/admin/walk-ins/queue');
+      const res = await fetch('/api/admin/walk-ins/queue', {
+        headers: getAdminHeaders(),
+      });
       if (res.ok) {
         const data = await res.json();
         const q: WalkInItem[] = data.queue || [];
@@ -195,7 +197,7 @@ export default function FrontDeskPage() {
     try {
       const res = await fetch('/api/admin/walk-ins/assign-and-encode', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           bookingReference: booking.booking_reference,
           roomNumber,

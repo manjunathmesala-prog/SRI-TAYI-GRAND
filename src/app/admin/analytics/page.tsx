@@ -21,7 +21,7 @@ import {
   Radio,
   Sparkles,
 } from 'lucide-react';
-import { useRealtimeSync } from '@/lib/realtime-client';
+import { useRealtimeSync, getAdminHeaders } from '@/lib/realtime-client';
 
 type TimeRange = 'today' | '7d' | '30d' | '90d' | 'ytd';
 
@@ -69,7 +69,9 @@ export default function AnalyticsAdminPage() {
   const fetchAnalytics = useCallback(async (range: TimeRange = selectedRange) => {
     try {
       setIsLoading(true);
-      const res = await fetch(`/api/admin/reports?range=${range}`);
+      const res = await fetch(`/api/admin/reports?range=${range}`, {
+        headers: getAdminHeaders(),
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.success) {

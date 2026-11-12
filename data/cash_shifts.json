@@ -1,1 +1,28 @@
-[]
+[
+  {
+    "id": "shift-1794479759899",
+    "shift_number": "SH-20261112-01",
+    "cashier_id": "stf-super-admin-01",
+    "cashier_name": "Sri Tayi Grand Admin",
+    "opened_at": "2026-11-12T10:35:59.899Z",
+    "closed_at": "2026-11-12T10:37:18.830Z",
+    "opening_float": 0,
+    "closing_cash_counted": 0,
+    "expected_closing_cash": 0,
+    "discrepancy": 0,
+    "status": "closed"
+  },
+  {
+    "id": "shift-20261112-morn",
+    "shift_number": "SFT-20261112-01",
+    "cashier_id": "stf-001",
+    "cashier_name": "Sri Tayi Grand Staff",
+    "opened_at": "2026-11-12T05:54:23.802Z",
+    "closed_at": "2026-11-12T12:03:55.030Z",
+    "opening_float": 5000,
+    "closing_cash_counted": 4449,
+    "expected_closing_cash": 4449,
+    "discrepancy": 0,
+    "status": "closed"
+  }
+]

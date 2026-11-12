@@ -1,1 +1,28 @@
-[]
+[
+  {
+    "id": "chg-001",
+    "booking_id": "STG-20261112-1011",
+    "booking_reference": "STG-20261112-1011",
+    "description": "Extra Bed & Linen Kit",
+    "category": "room_service",
+    "amount": 500,
+    "tax_rate": 0.05,
+    "tax_amount": 25,
+    "total_amount": 525,
+    "posted_by": "Front Desk Staff",
+    "created_at": "2026-11-12T11:55:38.109Z"
+  },
+  {
+    "id": "chg-002",
+    "booking_id": "STG-20261112-2022",
+    "booking_reference": "STG-20261112-2022",
+    "description": "Special South Indian Filter Coffee & Biscuits",
+    "category": "dining",
+    "amount": 240,
+    "tax_rate": 0.05,
+    "tax_amount": 12,
+    "total_amount": 252,
+    "posted_by": "Room Service Attendant",
+    "created_at": "2026-11-12T11:55:38.109Z"
+  }
+]

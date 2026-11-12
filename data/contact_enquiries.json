@@ -1,1 +1,31 @@
-[]
+[
+  {
+    "id": "enq-001",
+    "name": "R. Chandrasekhar Rao",
+    "phone": "+919848099887",
+    "email": "chandra.rao@tcs.com",
+    "subject": "Kadiri Sri Lakshmi Narasimha Swamy Temple Darshan Pilgrimage Stay",
+    "message": "We are a family group of 8 members arriving from Hyderabad for temple darshan. Looking for 3 AC double rooms for 2 nights.",
+    "check_in_date": "2026-11-20",
+    "check_out_date": "2026-11-22",
+    "room_type": "Deluxe AC Double Room",
+    "adults_count": 8,
+    "status": "new",
+    "source": "website_contact_form",
+    "created_at": "2026-11-12T11:54:23.665Z",
+    "updated_at": "2026-11-12T11:54:23.665Z"
+  },
+  {
+    "id": "enq-test-01",
+    "name": "R. Chandrasekhar",
+    "phone": "+919848011223",
+    "email": "chandra.sekhar@outlook.com",
+    "subject": "Pilgrimage Group Room Booking Enquiry",
+    "message": "Looking for 5 double rooms for family visiting Kadiri Sri Lakshmi Narasimha Swamy Temple on 20th Nov.",
+    "adults_count": 1,
+    "status": "new",
+    "source": "website_contact_form",
+    "created_at": "2026-11-12T10:45:45.136Z",
+    "updated_at": "2026-11-12T10:45:45.136Z"
+  }
+]

@@ -16,7 +16,7 @@ import {
   Radio,
   RefreshCw,
 } from 'lucide-react';
-import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
+import { useRealtimeSync, adminOperations, getAdminHeaders } from '@/lib/realtime-client';
 import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 
 export default function ReportsAdminPage() {
@@ -53,7 +53,9 @@ export default function ReportsAdminPage() {
       }
 
       // Fetch today's closing summary
-      const closeRes = await fetch('/api/admin/daily-closing');
+      const closeRes = await fetch('/api/admin/daily-closing', {
+        headers: getAdminHeaders(),
+      });
       if (closeRes.ok) {
         const closeData = await closeRes.json();
         setClosingSummary(closeData.summary);
@@ -100,10 +102,9 @@ export default function ReportsAdminPage() {
       const todayStr = new Date().toISOString().split('T')[0];
       const res = await fetch('/api/admin/daily-closing', {
         method: 'POST',
-        headers: {
+        headers: getAdminHeaders({
           'Content-Type': 'application/json',
-          'x-staff-role': 'Accounts',
-        },
+        }),
         body: JSON.stringify({
           closingDate: todayStr,
           actualCashCounted: Number(actualCash),

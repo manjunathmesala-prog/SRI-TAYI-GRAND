@@ -8,6 +8,7 @@ import {
   SeatingLayoutType,
   CateringPackageType,
 } from '@/types';
+import { getAdminHeaders } from '@/lib/auth-storage';
 import {
   Building,
   Calendar,
@@ -174,7 +175,7 @@ export default function ConventionHallAdminPage() {
   const fetchData = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/convention-hall', {
-        headers: { 'x-staff-role': 'Super Admin' },
+        headers: getAdminHeaders(),
       });
       if (res.ok) {
         const data = await res.json();
@@ -219,10 +220,9 @@ export default function ConventionHallAdminPage() {
     try {
       const res = await fetch('/api/admin/convention-hall', {
         method: 'POST',
-        headers: {
+        headers: getAdminHeaders({
           'Content-Type': 'application/json',
-          'x-staff-role': 'Super Admin',
-        },
+        }),
         body: JSON.stringify({
           action: 'create_quote',
           client_name: clientName,
@@ -282,10 +282,9 @@ export default function ConventionHallAdminPage() {
     try {
       const res = await fetch('/api/admin/convention-hall', {
         method: 'POST',
-        headers: {
+        headers: getAdminHeaders({
           'Content-Type': 'application/json',
-          'x-staff-role': 'Super Admin',
-        },
+        }),
         body: JSON.stringify({
           action: 'update_enquiry',
           id: selectedEnquiry.id,
