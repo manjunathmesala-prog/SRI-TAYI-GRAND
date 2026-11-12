@@ -1,16 +1,1 @@
-[
-  {
-    "id": "ENQ-HALL-202611-7769",
-    "enquiry_reference": "ENQ-HALL-202611-7769",
-    "name": "QA Hall Enquiry 1794401589756",
-    "phone": "9849011111",
-    "email": "qa.hall@example.invalid",
-    "event_type": "wedding",
-    "event_date": "2026-12-15",
-    "expected_guests": 350,
-    "requirements": "",
-    "message": "",
-    "status": "new",
-    "created_at": "2026-11-11T12:53:15.976Z"
-  }
-]
+[]
