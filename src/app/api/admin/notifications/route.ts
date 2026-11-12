@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const auth = verifyStaffRole(request, ['Super Admin']);
+  const auth = verifyStaffRole(request, ['Super Admin', 'Hotel Manager']);
   if (!auth.authorized) {
     return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
   }
@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const auth = verifyStaffRole(request, ['Super Admin']);
+  const auth = verifyStaffRole(request, ['Super Admin', 'Hotel Manager']);
   if (!auth.authorized) {
     return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
   }

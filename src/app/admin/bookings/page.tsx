@@ -39,6 +39,7 @@ import {
   Radio,
   RefreshCw,
   X,
+  Trash2,
   ArrowRightLeft,
 } from 'lucide-react';
 import TayiBrandIcon from '@/components/anantha/TayiBrandIcon';
@@ -591,6 +592,32 @@ export default function BookingsAdminPage() {
     }
   };
 
+  // Action: Permanently Delete Booking
+  const handleDeleteBooking = async (ref: string, guestName?: string) => {
+    const nameStr = guestName ? ` for ${guestName}` : '';
+    if (!window.confirm(`Are you sure you want to permanently delete reservation #${ref}${nameStr}? This action cannot be undone.`)) {
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      const res = await adminOperations.deleteBooking(ref);
+      if (res.success) {
+        toast.success(`Reservation #${ref} permanently deleted.`);
+        if (selectedRes?.booking_reference === ref) {
+          setSelectedRes(null);
+        }
+        await fetchBookings();
+      } else {
+        toast.error(res.error || 'Failed to delete reservation');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Network error deleting reservation');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
   // Action: Mark Paid
   const handleMarkPaid = async (ref: string, totalAmount: number) => {
     if (!confirm(`Mark reservation ${ref} as paid via Front Desk / POS for ₹${totalAmount.toLocaleString('en-IN')}?`)) return;
@@ -990,6 +1017,14 @@ export default function BookingsAdminPage() {
                         >
                           <Eye className="w-4 h-4" />
                         </button>
+
+                        <button
+                          onClick={() => handleDeleteBooking(r.booking_reference, r.guest_name)}
+                          className="p-2 rounded-xl border border-stone-200 bg-white text-stone-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center min-h-[40px] px-2.5 text-xs font-medium cursor-pointer transition-colors"
+                          title="Delete Reservation"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                   );
@@ -1242,6 +1277,15 @@ export default function BookingsAdminPage() {
                                 title="Inspect Full Folio & Gateway Audit"
                               >
                                 <Eye className="w-4 h-4" />
+                              </button>
+
+                              {/* Delete Reservation */}
+                              <button
+                                onClick={() => handleDeleteBooking(r.booking_reference, r.guest_name)}
+                                className="p-1.5 rounded-lg border border-stone-200 text-stone-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer transition-colors"
+                                title="Delete Reservation"
+                              >
+                                <Trash2 className="w-4 h-4" />
                               </button>
                             </div>
                           </td>
@@ -1996,6 +2040,16 @@ export default function BookingsAdminPage() {
                     Cancel Booking
                   </button>
                 )}
+
+                <button
+                  disabled={actionLoading}
+                  onClick={() => handleDeleteBooking(selectedRes.booking_reference, selectedRes.guest_name)}
+                  className="px-4 py-2 rounded-xl bg-stone-100 hover:bg-rose-50 text-rose-700 hover:text-rose-800 border border-stone-200 hover:border-rose-300 text-xs font-semibold cursor-pointer flex items-center gap-1.5 transition-colors"
+                  title="Permanently remove reservation record"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete Booking</span>
+                </button>
               </div>
             </div>
           </div>

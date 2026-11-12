@@ -237,8 +237,8 @@ export function PrintGstInvoiceModal({
                   <th className="py-2.5 px-3 font-semibold">Description / Particulars</th>
                   <th className="py-2.5 px-3 font-semibold text-center">SAC Code</th>
                   <th className="py-2.5 px-3 font-semibold text-right">Taxable Val (₹)</th>
-                  <th className="py-2.5 px-3 font-semibold text-right">CGST 6% (₹)</th>
-                  <th className="py-2.5 px-3 font-semibold text-right">SGST 6% (₹)</th>
+                  <th className="py-2.5 px-3 font-semibold text-right">CGST 2.5% (₹)</th>
+                  <th className="py-2.5 px-3 font-semibold text-right">SGST 2.5% (₹)</th>
                   <th className="py-2.5 px-3 font-semibold text-right">Line Total (₹)</th>
                 </tr>
               </thead>
@@ -316,7 +316,7 @@ export function PrintGstInvoiceModal({
                 {numberToWords(grandTotal)}
               </p>
               <div className="text-[10px] text-[#786B61] pt-1 border-t border-[#EFE3D6] leading-relaxed">
-                <strong>Statutory Notes:</strong> Rates include 12% Goods and Services Tax (6% CGST + 6% SGST). Computer generated Tax Invoice in full compliance with the Andhra Pradesh Goods and Services Tax Rules.
+                <strong>Statutory Notes:</strong> Rates include 5% Goods and Services Tax (2.5% CGST + 2.5% SGST). Computer generated Tax Invoice in full compliance with the Andhra Pradesh Goods and Services Tax Rules.
               </div>
             </div>
 

@@ -181,16 +181,25 @@ export function SuperAdminNotificationBell() {
   // Clear all
   const handleClearAll = async () => {
     try {
-      const token = authStorage.getToken();
       await fetch('/api/admin/notifications?clearAll=true', {
         method: 'DELETE',
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-          'x-staff-role': 'Super Admin',
-        },
+        headers: authStorage.getAuthHeaders({ 'x-staff-role': 'Super Admin' }),
       });
       setNotifications([]);
       setUnreadCount(0);
+    } catch {}
+  };
+
+  // Dismiss single notification
+  const handleDismissNotification = async (id: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    try {
+      await fetch(`/api/admin/notifications?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: authStorage.getAuthHeaders({ 'x-staff-role': 'Super Admin' }),
+      });
+      setNotifications((prev) => prev.filter((n) => n.id !== id));
+      setUnreadCount((c) => Math.max(0, c - 1));
     } catch {}
   };
 

@@ -107,7 +107,7 @@ describe('Payments, Cashbook Register & GST Invoicing Rules', () => {
     repo.deleteExpense(expense.id);
   });
 
-  it('computes daily closing summary with 12% GST breakdown (6% CGST + 6% SGST)', () => {
+  it('computes daily closing summary with 5% GST breakdown (2.5% CGST + 2.5% SGST)', () => {
     const today = new Date().toISOString().split('T')[0];
     const summary = repo.getTodayClosingSummary(today);
 
@@ -116,7 +116,7 @@ describe('Payments, Cashbook Register & GST Invoicing Rules', () => {
     expect(summary.gst).toBeDefined();
 
     if (summary.totalRevenue > 0) {
-      expect(summary.gst!.netTaxable).toBe(Math.round(summary.totalRevenue / 1.12));
+      expect(summary.gst!.netTaxable).toBe(Math.round(summary.totalRevenue / 1.05));
       expect(summary.gst!.totalGst).toBe(summary.totalRevenue - summary.gst!.netTaxable);
       expect(summary.gst!.cgst + summary.gst!.sgst).toBe(summary.gst!.totalGst);
       expect(Math.abs(summary.gst!.cgst - summary.gst!.sgst)).toBeLessThanOrEqual(1);

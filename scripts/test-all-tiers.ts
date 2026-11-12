@@ -139,7 +139,7 @@ async function runAllTiersVerification() {
   assert(Boolean(summary), '3.1 Night audit closing summary generated');
   assert(summary.operational.totalRooms === repo.getRooms().length, `3.2 Total room inventory counted (${repo.getRooms().length} rooms)`);
   assert(typeof summary.operational.occupancyRate === 'number', '3.3 Occupancy rate calculated');
-  assert(summary.gst.totalGst === summary.gst.cgst + summary.gst.sgst, '3.4 12% GST balanced (CGST + SGST = Total GST)');
+  assert(summary.gst.totalGst === summary.gst.cgst + summary.gst.sgst, '3.4 5% GST balanced (CGST + SGST = Total GST)');
 
   const closing = repo.performDailyClosing({
     closingDate: today,
@@ -298,9 +298,9 @@ async function runAllTiersVerification() {
     description: 'Guest cash settlement for Deluxe Room stay',
     lines: [
       { accountCode: '1010', accountName: 'Cash in Front Desk Drawer', debit: 2500, credit: 0, description: 'Cash collected' },
-      { accountCode: '4010', accountName: 'Room Accommodation Revenue', debit: 0, credit: 2232, description: 'Room tariff' },
-      { accountCode: '2010', accountName: 'GST Output SGST (6%) Payable', debit: 0, credit: 134, description: 'SGST 6%' },
-      { accountCode: '2020', accountName: 'GST Output CGST (6%) Payable', debit: 0, credit: 134, description: 'CGST 6%' },
+      { accountCode: '4010', accountName: 'Room Accommodation Revenue', debit: 0, credit: 2380, description: 'Room tariff' },
+      { accountCode: '2010', accountName: 'GST Output SGST (2.5%) Payable', debit: 0, credit: 60, description: 'SGST 2.5%' },
+      { accountCode: '2020', accountName: 'GST Output CGST (2.5%) Payable', debit: 0, credit: 60, description: 'CGST 2.5%' },
     ],
     total_debit: 2500,
     total_credit: 2500,

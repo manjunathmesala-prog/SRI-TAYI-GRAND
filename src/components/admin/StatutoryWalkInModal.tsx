@@ -29,6 +29,13 @@ import {
   Check,
 } from 'lucide-react';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
+import { normalizeCategoryId } from '@/lib/pricing';
+
+const isCategoryMatch = (roomCatId?: string | null, targetCatId?: string | null) => {
+  if (!roomCatId || !targetCatId) return false;
+  if (roomCatId === targetCatId) return true;
+  return normalizeCategoryId(roomCatId) === normalizeCategoryId(targetCatId);
+};
 
 interface StatutoryWalkInModalProps {
   isOpen: boolean;
@@ -129,12 +136,12 @@ export function StatutoryWalkInModal({
       const initialCatId = initialData?.categoryId || categories[0]?.id || '';
       setCategoryId(initialCatId);
 
-      const matchedCategory = categories.find((c) => c.id === initialCatId) || categories[0];
+      const matchedCategory = categories.find((c) => isCategoryMatch(c.id, initialCatId)) || categories[0];
       const standardRate = matchedCategory?.base_price_per_night || 1800;
       setOverrideTariff(standardRate);
 
       // Pre-select clean room
-      const cleanMatch = availableRooms.find((r) => r.category_id === initialCatId);
+      const cleanMatch = availableRooms.find((r) => isCategoryMatch(r.category_id, initialCatId));
       const chosenRoom = initialData?.roomNumber || cleanMatch?.room_number || availableRooms[0]?.room_number || '';
       setRoomNumber(chosenRoom);
 
@@ -166,12 +173,12 @@ export function StatutoryWalkInModal({
   // Update room selection & default tariff when category changes
   const handleCategoryChange = (catId: string) => {
     setCategoryId(catId);
-    const matchedCategory = categories.find((c) => c.id === catId);
+    const matchedCategory = categories.find((c) => isCategoryMatch(c.id, catId));
     const standardRate = matchedCategory?.base_price_per_night || 1800;
     if (!isTariffOverridden) {
       setOverrideTariff(standardRate);
     }
-    const cleanMatch = availableRooms.find((r) => r.category_id === catId);
+    const cleanMatch = availableRooms.find((r) => isCategoryMatch(r.category_id, catId));
     if (cleanMatch) {
       setRoomNumber(cleanMatch.room_number);
     } else if (availableRooms.length > 0) {
@@ -185,10 +192,10 @@ export function StatutoryWalkInModal({
   const diffTime = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
   const nights = isNaN(diffTime) || diffTime < 1 ? 1 : diffTime;
 
-  const selectedCategory = categories.find((c) => c.id === categoryId) || categories[0];
+  const selectedCategory = categories.find((c) => isCategoryMatch(c.id, categoryId)) || categories[0];
   const nightlyRate = isTariffOverridden ? overrideTariff : (selectedCategory?.base_price_per_night || 1800);
   const subtotal = nightlyRate * nights;
-  const gstTax = Math.round(subtotal * 0.12);
+  const gstTax = Math.round(subtotal * 0.05);
   const totalAmount = subtotal + gstTax;
 
   // Dynamic UPI QR code generator for exact walk-in folio amount
@@ -817,7 +824,7 @@ export function StatutoryWalkInModal({
               <div className="flex items-center gap-3 font-mono text-[11px]">
                 <span>Rate: <strong>₹{nightlyRate}</strong> &times; {nights} night(s) = <strong>₹{subtotal}</strong></span>
                 <span>+</span>
-                <span>12% GST (6% CGST + 6% SGST): <strong>₹{gstTax}</strong></span>
+                <span>5% GST (2.5% CGST + 2.5% SGST): <strong>₹{gstTax}</strong></span>
               </div>
               <div className="text-right">
                 <span className="text-[10px] uppercase font-bold text-[#786B61] mr-2">Total Folio Bill:</span>

@@ -217,9 +217,9 @@ async function run4250SyntheticAgentAudit() {
         category: 'f_and_b',
         description: 'Complimentary Bottled Water & Snack Pack',
         amount: 250,
-        tax_rate: 0.12,
-        tax_amount: 30,
-        total_amount: 280,
+        tax_rate: 0.05,
+        tax_amount: 12.5,
+        total_amount: 262.5,
         posted_by: 'Front Desk Agent',
       });
 

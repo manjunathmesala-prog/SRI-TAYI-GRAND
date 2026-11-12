@@ -394,7 +394,7 @@ export default function AdminMaintenancePage() {
     }
 
     try {
-      const res = await fetch(`/api/admin/maintenance?id=${id}`, {
+      const res = await fetch(`/api/admin/maintenance?id=${encodeURIComponent(id)}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       });

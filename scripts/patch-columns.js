@@ -48,7 +48,7 @@ async function patch() {
     ALTER TABLE additional_charges ADD COLUMN IF NOT EXISTS booking_reference VARCHAR(50);
     ALTER TABLE additional_charges ADD COLUMN IF NOT EXISTS category VARCHAR(50);
     ALTER TABLE additional_charges ADD COLUMN IF NOT EXISTS description TEXT;
-    ALTER TABLE additional_charges ADD COLUMN IF NOT EXISTS tax_rate NUMERIC(5, 2) DEFAULT 0.12;
+    ALTER TABLE additional_charges ADD COLUMN IF NOT EXISTS tax_rate NUMERIC(5, 2) DEFAULT 0.05;
     ALTER TABLE additional_charges ADD COLUMN IF NOT EXISTS tax_amount NUMERIC(10, 2) DEFAULT 0.00;
     ALTER TABLE additional_charges ADD COLUMN IF NOT EXISTS total_amount NUMERIC(10, 2) DEFAULT 0.00;
     ALTER TABLE additional_charges ADD COLUMN IF NOT EXISTS posted_by VARCHAR(150);

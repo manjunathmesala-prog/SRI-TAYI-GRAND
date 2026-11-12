@@ -68,13 +68,13 @@ async function runPhaseAudit() {
     description: 'Special Kadiri Temple Flower Garland & Pooja Kit',
     category: 'misc',
     amount: 450,
-    tax_rate: 0.12,
-    tax_amount: 54,
-    total_amount: 504,
+    tax_rate: 0.05,
+    tax_amount: 22.5,
+    total_amount: 472.5,
     posted_by: 'Front Desk Lead',
   });
-  assert(addedCharge.tax_amount === 54, '3.2 12% GST calculated correctly (₹54 on ₹450)');
-  assert(addedCharge.total_amount === 504, '3.3 Total charge computed (₹450 base + ₹54 tax = ₹504)');
+  assert(addedCharge.tax_amount === 22.5, '3.2 5% GST calculated correctly (₹22.5 on ₹450)');
+  assert(addedCharge.total_amount === 472.5, '3.3 Total charge computed (₹450 base + ₹22.5 tax = ₹472.5)');
 
   const bookingCharges = repo.getFolioCharges('STG-20261104-8142');
   const foundCharge = bookingCharges.find(c => c.id === addedCharge.id);
@@ -138,15 +138,15 @@ async function runPhaseAudit() {
     stage_decoration: 15000,
     generator_diesel: 4000,
     subtotal: 203500,
-    gst_rate: 0.18,
-    gst_amount: 36630,
-    total_amount: 240130,
+    gst_rate: 0.05,
+    gst_amount: 10175,
+    total_amount: 213675,
     status: 'draft',
     created_by: 'Event Manager',
     valid_until: '2026-12-01',
   });
   assert(newQuote.quote_number.startsWith('STG-QT-'), `7.2 Quote assigned sequential number: ${newQuote.quote_number}`);
-  assert(newQuote.total_amount === 240130, `7.3 18% GST banquet total calculated: ₹${newQuote.total_amount}`);
+  assert(newQuote.total_amount === 213675, `7.3 5% GST banquet total calculated: ₹${newQuote.total_amount}`);
 
   const quoteUpdated = repo.updateConventionQuoteStatus(newQuote.id, 'sent');
   assert(quoteUpdated, '7.4 Quote status updated to "sent"');

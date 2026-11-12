@@ -25,6 +25,7 @@ import {
 import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
+import { authStorage } from '@/lib/auth-storage';
 
 export default function PaymentsAdminPage() {
   const { t, formatCurrency, formatDate, translateStatus, isTelugu } = useAdminLanguage();
@@ -85,7 +86,7 @@ export default function PaymentsAdminPage() {
   const fetchFinancials = useCallback(async () => {
     try {
       const res = await fetch('/api/admin/payments', {
-        headers: { 'x-staff-role': 'Super Admin' },
+        headers: authStorage.getAuthHeaders({ 'x-staff-role': 'Super Admin' }),
       });
       if (res.ok) {
         const data = await res.json();
@@ -99,7 +100,7 @@ export default function PaymentsAdminPage() {
 
       // Fetch expenses
       const expRes = await fetch('/api/admin/expenses', {
-        headers: { 'x-staff-role': 'Super Admin' },
+        headers: authStorage.getAuthHeaders({ 'x-staff-role': 'Super Admin' }),
       });
       if (expRes.ok) {
         const expData = await expRes.json();
@@ -306,10 +307,10 @@ export default function PaymentsAdminPage() {
     try {
       const res = await fetch('/api/admin/expenses', {
         method: 'POST',
-        headers: {
+        headers: authStorage.getAuthHeaders({
           'Content-Type': 'application/json',
           'x-staff-role': 'Accounts',
-        },
+        }),
         body: JSON.stringify({
           title: expTitle,
           category: expCategory,
@@ -341,9 +342,9 @@ export default function PaymentsAdminPage() {
   const handleDeleteExpense = async (id: string) => {
     if (!confirm('Are you sure you want to remove this expense record?')) return;
     try {
-      const res = await fetch(`/api/admin/expenses?id=${id}`, {
+      const res = await fetch(`/api/admin/expenses?id=${encodeURIComponent(id)}`, {
         method: 'DELETE',
-        headers: { 'x-staff-role': 'Accounts' },
+        headers: authStorage.getAuthHeaders({ 'x-staff-role': 'Accounts' }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to delete expense');

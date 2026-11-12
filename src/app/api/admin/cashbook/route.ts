@@ -153,8 +153,21 @@ export async function DELETE(req: NextRequest) {
 
     const { searchParams } = new URL(req.url);
     const shiftId = searchParams.get('shiftId');
+    const txId = searchParams.get('txId') || searchParams.get('transactionId');
+
+    if (txId) {
+      const ok = await repo.deleteCashTransaction(txId, auth.session?.name);
+      if (!ok) {
+        return NextResponse.json({ success: false, error: 'Cash transaction record not found.' }, { status: 404 });
+      }
+      return NextResponse.json({
+        success: true,
+        message: `Cash transaction #${txId} successfully deleted.`,
+      });
+    }
+
     if (!shiftId) {
-      return NextResponse.json({ success: false, error: 'shiftId parameter is required.' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'shiftId or txId parameter is required.' }, { status: 400 });
     }
 
     const ok = await repo.deleteCashShift(shiftId, auth.session?.name);

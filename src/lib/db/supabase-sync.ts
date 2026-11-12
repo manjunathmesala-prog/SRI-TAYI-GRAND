@@ -23,6 +23,7 @@ import {
   JournalEntry,
   JournalLine,
 } from '@/types';
+import { normalizeCategoryId } from '@/lib/pricing';
 
 /**
  * ==============================================================================
@@ -687,6 +688,39 @@ export async function loadPaymentsFromSupabase(): Promise<PaymentRecord[] | null
   }
 }
 
+export async function deleteBookingFromSupabase(idOrRef: string): Promise<void> {
+  if (typeof window !== 'undefined' || !idOrRef) return;
+
+  const db = getSupabasePgPool();
+  if (!db) return;
+
+  try {
+    const client = await db.connect();
+    try {
+      await client.query('BEGIN');
+      await client.query(`DELETE FROM folio_charges WHERE booking_reference = $1 OR booking_id = $1;`, [idOrRef]);
+      await client.query(`DELETE FROM additional_charges WHERE booking_reference = $1;`, [idOrRef]);
+      await client.query(
+        `DELETE FROM booking_rooms WHERE booking_id IN (SELECT id FROM bookings WHERE id::text = $1 OR booking_reference = $1);`,
+        [idOrRef]
+      );
+      await client.query(
+        `DELETE FROM booking_guests WHERE booking_id IN (SELECT id FROM bookings WHERE id::text = $1 OR booking_reference = $1);`,
+        [idOrRef]
+      );
+      await client.query(`DELETE FROM bookings WHERE id::text = $1 OR booking_reference = $1;`, [idOrRef]);
+      await client.query('COMMIT');
+    } catch (txErr) {
+      await client.query('ROLLBACK');
+      throw txErr;
+    } finally {
+      client.release();
+    }
+  } catch (err: unknown) {
+    console.warn(`[SUPABASE DELETE BOOKING WARN] (${idOrRef}):`, err instanceof Error ? err.message : String(err));
+  }
+}
+
 // ==============================================================================
 // 3. ROOMS & HOUSEKEEPING STATUS SYNCHRONIZATION
 // ==============================================================================
@@ -972,6 +1006,35 @@ export async function deleteExpenseFromSupabase(id: string): Promise<void> {
 // 6. CONVENTION HALL ENQUIRIES & QUOTES SYNCHRONIZATION
 // ==============================================================================
 
+function mapHallEnquiryStatusToDb(st?: string): string {
+  switch (st) {
+    case 'quote_sent': return 'quotation_sent';
+    case 'pending': return 'new';
+    case 'advance_paid': return 'confirmed';
+    case 'confirmed': return 'confirmed';
+    case 'completed': return 'completed';
+    case 'cancelled': return 'cancelled';
+    case 'new': return 'new';
+    case 'contacted': return 'contacted';
+    case 'quotation_sent': return 'quotation_sent';
+    case 'pending_approval': return 'pending_approval';
+    default: return 'new';
+  }
+}
+
+function mapDbToHallEnquiryStatus(st?: string): any {
+  switch (st) {
+    case 'quotation_sent': return 'quote_sent';
+    case 'new': return 'pending';
+    case 'contacted': return 'pending';
+    case 'pending_approval': return 'pending';
+    case 'confirmed': return 'confirmed';
+    case 'completed': return 'completed';
+    case 'cancelled': return 'cancelled';
+    default: return 'pending';
+  }
+}
+
 export async function syncHallEnquiryToSupabase(enquiry: HallEnquiry): Promise<void> {
   if (typeof window !== 'undefined' || !enquiry) return;
 
@@ -1009,7 +1072,7 @@ export async function syncHallEnquiryToSupabase(enquiry: HallEnquiry): Promise<v
           Number(enquiry.expected_guests || 100),
           enquiry.requirements || '',
           (enquiry as any).message || '',
-          enquiry.status || 'new',
+          mapHallEnquiryStatusToDb(enquiry.status),
           enquiry.admin_notes || null,
           enquiry.created_at || new Date().toISOString(),
         ]
@@ -1052,7 +1115,7 @@ export async function loadHallEnquiriesFromSupabase(): Promise<HallEnquiry[]> {
         expected_guests: Number(row.expected_guests) || 100,
         requirements: row.requirements || '',
         message: row.message || '',
-        status: row.status,
+        status: mapDbToHallEnquiryStatus(row.status),
         admin_notes: row.admin_notes || undefined,
         created_at: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
       }));
@@ -1556,6 +1619,24 @@ export async function deleteCashShiftFromSupabase(shiftId: string): Promise<void
     }
   } catch (err: unknown) {
     console.warn(`[SUPABASE DELETE CASH SHIFT WARN] (${shiftId}):`, err instanceof Error ? err.message : String(err));
+  }
+}
+
+export async function deleteCashTransactionFromSupabase(id: string): Promise<void> {
+  if (typeof window !== 'undefined' || !id) return;
+
+  const db = getSupabasePgPool();
+  if (!db) return;
+
+  try {
+    const client = await db.connect();
+    try {
+      await client.query('DELETE FROM cash_transactions WHERE id = $1', [id]);
+    } finally {
+      client.release();
+    }
+  } catch (err: unknown) {
+    console.warn(`[SUPABASE DELETE CASH TX WARN] (${id}):`, err instanceof Error ? err.message : String(err));
   }
 }
 
@@ -2115,6 +2196,24 @@ export async function loadReviewsFromSupabase(): Promise<GoogleReview[]> {
   }
 }
 
+export async function deleteReviewFromSupabase(id: string): Promise<void> {
+  if (typeof window !== 'undefined' || !id) return;
+
+  const db = getSupabasePgPool();
+  if (!db) return;
+
+  try {
+    const client = await db.connect();
+    try {
+      await client.query(`DELETE FROM reviews WHERE id = $1;`, [id]);
+    } finally {
+      client.release();
+    }
+  } catch (err: unknown) {
+    console.warn(`[SUPABASE DELETE REVIEW WARN] (${id}):`, err instanceof Error ? err.message : String(err));
+  }
+}
+
 // ==============================================================================
 // 15. WEBSITE CONTENT SYNCHRONIZATION
 // ==============================================================================
@@ -2191,7 +2290,7 @@ export async function loadCategoriesFromSupabase(): Promise<RoomCategory[]> {
         ORDER BY base_price_per_night ASC;
       `);
       return res.rows.map((r: any) => ({
-        id: r.id,
+        id: normalizeCategoryId(r.slug || r.id),
         slug: r.slug,
         name: r.name,
         short_description: r.short_description || '',

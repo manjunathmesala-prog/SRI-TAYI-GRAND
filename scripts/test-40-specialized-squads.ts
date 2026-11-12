@@ -560,7 +560,7 @@ async function runSquadVerification() {
       agentId: 'AGENT-26',
       squad: 'Gamma',
       name: 'Dynamic Tariff & Yield Calculator',
-      mandate: 'Validate weekend surges (+15%), GST breakdown (12%), and total tariffs',
+      mandate: 'Validate weekend surges (+15%), GST breakdown (5%), and total tariffs',
       passed: Boolean(tariff && tariff.totalRupees > 0),
       assertionsCount: 4,
     });
@@ -705,17 +705,17 @@ async function runSquadVerification() {
       category: 'laundry',
       description: 'Express Dry Cleaning (2 Kurtas)',
       amount: 400,
-      tax_rate: 0.12,
-      tax_amount: 48,
-      total_amount: 448,
+      tax_rate: 0.05,
+      tax_amount: 20,
+      total_amount: 420,
       posted_by: 'Agent-34',
     });
     recordAgent({
       agentId: 'AGENT-34',
       squad: 'Delta',
       name: 'Folio Incidentals & Charge Master',
-      mandate: 'Validate itemized room folio charges with automated 12% GST breakdown',
-      passed: Boolean(folioCharge && folioCharge.total_amount === 448),
+      mandate: 'Validate itemized room folio charges with automated 5% GST breakdown',
+      passed: Boolean(folioCharge && folioCharge.total_amount === 420),
       assertionsCount: 3,
     });
   } catch (err: any) {
@@ -759,7 +759,7 @@ async function runSquadVerification() {
       agentId: 'AGENT-37',
       squad: 'Delta',
       name: 'GST Tax Invoice Specialist',
-      mandate: 'Verify SAC 9963 compliance, CGST 6%, SGST 6%, and tax invoice modal',
+      mandate: 'Verify SAC 9963 compliance, CGST 2.5%, SGST 2.5%, and tax invoice modal',
       passed: true,
       assertionsCount: 4,
     });

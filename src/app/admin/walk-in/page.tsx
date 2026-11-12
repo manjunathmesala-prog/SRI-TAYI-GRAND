@@ -50,6 +50,13 @@ import {
 } from '@/lib/rfid/bridge-client';
 import { useRealtimeSync, adminOperations } from '@/lib/realtime-client';
 import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
+import { normalizeCategoryId } from '@/lib/pricing';
+
+const isCategoryMatch = (roomCatId?: string | null, targetCatId?: string | null) => {
+  if (!roomCatId || !targetCatId) return false;
+  if (roomCatId === targetCatId) return true;
+  return normalizeCategoryId(roomCatId) === normalizeCategoryId(targetCatId);
+};
 
 interface AdditionalServiceItem {
   id: string;
@@ -229,7 +236,7 @@ export default function AnanthaWalkInPage() {
             if (prev) return prev;
             const initialCat = cats[0].id;
             const availPhys = rms.filter(
-              (pr) => pr.category_id === initialCat && pr.operational_status === 'available' && pr.housekeeping_status === 'clean'
+              (pr) => isCategoryMatch(pr.category_id, initialCat) && pr.operational_status === 'available' && pr.housekeeping_status === 'clean'
             );
             if (availPhys.length > 0) {
               setSelectedRoomNumber(availPhys[0].room_number);
@@ -256,7 +263,7 @@ export default function AnanthaWalkInPage() {
   const handleRoomTypeChange = (catId: string) => {
     setSelectedCategoryId(catId);
     const matchingPhys = physicalRooms.filter(
-      (pr) => pr.category_id === catId && pr.operational_status === 'available' && pr.housekeeping_status === 'clean'
+      (pr) => isCategoryMatch(pr.category_id, catId) && pr.operational_status === 'available' && pr.housekeeping_status === 'clean'
     );
     if (matchingPhys.length > 0) {
       setSelectedRoomNumber(matchingPhys[0].room_number);
@@ -306,7 +313,7 @@ export default function AnanthaWalkInPage() {
   // Filter available physical rooms for selected category
   const availableRoomsForType = useMemo(() => {
     return physicalRooms.filter(
-      (pr) => pr.category_id === selectedCategoryId
+      (pr) => isCategoryMatch(pr.category_id, selectedCategoryId)
     );
   }, [physicalRooms, selectedCategoryId]);
 
@@ -793,7 +800,7 @@ export default function AnanthaWalkInPage() {
                   onClick={() => {
                     setSelectedQueueItem(item);
                     const matchRooms = physicalRooms.filter(
-                      (pr) => pr.category_id === item.category_id && pr.operational_status === 'available' && pr.housekeeping_status === 'clean'
+                      (pr) => isCategoryMatch(pr.category_id, item.category_id) && pr.operational_status === 'available' && pr.housekeeping_status === 'clean'
                     );
                     if (matchRooms.length > 0) {
                       setAssignRoomNumber(matchRooms[0].room_number);
@@ -1188,7 +1195,7 @@ export default function AnanthaWalkInPage() {
                   {categories.map((rt) => {
                     const isSelected = selectedCategoryId === rt.id;
                     const countAvailable = physicalRooms.filter(
-                      (pr) => pr.category_id === rt.id && pr.operational_status === 'available' && pr.housekeeping_status === 'clean'
+                      (pr) => isCategoryMatch(pr.category_id, rt.id) && pr.operational_status === 'available' && pr.housekeeping_status === 'clean'
                     ).length;
 
                     return (
@@ -1234,7 +1241,7 @@ export default function AnanthaWalkInPage() {
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
                     {availableRoomsForType.map((pr) => {
                       const isSelected = selectedRoomNumber === pr.room_number;
-                      const isDirty = pr.housekeeping_status === 'in_progress';
+                      const isDirty = pr.housekeeping_status === 'dirty' || pr.housekeeping_status === 'in_progress';
                       const isOccupied = pr.operational_status === 'occupied';
 
                       return (
@@ -2033,7 +2040,7 @@ export default function AnanthaWalkInPage() {
                     .filter((pr) => pr.operational_status === 'available' && pr.housekeeping_status === 'clean')
                     .map((pr) => (
                       <option key={pr.id} value={pr.room_number}>
-                        Room {pr.room_number} (Floor {pr.floor_number} - {categories.find((c) => c.id === pr.category_id)?.name || 'AC Room'})
+                        Room {pr.room_number} (Floor {pr.floor_number} - {categories.find((c) => isCategoryMatch(c.id, pr.category_id))?.name || 'AC Room'})
                       </option>
                     ))}
                 </select>

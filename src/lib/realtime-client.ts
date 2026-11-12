@@ -257,7 +257,7 @@ export function useRealtimeSync(options: UseRealtimeSyncOptions = {}) {
 // AUTHORITATIVE ADMIN OPERATIONS CLIENT HELPER (WITH IN-MEMORY SWR CACHE)
 // ==============================================================================
 
-function getAdminHeaders(extra: Record<string, string> = {}): Record<string, string> {
+export function getAdminHeaders(extra: Record<string, string> = {}): Record<string, string> {
   const headers: Record<string, string> = { ...extra };
   if (typeof window !== 'undefined') {
     const token = authStorage.getToken();
@@ -547,6 +547,17 @@ export const adminOperations = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to delete folio charge');
+    adminOperations.invalidateFullState();
+    return data;
+  },
+
+  async deleteBooking(bookingReference: string) {
+    const res = await fetch(`/api/admin/bookings?bookingReference=${encodeURIComponent(bookingReference)}`, {
+      method: 'DELETE',
+      headers: getAdminHeaders(),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to delete booking');
     adminOperations.invalidateFullState();
     return data;
   },

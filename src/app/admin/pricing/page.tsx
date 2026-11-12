@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { PricingRule, PricingRuleType } from '@/types';
 import { useRealtimeSync } from '@/lib/realtime-client';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
+import { authStorage } from '@/lib/auth-storage';
 import {
   TrendingUp,
   Percent,
@@ -122,7 +123,7 @@ export default function AdminPricingPage() {
     if (showSpinner) setLoading(true);
     try {
       const res = await fetch('/api/admin/pricing', {
-        headers: { 'x-staff-role': 'Super Admin' },
+        headers: authStorage.getAuthHeaders({ 'x-staff-role': 'Super Admin' }),
       });
       const data = await res.json();
       if (data.success) {
@@ -149,10 +150,10 @@ export default function AdminPricingPage() {
     try {
       const res = await fetch('/api/admin/pricing', {
         method: 'PATCH',
-        headers: {
+        headers: authStorage.getAuthHeaders({
           'Content-Type': 'application/json',
           'x-staff-role': 'Super Admin',
-        },
+        }),
         body: JSON.stringify({
           id: rule.id,
           updates: { is_active: updatedState },
@@ -173,14 +174,16 @@ export default function AdminPricingPage() {
     if (!confirm(`Are you sure you want to permanently delete rule "${name}"?`)) return;
 
     try {
-      const res = await fetch(`/api/admin/pricing?id=${id}`, {
+      const res = await fetch(`/api/admin/pricing?id=${encodeURIComponent(id)}`, {
         method: 'DELETE',
-        headers: { 'x-staff-role': 'Super Admin' },
+        headers: authStorage.getAuthHeaders({ 'x-staff-role': 'Super Admin' }),
       });
       const data = await res.json();
       if (data.success) {
         showNotification(`Rule "${name}" deleted.`);
         fetchPricingData(false);
+      } else {
+        showNotification(`Failed to delete rule: ${data.error || 'Server error'}`);
       }
     } catch (err: any) {
       showNotification(`Error: ${err.message}`);
@@ -197,10 +200,10 @@ export default function AdminPricingPage() {
 
       const res = await fetch('/api/admin/pricing', {
         method: 'POST',
-        headers: {
+        headers: authStorage.getAuthHeaders({
           'Content-Type': 'application/json',
           'x-staff-role': 'Super Admin',
-        },
+        }),
         body: JSON.stringify({
           name: formName,
           description: formDescription,

@@ -103,7 +103,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Accounts']);
+    const auth = verifyStaffRole(req, [
+      'Super Admin',
+      'Hotel Manager',
+      'Accounts',
+      'Front Desk',
+      'Receptionist',
+    ]);
     if (!auth.authorized) {
       return NextResponse.json({ success: false, error: auth.error || 'Unauthorized' }, { status: 403 });
     }

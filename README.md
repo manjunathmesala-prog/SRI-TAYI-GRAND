@@ -38,7 +38,7 @@ Sri Tayi Grand is an enterprise-grade digital hotel booking and operational mana
   - **RFID Smart Room Key Integration (`/admin/rfid`):** Vendor-independent RFID device registry, keycard issuance, door access tap event logs, and test tap simulator.
   - **Reports & Analytics (`/admin/reports`):** Occupancy benchmarking, ADR calculation, and one-click CSV export.
   - **Website CMS (`/admin/content`):** Live editing of hero copy, address, and contact numbers without code deployment.
-  - **Hotel Settings (`/admin/settings`):** Configurable check-in/out times, GST rates (12%), and hold lease limits.
+  - **Hotel Settings (`/admin/settings`):** Configurable check-in/out times, GST rates (5%), and hold lease limits.
   - **Staff RBAC (`/admin/staff`):** Role-based permissions for Super Admin, Hotel Manager, Front Desk, Housekeeping, Accounts, and Event Manager.
 
 ---

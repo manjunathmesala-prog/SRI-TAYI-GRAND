@@ -23,6 +23,7 @@ import {
   TrendingDown,
 } from 'lucide-react';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
+import { authStorage } from '@/lib/auth-storage';
 
 const CATEGORY_LABELS: Record<ExpenseCategory, string> = {
   laundry: 'Linen & Laundry',
@@ -60,10 +61,16 @@ export default function AdminExpensesPage() {
     }, 4500);
   }, []);
 
+  const getAuthHeaders = useCallback((extra: Record<string, string> = {}) => {
+    return authStorage.getAuthHeaders(extra);
+  }, []);
+
   const fetchExpenses = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await fetch('/api/admin/expenses');
+      const res = await fetch('/api/admin/expenses', {
+        headers: getAuthHeaders(),
+      });
       if (res.ok) {
         const data = await res.json();
         setExpenses(data.expenses || []);
@@ -73,7 +80,7 @@ export default function AdminExpensesPage() {
     } finally {
       setLoading(false);
     }
-  }, [showNotification]);
+  }, [showNotification, getAuthHeaders]);
 
   // Reactive sync on expense events
   useRealtimeSync({
@@ -99,7 +106,7 @@ export default function AdminExpensesPage() {
       setSubmitting(true);
       const res = await fetch('/api/admin/expenses', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           category,
           title: title.trim(),
@@ -137,6 +144,7 @@ export default function AdminExpensesPage() {
     try {
       const res = await fetch(`/api/admin/expenses?id=${encodeURIComponent(id)}`, {
         method: 'DELETE',
+        headers: getAuthHeaders(),
       });
       const data = await res.json();
       if (res.ok && data.success) {

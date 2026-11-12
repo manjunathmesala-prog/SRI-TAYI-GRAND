@@ -123,3 +123,42 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Front Desk']);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error || 'Unauthorized' }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    let ref = searchParams.get('bookingReference') || searchParams.get('ref') || searchParams.get('id');
+
+    if (!ref) {
+      try {
+        const body = await req.json();
+        ref = body.bookingReference || body.ref || body.id;
+      } catch {}
+    }
+
+    if (!ref) {
+      return NextResponse.json(
+        { success: false, error: 'bookingReference or id parameter is required.' },
+        { status: 400 }
+      );
+    }
+
+    const staffName = auth.session?.name || 'Staff';
+    const deleted = await repo.deleteBooking(ref, staffName);
+    if (!deleted) {
+      return NextResponse.json({ success: false, error: `Booking ${ref} not found.` }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: `Booking ${ref} permanently removed.`,
+    });
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message || 'Failed to delete booking' }, { status: 500 });
+  }
+}

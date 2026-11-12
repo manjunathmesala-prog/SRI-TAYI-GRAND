@@ -29,10 +29,32 @@ export const authStorage = {
   getToken(): string | null {
     if (typeof window === 'undefined') return null;
     try {
-      return sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY);
+      const token = sessionStorage.getItem(TOKEN_KEY) || localStorage.getItem(TOKEN_KEY);
+      if (token) return token;
+      // Fallback: check document.cookie if accessible
+      const match = document.cookie.match(/(?:^|;\s*)stg_session=([^;]+)/);
+      if (match && match[1]) return decodeURIComponent(match[1]);
+      return null;
     } catch {
       return null;
     }
+  },
+
+  /**
+   * Generates authoritative headers including Authorization Bearer token
+   * and role context for API calls across all admin dashboard modules.
+   */
+  getAuthHeaders(extra: Record<string, string> = {}): Record<string, string> {
+    const headers: Record<string, string> = { ...extra };
+    const token = this.getToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    const role = this.getRole();
+    if (role && !headers['x-staff-role']) {
+      headers['x-staff-role'] = role;
+    }
+    return headers;
   },
 
   /**
@@ -170,3 +192,14 @@ export const authStorage = {
     return null;
   },
 };
+
+export function getAdminHeaders(extra: Record<string, string> = {}): Record<string, string> {
+  const headers: Record<string, string> = { ...extra };
+  if (typeof window !== 'undefined') {
+    const token = authStorage.getToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+  }
+  return headers;
+}

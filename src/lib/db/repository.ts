@@ -59,6 +59,7 @@ import { loadPersistedData, savePersistedData } from './operational-storage';
 import {
   syncBookingToSupabase,
   loadBookingsFromSupabase,
+  deleteBookingFromSupabase,
   syncPaymentToSupabase,
   loadPaymentsFromSupabase,
   syncRoomStatusToSupabase,
@@ -84,6 +85,7 @@ import {
   deleteCashShiftFromSupabase,
   syncCashTransactionToSupabase,
   loadCashTransactionsFromSupabase,
+  deleteCashTransactionFromSupabase,
   syncDailyClosingToSupabase,
   loadDailyClosingsFromSupabase,
   syncStaffAttendanceToSupabase,
@@ -96,6 +98,7 @@ import {
   syncAuditLogToSupabase,
   loadAuditLogsFromSupabase,
   loadReviewsFromSupabase,
+  deleteReviewFromSupabase,
   syncWebsiteContentToSupabase,
   loadWebsiteContentFromSupabase,
   syncJournalEntryToSupabase,
@@ -228,13 +231,15 @@ export class HotelRepository {
     loadCategoriesFromSupabase().then((pgCategories) => {
       if (pgCategories && pgCategories.length > 0) {
         for (const pgC of pgCategories) {
+          const canonicalId = normalizeCategoryId(pgC.id || pgC.slug);
           const index = this.categories.findIndex(
-            (c) => c.id === pgC.id || c.slug === pgC.slug || c.name.toLowerCase() === pgC.name.toLowerCase()
+            (c) => c.id === canonicalId || c.id === pgC.id || c.slug === pgC.slug || c.name.toLowerCase() === pgC.name.toLowerCase()
           );
           if (index !== -1) {
-            this.categories[index] = { ...this.categories[index], ...pgC };
+            const preservedId = this.categories[index].id || canonicalId;
+            this.categories[index] = { ...this.categories[index], ...pgC, id: preservedId };
           } else {
-            this.categories.push(pgC);
+            this.categories.push({ ...pgC, id: canonicalId });
           }
         }
       }
@@ -1134,6 +1139,36 @@ export class HotelRepository {
     return booking;
   }
 
+  async deleteBooking(idOrRef: string, actor: string = 'Staff'): Promise<boolean> {
+    const idx = this.bookings.findIndex((b) => b.id === idOrRef || b.booking_reference === idOrRef);
+    if (idx === -1) return false;
+    const removed = this.bookings.splice(idx, 1)[0];
+    if (removed.assigned_room_number) {
+      const room = this.rooms.find((r) => r.room_number === removed.assigned_room_number);
+      if (room && (room.operational_status === 'occupied' || room.operational_status === 'reserved')) {
+        room.operational_status = 'available';
+        room.current_booking_ref = undefined;
+        room.current_guest_name = undefined;
+        syncRoomStatusToSupabase({
+          roomNumber: room.room_number,
+          operationalStatus: room.operational_status,
+          housekeepingStatus: room.housekeeping_status,
+        });
+      }
+    }
+    savePersistedData('bookings.json', this.bookings);
+    await deleteBookingFromSupabase(removed.booking_reference);
+    this.broadcastEvent('booking_deleted', { id: removed.id, booking_reference: removed.booking_reference }, actor);
+    this.recordAuditLog({
+      action: 'DELETE_BOOKING',
+      entityType: 'booking',
+      entityId: removed.booking_reference,
+      details: `Permanently deleted reservation #${removed.booking_reference} (${removed.guest_name})`,
+      userName: actor,
+    });
+    return true;
+  }
+
   // --- WALK-IN RECEPTION KIOSK METHODS ---
   createWalkInBooking(params: {
     categoryId: string;
@@ -1614,6 +1649,7 @@ export class HotelRepository {
     const index = this.expenses.findIndex((e) => e.id === id);
     if (index === -1) return false;
     const removed = this.expenses.splice(index, 1)[0];
+    savePersistedData('expenses.json', this.expenses);
     deleteExpenseFromSupabase(id);
     this.broadcastEvent('expense_deleted', { id: removed.id, title: removed.title }, actor);
     return true;
@@ -1869,6 +1905,16 @@ export class HotelRepository {
     return true;
   }
 
+  async deleteCashTransaction(id: string, actor?: string): Promise<boolean> {
+    const idx = this.cashTransactions.findIndex((t) => t.id === id);
+    if (idx === -1) return false;
+    const removed = this.cashTransactions.splice(idx, 1)[0];
+    savePersistedData('cash_transactions.json', this.cashTransactions);
+    await deleteCashTransactionFromSupabase(removed.id);
+    this.broadcastEvent('cash_transaction_deleted', { id: removed.id }, actor);
+    return true;
+  }
+
   getCashTransactions(shiftId?: string): CashTransaction[] {
     let list = [...this.cashTransactions];
     if (shiftId) {
@@ -2075,6 +2121,7 @@ export class HotelRepository {
         syncRoomStatusToSupabase({ roomNumber: room.room_number, operationalStatus: room.operational_status, housekeepingStatus: room.housekeeping_status, notes: room.notes });
       }
     }
+    savePersistedData('maintenance.json', this.maintenanceTickets);
     deleteMaintenanceTicketFromSupabase(id);
     this.broadcastEvent(
       'maintenance_ticket_deleted',
@@ -2203,6 +2250,7 @@ export class HotelRepository {
     const idx = this.pricingRules.findIndex((r) => r.id === id);
     if (idx === -1) return false;
     const removed = this.pricingRules.splice(idx, 1)[0];
+    savePersistedData('pricing_rules.json', this.pricingRules);
     this.broadcastEvent('pricing_rule_deleted', { id: removed.id }, actor);
     this.recordAuditLog({
       action: 'DELETE_PRICING_RULE',
@@ -2595,6 +2643,8 @@ export class HotelRepository {
     const idx = this.reviews.findIndex((r) => r.id === id);
     if (idx === -1) return false;
     this.reviews.splice(idx, 1);
+    savePersistedData('reviews.json', this.reviews);
+    deleteReviewFromSupabase(id);
     return true;
   }
 

@@ -300,6 +300,27 @@ export default function AdminCashbookPage() {
     }
   };
 
+  const handleDeleteTransaction = async (txId: string, reason: string) => {
+    if (!window.confirm(`Permanently remove transaction "${reason}" from the cash register?`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/admin/cashbook?txId=${encodeURIComponent(txId)}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification('success', data.message || 'Transaction removed.');
+        fetchCashbook();
+      } else {
+        showNotification('error', data.error || 'Failed to delete transaction.');
+      }
+    } catch {
+      showNotification('error', 'Network error deleting transaction.');
+    }
+  };
+
   const filteredTransactions = useMemo(() => {
     return transactions.filter((t) => {
       const matchesSearch =
@@ -614,12 +635,13 @@ export default function AdminCashbookPage() {
                 <th className="py-2.5 px-3">{isTelugu ? 'రిఫరెన్స్' : 'Ref'}</th>
                 <th className="py-2.5 px-3">{isTelugu ? 'సిబ్బంది' : 'Staff'}</th>
                 <th className="py-2.5 px-3 text-right">{isTelugu ? 'మొత్తం' : 'Amount'}</th>
+                <th className="py-2.5 px-3 text-right">{isTelugu ? 'చర్య' : 'Action'}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#EFE3D6]/60">
               {filteredTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-gray-400">
+                  <td colSpan={8} className="py-8 text-center text-gray-400">
                     {isTelugu ? 'లావాదేవీలు ఏవీ లేవు.' : 'No cash transactions recorded for this criteria.'}
                   </td>
                 </tr>
@@ -653,6 +675,16 @@ export default function AdminCashbookPage() {
                       <span className={tx.type === 'cash_in' ? 'text-emerald-700' : 'text-rose-700'}>
                         {tx.type === 'cash_in' ? '+' : '-'}₹{tx.amount.toLocaleString('en-IN')}
                       </span>
+                    </td>
+                    <td className="py-3 px-3 text-right">
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteTransaction(tx.id, tx.reason)}
+                        className="p-1 rounded text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                        title={isTelugu ? 'లావాదేవీ తొలగించు' : 'Delete Transaction'}
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </td>
                   </tr>
                 ))

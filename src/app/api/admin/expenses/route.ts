@@ -92,7 +92,13 @@ export async function DELETE(req: NextRequest) {
     }
 
     const url = new URL(req.url);
-    const id = url.searchParams.get('id');
+    let id = url.searchParams.get('id');
+    if (!id) {
+      try {
+        const body = await req.json();
+        id = body.id;
+      } catch {}
+    }
     if (!id) {
       return NextResponse.json({ success: false, error: 'Missing expense id' }, { status: 400 });
     }

@@ -20,7 +20,7 @@ describe('Guest Room Change & Relocation Flow (AC / Water / Defect Scenario)', (
       r102.current_guest_name = undefined;
     }
     repo.getBookings().forEach((b) => {
-      if ((b.assigned_room_number === '101' || b.assigned_room_number === '102') && (b.guest_name === 'Bhavani Shankar' || b.guest_name === 'Suresh Kumar')) {
+      if (b.assigned_room_number === '101' || b.assigned_room_number === '102') {
         b.status = 'cancelled';
       }
     });

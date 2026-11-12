@@ -82,7 +82,7 @@ async function verifyPersistence() {
       category: 'room_service',
       description: 'Morning South Indian Breakfast Tray',
       amount: 250,
-      tax_rate: 0.12,
+      tax_rate: 0.05,
       posted_by: 'Room Service Lead',
     });
     await new Promise((r) => setTimeout(r, 1500));

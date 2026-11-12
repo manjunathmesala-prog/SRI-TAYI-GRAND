@@ -221,7 +221,12 @@ export function normalizeCategoryId(identifier?: string | null): string {
   const clean = identifier.trim().toLowerCase();
 
   // Suite
-  if (clean === 'cat-suite-01' || clean === 'suite-room' || clean === 'suite') {
+  if (
+    clean === 'cat-suite-01' ||
+    clean === 'suite-room' ||
+    clean === 'suite' ||
+    clean === 'd0000000-0000-0000-0000-000000000001'
+  ) {
     return 'cat-suite-01';
   }
 
@@ -231,7 +236,8 @@ export function normalizeCategoryId(identifier?: string | null): string {
     clean === 'single-room' ||
     clean === 'single' ||
     clean === 'single-bed-room' ||
-    clean === 'cat-single-01'
+    clean === 'cat-single-01' ||
+    clean === 'd0000000-0000-0000-0000-000000000004'
   ) {
     return 'cat-single-04';
   }
@@ -240,7 +246,8 @@ export function normalizeCategoryId(identifier?: string | null): string {
   if (
     clean === 'cat-four-bed-02' ||
     clean === 'four-bed-room' ||
-    clean === 'four-bed'
+    clean === 'four-bed' ||
+    clean === 'd0000000-0000-0000-0000-000000000002'
   ) {
     return 'cat-four-bed-02';
   }
@@ -251,7 +258,12 @@ export function normalizeCategoryId(identifier?: string | null): string {
     clean === 'double-room' ||
     clean === 'cat-double-bed-02' ||
     clean === 'double-bed-room' ||
-    clean === 'cat-double-01' || clean === 'deluxe-ac' || clean === 'deluxe' || clean === 'standard-ac' || clean === 'standard'
+    clean === 'cat-double-01' ||
+    clean === 'deluxe-ac' ||
+    clean === 'deluxe' ||
+    clean === 'standard-ac' ||
+    clean === 'standard' ||
+    clean === 'd0000000-0000-0000-0000-000000000003'
   ) {
     return 'cat-double-03';
   }

@@ -126,13 +126,20 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager']);
+    const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Front Desk']);
     if (!auth.authorized) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
     }
 
     const { searchParams } = new URL(req.url);
-    const id = searchParams.get('id');
+    let id = searchParams.get('id');
+    if (!id) {
+      try {
+        const body = await req.json();
+        id = body.id;
+      } catch {}
+    }
+
     if (!id) {
       return NextResponse.json({ success: false, error: 'Missing ticket id.' }, { status: 400 });
     }

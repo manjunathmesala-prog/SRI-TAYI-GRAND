@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { GoogleReview } from '@/types';
 import { INITIAL_REVIEWS_DATA, GOOGLE_REVIEWS_URL } from '@/lib/reviews-data';
 import { useRealtimeSync } from '@/lib/realtime-client';
+import { authStorage } from '@/lib/auth-storage';
 import {
   MessageSquareQuote,
   Star,
@@ -88,7 +89,7 @@ export default function AdminReviewsPage() {
     try {
       const res = await fetch('/api/reviews', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authStorage.getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ id: review.id, is_featured: nextVal }),
       });
 
@@ -118,7 +119,7 @@ export default function AdminReviewsPage() {
     try {
       const res = await fetch('/api/reviews', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authStorage.getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ id: review.id, is_published: nextVal }),
       });
 
@@ -152,6 +153,7 @@ export default function AdminReviewsPage() {
     try {
       const res = await fetch(`/api/reviews?id=${encodeURIComponent(review.id)}`, {
         method: 'DELETE',
+        headers: authStorage.getAuthHeaders(),
       });
 
       const data = await res.json();
@@ -187,7 +189,7 @@ export default function AdminReviewsPage() {
     try {
       const res = await fetch('/api/reviews', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authStorage.getAuthHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           reviewer_name: reviewerName.trim(),
           excerpt: isRatingOnly ? '' : reviewText.trim(),
