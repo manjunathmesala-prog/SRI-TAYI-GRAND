@@ -4295,13 +4295,93 @@ export class HotelRepository {
 
   async ensureEnquiriesLoaded(): Promise<void> {
     try {
-      const pgH = await loadHallEnquiriesFromSupabase();
+      const [pgH, pgQ] = await Promise.all([
+        loadHallEnquiriesFromSupabase(),
+        loadConventionQuotesFromSupabase(),
+      ]);
       if (pgH && pgH.length > 0) {
         this.hallEnquiries = pgH;
         savePersistedData('hall_enquiries.json', this.hallEnquiries);
       }
+      if (pgQ && pgQ.length > 0) {
+        this.conventionQuotes = pgQ;
+        savePersistedData('convention_quotes.json', this.conventionQuotes);
+      }
     } catch (err) {
       console.warn('[ENSURE ENQUIRIES LOAD WARN]', err);
+    }
+  }
+
+  async ensureConventionQuotesLoaded(): Promise<void> {
+    try {
+      const pgQ = await loadConventionQuotesFromSupabase();
+      if (pgQ && pgQ.length > 0) {
+        this.conventionQuotes = pgQ;
+        savePersistedData('convention_quotes.json', this.conventionQuotes);
+      }
+    } catch (err) {
+      console.warn('[ENSURE CONVENTION QUOTES LOAD WARN]', err);
+    }
+  }
+
+  async ensureGuestsLoaded(): Promise<void> {
+    try {
+      const { loadGuestsFromSupabase } = await import('./supabase-sync');
+      const pgG = await loadGuestsFromSupabase();
+      if (pgG && pgG.length > 0) {
+        this.guests = pgG;
+        savePersistedData('guests.json', this.guests);
+      }
+    } catch (err) {
+      console.warn('[ENSURE GUESTS LOAD WARN]', err);
+    }
+  }
+
+  async ensureStaffAttendanceLoaded(): Promise<void> {
+    try {
+      const pgA = await loadStaffAttendanceFromSupabase();
+      if (pgA && pgA.length > 0) {
+        this.staffAttendance = pgA;
+        savePersistedData('staff_attendance.json', this.staffAttendance);
+      }
+    } catch (err) {
+      console.warn('[ENSURE STAFF ATTENDANCE LOAD WARN]', err);
+    }
+  }
+
+  async ensureContactEnquiriesLoaded(): Promise<void> {
+    try {
+      const pgC = await loadContactEnquiriesFromSupabase();
+      if (pgC && pgC.length > 0) {
+        this.contactEnquiries = pgC;
+        savePersistedData('contact_enquiries.json', this.contactEnquiries);
+      }
+    } catch (err) {
+      console.warn('[ENSURE CONTACT ENQUIRIES LOAD WARN]', err);
+    }
+  }
+
+  async ensureFolioChargesLoaded(): Promise<void> {
+    try {
+      const pgFC = await loadFolioChargesFromSupabase();
+      if (pgFC && pgFC.length > 0) {
+        this.folioCharges = pgFC;
+        savePersistedData('folio_charges.json', this.folioCharges);
+      }
+    } catch (err) {
+      console.warn('[ENSURE FOLIO CHARGES LOAD WARN]', err);
+    }
+  }
+
+  async ensureAuditLogsLoaded(): Promise<void> {
+    try {
+      const pgAL = await loadAuditLogsFromSupabase();
+      if (pgAL && pgAL.length > 0) {
+        this.auditLogs = pgAL;
+        savePersistedData('audit_logs.json', this.auditLogs);
+      }
+    } catch (err) {
+      console.warn('[ENSURE AUDIT LOGS LOAD WARN]', err);
     }
   }
 
@@ -4315,6 +4395,12 @@ export class HotelRepository {
       this.ensureMaintenanceLoaded(),
       this.ensureJournalsLoaded(),
       this.ensureEnquiriesLoaded(),
+      this.ensureConventionQuotesLoaded(),
+      this.ensureGuestsLoaded(),
+      this.ensureStaffAttendanceLoaded(),
+      this.ensureContactEnquiriesLoaded(),
+      this.ensureFolioChargesLoaded(),
+      this.ensureAuditLogsLoaded(),
     ]);
   }
 
