@@ -318,15 +318,19 @@ export default function AnalyticsAdminPage() {
             </div>
 
             {/* Visual share bar */}
-            <div className="w-full h-3 rounded-full overflow-hidden flex bg-gray-100 mb-6 shadow-inner">
-              {analytics?.channelBreakdown.map((channel, index) => (
-                <div
-                  key={channel.name}
-                  style={{ width: `${Math.max(0, Math.min(100, channel.percentage))}%` }}
-                  className={['bg-[#43001F] h-full', 'bg-[#D8AD56] h-full', 'bg-[#786A5B] h-full'][index % 3]}
-                  title={`${channel.name} (${channel.percentage}%)`}
-                />
-              ))}
+            <div className="w-full h-3 rounded-full overflow-hidden flex bg-stone-100 mb-6 shadow-inner">
+              {analytics?.channelBreakdown && analytics.channelBreakdown.some((c) => c.percentage > 0) ? (
+                analytics.channelBreakdown.map((channel, index) => (
+                  <div
+                    key={channel.name}
+                    style={{ width: `${Math.max(0, Math.min(100, channel.percentage))}%` }}
+                    className={['bg-[#43001F] h-full', 'bg-[#D8AD56] h-full', 'bg-[#786A5B] h-full'][index % 3]}
+                    title={`${channel.name} (${channel.percentage}%)`}
+                  />
+                ))
+              ) : (
+                <div className="w-full h-full bg-[#E6D9C5]/40" title="Awaiting booking transactions" />
+              )}
             </div>
 
             {/* Channel Cards */}
@@ -393,7 +397,10 @@ export default function AnalyticsAdminPage() {
           <div className="mt-6 pt-4 pb-2">
             <div className="grid grid-cols-6 gap-2 sm:gap-4 items-end h-52 border-b border-[#E6D9C5] pb-2">
               {analytics?.monthlyTrajectory.map((item) => {
-                const heightPercent = Math.max(15, Math.round((item.revenue / maxMonthlyRevenue) * 100));
+                const heightPercent =
+                  maxMonthlyRevenue > 0 && item.revenue > 0
+                    ? Math.max(8, Math.round((item.revenue / maxMonthlyRevenue) * 100))
+                    : 0;
                 return (
                   <div key={item.month} className="flex flex-col items-center gap-2 h-full justify-end group">
                     {/* Hover tooltip */}
@@ -498,10 +505,12 @@ export default function AnalyticsAdminPage() {
                           ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                           : row.occupancy >= 50
                           ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                          : 'bg-stone-100 text-stone-700 border border-stone-300'
+                          : row.bookings > 0
+                          ? 'bg-stone-100 text-stone-700 border border-stone-300'
+                          : 'bg-stone-50 text-stone-400 border border-stone-200'
                       }`}
                     >
-                      {row.occupancy >= 70 ? 'High Yield' : row.occupancy >= 50 ? 'Optimal' : 'Growing'}
+                      {row.occupancy >= 70 ? 'High Yield' : row.occupancy >= 50 ? 'Optimal' : row.bookings > 0 ? 'Growing' : 'Available'}
                     </span>
                   </td>
                 </tr>

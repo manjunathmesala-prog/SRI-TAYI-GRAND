@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
       ? (rangeParam as 'today' | '7d' | '30d' | '90d' | 'ytd')
       : '30d';
 
+    await repo.ensureAllLoaded();
     const analytics = repo.getHospitalityAnalytics(range);
 
     if (isExportCsv) {

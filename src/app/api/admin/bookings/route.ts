@@ -112,9 +112,10 @@ export async function POST(req: NextRequest) {
       message: `Booking ${newBooking.booking_reference} registered successfully.`,
     });
   } catch (err: any) {
-    const isConflict = err?.code === '23P01' ||
+    const isConflict = err?.code === '23P01' || err?.code === '40P01' ||
       String(err?.message || '').toLowerCase().includes('exclusion constraint') ||
       String(err?.message || '').toLowerCase().includes('already booked') ||
+      String(err?.message || '').toLowerCase().includes('deadlock') ||
       String(err?.message || '').toLowerCase().includes('conflict');
     return NextResponse.json(
       { success: false, error: err.message || 'Failed to create booking' },

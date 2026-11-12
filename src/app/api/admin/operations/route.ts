@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: auth.error || 'Unauthorized: Staff session required' }, { status: 403 });
     }
 
+    await repo.ensureAllLoaded();
     const fullState = repo.getFullState();
     return NextResponse.json({
       success: true,

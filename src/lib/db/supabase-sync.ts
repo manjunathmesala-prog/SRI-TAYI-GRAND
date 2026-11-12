@@ -359,11 +359,11 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
   }
 }
 
-export async function loadBookingsFromSupabase(): Promise<Booking[]> {
-  if (typeof window !== 'undefined') return [];
+export async function loadBookingsFromSupabase(): Promise<Booking[] | null> {
+  if (typeof window !== 'undefined') return null;
 
   const db = getSupabasePgPool();
-  if (!db) return [];
+  if (!db) return null;
 
   try {
     const client = await db.connect();
@@ -450,7 +450,7 @@ export async function loadBookingsFromSupabase(): Promise<Booking[]> {
     }
   } catch (err: unknown) {
     console.warn('[SUPABASE LOAD BOOKINGS WARN]', err instanceof Error ? err.message : String(err));
-    return [];
+    return null;
   }
 }
 
@@ -635,11 +635,11 @@ export async function syncPaymentToSupabase(payment: PaymentRecord): Promise<voi
   }
 }
 
-export async function loadPaymentsFromSupabase(): Promise<PaymentRecord[]> {
-  if (typeof window !== 'undefined') return [];
+export async function loadPaymentsFromSupabase(): Promise<PaymentRecord[] | null> {
+  if (typeof window !== 'undefined') return null;
 
   const db = getSupabasePgPool();
-  if (!db) return [];
+  if (!db) return null;
 
   try {
     const client = await db.connect();
@@ -683,7 +683,7 @@ export async function loadPaymentsFromSupabase(): Promise<PaymentRecord[]> {
     }
   } catch (err: unknown) {
     console.warn('[SUPABASE LOAD PAYMENTS WARN]', err instanceof Error ? err.message : String(err));
-    return [];
+    return null;
   }
 }
 
@@ -910,11 +910,11 @@ export async function syncExpenseToSupabase(expense: Expense): Promise<void> {
   }
 }
 
-export async function loadExpensesFromSupabase(): Promise<Expense[]> {
-  if (typeof window !== 'undefined') return [];
+export async function loadExpensesFromSupabase(): Promise<Expense[] | null> {
+  if (typeof window !== 'undefined') return null;
 
   const db = getSupabasePgPool();
-  if (!db) return [];
+  if (!db) return null;
 
   try {
     const client = await db.connect();
@@ -946,7 +946,7 @@ export async function loadExpensesFromSupabase(): Promise<Expense[]> {
     }
   } catch (err: unknown) {
     console.warn('[SUPABASE LOAD EXPENSES WARN]', err instanceof Error ? err.message : String(err));
-    return [];
+    return null;
   }
 }
 
@@ -1630,11 +1630,11 @@ export async function syncDailyClosingToSupabase(closing: DailyClosing): Promise
   }
 }
 
-export async function loadDailyClosingsFromSupabase(): Promise<DailyClosing[]> {
-  if (typeof window !== 'undefined') return [];
+export async function loadDailyClosingsFromSupabase(): Promise<DailyClosing[] | null> {
+  if (typeof window !== 'undefined') return null;
 
   const db = getSupabasePgPool();
-  if (!db) return [];
+  if (!db) return null;
 
   try {
     const client = await db.connect();
@@ -1681,7 +1681,7 @@ export async function loadDailyClosingsFromSupabase(): Promise<DailyClosing[]> {
     }
   } catch (err: unknown) {
     console.warn('[SUPABASE LOAD DAILY CLOSINGS WARN]', err instanceof Error ? err.message : String(err));
-    return [];
+    return null;
   }
 }
 

@@ -219,15 +219,8 @@ export class HotelRepository {
     this.rfidEvents = loadedEvents.length > 0 ? loadedEvents : JSON.parse(JSON.stringify(INITIAL_RFID_ACCESS_EVENTS));
     // Hydrate all operational state from live Supabase PostgreSQL
     loadBookingsFromSupabase().then((pgBookings) => {
-      if (pgBookings && pgBookings.length > 0) {
-                for (const pgB of pgBookings) {
-          const index = this.bookings.findIndex((b) => b.booking_reference === pgB.booking_reference);
-          if (index !== -1) {
-            this.bookings[index] = { ...this.bookings[index], ...pgB };
-          } else {
-            this.bookings.push(pgB);
-          }
-        }
+      if (pgBookings !== null && Array.isArray(pgBookings)) {
+        this.bookings = pgBookings;
         savePersistedData('bookings.json', this.bookings);
       }
     }).catch(() => {});
@@ -261,13 +254,8 @@ export class HotelRepository {
     }).catch(() => {});
 
     loadPaymentsFromSupabase().then((pgPayments) => {
-      if (pgPayments && pgPayments.length > 0) {
-                for (const pgP of pgPayments) {
-          const exists = this.payments.some((p) => p.payment_reference === pgP.payment_reference);
-          if (!exists) {
-            this.payments.unshift(pgP);
-          }
-        }
+      if (pgPayments !== null && Array.isArray(pgPayments)) {
+        this.payments = pgPayments;
         savePersistedData('payments.json', this.payments);
       }
     }).catch(() => {});
@@ -279,7 +267,7 @@ export class HotelRepository {
     }).catch(() => {});
 
     loadExpensesFromSupabase().then((pgExpenses: any) => {
-      if (pgExpenses && pgExpenses.length > 0) { this.expenses = pgExpenses; savePersistedData('expenses.json', this.expenses); }
+      if (pgExpenses !== null && Array.isArray(pgExpenses)) { this.expenses = pgExpenses; savePersistedData('expenses.json', this.expenses); }
     }).catch(() => {});
 
     loadHallEnquiriesFromSupabase().then((pgHE: any) => {
@@ -315,7 +303,7 @@ export class HotelRepository {
     }).catch(() => {});
 
     loadDailyClosingsFromSupabase().then((pgDC: any) => {
-      if (pgDC && pgDC.length > 0) { this.dailyClosings = pgDC; savePersistedData('daily_closings.json', this.dailyClosings); }
+      if (pgDC !== null && Array.isArray(pgDC)) { this.dailyClosings = pgDC; savePersistedData('daily_closings.json', this.dailyClosings); }
     }).catch(() => {});
 
     loadStaffAttendanceFromSupabase().then((pgSA: any) => {
@@ -3644,24 +3632,38 @@ export class HotelRepository {
   // ==============================================================================
 
   public getHospitalityAnalytics(range: 'today' | '7d' | '30d' | '90d' | 'ytd' = '30d') {
-    const totalRooms = 25;
+    const totalRooms = this.rooms.length || 25;
     const occupiedRooms = this.rooms.filter(
       (r) => r.operational_status === 'occupied' || r.housekeeping_status === 'dirty'
     ).length;
     const availableRooms = this.rooms.filter((r) => r.operational_status === 'available').length;
     const maintenanceRooms = this.rooms.filter((r) => r.operational_status === 'maintenance').length;
 
-    const occupancyRate = Math.round((occupiedRooms / totalRooms) * 1000) / 10;
+    const occupancyRate = totalRooms > 0 ? Math.round((occupiedRooms / totalRooms) * 1000) / 10 : 0;
 
     // Filter relevant bookings based on range
     const now = new Date();
     let cutoffDays = 30;
-    if (range === 'today') cutoffDays = 1;
-    else if (range === '7d') cutoffDays = 7;
-    else if (range === '90d') cutoffDays = 90;
-    else if (range === 'ytd') cutoffDays = 365;
+    let cutoff: Date;
 
-    const cutoff = new Date(now.getTime() - cutoffDays * 24 * 60 * 60 * 1000);
+    if (range === 'today') {
+      cutoffDays = 1;
+      cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+    } else if (range === '7d') {
+      cutoffDays = 7;
+      cutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+    } else if (range === '90d') {
+      cutoffDays = 90;
+      cutoff = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+    } else if (range === 'ytd') {
+      const yearStart = new Date(now.getFullYear(), 0, 1, 0, 0, 0);
+      cutoff = yearStart;
+      cutoffDays = Math.max(1, Math.round((now.getTime() - yearStart.getTime()) / (1000 * 60 * 60 * 24)));
+    } else {
+      // default '30d'
+      cutoffDays = 30;
+      cutoff = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    }
 
     const periodBookings = this.bookings.filter(
       (b) => new Date(b.created_at) >= cutoff && b.status !== 'cancelled'
@@ -3676,60 +3678,117 @@ export class HotelRepository {
       return sum + nights;
     }, 0);
 
-    const adr = totalNights > 0 ? Math.round(roomRevenue / totalNights) : 2250;
-    const revPAR = Math.round((adr * occupancyRate) / 100);
+    const adr = totalNights > 0 ? Math.round(roomRevenue / totalNights) : 0;
+    const revPAR = totalRooms > 0 && cutoffDays > 0 ? Math.round(roomRevenue / (totalRooms * cutoffDays)) : 0;
 
-    // Channel breakdown
-    const directCount = periodBookings.filter((b) => !b.booking_source || b.booking_source !== 'online').length;
-    const otaCount = periodBookings.filter((b) => b.booking_source === 'online').length;
+    // Real Channel breakdown
+    const directBookings = periodBookings.filter(
+      (b) =>
+        b.booking_source === 'walk_in_qr' ||
+        b.booking_source === 'front_desk_manual' ||
+        (b.booking_source as string) === 'counter' ||
+        (b.booking_source as string) === 'direct' ||
+        !b.booking_source
+    );
+    const onlineBookings = periodBookings.filter((b) => b.booking_source === 'online');
+    const otaBookings = periodBookings.filter(
+      (b) =>
+        Boolean(b.booking_source) &&
+        !['walk_in_qr', 'front_desk_manual', 'counter', 'direct', 'online'].includes(b.booking_source as string)
+    );
+
+    const directRev = directBookings.reduce((sum, b) => sum + (b.total_amount || 0), 0);
+    const onlineRev = onlineBookings.reduce((sum, b) => sum + (b.total_amount || 0), 0);
+    const otaRev = otaBookings.reduce((sum, b) => sum + (b.total_amount || 0), 0);
+
     const channelBreakdown = [
       {
         name: 'Front Desk Direct & Walk-In',
-        count: directCount || 6,
-        revenue: Math.round(totalRevenue * 0.58) || 38500,
-        percentage: 58,
+        count: directBookings.length,
+        revenue: directRev,
+        percentage: totalRevenue > 0 ? Math.round((directRev / totalRevenue) * 100) : 0,
       },
       {
-        name: 'MakeMyTrip & Goibibo',
-        count: Math.round(otaCount * 0.6) || 3,
-        revenue: Math.round(totalRevenue * 0.25) || 16500,
-        percentage: 25,
+        name: 'Website & Online Direct',
+        count: onlineBookings.length,
+        revenue: onlineRev,
+        percentage: totalRevenue > 0 ? Math.round((onlineRev / totalRevenue) * 100) : 0,
       },
       {
-        name: 'Booking.com & Agoda',
-        count: Math.round(otaCount * 0.4) || 2,
-        revenue: Math.round(totalRevenue * 0.17) || 11200,
-        percentage: 17,
+        name: 'MakeMyTrip & OTA Partners',
+        count: otaBookings.length,
+        revenue: otaRev,
+        percentage: totalRevenue > 0 ? Math.round((otaRev / totalRevenue) * 100) : 0,
       },
     ];
 
-    // Category yield
+    // Real Category yield
     const categoryYield = this.categories.map((cat) => {
-      const catBookings = periodBookings.filter((b) => b.category_id === cat.id);
+      const catBookings = periodBookings.filter(
+        (b) =>
+          b.category_id === cat.id ||
+          (b.category_name && b.category_name.toLowerCase().trim() === cat.name.toLowerCase().trim()) ||
+          (b.category_id && cat.slug && b.category_id.replace(/^cat-/, '').startsWith(cat.slug.split('-')[0]))
+      );
       const catRev = catBookings.reduce((sum, b) => sum + (b.total_amount || 0), 0);
+      const catRooms = this.rooms.filter((r) => r.category_id === cat.id || r.category_name === cat.name).length || 1;
+      const catNights = catBookings.reduce((sum, b) => {
+        const start = new Date(b.check_in_date).getTime();
+        const end = new Date(b.check_out_date).getTime();
+        return sum + Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)));
+      }, 0);
+      const catCapacityNights = catRooms * cutoffDays;
+      const catOccupancy = catCapacityNights > 0 ? Math.min(100, Math.round((catNights / catCapacityNights) * 100)) : 0;
+
       return {
         category: cat.name,
         slug: cat.slug,
         basePrice: cat.base_price_per_night,
         bookings: catBookings.length,
-        revenue: catRev || cat.base_price_per_night * 4,
-        occupancy: Math.min(100, Math.round((catBookings.length / 5) * 85)),
+        revenue: catRev,
+        occupancy: catOccupancy,
       };
     });
 
-    // Monthly Trajectory (Last 6 Months)
-    const months = ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
-    const monthlyTrajectory = months.map((m, idx) => ({
-      month: m,
-      revenue: 75000 + idx * 18500 + (idx === 5 ? 32000 : 0),
-      occupancy: 55 + idx * 4,
-      bookings: 22 + idx * 6,
-    }));
+    // Real Dynamic Monthly Trajectory (Last 6 Months derived from current date)
+    const monthlyTrajectory = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const year = d.getFullYear();
+      const mIdx = d.getMonth();
+      const monthLabel = d.toLocaleString('en-US', { month: 'short' });
+
+      const monthStart = new Date(year, mIdx, 1, 0, 0, 0);
+      const monthEnd = new Date(year, mIdx + 1, 0, 23, 59, 59);
+      const daysInMonth = monthEnd.getDate();
+
+      const mBookings = this.bookings.filter((b) => {
+        if (b.status === 'cancelled') return false;
+        const bDate = new Date(b.created_at);
+        return bDate >= monthStart && bDate <= monthEnd;
+      });
+
+      const mRevenue = mBookings.reduce((sum, b) => sum + (b.total_amount || 0), 0);
+      const mNights = mBookings.reduce((sum, b) => {
+        const start = new Date(b.check_in_date).getTime();
+        const end = new Date(b.check_out_date).getTime();
+        return sum + Math.max(1, Math.round((end - start) / (1000 * 60 * 60 * 24)));
+      }, 0);
+      const mCapacity = totalRooms * daysInMonth;
+      const mOccupancy = mCapacity > 0 ? Math.min(100, Math.round((mNights / mCapacity) * 100)) : 0;
+
+      monthlyTrajectory.push({
+        month: monthLabel,
+        revenue: mRevenue,
+        occupancy: mOccupancy,
+        bookings: mBookings.length,
+      });
+    }
 
     return {
       range,
       kpis: {
-        totalRevenue: totalRevenue || 124500,
+        totalRevenue,
         occupancyRate,
         revPAR,
         adr,
@@ -4127,8 +4186,9 @@ export class HotelRepository {
   async ensureBookingsLoaded(): Promise<void> {
     try {
       const pgB = await loadBookingsFromSupabase();
-      if (pgB && pgB.length > 0) {
+      if (pgB !== null && Array.isArray(pgB)) {
         this.bookings = pgB;
+        savePersistedData('bookings.json', this.bookings);
       }
     } catch (err) {
       console.warn('[ENSURE BOOKINGS LOAD WARN]', err);
@@ -4138,8 +4198,9 @@ export class HotelRepository {
   async ensurePaymentsLoaded(): Promise<void> {
     try {
       const pgP = await loadPaymentsFromSupabase();
-      if (pgP && pgP.length > 0) {
+      if (pgP !== null && Array.isArray(pgP)) {
         this.payments = pgP;
+        savePersistedData('payments.json', this.payments);
       }
     } catch (err) {
       console.warn('[ENSURE PAYMENTS LOAD WARN]', err);
@@ -4149,11 +4210,24 @@ export class HotelRepository {
   async ensureExpensesLoaded(): Promise<void> {
     try {
       const pgE = await loadExpensesFromSupabase();
-      if (pgE && pgE.length > 0) {
+      if (pgE !== null && Array.isArray(pgE)) {
         this.expenses = pgE;
+        savePersistedData('expenses.json', this.expenses);
       }
     } catch (err) {
       console.warn('[ENSURE EXPENSES LOAD WARN]', err);
+    }
+  }
+
+  async ensureDailyClosingsLoaded(): Promise<void> {
+    try {
+      const pgDC = await loadDailyClosingsFromSupabase();
+      if (pgDC !== null && Array.isArray(pgDC)) {
+        this.dailyClosings = pgDC;
+        savePersistedData('daily_closings.json', this.dailyClosings);
+      }
+    } catch (err) {
+      console.warn('[ENSURE DAILY CLOSINGS LOAD WARN]', err);
     }
   }
 
@@ -4162,6 +4236,7 @@ export class HotelRepository {
       const pgJ = await loadJournalEntriesFromSupabase();
       if (pgJ && pgJ.length > 0) {
         this.journalEntries = pgJ;
+        savePersistedData('journal_entries.json', this.journalEntries);
       }
     } catch (err) {
       console.warn('[ENSURE JOURNALS LOAD WARN]', err);
@@ -4173,6 +4248,7 @@ export class HotelRepository {
       const pgH = await loadHallEnquiriesFromSupabase();
       if (pgH && pgH.length > 0) {
         this.hallEnquiries = pgH;
+        savePersistedData('hall_enquiries.json', this.hallEnquiries);
       }
     } catch (err) {
       console.warn('[ENSURE ENQUIRIES LOAD WARN]', err);
@@ -4184,6 +4260,7 @@ export class HotelRepository {
       this.ensureBookingsLoaded(),
       this.ensurePaymentsLoaded(),
       this.ensureExpensesLoaded(),
+      this.ensureDailyClosingsLoaded(),
       this.ensureCashbookLoaded(),
       this.ensureMaintenanceLoaded(),
       this.ensureJournalsLoaded(),
