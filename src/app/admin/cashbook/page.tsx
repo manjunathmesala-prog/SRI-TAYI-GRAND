@@ -28,6 +28,7 @@ import {
   ChevronDown,
   ChevronUp,
   FileSpreadsheet,
+  Trash2,
 } from 'lucide-react';
 
 interface DenominationCounts {
@@ -275,6 +276,27 @@ export default function AdminCashbookPage() {
       showNotification('error', 'Network error recording transaction.');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleDeleteShift = async (shiftId: string, shiftNumber: string) => {
+    if (!window.confirm(`Permanently delete shift #${shiftNumber} and its linked transactions?`)) {
+      return;
+    }
+    try {
+      const res = await fetch(`/api/admin/cashbook?shiftId=${encodeURIComponent(shiftId)}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification('success', data.message || `Shift #${shiftNumber} deleted.`);
+        fetchCashbook();
+      } else {
+        showNotification('error', data.error || 'Failed to delete shift.');
+      }
+    } catch {
+      showNotification('error', 'Network error deleting shift.');
     }
   };
 
@@ -709,14 +731,24 @@ export default function AdminCashbookPage() {
                       </span>
                     </td>
                     <td className="py-3 px-3 text-center">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedShiftForPrint(s)}
-                        className="p-1.5 rounded-lg hover:bg-stone-100 text-[#43001F] transition-colors cursor-pointer"
-                        title="Print Handover Report"
-                      >
-                        <Printer className="w-4 h-4 text-[#D8AD56]" />
-                      </button>
+                      <div className="flex items-center justify-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedShiftForPrint(s)}
+                          className="p-1.5 rounded-lg hover:bg-stone-100 text-[#43001F] transition-colors cursor-pointer"
+                          title="Print Handover Report"
+                        >
+                          <Printer className="w-4 h-4 text-[#D8AD56]" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteShift(s.id, s.shift_number)}
+                          className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500 hover:text-rose-700 transition-colors cursor-pointer"
+                          title="Delete Shift Record"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

@@ -3,6 +3,8 @@ import { repo } from '@/lib/db/repository';
 
 describe('Payments, Cashbook Register & GST Invoicing Rules', () => {
   it('manages cash shift lifecycle and accurately tracks drawer balance', async () => {
+    // Ensure cashbook state is loaded
+    await repo.ensureCashbookLoaded();
     // If a shift was already open from previous state, close it first for a clean test
     const existing = repo.getActiveCashShift();
     if (existing) {
@@ -99,6 +101,10 @@ describe('Payments, Cashbook Register & GST Invoicing Rules', () => {
     expect(closedShift.status).toBe('closed');
     expect(closedShift.discrepancy).toBe(0);
     expect(closedShift.closing_cash_counted).toBe(expectedClosing);
+
+    // Clean up test shift and test expense so test suite leaves repository pristine
+    await repo.deleteCashShift(shift.id);
+    repo.deleteExpense(expense.id);
   });
 
   it('computes daily closing summary with 12% GST breakdown (6% CGST + 6% SGST)', () => {

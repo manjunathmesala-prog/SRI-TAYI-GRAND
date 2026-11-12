@@ -1419,11 +1419,11 @@ export async function syncCashShiftToSupabase(shift: CashShift): Promise<void> {
   }
 }
 
-export async function loadCashShiftsFromSupabase(): Promise<CashShift[]> {
-  if (typeof window !== 'undefined') return [];
+export async function loadCashShiftsFromSupabase(): Promise<CashShift[] | null> {
+  if (typeof window !== 'undefined') return null;
 
   const db = getSupabasePgPool();
-  if (!db) return [];
+  if (!db) return null;
 
   try {
     const client = await db.connect();
@@ -1458,7 +1458,7 @@ export async function loadCashShiftsFromSupabase(): Promise<CashShift[]> {
     }
   } catch (err: unknown) {
     console.warn('[SUPABASE LOAD CASH SHIFTS WARN]', err instanceof Error ? err.message : String(err));
-    return [];
+    return null;
   }
 }
 
@@ -1502,11 +1502,11 @@ export async function syncCashTransactionToSupabase(tx: CashTransaction): Promis
   }
 }
 
-export async function loadCashTransactionsFromSupabase(): Promise<CashTransaction[]> {
-  if (typeof window !== 'undefined') return [];
+export async function loadCashTransactionsFromSupabase(): Promise<CashTransaction[] | null> {
+  if (typeof window !== 'undefined') return null;
 
   const db = getSupabasePgPool();
-  if (!db) return [];
+  if (!db) return null;
 
   try {
     const client = await db.connect();
@@ -1536,7 +1536,26 @@ export async function loadCashTransactionsFromSupabase(): Promise<CashTransactio
     }
   } catch (err: unknown) {
     console.warn('[SUPABASE LOAD CASH TX WARN]', err instanceof Error ? err.message : String(err));
-    return [];
+    return null;
+  }
+}
+
+export async function deleteCashShiftFromSupabase(shiftId: string): Promise<void> {
+  if (typeof window !== 'undefined' || !shiftId) return;
+
+  const db = getSupabasePgPool();
+  if (!db) return;
+
+  try {
+    const client = await db.connect();
+    try {
+      await client.query('DELETE FROM cash_transactions WHERE shift_id = $1', [shiftId]);
+      await client.query('DELETE FROM cash_shifts WHERE id = $1 OR shift_number = $1', [shiftId]);
+    } finally {
+      client.release();
+    }
+  } catch (err: unknown) {
+    console.warn(`[SUPABASE DELETE CASH SHIFT WARN] (${shiftId}):`, err instanceof Error ? err.message : String(err));
   }
 }
 

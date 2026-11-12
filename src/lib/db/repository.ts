@@ -81,6 +81,7 @@ import {
   loadRoomTransfersFromSupabase,
   syncCashShiftToSupabase,
   loadCashShiftsFromSupabase,
+  deleteCashShiftFromSupabase,
   syncCashTransactionToSupabase,
   loadCashTransactionsFromSupabase,
   syncDailyClosingToSupabase,
@@ -294,26 +295,21 @@ export class HotelRepository {
     }).catch(() => {});
 
     loadCashShiftsFromSupabase().then((pgCS: any) => {
-      if (pgCS && pgCS.length > 0) {
-        for (const s of pgCS) {
-          const idx = this.cashShifts.findIndex((cs) => cs.id === s.id || cs.shift_number === s.shift_number);
-          if (idx !== -1) {
-            const localId = this.cashShifts[idx].id;
-            this.cashShifts[idx] = { ...s, ...this.cashShifts[idx], id: localId };
-          } else {
-            this.cashShifts.push(s);
-          }
+      if (pgCS !== null && Array.isArray(pgCS)) {
+        const localActive = this.getActiveCashShift();
+        if (localActive && !pgCS.some(s => s.id === localActive.id || s.shift_number === localActive.shift_number)) {
+          this.cashShifts = [localActive, ...pgCS];
+        } else {
+          this.cashShifts = pgCS;
         }
         savePersistedData('cash_shifts.json', this.cashShifts);
       }
     }).catch(() => {});
 
     loadCashTransactionsFromSupabase().then((pgCT: any) => {
-      if (pgCT && pgCT.length > 0) {
-        for (const tx of pgCT) {
-          const exists = this.cashTransactions.some((t) => t.id === tx.id);
-          if (!exists) this.cashTransactions.push(tx);
-        }
+      if (pgCT !== null && Array.isArray(pgCT)) {
+        const uncommitted = this.cashTransactions.filter(lt => !pgCT.some(pt => pt.id === lt.id));
+        this.cashTransactions = [...uncommitted, ...pgCT];
         savePersistedData('cash_transactions.json', this.cashTransactions);
       }
     }).catch(() => {});
@@ -1835,6 +1831,7 @@ export class HotelRepository {
     };
 
     this.cashShifts.unshift(newShift);
+    savePersistedData('cash_shifts.json', this.cashShifts);
     syncCashShiftToSupabase(newShift);
     this.broadcastEvent('cash_shift_opened', newShift, actor || params.cashierName);
     return newShift;
@@ -1866,9 +1863,22 @@ export class HotelRepository {
       shift.notes = shift.notes ? `${shift.notes} | Close: ${params.notes}` : params.notes;
     }
 
+    savePersistedData('cash_shifts.json', this.cashShifts);
     syncCashShiftToSupabase(shift);
     this.broadcastEvent('cash_shift_closed', shift, actor || params.closedByName);
     return shift;
+  }
+
+  async deleteCashShift(id: string, actor?: string): Promise<boolean> {
+    const idx = this.cashShifts.findIndex((s) => s.id === id || s.shift_number === id);
+    if (idx === -1) return false;
+    const removed = this.cashShifts.splice(idx, 1)[0];
+    this.cashTransactions = this.cashTransactions.filter((t) => t.shift_id !== removed.id && t.shift_id !== removed.shift_number);
+    savePersistedData('cash_shifts.json', this.cashShifts);
+    savePersistedData('cash_transactions.json', this.cashTransactions);
+    await deleteCashShiftFromSupabase(removed.id);
+    this.broadcastEvent('cash_shift_deleted', { id: removed.id, shift_number: removed.shift_number }, actor);
+    return true;
   }
 
   getCashTransactions(shiftId?: string): CashTransaction[] {
@@ -1896,6 +1906,7 @@ export class HotelRepository {
     };
 
     this.cashTransactions.unshift(newTx);
+    savePersistedData('cash_transactions.json', this.cashTransactions);
     syncCashTransactionToSupabase(newTx);
     this.broadcastEvent('cash_transaction_created', newTx, actor || params.performed_by);
     return newTx;
@@ -1912,25 +1923,43 @@ export class HotelRepository {
       ? this.cashShifts.find((s) => s.id === specificShiftId) || null
       : this.getActiveCashShift();
 
-    const openingFloat = shift ? shift.opening_float : 0;
-    const txs = shift ? this.cashTransactions.filter((t) => t.shift_id === shift.id) : this.cashTransactions;
+    if (shift) {
+      const openingFloat = shift.opening_float || 0;
+      const txs = this.cashTransactions.filter((t) => t.shift_id === shift.id);
 
-    const totalCashIn = txs
-      .filter((t) => t.type === 'cash_in')
-      .reduce((sum, t) => sum + t.amount, 0);
+      const totalCashIn = txs
+        .filter((t) => t.type === 'cash_in')
+        .reduce((sum, t) => sum + t.amount, 0);
 
-    const totalCashOut = txs
-      .filter((t) => t.type === 'cash_out')
-      .reduce((sum, t) => sum + t.amount, 0);
+      const totalCashOut = txs
+        .filter((t) => t.type === 'cash_out')
+        .reduce((sum, t) => sum + t.amount, 0);
 
-    const currentBalance = Math.max(0, openingFloat + totalCashIn - totalCashOut);
+      const currentBalance = Math.max(0, openingFloat + totalCashIn - totalCashOut);
+
+      return {
+        activeShift: shift,
+        openingFloat,
+        totalCashIn,
+        totalCashOut,
+        currentBalance,
+      };
+    }
+
+    const latestClosedShift = this.cashShifts
+      .filter((s) => s.status === 'closed')
+      .sort(
+        (a, b) =>
+          new Date(b.closed_at || b.opened_at || 0).getTime() -
+          new Date(a.closed_at || a.opened_at || 0).getTime()
+      )[0];
 
     return {
-      activeShift: shift,
-      openingFloat,
-      totalCashIn,
-      totalCashOut,
-      currentBalance,
+      activeShift: null,
+      openingFloat: 0,
+      totalCashIn: 0,
+      totalCashOut: 0,
+      currentBalance: latestClosedShift?.closing_cash_counted ?? 0,
     };
   }
 
@@ -1940,11 +1969,19 @@ export class HotelRepository {
         loadCashShiftsFromSupabase(),
         loadCashTransactionsFromSupabase(),
       ]);
-      if (pgCS && pgCS.length > 0) {
-        this.cashShifts = pgCS;
+      if (pgCS !== null && Array.isArray(pgCS)) {
+        const localActive = this.getActiveCashShift();
+        if (localActive && !pgCS.some(s => s.id === localActive.id || s.shift_number === localActive.shift_number)) {
+          this.cashShifts = [localActive, ...pgCS];
+        } else {
+          this.cashShifts = pgCS;
+        }
+        savePersistedData('cash_shifts.json', this.cashShifts);
       }
-      if (pgCT && pgCT.length > 0) {
-        this.cashTransactions = pgCT;
+      if (pgCT !== null && Array.isArray(pgCT)) {
+        const uncommitted = this.cashTransactions.filter(lt => !pgCT.some(pt => pt.id === lt.id));
+        this.cashTransactions = [...uncommitted, ...pgCT];
+        savePersistedData('cash_transactions.json', this.cashTransactions);
       }
     } catch (err) {
       console.warn('[ENSURE CASHBOOK LOAD WARN]', err);

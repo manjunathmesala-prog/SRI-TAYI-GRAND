@@ -591,6 +591,7 @@ export type RealtimeEventType =
   | 'room_status_updated'
   | 'cash_shift_opened'
   | 'cash_shift_closed'
+  | 'cash_shift_deleted'
   | 'cash_transaction_created'
   | 'maintenance_ticket_created'
   | 'maintenance_ticket_updated'

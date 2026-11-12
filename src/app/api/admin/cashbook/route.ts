@@ -143,3 +143,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: err.message }, { status: 400 });
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager']);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
+    }
+
+    const { searchParams } = new URL(req.url);
+    const shiftId = searchParams.get('shiftId');
+    if (!shiftId) {
+      return NextResponse.json({ success: false, error: 'shiftId parameter is required.' }, { status: 400 });
+    }
+
+    const ok = await repo.deleteCashShift(shiftId, auth.session?.name);
+    if (!ok) {
+      return NextResponse.json({ success: false, error: 'Shift record not found.' }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: `Shift #${shiftId} successfully deleted.`,
+    });
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
+}
