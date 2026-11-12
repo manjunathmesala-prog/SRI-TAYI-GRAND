@@ -171,7 +171,7 @@ export function PrintGrcModal({ isOpen, onClose, booking }: PrintGrcModalProps) 
                   <tr className="border-b border-gray-300">
                     <td className="p-2 font-bold bg-[#FAF7F2] w-1/4 border-r border-gray-300 print:bg-gray-100">Room Rent Subtotal</td>
                     <td className="p-2 font-mono w-1/4 border-r border-gray-300">₹ {booking.subtotal_amount.toLocaleString('en-IN')}</td>
-                    <td className="p-2 font-bold bg-[#FAF7F2] w-1/4 border-r border-gray-300 print:bg-gray-100">GST (12% CGST+SGST)</td>
+                    <td className="p-2 font-bold bg-[#FAF7F2] w-1/4 border-r border-gray-300 print:bg-gray-100">GST (5% CGST+SGST)</td>
                     <td className="p-2 font-mono w-1/4">₹ {booking.tax_amount.toLocaleString('en-IN')}</td>
                   </tr>
                   <tr>
