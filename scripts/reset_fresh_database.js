@@ -72,17 +72,38 @@ async function resetFresh() {
     }
   }
 
-  // Step 2: Reset all 24 physical rooms to available and clean
-  console.log('\nStep 2: Resetting all physical rooms to Available and Clean...');
+  // Step 2: Reset all 24 physical rooms to available and clean with authoritative category mappings
+  console.log('\nStep 2: Resetting all 24 physical rooms to Available, Clean, and Authoritative Categories...');
   try {
-    const res = await pool.query(`
-      UPDATE public.rooms 
-      SET operational_status = 'available', 
-          housekeeping_status = 'clean', 
-          notes = NULL,
-          updated_at = NOW();
-    `);
-    console.log(`  ✅ Reset public.rooms: ${res.rowCount} physical room(s) set to available/clean.`);
+    // 24 physical room mappings
+    const roomCategoryMap = {
+      '106': 'd0000000-0000-0000-0000-000000000002', // Four Bed Room (₹2800)
+      '107': 'd0000000-0000-0000-0000-000000000004', // Single Room (₹900, walk-in)
+      '206': 'd0000000-0000-0000-0000-000000000002', // Four Bed Room (₹2800)
+      '306': 'd0000000-0000-0000-0000-000000000001', // Suite Room (₹3300)
+    };
+    const defaultDoubleCategoryId = 'd0000000-0000-0000-0000-000000000003'; // Double Room (₹1800)
+
+    for (let floor = 1; floor <= 3; floor++) {
+      for (let num = 1; num <= 8; num++) {
+        const roomNum = `${floor}0${num}`;
+        const catId = roomCategoryMap[roomNum] || defaultDoubleCategoryId;
+        await pool.query(`
+          INSERT INTO public.rooms (
+            room_number, floor_number, category_id, operational_status, housekeeping_status, is_active, updated_at
+          ) VALUES ($1, $2, $3, 'available', 'clean', true, NOW())
+          ON CONFLICT (room_number) DO UPDATE SET
+            floor_number = EXCLUDED.floor_number,
+            category_id = EXCLUDED.category_id,
+            operational_status = 'available',
+            housekeeping_status = 'clean',
+            notes = NULL,
+            is_active = true,
+            updated_at = NOW();
+        `, [roomNum, floor, catId]);
+      }
+    }
+    console.log('  ✅ Verified public.rooms: 24 physical rooms configured (Double ₹1800, Four Bed ₹2800, Suite ₹3300, Single ₹900).');
   } catch (err) {
     console.warn(`  ⚠️ Failed to reset rooms: ${err.message}`);
   }
@@ -112,67 +133,67 @@ async function resetFresh() {
     console.warn(`  ⚠️ Hotel settings update warn: ${err.message}`);
   }
 
-  // Step 4: Ensure all 4 room categories exist and are active
-  console.log('\nStep 4: Ensuring 4 canonical room categories are active...');
+  // Step 4: Ensure all 4 authoritative room categories exist and are active
+  console.log('\nStep 4: Ensuring 4 canonical authoritative room categories are active...');
   const categories = [
     {
       id: 'd0000000-0000-0000-0000-000000000001',
-      slug: 'standard-non-ac-double',
-      name: 'Standard Non-AC Double Room',
-      short_description: 'Cozy and economical non-AC double bedroom ideal for budget travelers and short pilgrim visits to Kadiri temple.',
-      full_description: 'Comfortable non-AC double bed accommodation featuring clean cotton linens, attached western bathroom with 24/7 hot water, high-speed Wi-Fi, and intercom service.',
-      base_price_per_night: 1499,
-      max_adults: 2,
-      max_children: 1,
-      max_occupancy: 3,
-      bed_type: 'Double Bed',
-      room_size_sqft: 220,
-      cover_image_url: '/images/hotel/rooms-double-deluxe.jpg',
+      slug: 'suite-room',
+      name: 'Suite Room',
+      short_description: 'Spacious luxury with premium comfort, dedicated living lounge, and private balcony.',
+      full_description: 'Our Suite Room offers a perfect blend of space, elegance, and modern amenities for a truly comfortable stay. Features a plush king bed, dedicated living lounge with premium armchairs, attached modern bathroom with hot/cold shower, and private balcony overlooking peaceful surroundings. Base tariff includes 2 persons, with provision for up to 2 additional guests at ₹300 each.',
+      base_price_per_night: 3300,
+      max_adults: 4,
+      max_children: 2,
+      max_occupancy: 4,
+      bed_type: 'Plush King Bed & Living Lounge',
+      room_size_sqft: 380,
+      cover_image_url: '/images/hotel/room-suite-bed-photo-enhanced.png',
       is_active: true
     },
     {
       id: 'd0000000-0000-0000-0000-000000000002',
-      slug: 'deluxe-ac-double',
-      name: 'Deluxe AC Double Room',
-      short_description: 'Spacious climate-controlled air conditioned room with plush double bed and modern amenities.',
-      full_description: 'Premium air-conditioned sanctuary with Daikin whisper-quiet split AC, 43-inch LED Smart TV, work desk, premium mattress, and tea/coffee kettle.',
-      base_price_per_night: 1899,
-      max_adults: 2,
-      max_children: 1,
-      max_occupancy: 3,
-      bed_type: 'King Bed',
-      room_size_sqft: 280,
-      cover_image_url: '/images/hotel/room-deluxe-double-king.png',
+      slug: 'four-bed-room',
+      name: 'Four Bed Room',
+      short_description: 'Generous family accommodation with 4 comfortable beds, air conditioning, and expansive space.',
+      full_description: 'Tailored for traveling families, temple pilgrims, and group companions visiting Kadiri. Offers 4 comfortable beds with premium linens, individual climate control, high-speed Wi-Fi, spacious ensuite bathroom with geyser hot water, and generous luggage storage. Base tariff includes 4 persons, with provision for 1 additional guest at ₹300.',
+      base_price_per_night: 2800,
+      max_adults: 5,
+      max_children: 2,
+      max_occupancy: 5,
+      bed_type: '4 Beds (Family Configuration)',
+      room_size_sqft: 340,
+      cover_image_url: '/images/hotel/room-twin-render-enhanced.png',
       is_active: true
     },
     {
       id: 'd0000000-0000-0000-0000-000000000003',
-      slug: 'executive-ac-triple',
-      name: 'Executive AC Triple Room',
-      short_description: 'Expansive family room accommodating 3 to 4 guests with climate control and premium furnishings.',
-      full_description: 'Spacious room designed for families visiting Kadiri with 1 Queen Bed + 1 Single Bed, separate sitting area, high-power split AC, and luxury toiletries.',
-      base_price_per_night: 2499,
+      slug: 'double-room',
+      name: 'Double Room',
+      short_description: 'Comfortable air-conditioned room with king or twin bedding and ensuite modern bathroom.',
+      full_description: 'Designed for couples, companions, and solo travelers visiting Kadiri. Features individual air conditioning, plush bedding with acoustic headboards, high-speed Wi-Fi, 24/7 hot water, smart TV, and work space. Base tariff includes 2 persons, with provision for 1 additional guest at ₹300.',
+      base_price_per_night: 1800,
       max_adults: 3,
-      max_children: 2,
-      max_occupancy: 4,
-      bed_type: '1 Queen + 1 Single',
-      room_size_sqft: 360,
-      cover_image_url: '/images/hotel/room-family-triple.png',
+      max_children: 1,
+      max_occupancy: 3,
+      bed_type: 'King Bed / Twin Beds',
+      room_size_sqft: 250,
+      cover_image_url: '/images/hotel/room-double-bed-photo-enhanced.png',
       is_active: true
     },
     {
       id: 'd0000000-0000-0000-0000-000000000004',
-      slug: 'grand-presidential-suite',
-      name: 'Grand Presidential Suite',
-      short_description: 'The pinnacle of luxury at Sri Tayi Grand featuring a master bedroom, separate lounge, and scenic Kadiri views.',
-      full_description: 'Top-tier luxury suite offering separate living room with Italian leather sofa, master bedroom with California King bed, 55-inch UHD Smart TV, and luxury bathroom with rain shower.',
-      base_price_per_night: 3999,
-      max_adults: 4,
-      max_children: 2,
-      max_occupancy: 5,
-      bed_type: 'California King Bed',
-      room_size_sqft: 520,
-      cover_image_url: '/images/hotel/room-presidential-suite.png',
+      slug: 'single-room',
+      name: 'Single Room',
+      short_description: 'Comfortable air-conditioned compact room with single bed, private bath, and essentials for solo travelers. Front desk walk-in only.',
+      full_description: 'Designed exclusively for solo travelers, single executives, and pilgrims visiting Kadiri. Features comfortable single bed, individual climate control AC, high-speed Wi-Fi, attached ensuite bathroom with 24/7 hot water, smart TV, and wardrobe space. This category is available exclusively for front-desk walk-in reservations.',
+      base_price_per_night: 900,
+      max_adults: 1,
+      max_children: 0,
+      max_occupancy: 1,
+      bed_type: 'Single Bed',
+      room_size_sqft: 180,
+      cover_image_url: '/images/hotel/room-corner-photo-enhanced.png',
       is_active: true
     }
   ];
