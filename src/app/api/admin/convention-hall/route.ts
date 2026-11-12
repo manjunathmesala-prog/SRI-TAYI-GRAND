@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
     }
 
     await repo.ensureEnquiriesLoaded();
+    await repo.ensureConventionQuotesLoaded();
     const enquiries = repo.getHallEnquiries();
     const quotes = repo.getConventionQuotes();
 

@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get('search')?.toLowerCase() || searchParams.get('q')?.toLowerCase() || '';
     const limit = parseInt(searchParams.get('limit') || '200', 10);
 
+    await repo.ensureAuditLogsLoaded();
     let logs = repo.getAuditLogs(category || undefined);
 
     if (search) {

@@ -19,6 +19,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
     }
 
+    await repo.ensureGuestsLoaded();
     const guests = repo.getGuests();
     const isCsvExport = req.nextUrl.searchParams.get('export') === 'csv';
 

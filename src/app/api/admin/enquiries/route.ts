@@ -17,6 +17,8 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status') as EnquiryStatus | 'all' | null;
     const search = searchParams.get('search')?.toLowerCase().trim() || '';
 
+    await repo.ensureEnquiriesLoaded();
+    await repo.ensureContactEnquiriesLoaded();
     let unified = repo.getUnifiedEnquiries();
     const contactEnquiries = repo.getContactEnquiries();
 
