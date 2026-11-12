@@ -467,7 +467,7 @@ export function GuestFolioModal({
                   </span>
                 </h3>
                 <p className="text-[11px] text-[#786B61]">
-                  Complete itemized breakdown with statutory 12% GST (6% CGST + 6% SGST)
+                  Complete itemized breakdown with statutory 5% GST (2.5% CGST + 2.5% SGST)
                 </p>
               </div>
 
@@ -492,7 +492,7 @@ export function GuestFolioModal({
                     Post Incidental Charge to Room Folio
                   </span>
                   <span className="text-[10px] text-[#786B61]">
-                    12% GST (6% CGST + 6% SGST) calculated automatically
+                    5% GST (2.5% CGST + 2.5% SGST) calculated automatically
                   </span>
                 </div>
 
@@ -550,9 +550,9 @@ export function GuestFolioModal({
                   <div className="flex items-center gap-3 font-mono text-[11px]">
                     <span>Base: <strong>₹{chargeAmount}</strong></span>
                     <span>+</span>
-                    <span>CGST (6%): <strong>₹{previewCgst}</strong></span>
+                    <span>CGST (2.5%): <strong>₹{previewCgst}</strong></span>
                     <span>+</span>
-                    <span>SGST (6%): <strong>₹{previewSgst}</strong></span>
+                    <span>SGST (2.5%): <strong>₹{previewSgst}</strong></span>
                     <span>=</span>
                     <span className="font-bold text-sm text-[#382216]">
                       Line Total: ₹{previewTotal}
@@ -583,8 +583,8 @@ export function GuestFolioModal({
                     <th className="py-3 px-3.5 font-semibold">Service Description</th>
                     <th className="py-3 px-3 font-semibold">Category</th>
                     <th className="py-3 px-3 font-semibold text-right">Base (₹)</th>
-                    <th className="py-3 px-3 font-semibold text-right">CGST 6%</th>
-                    <th className="py-3 px-3 font-semibold text-right">SGST 6%</th>
+                    <th className="py-3 px-3 font-semibold text-right">CGST 2.5%</th>
+                    <th className="py-3 px-3 font-semibold text-right">SGST 2.5%</th>
                     <th className="py-3 px-3 font-semibold text-right">Total (₹)</th>
                     <th className="py-3 px-3 font-semibold text-center">Posted By</th>
                     <th className="py-3 px-3 font-semibold text-right">Action</th>
