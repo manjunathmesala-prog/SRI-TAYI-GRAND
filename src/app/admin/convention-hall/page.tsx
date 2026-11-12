@@ -1040,7 +1040,7 @@ export default function ConventionHallAdminPage() {
             </div>
 
             {/* PRINTABLE LETTERHEAD AREA */}
-            <div className="border border-[#EFE3D6] rounded-2xl p-8 space-y-6 bg-linear-to-b from-[#FAF7F2]/50 to-white">
+            <div className="border border-[#EFE3D6] rounded-2xl p-8 space-y-6 bg-gradient-to-b from-[#FAF7F2]/50 to-white">
               {/* Hotel Header */}
               <div className="flex items-start justify-between border-b-2 border-[#D8AD56] pb-6">
                 <div>

@@ -166,7 +166,7 @@ function AdminLoginContent() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-[#180F08] via-[#241912] to-[#120B06] flex flex-col justify-center items-center px-4 py-8 sm:px-6 relative overflow-hidden">
+    <div className="min-h-screen bg-[#180F08] bg-gradient-to-b from-[#180F08] via-[#241912] to-[#120B06] flex flex-col justify-center items-center px-4 py-8 sm:px-6 relative overflow-hidden">
       {/* Background Ambience */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-[#B18A4A]/10 rounded-full blur-3xl pointer-events-none" />
 
@@ -395,7 +395,7 @@ function AdminLoginContent() {
             <button
               type="submit"
               disabled={loading || loginSuccess}
-              className="w-full py-3.5 px-4 rounded-xl bg-linear-to-r from-[#8D672F] via-[#B18A4A] to-[#8D672F] hover:from-[#6D4E21] hover:to-[#6D4E21] text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 active:scale-99 disabled:opacity-50 cursor-pointer min-h-[48px]"
+              className="w-full py-3.5 px-4 rounded-xl bg-[#8D672F] bg-gradient-to-r from-[#8D672F] via-[#B18A4A] to-[#8D672F] hover:from-[#6D4E21] hover:to-[#6D4E21] text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-50 cursor-pointer min-h-[48px]"
             >
               {loading ? (
                 <>
