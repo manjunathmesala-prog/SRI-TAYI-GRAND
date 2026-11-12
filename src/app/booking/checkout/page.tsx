@@ -98,7 +98,7 @@ function CheckoutContent() {
               extraPersonsCount: match.extraPersonsCount || 0,
               extraPersonCharges: match.extraPersonCharges || 0,
               subtotal: match.subtotal,
-              taxPercentage: match.taxPercentage || 0,
+              taxPercentage: typeof match.taxPercentage === 'number' ? match.taxPercentage : 5,
               tax: match.taxAmount,
               total: match.totalAmount,
               tariffSourceDate: match.tariffSourceDate || '01-09-2023',
@@ -476,6 +476,12 @@ function CheckoutContent() {
                   <div className="flex justify-between text-amber-900 bg-amber-50/80 p-2.5 rounded-xl border border-amber-200/50">
                     <span>Extra Person ({pricing.extraPersonsCount} guests × ₹300 × {pricing.nights} {pricing.nights === 1 ? 'night' : 'nights'})</span>
                     <span className="font-bold">₹{pricing.extraPersonCharges.toLocaleString('en-IN')}</span>
+                  </div>
+                )}
+                {pricing.tax > 0 && (
+                  <div className="flex justify-between">
+                    <span>Statutory GST ({pricing.taxPercentage || 5}%):</span>
+                    <span className="text-[#33271D] font-bold">₹{pricing.tax.toLocaleString('en-IN')}</span>
                   </div>
                 )}
                 <div className="pt-3 border-t border-[#E6D9C5]/80 flex justify-between text-base font-bold text-[#33271D]">

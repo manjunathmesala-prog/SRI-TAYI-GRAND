@@ -764,7 +764,7 @@ export class HotelRepository {
       : (category?.base_price_per_night || 1800);
 
     const subtotal = nightlyRate * nights;
-    const taxRate = (this.settings.tax_percentage || 12) / 100;
+    const taxRate = (typeof this.settings.tax_percentage === 'number' ? this.settings.tax_percentage : 5) / 100;
     const tax = Math.round(subtotal * taxRate);
     const total = subtotal + tax;
 
@@ -1177,7 +1177,7 @@ export class HotelRepository {
       adultsCount: 2,
       childrenCount: 0,
       customRatePaise: category.base_tariff_paise,
-      taxPercentage: this.settings.tax_percentage || 0,
+      taxPercentage: typeof this.settings.tax_percentage === 'number' ? this.settings.tax_percentage : 5,
     });
 
     const subtotal = tariffCalc.subtotalRupees;
@@ -1685,8 +1685,8 @@ export class HotelRepository {
       (b) => b.check_out_date === targetDate && b.status !== 'cancelled'
     ).length;
 
-    // GST statutory calculations (12% tax slab standard for rooms)
-    const netTaxable = Math.round(totalCollected / 1.12);
+    // GST statutory calculations (5% tax slab standard for rooms)
+    const netTaxable = Math.round(totalCollected / 1.05);
     const totalGst = totalCollected - netTaxable;
     const cgst = Math.round(totalGst / 2);
     const sgst = totalGst - cgst;
@@ -3422,7 +3422,7 @@ export class HotelRepository {
 
   public async addFolioCharge(charge: Omit<FolioCharge, 'id' | 'created_at'>): Promise<FolioCharge> {
     const id = 'fc-' + Date.now() + '-' + Math.random().toString(36).substr(2, 4);
-    const tax_rate = typeof charge.tax_rate === 'number' ? charge.tax_rate : 0.12;
+    const tax_rate = typeof charge.tax_rate === 'number' ? charge.tax_rate : 0.05;
     const tax_amount = Math.round(charge.amount * tax_rate * 100) / 100;
     const total_amount = Math.round((charge.amount + tax_amount) * 100) / 100;
 

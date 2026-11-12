@@ -203,7 +203,7 @@ export default function ConventionHallAdminPage() {
   const decorationTotal = enableFloral ? floralCost : 0;
   const dgTotal = enableDG ? dgCost : 0;
   const subtotal = hallRental + cateringSubtotal + avTotal + decorationTotal + dgTotal;
-  const gstRate = 0.18;
+  const gstRate = 0.05;
   const gstAmount = Math.round(subtotal * gstRate);
   const grandTotal = subtotal + gstAmount;
 
@@ -808,9 +808,9 @@ export default function ConventionHallAdminPage() {
                   <span className="font-mono">₹ {subtotal.toLocaleString('en-IN')}</span>
                 </div>
 
-                {/* GST 18% */}
+                {/* GST 5% */}
                 <div className="flex justify-between items-center text-xs text-gray-300">
-                  <span>18% Banquet GST:</span>
+                  <span>5% Banquet GST:</span>
                   <span className="font-mono text-white">+ ₹ {gstAmount.toLocaleString('en-IN')}</span>
                 </div>
 
@@ -854,7 +854,7 @@ export default function ConventionHallAdminPage() {
                   <th className="py-3.5 px-4 font-semibold">Event & Date</th>
                   <th className="py-3.5 px-4 font-semibold">Pax / Layout</th>
                   <th className="py-3.5 px-4 font-semibold">Catering Package</th>
-                  <th className="py-3.5 px-4 font-semibold">Grand Total (Inc 18% GST)</th>
+                  <th className="py-3.5 px-4 font-semibold">Grand Total (Inc 5% GST)</th>
                   <th className="py-3.5 px-4 font-semibold">Status</th>
                   <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
                 </tr>
@@ -1163,7 +1163,7 @@ export default function ConventionHallAdminPage() {
                       <td className="py-2 px-3 text-right font-mono font-bold">₹ {viewingQuoteForPrint.subtotal.toLocaleString('en-IN')}</td>
                     </tr>
                     <tr>
-                      <td colSpan={3} className="py-2 px-3 text-right">Banquet GST (18%):</td>
+                      <td colSpan={3} className="py-2 px-3 text-right">Banquet GST (5%):</td>
                       <td className="py-2 px-3 text-right font-mono font-bold">₹ {viewingQuoteForPrint.gst_amount.toLocaleString('en-IN')}</td>
                     </tr>
                     <tr className="bg-[#43001F] text-white text-sm">

@@ -115,7 +115,7 @@ export default function HomePage() {
         <div className="text-center space-y-2 mb-12 reveal-on-scroll">
           <div className="flex items-center justify-center gap-2 text-[#43001F]">
             <TayiBrandIcon size={18} />
-            <span className="text-xs uppercase tracking-[0.25em] font-semibold">STAY • FROM ₹1,800</span>
+            <span className="text-xs uppercase tracking-[0.25em] font-semibold">STAY • FROM ₹1,800 + 5% GST</span>
             <TayiBrandIcon size={18} />
           </div>
           <h2 className="text-3xl sm:text-4xl font-serif text-[#33271D]">
@@ -147,7 +147,7 @@ export default function HomePage() {
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                   <div className="absolute top-3 left-3 bg-[#F8F3E9]/95 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] uppercase tracking-wider font-semibold text-[#43001F] border border-[#E6D9C5] shadow-xs">
-                    ₹ {room.base_price_per_night.toLocaleString('en-IN')} / night
+                    ₹ {room.base_price_per_night.toLocaleString('en-IN')} / night + 5% GST
                   </div>
                 </NextLink>
 

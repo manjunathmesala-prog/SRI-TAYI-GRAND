@@ -825,7 +825,7 @@ export interface FolioCharge {
   description: string;
   category: FolioChargeCategory;
   amount: number;
-  tax_rate: number; // e.g. 0.12 (12% GST)
+  tax_rate: number; // e.g. 0.05 (5% GST)
   tax_amount: number;
   total_amount: number;
   posted_by: string;
@@ -918,7 +918,7 @@ export interface ConventionQuote {
   stage_decoration: number;
   generator_diesel: number;
   subtotal: number;
-  gst_rate: number; // 0.18 for banquet / services
+  gst_rate: number; // 0.05 for banquet / services
   gst_amount: number;
   total_amount: number;
   status: 'draft' | 'sent' | 'approved' | 'rejected';

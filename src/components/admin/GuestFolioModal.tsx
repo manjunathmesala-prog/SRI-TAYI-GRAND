@@ -129,8 +129,8 @@ export function GuestFolioModal({
   const totalPaidAmount = booking.paid_amount || 0;
   const balanceDue = Math.max(0, Math.round((totalFolioBill - totalPaidAmount) * 100) / 100);
 
-  // Line item tax preview for the Add form (12% GST = 6% CGST + 6% SGST)
-  const previewTax = Math.round(chargeAmount * 0.12 * 100) / 100;
+  // Line item tax preview for the Add form (5% GST = 2.5% CGST + 2.5% SGST)
+  const previewTax = Math.round(chargeAmount * 0.05 * 100) / 100;
   const previewCgst = Math.round((previewTax / 2) * 100) / 100;
   const previewSgst = Math.round((previewTax - previewCgst) * 100) / 100;
   const previewTotal = Math.round((chargeAmount + previewTax) * 100) / 100;
@@ -154,7 +154,7 @@ export function GuestFolioModal({
         category: chargeCategory,
         description: chargeDescription.trim(),
         amount: Number(chargeAmount),
-        tax_rate: 0.12,
+        tax_rate: 0.05,
         posted_by: 'Front Desk / Accounts',
       });
 

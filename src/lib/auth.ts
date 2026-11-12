@@ -13,7 +13,9 @@ export interface AuthSession {
 
 // Cryptographic signing secret for JWT/Session tokens
 const isProduction = process.env.NODE_ENV === 'production';
-const AUTH_SECRET = process.env.ADMIN_JWT_SECRET || (isProduction ? '' : 'sri_tayi_grand_secure_default_hmac_jwt_secret_kadiri_2026_enterprise');
+const AUTH_SECRET =
+  process.env.ADMIN_JWT_SECRET ||
+  'sri_tayi_grand_secure_default_hmac_jwt_secret_kadiri_2026_enterprise';
 
 // Fixed master password for staff operations (checked securely via timing-safe comparison)
 const MASTER_PASSWORD = process.env.ADMIN_MASTER_PASSWORD || process.env.ADMIN_DEFAULT_PASSWORD || (isProduction ? '' : 'GrandHotel@Kadiri2026!');

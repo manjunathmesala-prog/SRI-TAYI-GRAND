@@ -108,7 +108,7 @@ export default function BookingPortalPage() {
             <div className="space-y-3 mb-6 text-xs text-[#241912]">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>Zero Booking Fees & Transparent 12% GST</span>
+                <span>Zero Booking Fees & Transparent 5% GST</span>
               </div>
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-600" />

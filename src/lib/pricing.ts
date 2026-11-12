@@ -411,7 +411,7 @@ export function formatRupees(val: number): string {
 /**
  * Authoritative Server-Side Tariff Calculator.
  * Enforces integer paise arithmetic, guest allocation, and configurable billing rules.
- * Does not invent GST percentages; applies configured tax if present, otherwise 0.
+ * Does not invent GST percentages; applies configured tax if present, otherwise 5%.
  */
 export function calculateBookingTariff(params: {
   categoryId: string;
@@ -517,10 +517,10 @@ export function calculateBookingTariff(params: {
 
   const subtotalPaise = roomChargesPaise + extraPersonChargesPaise;
 
-  // Tax calculation: only applied if a valid tax percentage is configured (default 0)
-  const taxPercentage = typeof params.taxPercentage === 'number' && !isNaN(params.taxPercentage) && params.taxPercentage > 0
+  // Tax calculation: only applied if a valid tax percentage is configured (default 5%)
+  const taxPercentage = typeof params.taxPercentage === 'number' && !isNaN(params.taxPercentage)
     ? params.taxPercentage
-    : 0;
+    : 5;
 
   const taxAmountPaise = taxPercentage > 0
     ? Math.round((subtotalPaise * taxPercentage) / 100)

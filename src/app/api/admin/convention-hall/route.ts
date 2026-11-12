@@ -93,7 +93,7 @@ export async function POST(req: NextRequest) {
         stage_decoration: Number(stage_decoration || 0),
         generator_diesel: Number(generator_diesel || 0),
         subtotal: Number(subtotal || 0),
-        gst_rate: Number(gst_rate || 0.18),
+        gst_rate: Number(gst_rate || 0.05),
         gst_amount: Number(gst_amount || 0),
         total_amount: Number(total_amount || 0),
         status: status || 'draft',

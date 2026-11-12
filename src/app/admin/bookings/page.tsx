@@ -1818,7 +1818,7 @@ export default function BookingsAdminPage() {
                 <span>₹{selectedRes.subtotal_amount.toLocaleString('en-IN')}</span>
               </div>
               <div className="flex justify-between text-[#786A5B]">
-                <span>Taxes & Fees (12% GST):</span>
+                <span>Taxes & Fees (5% GST):</span>
                 <span>₹{selectedRes.tax_amount.toLocaleString('en-IN')}</span>
               </div>
               {selectedRes.additional_charges_amount > 0 && (

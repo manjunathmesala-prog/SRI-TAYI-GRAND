@@ -99,7 +99,7 @@ export default function RoomsPage() {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <div className="absolute top-4 left-4 bg-[#F8F3E9]/95 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-semibold text-[#43001F] tracking-wider uppercase border border-[#E6D9C5] shadow-xs flex items-center gap-1.5">
-                    <span>₹ {room.base_price_per_night.toLocaleString('en-IN')} / night</span>
+                    <span>₹ {room.base_price_per_night.toLocaleString('en-IN')} / night + 5% GST</span>
                     {room.walk_in_only && (
                       <span className="bg-amber-600 text-white text-[9px] px-2 py-0.5 rounded-full font-bold">
                         Walk-In Only

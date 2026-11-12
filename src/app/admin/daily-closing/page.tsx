@@ -745,13 +745,13 @@ export default function AdminDailyClosingPage() {
                 <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#EFE3D6] space-y-1">
                   <span className="text-xs text-[#786A5B]">Net Taxable Tariff</span>
                   <div className="text-2xl font-bold font-mono text-[#241912]">
-                    ₹{(summary.gst?.netTaxable || Math.round(summary.totalRevenue / 1.12)).toLocaleString('en-IN')}
+                    ₹{(summary.gst?.netTaxable || Math.round(summary.totalRevenue / 1.05)).toLocaleString('en-IN')}
                   </div>
                   <span className="text-[11px] text-[#786A5B]">Base room revenue</span>
                 </div>
 
                 <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#EFE3D6] space-y-1">
-                  <span className="text-xs text-[#786A5B]">CGST (6.0%)</span>
+                  <span className="text-xs text-[#786A5B]">CGST (2.5%)</span>
                   <div className="text-2xl font-bold font-mono text-[#382216]">
                     ₹{(summary.gst?.cgst || Math.round(((summary.gst?.totalGst || 0) / 2))).toLocaleString('en-IN')}
                   </div>
@@ -759,7 +759,7 @@ export default function AdminDailyClosingPage() {
                 </div>
 
                 <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#EFE3D6] space-y-1">
-                  <span className="text-xs text-[#786A5B]">SGST (6.0%)</span>
+                  <span className="text-xs text-[#786A5B]">SGST (2.5%)</span>
                   <div className="text-2xl font-bold font-mono text-[#382216]">
                     ₹{(summary.gst?.sgst || Math.round(((summary.gst?.totalGst || 0) / 2))).toLocaleString('en-IN')}
                   </div>
@@ -769,9 +769,9 @@ export default function AdminDailyClosingPage() {
                 <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 space-y-1">
                   <span className="text-xs text-emerald-800">Total GST Liability</span>
                   <div className="text-2xl font-bold font-mono text-emerald-700">
-                    ₹{(summary.gst?.totalGst || (summary.totalRevenue - Math.round(summary.totalRevenue / 1.12))).toLocaleString('en-IN')}
+                    ₹{(summary.gst?.totalGst || (summary.totalRevenue - Math.round(summary.totalRevenue / 1.05))).toLocaleString('en-IN')}
                   </div>
-                  <span className="text-[11px] text-emerald-600">Combined 12% Hotel Slab</span>
+                  <span className="text-[11px] text-emerald-600">Combined 5% Hotel Slab</span>
                 </div>
               </div>
 

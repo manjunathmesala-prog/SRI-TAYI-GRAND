@@ -11,7 +11,7 @@ export default function SettingsAdminPage() {
 
   const [checkInTime, setCheckInTime] = useState('14:00');
   const [checkOutTime, setCheckOutTime] = useState('11:00');
-  const [taxPercentage, setTaxPercentage] = useState(12);
+  const [taxPercentage, setTaxPercentage] = useState(5);
   const [allowPayAtHotel, setAllowPayAtHotel] = useState(true);
   const [holdTimeoutMinutes, setHoldTimeoutMinutes] = useState(15);
 
@@ -33,7 +33,7 @@ export default function SettingsAdminPage() {
           if (data.settings) {
             setCheckInTime(data.settings.check_in_time || '14:00');
             setCheckOutTime(data.settings.check_out_time || '11:00');
-            setTaxPercentage(data.settings.tax_percentage ?? 12);
+            setTaxPercentage(data.settings.tax_percentage ?? 5);
             setAllowPayAtHotel(Boolean(data.settings.allow_pay_at_hotel));
             setHoldTimeoutMinutes(data.settings.hold_timeout_minutes ?? 15);
           }

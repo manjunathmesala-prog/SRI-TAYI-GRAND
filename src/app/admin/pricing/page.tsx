@@ -298,7 +298,7 @@ export default function AdminPricingPage() {
 
     const extraPersonsCharge = calcExtraPersons * extraBedTariff;
     const subtotal = effective + extraPersonsCharge;
-    const gstRate = 0.12; // 12% GST standard
+    const gstRate = 0.05; // 5% GST standard
     const gstAmount = Math.round(subtotal * gstRate * 100) / 100;
     const finalTariff = subtotal + gstAmount;
 
@@ -603,7 +603,7 @@ export default function AdminPricingPage() {
                 </div>
 
                 <div className="flex items-center justify-between text-xs text-stone-600">
-                  <span>Goods & Services Tax (12% GST):</span>
+                  <span>Goods & Services Tax (5% GST):</span>
                   <span className="font-mono font-semibold text-stone-800">
                     ₹{calculatedBreakdown.gstAmount.toLocaleString('en-IN')}
                   </span>

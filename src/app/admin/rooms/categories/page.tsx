@@ -8,6 +8,15 @@ import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import { authStorage } from '@/lib/auth-storage';
 import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 
+const AUTHENTIC_HOTEL_PHOTOS = [
+  { label: 'Double Bed Room (Ambient Headboard)', url: '/images/hotel/room-double-bed-photo-enhanced.png' },
+  { label: 'Twin / Four Bed Room', url: '/images/hotel/room-twin-render-enhanced.png' },
+  { label: 'Executive Suite Master Bed', url: '/images/hotel/room-suite-bed-photo-enhanced.png' },
+  { label: 'Executive Suite Seating Lounge', url: '/images/hotel/suite-seating-photo-enhanced.png' },
+  { label: 'Single Room / Dressing Corner', url: '/images/hotel/room-corner-photo-enhanced.png' },
+  { label: 'Acoustic Headboard Detail', url: '/images/hotel/room-headboard-detail-photo-enhanced.png' },
+];
+
 export default function RoomCategoriesAdminPage() {
   const { t, formatCurrency, isTelugu } = useAdminLanguage();
 
@@ -23,6 +32,7 @@ export default function RoomCategoriesAdminPage() {
   const [price, setPrice] = useState(1800);
   const [bedType, setBedType] = useState('King Bed');
   const [maxOccupancy, setMaxOccupancy] = useState(3);
+  const [coverImageUrl, setCoverImageUrl] = useState('');
   const [isActive, setIsActive] = useState(true);
 
   const fetchCategories = useCallback(async () => {
@@ -52,6 +62,7 @@ export default function RoomCategoriesAdminPage() {
     setPrice(cat.base_price_per_night);
     setBedType(cat.bed_type);
     setMaxOccupancy(cat.max_occupancy);
+    setCoverImageUrl(cat.cover_image_url || '/images/hotel/room-double-bed-photo-enhanced.png');
     setIsActive(cat.is_active);
   };
 
@@ -76,6 +87,7 @@ export default function RoomCategoriesAdminPage() {
           base_tariff_paise: Number(price) * 100,
           bed_type: bedType,
           max_occupancy: Number(maxOccupancy),
+          cover_image_url: coverImageUrl,
           is_active: isActive,
         }),
       });
@@ -293,6 +305,54 @@ export default function RoomCategoriesAdminPage() {
                   onChange={(e) => setBedType(e.target.value)}
                   className="w-full text-xs font-medium p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
                 />
+              </div>
+
+              <div>
+                <label className="block text-[11px] uppercase font-semibold text-[#786B61] mb-1">
+                  {isTelugu ? 'కవర్ ఫోటో (అసలైన చిత్రం)' : 'Cover Image (Original Hotel Photo)'}
+                </label>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="relative w-20 h-14 rounded-lg overflow-hidden border border-[#D8AD56]/40 shrink-0 bg-stone-100">
+                    {coverImageUrl && (
+                      <Image
+                        src={coverImageUrl}
+                        alt="Preview"
+                        fill
+                        className="object-cover"
+                      />
+                    )}
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    value={coverImageUrl}
+                    onChange={(e) => setCoverImageUrl(e.target.value)}
+                    placeholder="/images/hotel/..."
+                    className="w-full text-xs font-mono p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[10px] text-[#786B61] block font-medium">
+                    {isTelugu ? 'అసలైన హోటల్ ఫోటోలలో ఒకటి ఎంచుకోండి:' : 'Select an original hotel photo:'}
+                  </span>
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {AUTHENTIC_HOTEL_PHOTOS.map((photo) => (
+                      <button
+                        key={photo.url}
+                        type="button"
+                        onClick={() => setCoverImageUrl(photo.url)}
+                        className={`text-[10px] p-1.5 rounded-lg border text-left truncate cursor-pointer transition-colors ${
+                          coverImageUrl === photo.url
+                            ? 'border-[#43001F] bg-[#43001F]/10 text-[#43001F] font-bold'
+                            : 'border-stone-200 hover:border-[#D8AD56] bg-stone-50 text-stone-700'
+                        }`}
+                        title={photo.label}
+                      >
+                        {photo.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               <div className="flex items-center gap-2 pt-1">

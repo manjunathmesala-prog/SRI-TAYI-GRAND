@@ -349,7 +349,7 @@ export default function RoomTapeChartPage() {
       );
 
       const subtotal = basePrice * nights;
-      const taxAmount = Math.round(subtotal * 0.12 * 100) / 100;
+      const taxAmount = Math.round(subtotal * 0.05 * 100) / 100;
       const totalAmount = subtotal + taxAmount;
 
       const data = await adminOperations.createBooking(

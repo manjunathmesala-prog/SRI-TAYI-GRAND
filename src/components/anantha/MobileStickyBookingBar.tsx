@@ -36,7 +36,7 @@ export default function MobileStickyBookingBar() {
             </span>
           </div>
           <span className="text-[11px] text-[#D8AD56] font-medium tracking-tight">
-            From ₹1,800 <span className="text-white/60 font-light">/ night</span>
+            From ₹1,800 <span className="text-white/60 font-light">/ night + 5% GST</span>
           </span>
         </Link>
 

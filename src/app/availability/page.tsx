@@ -280,7 +280,7 @@ function AvailabilityContent() {
                       ₹{result.totalAmount.toLocaleString('en-IN')}
                     </div>
                     <div className="text-[11px] text-[#786B61] font-light mt-0.5">
-                      Includes 12% GST
+                      Includes 5% GST
                     </div>
                   </div>
 

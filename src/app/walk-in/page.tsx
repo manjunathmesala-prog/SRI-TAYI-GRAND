@@ -114,7 +114,7 @@ function WalkInKioskContent() {
   const galleryImages =
     galleryCat?.gallery_images && galleryCat.gallery_images.length > 0
       ? galleryCat.gallery_images
-      : [galleryCat?.cover_image_url || '/images/hotel/room-suite-large.jpg'];
+      : [galleryCat?.cover_image_url || '/images/hotel/room-suite-bed-photo-enhanced.png'];
 
   const handlePrevImage = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
@@ -511,7 +511,7 @@ function WalkInKioskContent() {
                         title="Click to view room photos"
                       >
                         <Image
-                          src={cat.cover_image_url || '/images/hotel/room-suite-large.jpg'}
+                          src={cat.cover_image_url || '/images/hotel/room-suite-bed-photo-enhanced.png'}
                           alt={cat.name}
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-300"

@@ -46,7 +46,7 @@ export const INITIAL_HOTEL_SETTINGS: HotelSettings = {
   timezone: 'Asia/Kolkata',
   check_in_time: '14:00',
   check_out_time: '11:00',
-  tax_percentage: 0,
+  tax_percentage: 5,
   allow_pay_at_hotel: true,
   require_advance_payment: false,
   advance_percentage: 100,
@@ -244,7 +244,7 @@ export const INITIAL_PHYSICAL_ROOMS: PhysicalRoom[] = [
 
   // --- FLOOR 2 (Rooms 201 - 208) ---
   { id: 'rm-201', room_number: '201', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 2, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
-  { id: 'rm-202', room_number: '202', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 2, operational_status: 'occupied', housekeeping_status: 'clean', current_booking_ref: 'STG-20261104-8142', current_guest_name: 'K. Venkatesh Rao', is_active: true },
+  { id: 'rm-202', room_number: '202', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 2, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-203', room_number: '203', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 2, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-204', room_number: '204', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 2, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-205', room_number: '205', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 2, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
@@ -258,7 +258,7 @@ export const INITIAL_PHYSICAL_ROOMS: PhysicalRoom[] = [
   { id: 'rm-303', room_number: '303', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 3, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-304', room_number: '304', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 3, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-305', room_number: '305', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 3, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
-  { id: 'rm-306', room_number: '306', category_id: 'cat-suite-01', category_name: 'Suite Room', floor_number: 3, operational_status: 'occupied', housekeeping_status: 'clean', current_booking_ref: 'STG-20261103-1189', current_guest_name: 'Dr. Anand Raman', is_active: true },
+  { id: 'rm-306', room_number: '306', category_id: 'cat-suite-01', category_name: 'Suite Room', floor_number: 3, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-307', room_number: '307', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 3, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-308', room_number: '308', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 3, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
 ];
@@ -530,8 +530,7 @@ export const INITIAL_OTA_CHANNELS: OtaChannel[] = [
     badgeTextColor: 'text-red-400',
     isConnected: true,
     rateMultiplier: 1.15,
-    lastSyncAt: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-    syncStatus: 'synced',
+    syncStatus: 'idle',
   },
   {
     id: 'goibibo',
@@ -542,8 +541,7 @@ export const INITIAL_OTA_CHANNELS: OtaChannel[] = [
     badgeTextColor: 'text-orange-400',
     isConnected: true,
     rateMultiplier: 1.15,
-    lastSyncAt: new Date(Date.now() - 18 * 60 * 1000).toISOString(),
-    syncStatus: 'synced',
+    syncStatus: 'idle',
   },
   {
     id: 'booking_com',
@@ -554,8 +552,7 @@ export const INITIAL_OTA_CHANNELS: OtaChannel[] = [
     badgeTextColor: 'text-blue-400',
     isConnected: true,
     rateMultiplier: 1.15,
-    lastSyncAt: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
-    syncStatus: 'synced',
+    syncStatus: 'idle',
   },
   {
     id: 'agoda',
@@ -566,8 +563,7 @@ export const INITIAL_OTA_CHANNELS: OtaChannel[] = [
     badgeTextColor: 'text-emerald-400',
     isConnected: true,
     rateMultiplier: 1.15,
-    lastSyncAt: new Date(Date.now() - 40 * 60 * 1000).toISOString(),
-    syncStatus: 'synced',
+    syncStatus: 'idle',
   },
   {
     id: 'expedia',
@@ -582,30 +578,7 @@ export const INITIAL_OTA_CHANNELS: OtaChannel[] = [
   },
 ];
 
-export const INITIAL_CHANNEL_SYNC_LOGS: ChannelSyncLog[] = [
-  {
-    id: 'synclog-01',
-    channelId: 'makemytrip',
-    channelName: 'MakeMyTrip & Goibibo',
-    syncType: 'full_inventory',
-    status: 'success',
-    message: '25 physical rooms mapped, rate parity buffer applied (+15%).',
-    roomsUpdatedCount: 25,
-    ratesUpdatedCount: 6,
-    timestamp: new Date(Date.now() - 15 * 60 * 1000).toISOString(),
-  },
-  {
-    id: 'synclog-02',
-    channelId: 'booking_com',
-    channelName: 'Booking.com',
-    syncType: 'rates_only',
-    status: 'success',
-    message: 'Live ARI (Availability, Rates & Inventory) push verified.',
-    roomsUpdatedCount: 25,
-    ratesUpdatedCount: 6,
-    timestamp: new Date(Date.now() - 25 * 60 * 1000).toISOString(),
-  },
-];
+export const INITIAL_CHANNEL_SYNC_LOGS: ChannelSyncLog[] = [];
 
 export const INITIAL_PRICING_RULES: PricingRule[] = [
   {
@@ -651,20 +624,20 @@ export const INITIAL_PRICING_RULES: PricingRule[] = [
 // ==============================================================================
 
 export const INITIAL_GL_ACCOUNTS: GLAccount[] = [
-  { code: '1010', name: 'Cash in Front Desk Drawer', category: 'asset', balance: 5000, currency: 'INR', is_active: true },
-  { code: '1020', name: 'HDFC Current Bank Account', category: 'asset', balance: 342500, currency: 'INR', is_active: true },
-  { code: '1030', name: 'Razorpay Online Settlement Clearing', category: 'asset', balance: 18400, currency: 'INR', is_active: true },
-  { code: '1040', name: 'Guest Accounts Receivable', category: 'asset', balance: 4200, currency: 'INR', is_active: true },
-  { code: '2010', name: 'GST Output SGST (6%) Payable', category: 'liability', balance: 2150, currency: 'INR', is_active: true },
-  { code: '2020', name: 'GST Output CGST (6%) Payable', category: 'liability', balance: 2150, currency: 'INR', is_active: true },
-  { code: '2030', name: 'Advance Guest Deposits / Overpayments', category: 'liability', balance: 8000, currency: 'INR', is_active: true },
-  { code: '3010', name: 'Hotel Owner Equity & Capital', category: 'equity', balance: 357800, currency: 'INR', is_active: true },
-  { code: '4010', name: 'Room Accommodation Revenue', category: 'revenue', balance: 64800, currency: 'INR', is_active: true },
-  { code: '4020', name: 'Convention Hall & Banquet Revenue', category: 'revenue', balance: 25000, currency: 'INR', is_active: true },
-  { code: '5010', name: 'Linen & Laundry Operational Expense', category: 'expense', balance: 4200, currency: 'INR', is_active: true },
-  { code: '5020', name: 'Diesel Generator & Power Utilities', category: 'expense', balance: 6800, currency: 'INR', is_active: true },
-  { code: '5030', name: 'Property Maintenance & AC Repairs', category: 'expense', balance: 2330, currency: 'INR', is_active: true },
-  { code: '5040', name: 'Staff Welfare & Front Desk Operations', category: 'expense', balance: 1800, currency: 'INR', is_active: true },
+  { code: '1010', name: 'Cash in Front Desk Drawer', category: 'asset', balance: 0, currency: 'INR', is_active: true },
+  { code: '1020', name: 'HDFC Current Bank Account', category: 'asset', balance: 0, currency: 'INR', is_active: true },
+  { code: '1030', name: 'Razorpay Online Settlement Clearing', category: 'asset', balance: 0, currency: 'INR', is_active: true },
+  { code: '1040', name: 'Guest Accounts Receivable', category: 'asset', balance: 0, currency: 'INR', is_active: true },
+  { code: '2010', name: 'GST Output SGST (2.5%) Payable', category: 'liability', balance: 0, currency: 'INR', is_active: true },
+  { code: '2020', name: 'GST Output CGST (2.5%) Payable', category: 'liability', balance: 0, currency: 'INR', is_active: true },
+  { code: '2030', name: 'Advance Guest Deposits / Overpayments', category: 'liability', balance: 0, currency: 'INR', is_active: true },
+  { code: '3010', name: 'Hotel Owner Equity & Capital', category: 'equity', balance: 0, currency: 'INR', is_active: true },
+  { code: '4010', name: 'Room Accommodation Revenue', category: 'revenue', balance: 0, currency: 'INR', is_active: true },
+  { code: '4020', name: 'Convention Hall & Banquet Revenue', category: 'revenue', balance: 0, currency: 'INR', is_active: true },
+  { code: '5010', name: 'Linen & Laundry Operational Expense', category: 'expense', balance: 0, currency: 'INR', is_active: true },
+  { code: '5020', name: 'Diesel Generator & Power Utilities', category: 'expense', balance: 0, currency: 'INR', is_active: true },
+  { code: '5030', name: 'Property Maintenance & AC Repairs', category: 'expense', balance: 0, currency: 'INR', is_active: true },
+  { code: '5040', name: 'Staff Welfare & Front Desk Operations', category: 'expense', balance: 0, currency: 'INR', is_active: true },
 ];
 
 export const INITIAL_JOURNAL_ENTRIES: JournalEntry[] = [];

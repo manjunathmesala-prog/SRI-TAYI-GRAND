@@ -71,7 +71,7 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
     adultsCount: adults,
     childrenCount: children,
     customRatePaise: room.base_tariff_paise,
-    taxPercentage: 0,
+    taxPercentage: 5,
   });
 
   const nights = tariffCalc.billingPeriods;
@@ -258,7 +258,7 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                     <span className="font-serif text-3xl font-bold text-[#33271D]">
                       ₹{room.base_price_per_night.toLocaleString('en-IN')}
                     </span>
-                    <span className="text-xs text-[#786A5B] ml-1 font-light">/ night</span>
+                    <span className="text-xs text-[#786A5B] ml-1 font-light">/ night + 5% GST</span>
                   </div>
                   <span className="text-xs text-[#43001F] font-semibold">Includes Free Wi-Fi</span>
                 </div>
@@ -350,8 +350,14 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                   <div className="p-4 rounded-2xl bg-[#FAF6EE] border border-[#E6D9C5] space-y-2 text-xs">
                     <div className="flex justify-between text-[#786A5B]">
                       <span>{nights} {nights === 1 ? 'Night' : 'Nights'} × {roomsCount} {roomsCount === 1 ? 'Room' : 'Rooms'}</span>
-                      <span className="font-semibold text-[#33271D]">₹{total.toLocaleString('en-IN')}</span>
+                      <span className="font-semibold text-[#33271D]">₹{tariffCalc.subtotalRupees.toLocaleString('en-IN')}</span>
                     </div>
+                    {tariffCalc.taxAmountRupees > 0 && (
+                      <div className="flex justify-between text-[#786A5B]">
+                        <span>Statutory GST (5%):</span>
+                        <span className="font-semibold text-[#33271D]">₹{tariffCalc.taxAmountRupees.toLocaleString('en-IN')}</span>
+                      </div>
+                    )}
                     <div className="pt-2 border-t border-[#E6D9C5]/80 flex justify-between text-sm font-serif font-bold text-[#33271D]">
                       <span>Estimated Total</span>
                       <span className="text-[#43001F]">₹{total.toLocaleString('en-IN')}</span>
@@ -400,7 +406,7 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                       className="object-cover group-hover:scale-105 transition-transform duration-700"
                     />
                     <div className="absolute top-3 left-3 bg-[#F8F3E9]/95 px-3 py-1 rounded-full text-[10px] font-semibold text-[#43001F] border border-[#E6D9C5]">
-                      ₹ {other.base_price_per_night.toLocaleString('en-IN')} / night
+                      ₹ {other.base_price_per_night.toLocaleString('en-IN')} / night + 5% GST
                     </div>
                   </div>
 

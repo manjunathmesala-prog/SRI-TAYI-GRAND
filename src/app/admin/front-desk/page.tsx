@@ -1491,7 +1491,7 @@ export default function FrontDeskPage() {
                   <span>₹ {checkOutModalBooking.subtotal_amount.toLocaleString('en-IN')}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>GST Taxes (12%):</span>
+                  <span>GST Taxes (5%):</span>
                   <span>₹ {checkOutModalBooking.tax_amount.toLocaleString('en-IN')}</span>
                 </div>
                 <div className="flex justify-between">

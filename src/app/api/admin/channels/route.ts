@@ -153,7 +153,7 @@ export async function POST(req: NextRequest) {
         const basePrice = category.base_price_per_night;
         const otaNightlyRate = Math.round(basePrice * channel.rateMultiplier);
         const subtotal = otaNightlyRate * nights;
-        const taxAmount = Math.round(subtotal * 0.12 * 100) / 100; // 12% GST
+        const taxAmount = Math.round(subtotal * 0.05 * 100) / 100; // 5% GST
         const totalAmount = subtotal + taxAmount;
 
         const otaRef = `OTA-${channel.logoText}-${Math.floor(100000 + Math.random() * 900000)}`;

@@ -66,7 +66,7 @@ export async function POST(
     }
 
     const baseAmount = Number(amount);
-    const taxRate = typeof tax_rate === 'number' ? tax_rate : 0.12;
+    const taxRate = typeof tax_rate === 'number' ? tax_rate : 0.05;
     const taxAmount = Math.round(baseAmount * taxRate * 100) / 100;
     const totalAmount = Math.round((baseAmount + taxAmount) * 100) / 100;
 

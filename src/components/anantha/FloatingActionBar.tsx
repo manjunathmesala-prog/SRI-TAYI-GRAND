@@ -63,7 +63,7 @@ export default function FloatingActionBar() {
               <span className="text-[10px] text-emerald-300 font-medium tracking-wide">Kadiri</span>
             </div>
             <p className="text-[11px] text-[#E6D9C5]/80 font-sans">
-              Rooms from <strong className="font-bold text-white tabular-nums">₹1,800</strong> / night
+              Rooms from <strong className="font-bold text-white tabular-nums">₹1,800</strong> / night + 5% GST
             </p>
           </div>
         </NextLink>

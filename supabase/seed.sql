@@ -66,7 +66,7 @@ INSERT INTO room_categories (
         4, 2, 4,
         'King Bed',
         380,
-        '/images/hotel/room-suite-large.jpg',
+        '/images/hotel/room-suite-bed-photo-enhanced.png',
         true
     ),
     (
@@ -79,7 +79,7 @@ INSERT INTO room_categories (
         2, 1, 3,
         'Double Bed (King Size)',
         260,
-        '/images/hotel/room-double-bed-large.jpg',
+        '/images/hotel/room-double-bed-photo-enhanced.png',
         true
     ),
     (
@@ -92,7 +92,7 @@ INSERT INTO room_categories (
         2, 1, 2,
         'Twin Beds (Two Singles)',
         240,
-        '/images/hotel/room-double-large.jpg',
+        '/images/hotel/room-twin-render-enhanced.png',
         true
     ),
     (
@@ -105,7 +105,7 @@ INSERT INTO room_categories (
         1, 0, 1,
         'Single Bed',
         180,
-        '/images/hotel/room-single-large.jpg',
+        '/images/hotel/room-corner-photo-enhanced.png',
         true
     )
 ON CONFLICT (slug) DO NOTHING;

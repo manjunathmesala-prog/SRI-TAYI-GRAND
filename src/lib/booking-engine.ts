@@ -193,7 +193,7 @@ export function checkCategoryAvailability(
     adultsCount,
     childrenCount,
     customRatePaise: category.base_tariff_paise,
-    taxPercentage: settings.tax_percentage || 0,
+    taxPercentage: typeof settings.tax_percentage === 'number' ? settings.tax_percentage : 5,
   });
 
   const isAvailable = hasRooms && tariffCalc.isValid;
