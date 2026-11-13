@@ -72,38 +72,59 @@ async function resetFresh() {
     }
   }
 
-  // Step 2: Reset all 24 physical rooms to available and clean with authoritative category mappings
-  console.log('\nStep 2: Resetting all 24 physical rooms to Available, Clean, and Authoritative Categories...');
+  // Step 2: Reset all 25 physical rooms to available and clean with authoritative category mappings
+  console.log('\nStep 2: Resetting all 25 physical rooms to Available, Clean, and Authoritative Categories...');
   try {
-    // 24 physical room mappings
-    const roomCategoryMap = {
-      '106': 'd0000000-0000-0000-0000-000000000002', // Four Bed Room (₹2800)
-      '107': 'd0000000-0000-0000-0000-000000000004', // Single Room (₹900, walk-in)
-      '206': 'd0000000-0000-0000-0000-000000000002', // Four Bed Room (₹2800)
-      '306': 'd0000000-0000-0000-0000-000000000001', // Suite Room (₹3300)
-    };
-    const defaultDoubleCategoryId = 'd0000000-0000-0000-0000-000000000003'; // Double Room (₹1800)
+    // 25 physical room mappings across 3 floors (Floor 1: 101-109, Floor 2: 201-208, Floor 3: 301-308)
+    const roomsList = [
+      // Floor 1 (Rooms 101 - 109)
+      { num: '101', floor: 1, catId: 'd0000000-0000-0000-0000-000000000003' },
+      { num: '102', floor: 1, catId: 'd0000000-0000-0000-0000-000000000003' },
+      { num: '103', floor: 1, catId: 'd0000000-0000-0000-0000-000000000003' },
+      { num: '104', floor: 1, catId: 'd0000000-0000-0000-0000-000000000003' },
+      { num: '105', floor: 1, catId: 'd0000000-0000-0000-0000-000000000003' },
+      { num: '106', floor: 1, catId: 'd0000000-0000-0000-0000-000000000002' }, // Four Bed Room (₹2800)
+      { num: '107', floor: 1, catId: 'd0000000-0000-0000-0000-000000000004' }, // Single Room (₹900, walk-in)
+      { num: '108', floor: 1, catId: 'd0000000-0000-0000-0000-000000000003' },
+      { num: '109', floor: 1, catId: 'd0000000-0000-0000-0000-000000000003' }, // Double Room (₹1800)
 
-    for (let floor = 1; floor <= 3; floor++) {
-      for (let num = 1; num <= 8; num++) {
-        const roomNum = `${floor}0${num}`;
-        const catId = roomCategoryMap[roomNum] || defaultDoubleCategoryId;
-        await pool.query(`
-          INSERT INTO public.rooms (
-            room_number, floor_number, category_id, operational_status, housekeeping_status, is_active, updated_at
-          ) VALUES ($1, $2, $3, 'available', 'clean', true, NOW())
-          ON CONFLICT (room_number) DO UPDATE SET
-            floor_number = EXCLUDED.floor_number,
-            category_id = EXCLUDED.category_id,
-            operational_status = 'available',
-            housekeeping_status = 'clean',
-            notes = NULL,
-            is_active = true,
-            updated_at = NOW();
-        `, [roomNum, floor, catId]);
-      }
+      // Floor 2 (Rooms 201 - 208)
+      { num: '201', floor: 2, catId: 'd0000000-0000-0000-0000-000000000003' },
+      { num: '202', floor: 2, catId: 'd0000000-0000-0000-0000-000000000003' },
+      { num: '203', floor: 2, catId: 'd0000000-0000-0000-0000-000000000003' },
+      { num: '204', floor: 2, catId: 'd0000000-0000-0000-0000-000000000003' },
+      { num: '205', floor: 2, catId: 'd0000000-0000-0000-0000-000000000003' },
+      { num: '206', floor: 2, catId: 'd0000000-0000-0000-0000-000000000002' }, // Four Bed Room (₹2800)
+      { num: '207', floor: 2, catId: 'd0000000-0000-0000-0000-000000000003' },
+      { num: '208', floor: 2, catId: 'd0000000-0000-0000-0000-000000000003' },
+
+      // Floor 3 (Rooms 301 - 308)
+      { num: '301', floor: 3, catId: 'd0000000-0000-0000-0000-000000000003' },
+      { num: '302', floor: 3, catId: 'd0000000-0000-0000-0000-000000000003' },
+      { num: '303', floor: 3, catId: 'd0000000-0000-0000-0000-000000000003' },
+      { num: '304', floor: 3, catId: 'd0000000-0000-0000-0000-000000000003' },
+      { num: '305', floor: 3, catId: 'd0000000-0000-0000-0000-000000000003' },
+      { num: '306', floor: 3, catId: 'd0000000-0000-0000-0000-000000000001' }, // Suite Room (₹3300)
+      { num: '307', floor: 3, catId: 'd0000000-0000-0000-0000-000000000003' },
+      { num: '308', floor: 3, catId: 'd0000000-0000-0000-0000-000000000003' }
+    ];
+
+    for (const r of roomsList) {
+      await pool.query(`
+        INSERT INTO public.rooms (
+          room_number, floor_number, category_id, operational_status, housekeeping_status, is_active, updated_at
+        ) VALUES ($1, $2, $3, 'available', 'clean', true, NOW())
+        ON CONFLICT (room_number) DO UPDATE SET
+          floor_number = EXCLUDED.floor_number,
+          category_id = EXCLUDED.category_id,
+          operational_status = 'available',
+          housekeeping_status = 'clean',
+          notes = NULL,
+          is_active = true,
+          updated_at = NOW();
+      `, [r.num, r.floor, r.catId]);
     }
-    console.log('  ✅ Verified public.rooms: 24 physical rooms configured (Double ₹1800, Four Bed ₹2800, Suite ₹3300, Single ₹900).');
+    console.log('  ✅ Verified public.rooms: 25 physical rooms configured (Double ₹1800 [21 rooms], Four Bed ₹2800 [2 rooms], Suite ₹3300 [1 room], Single ₹900 [1 room]).');
   } catch (err) {
     console.warn(`  ⚠️ Failed to reset rooms: ${err.message}`);
   }
@@ -256,7 +277,7 @@ async function resetFresh() {
   console.log('\n================================================================');
   console.log('   DATABASE SUCCESSFULLY RESET TO FRESH CLEAN-SLATE START!     ');
   console.log('   All dummy transactions purged.                               ');
-  console.log('   24 physical rooms ready and set to Available & Clean.       ');
+  console.log('   25 physical rooms ready and set to Available & Clean.       ');
   console.log('   Master hotel settings & categories intact.                   ');
   console.log('================================================================\n');
 

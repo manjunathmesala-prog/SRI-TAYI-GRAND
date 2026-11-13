@@ -254,6 +254,22 @@ export class HotelRepository {
             r.operational_status = pgR.operational_status;
             if (pgR.housekeeping_status) r.housekeeping_status = pgR.housekeeping_status;
             if (pgR.notes) r.notes = pgR.notes;
+            if (pgR.category_id) r.category_id = normalizeCategoryId(pgR.category_id);
+            if (pgR.floor_number) r.floor_number = pgR.floor_number;
+          } else {
+            const catId = normalizeCategoryId(pgR.category_id);
+            const cat = this.categories.find((c) => c.id === catId);
+            this.rooms.push({
+              id: pgR.id || `rm-${pgR.room_number}`,
+              room_number: pgR.room_number,
+              category_id: catId,
+              category_name: cat ? cat.name : 'Double Room',
+              floor_number: pgR.floor_number || 1,
+              operational_status: pgR.operational_status || 'available',
+              housekeeping_status: pgR.housekeeping_status || 'clean',
+              is_active: true,
+              notes: pgR.notes,
+            });
           }
         }
       }
@@ -4357,6 +4373,22 @@ export class HotelRepository {
             r.operational_status = pgR.operational_status;
             if (pgR.housekeeping_status) r.housekeeping_status = pgR.housekeeping_status;
             if (pgR.notes) r.notes = pgR.notes;
+            if (pgR.category_id) r.category_id = normalizeCategoryId(pgR.category_id);
+            if (pgR.floor_number) r.floor_number = pgR.floor_number;
+          } else {
+            const catId = normalizeCategoryId(pgR.category_id);
+            const cat = this.categories.find((c) => c.id === catId);
+            this.rooms.push({
+              id: pgR.id || `rm-${pgR.room_number}`,
+              room_number: pgR.room_number,
+              category_id: catId,
+              category_name: cat ? cat.name : 'Double Room',
+              floor_number: pgR.floor_number || 1,
+              operational_status: pgR.operational_status || 'available',
+              housekeeping_status: pgR.housekeeping_status || 'clean',
+              is_active: true,
+              notes: pgR.notes,
+            });
           }
         }
       }

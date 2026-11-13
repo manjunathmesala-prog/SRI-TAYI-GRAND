@@ -232,7 +232,7 @@ export const INITIAL_ROOM_CATEGORIES: RoomCategory[] = [
 ];
 
 export const INITIAL_PHYSICAL_ROOMS: PhysicalRoom[] = [
-  // --- FLOOR 1 (Rooms 101 - 108) ---
+  // --- FLOOR 1 (Rooms 101 - 109) ---
   { id: 'rm-101', room_number: '101', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 1, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-102', room_number: '102', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 1, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-103', room_number: '103', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 1, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
@@ -241,6 +241,7 @@ export const INITIAL_PHYSICAL_ROOMS: PhysicalRoom[] = [
   { id: 'rm-106', room_number: '106', category_id: 'cat-four-bed-02', category_name: 'Four Bed Room', floor_number: 1, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
   { id: 'rm-107', room_number: '107', category_id: 'cat-single-04', category_name: 'Single Room', floor_number: 1, operational_status: 'available', housekeeping_status: 'clean', is_active: true, walk_in_only: true },
   { id: 'rm-108', room_number: '108', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 1, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
+  { id: 'rm-109', room_number: '109', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 1, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
 
   // --- FLOOR 2 (Rooms 201 - 208) ---
   { id: 'rm-201', room_number: '201', category_id: 'cat-double-03', category_name: 'Double Room', floor_number: 2, operational_status: 'available', housekeeping_status: 'clean', is_active: true },
@@ -471,6 +472,7 @@ export const INITIAL_RFID_DEVICES: RFIDDevice[] = [
   { id: 'dev-lock-106', device_name: 'Lock-Room-106', device_type: 'door_lock', room_number: '106', ip_address: '192.168.1.106', mac_address: '00:1B:44:11:1A:06', status: 'online', battery_level: 92, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:25:00+05:30' },
   { id: 'dev-lock-107', device_name: 'Lock-Room-107', device_type: 'door_lock', room_number: '107', ip_address: '192.168.1.107', mac_address: '00:1B:44:11:1A:07', status: 'online', battery_level: 94, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:25:00+05:30' },
   { id: 'dev-lock-108', device_name: 'Lock-Room-108', device_type: 'door_lock', room_number: '108', ip_address: '192.168.1.108', mac_address: '00:1B:44:11:1A:08', status: 'online', battery_level: 95, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:25:00+05:30' },
+  { id: 'dev-lock-109', device_name: 'Lock-Room-109', device_type: 'door_lock', room_number: '109', ip_address: '192.168.1.109', mac_address: '00:1B:44:11:1A:09', status: 'online', battery_level: 95, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:25:00+05:30' },
 
   // --- FLOOR 2 DOOR LOCKS ---
   { id: 'dev-lock-201', device_name: 'Lock-Room-201', device_type: 'door_lock', room_number: '201', ip_address: '192.168.1.121', mac_address: '00:1B:44:11:2A:01', status: 'online', battery_level: 95, firmware_version: 'v2.4.1', last_ping_at: '2026-11-05T14:25:00+05:30' },

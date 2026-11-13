@@ -224,7 +224,7 @@ export default function AdminDashboardPage() {
   }, [payments, filterPeriod, todayStr]);
 
   // Operational Room Metrics
-  const totalRooms = rooms.length || 24;
+  const totalRooms = rooms.length || 25;
   const occupiedRooms = rooms.filter((r) => r.operational_status === 'occupied').length;
   const reservedRooms = rooms.filter((r) => r.operational_status === 'reserved').length;
   const availableRooms = rooms.filter((r) => r.operational_status === 'available').length;
@@ -652,7 +652,7 @@ export default function AdminDashboardPage() {
 
       {/* Middle Grid: Operational Room Matrix & Front Desk Shortcuts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left: 24 Physical Rooms Interactive Status Grid */}
+        {/* Left: 25 Physical Rooms Interactive Status Grid */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-[#E6D9C5] p-6 shadow-xs">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-6">
             <div>
@@ -666,8 +666,8 @@ export default function AdminDashboardPage() {
               </div>
               <p className="text-xs text-[#786A5B]">
                 {isTelugu
-                  ? 'అంతస్తులు 1, 2 & 3 లోని మొత్తం 24 అతిథి గదుల ప్రత్యక్ష స్థితి'
-                  : 'Live state of all 24 guest rooms across Floors 1, 2 & 3'}
+                  ? 'అంతస్తులు 1, 2 & 3 లోని మొత్తం 25 అతిథి గదుల ప్రత్యక్ష స్థితి'
+                  : 'Live state of all 25 guest rooms across Floors 1, 2 & 3'}
               </p>
             </div>
 

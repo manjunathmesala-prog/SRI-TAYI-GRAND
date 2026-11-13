@@ -4,15 +4,15 @@ import { searchAvailability } from '@/lib/booking-engine';
 import { normalizeCategoryId } from '@/lib/pricing';
 
 describe('Rooms, Floors & Walk-In Inventory Rules', () => {
-  it('correctly allocates 24 physical rooms across Floors 1 to 3', () => {
+  it('correctly allocates 25 physical rooms across Floors 1 to 3', () => {
     const rooms = repo.getRooms();
-    expect(rooms.length).toBe(24);
+    expect(rooms.length).toBe(25);
 
     const floor1Rooms = rooms.filter((r) => r.floor_number === 1).map((r) => r.room_number).sort();
     const floor2Rooms = rooms.filter((r) => r.floor_number === 2).map((r) => r.room_number).sort();
     const floor3Rooms = rooms.filter((r) => r.floor_number === 3).map((r) => r.room_number).sort();
 
-    expect(floor1Rooms).toEqual(['101', '102', '103', '104', '105', '106', '107', '108']);
+    expect(floor1Rooms).toEqual(['101', '102', '103', '104', '105', '106', '107', '108', '109']);
     expect(floor2Rooms).toEqual(['201', '202', '203', '204', '205', '206', '207', '208']);
     expect(floor3Rooms).toEqual(['301', '302', '303', '304', '305', '306', '307', '308']);
   });
@@ -41,13 +41,13 @@ describe('Rooms, Floors & Walk-In Inventory Rules', () => {
     expect(r107?.walk_in_only).toBe(true);
   });
 
-  it('allocates all remaining 20 rooms from 101 to 308 as Double Rooms', () => {
+  it('allocates all remaining 21 rooms from 101 to 308 as Double Rooms', () => {
     const doubleRooms = repo.getRooms().filter((r) => r.category_id === 'cat-double-03');
-    expect(doubleRooms.length).toBe(20);
+    expect(doubleRooms.length).toBe(21);
 
     const doubleRoomNumbers = doubleRooms.map((r) => r.room_number).sort();
     const expectedDoubleNumbers = [
-      '101', '102', '103', '104', '105', '108',
+      '101', '102', '103', '104', '105', '108', '109',
       '201', '202', '203', '204', '205', '207', '208',
       '301', '302', '303', '304', '305', '307', '308'
     ].sort();

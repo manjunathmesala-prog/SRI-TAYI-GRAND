@@ -134,6 +134,7 @@ async function seed() {
     '106': { op: 'available', hk: 'clean', cat: 'd0000000-0000-0000-0000-000000000002' }, // Four Bed
     '107': { op: 'available', hk: 'clean', cat: 'd0000000-0000-0000-0000-000000000004' }, // Single (Walk-in)
     '108': { op: 'available', hk: 'clean', cat: 'd0000000-0000-0000-0000-000000000003' },
+    '109': { op: 'available', hk: 'clean', cat: 'd0000000-0000-0000-0000-000000000003' },
     '201': { op: 'occupied', hk: 'clean', cat: 'd0000000-0000-0000-0000-000000000003' },
     '202': { op: 'occupied', hk: 'clean', cat: 'd0000000-0000-0000-0000-000000000003' },
     '203': { op: 'available', hk: 'clean', cat: 'd0000000-0000-0000-0000-000000000003' },
@@ -159,7 +160,7 @@ async function seed() {
       WHERE room_number = $4;
     `, [info.op, info.hk, info.cat, rNum]);
   }
-  console.log('✅ Physical Rooms updated (24 rooms across 3 floors)');
+  console.log('✅ Physical Rooms updated (25 rooms across 3 floors)');
 
   // 4. Guests
   const guests = [

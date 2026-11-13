@@ -12,7 +12,7 @@ describe('Analytics, Revenue Yield & Business Intelligence', () => {
       expect(analytics.kpis.totalRevenue).toBe(0);
       expect(analytics.kpis.adr).toBe(0);
       expect(analytics.kpis.revPAR).toBe(0);
-      expect(analytics.kpis.totalRooms).toBe(24);
+      expect(analytics.kpis.totalRooms).toBe(25);
 
       // Channel breakdown must have 0 counts and 0 revenues
       expect(analytics.channelBreakdown).toHaveLength(3);

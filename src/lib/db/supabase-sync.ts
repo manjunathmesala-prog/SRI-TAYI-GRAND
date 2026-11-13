@@ -765,7 +765,10 @@ export async function syncRoomStatusToSupabase(params: {
 }
 
 export async function loadRoomsFromSupabase(): Promise<{
+  id: string;
   room_number: string;
+  floor_number: number;
+  category_id: string;
   operational_status: OperationalStatus;
   housekeeping_status: HousekeepingStatus;
   notes?: string;
@@ -779,11 +782,15 @@ export async function loadRoomsFromSupabase(): Promise<{
     const client = await db.connect();
     try {
       const res = await client.query(`
-        SELECT room_number, operational_status, housekeeping_status, notes
-        FROM rooms;
+        SELECT id, room_number, floor_number, category_id, operational_status, housekeeping_status, notes
+        FROM rooms
+        ORDER BY floor_number ASC, room_number ASC;
       `);
       return res.rows.map((r: any) => ({
-        room_number: r.room_number,
+        id: String(r.id),
+        room_number: String(r.room_number),
+        floor_number: Number(r.floor_number) || 1,
+        category_id: String(r.category_id),
         operational_status: r.operational_status as OperationalStatus,
         housekeeping_status: r.housekeeping_status as HousekeepingStatus,
         notes: r.notes || undefined,
