@@ -15,12 +15,22 @@ function getPgPool() {
   try {
     // Dynamic require so Webpack client bundles never attempt to package pg
     const { Pool } = require('pg');
+    const host = process.env.SUPABASE_DB_HOST || process.env.PGHOST;
+    const user = process.env.SUPABASE_DB_USER || process.env.PGUSER;
+    const password = process.env.SUPABASE_DB_PASSWORD || process.env.PGPASSWORD;
+    const database = process.env.SUPABASE_DB_NAME || process.env.PGDATABASE || 'postgres';
+    const port = Number(process.env.SUPABASE_DB_PORT || process.env.PGPORT) || 6543;
+
+    if (!host || !user || !password) {
+      return null;
+    }
+
     pgPoolInstance = new Pool({
-      host: process.env.SUPABASE_DB_HOST || 'aws-0-ap-northeast-1.pooler.supabase.com',
-      port: Number(process.env.SUPABASE_DB_PORT) || 6543,
-      database: process.env.SUPABASE_DB_NAME || 'postgres',
-      user: process.env.SUPABASE_DB_USER || 'postgres.wercvaimozbbkbwmuoct',
-      password: process.env.SUPABASE_DB_PASSWORD || 'Vaynex@2026',
+      host,
+      port,
+      database,
+      user,
+      password,
       ssl: { rejectUnauthorized: false },
       max: 3,
       idleTimeoutMillis: 10000,

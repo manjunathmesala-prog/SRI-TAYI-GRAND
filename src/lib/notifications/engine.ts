@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase/client';
+import { getSupabasePgPool } from '@/lib/db/supabase-sync';
 import {
   NotificationEventType,
   NotificationSeverity,
@@ -25,6 +26,8 @@ const rfidDedupeCache = new Map<string, number>();
 const RFID_DEDUPE_WINDOW_MS = 3000;
 
 class NotificationEngine {
+  private isHydrated = false;
+  private isHydrating = false;
   /**
    * Subscribe an active SSE connection to real-time Super Admin alerts
    */
@@ -232,37 +235,119 @@ class NotificationEngine {
       }
     });
 
-    // 5. Asynchronous persistence to PostgreSQL / Supabase
-    this.persistToSupabase(notification).catch((err) => {
-      console.warn('[SUPABASE NOTIF PERSIST WARN]', err.message);
+    // 5. Asynchronous dual persistence to PostgreSQL and Supabase
+    this.persistToDatabase(notification).catch((err) => {
+      console.warn('[DATABASE NOTIF PERSIST WARN]', err.message);
     });
 
     return notification;
   }
 
   /**
-   * Asynchronous database persistence (detached from transaction loop)
+   * Hydrates in-memory cache with persisted notifications from PostgreSQL
    */
-  private async persistToSupabase(notif: SuperAdminNotification): Promise<void> {
-    try {
-      const { error } = await supabaseAdmin.from('super_admin_notifications').upsert({
-        id: notif.id,
-        recipient_id: notif.recipientId,
-        type: notif.type,
-        severity: notif.severity,
-        title: notif.title,
-        message: notif.message,
-        metadata: notif.metadata,
-        is_read: notif.isRead,
-        created_at: notif.createdAt,
-      });
+  public async hydrateFromDatabase(): Promise<void> {
+    if (this.isHydrated || this.isHydrating) return;
+    this.isHydrating = true;
 
-      if (error) {
-        // Fallback or warning if cloud DB table is warming up
-        console.warn('[NOTIF DB INSERT]', error.message);
+    try {
+      const db = getSupabasePgPool();
+      if (!db) return;
+
+      const client = await db.connect();
+      try {
+        const res = await client.query(
+          `SELECT id, recipient_id, type, severity, title, message, metadata, is_read, read_at, created_at 
+           FROM super_admin_notifications 
+           ORDER BY created_at DESC 
+           LIMIT 100`
+        );
+
+        if (res.rows && res.rows.length > 0) {
+          const existingIds = new Set(inMemoryNotifications.map((n) => n.id));
+          for (const row of res.rows) {
+            if (!existingIds.has(row.id)) {
+              inMemoryNotifications.push({
+                id: row.id,
+                recipientId: row.recipient_id || 'super-admin',
+                type: row.type as NotificationEventType,
+                severity: row.severity as NotificationSeverity,
+                title: row.title,
+                message: row.message,
+                metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : (row.metadata || {}),
+                isRead: Boolean(row.is_read),
+                readAt: row.read_at ? new Date(row.read_at).toISOString() : undefined,
+                createdAt: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
+              });
+            }
+          }
+        }
+        this.isHydrated = true;
+      } finally {
+        client.release();
       }
     } catch (err: any) {
-      console.warn('[NOTIF DB PERSIST ERROR]', err.message);
+      console.warn('[NOTIF HYDRATION WARN]', err.message);
+    } finally {
+      this.isHydrating = false;
+    }
+  }
+
+  /**
+   * Asynchronous database persistence (detached from transaction loop)
+   */
+  private async persistToDatabase(notif: SuperAdminNotification): Promise<void> {
+    // 1. Primary: Direct PostgreSQL pool persistence
+    try {
+      const db = getSupabasePgPool();
+      if (db) {
+        const client = await db.connect();
+        try {
+          await client.query(
+            `INSERT INTO super_admin_notifications (
+              id, recipient_id, type, severity, title, message, metadata, is_read, created_at
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+            ON CONFLICT (id) DO UPDATE SET
+              is_read = EXCLUDED.is_read,
+              read_at = EXCLUDED.read_at,
+              metadata = EXCLUDED.metadata`,
+            [
+              notif.id,
+              notif.recipientId,
+              notif.type,
+              notif.severity,
+              notif.title,
+              notif.message,
+              JSON.stringify(notif.metadata || {}),
+              notif.isRead,
+              notif.createdAt,
+            ]
+          );
+        } finally {
+          client.release();
+        }
+      }
+    } catch (err: any) {
+      console.warn('[NOTIF PG PERSIST ERROR]', err.message);
+    }
+
+    // 2. Secondary: Mirror to Supabase JS if client configured
+    try {
+      if (supabaseAdmin) {
+        await supabaseAdmin.from('super_admin_notifications').upsert({
+          id: notif.id,
+          recipient_id: notif.recipientId,
+          type: notif.type,
+          severity: notif.severity,
+          title: notif.title,
+          message: notif.message,
+          metadata: notif.metadata,
+          is_read: notif.isRead,
+          created_at: notif.createdAt,
+        });
+      }
+    } catch {
+      // Non-fatal
     }
   }
 
@@ -270,6 +355,11 @@ class NotificationEngine {
    * Query notifications with category filtering and unread count
    */
   public getNotifications(filter: NotificationCategoryFilter = 'all', limit = 50) {
+    if (!this.isHydrated && !this.isHydrating) {
+      // Trigger background hydration
+      this.hydrateFromDatabase().catch(() => {});
+    }
+
     let list = inMemoryNotifications;
 
     if (filter === 'financials') {
@@ -292,59 +382,142 @@ class NotificationEngine {
   }
 
   /**
-   * Mark notification(s) as read
+   * Mark notification(s) as read in memory and PostgreSQL
    */
-  public markAsRead(id?: string, markAll = false): void {
+  public async markAsRead(id?: string, markAll = false): Promise<void> {
     const now = new Date().toISOString();
     if (markAll) {
       inMemoryNotifications.forEach((n) => {
         n.isRead = true;
         n.readAt = now;
       });
-      // Async update in Supabase
-      Promise.resolve(
-        supabaseAdmin
-          .from('super_admin_notifications')
-          .update({ is_read: true, read_at: now })
-          .eq('recipient_id', 'super-admin')
-          .eq('is_read', false)
-      ).catch(() => {});
+
+      // Update in PostgreSQL
+      try {
+        const db = getSupabasePgPool();
+        if (db) {
+          const client = await db.connect();
+          try {
+            await client.query(
+              `UPDATE super_admin_notifications SET is_read = TRUE, read_at = $1 WHERE recipient_id = $2 AND is_read = FALSE`,
+              [now, 'super-admin']
+            );
+          } finally {
+            client.release();
+          }
+        }
+      } catch (err: any) {
+        console.warn('[NOTIF MARK READ ALL DB ERROR]', err.message);
+      }
+
+      // Secondary mirror
+      try {
+        if (supabaseAdmin) {
+          await supabaseAdmin
+            .from('super_admin_notifications')
+            .update({ is_read: true, read_at: now })
+            .eq('recipient_id', 'super-admin')
+            .eq('is_read', false);
+        }
+      } catch {}
     } else if (id) {
       const item = inMemoryNotifications.find((n) => n.id === id);
       if (item) {
         item.isRead = true;
         item.readAt = now;
-        Promise.resolve(
-          supabaseAdmin
+      }
+
+      // Update in PostgreSQL
+      try {
+        const db = getSupabasePgPool();
+        if (db) {
+          const client = await db.connect();
+          try {
+            await client.query(
+              `UPDATE super_admin_notifications SET is_read = TRUE, read_at = $1 WHERE id = $2`,
+              [now, id]
+            );
+          } finally {
+            client.release();
+          }
+        }
+      } catch (err: any) {
+        console.warn('[NOTIF MARK READ DB ERROR]', err.message);
+      }
+
+      // Secondary mirror
+      try {
+        if (supabaseAdmin) {
+          await supabaseAdmin
             .from('super_admin_notifications')
             .update({ is_read: true, read_at: now })
-            .eq('id', id)
-        ).catch(() => {});
-      }
+            .eq('id', id);
+        }
+      } catch {}
     }
   }
 
   /**
-   * Clear notification history
+   * Clear notification history in memory and PostgreSQL
    */
-  public clearNotifications(id?: string, clearAll = false): void {
+  public async clearNotifications(id?: string, clearAll = false): Promise<void> {
     if (clearAll) {
       inMemoryNotifications.length = 0;
-      Promise.resolve(
-        supabaseAdmin
-          .from('super_admin_notifications')
-          .delete()
-          .eq('recipient_id', 'super-admin')
-      ).catch(() => {});
+
+      try {
+        const db = getSupabasePgPool();
+        if (db) {
+          const client = await db.connect();
+          try {
+            await client.query(
+              `DELETE FROM super_admin_notifications WHERE recipient_id = $1`,
+              ['super-admin']
+            );
+          } finally {
+            client.release();
+          }
+        }
+      } catch (err: any) {
+        console.warn('[NOTIF CLEAR ALL DB ERROR]', err.message);
+      }
+
+      try {
+        if (supabaseAdmin) {
+          await supabaseAdmin
+            .from('super_admin_notifications')
+            .delete()
+            .eq('recipient_id', 'super-admin');
+        }
+      } catch {}
     } else if (id) {
       const idx = inMemoryNotifications.findIndex((n) => n.id === id);
       if (idx !== -1) inMemoryNotifications.splice(idx, 1);
-      Promise.resolve(
-        supabaseAdmin
-          .from('super_admin_notifications')
-          .delete()
-          .eq('id', id)
-      ).catch(() => {});
+
+      try {
+        const db = getSupabasePgPool();
+        if (db) {
+          const client = await db.connect();
+          try {
+            await client.query(
+              `DELETE FROM super_admin_notifications WHERE id = $1`,
+              [id]
+            );
+          } finally {
+            client.release();
+          }
+        }
+      } catch (err: any) {
+        console.warn('[NOTIF CLEAR DB ERROR]', err.message);
+      }
+
+      try {
+        if (supabaseAdmin) {
+          await supabaseAdmin
+            .from('super_admin_notifications')
+            .delete()
+            .eq('id', id);
+        }
+      } catch {}
     }
   }
 }

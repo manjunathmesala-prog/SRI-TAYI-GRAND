@@ -34,8 +34,79 @@ export async function POST(request: NextRequest) {
     const { action, id, markAll } = body;
 
     if (action === 'mark_read' || !action) {
-      notificationEngine.markAsRead(id, Boolean(markAll));
+      await notificationEngine.markAsRead(id, Boolean(markAll));
       return NextResponse.json({ success: true, message: 'Notification(s) marked as read' });
+    }
+
+    if (action === 'simulate_event' || action === 'test_alert') {
+      const testTypes = [
+        'EVENT_CHECK_IN',
+        'EVENT_TRANSACTION',
+        'EVENT_RFID_TAP',
+        'EVENT_NEW_BOOKING',
+        'EVENT_CHECK_OUT',
+      ] as const;
+      const chosenType = (body.eventType ||
+        testTypes[Math.floor(Math.random() * testTypes.length)]) as typeof testTypes[number];
+
+      let payload: any = {};
+      if (chosenType === 'EVENT_CHECK_IN') {
+        payload = {
+          guestName: body.guestName || 'Srikanth Reddy',
+          roomNumber: body.roomNumber || '204',
+          bookingReference: `STG-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-204`,
+          staffName: 'Reception Desk',
+        };
+      } else if (chosenType === 'EVENT_TRANSACTION') {
+        payload = {
+          transactionId: `pay_demo_${Date.now()}`,
+          amount: body.amount || 4500,
+          currency: 'INR',
+          method: 'upi',
+          payerName: body.payerName || 'Chinna Sai',
+          bookingReference: 'STG-DEMO-PAY',
+          status: 'captured',
+        };
+      } else if (chosenType === 'EVENT_RFID_TAP') {
+        payload = {
+          deviceId: 'reader-102',
+          location: body.location || 'Room 102',
+          cardUid: '04A1B2C3D4',
+          holderName: body.holderName || 'Venkata Rao',
+          cardType: 'guest',
+          result: 'GRANTED',
+          reason: 'Authorized keycard tap',
+        };
+      } else if (chosenType === 'EVENT_NEW_BOOKING') {
+        payload = {
+          bookingReference: `STG-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-771`,
+          customerName: body.customerName || 'Kavitha Devi',
+          roomCategory: 'Executive Suite',
+          roomsCount: 1,
+          checkInDate: new Date().toISOString().slice(0, 10),
+          checkOutDate: new Date(Date.now() + 86400000).toISOString().slice(0, 10),
+          totalAmount: 3200,
+          source: 'online',
+        };
+      } else {
+        payload = {
+          guestName: body.guestName || 'Ramesh Babu',
+          roomNumber: body.roomNumber || '105',
+          bookingReference: 'STG-DEMO-OUT',
+          balanceStatus: 'settled',
+        };
+      }
+
+      const notification = await notificationEngine.dispatch({
+        eventType: chosenType,
+        payload,
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: 'Telemetry test alert dispatched successfully',
+        notification,
+      });
     }
 
     return NextResponse.json({ success: false, error: 'Unknown action' }, { status: 400 });
@@ -55,7 +126,7 @@ export async function DELETE(request: NextRequest) {
     const id = url.searchParams.get('id') || undefined;
     const clearAll = url.searchParams.get('clearAll') === 'true';
 
-    notificationEngine.clearNotifications(id, clearAll);
+    await notificationEngine.clearNotifications(id, clearAll);
     return NextResponse.json({ success: true, message: 'Notification(s) cleared' });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 400 });

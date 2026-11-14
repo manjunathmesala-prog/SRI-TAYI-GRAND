@@ -27,6 +27,7 @@ export function loadPersistedData<T>(filename: string): T[] {
   try {
     if (fs.existsSync(filePath)) {
       const content = fs.readFileSync(filePath, 'utf-8');
+      if (!content || !content.trim()) return [];
       const parsed = JSON.parse(content);
       if (Array.isArray(parsed)) {
         return parsed;
@@ -45,7 +46,9 @@ export function savePersistedData<T>(filename: string, items: T[]): void {
 
   const filePath = path.join(dir, filename);
   try {
-    fs.writeFileSync(filePath, JSON.stringify(items, null, 2), 'utf-8');
+    const tempPath = `${filePath}.tmp.${Date.now()}`;
+    fs.writeFileSync(tempPath, JSON.stringify(items || [], null, 2), 'utf-8');
+    fs.renameSync(tempPath, filePath);
   } catch (err) {
     console.warn(`[STORAGE] Failed to write ${filename}:`, err instanceof Error ? err.message : String(err));
   }

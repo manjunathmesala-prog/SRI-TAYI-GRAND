@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.gitignore
+*.log
+data/backups
+rfid-bridge/bin
+rfid-bridge/obj
+*.dat
+*.bat
+latest_production_tunnel_url.txt
+bridge_active_port.txt
+scratch
+qa/evidence

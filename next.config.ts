@@ -38,14 +38,15 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   serverExternalPackages: ['pg'],
   env: {
-    DATABASE_URL: process.env.DATABASE_URL || 'postgresql://postgres.wercvaimozbbkbwmuoct:Vaynex%402026@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres',
-    SUPABASE_DATABASE_URL: process.env.SUPABASE_DATABASE_URL || 'postgresql://postgres.wercvaimozbbkbwmuoct:Vaynex%402026@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres',
+    DATABASE_URL: process.env.DATABASE_URL || 'postgresql://postgres.goxgiohyshxzqzesernz:Vaynex%402026@aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres',
+    SUPABASE_DATABASE_URL: process.env.SUPABASE_DATABASE_URL || 'postgresql://postgres.goxgiohyshxzqzesernz:Vaynex%402026@aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres',
     SUPABASE_DB_NAME: process.env.SUPABASE_DB_NAME || 'postgres',
-    SUPABASE_DB_HOST: process.env.SUPABASE_DB_HOST || 'aws-0-ap-northeast-1.pooler.supabase.com',
+    SUPABASE_DB_HOST: process.env.SUPABASE_DB_HOST || 'aws-1-ap-northeast-2.pooler.supabase.com',
     SUPABASE_DB_PORT: process.env.SUPABASE_DB_PORT || '6543',
-    SUPABASE_DB_USER: process.env.SUPABASE_DB_USER || 'postgres.wercvaimozbbkbwmuoct',
+    SUPABASE_DB_USER: process.env.SUPABASE_DB_USER || 'postgres.goxgiohyshxzqzesernz',
     SUPABASE_DB_PASSWORD: process.env.SUPABASE_DB_PASSWORD || 'Vaynex@2026',
     ADMIN_DEFAULT_EMAIL: process.env.ADMIN_DEFAULT_EMAIL || 'admin@sritayigrand.com',
     ADMIN_DEFAULT_PASSWORD: process.env.ADMIN_DEFAULT_PASSWORD || 'GrandHotel@Kadiri2026!',

@@ -40,6 +40,11 @@ let poolInstance: any = null;
 
 export function getSupabasePgPool(): any {
   if (typeof window !== 'undefined') return null;
+  const isBuild =
+    process.env.NEXT_PHASE === 'phase-production-build' ||
+    process.env.npm_lifecycle_event === 'build' ||
+    Boolean(process.env.NEXT_IS_BUILD);
+  if (isBuild) return null;
   if (poolInstance) return poolInstance;
 
   try {
@@ -47,19 +52,22 @@ export function getSupabasePgPool(): any {
     if (!req) return null;
     const { Pool } = req('pg');
 
-    const host = process.env.SUPABASE_DB_HOST || 'aws-0-ap-northeast-1.pooler.supabase.com';
-    const port = Number(process.env.SUPABASE_DB_PORT) || 6543;
-    const database = process.env.SUPABASE_DB_NAME || 'postgres';
-    const user = process.env.SUPABASE_DB_USER || 'postgres.wercvaimozbbkbwmuoct';
-    const password = process.env.SUPABASE_DB_PASSWORD || 'Vaynex@2026';
+    const host = process.env.SUPABASE_DB_HOST || process.env.PGHOST;
+    const port = Number(process.env.SUPABASE_DB_PORT || process.env.PGPORT) || 5432;
+    const database = process.env.SUPABASE_DB_NAME || process.env.PGDATABASE || 'postgres';
+    const user = process.env.SUPABASE_DB_USER || process.env.PGUSER;
+    const password = process.env.SUPABASE_DB_PASSWORD || process.env.PGPASSWORD;
 
     let connectionString =
       process.env.DATABASE_URL ||
       process.env.SUPABASE_DATABASE_URL ||
-      `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${host}:${port}/${database}`;
+      (host && user && password ? `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${host}:${port}/${database}` : '');
 
-    if (connectionString.includes('db.wercvaimozbbkbwmuoct.supabase.co')) {
-      connectionString = `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@${host}:${port}/${database}`;
+    if (!connectionString) return null;
+
+    // Automatic IPv4 remapping: If connection string points to IPv6-only direct host, route via active IPv4 pooler
+    if (connectionString.includes('db.goxgiohyshxzqzesernz.supabase.co') || connectionString.includes('db.wercvaimozbbkbwmuoct.supabase.co')) {
+      connectionString = `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@aws-1-ap-northeast-2.pooler.supabase.com:5432/${database}`;
     }
 
     poolInstance = new Pool({

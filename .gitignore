@@ -46,3 +46,4 @@ scratch/
 .vercel
 .env*
 data/backups/
+supabase/.temp/

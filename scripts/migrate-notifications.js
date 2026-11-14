@@ -1,12 +1,13 @@
 const { Client } = require('pg');
 
 async function migrate() {
+  const connectionString =
+    process.env.DATABASE_URL ||
+    process.env.SUPABASE_DATABASE_URL ||
+    'postgresql://postgres.goxgiohyshxzqzesernz:Vaynex%402026@aws-1-ap-northeast-2.pooler.supabase.com:5432/postgres';
+
   const client = new Client({
-    host: process.env.PGHOST || 'aws-0-ap-northeast-1.pooler.supabase.com',
-    port: Number(process.env.PGPORT) || 5432,
-    database: process.env.PGDATABASE || 'postgres',
-    user: process.env.PGUSER || 'postgres.wercvaimozbbkbwmuoct',
-    password: process.env.PGPASSWORD || 'Vaynex@2026',
+    connectionString,
     ssl: { rejectUnauthorized: false },
   });
 
