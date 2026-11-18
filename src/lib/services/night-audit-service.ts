@@ -1,5 +1,5 @@
 import { repo } from '../db/repository.ts';
-import { Booking, PaymentRecord, Expense, FolioCharge } from '../../types.ts';
+import { Booking, PaymentRecord, Expense, FolioCharge, GoogleReview } from '../../types.ts';
 import { parseISO, isSameDay } from 'date-fns';
 import { PdfGenerationService } from './pdf-service';
 import { EmailDeliveryService } from './email-service';
@@ -29,6 +29,7 @@ export interface AuditReportData {
     dailyTotal: number;
   };
   outstanding: number;
+  featuredReviews: GoogleReview[];
 }
 
 export class NightAuditService {
@@ -43,6 +44,7 @@ export class NightAuditService {
     const expenses = repo.getExpenses();
     const rooms = repo.getRooms();
     const folioCharges = repo.getFolioCharges();
+    const allReviews = repo.getReviews(true);
 
     // 1. Room Occupancy
     const totalRooms = rooms.length;
@@ -90,15 +92,20 @@ export class NightAuditService {
       .filter(b => b.status !== 'cancelled' && b.status !== 'checked_out')
       .reduce((sum, b) => sum + Math.max(0, b.total_amount - b.paid_amount), 0);
 
+    // 6. Featured Reviews (up to 3 for report)
+    const featuredReviews = allReviews.filter(r => r.is_featured).slice(0, 3);
+
     return {
       businessDate,
       occupancy: { totalRooms, occupiedRooms, availableRooms, occupancyRate },
       revenue: { roomRevenue, hallRevenue, extraCharges, totalRevenue },
       collections,
       expenses: { dailyTotal: expenseTotal },
-      outstanding
+      outstanding,
+      featuredReviews
     };
   }
+
 
   public async runNightAudit(businessDate: string): Promise<void> {
     // 1. Calculate Audit Data
