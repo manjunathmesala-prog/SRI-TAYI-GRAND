@@ -115,10 +115,10 @@ export default function AdminAuditLogsPage() {
     if (filteredLogs.length === 0) return;
     const headers = ['Timestamp', 'Action', 'Entity Type', 'Entity ID', 'Actor Name', 'Actor Role', 'Details'];
     const rows = filteredLogs.map((l) => [
-      `"${l.timestamp}"`,
+      `"${l.created_at}"`,
       `"${l.action}"`,
-      `"${l.entityType}"`,
-      `"${l.entityId}"`,
+      `"${l.entity_type}"`,
+      `"${l.entity_id}"`,
       `"${l.userName}"`,
       `"${l.userRole}"`,
       `"${l.details.replace(/"/g, '""')}"`,
