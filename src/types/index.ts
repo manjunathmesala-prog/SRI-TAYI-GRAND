@@ -872,10 +872,6 @@ export interface AuditLogEntry {
   entityType: AuditActionCategory;
   entityId: string;
   details: string;
-  previousValue?: any;
-  newValue?: any;
-  ipAddress?: string;
-}
 
 // ==============================================================================
 // TIER-3: STAFF ATTENDANCE & SHIFT ROSTER
