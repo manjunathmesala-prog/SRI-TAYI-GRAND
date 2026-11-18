@@ -274,6 +274,7 @@ export function AdminSidebar() {
     {
       title: 'F. SYSTEM MANAGEMENT',
       items: [
+        { label: 'Night Audit', href: '/admin/night-audit', icon: Lock, badge: 'Audit' },
         { label: 'System Audit Logs', href: '/admin/audit-logs', icon: ShieldCheck, badge: 'Audit' },
       ],
     },
