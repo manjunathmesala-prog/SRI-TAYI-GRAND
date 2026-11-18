@@ -119,9 +119,9 @@ export default function AdminAuditLogsPage() {
       `"${l.action}"`,
       `"${l.entity_type}"`,
       `"${l.entity_id}"`,
-      `"${l.userName}"`,
-      `"${l.userRole}"`,
-      `"${l.details.replace(/"/g, '""')}"`,
+      `"${l.user_name}"`,
+      `"${l.role}"`,
+      `"${(l.details || "").replace(/"/g, '""')}"`,
     ]);
 
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
