@@ -855,7 +855,8 @@ export type AuditActionCategory =
   | 'cashbook'
   | 'accounting'
   | 'pricing'
-  | 'maintenance';
+  | 'maintenance'
+  | 'security';
 
 export interface AuditLogEntry {
   id: string;
