@@ -843,6 +843,7 @@ export interface NightAuditExecutionLog {
   created_at: string;
 }
 
+export interface AuditLogEntry {
   userName: string;
   userRole: string;
   action: string;
