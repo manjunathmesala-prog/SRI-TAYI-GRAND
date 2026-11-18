@@ -1200,6 +1200,8 @@ export default function AdminDashboardPage() {
         onClose={() => setWalkInModalOpen(false)}
         availableRooms={rooms.filter((r) => r.operational_status === 'available')}
         categories={categories}
+        allRooms={rooms}
+        allBookings={bookings}
         initialData={{
           roomNumber: walkInPreselectedRoom,
           categoryId: walkInPreselectedCategory,

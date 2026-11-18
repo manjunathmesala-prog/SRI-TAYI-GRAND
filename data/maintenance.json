@@ -1,1 +1,54 @@
-[]
+[
+  {
+    "id": "maint-1794846413595",
+    "room_number": "101",
+    "issue_title": "Room Transfer Relocation: Guest spent 30 minutes in room; AC compressor is not cooling and blowing warm air.",
+    "category": "ac_hvac",
+    "priority": "high",
+    "description": "Guest relocated to Room 102. Transfer reason: [ac_issue] Guest spent 30 minutes in room; AC compressor is not cooling and blowing warm air.",
+    "status": "open",
+    "reported_by": "Front Desk - Receptionist Ramesh",
+    "created_at": "2026-11-16T16:26:53.595Z",
+    "estimated_cost": 0,
+    "room_blocked": true
+  },
+  {
+    "id": "maint-1794845160493",
+    "room_number": "101",
+    "issue_title": "Room Transfer Relocation: Guest spent 30 minutes in room; AC compressor is not cooling and blowing warm air.",
+    "category": "ac_hvac",
+    "priority": "high",
+    "description": "Guest relocated to Room 102. Transfer reason: [ac_issue] Guest spent 30 minutes in room; AC compressor is not cooling and blowing warm air.",
+    "status": "open",
+    "reported_by": "Front Desk - Receptionist Ramesh",
+    "created_at": "2026-11-16T16:06:00.493Z",
+    "estimated_cost": 0,
+    "room_blocked": true
+  },
+  {
+    "id": "maint-1794844709423",
+    "room_number": "101",
+    "issue_title": "Room Transfer Relocation: Guest spent 30 minutes in room; AC compressor is not cooling and blowing warm air.",
+    "category": "ac_hvac",
+    "priority": "high",
+    "description": "Guest relocated to Room 102. Transfer reason: [ac_issue] Guest spent 30 minutes in room; AC compressor is not cooling and blowing warm air.",
+    "status": "open",
+    "reported_by": "Front Desk - Receptionist Ramesh",
+    "created_at": "2026-11-16T15:58:29.423Z",
+    "estimated_cost": 0,
+    "room_blocked": true
+  },
+  {
+    "id": "maint-1794756942903",
+    "room_number": "106",
+    "issue_title": "Room Transfer Relocation: Guest reported AC is not cooling properly and blowing warm air after 30 mins in room.",
+    "category": "ac_hvac",
+    "priority": "high",
+    "description": "Guest relocated to Room 301. Transfer reason: [ac_issue] Guest reported AC is not cooling properly and blowing warm air after 30 mins in room.",
+    "status": "open",
+    "reported_by": "Sri Tayi Grand Admin",
+    "created_at": "2026-11-15T15:35:42.903Z",
+    "estimated_cost": 0,
+    "room_blocked": true
+  }
+]

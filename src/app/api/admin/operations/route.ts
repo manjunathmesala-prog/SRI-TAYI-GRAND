@@ -241,13 +241,20 @@ export async function POST(req: NextRequest) {
         }
 
         // Deactivate card on hardware bridge if connected
-        const targetRoomNumber = booking.assigned_room_number || booking.room_number;
-        if (targetRoomNumber) {
+        const targetRooms =
+          booking.assigned_room_numbers && booking.assigned_room_numbers.length > 0
+            ? booking.assigned_room_numbers
+            : booking.assigned_room_number
+            ? [booking.assigned_room_number]
+            : booking.room_number
+            ? [booking.room_number]
+            : [];
+        for (const rNum of targetRooms) {
           fetch('http://127.0.0.1:8989/api/checkout-card', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-Staff-User': staffName },
             body: JSON.stringify({
-              roomNumber: targetRoomNumber,
+              roomNumber: rNum,
               staffUser: staffName,
             }),
             signal: AbortSignal.timeout(3000),
@@ -371,6 +378,55 @@ export async function POST(req: NextRequest) {
           });
         } catch (conflictErr: any) {
           return NextResponse.json({ success: false, error: conflictErr.message }, { status: 409 });
+        }
+      }
+
+      case 'add_extra_room': {
+        const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Front Desk', 'Receptionist']);
+        if (!auth.authorized) {
+          return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
+        }
+
+        const { bookingReference, roomId, roomNumber, categoryId } = body;
+        if (!bookingReference) {
+          return NextResponse.json(
+            { success: false, error: 'bookingReference is required' },
+            { status: 400 }
+          );
+        }
+        if (!roomId && !roomNumber && !categoryId) {
+          return NextResponse.json(
+            { success: false, error: 'roomId, roomNumber, or categoryId is required to add an extra room' },
+            { status: 400 }
+          );
+        }
+
+        const staffName = auth.session?.name || body.staffName || 'Front Desk Duty Officer';
+        try {
+          const result = await repo.addExtraRoomToBooking({
+            bookingReference,
+            roomId,
+            roomNumber,
+            categoryId,
+            actor: staffName,
+          });
+
+          return NextResponse.json({
+            success: true,
+            message: `Extra Room #${result.extraRoom.room_number} added to booking ${bookingReference}.`,
+            newRoomsCount: result.booking.rooms_count,
+            ...result,
+          });
+        } catch (err: any) {
+          const isConflict =
+            err?.message?.toLowerCase().includes('already booked') ||
+            err?.message?.toLowerCase().includes('conflict') ||
+            err?.message?.toLowerCase().includes('occupied') ||
+            err?.message?.toLowerCase().includes('already assigned');
+          return NextResponse.json(
+            { success: false, error: err.message || 'Failed to add extra room' },
+            { status: isConflict ? 409 : 400 }
+          );
         }
       }
 
@@ -633,9 +689,10 @@ export async function POST(req: NextRequest) {
           specialRequests,
         } = body;
 
-        if (!guestName || !guestPhone || !idProofType || !idProofNumber || !roomNumber || !categoryId) {
+        const hasRoomsList = Array.isArray(body.rooms) && body.rooms.length > 0;
+        if (!guestName || !guestPhone || !idProofType || !idProofNumber || (!hasRoomsList && (!roomNumber || !categoryId))) {
           return NextResponse.json(
-            { success: false, error: 'Guest name, phone, Govt ID type, Govt ID number, room number, and category are required' },
+            { success: false, error: 'Guest name, phone, Govt ID type, Govt ID number, and room selection are required' },
             { status: 400 }
           );
         }
@@ -661,6 +718,7 @@ export async function POST(req: NextRequest) {
             purposeOfVisit: purposeOfVisit || 'Pilgrimage / Temple Darshan',
             categoryId,
             roomNumber,
+            rooms: body.rooms,
             checkInDate: checkInDate || new Date().toISOString().split('T')[0],
             checkOutDate: checkOutDate || new Date(Date.now() + 86400000).toISOString().split('T')[0],
             adultsCount: Number(adultsCount) || 2,
@@ -669,6 +727,7 @@ export async function POST(req: NextRequest) {
             isTariffOverridden: Boolean(isTariffOverridden),
             tariffOverrideReason,
             paymentMethod: paymentMethod || 'cash',
+            pricingMode: body.pricingMode,
             amountCollected: amountCollected !== undefined ? Number(amountCollected) : undefined,
             paymentReference,
             issueKeycard: issueKeycard !== false,

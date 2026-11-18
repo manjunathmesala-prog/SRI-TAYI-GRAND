@@ -1,1 +1,30 @@
-[]
+[
+  {
+    "id": "shift-1794759297872",
+    "shift_number": "SH-20261115-02",
+    "cashier_id": "stf-02",
+    "cashier_name": "G. Mohan Kumar",
+    "opened_at": "2026-11-15T16:14:57.872Z",
+    "closed_at": "2026-11-16T15:58:21.797Z",
+    "opening_float": 6700,
+    "closing_cash_counted": 10795,
+    "expected_closing_cash": 10795,
+    "discrepancy": 0,
+    "notes": "hari",
+    "status": "closed"
+  },
+  {
+    "id": "shift-1794759062935",
+    "shift_number": "SH-20261115-01",
+    "cashier_id": "stf-staff",
+    "cashier_name": "Sri Tayi Grand Staff",
+    "opened_at": "2026-11-15T16:11:02.935Z",
+    "closed_at": "2026-11-15T16:14:12.757Z",
+    "opening_float": 5000,
+    "closing_cash_counted": 3700,
+    "expected_closing_cash": 3700,
+    "discrepancy": 0,
+    "notes": "HARI",
+    "status": "closed"
+  }
+]

@@ -17,6 +17,7 @@ import {
   BookingStatus,
   PaymentStatus,
   PaymentMethod,
+  PricingMode,
   StaffRole,
   Expense,
   DailyClosing,
@@ -103,6 +104,7 @@ import {
   loadWebsiteContentFromSupabase,
   syncJournalEntryToSupabase,
   loadJournalEntriesFromSupabase,
+  syncGuestToSupabase,
   loadGuestsFromSupabase,
 } from './supabase-sync';
 import {
@@ -142,7 +144,7 @@ import {
   INITIAL_CONTACT_ENQUIRIES,
   INITIAL_CONVENTION_QUOTES,
 } from './mock-data';
-import { calculateBookingTariff, normalizeCategoryId } from '@/lib/pricing';
+import { calculateBookingTariff, normalizeCategoryId, calculateBillingPeriods, getAuthoritativeTariff } from '@/lib/pricing';
 
 // Singleton authoritative repository that persists during server runtime
 export class HotelRepository {
@@ -627,7 +629,7 @@ export class HotelRepository {
           b.booking_reference !== bookingRef &&
           b.status !== 'cancelled' &&
           b.status !== 'checked_out' &&
-          (b.assigned_room_id === room.id || b.assigned_room_number === room.room_number) &&
+          (b.assigned_room_id === room.id || b.assigned_room_number === room.room_number || (b.assigned_room_numbers && b.assigned_room_numbers.includes(room.room_number))) &&
           b.check_in_date < booking.check_out_date &&
           b.check_out_date > booking.check_in_date
       );
@@ -696,6 +698,253 @@ export class HotelRepository {
     return room;
   }
 
+  /**
+   * Adds an extra room to an existing reservation workflow.
+   * 1. Reuses authoritative room availability and pricing logic.
+   * 2. Validates that the requested room has valid availability across the stay dates (prevents double-booking).
+   * 3. Recalculates reservation financial totals (rooms_count, subtotal, 5% GST, and total).
+   * 4. Each additional room maintains its distinct physical room identity.
+   * 5. Preserves existing single-room workflows and OTA booking contracts.
+   */
+  async addExtraRoomToBooking(params: {
+    bookingReference: string;
+    categoryId?: string;
+    roomId?: string;
+    roomNumber?: string;
+    actor?: string;
+  }): Promise<{
+    booking: Booking;
+    extraRoom: PhysicalRoom;
+    addedAmount: number;
+    addedTax: number;
+    newTotal: number;
+  }> {
+    const { bookingReference, categoryId, roomId, roomNumber, actor } = params;
+    const booking = this.getBookingByReference(bookingReference);
+    if (!booking) {
+      throw new Error(`Booking '${bookingReference}' was not found.`);
+    }
+    if (booking.status === 'checked_out') {
+      throw new Error(`Cannot add extra room: Booking '${bookingReference}' has already checked out.`);
+    }
+    if (booking.status === 'cancelled') {
+      throw new Error(`Cannot add extra room: Booking '${bookingReference}' has been cancelled.`);
+    }
+
+    // 1. Resolve target physical room
+    let targetRoom: PhysicalRoom | undefined;
+    if (roomId || roomNumber) {
+      targetRoom = this.rooms.find(
+        (r) => r.id === roomId || r.room_number === (roomNumber || roomId)
+      );
+      if (!targetRoom) {
+        throw new Error(`Room '${roomNumber || roomId}' was not found in hotel inventory.`);
+      }
+    } else if (categoryId) {
+      const normCatId = normalizeCategoryId(categoryId);
+      // Auto-select first available active room in category
+      const candidateRooms = this.rooms.filter(
+        (r) =>
+          (r.category_id === categoryId || normalizeCategoryId(r.category_id) === normCatId) &&
+          r.is_active &&
+          r.operational_status !== 'maintenance' &&
+          r.operational_status !== 'out_of_service'
+      );
+      targetRoom = candidateRooms.find((r) => {
+        // Must not already be assigned to this booking
+        if (
+          booking.assigned_room_id === r.id ||
+          booking.assigned_room_number === r.room_number ||
+          (booking.assigned_room_numbers && booking.assigned_room_numbers.includes(r.room_number))
+        ) {
+          return false;
+        }
+        // Must not conflict with other active bookings
+        return !this.bookings.some((b) => {
+          if (b.status === 'cancelled' || b.status === 'checked_out') return false;
+          const matches =
+            b.assigned_room_id === r.id ||
+            b.assigned_room_number === r.room_number ||
+            (b.assigned_room_numbers && b.assigned_room_numbers.includes(r.room_number));
+          if (!matches) return false;
+          return b.check_in_date < booking.check_out_date && b.check_out_date > booking.check_in_date;
+        });
+      });
+      if (!targetRoom) {
+        throw new Error(`No available rooms found in category for these stay dates.`);
+      }
+    } else {
+      throw new Error('Either roomId, roomNumber, or categoryId must be specified to add an extra room.');
+    }
+
+    if (!targetRoom.is_active) {
+      throw new Error(`Room ${targetRoom.room_number} is currently out of service.`);
+    }
+    if (targetRoom.operational_status === 'maintenance' || targetRoom.operational_status === 'out_of_service') {
+      throw new Error(`Room ${targetRoom.room_number} is currently under maintenance.`);
+    }
+
+    // 2. Prevent duplicate assignment within the same booking
+    const alreadyAssigned =
+      booking.assigned_room_id === targetRoom.id ||
+      booking.assigned_room_number === targetRoom.room_number ||
+      (booking.assigned_room_numbers && booking.assigned_room_numbers.includes(targetRoom.room_number));
+    if (alreadyAssigned) {
+      throw new Error(`Room ${targetRoom.room_number} is already assigned to booking ${bookingReference}.`);
+    }
+
+    // 3. Strict Concurrency & Overlap Check across stay dates (Double Booking Prevention)
+    const hasOverlap = this.bookings.some((b) => {
+      if (b.booking_reference.toLowerCase() === bookingReference.toLowerCase()) return false;
+      if (b.status === 'cancelled' || b.status === 'checked_out') return false;
+      const matches =
+        b.assigned_room_id === targetRoom!.id ||
+        b.assigned_room_number === targetRoom!.room_number ||
+        (b.assigned_room_numbers && b.assigned_room_numbers.includes(targetRoom!.room_number));
+      if (!matches) return false;
+      return b.check_in_date < booking.check_out_date && b.check_out_date > booking.check_in_date;
+    });
+    if (hasOverlap) {
+      throw new Error(`Conflict: Room ${targetRoom.room_number} is already booked for overlapping dates.`);
+    }
+
+    // Today's stay lock check
+    const today = new Date().toISOString().slice(0, 10);
+    const isTodayStay = booking.check_in_date
+      ? booking.check_in_date <= today && booking.check_out_date > today
+      : true;
+    if (isTodayStay) {
+      if (targetRoom.operational_status === 'occupied' && targetRoom.current_booking_ref !== bookingReference) {
+        const occB = this.getBookingByReference(targetRoom.current_booking_ref || '');
+        if (occB && occB.status !== 'cancelled' && occB.status !== 'checked_out') {
+          throw new Error(`Conflict: Room ${targetRoom.room_number} is already occupied today by ${targetRoom.current_guest_name || 'another guest'}.`);
+        }
+      }
+      if (
+        targetRoom.operational_status === 'reserved' &&
+        targetRoom.current_booking_ref &&
+        targetRoom.current_booking_ref.toLowerCase() !== bookingReference.toLowerCase()
+      ) {
+        const resB = this.getBookingByReference(targetRoom.current_booking_ref);
+        if (resB && resB.status !== 'cancelled' && resB.status !== 'checked_out') {
+          throw new Error(`Conflict: Room ${targetRoom.room_number} is already reserved today for booking ${targetRoom.current_booking_ref}.`);
+        }
+      }
+    }
+
+    // 4. Calculate Tariff using authoritative pricing logic
+    const nights = calculateBillingPeriods(booking.check_in_date, booking.check_out_date);
+    const roomCatTariff = getAuthoritativeTariff(targetRoom.category_id || booking.category_id);
+    const nightlyRate = roomCatTariff.baseTariffRupees;
+    const isInclusive = booking.pricing_mode === 'gst_inclusive';
+    let addedSubtotal = nightlyRate * nights;
+    let addedTax = Math.round(addedSubtotal * 0.05); // 5% GST slab
+    let addedTotal = addedSubtotal + addedTax;
+    if (isInclusive) {
+      addedTotal = nightlyRate * nights;
+      addedSubtotal = Math.round((addedTotal * 100) / 105);
+      addedTax = addedTotal - addedSubtotal;
+    }
+
+    // 5. Update room physical identity on booking
+    if (!booking.assigned_room_numbers) {
+      booking.assigned_room_numbers = booking.assigned_room_number ? [booking.assigned_room_number] : [];
+    }
+    if (!booking.assigned_room_numbers.includes(targetRoom.room_number)) {
+      booking.assigned_room_numbers.push(targetRoom.room_number);
+    }
+
+    if (!booking.assigned_room_number) {
+      booking.assigned_room_id = targetRoom.id;
+      booking.assigned_room_number = targetRoom.room_number;
+    }
+
+    if (!booking.booking_rooms) {
+      booking.booking_rooms = [];
+      if (booking.assigned_room_number && booking.assigned_room_number !== targetRoom.room_number) {
+        booking.booking_rooms.push({
+          room_id: booking.assigned_room_id,
+          room_number: booking.assigned_room_number,
+          category_id: booking.category_id,
+          category_name: booking.category_name,
+          price_per_night: Math.round((booking.subtotal_amount || 0) / Math.max(1, (booking.rooms_count || 1) * nights)),
+        });
+      }
+    }
+    booking.booking_rooms.push({
+      room_id: targetRoom.id,
+      room_number: targetRoom.room_number,
+      category_id: targetRoom.category_id,
+      category_name: roomCatTariff.name || booking.category_name,
+      price_per_night: nightlyRate,
+      added_at: new Date().toISOString(),
+    });
+
+    // 6. Recalculate totals
+    booking.rooms_count = (booking.rooms_count || 1) + 1;
+    booking.room_charges_amount = (booking.room_charges_amount || booking.subtotal_amount || 0) + addedSubtotal;
+    booking.subtotal_amount = (booking.subtotal_amount || 0) + addedSubtotal;
+    booking.tax_amount = (booking.tax_amount || 0) + addedTax;
+    booking.total_amount = (booking.total_amount || 0) + addedTotal;
+
+    // 7. Respect OTA Contract (Requirement 7)
+    const bSrc = (booking.booking_source as string) || '';
+    const isOtaBooking =
+      bSrc === 'ota' ||
+      bSrc === 'agoda' ||
+      bSrc === 'expedia' ||
+      bSrc === 'airbnb' ||
+      (booking.internal_notes && booking.internal_notes.toLowerCase().includes('ota'));
+
+    if (isOtaBooking) {
+      const otaAuditNote = `[Extra Room #${targetRoom.room_number} added at Front Desk: ₹${addedSubtotal} + ₹${addedTax} GST. Channel voucher preserved. Extra charges balance due at desk.]`;
+      booking.internal_notes = booking.internal_notes
+        ? `${booking.internal_notes} | ${otaAuditNote}`
+        : otaAuditNote;
+    }
+
+    // 8. Update physical room status if stay is active
+    if (isTodayStay) {
+      targetRoom.current_booking_ref = bookingReference;
+      targetRoom.current_guest_name = booking.guest_name;
+      if (booking.status === 'checked_in') {
+        targetRoom.operational_status = 'occupied';
+      } else if (targetRoom.operational_status !== 'occupied') {
+        targetRoom.operational_status = 'reserved';
+      }
+    }
+
+    // 9. Persist to authoritative Supabase PostgreSQL
+    await syncBookingToSupabase(booking);
+    await syncRoomStatusToSupabase({
+      roomNumber: targetRoom.room_number,
+      operationalStatus: targetRoom.operational_status,
+      housekeepingStatus: targetRoom.housekeeping_status,
+    });
+    savePersistedData('bookings.json', this.bookings);
+
+    // 10. Broadcast realtime event
+    this.broadcastEvent(
+      'extra_room_added',
+      {
+        bookingReference,
+        roomNumber: targetRoom.room_number,
+        newRoomsCount: booking.rooms_count,
+        addedAmount: addedTotal,
+        newTotal: booking.total_amount,
+      },
+      actor
+    );
+
+    return {
+      booking,
+      extraRoom: targetRoom,
+      addedAmount: addedSubtotal,
+      addedTax,
+      newTotal: booking.total_amount,
+    };
+  }
+
   // --- BOOKINGS ---
   getBookings(): Booking[] {
     return [...this.bookings].sort(
@@ -738,8 +987,16 @@ export class HotelRepository {
     idProofType: string;
     idProofNumber: string;
     purposeOfVisit: string;
-    categoryId: string;
-    roomNumber: string;
+    categoryId?: string;
+    roomNumber?: string;
+    rooms?: Array<{
+      categoryId: string;
+      roomNumber?: string;
+      roomId?: string;
+      customRate?: number;
+      adultsCount?: number;
+      childrenCount?: number;
+    }>;
     checkInDate: string;
     checkOutDate: string;
     adultsCount?: number;
@@ -748,6 +1005,7 @@ export class HotelRepository {
     isTariffOverridden?: boolean;
     tariffOverrideReason?: string;
     paymentMethod: PaymentMethod;
+    pricingMode?: PricingMode;
     amountCollected?: number;
     paymentReference?: string;
     issueKeycard?: boolean;
@@ -761,34 +1019,136 @@ export class HotelRepository {
     payment?: PaymentRecord;
   }> {
     const staffName = params.staffName || 'Front Desk Reception';
-    const category =
-      this.categories.find((c) => c.id === params.categoryId || c.slug === params.categoryId) ||
-      this.categories[0];
-
-    const room = this.rooms.find((r) => r.room_number === params.roomNumber);
-    if (!room) {
-      throw new Error(`Physical Room ${params.roomNumber} does not exist`);
-    }
-
-    if (room.operational_status === 'occupied') {
-      throw new Error(`Room ${params.roomNumber} is currently occupied by ${room.current_guest_name || 'another guest'}`);
-    }
+    const today = new Date().toISOString().slice(0, 10);
+    const isTodayStay = params.checkInDate <= today && params.checkOutDate > today;
 
     // Calculate nights
     const start = new Date(params.checkInDate);
     const end = new Date(params.checkOutDate);
     const diffTime = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
     const nights = isNaN(diffTime) || diffTime < 1 ? 1 : diffTime;
-
-    // Rate calculation
-    const nightlyRate = params.isTariffOverridden && typeof params.baseTariff === 'number'
-      ? params.baseTariff
-      : (category?.base_price_per_night || 1800);
-
-    const subtotal = nightlyRate * nights;
     const taxRate = (typeof this.settings.tax_percentage === 'number' ? this.settings.tax_percentage : 5) / 100;
-    const tax = Math.round(subtotal * taxRate);
-    const total = subtotal + tax;
+
+    const allocatedRooms: PhysicalRoom[] = [];
+    const allocatedCategories: RoomCategory[] = [];
+    const allocatedNightlyRates: number[] = [];
+
+    if (Array.isArray(params.rooms) && params.rooms.length > 0) {
+      // 1. Multiple room selection mode
+      const rawRoomIdentifiers = params.rooms.map((r) => String(r.roomNumber || r.roomId || '').trim()).filter(Boolean);
+      if (new Set(rawRoomIdentifiers).size !== rawRoomIdentifiers.length) {
+        throw new Error('Duplicate rooms cannot be selected in the same reservation.');
+      }
+
+      for (const rReq of params.rooms) {
+        const ident = String(rReq.roomNumber || rReq.roomId || '').trim();
+        const room = this.rooms.find((r) => r.room_number === ident || r.id === ident);
+        if (!room) {
+          throw new Error(`Physical Room '${ident}' does not exist in hotel inventory.`);
+        }
+        if (!room.is_active || room.operational_status === 'maintenance' || room.operational_status === 'out_of_service') {
+          throw new Error(`Room ${room.room_number} is currently out of service or in maintenance.`);
+        }
+
+        // Concurrency / Date overlap conflict check
+        const hasOverlap = this.bookings.some((b) => {
+          if (b.status === 'cancelled' || b.status === 'checked_out') return false;
+          const matches =
+            b.assigned_room_id === room.id ||
+            b.assigned_room_number === room.room_number ||
+            (b.assigned_room_numbers && b.assigned_room_numbers.includes(room.room_number));
+          if (!matches) return false;
+          return b.check_in_date < params.checkOutDate && b.check_out_date > params.checkInDate;
+        });
+        if (hasOverlap) {
+          throw new Error(`Conflict: Room ${room.room_number} is already booked for overlapping stay dates.`);
+        }
+
+        if (isTodayStay && room.operational_status === 'occupied') {
+          throw new Error(`Room ${room.room_number} is currently occupied by ${room.current_guest_name || 'another guest'}`);
+        }
+
+        const catId = rReq.categoryId || room.category_id;
+        const cat =
+          this.categories.find(
+            (c) => c.id === catId || c.slug === catId || normalizeCategoryId(c.id) === normalizeCategoryId(catId)
+          ) || this.categories[0];
+
+        const nightlyRate =
+          typeof rReq.customRate === 'number' && rReq.customRate > 0
+            ? rReq.customRate
+            : params.isTariffOverridden && typeof params.baseTariff === 'number'
+            ? params.baseTariff
+            : cat.base_price_per_night || 1800;
+
+        allocatedRooms.push(room);
+        allocatedCategories.push(cat);
+        allocatedNightlyRates.push(nightlyRate);
+      }
+    } else {
+      // 2. Single room legacy mode
+      const catId = params.categoryId || '';
+      const category =
+        this.categories.find(
+          (c) => c.id === catId || c.slug === catId || normalizeCategoryId(c.id) === normalizeCategoryId(catId)
+        ) || this.categories[0];
+
+      const roomNum = params.roomNumber || '';
+      const room = this.rooms.find((r) => r.room_number === roomNum || r.id === roomNum);
+      if (!room) {
+        throw new Error(`Physical Room ${params.roomNumber} does not exist`);
+      }
+      if (room.operational_status === 'occupied') {
+        throw new Error(`Room ${params.roomNumber} is currently occupied by ${room.current_guest_name || 'another guest'}`);
+      }
+
+      // Check overlap
+      const hasOverlap = this.bookings.some((b) => {
+        if (b.status === 'cancelled' || b.status === 'checked_out') return false;
+        const matches =
+          b.assigned_room_id === room.id ||
+          b.assigned_room_number === room.room_number ||
+          (b.assigned_room_numbers && b.assigned_room_numbers.includes(room.room_number));
+        if (!matches) return false;
+        return b.check_in_date < params.checkOutDate && b.check_out_date > params.checkInDate;
+      });
+      if (hasOverlap) {
+        throw new Error(`Conflict: Room ${room.room_number} is already booked for overlapping stay dates.`);
+      }
+
+      const nightlyRate =
+        params.isTariffOverridden && typeof params.baseTariff === 'number'
+          ? params.baseTariff
+          : category?.base_price_per_night || 1800;
+
+      allocatedRooms.push(room);
+      allocatedCategories.push(category);
+      allocatedNightlyRates.push(nightlyRate);
+    }
+
+    const pricingMode: PricingMode = params.pricingMode || 'gst_exclusive';
+    let subtotal = 0;
+    let tax = 0;
+    let total = 0;
+
+    if (pricingMode === 'gst_inclusive') {
+      for (const rate of allocatedNightlyRates) {
+        const roomGross = rate * nights;
+        const roomTaxable = Math.round((roomGross * 100) / (100 + (taxRate * 100)));
+        const roomTax = roomGross - roomTaxable;
+        subtotal += roomTaxable;
+        tax += roomTax;
+        total += roomGross;
+      }
+    } else {
+      for (const rate of allocatedNightlyRates) {
+        const roomSubtotal = rate * nights;
+        const roomTax = Math.round(roomSubtotal * taxRate);
+        subtotal += roomSubtotal;
+        tax += roomTax;
+      }
+      total = subtotal + tax;
+    }
 
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const randCode = Math.floor(1000 + Math.random() * 9000);
@@ -798,10 +1158,50 @@ export class HotelRepository {
     const paidAmount = isNaN(collected) ? 0 : Math.max(0, collected);
     const paymentStatus: PaymentStatus = paidAmount >= total ? 'successful' : 'pay_at_hotel';
 
+    const primaryRoom = allocatedRooms[0];
+    const primaryCat = allocatedCategories[0];
+
+    // Identify or reuse existing guest record (phone or government ID deduplication)
+    const cleanPhone = (params.guestPhone || '').replace(/\D/g, '').slice(-10);
+    const cleanId = (params.idProofNumber || '').trim().toUpperCase().replace(/\s+/g, '');
+    let guest = this.guests.find((g) => {
+      const gCleanPhone = (g.phone || '').replace(/\D/g, '').slice(-10);
+      const gCleanId = (g.id_number || '').trim().toUpperCase().replace(/\s+/g, '');
+      return (cleanPhone && gCleanPhone && gCleanPhone === cleanPhone) || (cleanId && gCleanId && gCleanId === cleanId);
+    });
+
+    if (guest) {
+      guest.total_stays = (guest.total_stays || 1) + 1;
+      guest.full_name = params.guestName.trim() || guest.full_name;
+      guest.id_type = params.idProofType;
+      guest.id_number = params.idProofNumber.trim();
+      guest.nationality = params.nationality || 'Indian';
+      if (params.cityOfOrigin) guest.city_of_origin = params.cityOfOrigin.trim();
+      if (params.purposeOfVisit) guest.purpose_of_visit = params.purposeOfVisit;
+    } else {
+      guest = {
+        id: `gst-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        full_name: params.guestName.trim(),
+        phone: params.guestPhone.trim(),
+        email: params.guestEmail?.trim() || `${params.guestPhone.replace(/\D/g, '')}@guest.sritayigrand.com`,
+        id_type: params.idProofType,
+        id_number: params.idProofNumber.trim(),
+        nationality: params.nationality || 'Indian',
+        city_of_origin: params.cityOfOrigin?.trim(),
+        purpose_of_visit: params.purposeOfVisit,
+        country: params.nationality === 'Foreigner' ? 'International' : 'India',
+        total_stays: 1,
+        created_at: new Date().toISOString(),
+      };
+      this.guests.push(guest);
+    }
+    savePersistedData('guests.json', this.guests);
+    syncGuestToSupabase(guest).catch(() => {});
+
     const booking: Booking = {
       id: `bk-fd-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       booking_reference: bookingReference,
-      guest_id: `gst-${Date.now()}`,
+      guest_id: guest.id,
       guest_name: params.guestName.trim(),
       guest_phone: params.guestPhone.trim(),
       guest_email: params.guestEmail?.trim() || `${params.guestPhone.replace(/\D/g, '')}@guest.sritayigrand.com`,
@@ -810,19 +1210,28 @@ export class HotelRepository {
       nationality: params.nationality || 'Indian',
       city_of_origin: params.cityOfOrigin?.trim(),
       purpose_of_visit: params.purposeOfVisit,
-      category_id: category.id,
-      category_name: category.name,
-      assigned_room_id: room.id,
-      assigned_room_number: room.room_number,
-      room_number: room.room_number,
-      adults_count: params.adultsCount || 2,
+      category_id: primaryCat.id,
+      category_name: primaryCat.name,
+      assigned_room_id: primaryRoom.id,
+      assigned_room_number: primaryRoom.room_number,
+      assigned_room_numbers: allocatedRooms.map((r) => r.room_number),
+      room_number: primaryRoom.room_number,
+      booking_rooms: allocatedRooms.map((r, idx) => ({
+        room_id: r.id,
+        room_number: r.room_number,
+        category_id: allocatedCategories[idx].id,
+        category_name: allocatedCategories[idx].name,
+        price_per_night: allocatedNightlyRates[idx],
+      })),
+      adults_count: params.adultsCount || (allocatedRooms.length * 2),
       children_count: params.childrenCount || 0,
-      rooms_count: 1,
+      rooms_count: allocatedRooms.length,
       check_in_date: params.checkInDate,
       check_out_date: params.checkOutDate,
       status: 'checked_in',
       payment_status: paymentStatus,
       payment_method: params.paymentMethod,
+      pricing_mode: pricingMode,
       subtotal_amount: subtotal,
       room_charges_amount: subtotal,
       tax_amount: tax,
@@ -841,40 +1250,20 @@ export class HotelRepository {
     };
 
     this.bookings.unshift(booking);
+    savePersistedData('bookings.json', this.bookings);
 
-    // Update / create Guest record
-    let guest = this.guests.find((g) => g.phone === params.guestPhone);
-    if (guest) {
-      guest.total_stays += 1;
-      guest.id_type = params.idProofType;
-      guest.id_number = params.idProofNumber;
-      guest.nationality = params.nationality || 'Indian';
-      if (params.cityOfOrigin) guest.city_of_origin = params.cityOfOrigin;
-      if (params.purposeOfVisit) guest.purpose_of_visit = params.purposeOfVisit;
-    } else {
-      guest = {
-        id: booking.guest_id,
-        full_name: params.guestName,
-        phone: params.guestPhone,
-        email: booking.guest_email,
-        id_type: params.idProofType,
-        id_number: params.idProofNumber,
-        nationality: params.nationality || 'Indian',
-        city_of_origin: params.cityOfOrigin,
-        purpose_of_visit: params.purposeOfVisit,
-        country: params.nationality === 'Foreigner' ? 'International' : 'India',
-        total_stays: 1,
-        created_at: new Date().toISOString(),
-      };
-      this.guests.push(guest);
-      savePersistedData('guests.json', this.guests);
+    // Allocate & occupy all physical rooms
+    for (const rm of allocatedRooms) {
+      rm.operational_status = 'occupied';
+      rm.housekeeping_status = 'clean';
+      rm.current_booking_ref = booking.booking_reference;
+      rm.current_guest_name = booking.guest_name;
+      await syncRoomStatusToSupabase({
+        roomNumber: rm.room_number,
+        operationalStatus: rm.operational_status,
+        housekeepingStatus: rm.housekeeping_status,
+      });
     }
-
-    // Allocate & occupy physical room
-    room.operational_status = 'occupied';
-    room.housekeeping_status = 'clean';
-    room.current_booking_ref = booking.booking_reference;
-    room.current_guest_name = booking.guest_name;
 
     // Record payment if collected
     let payment: PaymentRecord | undefined;
@@ -894,12 +1283,12 @@ export class HotelRepository {
       );
     }
 
-    // Issue RFID card if requested
+    // Issue RFID card if requested (primary room)
     let card: RFIDCard | undefined;
     if (params.issueKeycard !== false) {
       const expiryIso = new Date(`${params.checkOutDate}T11:00:00+05:30`).toISOString();
       card = this.issueRFIDCard(
-        room.room_number,
+        primaryRoom.room_number,
         booking.booking_reference,
         booking.guest_name,
         staffName,
@@ -913,21 +1302,21 @@ export class HotelRepository {
     }
 
     this.broadcastEvent('walk_in_created', booking, staffName);
-    this.broadcastEvent('check_in', { booking, roomNumber: room.room_number, cardUid: card?.card_uid }, staffName);
+    this.broadcastEvent('check_in', { booking, roomNumber: primaryRoom.room_number, cardUid: card?.card_uid }, staffName);
 
     this.recordAuditLog({
       action: 'STATUTORY_WALKIN_CHECKIN',
       entityType: 'booking',
       entityId: booking.booking_reference,
-      details: `Statutory walk-in check-in for ${booking.guest_name} into Room ${room.room_number} (Govt ID: ${params.idProofType} ${params.idProofNumber})`,
+      details: `Statutory walk-in check-in for ${booking.guest_name} into Rooms ${allocatedRooms.map((r) => r.room_number).join(', ')} (${allocatedRooms.length} room(s), Govt ID: ${params.idProofType} ${params.idProofNumber})`,
       newValue: booking,
       userId: 'stf-reception',
       userName: staffName,
       userRole: 'Front Desk',
     });
 
-    syncBookingToSupabase(booking);
-    return { booking, room, card, payment };
+    await syncBookingToSupabase(booking);
+    return { booking, room: primaryRoom, card, payment };
   }
 
   statutoryWalkIn(params: Parameters<HotelRepository['createFrontDeskWalkIn']>[0]) {
@@ -960,7 +1349,7 @@ export class HotelRepository {
         }
         const hasOverlap = this.bookings.some((b) => {
           if (b.status === 'cancelled' || b.status === 'checked_out') return false;
-          const matchesRoom = b.assigned_room_id === r.id || b.assigned_room_number === r.room_number;
+          const matchesRoom = b.assigned_room_id === r.id || b.assigned_room_number === r.room_number || (b.assigned_room_numbers && b.assigned_room_numbers.includes(r.room_number));
           if (!matchesRoom) return false;
           return b.check_in_date < checkOut && b.check_out_date > checkIn;
         });
@@ -971,18 +1360,30 @@ export class HotelRepository {
 
     const requestedCount = bookingData.rooms_count || 1;
 
-    // Concurrency conflict guard: verify requested room is not already occupied or reserved
-    if (bookingData.assigned_room_id || bookingData.assigned_room_number) {
+    // Concurrency conflict guard: verify requested rooms are not already occupied or reserved
+    const assignedRoomsToCheck =
+      bookingData.assigned_room_numbers && bookingData.assigned_room_numbers.length > 0
+        ? bookingData.assigned_room_numbers
+        : bookingData.assigned_room_id
+        ? [bookingData.assigned_room_id]
+        : bookingData.assigned_room_number
+        ? [bookingData.assigned_room_number]
+        : [];
+
+    for (const rIdOrNum of assignedRoomsToCheck) {
       const roomTarget = this.rooms.find(
-        (r) => r.id === bookingData.assigned_room_id || r.room_number === (bookingData.assigned_room_number || bookingData.assigned_room_id)
+        (r) => r.id === rIdOrNum || r.room_number === rIdOrNum
       );
       if (roomTarget) {
-        if (!roomTarget.is_active) {
-          throw new Error(`Room ${roomTarget.room_number} is currently out of service.`);
+        if (!roomTarget.is_active || roomTarget.operational_status === 'maintenance' || roomTarget.operational_status === 'out_of_service') {
+          throw new Error(`Room ${roomTarget.room_number} is currently out of service or in maintenance.`);
         }
         const hasOverlap = this.bookings.some((b) => {
           if (b.status === 'cancelled' || b.status === 'checked_out') return false;
-          const matches = b.assigned_room_id === roomTarget.id || b.assigned_room_number === roomTarget.room_number;
+          const matches =
+            b.assigned_room_id === roomTarget.id ||
+            b.assigned_room_number === roomTarget.room_number ||
+            (b.assigned_room_numbers && b.assigned_room_numbers.includes(roomTarget.room_number));
           if (!matches) return false;
           if (checkIn && checkOut && b.check_in_date && b.check_out_date) {
             return b.check_in_date < checkOut && b.check_out_date > checkIn;
@@ -1007,7 +1408,16 @@ export class HotelRepository {
 
     const newBooking: Booking = {
       ...bookingData,
+      pricing_mode: bookingData.pricing_mode || 'gst_exclusive',
       category_id: normalizedCatId,
+      assigned_room_numbers: bookingData.assigned_room_numbers || (bookingData.assigned_room_number ? [bookingData.assigned_room_number] : []),
+      booking_rooms: bookingData.booking_rooms || (bookingData.assigned_room_number ? [{
+        room_id: bookingData.assigned_room_id,
+        room_number: bookingData.assigned_room_number,
+        category_id: normalizedCatId,
+        category_name: bookingData.category_name,
+        price_per_night: Number(bookingData.subtotal_amount || bookingData.total_amount || 1800) / (bookingData.rooms_count || 1),
+      }] : []),
       id: `bk-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       booking_reference: bookingReference,
       created_at: new Date().toISOString(),
@@ -1039,7 +1449,7 @@ export class HotelRepository {
       this.guests.push(guest);
     }
 
-    // If an assigned physical room was specified, reserve it atomically
+    // If assigned physical rooms specified, reserve or occupy them atomically
     if (newBooking.assigned_room_id) {
       await this.assignRoomToBooking(
         newBooking.assigned_room_id,
@@ -1047,6 +1457,21 @@ export class HotelRepository {
         newBooking.guest_name,
         actor
       );
+    }
+    if (isTodayStay && (newBooking.status === 'checked_in' || newBooking.status === 'confirmed')) {
+      for (const rIdOrNum of assignedRoomsToCheck) {
+        const room = this.rooms.find((r) => r.id === rIdOrNum || r.room_number === rIdOrNum);
+        if (room) {
+          room.operational_status = newBooking.status === 'checked_in' ? 'occupied' : 'reserved';
+          room.current_booking_ref = newBooking.booking_reference;
+          room.current_guest_name = newBooking.guest_name;
+          await syncRoomStatusToSupabase({
+            roomNumber: room.room_number,
+            operationalStatus: room.operational_status,
+            housekeepingStatus: room.housekeeping_status,
+          });
+        }
+      }
     }
 
     // 3. Broadcast new booking in real-time ONLY after successful commit
@@ -1071,16 +1496,35 @@ export class HotelRepository {
 
     if (status === 'checked_in') {
       booking.checked_in_at = new Date().toISOString();
-      if (booking.assigned_room_id) {
-        this.updateRoomStatus(booking.assigned_room_id, 'occupied', 'clean', undefined, actor);
+      const roomsToCheckIn =
+        booking.assigned_room_numbers && booking.assigned_room_numbers.length > 0
+          ? booking.assigned_room_numbers
+          : booking.assigned_room_id
+          ? [booking.assigned_room_id]
+          : booking.assigned_room_number
+          ? [booking.assigned_room_number]
+          : [];
+      for (const rmIdOrNum of roomsToCheckIn) {
+        const room = this.rooms.find((r) => r.id === rmIdOrNum || r.room_number === rmIdOrNum);
+        if (room) {
+          this.updateRoomStatus(room.id, 'occupied', 'clean', undefined, actor);
+        }
       }
       this.broadcastEvent('check_in', { booking, roomNumber: booking.assigned_room_number }, actor);
     } else if (status === 'checked_out') {
       booking.checked_out_at = new Date().toISOString();
-      if (booking.assigned_room_id) {
-        this.updateRoomStatus(booking.assigned_room_id, 'cleaning', 'dirty', undefined, actor);
-        const room = this.rooms.find((r) => r.id === booking.assigned_room_id);
+      const roomsToCheckout =
+        booking.assigned_room_numbers && booking.assigned_room_numbers.length > 0
+          ? booking.assigned_room_numbers
+          : booking.assigned_room_id
+          ? [booking.assigned_room_id]
+          : booking.assigned_room_number
+          ? [booking.assigned_room_number]
+          : [];
+      for (const rmIdOrNum of roomsToCheckout) {
+        const room = this.rooms.find((r) => r.id === rmIdOrNum || r.room_number === rmIdOrNum);
         if (room) {
+          this.updateRoomStatus(room.id, 'cleaning', 'dirty', undefined, actor);
           const roomCards = this.rfidCards.filter(
             (c) =>
               (c.assigned_room_number === room.room_number || c.room_number === room.room_number || c.booking_reference === booking.booking_reference) &&
@@ -1099,12 +1543,25 @@ export class HotelRepository {
       this.broadcastEvent('check_out', { booking, roomNumber: booking.assigned_room_number }, actor);
     } else if (status === 'cancelled') {
       booking.cancelled_at = new Date().toISOString();
-      if (booking.assigned_room_id) {
-        const room = this.rooms.find((r) => r.id === booking.assigned_room_id);
+      const roomsToRelease =
+        booking.assigned_room_numbers && booking.assigned_room_numbers.length > 0
+          ? booking.assigned_room_numbers
+          : booking.assigned_room_id
+          ? [booking.assigned_room_id]
+          : booking.assigned_room_number
+          ? [booking.assigned_room_number]
+          : [];
+      for (const rmIdOrNum of roomsToRelease) {
+        const room = this.rooms.find((r) => r.id === rmIdOrNum || r.room_number === rmIdOrNum);
         if (room) {
           room.operational_status = 'available';
           room.current_booking_ref = undefined;
           room.current_guest_name = undefined;
+          syncRoomStatusToSupabase({
+            roomNumber: room.room_number,
+            operationalStatus: 'available',
+            housekeepingStatus: room.housekeeping_status,
+          });
         }
       }
       this.broadcastEvent('booking_updated', { booking, status }, actor);
@@ -1156,6 +1613,70 @@ export class HotelRepository {
     return booking;
   }
 
+  async rescheduleBooking(params: {
+    bookingReference: string;
+    newCheckIn: string;
+    newCheckOut: string;
+    actor?: string;
+  }): Promise<Booking> {
+    const { bookingReference, newCheckIn, newCheckOut, actor = 'Front Desk' } = params;
+    const booking = this.getBookingByReference(bookingReference);
+    if (!booking) throw new Error(`Booking ${bookingReference} not found`);
+
+    const previousCheckIn = booking.check_in_date;
+    const previousCheckOut = booking.check_out_date;
+
+    booking.check_in_date = newCheckIn;
+    booking.check_out_date = newCheckOut;
+
+    // Unassign all allocated rooms so they are freed up and can be reallocated for the new dates
+    const roomsToUnassign =
+      booking.assigned_room_numbers && booking.assigned_room_numbers.length > 0
+        ? [...booking.assigned_room_numbers]
+        : booking.assigned_room_id
+        ? [booking.assigned_room_id]
+        : booking.assigned_room_number
+        ? [booking.assigned_room_number]
+        : [];
+
+    for (const rmIdOrNum of roomsToUnassign) {
+      const rm = this.rooms.find((r) => r.id === rmIdOrNum || r.room_number === rmIdOrNum);
+      if (rm) {
+        rm.operational_status = 'available';
+        rm.current_booking_ref = undefined;
+        rm.current_guest_name = undefined;
+        await syncRoomStatusToSupabase({
+          roomNumber: rm.room_number,
+          operationalStatus: 'available',
+          housekeepingStatus: rm.housekeeping_status,
+        });
+      }
+    }
+
+    booking.assigned_room_id = undefined;
+    booking.assigned_room_number = undefined;
+    booking.assigned_room_numbers = [];
+    booking.booking_rooms = [];
+
+    savePersistedData('bookings.json', this.bookings);
+    await syncBookingToSupabase(booking);
+
+    this.recordAuditLog({
+      action: 'BOOKING_RESCHEDULED',
+      entityType: 'booking',
+      entityId: booking.booking_reference,
+      details: `Reservation ${booking.booking_reference} rescheduled from ${previousCheckIn}->${previousCheckOut} to ${newCheckIn}->${newCheckOut}. All rooms unassigned.`,
+      newValue: booking,
+      userId: 'stf-duty',
+      userName: actor,
+      userRole: 'Front Desk',
+    });
+
+    this.broadcastEvent('booking_updated', { booking, action: 'rescheduled' }, actor);
+
+    return booking;
+  }
+
   async deleteBooking(idOrRef: string, actor: string = 'Staff'): Promise<boolean> {
     const idx = this.bookings.findIndex((b) => b.id === idOrRef || b.booking_reference === idOrRef);
     if (idx === -1) return false;
@@ -1196,6 +1717,7 @@ export class HotelRepository {
     idProofNumber?: string;
     numberOfNights?: number;
     paymentMethod: PaymentMethod;
+    pricingMode?: PricingMode;
     paidAmount?: number;
     walkInToken: string;
     specialRequests?: string;
@@ -1221,6 +1743,7 @@ export class HotelRepository {
     checkOut.setDate(checkOut.getDate() + nights);
     const checkOutDate = checkOut.toISOString().split('T')[0];
 
+    const pricingMode: PricingMode = params.pricingMode || 'gst_exclusive';
     const tariffCalc = calculateBookingTariff({
       categoryId: category.id,
       checkIn: checkInDate,
@@ -1230,6 +1753,7 @@ export class HotelRepository {
       childrenCount: 0,
       customRatePaise: category.base_tariff_paise,
       taxPercentage: typeof this.settings.tax_percentage === 'number' ? this.settings.tax_percentage : 5,
+      pricingMode,
     });
 
     const subtotal = tariffCalc.subtotalRupees;
@@ -1267,6 +1791,7 @@ export class HotelRepository {
       status: 'confirmed',
       payment_status: paymentStatus,
       payment_method: params.paymentMethod,
+      pricing_mode: pricingMode,
       room_charges_amount: tariffCalc.roomChargesRupees,
       extra_persons_count: tariffCalc.extraPersonsCount,
       extra_person_charges_amount: tariffCalc.extraPersonChargesRupees,

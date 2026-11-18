@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { PhysicalRoom, RoomCategory, PaymentMethod, Booking } from '@/types';
+import { PhysicalRoom, RoomCategory, PaymentMethod, Booking, PricingMode } from '@/types';
 import { adminOperations } from '@/lib/realtime-client';
 import { playChimeSound } from '@/lib/rfid/bridge-client';
 import QRCode from 'qrcode';
@@ -27,6 +27,8 @@ import {
   QrCode,
   Copy,
   Check,
+  Trash2,
+  Plus,
 } from 'lucide-react';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import { normalizeCategoryId } from '@/lib/pricing';
@@ -42,6 +44,8 @@ interface StatutoryWalkInModalProps {
   onClose: () => void;
   availableRooms: PhysicalRoom[];
   categories: RoomCategory[];
+  allRooms?: PhysicalRoom[];
+  allBookings?: Booking[];
   onSuccess: (booking: Booking, roomNumber: string) => void;
   initialData?: {
     guestName?: string;
@@ -53,11 +57,19 @@ interface StatutoryWalkInModalProps {
   };
 }
 
+export interface SelectedRoomEntry {
+  id: string;
+  categoryId: string;
+  roomNumber: string;
+}
+
 export function StatutoryWalkInModal({
   isOpen,
   onClose,
   availableRooms,
   categories,
+  allRooms,
+  allBookings,
   onSuccess,
   initialData,
 }: StatutoryWalkInModalProps) {
@@ -71,18 +83,26 @@ export function StatutoryWalkInModal({
   const [idProofNumber, setIdProofNumber] = useState('');
   const [purposeOfVisit, setPurposeOfVisit] = useState('Pilgrimage / Temple Darshan');
 
-  // Room Allocation & Dates
-  const [categoryId, setCategoryId] = useState('');
-  const [roomNumber, setRoomNumber] = useState('');
+  // Room Allocation & Dates (Multi-Room Selection by Category)
+  const [selectedRooms, setSelectedRooms] = useState<SelectedRoomEntry[]>([
+    { id: 'entry-1', categoryId: '', roomNumber: '' },
+  ]);
   const [checkInDate, setCheckInDate] = useState('');
   const [checkOutDate, setCheckOutDate] = useState('');
   const [adultsCount, setAdultsCount] = useState(2);
   const [childrenCount, setChildrenCount] = useState(0);
 
+  // Backward-compatible computed aliases
+  const primaryRoomNumber = selectedRooms[0]?.roomNumber || '';
+  const primaryCategoryId = selectedRooms[0]?.categoryId || categories[0]?.id || '';
+  const roomNumber = primaryRoomNumber;
+  const categoryId = primaryCategoryId;
+
   // Tariff & Manager Override
   const [isTariffOverridden, setIsTariffOverridden] = useState(false);
   const [overrideTariff, setOverrideTariff] = useState<number>(2499);
   const [tariffOverrideReason, setTariffOverrideReason] = useState('');
+  const [pricingMode, setPricingMode] = useState<PricingMode>('gst_exclusive');
 
   // Payment - strictly Cash, UPI, or Card (Pay Later removed per statutory front desk rules)
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'upi' | 'card'>('cash');
@@ -134,8 +154,6 @@ export function StatutoryWalkInModal({
       setCheckOutDate(tomorrowStr);
 
       const initialCatId = initialData?.categoryId || categories[0]?.id || '';
-      setCategoryId(initialCatId);
-
       const matchedCategory = categories.find((c) => isCategoryMatch(c.id, initialCatId)) || categories[0];
       const standardRate = matchedCategory?.base_price_per_night || 1800;
       setOverrideTariff(standardRate);
@@ -143,7 +161,14 @@ export function StatutoryWalkInModal({
       // Pre-select clean room
       const cleanMatch = availableRooms.find((r) => isCategoryMatch(r.category_id, initialCatId));
       const chosenRoom = initialData?.roomNumber || cleanMatch?.room_number || availableRooms[0]?.room_number || '';
-      setRoomNumber(chosenRoom);
+
+      setSelectedRooms([
+        {
+          id: 'entry-1',
+          categoryId: initialCatId,
+          roomNumber: chosenRoom,
+        },
+      ]);
 
       // Pre-fill initial guest details if passed
       setGuestName(initialData?.guestName || '');
@@ -170,20 +195,123 @@ export function StatutoryWalkInModal({
     }
   }, [isOpen, initialData, categories, availableRooms]);
 
-  // Update room selection & default tariff when category changes
-  const handleCategoryChange = (catId: string) => {
-    setCategoryId(catId);
-    const matchedCategory = categories.find((c) => isCategoryMatch(c.id, catId));
-    const standardRate = matchedCategory?.base_price_per_night || 1800;
-    if (!isTariffOverridden) {
-      setOverrideTariff(standardRate);
+  // Dynamic available rooms filter based on stay dates and category
+  const getAvailableRoomsForDates = useCallback(
+    (targetCatId?: string, excludeEntryId?: string) => {
+      const candidateRooms = allRooms && allRooms.length > 0 ? allRooms : availableRooms;
+      const today = new Date().toISOString().slice(0, 10);
+      const isTodayStay = checkInDate ? checkInDate <= today && checkOutDate > today : true;
+
+      const otherSelectedRoomNumbers = new Set(
+        selectedRooms
+          .filter((entry) => entry.id !== excludeEntryId && entry.roomNumber)
+          .map((entry) => entry.roomNumber)
+      );
+
+      return candidateRooms.filter((room) => {
+        if (!room.is_active || room.operational_status === 'maintenance' || room.operational_status === 'out_of_service') {
+          return false;
+        }
+        if (targetCatId && !isCategoryMatch(room.category_id, targetCatId)) {
+          return false;
+        }
+        if (otherSelectedRoomNumbers.has(room.room_number)) {
+          return false;
+        }
+        if (isTodayStay && room.operational_status === 'occupied') {
+          return false;
+        }
+        if (allBookings && allBookings.length > 0 && checkInDate && checkOutDate) {
+          const hasOverlap = allBookings.some((b) => {
+            if (b.status === 'cancelled' || b.status === 'checked_out') return false;
+            const matches =
+              b.assigned_room_id === room.id ||
+              b.assigned_room_number === room.room_number ||
+              (b.assigned_room_numbers && b.assigned_room_numbers.includes(room.room_number));
+            if (!matches) return false;
+            return b.check_in_date < checkOutDate && b.check_out_date > checkInDate;
+          });
+          if (hasOverlap) return false;
+        }
+        return true;
+      });
+    },
+    [allRooms, availableRooms, allBookings, checkInDate, checkOutDate, selectedRooms]
+  );
+
+  // Multi-room management handlers
+  const handleAddRoomEntry = () => {
+    let nextCat = categories[0];
+    let nextRoomNumber = '';
+
+    for (const cat of categories) {
+      const avail = getAvailableRoomsForDates(cat.id);
+      if (avail.length > 0) {
+        nextCat = cat;
+        nextRoomNumber = avail[0].room_number;
+        break;
+      }
     }
-    const cleanMatch = availableRooms.find((r) => isCategoryMatch(r.category_id, catId));
-    if (cleanMatch) {
-      setRoomNumber(cleanMatch.room_number);
-    } else if (availableRooms.length > 0) {
-      setRoomNumber(availableRooms[0].room_number);
+
+    if (!nextRoomNumber) {
+      const avail = getAvailableRoomsForDates();
+      if (avail.length > 0) {
+        nextRoomNumber = avail[0].room_number;
+        const matchedCat = categories.find((c) => isCategoryMatch(c.id, avail[0].category_id));
+        if (matchedCat) nextCat = matchedCat;
+      }
     }
+
+    setSelectedRooms((prev) => [
+      ...prev,
+      {
+        id: `entry-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        categoryId: nextCat?.id || '',
+        roomNumber: nextRoomNumber,
+      },
+    ]);
+  };
+
+  const handleRemoveRoomEntry = (entryId: string) => {
+    setSelectedRooms((prev) => {
+      if (prev.length <= 1) return prev;
+      return prev.filter((r) => r.id !== entryId);
+    });
+  };
+
+  const handleEntryCategoryChange = (entryId: string, catId: string) => {
+    setSelectedRooms((prev) =>
+      prev.map((entry) => {
+        if (entry.id !== entryId) return entry;
+        const avail = getAvailableRoomsForDates(catId, entryId);
+        const newRoomNumber = avail.length > 0 ? avail[0].room_number : '';
+        return {
+          ...entry,
+          categoryId: catId,
+          roomNumber: newRoomNumber,
+        };
+      })
+    );
+  };
+
+  const handleEntryRoomChange = (entryId: string, roomNum: string) => {
+    setSelectedRooms((prev) =>
+      prev.map((entry) => {
+        if (entry.id !== entryId) return entry;
+        const candidateRooms = allRooms && allRooms.length > 0 ? allRooms : availableRooms;
+        const matchedRoom = candidateRooms.find((r) => r.room_number === roomNum);
+        let newCatId = entry.categoryId;
+        if (matchedRoom && !isCategoryMatch(matchedRoom.category_id, entry.categoryId)) {
+          const cat = categories.find((c) => isCategoryMatch(c.id, matchedRoom.category_id));
+          if (cat) newCatId = cat.id;
+        }
+        return {
+          ...entry,
+          roomNumber: roomNum,
+          categoryId: newCatId,
+        };
+      })
+    );
   };
 
   // Calculate nights and billing
@@ -192,11 +320,30 @@ export function StatutoryWalkInModal({
   const diffTime = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
   const nights = isNaN(diffTime) || diffTime < 1 ? 1 : diffTime;
 
-  const selectedCategory = categories.find((c) => isCategoryMatch(c.id, categoryId)) || categories[0];
-  const nightlyRate = isTariffOverridden ? overrideTariff : (selectedCategory?.base_price_per_night || 1800);
-  const subtotal = nightlyRate * nights;
-  const gstTax = Math.round(subtotal * 0.05);
-  const totalAmount = subtotal + gstTax;
+  const getRoomNightlyRate = (entry: SelectedRoomEntry) => {
+    if (isTariffOverridden && overrideTariff > 0) {
+      return overrideTariff;
+    }
+    const cat = categories.find((c) => isCategoryMatch(c.id, entry.categoryId));
+    return cat?.base_price_per_night || 1800;
+  };
+
+  const rawSum = selectedRooms.reduce((sum, entry) => {
+    return sum + getRoomNightlyRate(entry) * nights;
+  }, 0);
+
+  let totalSubtotal = rawSum;
+  let gstTax = Math.round(totalSubtotal * 0.05);
+  let totalAmount = totalSubtotal + gstTax;
+
+  if (pricingMode === 'gst_inclusive') {
+    totalAmount = rawSum;
+    totalSubtotal = Math.round((totalAmount * 100) / 105);
+    gstTax = totalAmount - totalSubtotal;
+  }
+
+  const nightlyRate = isTariffOverridden ? overrideTariff : (selectedRooms.length > 0 ? getRoomNightlyRate(selectedRooms[0]) : 1800);
+  const subtotal = totalSubtotal;
 
   // Dynamic UPI QR code generator for exact walk-in folio amount
   const generateUpiQr = useCallback(async (amount: number, room: string) => {
@@ -225,9 +372,9 @@ export function StatutoryWalkInModal({
     setAmountCollected(totalAmount);
     setCashTendered(totalAmount);
     if (paymentMethod === 'upi') {
-      generateUpiQr(totalAmount, roomNumber);
+      generateUpiQr(totalAmount, primaryRoomNumber);
     }
-  }, [totalAmount, roomNumber, paymentMethod, generateUpiQr]);
+  }, [totalAmount, primaryRoomNumber, paymentMethod, generateUpiQr]);
 
   // Handle switching payment methods
   const handleSelectPaymentMethod = (method: 'cash' | 'upi' | 'card') => {
@@ -236,7 +383,7 @@ export function StatutoryWalkInModal({
     if (method === 'cash') {
       setCashTendered(totalAmount);
     } else if (method === 'upi') {
-      generateUpiQr(totalAmount, roomNumber);
+      generateUpiQr(totalAmount, primaryRoomNumber);
     }
   };
 
@@ -383,8 +530,19 @@ export function StatutoryWalkInModal({
       setErrorMsg(`Invalid Govt ID: ${idValidation.msg}`);
       return;
     }
-    if (!roomNumber) {
-      setErrorMsg('Please select an available clean physical room');
+    if (selectedRooms.length === 0) {
+      setErrorMsg('Please select at least one room.');
+      return;
+    }
+    for (let i = 0; i < selectedRooms.length; i++) {
+      if (!selectedRooms[i].roomNumber) {
+        setErrorMsg(`Please allocate a clean physical room for Room #${i + 1}`);
+        return;
+      }
+    }
+    const chosenRoomNumbers = selectedRooms.map((r) => r.roomNumber);
+    if (new Set(chosenRoomNumbers).size !== chosenRoomNumbers.length) {
+      setErrorMsg('Duplicate room numbers selected. Each room under this reservation must be unique.');
       return;
     }
     if (isTariffOverridden && !tariffOverrideReason.trim()) {
@@ -423,8 +581,13 @@ export function StatutoryWalkInModal({
         idProofType,
         idProofNumber: idProofNumber.trim(),
         purposeOfVisit,
-        categoryId,
-        roomNumber,
+        categoryId: primaryCategoryId,
+        roomNumber: primaryRoomNumber,
+        rooms: selectedRooms.map((r) => ({
+          categoryId: r.categoryId,
+          roomNumber: r.roomNumber,
+          customRate: isTariffOverridden ? Number(overrideTariff) : undefined,
+        })),
         checkInDate,
         checkOutDate,
         adultsCount: Number(adultsCount),
@@ -433,6 +596,7 @@ export function StatutoryWalkInModal({
         isTariffOverridden,
         tariffOverrideReason: isTariffOverridden ? tariffOverrideReason.trim() : undefined,
         paymentMethod,
+        pricingMode,
         amountCollected: Number(amountCollected),
         paymentReference: paymentRef,
         issueKeycard,
@@ -443,7 +607,8 @@ export function StatutoryWalkInModal({
 
       if (result.success && result.booking) {
         playChimeSound(true);
-        onSuccess(result.booking, roomNumber);
+        const allAssignedRooms = selectedRooms.map((r) => r.roomNumber).join(', ');
+        onSuccess(result.booking, allAssignedRooms);
         onClose();
       } else {
         setErrorMsg(result.error || 'Failed to complete registration');
@@ -671,51 +836,19 @@ export function StatutoryWalkInModal({
               <div className="flex items-center gap-2">
                 <BedDouble className="w-4 h-4 text-[#D8AD56]" />
                 <span className="font-serif font-bold text-sm text-[#241912]">
-                  2. Room Category & Instant Allocation
+                  2. Room Category & Multi-Room Allocation
                 </span>
               </div>
               <span className="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full">
-                {availableRooms.length} Clean Rooms Ready
+                {getAvailableRoomsForDates().length} Clean Rooms Ready Across All Categories
               </span>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
-              <div className="sm:col-span-2">
-                <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-1">
-                  Room Category *
-                </label>
-                <LuxurySelect
-                  size="md"
-                  variant="admin"
-                  value={categoryId}
-                  onChange={(val) => handleCategoryChange(String(val))}
-                  options={categories.map((c) => ({
-                    value: c.id,
-                    label: `${c.name} • Base ₹${c.base_price_per_night} / night`,
-                  }))}
-                />
-              </div>
-
-              <div className="sm:col-span-2">
-                <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-1">
-                  Allocate Clean Physical Room *
-                </label>
-                <LuxurySelect
-                  size="md"
-                  variant="admin"
-                  value={roomNumber}
-                  placeholder={availableRooms.length === 0 ? "No clean rooms available" : "Select clean room..."}
-                  onChange={(val) => setRoomNumber(String(val))}
-                  options={availableRooms.map((r) => ({
-                    value: r.room_number,
-                    label: `Room ${r.room_number} • Floor ${r.floor_number} • ${r.category_name || 'Standard'} (Clean & Inspected)`,
-                  }))}
-                />
-              </div>
-
+            {/* Stay Dates & Occupancy Header */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 pb-3 border-b border-[#EFE3D6]/60">
               <div>
                 <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-1">
-                  Check-In Date
+                  Check-In Date *
                 </label>
                 <input
                   type="date"
@@ -728,7 +861,7 @@ export function StatutoryWalkInModal({
 
               <div>
                 <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-1">
-                  Check-Out Date
+                  Check-Out Date *
                 </label>
                 <input
                   type="date"
@@ -741,26 +874,144 @@ export function StatutoryWalkInModal({
 
               <div>
                 <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-1">
-                  Adults Count
-                </label>
-                <input
-                  type="number"
-                  min="1"
-                  max="6"
-                  value={adultsCount}
-                  onChange={(e) => setAdultsCount(Number(e.target.value))}
-                  className="w-full text-xs font-bold p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
-                />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-1">
                   Stay Duration
                 </label>
                 <div className="p-2.5 rounded-lg bg-[#FAF7F2] border border-[#EFE3D6] font-bold text-xs text-[#382216]">
                   {nights} Night{nights > 1 ? 's' : ''} Stay
                 </div>
               </div>
+
+              <div>
+                <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-1">
+                  Total Adults & Children
+                </label>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <input
+                    type="number"
+                    min="1"
+                    max="20"
+                    value={adultsCount}
+                    onChange={(e) => setAdultsCount(Number(e.target.value))}
+                    title="Adults Count"
+                    placeholder="Adults"
+                    className="w-full text-xs font-bold p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                  />
+                  <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    value={childrenCount}
+                    onChange={(e) => setChildrenCount(Number(e.target.value))}
+                    title="Children Count"
+                    placeholder="Kids"
+                    className="w-full text-xs font-bold p-2.5 rounded-lg border border-[#EFE3D6] bg-white text-[#241912]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Selected Rooms List */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-[#382216] uppercase tracking-wider">
+                  Selected Rooms ({selectedRooms.length} Room{selectedRooms.length > 1 ? 's' : ''} in Reservation)
+                </span>
+                <button
+                  type="button"
+                  onClick={handleAddRoomEntry}
+                  className="px-3 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-[#382216] border border-[#D8AD56]/60 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer transition-colors shadow-2xs"
+                >
+                  <Plus className="w-3.5 h-3.5 text-[#D8AD56]" />
+                  <span>+ Add Another Room / Category</span>
+                </button>
+              </div>
+
+              {selectedRooms.map((entry, idx) => {
+                const roomOptions = getAvailableRoomsForDates(entry.categoryId, entry.id);
+                // Include currently selected room if not already in roomOptions
+                const selectedRoomObj = (allRooms || availableRooms).find((r) => r.room_number === entry.roomNumber);
+                const combinedRoomOptions = [...roomOptions];
+                if (selectedRoomObj && !combinedRoomOptions.some((r) => r.room_number === selectedRoomObj.room_number)) {
+                  combinedRoomOptions.unshift(selectedRoomObj);
+                }
+
+                const entryRate = getRoomNightlyRate(entry);
+                const entrySubtotal = entryRate * nights;
+
+                return (
+                  <div
+                    key={entry.id}
+                    className="p-3.5 rounded-xl bg-[#FAF7F2] border border-[#EFE3D6] space-y-2.5 relative"
+                  >
+                    <div className="flex items-center justify-between border-b border-[#EFE3D6]/70 pb-1.5">
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-[#382216] text-[#D8AD56] font-bold text-[10px] flex items-center justify-center">
+                          {idx + 1}
+                        </span>
+                        <span className="font-bold text-xs text-[#241912]">
+                          Room #{idx + 1}
+                        </span>
+                        {idx === 0 && (
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-[#D8AD56]/20 text-[#382216] border border-[#D8AD56]/40">
+                            Primary Keycard Room
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono text-[#786B61]">
+                          ₹{entryRate}/night &times; {nights}N = <strong className="text-[#382216]">₹{entrySubtotal.toLocaleString('en-IN')}</strong>
+                        </span>
+                        {selectedRooms.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveRoomEntry(entry.id)}
+                            className="p-1 rounded text-red-600 hover:bg-red-100 transition-colors cursor-pointer"
+                            title="Remove this room"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-1">
+                          Room Category *
+                        </label>
+                        <LuxurySelect
+                          size="md"
+                          variant="admin"
+                          value={entry.categoryId}
+                          onChange={(val) => handleEntryCategoryChange(entry.id, String(val))}
+                          options={categories.map((c) => ({
+                            value: c.id,
+                            label: `${c.name} • Base ₹${c.base_price_per_night} / night`,
+                          }))}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] font-bold text-[#786B61] uppercase block mb-1">
+                          Allocate Clean Physical Room *
+                        </label>
+                        <LuxurySelect
+                          size="md"
+                          variant="admin"
+                          value={entry.roomNumber}
+                          placeholder={combinedRoomOptions.length === 0 ? "No available clean rooms in this category" : "Select clean room..."}
+                          onChange={(val) => handleEntryRoomChange(entry.id, String(val))}
+                          options={combinedRoomOptions.map((r) => ({
+                            value: r.room_number,
+                            label: `Room ${r.room_number} • Floor ${r.floor_number} • ${r.category_name || 'Standard'} (Clean & Inspected)`,
+                          }))}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
@@ -791,7 +1042,7 @@ export function StatutoryWalkInModal({
               <div className="p-3 rounded-lg bg-amber-50 border border-amber-300 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="text-[10px] font-bold text-amber-900 uppercase block mb-1">
-                    Overridden Rate per Night (₹) *
+                    Overridden Rate per Room / Night (₹) *
                   </label>
                   <input
                     type="number"
@@ -819,18 +1070,78 @@ export function StatutoryWalkInModal({
               </div>
             )}
 
-            {/* Financial Calculation Bar */}
-            <div className="p-3 rounded-lg bg-white border border-[#EFE3D6] flex flex-wrap items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-3 font-mono text-[11px]">
-                <span>Rate: <strong>₹{nightlyRate}</strong> &times; {nights} night(s) = <strong>₹{subtotal}</strong></span>
-                <span>+</span>
-                <span>5% GST (2.5% CGST + 2.5% SGST): <strong>₹{gstTax}</strong></span>
-              </div>
-              <div className="text-right">
-                <span className="text-[10px] uppercase font-bold text-[#786B61] mr-2">Total Folio Bill:</span>
-                <span className="font-serif text-lg font-black text-[#382216]">
-                  ₹ {totalAmount.toLocaleString('en-IN')}
+            {/* Pricing Mode Selector: GST Exclusive vs GST Inclusive */}
+            <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-white border border-[#EFE3D6] text-xs">
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-bold text-[#382216] uppercase tracking-wider">
+                  Pricing Mode:
                 </span>
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#FAF7F2] border border-[#EFE3D6] text-[#786B61]">
+                  {pricingMode === 'gst_inclusive' ? 'GST Inclusive (Flat / All-Inc)' : 'GST Exclusive (+5% GST)'}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setPricingMode('gst_exclusive')}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                    pricingMode === 'gst_exclusive'
+                      ? 'bg-[#382216] text-[#D8AD56] shadow-xs'
+                      : 'bg-[#FAF7F2] text-[#786B61] hover:text-[#382216] border border-[#EFE3D6]'
+                  }`}
+                >
+                  GST Exclusive (+5%)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPricingMode('gst_inclusive')}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+                    pricingMode === 'gst_inclusive'
+                      ? 'bg-[#382216] text-[#D8AD56] shadow-xs'
+                      : 'bg-[#FAF7F2] text-[#786B61] hover:text-[#382216] border border-[#EFE3D6]'
+                  }`}
+                >
+                  GST Inclusive (Flat)
+                </button>
+              </div>
+            </div>
+
+            {/* Financial Calculation Bar */}
+            <div className="p-3.5 rounded-xl bg-white border border-[#EFE3D6] space-y-2 text-xs">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#EFE3D6] pb-2 text-[11px] text-[#786B61]">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <span className="font-bold text-[#241912]">Room-Wise Rates:</span>
+                  {selectedRooms.map((entry, idx) => {
+                    const r = (allRooms || availableRooms).find((rm) => rm.room_number === entry.roomNumber);
+                    const cat = categories.find((c) => isCategoryMatch(c.id, entry.categoryId));
+                    const rate = getRoomNightlyRate(entry);
+                    return (
+                      <span key={entry.id} className="font-mono bg-[#FAF7F2] px-2 py-0.5 rounded border border-[#EFE3D6]">
+                        Room {entry.roomNumber || `#${idx + 1}`} ({cat?.name || r?.category_name || 'Standard'}): ₹{rate} &times; {nights}N = ₹{(rate * nights).toLocaleString('en-IN')}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3 font-mono text-[11px]">
+                <div className="flex items-center gap-3">
+                  <span>Taxable Subtotal: <strong>₹{totalSubtotal.toLocaleString('en-IN')}</strong></span>
+                  <span>+</span>
+                  <span>5% GST (2.5% CGST + 2.5% SGST): <strong>₹{gstTax.toLocaleString('en-IN')}</strong></span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[10px] uppercase font-bold text-[#786B61] mr-2">
+                    {pricingMode === 'gst_inclusive' ? 'All-Inclusive Total:' : 'Combined Folio Bill:'}
+                  </span>
+                  <span className="font-serif text-lg font-black text-[#382216]">
+                    ₹ {totalAmount.toLocaleString('en-IN')}
+                  </span>
+                </div>
+              </div>
+
+              <div className="text-[10px] text-[#786B61] pt-1 border-t border-[#EFE3D6] italic">
+                * Statutory Compliance Note: Standard 5% GST (SAC 996311) is applied in both pricing modes (added on top in GST-Exclusive mode or backed out from flat tariff in GST-Inclusive mode). Sri Tayi Grand does not permit arbitrary 0% tax exemptions without formal authority.
               </div>
             </div>
 
@@ -1245,7 +1556,7 @@ export function StatutoryWalkInModal({
           {/* Action Buttons */}
           <div className="pt-4 border-t border-[#EFE3D6] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <span className="text-xs text-[#786B61]">
-              Allocating: <strong>Room {roomNumber}</strong> &bull; Total: <strong>₹{totalAmount.toLocaleString('en-IN')}</strong> ({paymentMethod.toUpperCase()})
+              Allocating: <strong>{selectedRooms.length > 1 ? `Rooms ${selectedRooms.map((r) => r.roomNumber).filter(Boolean).join(', ')} (${selectedRooms.length} rooms)` : `Room ${roomNumber}`}</strong> &bull; Total: <strong>₹{totalAmount.toLocaleString('en-IN')}</strong> ({paymentMethod.toUpperCase()})
             </span>
 
             <div className="flex items-center gap-2">
@@ -1258,7 +1569,7 @@ export function StatutoryWalkInModal({
               </button>
               <button
                 type="submit"
-                disabled={isSubmitting || !roomNumber || availableRooms.length === 0}
+                disabled={isSubmitting || selectedRooms.some((r) => !r.roomNumber) || availableRooms.length === 0}
                 className="px-6 py-2.5 rounded-xl bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] text-xs font-extrabold transition-all flex items-center gap-2 shadow-md disabled:opacity-50 cursor-pointer"
               >
                 {isSubmitting ? (

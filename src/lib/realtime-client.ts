@@ -456,6 +456,25 @@ export const adminOperations = {
     return data;
   },
 
+  async addExtraRoom(params: {
+    bookingReference: string;
+    roomId?: string;
+    roomNumber?: string;
+    categoryId?: string;
+    staffName?: string;
+  }) {
+    adminOperations.invalidateFullState();
+    const res = await fetch('/api/admin/operations', {
+      method: 'POST',
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ action: 'add_extra_room', ...params }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to add extra room');
+    adminOperations.invalidateFullState();
+    return data;
+  },
+
   async updateHousekeeping(params: {
     roomId: string;
     housekeepingStatus: string;
@@ -498,6 +517,7 @@ export const adminOperations = {
     guestName: string;
     amount: number;
     paymentMethod: string;
+    pricingMode?: string;
     staffName?: string;
   }) {
     adminOperations.invalidateFullState();
@@ -571,8 +591,16 @@ export const adminOperations = {
     idProofType: string;
     idProofNumber: string;
     purposeOfVisit: string;
-    categoryId: string;
-    roomNumber: string;
+    categoryId?: string;
+    roomNumber?: string;
+    rooms?: Array<{
+      categoryId: string;
+      roomNumber?: string;
+      roomId?: string;
+      customRate?: number;
+      adultsCount?: number;
+      childrenCount?: number;
+    }>;
     checkInDate: string;
     checkOutDate: string;
     adultsCount?: number;
@@ -581,6 +609,7 @@ export const adminOperations = {
     isTariffOverridden?: boolean;
     tariffOverrideReason?: string;
     paymentMethod: string;
+    pricingMode?: string;
     amountCollected?: number;
     paymentReference?: string;
     issueKeycard?: boolean;

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
@@ -55,6 +55,7 @@ import { useRealtimeSync, adminOperations, getAdminHeaders } from '@/lib/realtim
 import { Booking, BookingStatus, PhysicalRoom, RoomCategory, FolioCharge } from '@/types';
 import { toast } from '@/components/ui/Toast';
 import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
+import { getAuthoritativeTariff } from '@/lib/pricing';
 
 export default function BookingsAdminPage() {
   const { t, formatCurrency, formatDate, translateStatus, isTelugu } = useAdminLanguage();
@@ -74,6 +75,10 @@ export default function BookingsAdminPage() {
   // Add / Assign Room modal
   const [assignRoomTarget, setAssignRoomTarget] = useState<Booking | null>(null);
   const [selectedAssignRoomId, setSelectedAssignRoomId] = useState('');
+
+  // Add Extra Room modal
+  const [addExtraRoomTarget, setAddExtraRoomTarget] = useState<Booking | null>(null);
+  const [selectedExtraRoomNumber, setSelectedExtraRoomNumber] = useState('');
 
   // Cancel Checkout modal
   const [cancelCheckoutTarget, setCancelCheckoutTarget] = useState<Booking | null>(null);
@@ -320,7 +325,7 @@ export default function BookingsAdminPage() {
       ].join(',');
     });
 
-    const csvHeaders = isTelugu ? ['బుకింగ్ రిఫరెన్స్', 'అతిథి పేరు', 'ఫోన్', 'ఈమెయిల్', 'గది రకం', 'కేటాయించిన గది', 'చెక్-ఇన్ తేదీ', 'చెక్-అవుట్ తేదీ', 'రాత్రులు', 'మొత్తం (రూ)', 'చెల్లించినది (రూ)', 'బకాయి (రూ)', 'బుకింగ్ స్థితి', 'చెల్లింపు స్థితి', 'బుకింగ్ మార్గం'] : headers;
+    const csvHeaders = isTelugu ? ['à°¬à±à°•à°¿à°‚à°—à± à°°à°¿à°«à°°à±†à°¨à±à°¸à±', 'à°…à°¤à°¿à°¥à°¿ à°ªà±‡à°°à±', 'à°«à±‹à°¨à±', 'à°ˆà°®à±†à°¯à°¿à°²à±', 'à°—à°¦à°¿ à°°à°•à°‚', 'à°•à±‡à°Ÿà°¾à°¯à°¿à°‚à°šà°¿à°¨ à°—à°¦à°¿', 'à°šà±†à°•à±-à°‡à°¨à± à°¤à±‡à°¦à±€', 'à°šà±†à°•à±-à°…à°µà±à°Ÿà± à°¤à±‡à°¦à±€', 'à°°à°¾à°¤à±à°°à±à°²à±', 'à°®à±Šà°¤à±à°¤à°‚ (à°°à±‚)', 'à°šà±†à°²à±à°²à°¿à°‚à°šà°¿à°¨à°¦à°¿ (à°°à±‚)', 'à°¬à°•à°¾à°¯à°¿ (à°°à±‚)', 'à°¬à±à°•à°¿à°‚à°—à± à°¸à±à°¥à°¿à°¤à°¿', 'à°šà±†à°²à±à°²à°¿à°‚à°ªà± à°¸à±à°¥à°¿à°¤à°¿', 'à°¬à±à°•à°¿à°‚à°—à± à°®à°¾à°°à±à°—à°‚'] : headers;
     const csvContent = 'data:text/csv;charset=utf-8,%EF%BB%BF' + encodeURIComponent([csvHeaders.join(','), ...rows].join('\n'));
     const link = document.createElement('a');
     link.setAttribute('href', csvContent);
@@ -368,6 +373,40 @@ export default function BookingsAdminPage() {
       }
     } catch (err: any) {
       toast.error(err.message || 'Network error while assigning room');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Action: Confirm Add Extra Room to existing booking workflow
+  const handleConfirmAddExtraRoom = async () => {
+    if (!addExtraRoomTarget) return;
+    if (!selectedExtraRoomNumber) {
+      toast.warning('Please select an available physical room to add.');
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      const res = await adminOperations.addExtraRoom({
+        bookingReference: addExtraRoomTarget.booking_reference,
+        roomNumber: selectedExtraRoomNumber,
+        staffName: 'Front Desk Duty Officer',
+      });
+
+      if (res.success) {
+        toast.success(`Extra Room #${selectedExtraRoomNumber} added to booking ${addExtraRoomTarget.booking_reference}!`);
+        setAddExtraRoomTarget(null);
+        setSelectedExtraRoomNumber('');
+        await fetchBookings();
+        if (selectedRes && selectedRes.booking_reference === addExtraRoomTarget.booking_reference) {
+          setSelectedRes(res.booking);
+        }
+      } else {
+        toast.error(res.error || 'Failed to add extra room');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Error adding extra room');
     } finally {
       setActionLoading(false);
     }
@@ -470,15 +509,22 @@ export default function BookingsAdminPage() {
       });
 
       if (res.success) {
-        const targetRoom = checkOutTarget.assigned_room_number || checkOutTarget.room_number;
-        if (targetRoom) {
-          checkoutPhysicalCard(targetRoom, 'Front Desk Duty Officer').catch(() => {});
+        const targetRooms =
+          checkOutTarget.assigned_room_numbers && checkOutTarget.assigned_room_numbers.length > 0
+            ? checkOutTarget.assigned_room_numbers
+            : checkOutTarget.assigned_room_number
+            ? [checkOutTarget.assigned_room_number]
+            : checkOutTarget.room_number
+            ? [checkOutTarget.room_number]
+            : [];
+        for (const tr of targetRooms) {
+          checkoutPhysicalCard(tr, 'Front Desk Duty Officer').catch(() => {});
         }
 
         toast.success(
-          `Guest checked out. Room #${
-            targetRoom || 'Room'
-          } is now marked as Vacant Dirty for Housekeeping. Keycards deactivated.`
+          `Guest checked out. ${
+            targetRooms.length > 1 ? `Rooms #${targetRooms.join(', #')}` : `Room #${targetRooms[0] || 'Room'}`
+          } marked as Vacant Dirty for Housekeeping. Keycards deactivated.`
         );
         setCheckOutTarget(null);
         await fetchBookings();
@@ -861,7 +907,11 @@ export default function BookingsAdminPage() {
                           {r.assigned_room_number ? (
                             <div className="flex flex-col items-end gap-0.5">
                               <span className="inline-flex items-center space-x-1 font-bold text-xs bg-[#21180F] text-white px-2.5 py-1 rounded-xl">
-                                <span>Room #{r.assigned_room_number}</span>
+                                <span>
+                                  {r.assigned_room_numbers && r.assigned_room_numbers.length > 1
+                                    ? `Rooms #${r.assigned_room_numbers.join(', #')}`
+                                    : `Room #${r.assigned_room_number}`}
+                                </span>
                               </span>
                               <div className="text-[10px] text-[#786A5B] font-medium">{getCategoryBedSubtitle(r.category_id, r.category_name)}</div>
                             </div>
@@ -1113,7 +1163,11 @@ export default function BookingsAdminPage() {
                             {r.assigned_room_number ? (
                               <div className="flex flex-col items-start gap-0.5">
                                 <span className="inline-flex items-center space-x-1 font-bold text-xs bg-[#21180F] text-white px-2.5 py-1 rounded-xl">
-                                  <span>Room #{r.assigned_room_number}</span>
+                                  <span>
+                                    {r.assigned_room_numbers && r.assigned_room_numbers.length > 1
+                                      ? `Rooms #${r.assigned_room_numbers.join(', #')}`
+                                      : `Room #${r.assigned_room_number}`}
+                                  </span>
                                 </span>
                                 <div className="text-[10px] text-[#786A5B] font-medium">{getCategoryBedSubtitle(r.category_id, r.category_name)}</div>
                               </div>
@@ -1366,7 +1420,7 @@ export default function BookingsAdminPage() {
                       )
                       .map((pr) => ({
                         value: pr.room_number,
-                        label: `Room #${pr.room_number} (Floor ${pr.floor_number}) — ${
+                        label: `Room #${pr.room_number} (Floor ${pr.floor_number}) â€” ${
                           pr.operational_status === 'available' ? 'Available Clean' : pr.operational_status
                         }`,
                       })),
@@ -1603,7 +1657,7 @@ export default function BookingsAdminPage() {
                         const matchTag = isCategoryMatch ? 'Exact Category' : 'Upgrade/Cross-type';
                         return {
                           value: pr.room_number,
-                          label: `Room #${pr.room_number} (Floor ${pr.floor_number}) • ${matchTag} [${statusTag}]`,
+                          label: `Room #${pr.room_number} (Floor ${pr.floor_number}) â€¢ ${matchTag} [${statusTag}]`,
                         };
                       }),
                   ]}
@@ -1637,6 +1691,188 @@ export default function BookingsAdminPage() {
           </div>
         </div>
       )}
+
+      {/* --- MODAL 2A-EXT: ADD EXTRA ROOM TO BOOKING --- */}
+      {addExtraRoomTarget && (() => {
+        const stayNights = Math.max(1, Math.round(
+          (new Date(addExtraRoomTarget.check_out_date).getTime() - new Date(addExtraRoomTarget.check_in_date).getTime()) /
+          (1000 * 60 * 60 * 24)
+        ));
+        const today = new Date().toISOString().slice(0, 10);
+        const isTodayStay = addExtraRoomTarget.check_in_date <= today && addExtraRoomTarget.check_out_date > today;
+        const currentRooms = addExtraRoomTarget.assigned_room_numbers || (addExtraRoomTarget.assigned_room_number ? [addExtraRoomTarget.assigned_room_number] : []);
+
+        const selectableRooms = physicalRooms.filter((pr) => {
+          if (!pr.is_active) return false;
+          if (pr.operational_status === 'maintenance' || pr.operational_status === 'out_of_service') return false;
+          if (currentRooms.includes(pr.room_number)) return false;
+
+          // Check overlap with other active bookings
+          const hasConflict = bookings.some((b) => {
+            if (b.booking_reference === addExtraRoomTarget.booking_reference) return false;
+            if (b.status === 'cancelled' || b.status === 'checked_out') return false;
+            const matches =
+              b.assigned_room_id === pr.id ||
+              b.assigned_room_number === pr.room_number ||
+              (b.assigned_room_numbers && b.assigned_room_numbers.includes(pr.room_number));
+            if (!matches) return false;
+            return b.check_in_date < addExtraRoomTarget.check_out_date && b.check_out_date > addExtraRoomTarget.check_in_date;
+          });
+          if (hasConflict) return false;
+
+          if (isTodayStay && (pr.operational_status === 'occupied' || pr.operational_status === 'reserved')) {
+            return false;
+          }
+
+          return true;
+        });
+
+        const chosenRoom = physicalRooms.find((r) => r.room_number === selectedExtraRoomNumber);
+        const chosenCatTariff = chosenRoom ? getAuthoritativeTariff(chosenRoom.category_id) : null;
+        const extraRoomTariff = chosenCatTariff ? chosenCatTariff.baseTariffRupees : 1800;
+        const extraSubtotal = extraRoomTariff * stayNights;
+        const extraTax = Math.round(extraSubtotal * 0.05);
+        const extraTotal = extraSubtotal + extraTax;
+        const targetSrc = (addExtraRoomTarget.booking_source as string) || '';
+        const isOta =
+          targetSrc === 'ota' ||
+          targetSrc === 'agoda' ||
+          targetSrc === 'expedia' ||
+          targetSrc === 'airbnb' ||
+          (addExtraRoomTarget.internal_notes && addExtraRoomTarget.internal_notes.toLowerCase().includes('ota'));
+
+        return (
+          <div
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setAddExtraRoomTarget(null);
+            }}
+            className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3.5 sm:p-4"
+          >
+            <div className="bg-white rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl border border-[#E6D9C5] space-y-4 max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between pb-3 border-b border-[#E6D9C5]">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700">
+                    <BedDouble className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-serif font-bold text-[#33271D]">Add Extra Room to Booking</h3>
+                    <p className="text-[11px] text-[#786A5B]">Ref: {addExtraRoomTarget.booking_reference} &bull; {addExtraRoomTarget.guest_name}</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setAddExtraRoomTarget(null)}
+                  className="text-gray-400 hover:text-gray-600 p-1 cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              {/* Stay Duration & Current Rooms */}
+              <div className="p-3 bg-[#FAF5EB] border border-[#E2D5BE] rounded-xl text-xs space-y-1.5">
+                <div className="flex justify-between text-[#786A5B]">
+                  <span>Stay Dates:</span>
+                  <span className="font-semibold text-[#33271D]">{addExtraRoomTarget.check_in_date} to {addExtraRoomTarget.check_out_date} ({stayNights} night{stayNights > 1 ? 's' : ''})</span>
+                </div>
+                <div className="flex justify-between text-[#786A5B]">
+                  <span>Currently Assigned:</span>
+                  <span className="font-semibold text-[#33271D]">
+                    {currentRooms.length > 0 ? `Room(s) #${currentRooms.join(', #')}` : 'None'}
+                  </span>
+                </div>
+                <div className="flex justify-between text-[#786A5B]">
+                  <span>Rooms Count:</span>
+                  <span className="font-bold text-[#8D672F]">{addExtraRoomTarget.rooms_count || 1} room(s) &rarr; {(addExtraRoomTarget.rooms_count || 1) + 1} room(s)</span>
+                </div>
+              </div>
+
+              {/* Room Selection */}
+              <div className="space-y-1.5">
+                <label className="block text-xs font-bold text-[#33271D]">
+                  Select Available Room to Include <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={selectedExtraRoomNumber}
+                  onChange={(e) => setSelectedExtraRoomNumber(e.target.value)}
+                  className="w-full text-xs p-2.5 rounded-xl border border-[#E6D9C5] bg-[#FDFBF7] text-[#33271D] focus:outline-hidden focus:ring-2 focus:ring-[#8D672F]"
+                >
+                  <option value="">-- Choose an available clean room ({selectableRooms.length} available) --</option>
+                  {selectableRooms.map((pr) => {
+                    const cat = categories.find((c) => c.id === pr.category_id);
+                    const catTariff = getAuthoritativeTariff(pr.category_id);
+                    return (
+                      <option key={pr.id} value={pr.room_number}>
+                        Room #{pr.room_number} (Floor {pr.floor_number}) &bull; {cat?.name || pr.category_name || 'Room'} &bull; ₹{catTariff.baseTariffRupees.toLocaleString('en-IN')}/night [{pr.housekeeping_status}]
+                      </option>
+                    );
+                  })}
+                </select>
+                {selectableRooms.length === 0 && (
+                  <p className="text-[11px] text-rose-600 font-medium">No other rooms are available without conflict for these stay dates.</p>
+                )}
+              </div>
+
+              {/* Pricing Calculation Breakdown */}
+              {chosenRoom && chosenCatTariff && (
+                <div className="p-3.5 bg-amber-50/60 border border-amber-200 rounded-xl text-xs space-y-1.5 shadow-2xs">
+                  <div className="font-bold text-amber-950 pb-1 border-b border-amber-200/60 flex items-center justify-between">
+                    <span>Extra Room Tariff & Recalculation</span>
+                    <span className="text-[10px] bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full font-semibold">
+                      Authoritative Rate
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-[#786A5B]">
+                    <span>Category:</span>
+                    <span className="font-semibold text-[#33271D]">{chosenCatTariff.name}</span>
+                  </div>
+                  <div className="flex justify-between text-[#786A5B]">
+                    <span>Rate:</span>
+                    <span>₹{chosenCatTariff.baseTariffRupees.toLocaleString('en-IN')} &times; {stayNights} night{stayNights > 1 ? 's' : ''} = ₹{extraSubtotal.toLocaleString('en-IN')}</span>
+                  </div>
+                  <div className="flex justify-between text-[#786A5B]">
+                    <span>GST (5%):</span>
+                    <span>₹{extraTax.toLocaleString('en-IN')}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-amber-900 pt-1 border-t border-amber-200/60">
+                    <span>Additional Amount for Room #{chosenRoom.room_number}:</span>
+                    <span>₹{extraTotal.toLocaleString('en-IN')}</span>
+                  </div>
+                  <div className="flex justify-between font-bold text-[#33271D] pt-1 border-t border-amber-200/60 text-xs">
+                    <span>Updated Reservation Total:</span>
+                    <span className="text-[#8D672F]">₹{(addExtraRoomTarget.total_amount + extraTotal).toLocaleString('en-IN')}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* OTA Contract Disclosure */}
+              {isOta && (
+                <div className="p-3 bg-purple-50 border border-purple-200 rounded-xl text-[11px] text-purple-900 leading-relaxed">
+                  <strong>OTA Channel Booking:</strong> The existing OTA voucher reference and channel commission will be preserved. The additional room is added at the standard hotel rate and balance is payable directly at front desk.
+                </div>
+              )}
+
+              <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#E6D9C5]">
+                <button
+                  type="button"
+                  onClick={() => setAddExtraRoomTarget(null)}
+                  className="px-4 py-2 rounded-xl border border-[#E6D9C5] text-xs text-[#786A5B] hover:bg-[#F8F3E9] cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={actionLoading || !selectedExtraRoomNumber}
+                  onClick={handleConfirmAddExtraRoom}
+                  className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider flex items-center space-x-1.5 shadow-sm cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{actionLoading ? 'Adding Extra Room...' : 'Confirm Extra Room'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
 
       {/* --- MODAL 2B: CANCEL CHECKOUT (REVERT STAY TO IN-HOUSE) --- */}
       {cancelCheckoutTarget && (
@@ -1814,7 +2050,11 @@ export default function BookingsAdminPage() {
                 </span>
                 <h3 className="text-xl font-serif text-[#33271D] font-bold">
                   {selectedRes.booking_reference}{' '}
-                  {selectedRes.assigned_room_number ? `(Room #${selectedRes.assigned_room_number})` : ''}
+                  {selectedRes.assigned_room_numbers && selectedRes.assigned_room_numbers.length > 0
+                    ? `(Rooms #${selectedRes.assigned_room_numbers.join(', #')})`
+                    : selectedRes.assigned_room_number
+                    ? `(Room #${selectedRes.assigned_room_number})`
+                    : ''}
                 </h3>
               </div>
               <button
@@ -1829,11 +2069,50 @@ export default function BookingsAdminPage() {
               <div><span className="text-[#786A5B]">Guest Name:</span> <span className="font-semibold text-[#33271D]">{selectedRes.guest_name}</span></div>
               <div><span className="text-[#786A5B]">Contact Phone:</span> <span className="font-semibold text-[#33271D]">{selectedRes.guest_phone}</span></div>
               <div><span className="text-[#786A5B]">Email:</span> <span className="font-semibold text-[#33271D]">{selectedRes.guest_email || 'Not specified'}</span></div>
-              <div><span className="text-[#786A5B]">Room Category:</span> <span className="font-semibold text-[#33271D]">{selectedRes.category_name}</span></div>
+              <div><span className="text-[#786A5B]">Rooms & Category:</span> <span className="font-semibold text-[#33271D]">{selectedRes.rooms_count || 1} room(s) &bull; {selectedRes.category_name}</span></div>
               <div><span className="text-[#786A5B]">Check-in Date:</span> <span className="font-semibold text-[#33271D]">{selectedRes.check_in_date}</span></div>
               <div><span className="text-[#786A5B]">Check-out Date:</span> <span className="font-semibold text-[#33271D]">{selectedRes.check_out_date}</span></div>
               <div><span className="text-[#786A5B]">Reservation Status:</span> <span className="font-bold uppercase text-[#8D672F]">{selectedRes.status}</span></div>
               <div><span className="text-[#786A5B]">Payment Status:</span> <span className="font-bold uppercase text-[#8D672F]">{selectedRes.payment_status}</span></div>
+
+              {/* Linked Rooms Breakdown for Multi-Room Bookings */}
+              {((selectedRes.booking_rooms && selectedRes.booking_rooms.length > 0) ||
+                (selectedRes.assigned_room_numbers && selectedRes.assigned_room_numbers.length > 1)) && (
+                <div className="col-span-2 p-3 rounded-2xl bg-[#FAF6EE] border border-[#E6D9C5] space-y-2">
+                  <div className="flex items-center justify-between text-xs font-bold text-[#33271D]">
+                    <span className="flex items-center gap-1.5">
+                      <BedDouble className="w-4 h-4 text-[#8D672F]" />
+                      <span>Linked Rooms in this Reservation ({selectedRes.booking_rooms?.length || selectedRes.assigned_room_numbers?.length || selectedRes.rooms_count} Rooms)</span>
+                    </span>
+                    <span className="text-[10px] bg-[#8D672F]/10 text-[#8D672F] px-2 py-0.5 rounded-full font-bold">
+                      Multi-Room Party
+                    </span>
+                  </div>
+                  {selectedRes.booking_rooms && selectedRes.booking_rooms.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                      {selectedRes.booking_rooms.map((rm, idx) => (
+                        <div key={idx} className="p-2.5 bg-white rounded-xl border border-[#E6D9C5] flex items-center justify-between">
+                          <div>
+                            <div className="font-bold text-[#33271D]">Room #{rm.room_number}</div>
+                            <div className="text-[10px] text-[#786A5B]">{rm.category_name || selectedRes.category_name}</div>
+                          </div>
+                          <div className="text-right">
+                            <div className="font-semibold text-[#8D672F]">₹{rm.price_per_night?.toLocaleString('en-IN')}<span className="text-[9px] text-[#786A5B]">/nt</span></div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      {selectedRes.assigned_room_numbers?.map((rNum) => (
+                        <span key={rNum} className="px-2.5 py-1 bg-white rounded-lg border border-[#E6D9C5] font-bold text-[#33271D]">
+                          Room #{rNum}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
 
               {/* HIGHLIGHTED STATUTORY GOVERNMENT ID PROOF CARD */}
               <div className="col-span-2 p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-300 space-y-2 shadow-xs">
@@ -1857,6 +2136,12 @@ export default function BookingsAdminPage() {
 
             {/* Financial breakdown */}
             <div className="p-4 rounded-xl bg-[#F8F3E9]/50 border border-[#E6D9C5] space-y-1.5 text-xs">
+              <div className="flex justify-between text-[#786A5B] pb-1 border-b border-[#E6D9C5]/50">
+                <span>Pricing Mode:</span>
+                <span className="font-semibold text-[#8D672F]">
+                  {selectedRes.pricing_mode === 'gst_inclusive' ? 'GST Inclusive (Flat Rate)' : 'GST Exclusive (+5% GST)'}
+                </span>
+              </div>
               <div className="flex justify-between text-[#786A5B]">
                 <span>Room Charges:</span>
                 <span>₹{selectedRes.subtotal_amount.toLocaleString('en-IN')}</span>
@@ -1998,6 +2283,20 @@ export default function BookingsAdminPage() {
                     <span>Change Room</span>
                   </button>
                 )}
+                {selectedRes.status !== 'cancelled' && selectedRes.status !== 'checked_out' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAddExtraRoomTarget(selectedRes);
+                      setSelectedExtraRoomNumber('');
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-300 hover:bg-amber-100 text-amber-900 text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer shadow-xs"
+                    title="Add another room to this reservation"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-amber-700" />
+                    <span>+ Extra Room</span>
+                  </button>
+                )}
                 <Link
                   href={`/booking/confirmation/${selectedRes.booking_reference}`}
                   target="_blank"
@@ -2070,7 +2369,7 @@ export default function BookingsAdminPage() {
                     Forensic Door Lock Audit Trail
                   </span>
                   <h3 className="font-serif text-base sm:text-lg font-bold text-[#241912]">
-                    Stay {rfidAuditBooking.booking_reference} • Room {rfidAuditBooking.assigned_room_number || rfidAuditBooking.room_number || 'Unassigned'}
+                    Stay {rfidAuditBooking.booking_reference} â€¢ Room {rfidAuditBooking.assigned_room_number || rfidAuditBooking.room_number || 'Unassigned'}
                   </h3>
                 </div>
               </div>

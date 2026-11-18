@@ -101,19 +101,28 @@ export async function POST(req: NextRequest) {
     booking.subtotal_amount = newTariff.subtotalRupees;
     booking.tax_amount = newTariff.taxAmountRupees;
 
-    // Unassign room so front desk can assign appropriate room for new dates
-    if (booking.assigned_room_id) {
+    // Unassign rooms so front desk can assign appropriate rooms for new dates
+    const roomsToUnassign = (booking.assigned_room_numbers && booking.assigned_room_numbers.length > 0)
+      ? booking.assigned_room_numbers
+      : (booking.assigned_room_id ? [booking.assigned_room_id] : (booking.assigned_room_number ? [booking.assigned_room_number] : []));
+
+    for (const rmIdOrNum of roomsToUnassign) {
       try {
-        repo.updateRoomStatus(
-          booking.assigned_room_id,
-          'available',
-          'clean',
-          `Booking ${bookingReference} rescheduled from ${previousCheckIn} to ${newCheckInDate}`
-        );
+        const rm = repo.getRooms().find((r) => r.id === rmIdOrNum || r.room_number === rmIdOrNum);
+        if (rm) {
+          repo.updateRoomStatus(
+            rm.id,
+            'available',
+            'clean',
+            `Booking ${bookingReference} rescheduled from ${previousCheckIn} to ${newCheckInDate}`
+          );
+        }
       } catch {}
-      booking.assigned_room_id = undefined;
-      booking.assigned_room_number = undefined;
     }
+    booking.assigned_room_id = undefined;
+    booking.assigned_room_number = undefined;
+    booking.assigned_room_numbers = [];
+    booking.booking_rooms = [];
 
     const actor = isStaff ? (staffAuth.session?.name || 'Authorized Staff') : 'Guest Self-Service';
 

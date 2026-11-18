@@ -67,7 +67,7 @@ export function getSupabasePgPool(): any {
 
     // Automatic IPv4 remapping: If connection string points to IPv6-only direct host, route via active IPv4 pooler
     if (connectionString.includes('db.goxgiohyshxzqzesernz.supabase.co') || connectionString.includes('db.wercvaimozbbkbwmuoct.supabase.co')) {
-      connectionString = `postgresql://${encodeURIComponent(user)}:${encodeURIComponent(password)}@aws-1-ap-northeast-2.pooler.supabase.com:5432/${database}`;
+      connectionString = `postgresql://${encodeURIComponent(user || '')}:${encodeURIComponent(password || '')}@aws-1-ap-northeast-2.pooler.supabase.com:5432/${database}`;
     }
 
     poolInstance = new Pool({
@@ -195,6 +195,10 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
         ON CONFLICT (booking_reference) DO UPDATE SET
           status = EXCLUDED.status,
           payment_status = EXCLUDED.payment_status,
+          rooms_count = EXCLUDED.rooms_count,
+          subtotal_amount = EXCLUDED.subtotal_amount,
+          tax_amount = EXCLUDED.tax_amount,
+          total_amount = EXCLUDED.total_amount,
           paid_amount = EXCLUDED.paid_amount,
           room_assigned_by = COALESCE(EXCLUDED.room_assigned_by, bookings.room_assigned_by),
           id_proof_type = COALESCE(EXCLUDED.id_proof_type, bookings.id_proof_type),
@@ -292,26 +296,63 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
           if (rmRes.rows.length > 0) roomUuid = rmRes.rows[0].id;
         }
 
-        const brCheck = await client.query(
-          `SELECT id FROM booking_rooms WHERE booking_id = $1 LIMIT 1;`,
-          [bookingUuid]
-        );
         const pricePerNight = Number(booking.subtotal_amount || booking.total_amount || 1800);
-        if (brCheck.rows.length === 0 && catUuid) {
-          await client.query(
-            `INSERT INTO booking_rooms (booking_id, category_id, assigned_room_id, price_per_night, created_at)
-             VALUES ($1, $2, $3, $4, NOW());`,
-            [bookingUuid, catUuid, roomUuid, pricePerNight]
+        if (Array.isArray(booking.booking_rooms) && booking.booking_rooms.length > 0) {
+          for (const brItem of booking.booking_rooms) {
+            let itemRoomUuid: string | null = null;
+            if (brItem.room_number || brItem.room_id) {
+              const rRes = await client.query(
+                `SELECT id FROM rooms WHERE room_number = $1 OR id::text = $2 LIMIT 1;`,
+                [brItem.room_number || '', brItem.room_id || '']
+              );
+              if (rRes.rows.length > 0) itemRoomUuid = rRes.rows[0].id;
+            }
+            let itemCatUuid = catUuid;
+            if (brItem.category_id || brItem.category_name) {
+              const cRes = await client.query(
+                `SELECT id FROM room_categories WHERE name ILIKE $1 OR slug ILIKE $1 OR id::text = $2 LIMIT 1;`,
+                [brItem.category_name || '', brItem.category_id || '']
+              );
+              if (cRes.rows.length > 0) itemCatUuid = cRes.rows[0].id;
+            }
+            const itemPrice = Number(brItem.price_per_night || pricePerNight);
+
+            let existingItemRes;
+            if (itemRoomUuid) {
+              existingItemRes = await client.query(
+                `SELECT id FROM booking_rooms WHERE booking_id = $1 AND assigned_room_id = $2 LIMIT 1;`,
+                [bookingUuid, itemRoomUuid]
+              );
+            }
+            if (!existingItemRes || existingItemRes.rows.length === 0) {
+              await client.query(
+                `INSERT INTO booking_rooms (booking_id, category_id, assigned_room_id, price_per_night, created_at)
+                 VALUES ($1, $2, $3, $4, NOW());`,
+                [bookingUuid, itemCatUuid, itemRoomUuid, itemPrice]
+              );
+            }
+          }
+        } else {
+          const brCheck = await client.query(
+            `SELECT id FROM booking_rooms WHERE booking_id = $1 LIMIT 1;`,
+            [bookingUuid]
           );
-        } else if (brCheck.rows.length > 0) {
-          await client.query(
-            `UPDATE booking_rooms 
-             SET assigned_room_id = COALESCE($1, assigned_room_id),
-                 category_id = COALESCE($2, category_id),
-                 price_per_night = COALESCE($3, price_per_night)
-             WHERE id = $4;`,
-            [roomUuid, catUuid, pricePerNight, brCheck.rows[0].id]
-          );
+          if (brCheck.rows.length === 0 && catUuid) {
+            await client.query(
+              `INSERT INTO booking_rooms (booking_id, category_id, assigned_room_id, price_per_night, created_at)
+               VALUES ($1, $2, $3, $4, NOW());`,
+              [bookingUuid, catUuid, roomUuid, pricePerNight]
+            );
+          } else if (brCheck.rows.length > 0) {
+            await client.query(
+              `UPDATE booking_rooms 
+               SET assigned_room_id = COALESCE($1, assigned_room_id),
+                   category_id = COALESCE($2, category_id),
+                   price_per_night = COALESCE($3, price_per_night)
+               WHERE id = $4;`,
+              [roomUuid, catUuid, pricePerNight, brCheck.rows[0].id]
+            );
+          }
         }
 
         // 6. Append to booking_status_history
@@ -411,9 +452,13 @@ export async function loadBookingsFromSupabase(): Promise<Booking[] | null> {
           COALESCE(b.category_id, 'cat-double-03') as category_id,
           COALESCE(b.category_name, 'Double Bed Room') as category_name,
           b.keycard_uid,
-          b.created_at
+          b.created_at,
+          ARRAY_REMOVE(ARRAY_AGG(DISTINCT r.room_number), NULL) as assigned_room_numbers
         FROM bookings b
         LEFT JOIN guests g ON b.guest_id = g.id
+        LEFT JOIN booking_rooms br ON br.booking_id = b.id
+        LEFT JOIN rooms r ON br.assigned_room_id = r.id
+        GROUP BY b.id, g.full_name, g.phone, g.email
         ORDER BY b.created_at DESC;
       `);
 
@@ -429,7 +474,10 @@ export async function loadBookingsFromSupabase(): Promise<Booking[] | null> {
         category_id: row.category_id,
         category_name: row.category_name,
         assigned_room_id: row.assigned_room_id || undefined,
-        assigned_room_number: row.assigned_room_number || undefined,
+        assigned_room_number: row.assigned_room_number || (row.assigned_room_numbers?.[0]) || undefined,
+        assigned_room_numbers: Array.isArray(row.assigned_room_numbers) && row.assigned_room_numbers.length > 0
+          ? row.assigned_room_numbers
+          : (row.assigned_room_number ? [row.assigned_room_number] : undefined),
         adults_count: Number(row.adults_count) || 1,
         children_count: Number(row.children_count) || 0,
         rooms_count: Number(row.rooms_count) || 1,

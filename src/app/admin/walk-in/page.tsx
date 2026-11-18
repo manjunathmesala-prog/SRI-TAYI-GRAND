@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 import QRCode from 'qrcode';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -40,7 +40,7 @@ import {
 import { ReceptionStandeeModal } from '@/components/admin/ReceptionStandeeModal';
 import LuxuryDateRangePicker from '@/components/anantha/LuxuryDateRangePicker';
 import LuxurySelect from '@/components/anantha/LuxurySelect';
-import { Booking, PhysicalRoom, RoomCategory, RFIDCard } from '@/types';
+import { Booking, PhysicalRoom, RoomCategory, RFIDCard, PricingMode } from '@/types';
 import {
   issuePhysicalKeycard,
   checkBridgeHealth,
@@ -62,6 +62,16 @@ interface AdditionalServiceItem {
   id: string;
   name: string;
   priceInr: number;
+}
+
+export interface WalkInSelectedRoom {
+  roomId: string;
+  roomNumber: string;
+  categoryId: string;
+  categoryName: string;
+  basePrice: number;
+  customRate?: number;
+  floorNumber?: number;
 }
 
 const DEFAULT_ADDITIONAL_SERVICES: AdditionalServiceItem[] = [
@@ -88,6 +98,8 @@ export default function AnanthaWalkInPage() {
   const [checkOutDate, setCheckOutDate] = useState(tomorrowStr);
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
   const [selectedRoomNumber, setSelectedRoomNumber] = useState<string>('');
+  const [selectedRooms, setSelectedRooms] = useState<WalkInSelectedRoom[]>([]);
+  const [multiRoomMode, setMultiRoomMode] = useState<boolean>(false);
   const [numAdults, setNumAdults] = useState<number>(2);
   const [numChildren, setNumChildren] = useState<number>(0);
 
@@ -107,6 +119,7 @@ export default function AnanthaWalkInPage() {
   const [discountInr, setDiscountInr] = useState<string>('');
   const [discountReason, setDiscountReason] = useState<string>('');
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [pricingMode, setPricingMode] = useState<PricingMode>('gst_exclusive');
 
   // Payment & check-in
   const [instantCheckIn, setInstantCheckIn] = useState(true);
@@ -182,7 +195,7 @@ export default function AnanthaWalkInPage() {
         setRfidBridgeDetails({ port: res.port, readerType: res.readerType, service: res.service });
         if (manual) {
           playChimeSound(true);
-          setRfidSuccessMessage(`🟢 Be-Tech BIS 5.7 USB Card Encoder is ONLINE & READY (Port ${res.port || 1}, Type ${res.readerType || 4})`);
+          setRfidSuccessMessage(`ðŸŸ¢ Be-Tech BIS 5.7 USB Card Encoder is ONLINE & READY (Port ${res.port || 1}, Type ${res.readerType || 4})`);
           setRfidErrorMessage(null);
         }
       } else {
@@ -244,6 +257,16 @@ export default function AnanthaWalkInPage() {
             );
             if (availPhys.length > 0) {
               setSelectedRoomNumber(availPhys[0].room_number);
+              setSelectedRooms([
+                {
+                  roomId: availPhys[0].id,
+                  roomNumber: availPhys[0].room_number,
+                  categoryId: initialCat,
+                  categoryName: cats[0].name,
+                  basePrice: cats[0].base_price_per_night || 2100,
+                  floorNumber: availPhys[0].floor_number,
+                },
+              ]);
             }
             return initialCat;
           });
@@ -263,16 +286,79 @@ export default function AnanthaWalkInPage() {
     return () => clearInterval(interval);
   }, [fetchData, loadWalkInQueue]);
 
-  // When room category changes, pick first available physical room
+  // When room category changes, pick first available physical room (or retain multi-selection)
   const handleRoomTypeChange = (catId: string) => {
     setSelectedCategoryId(catId);
-    const matchingPhys = physicalRooms.filter(
-      (pr) => isCategoryMatch(pr.category_id, catId) && pr.operational_status === 'available' && pr.housekeeping_status === 'clean'
-    );
-    if (matchingPhys.length > 0) {
-      setSelectedRoomNumber(matchingPhys[0].room_number);
+    if (!multiRoomMode || selectedRooms.length <= 1) {
+      const cat = categories.find((c) => c.id === catId);
+      const matchingPhys = physicalRooms.filter(
+        (pr) => isCategoryMatch(pr.category_id, catId) && pr.operational_status === 'available' && pr.housekeeping_status === 'clean'
+      );
+      if (matchingPhys.length > 0) {
+        setSelectedRoomNumber(matchingPhys[0].room_number);
+        setSelectedRooms([
+          {
+            roomId: matchingPhys[0].id,
+            roomNumber: matchingPhys[0].room_number,
+            categoryId: catId,
+            categoryName: cat?.name || 'Standard Room',
+            basePrice: cat?.base_price_per_night || 2100,
+            floorNumber: matchingPhys[0].floor_number,
+          },
+        ]);
+      } else {
+        setSelectedRoomNumber('');
+        setSelectedRooms([]);
+      }
+    }
+  };
+
+  // Toggle selection of a physical room in single or multi-room mode
+  const handleToggleRoomSelection = (room: PhysicalRoom) => {
+    if (room.operational_status !== 'available' || room.housekeeping_status !== 'clean') {
+      return;
+    }
+
+    const roomCat =
+      categories.find((c) => isCategoryMatch(c.id, room.category_id)) ||
+      categories.find((c) => c.id === selectedCategoryId) ||
+      categories[0];
+
+    const isAlreadySelected = selectedRooms.some((r) => r.roomNumber === room.room_number);
+
+    if (multiRoomMode) {
+      if (isAlreadySelected) {
+        if (selectedRooms.length > 1) {
+          const filtered = selectedRooms.filter((r) => r.roomNumber !== room.room_number);
+          setSelectedRooms(filtered);
+          setSelectedRoomNumber(filtered[0]?.roomNumber || '');
+        }
+      } else {
+        const newEntry: WalkInSelectedRoom = {
+          roomId: room.id,
+          roomNumber: room.room_number,
+          categoryId: roomCat?.id || selectedCategoryId,
+          categoryName: roomCat?.name || 'Standard Room',
+          basePrice: roomCat?.base_price_per_night || 2100,
+          floorNumber: room.floor_number,
+        };
+        const updated = [...selectedRooms, newEntry];
+        setSelectedRooms(updated);
+        setSelectedRoomNumber(updated[0]?.roomNumber || '');
+        setNumAdults(Math.max(numAdults, updated.length * 2));
+      }
     } else {
-      setSelectedRoomNumber('');
+      // Single room mode: swap room
+      const newEntry: WalkInSelectedRoom = {
+        roomId: room.id,
+        roomNumber: room.room_number,
+        categoryId: roomCat?.id || selectedCategoryId,
+        categoryName: roomCat?.name || 'Standard Room',
+        basePrice: roomCat?.base_price_per_night || 2100,
+        floorNumber: room.floor_number,
+      };
+      setSelectedRooms([newEntry]);
+      setSelectedRoomNumber(room.room_number);
     }
   };
 
@@ -291,8 +377,26 @@ export default function AnanthaWalkInPage() {
   };
 
   const numNights = calculateNights();
-  const effectiveNightlyRate = customRate && Number(customRate) > 0 ? Number(customRate) : (selectedCategory?.base_price_per_night || 2100);
-  const roomSubtotal = effectiveNightlyRate * numNights;
+
+  // Multi-room subtotal calculation across all selected rooms
+  const roomSubtotal = useMemo(() => {
+    if (selectedRooms.length === 0) {
+      const fallbackRate = customRate && Number(customRate) > 0 ? Number(customRate) : (selectedCategory?.base_price_per_night || 2100);
+      return fallbackRate * numNights;
+    }
+    return selectedRooms.reduce((acc, r) => {
+      const nightly =
+        r.customRate && r.customRate > 0
+          ? r.customRate
+          : customRate && Number(customRate) > 0 && selectedRooms.length === 1
+          ? Number(customRate)
+          : r.basePrice;
+      return acc + nightly * numNights;
+    }, 0);
+  }, [selectedRooms, numNights, customRate, selectedCategory]);
+
+  const effectiveNightlyRate =
+    selectedRooms.length > 0 ? Math.round(roomSubtotal / numNights) : (selectedCategory?.base_price_per_night || 2100);
 
   const servicesSubtotal = selectedServices.reduce((acc, sId) => {
     const s = services.find((srv) => srv.id === sId);
@@ -300,11 +404,18 @@ export default function AnanthaWalkInPage() {
   }, 0);
 
   const discountAmount = Math.max(0, Number(discountInr) || 0);
-  const taxableSubtotal = Math.max(0, roomSubtotal + servicesSubtotal - discountAmount);
+  const rawSubtotal = Math.max(0, roomSubtotal + servicesSubtotal - discountAmount);
   // 5% standard GST per luxury room guidelines
   const taxPercentage = 5;
-  const taxesInr = Math.round(taxableSubtotal * (taxPercentage / 100));
-  const totalAmountInr = taxableSubtotal + taxesInr;
+  let taxableSubtotal = rawSubtotal;
+  let taxesInr = Math.round(taxableSubtotal * (taxPercentage / 100));
+  let totalAmountInr = taxableSubtotal + taxesInr;
+
+  if (pricingMode === 'gst_inclusive') {
+    totalAmountInr = rawSubtotal;
+    taxableSubtotal = Math.round((totalAmountInr * 100) / (100 + taxPercentage));
+    taxesInr = totalAmountInr - taxableSubtotal;
+  }
 
   // Auto-fill paid amount when total changes if empty or previously matching
   useEffect(() => {
@@ -332,8 +443,8 @@ export default function AnanthaWalkInPage() {
     e.preventDefault();
     setError(null);
 
-    if (!selectedRoomNumber) {
-      setError('Please select an available physical room number.');
+    if (selectedRooms.length === 0 && !selectedRoomNumber) {
+      setError('Please select at least one available physical room number.');
       return;
     }
     if (!guestName.trim()) {
@@ -385,6 +496,24 @@ export default function AnanthaWalkInPage() {
         pMethod === 'card' ? `POS Slip: ${cardNetwork} ${cardLast4.trim() ? `****${cardLast4.trim()}` : ''} ${cardAuthCode.trim() ? `Auth: ${cardAuthCode.trim()}` : ''}`.trim() : null,
       ].filter(Boolean).join(' | ');
 
+      const effectiveRooms = selectedRooms.length > 0 ? selectedRooms : [
+        {
+          roomId: selectedRoomNumber,
+          roomNumber: selectedRoomNumber,
+          categoryId: selectedCategoryId,
+          categoryName: selectedCategory?.name || 'Standard Room',
+          basePrice: effectiveNightlyRate,
+          customRate: customRate && Number(customRate) > 0 ? Number(customRate) : undefined,
+        }
+      ];
+
+      const roomsPayload = effectiveRooms.map((r) => ({
+        categoryId: r.categoryId,
+        roomNumber: r.roomNumber,
+        roomId: r.roomId,
+        customRate: r.customRate || r.basePrice,
+      }));
+
       const res = await adminOperations.statutoryWalkIn({
         guestName: guestName.trim(),
         guestPhone: guestPhone.trim(),
@@ -394,16 +523,18 @@ export default function AnanthaWalkInPage() {
         idProofType: guestIdProofType,
         idProofNumber: guestIdProofNumber.trim(),
         purposeOfVisit,
-        categoryId: selectedCategoryId,
-        roomNumber: selectedRoomNumber,
+        categoryId: effectiveRooms[0].categoryId,
+        roomNumber: effectiveRooms[0].roomNumber,
+        rooms: roomsPayload,
         checkInDate,
         checkOutDate,
         adultsCount: numAdults,
         childrenCount: numChildren,
-        baseTariff: effectiveNightlyRate,
+        baseTariff: effectiveRooms[0].customRate || effectiveRooms[0].basePrice || effectiveNightlyRate,
         isTariffOverridden: Boolean(customRate && Number(customRate) > 0),
         tariffOverrideReason: customRate ? 'Front desk custom rate' : undefined,
         paymentMethod: pMethod,
+        pricingMode,
         amountCollected: paidAmountNum,
         paymentReference: transactionRef.trim() || `FD-COLLECTED-₹${paidAmountNum}`,
         issueKeycard: false, // We activate keycard explicitly in post-booking step per user requirement!
@@ -657,6 +788,8 @@ export default function AnanthaWalkInPage() {
     setRfidActivatedCount(0);
     setActiveGuestCards([]);
     setTapTestStatus(null);
+    setSelectedRooms([]);
+    setMultiRoomMode(false);
     fetchData();
     loadWalkInQueue();
   };
@@ -984,7 +1117,7 @@ export default function AnanthaWalkInPage() {
                   onClick={() => setTapTestStatus(null)}
                   className="text-white/60 hover:text-white text-xs px-2 py-0.5 rounded cursor-pointer"
                 >
-                  ✕
+                  âœ•
                 </button>
               </div>
             )}
@@ -1088,7 +1221,7 @@ export default function AnanthaWalkInPage() {
                           <div className="flex items-center gap-2">
                             <span className="font-mono font-bold text-amber-300">{card.card_uid}</span>
                             <span className={`text-[9px] px-2 py-0.2 rounded-full font-semibold ${card.status === 'active' ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-400/40' : 'bg-rose-500/20 text-rose-300 border border-rose-400/40'}`}>
-                              {card.status === 'active' ? '🟢 Active & Authorized' : '🔴 Inactive / Revoked'}
+                              {card.status === 'active' ? 'ðŸŸ¢ Active & Authorized' : 'ðŸ”´ Inactive / Revoked'}
                             </span>
                           </div>
                           <span className="text-[10px] text-[#E6D9C5]/70">
@@ -1146,7 +1279,7 @@ export default function AnanthaWalkInPage() {
                 ) : (
                   <>
                     <Zap className="w-4 h-4 text-[#21180F]" />
-                    <span>{rfidActivatedCount > 0 ? '+ Encode Additional Keycard' : '⚡ Activate Physical Keycard Now'}</span>
+                    <span>{rfidActivatedCount > 0 ? '+ Encode Additional Keycard' : 'âš¡ Activate Physical Keycard Now'}</span>
                   </>
                 )}
               </button>
@@ -1228,14 +1361,107 @@ export default function AnanthaWalkInPage() {
                 </div>
               </div>
 
-              {/* Physical Room Selection Dropdown & Quick Badges */}
-              <div>
-                <label className="block text-xs font-medium text-[#786A5B] mb-1.5 flex items-center justify-between">
-                  <span>Physical Room Number (Mandatory for Walk-In)</span>
+              {/* Physical Room Selection & Multi-Room Party Controls */}
+              <div className="space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-semibold text-[#33271D]">Selection Mode:</span>
+                    <div className="inline-flex rounded-xl bg-[#FAF6EE] p-0.5 border border-[#E6D9C5] text-xs">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMultiRoomMode(false);
+                          if (selectedRooms.length > 1) {
+                            setSelectedRooms([selectedRooms[0]]);
+                            setSelectedRoomNumber(selectedRooms[0].roomNumber);
+                            setNumAdults(2);
+                          }
+                        }}
+                        className={`px-3 py-1 rounded-lg font-medium transition-all cursor-pointer ${
+                          !multiRoomMode
+                            ? 'bg-[#21180F] text-white shadow-xs font-bold'
+                            : 'text-[#786A5B] hover:text-[#33271D]'
+                        }`}
+                      >
+                        Single Room
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setMultiRoomMode(true)}
+                        className={`px-3 py-1 rounded-lg font-medium transition-all flex items-center gap-1.5 cursor-pointer ${
+                          multiRoomMode
+                            ? 'bg-[#8D672F] text-white shadow-xs font-bold'
+                            : 'text-[#786A5B] hover:text-[#33271D]'
+                        }`}
+                      >
+                        <span>Multi-Room Party</span>
+                        {selectedRooms.length > 1 && (
+                          <span className="px-1.5 py-0.2 bg-white/20 rounded-full text-[10px] font-mono">
+                            {selectedRooms.length}
+                          </span>
+                        )}
+                      </button>
+                    </div>
+                  </div>
                   <span className="text-[11px] text-[#8D672F]">
-                    {availableRoomsForType.filter((pr) => pr.operational_status === 'available' && pr.housekeeping_status === 'clean').length} Room(s) available on floor
+                    {multiRoomMode
+                      ? 'Click clean rooms to add/remove from party'
+                      : `${availableRoomsForType.filter((pr) => pr.operational_status === 'available' && pr.housekeeping_status === 'clean').length} Room(s) clean on floor`}
                   </span>
-                </label>
+                </div>
+
+                {/* Selected Rooms Tray */}
+                {selectedRooms.length > 0 && (
+                  <div className="p-3.5 rounded-2xl bg-[#FAF6EE] border border-[#E6D9C5] space-y-2">
+                    <div className="flex items-center justify-between text-xs font-bold text-[#33271D]">
+                      <span className="flex items-center gap-1.5">
+                        <BedDouble className="w-4 h-4 text-[#8D672F]" />
+                        <span>Selected Rooms ({selectedRooms.length} {selectedRooms.length === 1 ? 'Room' : 'Rooms'})</span>
+                      </span>
+                      {multiRoomMode && selectedRooms.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedRooms([selectedRooms[0]]);
+                            setSelectedRoomNumber(selectedRooms[0].roomNumber);
+                            setMultiRoomMode(false);
+                            setNumAdults(2);
+                          }}
+                          className="text-[11px] text-[#8D672F] hover:underline cursor-pointer font-medium"
+                        >
+                          Reset to Single Room
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {selectedRooms.map((sr) => (
+                        <div
+                          key={sr.roomNumber}
+                          className="flex items-center gap-2 px-3 py-1.5 bg-[#21180F] text-white rounded-xl text-xs font-medium shadow-xs"
+                        >
+                          <span className="font-bold text-[#D8AD56]">#{sr.roomNumber}</span>
+                          <span className="text-[10px] text-white/75 truncate max-w-[120px]">{sr.categoryName}</span>
+                          <span className="text-[11px] font-semibold text-[#D8AD56]">₹{sr.basePrice?.toLocaleString('en-IN')}/nt</span>
+                          {selectedRooms.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const filtered = selectedRooms.filter((r) => r.roomNumber !== sr.roomNumber);
+                                setSelectedRooms(filtered);
+                                setSelectedRoomNumber(filtered[0]?.roomNumber || '');
+                              }}
+                              className="ml-1 text-white/60 hover:text-white cursor-pointer text-sm font-bold"
+                              title="Remove room"
+                            >
+                              &times;
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {availableRoomsForType.length === 0 ? (
                   <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800">
@@ -1244,7 +1470,7 @@ export default function AnanthaWalkInPage() {
                 ) : (
                   <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
                     {availableRoomsForType.map((pr) => {
-                      const isSelected = selectedRoomNumber === pr.room_number;
+                      const isSelected = selectedRooms.some((r) => r.roomNumber === pr.room_number) || selectedRoomNumber === pr.room_number;
                       const isDirty = pr.housekeeping_status === 'dirty' || pr.housekeeping_status === 'in_progress';
                       const isOccupied = pr.operational_status === 'occupied';
 
@@ -1253,10 +1479,10 @@ export default function AnanthaWalkInPage() {
                           key={pr.id}
                           type="button"
                           disabled={isOccupied}
-                          onClick={() => setSelectedRoomNumber(pr.room_number)}
+                          onClick={() => handleToggleRoomSelection(pr)}
                           className={`p-2.5 rounded-xl border text-center transition-all min-h-[46px] flex flex-col justify-center items-center cursor-pointer ${
                             isSelected
-                              ? 'bg-[#21180F] text-white border-black shadow-md font-bold'
+                              ? 'bg-[#21180F] text-white border-black shadow-md font-bold ring-2 ring-[#D8AD56]'
                               : isOccupied
                               ? 'bg-gray-100 border-gray-200 text-gray-400 cursor-not-allowed opacity-50'
                               : isDirty
@@ -1264,7 +1490,10 @@ export default function AnanthaWalkInPage() {
                               : 'bg-emerald-50/70 border-emerald-200 text-emerald-900 hover:bg-emerald-100 font-medium'
                           }`}
                         >
-                          <div className="text-xs font-bold">#{pr.room_number}</div>
+                          <div className="text-xs font-bold flex items-center gap-1">
+                            {isSelected && <Check className="w-3 h-3 text-[#D8AD56]" />}
+                            <span>#{pr.room_number}</span>
+                          </div>
                           <div className="text-[9px] uppercase tracking-wider opacity-80">
                             {isOccupied ? 'Occupied' : isDirty ? 'Dirty' : `Fl. ${pr.floor_number}`}
                           </div>
@@ -1537,12 +1766,61 @@ export default function AnanthaWalkInPage() {
                 </span>
               </div>
 
+              {/* Pricing Mode Toggle: GST Exclusive vs GST Inclusive */}
+              <div className="bg-[#2a1d13] p-3 rounded-2xl border border-[#3a2c1f] space-y-2">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="text-[#E6D9C5]/80 font-medium">Pricing Mode</span>
+                  <span className="text-[10px] font-mono uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-[#8D672F]/30 text-[#D8AD56]">
+                    {pricingMode === 'gst_inclusive' ? 'GST Inclusive' : 'GST Exclusive'}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5 p-1 bg-[#1a120b] rounded-xl border border-[#3a2c1f]/60">
+                  <button
+                    type="button"
+                    onClick={() => setPricingMode('gst_exclusive')}
+                    className={`py-1.5 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      pricingMode === 'gst_exclusive'
+                        ? 'bg-[#8D672F] text-white shadow-sm'
+                        : 'text-[#E6D9C5]/60 hover:text-white'
+                    }`}
+                  >
+                    GST Exclusive (+5%)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPricingMode('gst_inclusive')}
+                    className={`py-1.5 px-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                      pricingMode === 'gst_inclusive'
+                        ? 'bg-[#8D672F] text-white shadow-sm'
+                        : 'text-[#E6D9C5]/60 hover:text-white'
+                    }`}
+                  >
+                    GST Inclusive (Flat)
+                  </button>
+                </div>
+                <p className="text-[10px] text-[#E6D9C5]/60 leading-tight">
+                  {pricingMode === 'gst_inclusive'
+                    ? 'Tariff is all-inclusive. 5% GST (2.5% CGST + 2.5% SGST) is backed out from gross.'
+                    : 'Standard 5% GST is added on top of the taxable tariff.'}
+                </p>
+              </div>
+
               {/* Breakdown */}
               <div className="space-y-3 text-xs">
                 <div className="flex justify-between items-center text-[#E6D9C5]/80">
-                  <span>Room Charge ({numNights} Night{numNights > 1 ? 's' : ''})</span>
+                  <span>{pricingMode === 'gst_inclusive' ? 'Quoted Tariff (Gross)' : 'Room Charge'} ({numNights} Night{numNights > 1 ? 's' : ''}{selectedRooms.length > 1 ? ` • ${selectedRooms.length} Rooms` : ''})</span>
                   <span className="font-mono text-white font-semibold">₹{roomSubtotal.toLocaleString('en-IN')}</span>
                 </div>
+                {selectedRooms.length > 1 && (
+                  <div className="pl-2 space-y-1 text-[11px] text-[#E6D9C5]/70 border-l border-[#8D672F]/50 my-1 font-mono">
+                    {selectedRooms.map((sr) => (
+                      <div key={sr.roomNumber} className="flex justify-between">
+                        <span>#{sr.roomNumber} ({sr.categoryName})</span>
+                        <span>₹{((sr.customRate || sr.basePrice) * numNights).toLocaleString('en-IN')}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {servicesSubtotal > 0 && (
                   <div className="flex justify-between items-center text-[#E6D9C5]/80">
@@ -1559,7 +1837,12 @@ export default function AnanthaWalkInPage() {
                 )}
 
                 <div className="flex justify-between items-center text-[#E6D9C5]/80">
-                  <span>Statutory GST ({taxPercentage}%)</span>
+                  <span>Taxable Subtotal</span>
+                  <span className="font-mono text-white font-semibold">₹{taxableSubtotal.toLocaleString('en-IN')}</span>
+                </div>
+
+                <div className="flex justify-between items-center text-[#E6D9C5]/80">
+                  <span>{pricingMode === 'gst_inclusive' ? 'Included GST (5%)' : 'Statutory GST (5%)'} (CGST 2.5% + SGST 2.5%)</span>
                   <span className="font-mono text-white font-semibold">₹{taxesInr.toLocaleString('en-IN')}</span>
                 </div>
 
@@ -1568,6 +1851,10 @@ export default function AnanthaWalkInPage() {
                   <span className="text-xl font-bold font-mono text-[#B18A4A]">
                     ₹{totalAmountInr.toLocaleString('en-IN')}
                   </span>
+                </div>
+
+                <div className="text-[10px] text-[#E6D9C5]/50 pt-1 border-t border-[#3a2c1f] italic">
+                  * Statutory Compliance: 5% GST (SAC 996311) is applied in all modes. Sri Tayi Grand does not apply arbitrary 0% tax exemptions without formal authority.
                 </div>
               </div>
 
@@ -1810,7 +2097,7 @@ export default function AnanthaWalkInPage() {
                           }`}
                         >
                           <CheckCircle2 className="w-3.5 h-3.5" />
-                          <span>{upiConfirmed ? '✓ UPI Payment Received & Verified' : 'Mark UPI Payment Verified'}</span>
+                          <span>{upiConfirmed ? 'âœ“ UPI Payment Received & Verified' : 'Mark UPI Payment Verified'}</span>
                         </button>
                       </div>
                     </div>
@@ -1888,7 +2175,7 @@ export default function AnanthaWalkInPage() {
                         }`}
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>{cardConfirmed ? '✓ Card Charge Authorized' : 'Mark POS Card Charge Authorized'}</span>
+                        <span>{cardConfirmed ? 'âœ“ Card Charge Authorized' : 'Mark POS Card Charge Authorized'}</span>
                       </button>
                     </div>
                   </div>
@@ -1907,7 +2194,9 @@ export default function AnanthaWalkInPage() {
                       <Zap className="w-3.5 h-3.5 text-amber-400" />
                       <span>Check In Immediately</span>
                     </span>
-                    Assign Room #{selectedRoomNumber || '...'} as occupied now & register arrival timestamp.
+                    {selectedRooms.length > 1
+                      ? `Assign ${selectedRooms.length} Rooms (#${selectedRooms.map((r) => r.roomNumber).join(', #')}) as occupied now & register arrival timestamp.`
+                      : `Assign Room #${selectedRoomNumber || '...'} as occupied now & register arrival timestamp.`}
                   </label>
                 </div>
 
@@ -1961,7 +2250,7 @@ export default function AnanthaWalkInPage() {
                 </>
               ) : (
                 <>
-                  <span>Check In #{selectedRoomNumber || '...'}</span>
+                  <span>{selectedRooms.length > 1 ? `Check In ${selectedRooms.length} Rooms` : `Check In #${selectedRoomNumber || '...'}`}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </>
               )}

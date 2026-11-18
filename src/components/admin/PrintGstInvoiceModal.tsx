@@ -225,6 +225,7 @@ export function PrintGstInvoiceModal({
               <div>Occupancy: <strong>{booking.adults_count || 2} Adults{booking.children_count ? `, ${booking.children_count} Children` : ''}</strong></div>
               <div>Purpose of Visit: <strong>{booking.purpose_of_visit || 'Pilgrimage / Temple Darshan'}</strong></div>
               <div>Source: <strong>{booking.booking_source === 'walk_in_qr' ? 'Walk-In QR Counter' : (booking.booking_source === 'front_desk_manual' ? 'Front Desk Walk-In' : 'Online Direct')}</strong></div>
+              <div>Pricing Mode: <strong>{booking.pricing_mode === 'gst_inclusive' ? 'GST Inclusive (Rate includes 5% GST)' : 'GST Exclusive (+ 5% GST)'}</strong></div>
             </div>
           </div>
 

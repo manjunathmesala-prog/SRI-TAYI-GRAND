@@ -1645,6 +1645,8 @@ export default function FrontDeskPage() {
         }}
         availableRooms={availableCleanRooms}
         categories={categories}
+        allRooms={rooms}
+        allBookings={bookings}
         initialData={statutoryInitialData}
         onSuccess={async (booking, roomNum) => {
           setWalkInAlert({

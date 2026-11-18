@@ -79,15 +79,22 @@ export async function POST(req: NextRequest) {
       actor
     );
 
-    // If a physical room was assigned, release it back to available
-    if (booking.assigned_room_id) {
+    // If physical rooms were assigned, release all of them back to available
+    const roomsToRelease = (booking.assigned_room_numbers && booking.assigned_room_numbers.length > 0)
+      ? booking.assigned_room_numbers
+      : (booking.assigned_room_id ? [booking.assigned_room_id] : (booking.assigned_room_number ? [booking.assigned_room_number] : []));
+
+    for (const rmIdOrNum of roomsToRelease) {
       try {
-        repo.updateRoomStatus(
-          booking.assigned_room_id,
-          'available',
-          'clean',
-          `Reservation ${bookingReference} cancelled by ${actor}`
-        );
+        const rm = repo.getRooms().find((r) => r.id === rmIdOrNum || r.room_number === rmIdOrNum);
+        if (rm) {
+          repo.updateRoomStatus(
+            rm.id,
+            'available',
+            'clean',
+            `Reservation ${bookingReference} cancelled by ${actor}`
+          );
+        }
       } catch {}
     }
 

@@ -1,1 +1,26 @@
-[]
+[
+  {
+    "id": "exp-1794759335603-558",
+    "category": "laundry",
+    "title": "laundry manoj",
+    "description": "",
+    "amount": 1500,
+    "payment_method": "cash",
+    "recorded_by": "G. Mohan Kumar",
+    "expense_date": "2026-11-15",
+    "status": "approved",
+    "created_at": "2026-11-15T16:15:35.603Z"
+  },
+  {
+    "id": "exp-1794759178124-193",
+    "category": "other",
+    "title": "water bottles",
+    "description": "",
+    "amount": 1300,
+    "payment_method": "cash",
+    "recorded_by": "G. Mohan Kumar",
+    "expense_date": "2026-11-15",
+    "status": "approved",
+    "created_at": "2026-11-15T16:12:58.124Z"
+  }
+]

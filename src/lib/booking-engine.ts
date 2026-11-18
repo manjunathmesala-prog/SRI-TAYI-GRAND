@@ -1,5 +1,5 @@
 import { repo } from '@/lib/db/repository';
-import { RoomCategory } from '@/types';
+import { RoomCategory, PricingMode } from '@/types';
 import {
   calculateBookingTariff,
   normalizeCategoryId,
@@ -11,6 +11,7 @@ export interface AvailabilityResult {
   totalRooms: number;
   availableRooms: number;
   isAvailable: boolean;
+  pricingMode?: PricingMode;
   nights: number;
   pricePerNight: number;
   roomCharges: number;
@@ -93,7 +94,8 @@ export function checkCategoryAvailability(
   checkOut: string,
   requestedRooms: number = 1,
   adultsCount: number = 1,
-  childrenCount: number = 0
+  childrenCount: number = 0,
+  pricingMode: PricingMode = 'gst_exclusive'
 ): AvailabilityResult {
   cleanExpiredHolds();
 
@@ -108,6 +110,7 @@ export function checkCategoryAvailability(
       totalRooms: 0,
       availableRooms: 0,
       isAvailable: false,
+      pricingMode,
       nights: 0,
       pricePerNight: cat.base_price_per_night,
       roomCharges: 0,
@@ -152,19 +155,25 @@ export function checkCategoryAvailability(
   // 3. Count overlapping active bookings for this category
   const overlappingBookings = repo.getBookings().filter((b) => {
     if (b.status === 'cancelled' || b.status === 'no_show') return false;
-    if (
-      b.category_id !== category.id &&
-      normalizeCategoryId(b.category_id) !== normalizedId
-    ) {
+    const matchesPrimary = b.category_id === category.id || normalizeCategoryId(b.category_id) === normalizedId;
+    const matchesRoomItem = Array.isArray(b.booking_rooms) && b.booking_rooms.some(
+      (br) => br.category_id === category.id || normalizeCategoryId(br.category_id) === normalizedId
+    );
+    if (!matchesPrimary && !matchesRoomItem) {
       return false;
     }
     return datesOverlap(checkIn, checkOut, b.check_in_date, b.check_out_date);
   });
 
-  const bookedRoomsCount = overlappingBookings.reduce(
-    (sum, b) => sum + (b.rooms_count || 1),
-    0
-  );
+  const bookedRoomsCount = overlappingBookings.reduce((sum, b) => {
+    if (Array.isArray(b.booking_rooms) && b.booking_rooms.length > 0) {
+      const matchCount = b.booking_rooms.filter(
+        (br) => br.category_id === category.id || normalizeCategoryId(br.category_id) === normalizedId
+      ).length;
+      return sum + (matchCount > 0 ? matchCount : (b.category_id === category.id ? (b.rooms_count || 1) : 0));
+    }
+    return sum + (b.rooms_count || 1);
+  }, 0);
 
   // 4. Count overlapping active holds
   let holdRoomsCount = 0;
@@ -194,6 +203,7 @@ export function checkCategoryAvailability(
     childrenCount,
     customRatePaise: category.base_tariff_paise,
     taxPercentage: typeof settings.tax_percentage === 'number' ? settings.tax_percentage : 5,
+    pricingMode,
   });
 
   const isAvailable = hasRooms && tariffCalc.isValid;
@@ -203,6 +213,7 @@ export function checkCategoryAvailability(
     totalRooms: totalPhysicalRooms,
     availableRooms,
     isAvailable,
+    pricingMode: tariffCalc.pricingMode,
     nights: tariffCalc.billingPeriods,
     pricePerNight: tariffCalc.roomTariffRateRupees,
     roomCharges: tariffCalc.roomChargesRupees,

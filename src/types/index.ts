@@ -134,6 +134,27 @@ export interface Guest {
   last_stay_date?: string;
 }
 
+export interface BookingRoomItem {
+  id?: string;
+  room_id?: string;
+  room_number?: string;
+  category_id: string;
+  category_name?: string;
+  price_per_night: number;
+  added_at?: string;
+}
+
+export type PricingMode = 'gst_inclusive' | 'gst_exclusive';
+
+export interface RequestedRoomSelection {
+  categoryId: string;
+  roomNumber?: string;
+  roomId?: string;
+  customRate?: number;
+  adultsCount?: number;
+  childrenCount?: number;
+}
+
 export interface Booking {
   id: string;
   booking_reference: string;
@@ -147,6 +168,8 @@ export interface Booking {
   category_name: string;
   assigned_room_id?: string;
   assigned_room_number?: string;
+  assigned_room_numbers?: string[];
+  booking_rooms?: BookingRoomItem[];
   room_number?: string;
   adults_count: number;
   children_count: number;
@@ -154,6 +177,7 @@ export interface Booking {
   status: BookingStatus;
   payment_status: PaymentStatus;
   payment_method: PaymentMethod;
+  pricing_mode?: PricingMode;
   subtotal_amount: number;
   room_charges_amount?: number;
   extra_persons_count?: number;
@@ -573,6 +597,7 @@ export interface MaintenanceTicket {
 export type RealtimeEventType = 
   | 'booking_created' 
   | 'booking_updated' 
+  | 'extra_room_added'
   | 'booking_status_updated'
   | 'booking_deleted'
   | 'walk_in_created'

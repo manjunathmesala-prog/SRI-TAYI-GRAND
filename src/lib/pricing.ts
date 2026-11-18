@@ -1,4 +1,4 @@
-/**
+﻿/**
  * ==============================================================================
  * SRI TAYI GRAND HOTEL - AUTHORITATIVE PRICING & TARIFF CONFIGURATION
  * ==============================================================================
@@ -41,6 +41,7 @@ export const STARTING_PRICE_DISCLAIMER = 'Subject to availability';
 
 export type BillingPeriodUnit = 'night' | 'day' | '24_hour';
 export type ExtraPersonChargeFrequency = 'per_billing_period' | 'per_stay';
+export type PricingMode = 'gst_inclusive' | 'gst_exclusive';
 
 export interface AuthoritativeRoomCategoryTariff {
   id: string;
@@ -369,6 +370,7 @@ export function calculateBillingPeriods(checkIn: string, checkOut: string): numb
 }
 
 export interface BookingTariffCalculation {
+  pricingMode: PricingMode;
   isValid: boolean;
   errorMessage?: string;
   category: AuthoritativeRoomCategoryTariff;
@@ -438,6 +440,7 @@ export function calculateBookingTariff(params: {
   childrenCount?: number;
   customRatePaise?: number;
   taxPercentage?: number;
+  pricingMode?: PricingMode;
   billingUnit?: BillingPeriodUnit;
   extraPersonFrequency?: ExtraPersonChargeFrequency;
 }): BookingTariffCalculation {
@@ -455,6 +458,7 @@ export function calculateBookingTariff(params: {
   const isInvalidDate = !checkInVal || !checkOutVal || isNaN(dIn.getTime()) || isNaN(dOut.getTime()) || dOut.getTime() <= dIn.getTime();
   if (isInvalidDate) {
     return {
+      pricingMode: params.pricingMode || 'gst_exclusive',
       isValid: false,
       errorMessage: 'Check-out date must be strictly after check-in date.',
       category,
@@ -499,6 +503,7 @@ export function calculateBookingTariff(params: {
   const billingPeriods = calculateBillingPeriods(checkInVal, checkOutVal);
   const billingUnit: BillingPeriodUnit = params.billingUnit || 'night';
   const extraPersonFrequency: ExtraPersonChargeFrequency = params.extraPersonFrequency || 'per_billing_period';
+  const pricingMode: PricingMode = params.pricingMode || 'gst_exclusive';
 
   // Multi-room occupancy allocation
   const allocation = allocateGuestsToRooms(
@@ -514,43 +519,68 @@ export function calculateBookingTariff(params: {
 
   const extraPersonTariffRatePaise = category.extraPersonTariffPaise;
 
-  // Room charges: (base rate) * roomsCount * billingPeriods
-  const roomChargesPaise = roomTariffRatePaise * roomsCount * billingPeriods;
+  // Base room charges and extra person charges before mode-specific tax allocation
+  const rawRoomChargesPaise = roomTariffRatePaise * roomsCount * billingPeriods;
 
   // Extra person charges: only for permitted additional occupants
-  let extraPersonChargesPaise = 0;
+  let rawExtraPersonChargesPaise = 0;
   if (allocation.isPermitted && allocation.extraPersonsCount > 0) {
     if (extraPersonFrequency === 'per_billing_period') {
-      extraPersonChargesPaise = allocation.extraPersonsCount * extraPersonTariffRatePaise * billingPeriods;
+      rawExtraPersonChargesPaise = allocation.extraPersonsCount * extraPersonTariffRatePaise * billingPeriods;
     } else {
-      extraPersonChargesPaise = allocation.extraPersonsCount * extraPersonTariffRatePaise;
+      rawExtraPersonChargesPaise = allocation.extraPersonsCount * extraPersonTariffRatePaise;
     }
   }
 
-  const subtotalPaise = roomChargesPaise + extraPersonChargesPaise;
-
-  // Tax calculation: only applied if a valid tax percentage is configured (default 5%)
+  // Tax percentage: standard 5% GST (CGST 2.5% + SGST 2.5%, SAC 996311)
   const taxPercentage = typeof params.taxPercentage === 'number' && !isNaN(params.taxPercentage)
     ? params.taxPercentage
     : 5;
 
-  const taxAmountPaise = taxPercentage > 0
-    ? Math.round((subtotalPaise * taxPercentage) / 100)
-    : 0;
+  let roomChargesPaise = 0;
+  let extraPersonChargesPaise = 0;
+  let subtotalPaise = 0;
+  let taxAmountPaise = 0;
+  let totalPaise = 0;
 
-  const totalPaise = subtotalPaise + taxAmountPaise;
+  if (pricingMode === 'gst_inclusive') {
+    // GST INCLUSIVE: The quoted rate is the gross total.
+    // Back out taxable subtotal: Taxable = round(Gross * 100 / (100 + taxPercentage))
+    const grossTotalPaise = rawRoomChargesPaise + rawExtraPersonChargesPaise;
+    totalPaise = grossTotalPaise;
+    subtotalPaise = taxPercentage > 0
+      ? Math.round((grossTotalPaise * 100) / (100 + taxPercentage))
+      : grossTotalPaise;
+    taxAmountPaise = grossTotalPaise - subtotalPaise;
 
-  // Rupee conversions
+    // Itemized taxable allocation ensuring roomCharges + extraCharges === subtotalPaise
+    roomChargesPaise = taxPercentage > 0
+      ? Math.round((rawRoomChargesPaise * 100) / (100 + taxPercentage))
+      : rawRoomChargesPaise;
+    extraPersonChargesPaise = subtotalPaise - roomChargesPaise;
+  } else {
+    // GST EXCLUSIVE: GST is added on top of the taxable room tariff
+    roomChargesPaise = rawRoomChargesPaise;
+    extraPersonChargesPaise = rawExtraPersonChargesPaise;
+    subtotalPaise = roomChargesPaise + extraPersonChargesPaise;
+    taxAmountPaise = taxPercentage > 0
+      ? Math.round((subtotalPaise * taxPercentage) / 100)
+      : 0;
+    totalPaise = subtotalPaise + taxAmountPaise;
+  }
+
+  // Rupee conversions with 2-decimal precision rounding
   const roomTariffRateRupees = roomTariffRatePaise / 100;
   const extraPersonTariffRateRupees = extraPersonTariffRatePaise / 100;
-  const roomChargesRupees = roomChargesPaise / 100;
-  const extraPersonChargesRupees = extraPersonChargesPaise / 100;
-  const subtotalRupees = subtotalPaise / 100;
-  const taxAmountRupees = taxAmountPaise / 100;
-  const totalRupees = totalPaise / 100;
+  const roomChargesRupees = Math.round((roomChargesPaise / 100) * 100) / 100;
+  const extraPersonChargesRupees = Math.round((extraPersonChargesPaise / 100) * 100) / 100;
+  const subtotalRupees = Math.round((subtotalPaise / 100) * 100) / 100;
+  const taxAmountRupees = Math.round((taxAmountPaise / 100) * 100) / 100;
+  const totalRupees = Math.round((totalPaise / 100) * 100) / 100;
 
 
   return {
+    pricingMode,
     isValid: allocation.isPermitted,
     errorMessage: allocation.errorMessage,
     category,
