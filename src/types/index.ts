@@ -843,8 +843,30 @@ export interface NightAuditExecutionLog {
   created_at: string;
 }
 
+export type AuditActionCategory = 
+  | 'booking'
+  | 'room'
+  | 'payment'
+  | 'housekeeping'
+  | 'rfid'
+  | 'staff'
+  | 'system'
+  | 'finance';
+
 export interface AuditLogEntry {
-  userName: string;
+  id: string;
+  user_id: string;
+  user_name: string;
+  role: string;
+  action: string;
+  category: AuditActionCategory;
+  entity_type: string;
+  entity_id: string;
+  previous_value?: any;
+  new_value?: any;
+  ip_address?: string;
+  created_at: string;
+}
   userRole: string;
   action: string;
   entityType: AuditActionCategory;
