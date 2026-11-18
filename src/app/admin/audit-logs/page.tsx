@@ -355,7 +355,7 @@ export default function AdminAuditLogsPage() {
                   <td className="py-3.5 px-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <div className="w-7 h-7 rounded-full bg-[#241912] text-[#D8AD56] flex items-center justify-center text-[10px] font-bold">
-                        {log.userName.slice(0, 2).toUpperCase()}
+                        {log.user_name.slice(0, 2).toUpperCase()}
                       </div>
                       <div>
                         <span className="font-semibold text-stone-900 block leading-tight">
