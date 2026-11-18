@@ -851,7 +851,11 @@ export type AuditActionCategory =
   | 'rfid'
   | 'staff'
   | 'system'
-  | 'finance';
+  | 'finance'
+  | 'cashbook'
+  | 'accounting'
+  | 'pricing'
+  | 'maintenance';
 
 export interface AuditLogEntry {
   id: string;
