@@ -347,7 +347,7 @@ export default function AdminAuditLogsPage() {
                   <td className="py-3.5 px-4 whitespace-nowrap text-stone-600 font-mono text-[11px]">
                     <div className="flex items-center gap-1.5">
                       <Clock className="w-3.5 h-3.5 text-stone-400" />
-                      <span>{formatLogTimestamp(log.timestamp)}</span>
+                      <span>{formatLogTimestamp(log.created_at)}</span>
                     </div>
                   </td>
 
