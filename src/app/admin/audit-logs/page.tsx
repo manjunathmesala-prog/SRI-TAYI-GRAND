@@ -102,7 +102,7 @@ export default function AdminAuditLogsPage() {
     return logs.filter(
       (log) =>
         log.action.toLowerCase().includes(q) ||
-        log.userName.toLowerCase().includes(q) ||
+        log.user_name.toLowerCase().includes(q) ||
         log.userRole.toLowerCase().includes(q) ||
         log.entityId.toLowerCase().includes(q) ||
         log.details.toLowerCase().includes(q) ||
