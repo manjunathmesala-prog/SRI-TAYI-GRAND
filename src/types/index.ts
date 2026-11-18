@@ -778,26 +778,71 @@ export interface JournalEntry {
   created_at: string;
 }
 
-// ==============================================================================
-// TIER-3: IMMUTABLE AUDIT LOGS
-// ==============================================================================
-
-export type AuditActionCategory =
-  | 'booking'
-  | 'payment'
-  | 'cashbook'
-  | 'room'
-  | 'pricing'
-  | 'channel'
-  | 'maintenance'
-  | 'accounting'
-  | 'security'
-  | 'staff';
-
-export interface AuditLogEntry {
+export interface NightAuditSettings {
   id: string;
-  timestamp: string;
-  userId: string;
+  hotel_id: string;
+  enabled: boolean;
+  execution_time: string; // '00:00'
+  timezone: string; // 'Asia/Kolkata'
+  email_enabled: boolean;
+  whatsapp_enabled: boolean;
+  updated_at: string;
+}
+
+export interface NightAuditRecipient {
+  id: string;
+  hotel_id: string;
+  channel: 'email' | 'whatsapp';
+  recipient_name: string;
+  recipient_address: string; // email address or phone number
+  is_active: boolean;
+  consent_status: 'pending' | 'granted' | 'revoked';
+  created_at: string;
+}
+
+export type NightAuditStatus = 'pending' | 'in_progress' | 'completed' | 'failed' | 'exception';
+
+export interface NightAuditRun {
+  id: string;
+  hotel_id: string;
+  business_date: string;
+  status: NightAuditStatus;
+  started_at: string;
+  completed_at?: string;
+  error_details?: string;
+  report_version: string;
+}
+
+export interface NightAuditReport {
+  id: string;
+  audit_run_id: string;
+  report_data: any; // Financial/Occupancy JSON snapshot
+  pdf_storage_path: string;
+  generated_at: string;
+  finalized_at: string;
+}
+
+export interface NightAuditDelivery {
+  id: string;
+  audit_run_id: string;
+  recipient_id: string;
+  channel: 'email' | 'whatsapp';
+  status: 'pending' | 'delivered' | 'failed';
+  attempts: number;
+  provider_message_id?: string;
+  last_error?: string;
+  sent_at?: string;
+  delivered_at?: string;
+}
+
+export interface NightAuditExecutionLog {
+  id: string;
+  audit_run_id: string;
+  event_type: string;
+  event_details: string;
+  created_at: string;
+}
+
   userName: string;
   userRole: string;
   action: string;

@@ -50,6 +50,8 @@ import {
   PaymentOrder,
   PaymentOrderStatus,
   PaymentTransaction,
+  NightAuditSettings,
+  NightAuditRecipient,
   RoomTransferRecord,
   RoomTransferReasonCategory,
   MaintenanceCategory,
@@ -180,6 +182,8 @@ export class HotelRepository {
   private conventionQuotes: ConventionQuote[] = JSON.parse(JSON.stringify(INITIAL_CONVENTION_QUOTES));
   private paymentOrders: PaymentOrder[] = [];
   private paymentTransactions: PaymentTransaction[] = [];
+  private nightAuditSettings?: NightAuditSettings;
+  private nightAuditRecipients: NightAuditRecipient[] = [];
 
   // In-Memory Real-Time Event Bus with Reconnection Replay Buffer
   private eventCounter: number = 0;
@@ -3128,6 +3132,10 @@ export class HotelRepository {
 
   getGallery(): GalleryItem[] {
     return [...this.gallery].sort((a, b) => a.display_order - b.display_order);
+  }
+
+  getFolioCharges(): FolioCharge[] {
+    return [...this.folioCharges];
   }
 
   // --- STAFF ---
