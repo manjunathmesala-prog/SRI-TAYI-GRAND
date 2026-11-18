@@ -1,34 +1,34 @@
 import type { Metadata, Viewport } from 'next';
-import { Cormorant_Garamond, Playfair_Display, Plus_Jakarta_Sans, Noto_Sans_Telugu } from 'next/font/google';
+// import { Cormorant_Garamond, Playfair_Display, Plus_Jakarta_Sans, Noto_Sans_Telugu } from 'next/font/google';
 import './globals.css';
 import ScrollReveal from '@/components/anantha/ScrollReveal';
 import PwaProvider from '@/components/pwa/PwaProvider';
 
-const cormorant = Cormorant_Garamond({
-  subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-cormorant',
-  display: 'swap',
-});
+// const cormorant = Cormorant_Garamond({
+//   subsets: ['latin'],
+//   weight: ['400', '500', '600', '700'],
+//   variable: '--font-cormorant',
+//   display: 'swap',
+// });
 
-const playfair = Playfair_Display({
-  subsets: ['latin'],
-  variable: '--font-playfair',
-  display: 'swap',
-});
+// const playfair = Playfair_Display({
+//   subsets: ['latin'],
+//   variable: '--font-playfair',
+//   display: 'swap',
+// });
 
-const plusJakarta = Plus_Jakarta_Sans({
-  subsets: ['latin'],
-  variable: '--font-plus-jakarta',
-  display: 'swap',
-});
+// const plusJakarta = Plus_Jakarta_Sans({
+//   subsets: ['latin'],
+//   variable: '--font-plus-jakarta',
+//   display: 'swap',
+// });
 
-const notoSansTelugu = Noto_Sans_Telugu({
-  subsets: ['telugu', 'latin'],
-  weight: ['400', '500', '600', '700'],
-  variable: '--font-noto-telugu',
-  display: 'swap',
-});
+// const notoSansTelugu = Noto_Sans_Telugu({
+//   subsets: ['telugu', 'latin'],
+//   weight: ['400', '500', '600', '700'],
+//   variable: '--font-noto-telugu',
+//   display: 'swap',
+// });
 
 export const viewport: Viewport = {
   themeColor: '#43001F',
@@ -121,7 +121,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`scroll-smooth ${cormorant.variable} ${playfair.variable} ${plusJakarta.variable} ${notoSansTelugu.variable}`}
+      className="scroll-smooth"
     >
       <head>
         <script
