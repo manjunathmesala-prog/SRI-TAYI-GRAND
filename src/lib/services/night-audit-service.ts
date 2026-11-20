@@ -1,5 +1,5 @@
 import { repo } from '../db/repository';
-import { Booking, PaymentRecord, Expense, FolioCharge, GoogleReview } from '@/types';
+import { Booking, PaymentRecord, Expense, FolioCharge, GoogleReview, NightAuditRecipient } from '@/types';
 import { parseISO, isSameDay } from 'date-fns';
 import { PdfGenerationService } from './pdf-service';
 import { EmailDeliveryService } from './email-service';
@@ -107,20 +107,61 @@ export class NightAuditService {
   }
 
 
-  public async runNightAudit(businessDate: string): Promise<void> {
+  public async runNightAudit(
+    businessDate: string,
+    overrideRecipients?: Partial<NightAuditRecipient>[]
+  ): Promise<{ success: boolean; businessDate: string; data: AuditReportData; deliveries: { address: string; channel: string; status: 'sent' | 'failed' | 'disabled' }[] }> {
+    const settings = repo.getSettings();
+    const config = settings.night_audit_config;
+
+    // If disabled and not explicitly triggered with override recipients
+    if (config && !config.enabled && !overrideRecipients) {
+      console.log('[NIGHT AUDIT] Automated daily audit is currently paused in settings.');
+      const data = await this.generateAuditData(businessDate);
+      return { success: true, businessDate, data, deliveries: [] };
+    }
+
     // 1. Calculate Audit Data
     const data = await this.generateAuditData(businessDate);
     
     // 2. Generate PDF
     const pdf = await this.pdfService.generateReportPdf(data);
     
-    // 3. Queue Deliveries
-    // In production, fetch actual recipients from db
-    const recipients = [{ email: 'admin@sritayigrand.com', whatsapp: '+919999999999' }];
-    
-    for (const r of recipients) {
-      if (r.email) await this.emailService.sendReport(r.email, data, pdf);
-      if (r.whatsapp) await this.waService.sendSummary(r.whatsapp, data);
+    // 3. Determine Recipients
+    const deliveries: { address: string; channel: string; status: 'sent' | 'failed' | 'disabled' }[] = [];
+
+    const activeRecipients = overrideRecipients || (config?.recipients?.filter((r) => r.is_active) ?? [
+      { channel: 'email', address: 'admin@sritayigrand.com', name: 'Admin' }
+    ]);
+
+    const isEmailEnabled = config ? config.email_enabled : true;
+    const isWhatsappEnabled = config ? config.whatsapp_enabled : false;
+
+    for (const r of activeRecipients) {
+      const dest = r.address || r.recipient_address;
+      if (!dest) continue;
+      if (r.channel === 'email') {
+        if (!isEmailEnabled && !overrideRecipients) {
+          deliveries.push({ address: dest, channel: 'email', status: 'disabled' });
+          continue;
+        }
+        const sent = await this.emailService.sendReport(dest, data, pdf);
+        deliveries.push({ address: dest, channel: 'email', status: sent ? 'sent' : 'failed' });
+      } else if (r.channel === 'whatsapp') {
+        if (!isWhatsappEnabled && !overrideRecipients) {
+          deliveries.push({ address: dest, channel: 'whatsapp', status: 'disabled' });
+          continue;
+        }
+        const sent = await this.waService.sendSummary(dest, data);
+        deliveries.push({ address: dest, channel: 'whatsapp', status: sent ? 'sent' : 'failed' });
+      }
     }
+
+    return {
+      success: true,
+      businessDate,
+      data,
+      deliveries,
+    };
   }
 }

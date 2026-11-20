@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { DailyClosing } from '@/types';
+import { DailyClosing, NightAuditConfig, NightAuditRecipient } from '@/types';
 import { useRealtimeSync } from '@/lib/realtime-client';
 import { getAdminHeaders } from '@/lib/auth-storage';
 import {
@@ -27,6 +27,14 @@ import {
   FileSpreadsheet,
   AlertTriangle,
   Users,
+  Mail,
+  Phone,
+  Plus,
+  Trash2,
+  Send,
+  Clock,
+  Sliders,
+  Check,
 } from 'lucide-react';
 
 interface ClosingSummaryData {
@@ -80,6 +88,148 @@ export default function AdminDailyClosingPage() {
   // Modal for viewing/printing a certificate
   const [selectedClosing, setSelectedClosing] = useState<DailyClosing | null>(null);
 
+  // Automated Dispatch & Recipient Settings state
+  const [activeTab, setActiveTab] = useState<'closing' | 'automated-dispatch'>('closing');
+  const [auditConfig, setAuditConfig] = useState<NightAuditConfig | null>(null);
+  const [loadingConfig, setLoadingConfig] = useState(false);
+  const [savingConfig, setSavingConfig] = useState(false);
+  const [testSending, setTestSending] = useState(false);
+  const [testResult, setTestResult] = useState<string | null>(null);
+
+  // New recipient form state
+  const [showAddRecipientModal, setShowAddRecipientModal] = useState(false);
+  const [newRecipientName, setNewRecipientName] = useState('');
+  const [newRecipientChannel, setNewRecipientChannel] = useState<'email' | 'whatsapp'>('email');
+  const [newRecipientAddress, setNewRecipientAddress] = useState('');
+
+  const fetchAuditConfig = useCallback(async () => {
+    try {
+      setLoadingConfig(true);
+      const res = await fetch('/api/admin/night-audit/settings', {
+        headers: getAdminHeaders(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.config) {
+          setAuditConfig(data.config);
+        }
+      }
+    } catch (err: any) {
+      console.warn('Failed to load night audit config', err);
+    } finally {
+      setLoadingConfig(false);
+    }
+  }, []);
+
+  const handleSaveAuditConfig = async (newConfig?: NightAuditConfig) => {
+    const configToSave = newConfig || auditConfig;
+    if (!configToSave) return;
+    try {
+      setSavingConfig(true);
+      const res = await fetch('/api/admin/night-audit/settings', {
+        method: 'POST',
+        headers: {
+          ...getAdminHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(configToSave),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setAuditConfig(data.config);
+        setFeedback({ type: 'success', message: 'Automated Night Audit settings and recipient list saved successfully.' });
+      } else {
+        setFeedback({ type: 'error', message: data.error || 'Failed to save settings.' });
+      }
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err.message || 'Error saving settings.' });
+    } finally {
+      setSavingConfig(false);
+    }
+  };
+
+  const handleTriggerTestAudit = async () => {
+    try {
+      setTestSending(true);
+      setTestResult(null);
+      const res = await fetch('/api/admin/night-audit/test', {
+        method: 'POST',
+        headers: {
+          ...getAdminHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ businessDate }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        const deliveries = data.result?.deliveries || [];
+        const sentCount = deliveries.filter((d: any) => d.status === 'sent').length;
+        setTestResult(`Test audit generated successfully! Dispatched to ${sentCount} recipient(s).`);
+        setFeedback({ type: 'success', message: `Test report dispatched for ${businessDate}.` });
+      } else {
+        setFeedback({ type: 'error', message: data.error || 'Test audit dispatch failed.' });
+      }
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err.message || 'Failed to dispatch test report.' });
+    } finally {
+      setTestSending(false);
+    }
+  };
+
+  const handleAddRecipient = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newRecipientName.trim() || !newRecipientAddress.trim()) {
+      setFeedback({ type: 'error', message: 'Please provide recipient name and address.' });
+      return;
+    }
+    const newRecipient: NightAuditRecipient = {
+      id: `rec-${Date.now()}`,
+      name: newRecipientName.trim(),
+      channel: newRecipientChannel,
+      address: newRecipientAddress.trim(),
+      is_active: true,
+      created_at: new Date().toISOString(),
+    };
+    const updated = {
+      ...(auditConfig || {
+        enabled: true,
+        execution_time: '00:00',
+        timezone: 'Asia/Kolkata',
+        email_enabled: true,
+        whatsapp_enabled: false,
+        recipients: [],
+      }),
+      recipients: [...(auditConfig?.recipients || []), newRecipient],
+    };
+    setAuditConfig(updated);
+    handleSaveAuditConfig(updated);
+    setNewRecipientName('');
+    setNewRecipientAddress('');
+    setShowAddRecipientModal(false);
+  };
+
+  const handleToggleRecipient = (id: string) => {
+    if (!auditConfig) return;
+    const updated = {
+      ...auditConfig,
+      recipients: auditConfig.recipients.map((r) =>
+        r.id === id ? { ...r, is_active: !r.is_active } : r
+      ),
+    };
+    setAuditConfig(updated);
+    handleSaveAuditConfig(updated);
+  };
+
+  const handleDeleteRecipient = (id: string) => {
+    if (!auditConfig) return;
+    const updated = {
+      ...auditConfig,
+      recipients: auditConfig.recipients.filter((r) => r.id !== id),
+    };
+    setAuditConfig(updated);
+    handleSaveAuditConfig(updated);
+  };
+
   const fetchClosingData = useCallback(async () => {
     try {
       setLoading(true);
@@ -105,7 +255,8 @@ export default function AdminDailyClosingPage() {
 
   useEffect(() => {
     fetchClosingData();
-  }, [fetchClosingData]);
+    fetchAuditConfig();
+  }, [fetchClosingData, fetchAuditConfig]);
 
   // Real-time synchronization
   useRealtimeSync({
@@ -237,8 +388,53 @@ export default function AdminDailyClosingPage() {
         </div>
       )}
 
-      {/* Already Closed Banner */}
-      {isDateClosed && (
+      {/* Primary Tab Switcher */}
+      <div className="flex flex-wrap items-center gap-2 border-b border-[#EFE3D6] pb-3">
+        <button
+          type="button"
+          onClick={() => setActiveTab('closing')}
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            activeTab === 'closing'
+              ? 'bg-[#241912] text-[#D8AD56] shadow-md ring-2 ring-[#D8AD56]/40'
+              : 'bg-white hover:bg-[#FAF7F2] text-[#786A5B] border border-[#EFE3D6]'
+          }`}
+        >
+          <Lock className="w-4 h-4" />
+          <span>Manual Closing &amp; Audit Wizard</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => {
+            setActiveTab('automated-dispatch');
+            if (!auditConfig) fetchAuditConfig();
+          }}
+          className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            activeTab === 'automated-dispatch'
+              ? 'bg-[#241912] text-[#D8AD56] shadow-md ring-2 ring-[#D8AD56]/40'
+              : 'bg-white hover:bg-[#FAF7F2] text-[#786A5B] border border-[#EFE3D6]'
+          }`}
+        >
+          <Mail className="w-4 h-4" />
+          <span>Automated Dispatch Settings</span>
+          {auditConfig && (
+            <span
+              className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                auditConfig.enabled
+                  ? 'bg-emerald-500/20 text-emerald-700 border border-emerald-400/40'
+                  : 'bg-stone-200 text-stone-600'
+              }`}
+            >
+              {auditConfig.enabled ? 'Active' : 'Paused'}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {activeTab === 'closing' && (
+        <>
+          {/* Already Closed Banner */}
+          {isDateClosed && (
         <div className="p-6 rounded-3xl bg-gradient-to-r from-[#241912] to-[#382216] text-white border border-[#D8AD56]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-[#D8AD56]/20 border border-[#D8AD56]/40 flex items-center justify-center shrink-0">
@@ -1006,6 +1202,400 @@ export default function AdminDailyClosingPage() {
           </table>
         </div>
       </div>
+        </>
+      )}
+
+      {/* AUTOMATED NIGHT AUDIT & DISPATCH SETTINGS VIEW */}
+      {activeTab === 'automated-dispatch' && (
+        <div className="space-y-6">
+          {/* Header Card */}
+          <div className="bg-[#241912] border border-[#D8AD56]/30 rounded-3xl p-6 sm:p-8 text-[#FAF7F2] shadow-xl relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[#D8AD56]/15 via-transparent to-transparent pointer-events-none rounded-full blur-3xl" />
+            <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <span className="px-3 py-1 rounded-full text-[11px] font-semibold tracking-wider uppercase bg-[#D8AD56]/20 text-[#D8AD56] border border-[#D8AD56]/40 flex items-center gap-1.5">
+                    <Clock className="w-3.5 h-3.5" />
+                    Automated Night Audit Scheduler
+                  </span>
+                  <span className="text-xs text-[#FAF7F2]/70 flex items-center gap-1.5 font-mono">
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#D8AD56]" />
+                    Cron Engine: {auditConfig?.enabled ? 'Active (Daily at 00:00 IST)' : 'Paused'}
+                  </span>
+                </div>
+                <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white tracking-wide">
+                  Automated Daily Audit &amp; Report Distribution
+                </h2>
+                <p className="text-xs sm:text-sm text-[#FAF7F2]/80 max-w-2xl font-light">
+                  Sri Tayi Grand automatically compiles daily night audit reports (room occupancy, revenue, cash/UPI collections, daily expenses, and outstanding balances) into an official PDF document and delivers them to authorized management emails and WhatsApp numbers.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleTriggerTestAudit}
+                  disabled={testSending}
+                  className="px-4 py-2.5 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white font-semibold text-xs tracking-wide shadow-md hover:shadow-lg transition-all flex items-center gap-2 border border-[#D8AD56]/40 disabled:opacity-50"
+                >
+                  <Send className={`w-3.5 h-3.5 ${testSending ? 'animate-spin' : ''}`} />
+                  <span>{testSending ? 'Generating & Sending...' : 'Send Test Report Now'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowAddRecipientModal(true)}
+                  className="px-4 py-2.5 rounded-xl bg-[#D8AD56] hover:bg-[#c99f48] text-[#241912] font-bold text-xs tracking-wide shadow-md transition-all flex items-center gap-1.5"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Recipient</span>
+                </button>
+              </div>
+            </div>
+
+            {testResult && (
+              <div className="mt-4 p-3.5 rounded-2xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-200 text-xs flex items-center justify-between">
+                <span className="font-medium flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  {testResult}
+                </span>
+                <button
+                  onClick={() => setTestResult(null)}
+                  className="text-xs underline text-emerald-300 hover:text-white"
+                >
+                  Close
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Configuration Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Schedule & Channel Settings Card */}
+            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#EFE3D6] shadow-sm space-y-6">
+              <div className="flex items-center justify-between pb-4 border-b border-[#EFE3D6]">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#241912] text-[#D8AD56] flex items-center justify-center font-bold">
+                    <Sliders className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-serif font-bold text-base text-[#241912]">
+                      Scheduler &amp; Channel Policies
+                    </h3>
+                    <p className="text-[11px] text-[#786A5B]">
+                      Execution trigger time and automated communication channels.
+                    </p>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => handleSaveAuditConfig()}
+                  disabled={savingConfig}
+                  className="px-4 py-2 rounded-xl bg-[#241912] text-[#D8AD56] text-xs font-bold hover:bg-[#382216] transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>{savingConfig ? 'Saving...' : 'Save Settings'}</span>
+                </button>
+              </div>
+
+              <div className="space-y-5">
+                {/* Master Switch */}
+                <div className="flex items-center justify-between p-4 rounded-2xl bg-[#FAF7F2] border border-[#EFE3D6]">
+                  <div className="space-y-0.5 pr-4">
+                    <span className="text-xs font-bold text-[#241912] block">
+                      Enable Automated Night Audit Cron
+                    </span>
+                    <span className="text-[11px] text-[#786A5B] block">
+                      When enabled, Vercel Cron automatically triggers daily at the scheduled time.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!auditConfig) return;
+                      const updated = { ...auditConfig, enabled: !auditConfig.enabled };
+                      setAuditConfig(updated);
+                      handleSaveAuditConfig(updated);
+                    }}
+                    className={`w-12 h-6 rounded-full transition-colors relative p-0.5 shrink-0 ${
+                      auditConfig?.enabled ? 'bg-emerald-600' : 'bg-stone-300'
+                    }`}
+                  >
+                    <span
+                      className={`block w-5 h-5 rounded-full bg-white shadow-md transform transition-transform ${
+                        auditConfig?.enabled ? 'translate-x-6' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+
+                {/* Execution Schedule Time & Timezone */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[11px] font-bold text-[#786A5B] uppercase tracking-wider block mb-1">
+                      Execution Time (IST)
+                    </label>
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-[#EFE3D6] bg-white">
+                      <Clock className="w-4 h-4 text-[#D8AD56]" />
+                      <input
+                        type="time"
+                        value={auditConfig?.execution_time || '00:00'}
+                        onChange={(e) => {
+                          if (!auditConfig) return;
+                          setAuditConfig({ ...auditConfig, execution_time: e.target.value });
+                        }}
+                        className="w-full text-xs font-mono font-bold text-[#241912] outline-none bg-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-bold text-[#786A5B] uppercase tracking-wider block mb-1">
+                      Timezone
+                    </label>
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-[#EFE3D6] bg-[#FAF7F2] text-[#786A5B] text-xs font-mono">
+                      <span>{auditConfig?.timezone || 'Asia/Kolkata'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Channel Toggles */}
+                <div className="space-y-3 pt-2 border-t border-[#EFE3D6]">
+                  <span className="text-xs font-bold text-[#241912] block">
+                    Active Delivery Channels
+                  </span>
+
+                  {/* Email Toggle */}
+                  <div className="flex items-center justify-between p-3.5 rounded-2xl border border-[#EFE3D6] bg-white">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
+                        <Mail className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-[#241912] block">
+                          Email PDF Report Dispatch
+                        </span>
+                        <span className="text-[11px] text-[#786A5B] block">
+                          Generates and emails official multi-page PDF audit certificate.
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!auditConfig) return;
+                        const updated = { ...auditConfig, email_enabled: !auditConfig.email_enabled };
+                        setAuditConfig(updated);
+                        handleSaveAuditConfig(updated);
+                      }}
+                      className={`w-11 h-6 rounded-full transition-colors relative p-0.5 shrink-0 ${
+                        auditConfig?.email_enabled ? 'bg-blue-600' : 'bg-stone-300'
+                      }`}
+                    >
+                      <span
+                        className={`block w-5 h-5 rounded-full bg-white shadow-md transform transition-transform ${
+                          auditConfig?.email_enabled ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* WhatsApp Toggle */}
+                  <div className="flex items-center justify-between p-3.5 rounded-2xl border border-[#EFE3D6] bg-white">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                        <Phone className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="text-xs font-bold text-[#241912] block">
+                          WhatsApp Metric Summary
+                        </span>
+                        <span className="text-[11px] text-[#786A5B] block">
+                          Sends instant daily collection &amp; occupancy metrics alert.
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (!auditConfig) return;
+                        const updated = { ...auditConfig, whatsapp_enabled: !auditConfig.whatsapp_enabled };
+                        setAuditConfig(updated);
+                        handleSaveAuditConfig(updated);
+                      }}
+                      className={`w-11 h-6 rounded-full transition-colors relative p-0.5 shrink-0 ${
+                        auditConfig?.whatsapp_enabled ? 'bg-emerald-600' : 'bg-stone-300'
+                      }`}
+                    >
+                      <span
+                        className={`block w-5 h-5 rounded-full bg-white shadow-md transform transition-transform ${
+                          auditConfig?.whatsapp_enabled ? 'translate-x-5' : 'translate-x-0'
+                        }`}
+                      />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Test Report & Manual Trigger Card */}
+            <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#EFE3D6] shadow-sm space-y-6 flex flex-col justify-between">
+              <div className="space-y-4">
+                <div className="pb-4 border-b border-[#EFE3D6] flex items-center gap-2.5">
+                  <div className="w-9 h-9 rounded-xl bg-[#43001F] text-[#FAF7F2] flex items-center justify-center font-bold">
+                    <Send className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-serif font-bold text-base text-[#241912]">
+                      Manual Test &amp; On-Demand Generation
+                    </h3>
+                    <p className="text-[11px] text-[#786A5B]">
+                      Immediately trigger report generation and delivery for any business date.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-[11px] font-bold text-[#786A5B] uppercase tracking-wider block mb-1">
+                      Business Date to Audit
+                    </label>
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-[#EFE3D6] bg-white">
+                      <Calendar className="w-4 h-4 text-[#D8AD56]" />
+                      <input
+                        type="date"
+                        value={businessDate}
+                        onChange={(e) => setBusinessDate(e.target.value)}
+                        className="w-full text-xs font-semibold text-[#241912] outline-none bg-transparent"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-amber-50/60 border border-[#D8AD56]/30 text-xs text-[#786A5B] space-y-2">
+                    <span className="font-bold text-[#241912] flex items-center gap-1.5">
+                      <Sparkles className="w-4 h-4 text-[#D8AD56]" />
+                      Report Highlights Included:
+                    </span>
+                    <ul className="list-disc list-inside space-y-1 text-[11px] leading-relaxed">
+                      <li>Room Occupancy Rate, Total Rooms, Occupied &amp; Available Rooms</li>
+                      <li>Total Gross Revenue (Room Tariff, Extra Folio Charges, Hall Enquiries)</li>
+                      <li>Collection Breakdown by Payment Method (Cash, UPI, Credit/Debit Card)</li>
+                      <li>Daily Operational Expenses from Cash Drawer</li>
+                      <li>Outstanding Balances &amp; Unpaid Invoices</li>
+                      <li>Featured Google Guest Reviews &amp; Testimonials</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-[#EFE3D6]">
+                <button
+                  type="button"
+                  onClick={handleTriggerTestAudit}
+                  disabled={testSending}
+                  className="w-full py-3 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  <Send className={`w-4 h-4 ${testSending ? 'animate-spin' : ''}`} />
+                  <span>{testSending ? 'Compiling PDF & Delivering...' : 'Dispatch Test Report to Active Recipients'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Recipients Management Table */}
+          <div className="bg-white rounded-3xl border border-[#EFE3D6] shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-[#EFE3D6] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-serif font-bold text-[#241912] flex items-center gap-2">
+                  <Users className="w-5 h-5 text-[#D8AD56]" />
+                  <span>Configured Report Recipients</span>
+                </h3>
+                <p className="text-xs text-[#786A5B] mt-0.5">
+                  Designated stakeholders who receive automated daily night audit reports.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowAddRecipientModal(true)}
+                className="px-4 py-2.5 rounded-xl bg-[#241912] text-[#D8AD56] font-bold text-xs tracking-wide shadow-sm hover:bg-[#382216] transition-colors flex items-center gap-1.5 self-start sm:self-auto"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Add Recipient</span>
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#FAF7F2] text-[#786A5B] font-semibold uppercase tracking-wider border-b border-[#EFE3D6]">
+                  <tr>
+                    <th className="py-3 px-4">Recipient Name</th>
+                    <th className="py-3 px-4">Delivery Channel</th>
+                    <th className="py-3 px-4">Email / Phone Destination</th>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#EFE3D6]">
+                  {(!auditConfig?.recipients || auditConfig.recipients.length === 0) ? (
+                    <tr>
+                      <td colSpan={5} className="py-8 text-center text-xs text-[#786A5B]">
+                        No recipients added yet. Click &quot;Add Recipient&quot; to configure email or WhatsApp delivery.
+                      </td>
+                    </tr>
+                  ) : (
+                    auditConfig.recipients.map((rec) => (
+                      <tr key={rec.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
+                        <td className="py-3.5 px-4 font-semibold text-[#241912]">
+                          {rec.name}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span
+                            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                              rec.channel === 'email'
+                                ? 'bg-blue-50 text-blue-800 border border-blue-200'
+                                : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                            }`}
+                          >
+                            {rec.channel === 'email' ? <Mail className="w-3 h-3" /> : <Phone className="w-3 h-3" />}
+                            <span>{rec.channel}</span>
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 font-mono text-stone-800 font-medium">
+                          {rec.address}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleRecipient(rec.id)}
+                            className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider transition-colors border ${
+                              rec.is_active
+                                ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                                : 'bg-stone-100 text-stone-600 border-stone-200'
+                            }`}
+                          >
+                            {rec.is_active ? 'Active' : 'Paused'}
+                          </button>
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteRecipient(rec.id)}
+                            className="p-1.5 rounded-lg text-rose-600 hover:bg-rose-50 transition-colors"
+                            title="Delete Recipient"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* AUDIT CERTIFICATE / EOD MODAL */}
       {selectedClosing && (
@@ -1137,6 +1727,110 @@ export default function AdminDailyClosingPage() {
                 Close
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ADD RECIPIENT MODAL */}
+      {showAddRecipientModal && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full border border-[#EFE3D6] shadow-2xl p-6 sm:p-7 space-y-5">
+            <div className="flex items-center justify-between pb-3 border-b border-[#EFE3D6]">
+              <div>
+                <span className="text-[10px] uppercase font-bold tracking-widest text-[#D8AD56]">
+                  Report Distribution
+                </span>
+                <h3 className="text-lg font-serif font-bold text-[#241912]">
+                  Add Audit Recipient
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAddRecipientModal(false)}
+                className="w-8 h-8 rounded-full bg-[#FAF7F2] text-[#786A5B] hover:text-[#241912] flex items-center justify-center"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddRecipient} className="space-y-4">
+              <div>
+                <label className="text-xs font-bold text-[#786A5B] uppercase tracking-wider block mb-1">
+                  Recipient Name / Designation
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newRecipientName}
+                  onChange={(e) => setNewRecipientName(e.target.value)}
+                  placeholder="e.g. General Manager, Accounts Head"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#EFE3D6] text-xs font-semibold text-[#241912] outline-none focus:border-[#D8AD56]"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-[#786A5B] uppercase tracking-wider block mb-1">
+                  Delivery Channel
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setNewRecipientChannel('email')}
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ${
+                      newRecipientChannel === 'email'
+                        ? 'bg-[#241912] text-[#D8AD56] border-[#241912]'
+                        : 'bg-white border-[#EFE3D6] text-[#786A5B]'
+                    }`}
+                  >
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Email (PDF)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setNewRecipientChannel('whatsapp')}
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-1.5 transition-colors ${
+                      newRecipientChannel === 'whatsapp'
+                        ? 'bg-[#241912] text-[#D8AD56] border-[#241912]'
+                        : 'bg-white border-[#EFE3D6] text-[#786A5B]'
+                    }`}
+                  >
+                    <Phone className="w-3.5 h-3.5" />
+                    <span>WhatsApp</span>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-[#786A5B] uppercase tracking-wider block mb-1">
+                  {newRecipientChannel === 'email' ? 'Email Address' : 'WhatsApp Phone Number'}
+                </label>
+                <input
+                  type={newRecipientChannel === 'email' ? 'email' : 'tel'}
+                  required
+                  value={newRecipientAddress}
+                  onChange={(e) => setNewRecipientAddress(e.target.value)}
+                  placeholder={newRecipientChannel === 'email' ? 'e.g. manager@sritayigrand.com' : 'e.g. +919876543210'}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#EFE3D6] text-xs font-semibold text-[#241912] outline-none focus:border-[#D8AD56]"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-3 border-t border-[#EFE3D6]">
+                <button
+                  type="button"
+                  onClick={() => setShowAddRecipientModal(false)}
+                  className="px-4 py-2 rounded-xl text-xs font-semibold text-[#786A5B] hover:bg-[#FAF7F2]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-[#D8AD56] hover:bg-[#c99f48] text-[#241912] font-bold text-xs shadow-md transition-colors"
+                >
+                  Save Recipient
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

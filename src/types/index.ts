@@ -363,6 +363,16 @@ export interface HotelSettings {
   extra_person_tariff_paise?: number;
   tariff_source_date?: string;
   tariff_source_label?: string;
+  night_audit_config?: NightAuditConfig;
+}
+
+export interface NightAuditConfig {
+  enabled: boolean;
+  execution_time: string; // e.g. "00:00"
+  timezone: string; // "Asia/Kolkata"
+  email_enabled: boolean;
+  whatsapp_enabled: boolean;
+  recipients: NightAuditRecipient[];
 }
 
 export interface RFIDDevice {
@@ -791,13 +801,19 @@ export interface NightAuditSettings {
 
 export interface NightAuditRecipient {
   id: string;
-  hotel_id: string;
   channel: 'email' | 'whatsapp';
-  recipient_name: string;
-  recipient_address: string; // email address or phone number
   is_active: boolean;
-  consent_status: 'pending' | 'granted' | 'revoked';
-  created_at: string;
+
+  // PMS / UI shorthand fields
+  name?: string;
+  address?: string;
+
+  // DB schema fields
+  recipient_name?: string;
+  recipient_address?: string; // email address or phone number
+  hotel_id?: string;
+  consent_status?: 'pending' | 'granted' | 'revoked';
+  created_at?: string;
 }
 
 export type NightAuditStatus = 'pending' | 'in_progress' | 'completed' | 'failed' | 'exception';

@@ -55,6 +55,39 @@ export const INITIAL_HOTEL_SETTINGS: HotelSettings = {
   extra_person_tariff_paise: 30000,
   tariff_source_date: '01-09-2023',
   tariff_source_label: 'Owner Tariff Card dated 01-09-2023',
+  night_audit_config: {
+    enabled: true,
+    execution_time: '00:00',
+    timezone: 'Asia/Kolkata',
+    email_enabled: true,
+    whatsapp_enabled: false,
+    recipients: [
+      {
+        id: 'rec-1',
+        name: 'General Manager',
+        channel: 'email',
+        address: 'admin@sritayigrand.com',
+        is_active: true,
+        created_at: '2026-01-01T00:00:00.000Z',
+      },
+      {
+        id: 'rec-2',
+        name: 'Accounts Department',
+        channel: 'email',
+        address: 'manjunathmesala@gmail.com',
+        is_active: true,
+        created_at: '2026-01-01T00:00:00.000Z',
+      },
+      {
+        id: 'rec-3',
+        name: 'Front Desk WhatsApp',
+        channel: 'whatsapp',
+        address: '+918494223379',
+        is_active: false,
+        created_at: '2026-01-01T00:00:00.000Z',
+      },
+    ],
+  },
 };
 
 export const INITIAL_ROOM_CATEGORIES: RoomCategory[] = [
