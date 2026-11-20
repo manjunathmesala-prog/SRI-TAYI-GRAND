@@ -29,17 +29,17 @@ export class PdfGenerationService {
 
       // Revenue
       doc.fontSize(16).text('Revenue Summary');
-      doc.fontSize(10).text(`Total Revenue: ₹${data.revenue.totalRevenue.toFixed(2)}`);
-      doc.text(`Room Revenue: ₹${data.revenue.roomRevenue.toFixed(2)}`);
-      doc.text(`Extra Charges: ₹${data.revenue.extraCharges.toFixed(2)}`);
+      doc.fontSize(10).text(`Total Revenue: Rs. ${data.revenue.totalRevenue.toFixed(2)}`);
+      doc.text(`Room Revenue: Rs. ${data.revenue.roomRevenue.toFixed(2)}`);
+      doc.text(`Extra Charges: Rs. ${data.revenue.extraCharges.toFixed(2)}`);
       doc.moveDown();
 
       // Collections
       doc.fontSize(16).text('Collections');
-      doc.fontSize(10).text(`Total Collections: ₹${data.collections.total.toFixed(2)}`);
-      doc.text(`Cash: ₹${data.collections.cash.toFixed(2)}`);
-      doc.text(`UPI: ₹${data.collections.upi.toFixed(2)}`);
-      doc.text(`Card: ₹${data.collections.card.toFixed(2)}`);
+      doc.fontSize(10).text(`Total Collections: Rs. ${data.collections.total.toFixed(2)}`);
+      doc.text(`Cash: Rs. ${data.collections.cash.toFixed(2)}`);
+      doc.text(`UPI: Rs. ${data.collections.upi.toFixed(2)}`);
+      doc.text(`Card: Rs. ${data.collections.card.toFixed(2)}`);
       doc.moveDown();
 
       // Featured Reviews

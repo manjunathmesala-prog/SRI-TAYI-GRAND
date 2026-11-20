@@ -53,47 +53,82 @@ export class NightAuditService {
     const occupancyRate = totalRooms > 0 ? (occupiedRooms / totalRooms) * 100 : 0;
 
     // 2. Revenue
-    const activeBookings = bookings.filter(b => 
-      b.status !== 'cancelled' && 
-      b.status !== 'no_show' &&
-      parseISO(b.check_in_date) <= targetDate && 
-      parseISO(b.check_out_date) >= targetDate
-    );
+    const activeBookings = bookings.filter(b => {
+      if (b.status === 'cancelled' || b.status === 'no_show') return false;
+      if (!b.check_in_date || !b.check_out_date) return false;
+      try {
+        const inDate = parseISO(b.check_in_date);
+        const outDate = parseISO(b.check_out_date);
+        return inDate <= targetDate && outDate >= targetDate;
+      } catch {
+        return false;
+      }
+    });
     
     const roomRevenue = activeBookings.reduce((sum, b) => {
-      const nights = Math.max(1, Math.round((parseISO(b.check_out_date).getTime() - parseISO(b.check_in_date).getTime()) / (1000 * 60 * 60 * 24)));
-      return sum + (b.subtotal_amount / nights);
+      try {
+        const inDate = parseISO(b.check_in_date);
+        const outDate = parseISO(b.check_out_date);
+        const diffMs = outDate.getTime() - inDate.getTime();
+        const nights = Math.max(1, Math.round(diffMs / (1000 * 60 * 60 * 24)));
+        const amount = Number(b.subtotal_amount) || Number(b.total_amount) || 0;
+        return sum + (amount / nights);
+      } catch {
+        return sum;
+      }
     }, 0);
 
     const hallRevenue = 0;
     
-    const extraCharges = folioCharges
-      .filter(f => isSameDay(parseISO(f.created_at), targetDate))
-      .reduce((sum, f) => sum + f.amount, 0);
+    const extraCharges = (folioCharges || [])
+      .filter(f => {
+        if (!f || !f.created_at) return false;
+        try {
+          return isSameDay(parseISO(f.created_at), targetDate);
+        } catch {
+          return false;
+        }
+      })
+      .reduce((sum, f) => sum + (Number(f.amount) || 0), 0);
 
     const totalRevenue = roomRevenue + hallRevenue + extraCharges;
 
     // 3. Collections
-    const dailyPayments = payments.filter(p => isSameDay(parseISO(p.created_at), targetDate));
+    const dailyPayments = (payments || []).filter(p => {
+      if (!p || !p.created_at) return false;
+      try {
+        return isSameDay(parseISO(p.created_at), targetDate);
+      } catch {
+        return false;
+      }
+    });
     
     const collections = {
-      cash: dailyPayments.filter(p => p.payment_method === 'cash').reduce((sum, p) => sum + p.amount, 0),
-      upi: dailyPayments.filter(p => p.payment_method === 'upi').reduce((sum, p) => sum + p.amount, 0),
-      card: dailyPayments.filter(p => p.payment_method === 'card').reduce((sum, p) => sum + p.amount, 0),
-      total: dailyPayments.reduce((sum, p) => sum + p.amount, 0),
+      cash: dailyPayments.filter(p => p.payment_method === 'cash').reduce((sum, p) => sum + (Number(p.amount) || 0), 0),
+      upi: dailyPayments.filter(p => p.payment_method === 'upi').reduce((sum, p) => sum + (Number(p.amount) || 0), 0),
+      card: dailyPayments.filter(p => p.payment_method === 'card').reduce((sum, p) => sum + (Number(p.amount) || 0), 0),
+      total: dailyPayments.reduce((sum, p) => sum + (Number(p.amount) || 0), 0),
     };
 
     // 4. Expenses
-    const dailyExpenses = expenses.filter(e => isSameDay(parseISO(e.expense_date), targetDate));
-    const expenseTotal = dailyExpenses.reduce((sum, e) => sum + e.amount, 0);
+    const dailyExpenses = (expenses || []).filter(e => {
+      const dateVal = e.expense_date || e.created_at;
+      if (!dateVal) return false;
+      try {
+        return isSameDay(parseISO(dateVal), targetDate);
+      } catch {
+        return false;
+      }
+    });
+    const expenseTotal = dailyExpenses.reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
 
     // 5. Outstanding
     const outstanding = bookings
       .filter(b => b.status !== 'cancelled' && b.status !== 'checked_out')
-      .reduce((sum, b) => sum + Math.max(0, b.total_amount - b.paid_amount), 0);
+      .reduce((sum, b) => sum + Math.max(0, (Number(b.total_amount) || 0) - (Number(b.paid_amount) || 0)), 0);
 
     // 6. Featured Reviews (up to 3 for report)
-    const featuredReviews = allReviews.filter(r => r.is_featured).slice(0, 3);
+    const featuredReviews = (allReviews || []).filter(r => r && r.is_featured).slice(0, 3);
 
     return {
       businessDate,

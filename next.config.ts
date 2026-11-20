@@ -39,7 +39,10 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   output: 'standalone',
-  serverExternalPackages: ['pg'],
+  serverExternalPackages: ['pg', 'pdfkit'],
+  outputFileTracingIncludes: {
+    '/**': ['./node_modules/pdfkit/**/*'],
+  },
   env: {
     DATABASE_URL: process.env.DATABASE_URL || 'postgresql://postgres.goxgiohyshxzqzesernz:Vaynex%402026@aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres',
     SUPABASE_DATABASE_URL: process.env.SUPABASE_DATABASE_URL || 'postgresql://postgres.goxgiohyshxzqzesernz:Vaynex%402026@aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres',

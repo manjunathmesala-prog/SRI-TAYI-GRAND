@@ -22,6 +22,8 @@ import {
   RoomTransferRecord,
   JournalEntry,
   JournalLine,
+  NightAuditConfig,
+  NightAuditRecipient,
 } from '@/types';
 import { normalizeCategoryId } from '@/lib/pricing';
 
@@ -2755,3 +2757,132 @@ export async function loadGuestsFromSupabase(): Promise<Guest[]> {
     client.release();
   }
 }
+
+/**
+ * ==============================================================================
+ * NIGHT AUDIT SUPABASE CLOUD SYNCHRONIZATION
+ * Persists night audit automated settings and recipients directly into PostgreSQL.
+ * ==============================================================================
+ */
+
+export async function syncNightAuditConfigToSupabase(config: NightAuditConfig): Promise<void> {
+  const db = getSupabasePgPool();
+  if (!db) return;
+  const client = await db.connect();
+  try {
+    // 1. Upsert settings
+    await client.query(`
+      INSERT INTO night_audit_settings (id, hotel_id, enabled, execution_time, timezone, email_enabled, whatsapp_enabled, updated_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+      ON CONFLICT (id) DO UPDATE SET
+        enabled = EXCLUDED.enabled,
+        execution_time = EXCLUDED.execution_time,
+        timezone = EXCLUDED.timezone,
+        email_enabled = EXCLUDED.email_enabled,
+        whatsapp_enabled = EXCLUDED.whatsapp_enabled,
+        updated_at = NOW();
+    `, [
+      'stg-audit-settings',
+      'sri-tayi-grand',
+      Boolean(config.enabled),
+      config.execution_time || '00:00',
+      config.timezone || 'Asia/Kolkata',
+      Boolean(config.email_enabled),
+      Boolean(config.whatsapp_enabled)
+    ]);
+
+    // 2. Upsert recipients and clean up removed ones
+    if (Array.isArray(config.recipients)) {
+      const activeIds = config.recipients.map(r => r.id).filter(Boolean);
+      if (activeIds.length > 0) {
+        await client.query(
+          `DELETE FROM night_audit_recipients WHERE id NOT IN (${activeIds.map((_, i) => `$${i + 1}`).join(', ')});`,
+          activeIds
+        );
+      } else {
+        await client.query(`DELETE FROM night_audit_recipients;`);
+      }
+
+      for (const r of config.recipients) {
+        const addr = r.address || r.recipient_address || '';
+        const name = r.name || r.recipient_name || 'Recipient';
+        const id = r.id || `rec-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+        await client.query(`
+          INSERT INTO night_audit_recipients (id, hotel_id, channel, recipient_name, recipient_address, is_active, consent_status, created_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+          ON CONFLICT (id) DO UPDATE SET
+            channel = EXCLUDED.channel,
+            recipient_name = EXCLUDED.recipient_name,
+            recipient_address = EXCLUDED.recipient_address,
+            is_active = EXCLUDED.is_active;
+        `, [
+          id,
+          'sri-tayi-grand',
+          r.channel || 'email',
+          name,
+          addr,
+          r.is_active !== false,
+          r.consent_status || 'granted'
+        ]);
+      }
+    }
+  } catch (err: any) {
+    console.warn('[SUPABASE SYNC NIGHT AUDIT CONFIG WARN]', err.message);
+  } finally {
+    client.release();
+  }
+}
+
+export async function loadNightAuditConfigFromSupabase(): Promise<NightAuditConfig | null> {
+  const db = getSupabasePgPool();
+  if (!db) return null;
+  const client = await db.connect();
+  try {
+    const sRes = await client.query(`SELECT * FROM night_audit_settings WHERE id = 'stg-audit-settings' LIMIT 1;`);
+    const rRes = await client.query(`SELECT * FROM night_audit_recipients ORDER BY created_at ASC;`);
+    
+    if (sRes.rows.length === 0) return null;
+    const s = sRes.rows[0];
+
+    const recipients: NightAuditRecipient[] = rRes.rows.map((r: any) => ({
+      id: r.id,
+      hotel_id: r.hotel_id,
+      channel: r.channel,
+      name: r.recipient_name,
+      recipient_name: r.recipient_name,
+      address: r.recipient_address,
+      recipient_address: r.recipient_address,
+      is_active: r.is_active,
+      consent_status: r.consent_status,
+      created_at: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString()
+    }));
+
+    return {
+      enabled: s.enabled,
+      execution_time: s.execution_time,
+      timezone: s.timezone,
+      email_enabled: s.email_enabled,
+      whatsapp_enabled: s.whatsapp_enabled,
+      recipients
+    };
+  } catch (err: any) {
+    console.warn('[SUPABASE LOAD NIGHT AUDIT CONFIG WARN]', err.message);
+    return null;
+  } finally {
+    client.release();
+  }
+}
+
+export async function deleteNightAuditRecipientFromSupabase(recipientId: string): Promise<void> {
+  const db = getSupabasePgPool();
+  if (!db) return;
+  const client = await db.connect();
+  try {
+    await client.query(`DELETE FROM night_audit_recipients WHERE id = $1;`, [recipientId]);
+  } catch (err: any) {
+    console.warn('[SUPABASE DELETE NIGHT AUDIT RECIPIENT WARN]', err.message);
+  } finally {
+    client.release();
+  }
+}
+

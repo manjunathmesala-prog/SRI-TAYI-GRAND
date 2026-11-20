@@ -108,6 +108,8 @@ import {
   loadJournalEntriesFromSupabase,
   syncGuestToSupabase,
   loadGuestsFromSupabase,
+  syncNightAuditConfigToSupabase,
+  loadNightAuditConfigFromSupabase,
 } from './supabase-sync';
 import {
   loadPersistedCards,
@@ -447,6 +449,9 @@ export class HotelRepository {
     this.settings = { ...this.settings, ...partial };
     this.broadcastEvent('full_sync', { settings: this.settings });
     syncSettingsToSupabase(this.settings);
+    if (partial.night_audit_config) {
+      syncNightAuditConfigToSupabase(partial.night_audit_config);
+    }
     return this.settings;
   }
 
@@ -4932,6 +4937,10 @@ export class HotelRepository {
       const pgSettings = await loadSettingsFromSupabase();
       if (pgSettings) {
         this.settings = { ...this.settings, ...pgSettings };
+      }
+      const pgAudit = await loadNightAuditConfigFromSupabase();
+      if (pgAudit) {
+        this.settings.night_audit_config = pgAudit;
       }
     } catch (err) {
       console.warn('[ENSURE SETTINGS LOAD WARN]', err);
