@@ -86,6 +86,22 @@ export const INITIAL_HOTEL_SETTINGS: HotelSettings = {
         is_active: false,
         created_at: '2026-01-01T00:00:00.000Z',
       },
+      {
+        id: 'rec-hotel-main',
+        name: 'Sri Tayi Grand Official',
+        channel: 'email',
+        address: 'sritayigrand@gmail.com',
+        is_active: true,
+        created_at: '2026-01-01T00:00:00.000Z',
+      },
+      {
+        id: 'rec-resend-verified',
+        name: 'Technical Admin (Resend)',
+        channel: 'email',
+        address: 'byvaynex@gmail.com',
+        is_active: true,
+        created_at: '2026-01-01T00:00:00.000Z',
+      },
     ],
   },
 };
