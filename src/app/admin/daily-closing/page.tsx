@@ -168,8 +168,18 @@ export default function AdminDailyClosingPage() {
       if (res.ok && data.success) {
         const deliveries = data.result?.deliveries || [];
         const sentCount = deliveries.filter((d: any) => d.status === 'sent').length;
-        setTestResult(`Test audit generated successfully! Dispatched to ${sentCount} recipient(s).`);
-        setFeedback({ type: 'success', message: `Test report dispatched for ${businessDate}.` });
+        const failed = deliveries.filter((d: any) => d.status === 'failed');
+        if (failed.length > 0 && sentCount === 0) {
+          const firstErr = failed[0].error || 'Delivery rejected by email service provider.';
+          setTestResult(`Delivery failed: ${firstErr}`);
+          setFeedback({ type: 'error', message: `Delivery failed: ${firstErr}` });
+        } else if (failed.length > 0) {
+          setTestResult(`Dispatched to ${sentCount} recipient(s), but ${failed.length} failed: ${failed[0].error || 'Check email service limits'}`);
+          setFeedback({ type: 'error', message: `Partial dispatch: ${failed[0].error || 'Check email service limits'}` });
+        } else {
+          setTestResult(`Test audit generated successfully! Dispatched to ${sentCount} recipient(s).`);
+          setFeedback({ type: 'success', message: `Test report dispatched for ${businessDate}.` });
+        }
       } else {
         setFeedback({ type: 'error', message: data.error || 'Test audit dispatch failed.' });
       }

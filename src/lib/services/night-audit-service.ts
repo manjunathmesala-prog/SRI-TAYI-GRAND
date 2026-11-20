@@ -145,7 +145,12 @@ export class NightAuditService {
   public async runNightAudit(
     businessDate: string,
     overrideRecipients?: Partial<NightAuditRecipient>[]
-  ): Promise<{ success: boolean; businessDate: string; data: AuditReportData; deliveries: { address: string; channel: string; status: 'sent' | 'failed' | 'disabled' }[] }> {
+  ): Promise<{
+    success: boolean;
+    businessDate: string;
+    data: AuditReportData;
+    deliveries: { address: string; channel: string; status: 'sent' | 'failed' | 'disabled'; error?: string; messageId?: string }[];
+  }> {
     const settings = repo.getSettings();
     const config = settings.night_audit_config;
 
@@ -163,7 +168,7 @@ export class NightAuditService {
     const pdf = await this.pdfService.generateReportPdf(data);
     
     // 3. Determine Recipients
-    const deliveries: { address: string; channel: string; status: 'sent' | 'failed' | 'disabled' }[] = [];
+    const deliveries: { address: string; channel: string; status: 'sent' | 'failed' | 'disabled'; error?: string; messageId?: string }[] = [];
 
     const activeRecipients = overrideRecipients || (config?.recipients?.filter((r) => r.is_active) ?? [
       { channel: 'email', address: 'admin@sritayigrand.com', name: 'Admin' }
@@ -180,8 +185,14 @@ export class NightAuditService {
           deliveries.push({ address: dest, channel: 'email', status: 'disabled' });
           continue;
         }
-        const sent = await this.emailService.sendReport(dest, data, pdf);
-        deliveries.push({ address: dest, channel: 'email', status: sent ? 'sent' : 'failed' });
+        const sendResult = await this.emailService.sendReport(dest, data, pdf);
+        deliveries.push({
+          address: dest,
+          channel: 'email',
+          status: sendResult.success ? 'sent' : 'failed',
+          ...(sendResult.error ? { error: sendResult.error } : {}),
+          ...(sendResult.messageId ? { messageId: sendResult.messageId } : {}),
+        });
       } else if (r.channel === 'whatsapp') {
         if (!isWhatsappEnabled && !overrideRecipients) {
           deliveries.push({ address: dest, channel: 'whatsapp', status: 'disabled' });
