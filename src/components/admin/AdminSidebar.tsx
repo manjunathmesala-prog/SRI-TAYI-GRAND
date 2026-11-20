@@ -178,6 +178,7 @@ export function AdminSidebar() {
         return t('nav.expenses', fallback);
       case '/admin/accounting':
         return isTelugu ? 'జనరల్ లెడ్జర్ ERP' : 'General Ledger ERP';
+      case '/admin/night-audit':
       case '/admin/daily-closing':
         return t('nav.dailyClosing', fallback);
       case '/admin/staff/attendance':
@@ -366,7 +367,8 @@ export function AdminSidebar() {
                       const Icon = item.icon;
                       const isActive =
                         pathname === item.href ||
-                        (item.href !== '/admin/dashboard' && pathname.startsWith(item.href));
+                        (item.href !== '/admin/dashboard' && pathname.startsWith(item.href)) ||
+                        (item.href === '/admin/daily-closing' && pathname.startsWith('/admin/night-audit'));
 
                       const translatedLabel = getTranslatedLabel(item.href, item.label);
                       const translatedBadge = getTranslatedBadge(item.badge);
@@ -583,7 +585,8 @@ export function AdminSidebar() {
                           const Icon = item.icon;
                           const isActive =
                             pathname === item.href ||
-                            (item.href !== '/admin/dashboard' && pathname.startsWith(item.href));
+                            (item.href !== '/admin/dashboard' && pathname.startsWith(item.href)) ||
+                            (item.href === '/admin/daily-closing' && pathname.startsWith('/admin/night-audit'));
                           const translatedLabel = getTranslatedLabel(item.href, item.label);
                           const translatedBadge = getTranslatedBadge(item.badge);
 
@@ -686,7 +689,8 @@ export function AdminSidebar() {
           const Icon = item.icon;
           const isActive =
             pathname === item.href ||
-            (item.href !== '/admin/dashboard' && pathname.startsWith(item.href));
+            (item.href !== '/admin/dashboard' && pathname.startsWith(item.href)) ||
+            (item.href === '/admin/daily-closing' && pathname.startsWith('/admin/night-audit'));
 
           return (
             <NextLink

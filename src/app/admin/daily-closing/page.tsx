@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import { DailyClosing, NightAuditConfig, NightAuditRecipient } from '@/types';
 import { useRealtimeSync } from '@/lib/realtime-client';
 import { getAdminHeaders } from '@/lib/auth-storage';
@@ -89,7 +90,10 @@ export default function AdminDailyClosingPage() {
   const [selectedClosing, setSelectedClosing] = useState<DailyClosing | null>(null);
 
   // Automated Dispatch & Recipient Settings state
-  const [activeTab, setActiveTab] = useState<'closing' | 'automated-dispatch'>('closing');
+  const pathname = usePathname();
+  const [activeTab, setActiveTab] = useState<'closing' | 'automated-dispatch'>(
+    pathname?.includes('/night-audit') ? 'automated-dispatch' : 'closing'
+  );
   const [auditConfig, setAuditConfig] = useState<NightAuditConfig | null>(null);
   const [loadingConfig, setLoadingConfig] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);
