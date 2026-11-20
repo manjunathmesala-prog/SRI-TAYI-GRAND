@@ -101,12 +101,12 @@ export default function AdminAuditLogsPage() {
     if (!q) return logs;
     return logs.filter(
       (log) =>
-        log.action.toLowerCase().includes(q) ||
-        log.user_name.toLowerCase().includes(q) ||
-        log.role.toLowerCase().includes(q) ||
-        log.entity_id.toLowerCase().includes(q) ||
-        
-        log.entity_type.toLowerCase().includes(q)
+        (log.action || '').toLowerCase().includes(q) ||
+        (log.user_name || log.userName || '').toLowerCase().includes(q) ||
+        (log.role || log.userRole || '').toLowerCase().includes(q) ||
+        (log.entity_id || log.entityId || '').toLowerCase().includes(q) ||
+        (log.details || '').toLowerCase().includes(q) ||
+        (log.entity_type || (log.entityType as string) || '').toLowerCase().includes(q)
     );
   }, [logs, searchQuery]);
 
@@ -115,13 +115,13 @@ export default function AdminAuditLogsPage() {
     if (filteredLogs.length === 0) return;
     const headers = ['Timestamp', 'Action', 'Entity Type', 'Entity ID', 'Actor Name', 'Actor Role', 'Details'];
     const rows = filteredLogs.map((l) => [
-      `"${l.created_at}"`,
-      `"${l.action}"`,
-      `"${l.entity_type}"`,
-      `"${l.entity_id}"`,
-      `"${l.user_name}"`,
-      `"${l.role}"`,
-      `""`,
+      `"${l.created_at || l.timestamp || ''}"`,
+      `"${l.action || ''}"`,
+      `"${l.entity_type || l.entityType || ''}"`,
+      `"${l.entity_id || l.entityId || ''}"`,
+      `"${l.user_name || l.userName || ''}"`,
+      `"${l.role || l.userRole || ''}"`,
+      `"${(l.details || '').replace(/"/g, '""')}"`,
     ]);
 
     const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\n');
@@ -135,7 +135,7 @@ export default function AdminAuditLogsPage() {
     showNotification('success', 'Audit trail exported as CSV.');
   };
 
-  const getEntityBadge = (entityType: AuditActionCategory) => {
+  const getEntityBadge = (entityType?: AuditActionCategory | string) => {
     switch (entityType) {
       case 'booking':
         return 'bg-blue-50 text-blue-800 border-blue-200';
@@ -176,7 +176,8 @@ export default function AdminAuditLogsPage() {
     return 'bg-stone-100 text-stone-800 border-stone-200';
   };
 
-  const formatLogTimestamp = (iso: string) => {
+  const formatLogTimestamp = (iso?: string) => {
+    if (!iso) return '-';
     try {
       const date = new Date(iso);
       return date.toLocaleString('en-IN', {
@@ -347,7 +348,7 @@ export default function AdminAuditLogsPage() {
                   <td className="py-3.5 px-4 whitespace-nowrap text-stone-600 font-mono text-[11px]">
                     <div className="flex items-center gap-1.5">
                       <Clock className="w-3.5 h-3.5 text-stone-400" />
-                      <span>{formatLogTimestamp(log.created_at)}</span>
+                      <span>{formatLogTimestamp(log.created_at || log.timestamp)}</span>
                     </div>
                   </td>
 
@@ -355,13 +356,13 @@ export default function AdminAuditLogsPage() {
                   <td className="py-3.5 px-4 whitespace-nowrap">
                     <div className="flex items-center gap-2">
                       <div className="w-7 h-7 rounded-full bg-[#241912] text-[#D8AD56] flex items-center justify-center text-[10px] font-bold">
-                        {log.user_name.slice(0, 2).toUpperCase()}
+                        {(log.user_name || log.userName || 'U').slice(0, 2).toUpperCase()}
                       </div>
                       <div>
                         <span className="font-semibold text-stone-900 block leading-tight">
-                          {log.userName}
+                          {log.userName || log.user_name || 'System'}
                         </span>
-                        <span className="text-[10px] text-stone-500 block">{log.userRole}</span>
+                        <span className="text-[10px] text-stone-500 block">{log.userRole || log.role || 'Staff'}</span>
                       </div>
                     </div>
                   </td>
@@ -382,13 +383,13 @@ export default function AdminAuditLogsPage() {
                     <div className="space-y-0.5">
                       <span
                         className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${getEntityBadge(
-                          log.entityType
+                          log.entityType || log.entity_type
                         )}`}
                       >
-                        {log.entityType}
+                        {log.entityType || log.entity_type}
                       </span>
                       <span className="block font-mono text-[11px] text-stone-600 font-bold">
-                        {log.entityId}
+                        {log.entityId || log.entity_id}
                       </span>
                     </div>
                   </td>
@@ -460,7 +461,7 @@ export default function AdminAuditLogsPage() {
                     Timestamp
                   </span>
                   <span className="text-xs font-mono font-medium text-stone-800">
-                    {formatLogTimestamp(selectedLog.timestamp)}
+                    {formatLogTimestamp(selectedLog.timestamp || selectedLog.created_at)}
                   </span>
                 </div>
                 <div>
@@ -468,7 +469,7 @@ export default function AdminAuditLogsPage() {
                     Actor / Role
                   </span>
                   <span className="text-xs font-semibold text-stone-900">
-                    {selectedLog.userName} ({selectedLog.userRole})
+                    {selectedLog.userName || selectedLog.user_name || 'System'} ({selectedLog.userRole || selectedLog.role || 'Staff'})
                   </span>
                 </div>
                 <div>
@@ -484,14 +485,14 @@ export default function AdminAuditLogsPage() {
                     Target Entity
                   </span>
                   <span className="text-xs font-medium text-stone-800 uppercase">
-                    {selectedLog.entityType} ({selectedLog.entityId})
+                    {selectedLog.entityType || selectedLog.entity_type || 'SYSTEM'} ({selectedLog.entityId || selectedLog.entity_id || 'N/A'})
                   </span>
                 </div>
                 <div>
                   <span className="text-[10px] text-stone-400 uppercase tracking-wider block font-semibold">
                     Actor User ID
                   </span>
-                  <span className="text-xs font-mono text-stone-600">{selectedLog.userId}</span>
+                  <span className="text-xs font-mono text-stone-600">{selectedLog.userId || selectedLog.user_id || 'stf-sys'}</span>
                 </div>
                 <div>
                   <span className="text-[10px] text-stone-400 uppercase tracking-wider block font-semibold">
@@ -510,38 +511,38 @@ export default function AdminAuditLogsPage() {
                   Event Statement
                 </label>
                 <div className="p-3.5 rounded-xl bg-amber-50/50 border border-[#D8AD56]/20 text-xs text-stone-800 leading-relaxed font-medium">
-                  {selectedLog.details}
+                  {selectedLog.details || (selectedLog.new_value ? JSON.stringify(selectedLog.new_value) : selectedLog.action)}
                 </div>
               </div>
 
               {/* Previous vs New State if provided */}
-              {(selectedLog.previousValue || selectedLog.newValue) && (
+              {(selectedLog.previousValue || selectedLog.newValue || selectedLog.previous_value || selectedLog.new_value) && (
                 <div className="space-y-3 pt-2">
                   <label className="text-xs font-bold text-stone-800 uppercase tracking-wider block">
                     State Transition Payload
                   </label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {selectedLog.previousValue && (
+                    {(selectedLog.previousValue ?? selectedLog.previous_value) && (
                       <div className="space-y-1">
                         <span className="text-[10px] text-stone-500 uppercase font-bold">
                           Previous State
                         </span>
                         <pre className="p-3 rounded-xl bg-stone-100 text-[11px] font-mono overflow-x-auto text-stone-700 border border-stone-200">
-                          {typeof selectedLog.previousValue === 'object'
-                            ? JSON.stringify(selectedLog.previousValue, null, 2)
-                            : String(selectedLog.previousValue)}
+                          {typeof (selectedLog.previousValue ?? selectedLog.previous_value) === 'object'
+                            ? JSON.stringify(selectedLog.previousValue ?? selectedLog.previous_value, null, 2)
+                            : String(selectedLog.previousValue ?? selectedLog.previous_value)}
                         </pre>
                       </div>
                     )}
-                    {selectedLog.newValue && (
+                    {(selectedLog.newValue ?? selectedLog.new_value) && (
                       <div className="space-y-1">
                         <span className="text-[10px] text-stone-500 uppercase font-bold">
                           New Committed State
                         </span>
                         <pre className="p-3 rounded-xl bg-emerald-50 text-[11px] font-mono overflow-x-auto text-emerald-900 border border-emerald-200">
-                          {typeof selectedLog.newValue === 'object'
-                            ? JSON.stringify(selectedLog.newValue, null, 2)
-                            : String(selectedLog.newValue)}
+                          {typeof (selectedLog.newValue ?? selectedLog.new_value) === 'object'
+                            ? JSON.stringify(selectedLog.newValue ?? selectedLog.new_value, null, 2)
+                            : String(selectedLog.newValue ?? selectedLog.new_value)}
                         </pre>
                       </div>
                     )}

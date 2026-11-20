@@ -1,5 +1,5 @@
-import { repo } from '../db/repository.ts';
-import { Booking, PaymentRecord, Expense, FolioCharge, GoogleReview } from '../../types.ts';
+import { repo } from '../db/repository';
+import { Booking, PaymentRecord, Expense, FolioCharge, GoogleReview } from '@/types';
 import { parseISO, isSameDay } from 'date-fns';
 import { PdfGenerationService } from './pdf-service';
 import { EmailDeliveryService } from './email-service';

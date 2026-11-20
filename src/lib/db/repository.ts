@@ -2974,10 +2974,10 @@ export class HotelRepository {
 
   getAuditLogs(category?: AuditActionCategory): AuditLogEntry[] {
     if (category) {
-      return this.auditLogs.filter((l) => l.entityType === category);
+      return this.auditLogs.filter((l) => (l.entityType || l.category) === category);
     }
     return [...this.auditLogs].sort(
-      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      (a, b) => new Date(b.timestamp || b.created_at || 0).getTime() - new Date(a.timestamp || a.created_at || 0).getTime()
     );
   }
 
@@ -3134,9 +3134,6 @@ export class HotelRepository {
     return [...this.gallery].sort((a, b) => a.display_order - b.display_order);
   }
 
-  getFolioCharges(): FolioCharge[] {
-    return [...this.folioCharges];
-  }
 
   // --- STAFF ---
   getStaff(): StaffMember[] {

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { NightAuditService } from '@/lib/services/night-audit-service';
-import { headers } from 'next/headers';
+export const dynamic = 'force-dynamic';
 
 const auditService = new NightAuditService();
 

@@ -856,27 +856,37 @@ export type AuditActionCategory =
   | 'accounting'
   | 'pricing'
   | 'maintenance'
-  | 'security';
+  | 'security'
+  | 'channel';
 
 export interface AuditLogEntry {
   id: string;
-  user_id: string;
-  user_name: string;
-  role: string;
   action: string;
-  category: AuditActionCategory;
-  entity_type: string;
-  entity_id: string;
+
+  // CamelCase fields (PMS / Repository)
+  timestamp?: string;
+  userId?: string;
+  userName?: string;
+  userRole?: string;
+  entityType?: AuditActionCategory;
+  entityId?: string;
+  details?: string;
+  previousValue?: any;
+  newValue?: any;
+  ipAddress?: string;
+
+  // Snake_case aliases (PostgreSQL / Audit API)
+  user_id?: string;
+  user_name?: string;
+  role?: string;
+  category?: AuditActionCategory;
+  entity_type?: string;
+  entity_id?: string;
   previous_value?: any;
   new_value?: any;
   ip_address?: string;
-  created_at: string;
+  created_at?: string;
 }
-  userRole: string;
-  action: string;
-  entityType: AuditActionCategory;
-  entityId: string;
-  details: string;
 
 // ==============================================================================
 // TIER-3: STAFF ATTENDANCE & SHIFT ROSTER

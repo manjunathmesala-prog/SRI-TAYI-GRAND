@@ -31,12 +31,12 @@ export async function GET(req: NextRequest) {
     if (search) {
       logs = logs.filter(
         (log) =>
-          log.action.toLowerCase().includes(search) ||
-          log.userName.toLowerCase().includes(search) ||
-          log.userRole.toLowerCase().includes(search) ||
-          log.entityId.toLowerCase().includes(search) ||
-          log.details.toLowerCase().includes(search) ||
-          log.entityType.toLowerCase().includes(search)
+          (log.action || '').toLowerCase().includes(search) ||
+          (log.userName || log.user_name || '').toLowerCase().includes(search) ||
+          (log.userRole || log.role || '').toLowerCase().includes(search) ||
+          (log.entityId || log.entity_id || '').toLowerCase().includes(search) ||
+          (log.details || '').toLowerCase().includes(search) ||
+          (log.entityType || log.entity_type || '').toLowerCase().includes(search)
       );
     }
 

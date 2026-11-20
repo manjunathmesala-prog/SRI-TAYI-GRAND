@@ -47,7 +47,7 @@ export class PdfGenerationService {
         doc.fontSize(16).text('Featured Guest Reviews');
         data.featuredReviews.forEach((review) => {
           doc.moveDown();
-          doc.fontSize(10).text(`"${review.excerpt || review.full_text}"`, { italic: true });
+          doc.fontSize(10).font('Helvetica-Oblique').text(`"${review.excerpt || review.full_text}"`).font('Helvetica');
           doc.fontSize(8).text(`- ${review.reviewer_name}`);
         });
       }
