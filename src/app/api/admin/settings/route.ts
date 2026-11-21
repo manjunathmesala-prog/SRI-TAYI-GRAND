@@ -27,9 +27,9 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager']);
+    const auth = verifyStaffRole(req, ['Super Admin']);
     if (!auth.authorized) {
-      return NextResponse.json({ success: false, error: auth.error || 'Access denied: Manager or Super Admin role required' }, { status: 403 });
+      return NextResponse.json({ success: false, error: auth.error || 'Access denied: Super Admin role required' }, { status: 403 });
     }
 
     const body = await req.json();

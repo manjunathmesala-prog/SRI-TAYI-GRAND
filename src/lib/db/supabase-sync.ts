@@ -24,6 +24,8 @@ import {
   JournalLine,
   NightAuditConfig,
   NightAuditRecipient,
+  StaffMember,
+  StaffRole,
 } from '@/types';
 import { normalizeCategoryId } from '@/lib/pricing';
 
@@ -68,8 +70,10 @@ export function getSupabasePgPool(): any {
     if (!connectionString) return null;
 
     // Automatic IPv4 remapping: If connection string points to IPv6-only direct host, route via active IPv4 pooler
-    if (connectionString.includes('db.goxgiohyshxzqzesernz.supabase.co') || connectionString.includes('db.wercvaimozbbkbwmuoct.supabase.co')) {
-      connectionString = `postgresql://${encodeURIComponent(user || '')}:${encodeURIComponent(password || '')}@aws-1-ap-northeast-2.pooler.supabase.com:5432/${database}`;
+    if (connectionString.includes('db.wercvaimozbbkbwmuoct.supabase.co')) {
+      connectionString = `postgresql://${encodeURIComponent(user || '')}:${encodeURIComponent(password || '')}@aws-0-ap-northeast-1.pooler.supabase.com:6543/${database}`;
+    } else if (connectionString.includes('db.goxgiohyshxzqzesernz.supabase.co')) {
+      connectionString = `postgresql://${encodeURIComponent(user || '')}:${encodeURIComponent(password || '')}@aws-1-ap-northeast-2.pooler.supabase.com:6543/${database}`;
     }
 
     poolInstance = new Pool({
@@ -403,11 +407,10 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
       client.release();
     }
   } catch (err: unknown) {
-    console.error(
-      `[SUPABASE BOOKING SYNC ERROR] (${booking.booking_reference}):`,
+    console.warn(
+      `[SUPABASE BOOKING SYNC WARN] (${booking.booking_reference}):`,
       err instanceof Error ? err.message : String(err)
     );
-    throw err;
   }
 }
 
@@ -1004,8 +1007,7 @@ export async function syncExpenseToSupabase(expense: Expense): Promise<void> {
       client.release();
     }
   } catch (err: unknown) {
-    console.error(`[SUPABASE EXPENSE SYNC ERROR] (${expense.id}):`, err instanceof Error ? err.message : String(err));
-    throw err;
+    console.warn(`[SUPABASE EXPENSE SYNC WARN] (${expense.id}):`, err instanceof Error ? err.message : String(err));
   }
 }
 
@@ -1146,8 +1148,7 @@ export async function syncHallEnquiryToSupabase(enquiry: HallEnquiry): Promise<v
       client.release();
     }
   } catch (err: unknown) {
-    console.error(`[SUPABASE HALL ENQUIRY SYNC ERROR] (${enquiry.id}):`, err instanceof Error ? err.message : String(err));
-    throw err;
+    console.warn(`[SUPABASE HALL ENQUIRY SYNC WARN] (${enquiry.id}):`, err instanceof Error ? err.message : String(err));
   }
 }
 
@@ -1261,8 +1262,7 @@ export async function syncConventionQuoteToSupabase(quote: ConventionQuote): Pro
       client.release();
     }
   } catch (err: unknown) {
-    console.error(`[SUPABASE CONVENTION QUOTE SYNC ERROR] (${quote.quote_number}):`, err instanceof Error ? err.message : String(err));
-    throw err;
+    console.warn(`[SUPABASE CONVENTION QUOTE SYNC WARN] (${quote.quote_number}):`, err instanceof Error ? err.message : String(err));
   }
 }
 
@@ -1542,8 +1542,7 @@ export async function syncCashShiftToSupabase(shift: CashShift): Promise<void> {
       client.release();
     }
   } catch (err: unknown) {
-    console.error(`[SUPABASE CASH SHIFT SYNC ERROR] (${shift.id}):`, err instanceof Error ? err.message : String(err));
-    throw err;
+    console.warn(`[SUPABASE CASH SHIFT SYNC WARN] (${shift.id}):`, err instanceof Error ? err.message : String(err));
   }
 }
 
@@ -1872,8 +1871,7 @@ export async function syncStaffAttendanceToSupabase(attendance: StaffAttendance)
       client.release();
     }
   } catch (err: unknown) {
-    console.error(`[SUPABASE ATTENDANCE SYNC ERROR] (${attendance.id}):`, err instanceof Error ? err.message : String(err));
-    throw err;
+    console.warn(`[SUPABASE ATTENDANCE SYNC WARN] (${attendance.id}):`, err instanceof Error ? err.message : String(err));
   }
 }
 
@@ -1913,6 +1911,66 @@ export async function loadStaffAttendanceFromSupabase(): Promise<StaffAttendance
     }
   } catch (err: unknown) {
     console.warn('[SUPABASE LOAD ATTENDANCE WARN]', err instanceof Error ? err.message : String(err));
+    return [];
+  }
+}
+
+export async function loadStaffFromSupabase(): Promise<StaffMember[]> {
+  if (typeof window !== 'undefined') return [];
+
+  const db = getSupabasePgPool();
+  if (!db) return [];
+
+  try {
+    const client = await db.connect();
+    try {
+      const res = await client.query(`
+        SELECT 
+          p.id,
+          p.full_name,
+          u.email,
+          p.phone,
+          r.name as role_name,
+          p.is_active,
+          p.last_login_at
+        FROM profiles p
+        LEFT JOIN roles r ON p.role_id = r.id
+        LEFT JOIN auth.users u ON p.id = u.id
+        WHERE p.is_active = true
+        ORDER BY p.created_at ASC;
+      `);
+
+      if (!res.rows || res.rows.length === 0) return [];
+
+      return res.rows.map((row: any) => {
+        const role = (row.role_name || 'Front Desk') as StaffRole;
+        const isManager = role === 'Hotel Manager';
+        const isAdmin = role === 'Super Admin';
+
+        return {
+          id: row.id,
+          full_name: row.full_name,
+          email: row.email || `${row.full_name.toLowerCase().replace(/[^a-z0-9]/g, '')}@sritayigrand.com`,
+          phone: row.phone || '',
+          role,
+          department: isManager ? 'Hotel Operations & Management' : isAdmin ? 'Executive Management' : 'Front Desk & Reception',
+          is_active: row.is_active !== false,
+          last_login: row.last_login_at ? new Date(row.last_login_at).toISOString() : new Date().toISOString(),
+          permissions: {
+            can_override_rates: isAdmin || isManager,
+            can_process_refunds: isAdmin || isManager,
+            can_view_accounting: isAdmin || isManager,
+            can_encode_rfid: true,
+            can_run_night_audit: isAdmin || isManager,
+            can_manage_inventory: true,
+          },
+        };
+      });
+    } finally {
+      client.release();
+    }
+  } catch (err: unknown) {
+    console.warn('[SUPABASE LOAD STAFF WARN]', err instanceof Error ? err.message : String(err));
     return [];
   }
 }
@@ -2054,8 +2112,7 @@ export async function syncFolioChargeToSupabase(charge: FolioCharge): Promise<vo
       client.release();
     }
   } catch (err: unknown) {
-    console.error(`[SUPABASE FOLIO CHARGE SYNC ERROR] (${charge.id}):`, err instanceof Error ? err.message : String(err));
-    throw err;
+    console.warn(`[SUPABASE FOLIO CHARGE SYNC WARN] (${charge.id}):`, err instanceof Error ? err.message : String(err));
   }
 }
 
@@ -2139,17 +2196,12 @@ export async function syncAuditLogToSupabase(log: AuditLogEntry): Promise<void> 
     try {
       await client.query(
         `INSERT INTO audit_logs (
-          log_id, action, entity_name, entity_id, user_name, user_role, category, details, ip_address, created_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);`,
+          action, entity_name, entity_id, ip_address, created_at
+        ) VALUES ($1, $2, $3, $4, $5);`,
         [
-          log.id,
           log.action,
           log.entityType || 'SYSTEM',
           log.entityId || null,
-          log.userName || 'Admin',
-          log.userRole || 'admin',
-          log.entityType || 'SECURITY',
-          log.details || null,
           log.ipAddress || '127.0.0.1',
           log.timestamp || new Date().toISOString(),
         ]
@@ -2158,8 +2210,7 @@ export async function syncAuditLogToSupabase(log: AuditLogEntry): Promise<void> 
       client.release();
     }
   } catch (err: unknown) {
-    console.error(`[SUPABASE AUDIT LOG SYNC ERROR] (${log.id}):`, err instanceof Error ? err.message : String(err));
-    throw err;
+    console.warn(`[SUPABASE AUDIT LOG SYNC WARN] (${log.id}):`, err instanceof Error ? err.message : String(err));
   }
 }
 
@@ -2174,15 +2225,11 @@ export async function loadAuditLogsFromSupabase(): Promise<AuditLogEntry[]> {
     try {
       const res = await client.query(`
         SELECT 
-          COALESCE(log_id, id::text) as id,
+          id::text as id,
           action,
           COALESCE(entity_name, 'SYSTEM') as entity_type,
           entity_id,
-          COALESCE(user_name, 'Admin') as user_name,
-          COALESCE(user_role, 'admin') as user_role,
-          COALESCE(category, 'SECURITY') as category,
-          details,
-          ip_address,
+          COALESCE(ip_address, '127.0.0.1') as ip_address,
           created_at
         FROM audit_logs
         ORDER BY created_at DESC
@@ -2193,12 +2240,12 @@ export async function loadAuditLogsFromSupabase(): Promise<AuditLogEntry[]> {
         id: row.id,
         timestamp: row.created_at ? new Date(row.created_at).toISOString() : new Date().toISOString(),
         userId: 'admin-user',
-        userName: row.user_name,
-        userRole: row.user_role,
+        userName: 'Admin',
+        userRole: 'admin',
         action: row.action,
         entityType: row.entity_type as any,
         entityId: row.entity_id || 'system',
-        details: row.details || '',
+        details: '',
         ipAddress: row.ip_address || '127.0.0.1',
       }));
     } finally {
@@ -2588,14 +2635,12 @@ export async function syncJournalEntryToSupabase(entry: JournalEntry): Promise<v
       await client.query('COMMIT');
     } catch (err: unknown) {
       await client.query('ROLLBACK').catch(() => {});
-      console.error(`[SUPABASE JOURNAL SYNC ERROR] (${entry.id}):`, err instanceof Error ? err.message : String(err));
-      throw err;
+      console.warn(`[SUPABASE JOURNAL SYNC WARN] (${entry.id}):`, err instanceof Error ? err.message : String(err));
     } finally {
       client.release();
     }
   } catch (err: unknown) {
-    console.error(`[SUPABASE JOURNAL SYNC POOL ERROR] (${entry.id}):`, err instanceof Error ? err.message : String(err));
-    throw err;
+    console.warn(`[SUPABASE JOURNAL SYNC POOL WARN] (${entry.id}):`, err instanceof Error ? err.message : String(err));
   }
 }
 
@@ -2718,8 +2763,7 @@ export async function syncGuestToSupabase(guest: Partial<Guest>): Promise<void> 
       }
     }
   } catch (err: any) {
-    console.error('[SUPABASE GUEST SYNC ERROR]:', err.message);
-    throw err;
+    console.warn('[SUPABASE GUEST SYNC WARN]:', err.message);
   } finally {
     client.release();
   }

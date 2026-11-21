@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
     const date = searchParams.get('date') || new Date().toISOString().split('T')[0];
 
     await repo.ensureStaffAttendanceLoaded();
+    await repo.ensureStaffLoaded();
     const attendance = repo.getStaffAttendance(date);
     const staff = repo.getStaff();
 

@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager']);
+    const auth = verifyStaffRole(req, ['Super Admin']);
     if (!auth.authorized) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
     }
@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
 
 export async function PATCH(req: NextRequest) {
   try {
-    const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager']);
+    const auth = verifyStaffRole(req, ['Super Admin']);
     if (!auth.authorized) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
     }
@@ -151,7 +151,7 @@ export async function PATCH(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
-    const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager']);
+    const auth = verifyStaffRole(req, ['Super Admin']);
     if (!auth.authorized) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
     }

@@ -93,6 +93,7 @@ import {
   loadDailyClosingsFromSupabase,
   syncStaffAttendanceToSupabase,
   loadStaffAttendanceFromSupabase,
+  loadStaffFromSupabase,
   syncContactEnquiryToSupabase,
   loadContactEnquiriesFromSupabase,
   syncFolioChargeToSupabase,
@@ -3011,7 +3012,9 @@ export class HotelRepository {
       newValue: params.newValue,
     };
     this.auditLogs.unshift(entry);
-    syncAuditLogToSupabase(entry);
+    syncAuditLogToSupabase(entry).catch((err) => {
+      console.warn('[SUPABASE AUDIT SYNC NON-FATAL]', err?.message || err);
+    });
     this.broadcastEvent('audit_log_created', entry, entry.userName);
     return entry;
   }
@@ -4982,6 +4985,25 @@ export class HotelRepository {
     }
   }
 
+  async ensureStaffLoaded(): Promise<void> {
+    try {
+      const pgStaff = await loadStaffFromSupabase();
+      if (pgStaff && pgStaff.length > 0) {
+        const staffMap = new Map(this.staff.map((s) => [s.email.toLowerCase(), s]));
+        for (const s of pgStaff) {
+          staffMap.set(s.email.toLowerCase(), {
+            ...(staffMap.get(s.email.toLowerCase()) || {}),
+            ...s,
+          });
+        }
+        this.staff = Array.from(staffMap.values());
+        savePersistedData('staff.json', this.staff);
+      }
+    } catch (err) {
+      console.warn('[ENSURE STAFF LOAD WARN]', err);
+    }
+  }
+
   async ensureContactEnquiriesLoaded(): Promise<void> {
     try {
       const pgC = await loadContactEnquiriesFromSupabase();
@@ -5034,6 +5056,7 @@ export class HotelRepository {
       this.ensureConventionQuotesLoaded(),
       this.ensureGuestsLoaded(),
       this.ensureStaffAttendanceLoaded(),
+      this.ensureStaffLoaded(),
       this.ensureContactEnquiriesLoaded(),
       this.ensureFolioChargesLoaded(),
       this.ensureAuditLogsLoaded(),

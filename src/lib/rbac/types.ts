@@ -214,10 +214,15 @@ export const ROLE_PERMISSIONS: Record<RoleEnum, readonly Permission[]> = {
   ],
 
   MANAGER: [
-    // Manager has operational oversight, cannot do destructive hard deletes or system infrastructure
+    // Manager has full operational, accounting, inventory, and attendance oversight
     'users:read',
-    'users:update', // Can update staff details, but cannot create/delete super admins
     'accounting:read',
+    'accounting:create_journal',
+    'accounting:close_period',
+    'accounting:export',
+    'billing:read',
+    'billing:update',
+    'billing:view_revenue',
     'bookings:read',
     'bookings:create',
     'bookings:update',
@@ -252,7 +257,6 @@ export const ROLE_PERMISSIONS: Record<RoleEnum, readonly Permission[]> = {
     'rfid:issue_master',
     'rfid:deactivate',
     'reports:read_operational',
-    'reports:export',
   ],
 
   STAFF: [
@@ -281,19 +285,29 @@ export const ROLE_PERMISSIONS: Record<RoleEnum, readonly Permission[]> = {
  * Route to Required Role / Permission Mapping
  */
 export const ROUTE_ACCESS_RULES: { path: string; exact?: boolean; minRole: RoleEnum }[] = [
+  // Super Admin Exclusive (Restricted from Managers Hari Achari & Sagar)
   { path: '/admin/settings', minRole: 'SUPER_ADMIN' },
   { path: '/admin/audit-logs', minRole: 'SUPER_ADMIN' },
-  { path: '/admin/pricing', minRole: 'MANAGER' },
-  { path: '/admin/channels', minRole: 'MANAGER' },
-  { path: '/admin/staff', minRole: 'MANAGER' },
-  { path: '/admin/reports', minRole: 'MANAGER' },
-  { path: '/admin/analytics', minRole: 'MANAGER' },
+  { path: '/admin/analytics', minRole: 'SUPER_ADMIN' },
+  { path: '/admin/reports', minRole: 'SUPER_ADMIN' },
+  { path: '/admin/pricing', minRole: 'SUPER_ADMIN' },
+  { path: '/admin/channels', minRole: 'SUPER_ADMIN' },
+  { path: '/admin/content', minRole: 'SUPER_ADMIN' },
+  { path: '/admin/staff', exact: true, minRole: 'SUPER_ADMIN' },
+
+  // Hotel Manager Full Operational Access (Hari Achari & Sagar)
+  { path: '/admin/staff/attendance', minRole: 'MANAGER' },
   { path: '/admin/accounting', minRole: 'MANAGER' },
-  { path: '/admin/payments', minRole: 'MANAGER' },
-  { path: '/admin/daily-closing', minRole: 'MANAGER' },
   { path: '/admin/expenses', minRole: 'MANAGER' },
   { path: '/admin/rooms/categories', minRole: 'MANAGER' },
-  // Front Desk, Bookings, Guests, Housekeeping, Maintenance, RFID accessible to Staff
+  { path: '/admin/daily-closing', minRole: 'MANAGER' },
+  { path: '/admin/night-audit', minRole: 'MANAGER' },
+  { path: '/admin/convention-hall', minRole: 'MANAGER' },
+  { path: '/admin/enquiries', minRole: 'MANAGER' },
+  { path: '/admin/payments', minRole: 'MANAGER' },
+  { path: '/admin/cashbook', minRole: 'MANAGER' },
+
+  // Operational Front Desk (Staff, Managers, Super Admin)
   { path: '/admin/front-desk', minRole: 'STAFF' },
   { path: '/admin/walk-in', minRole: 'STAFF' },
   { path: '/admin/bookings', minRole: 'STAFF' },
@@ -302,11 +316,8 @@ export const ROUTE_ACCESS_RULES: { path: string; exact?: boolean; minRole: RoleE
   { path: '/admin/rooms/inventory', minRole: 'STAFF' },
   { path: '/admin/housekeeping', minRole: 'STAFF' },
   { path: '/admin/maintenance', minRole: 'STAFF' },
-  { path: '/admin/convention-hall', minRole: 'STAFF' },
-  { path: '/admin/enquiries', minRole: 'STAFF' },
   { path: '/admin/rfid', minRole: 'STAFF' },
   { path: '/admin/reviews', minRole: 'STAFF' },
-  { path: '/admin/cashbook', minRole: 'STAFF' },
   { path: '/admin/dashboard', minRole: 'STAFF' },
 ];
 

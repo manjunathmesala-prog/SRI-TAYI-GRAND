@@ -384,6 +384,42 @@ export const INITIAL_STAFF: StaffMember[] = [
     }
   },
   { 
+    id: 'stf-hari', 
+    full_name: 'Hari Achari', 
+    email: 'hari@sritayigrand.com', 
+    phone: '9440812346', 
+    role: 'Hotel Manager', 
+    department: 'Hotel Operations & Management',
+    is_active: true, 
+    last_login: '2026-11-22T08:00:00+05:30',
+    permissions: {
+      can_override_rates: true,
+      can_process_refunds: true,
+      can_view_accounting: true,
+      can_encode_rfid: true,
+      can_run_night_audit: true,
+      can_manage_inventory: true
+    }
+  },
+  { 
+    id: 'stf-sagar', 
+    full_name: 'Sagar', 
+    email: 'sagar@sritayigrand.com', 
+    phone: '9440812347', 
+    role: 'Hotel Manager', 
+    department: 'Hotel Operations & Management',
+    is_active: true, 
+    last_login: '2026-11-22T08:00:00+05:30',
+    permissions: {
+      can_override_rates: true,
+      can_process_refunds: true,
+      can_view_accounting: true,
+      can_encode_rfid: true,
+      can_run_night_audit: true,
+      can_manage_inventory: true
+    }
+  },
+  { 
     id: 'stf-03', 
     full_name: 'B. Lakshmi Devi', 
     email: 'frontdesk@sritayigrand.com', 

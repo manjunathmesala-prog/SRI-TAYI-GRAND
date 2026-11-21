@@ -12,6 +12,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
     }
 
+    await repo.ensureStaffLoaded();
     const staff = repo.getStaff();
     return NextResponse.json({
       success: true,
@@ -25,7 +26,7 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager']);
+    const auth = verifyStaffRole(req, ['Super Admin']);
     if (!auth.authorized) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
     }

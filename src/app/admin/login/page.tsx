@@ -45,19 +45,30 @@ const PRESET_ACCOUNTS = [
     scopeTe: 'పూర్తి అపరిమిత యాక్సెస్ • సెట్టింగులు • ఆడిట్ లాగ్స్ • P&L',
   },
   {
-    roleId: 'MANAGER',
-    roleLabel: 'Hotel Manager',
-    roleLabelTe: 'హోటల్ మేనేజర్',
-    name: 'G. Mohan Kumar',
-    email: 'manager@sritayigrand.com',
+    roleId: 'HARI',
+    roleLabel: 'Manager Hari',
+    roleLabelTe: 'మేనేజర్ హరి ఆచారి',
+    name: 'Hari Achari',
+    email: 'hari@sritayigrand.com',
     icon: Briefcase,
     badgeColor: 'bg-purple-100 text-purple-900 border-purple-300',
-    scopeEn: 'Operations • Reservations • Housekeeping • Staff • Reports',
-    scopeTe: 'కార్యకలాపాలు • రిజర్వేషన్లు • గదుల శుభ్రత • సిబ్బంది • నివేదికలు',
+    scopeEn: 'Operations • ERP • Expenses • Attendance • Night Audit',
+    scopeTe: 'కార్యకలాపాలు • ERP • ఖర్చులు • హాజరు • నైట్ ఆడిట్',
+  },
+  {
+    roleId: 'SAGAR',
+    roleLabel: 'Manager Sagar',
+    roleLabelTe: 'మేనేజర్ సాగర్',
+    name: 'Sagar',
+    email: 'sagar@sritayigrand.com',
+    icon: Briefcase,
+    badgeColor: 'bg-purple-100 text-purple-900 border-purple-300',
+    scopeEn: 'Operations • ERP • Expenses • Attendance • Night Audit',
+    scopeTe: 'కార్యకలాపాలు • ERP • ఖర్చులు • హాజరు • నైట్ ఆడిట్',
   },
   {
     roleId: 'STAFF',
-    roleLabel: 'Front Desk Staff',
+    roleLabel: 'Front Desk',
     roleLabelTe: 'రిసెప్షన్ సిబ్బంది',
     name: 'Sri Tayi Grand Staff',
     email: 'staff@sritayigrand.com',
@@ -214,11 +225,11 @@ function AdminLoginContent() {
               <span>{isTelugu ? 'ఖాతాను ఎంచుకోండి' : 'Select Staff Account'}</span>
             </div>
             <span className="text-[10px] text-white/60 uppercase tracking-widest font-mono">
-              {isTelugu ? '3 పాత్రలు అందుబాటులో ఉన్నాయి' : 'Password required'}
+              {isTelugu ? '4 ఖాతాలు అందుబాటులో ఉన్నాయి' : 'Select role to pre-fill'}
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-2.5">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
             {PRESET_ACCOUNTS.map((preset) => {
               const isSelected = activePreset === preset.roleId;
               const Icon = preset.icon;

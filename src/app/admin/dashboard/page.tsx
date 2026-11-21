@@ -366,7 +366,54 @@ export default function AdminDashboardPage() {
       ];
     }
 
-    // Manager and Super Admin Shortcuts
+    if (isManager) {
+      return [
+        {
+          title: t('frontDesk.title', 'Walk-In & Front Desk'),
+          subtitle: isTelugu ? 'వాక్-ఇన్, కీకార్డులు & ఫోలియోలు' : 'Walk-in registration & room folios',
+          href: '/admin/front-desk',
+          icon: ConciergeBell,
+          color: 'text-[#8D672F] bg-[#B18A4A]/10 group-hover:bg-[#8D672F] group-hover:text-white',
+        },
+        {
+          title: isTelugu ? 'సిబ్బంది హాజరు & షిఫ్ట్‌లు' : 'Staff Attendance (Clock In/Out)',
+          subtitle: isTelugu ? 'రోజువారీ హాజరు & పని గంటలు' : 'Clock-in, clock-out & roster shifts',
+          href: '/admin/staff/attendance',
+          icon: Users,
+          color: 'text-[#2E7D32] bg-emerald-50 group-hover:bg-[#2E7D32] group-hover:text-white',
+        },
+        {
+          title: isTelugu ? 'నిర్వహణ ఖర్చులు' : 'Operating Expenditure',
+          subtitle: isTelugu ? 'హోటల్ రోజువారీ ఖర్చులు & వోచర్లు' : 'Daily expenses & cashbook vouchers',
+          href: '/admin/expenses',
+          icon: CreditCard,
+          color: 'text-[#C62828] bg-rose-50 group-hover:bg-[#C62828] group-hover:text-white',
+        },
+        {
+          title: isTelugu ? 'కన్వెన్షన్ హాల్ & ఈవెంట్లు' : 'Convention Hall & Functions',
+          subtitle: isTelugu ? 'ఈవెంట్ బుకింగ్‌లు & విచారణలు' : 'Function hall bookings & banquet leads',
+          href: '/admin/convention-hall',
+          icon: Building,
+          color: 'text-[#E65100] bg-amber-50 group-hover:bg-[#E65100] group-hover:text-white',
+        },
+        {
+          title: isTelugu ? 'నైట్ ఆడిట్ & రోజువారీ క్లోజింగ్' : 'Night Audit & Daily Closing',
+          subtitle: isTelugu ? 'షిఫ్ట్ ముగింపు & లెడ్జర్ లాక్' : 'Shift reconcile & lock financial day',
+          href: '/admin/daily-closing',
+          icon: FileText,
+          color: 'text-[#1565C0] bg-blue-50 group-hover:bg-[#1565C0] group-hover:text-white',
+        },
+        {
+          title: isTelugu ? 'జనరల్ లెడ్జర్ ERP' : 'General Ledger Accounting',
+          subtitle: isTelugu ? 'జర్నల్ ఎంట్రీలు & ఖాతాలు' : 'ERP accounts & journal entries',
+          href: '/admin/accounting',
+          icon: TrendingUp,
+          color: 'text-[#6A1B9A] bg-purple-50 group-hover:bg-[#6A1B9A] group-hover:text-white',
+        },
+      ];
+    }
+
+    // Super Admin Exclusive Shortcuts
     return [
       {
         title: t('frontDesk.title', 'Front Desk Operations'),
@@ -376,24 +423,17 @@ export default function AdminDashboardPage() {
         color: 'text-[#8D672F] bg-[#B18A4A]/10 group-hover:bg-[#8D672F] group-hover:text-white',
       },
       {
-        title: t('payments.title', 'Financial Ledger & Expenses'),
-        subtitle: isTelugu ? 'కౌంటర్ వసూళ్లు & రోజువారీ ఖర్చులు' : 'Collections, ledger & cashbook',
-        href: '/admin/payments',
-        icon: CreditCard,
-        color: 'text-[#2E7D32] bg-emerald-50 group-hover:bg-[#2E7D32] group-hover:text-white',
-      },
-      {
-        title: isTelugu ? 'రోజువారీ షిఫ్ట్ క్లోజింగ్ & ఆడిట్' : 'Night Audit & Daily Closing',
-        subtitle: isTelugu ? 'షిఫ్ట్ ముగింపు & లెడ్జర్ లాక్' : 'Shift reconcile & lock financial day',
-        href: '/admin/daily-closing',
-        icon: FileText,
+        title: isTelugu ? 'ఎగ్జిక్యూటివ్ అనలిటిక్స్' : 'Executive Analytics & RevPAR',
+        subtitle: isTelugu ? 'ఆదాయ విశ్లేషణ & ఈల్డ్ పోకడలు' : 'Yield, ADR, RevPAR & monthly trajectory',
+        href: '/admin/analytics',
+        icon: TrendingUp,
         color: 'text-[#1565C0] bg-blue-50 group-hover:bg-[#1565C0] group-hover:text-white',
       },
       {
         title: isTelugu ? 'జనరల్ లెడ్జర్ ERP' : 'General Ledger Accounting',
         subtitle: isTelugu ? 'జర్నల్ ఎంట్రీలు & GST నివేదికలు' : 'ERP accounts & financial export',
         href: '/admin/accounting',
-        icon: TrendingUp,
+        icon: CreditCard,
         color: 'text-[#6A1B9A] bg-purple-50 group-hover:bg-[#6A1B9A] group-hover:text-white',
       },
       {
@@ -402,6 +442,13 @@ export default function AdminDashboardPage() {
         href: '/admin/pricing',
         icon: Building,
         color: 'text-[#E65100] bg-amber-50 group-hover:bg-[#E65100] group-hover:text-white',
+      },
+      {
+        title: isTelugu ? 'సిస్టమ్ సెట్టింగ్‌లు & API' : 'Hotel Master Settings',
+        subtitle: isTelugu ? 'సిస్టమ్ కన్ఫిగరేషన్ & గేట్‌వే' : 'Hotel settings, cloud & integrations',
+        href: '/admin/settings',
+        icon: ShieldCheck,
+        color: 'text-[#2E7D32] bg-emerald-50 group-hover:bg-[#2E7D32] group-hover:text-white',
       },
     ];
   };

@@ -41,6 +41,22 @@ export const DEFAULT_CREDENTIALS = {
     badge: 'Hotel Manager',
     description: 'Operational Lead (Bookings, Guests, Operations, Soft-delete)',
   },
+  hari: {
+    email: 'hari@sritayigrand.com',
+    password: process.env.HARI_PASSWORD || process.env.MANAGER_PASSWORD || (isProduction ? '' : 'GrandHotel@Kadiri2026!'),
+    role: 'Hotel Manager' as StaffRole,
+    name: 'Hari Achari',
+    badge: 'Hotel Manager',
+    description: 'Operational Manager (Walk-ins, Sales, Expenses, General Ledger ERP, Attendance, Night Audit)',
+  },
+  sagar: {
+    email: 'sagar@sritayigrand.com',
+    password: process.env.SAGAR_PASSWORD || process.env.MANAGER_PASSWORD || (isProduction ? '' : 'GrandHotel@Kadiri2026!'),
+    role: 'Hotel Manager' as StaffRole,
+    name: 'Sagar',
+    badge: 'Hotel Manager',
+    description: 'Operational Manager (Walk-ins, Sales, Expenses, General Ledger ERP, Attendance, Night Audit)',
+  },
   staff: {
     email: 'staff@sritayigrand.com',
     password: process.env.STAFF_PASSWORD || (isProduction ? '' : 'GrandHotel@Kadiri2026!'),
@@ -59,6 +75,14 @@ export const ROLE_CREDENTIALS: Record<string, { role: StaffRole; expectedPasswor
   'manager@sritayigrand.com': {
     role: 'Hotel Manager',
     expectedPassword: process.env.MANAGER_PASSWORD || (isProduction ? '' : 'GrandHotel@Kadiri2026!'),
+  },
+  'hari@sritayigrand.com': {
+    role: 'Hotel Manager',
+    expectedPassword: process.env.HARI_PASSWORD || process.env.MANAGER_PASSWORD || (isProduction ? '' : 'GrandHotel@Kadiri2026!'),
+  },
+  'sagar@sritayigrand.com': {
+    role: 'Hotel Manager',
+    expectedPassword: process.env.SAGAR_PASSWORD || process.env.MANAGER_PASSWORD || (isProduction ? '' : 'GrandHotel@Kadiri2026!'),
   },
   'staff@sritayigrand.com': {
     role: 'Front Desk',
