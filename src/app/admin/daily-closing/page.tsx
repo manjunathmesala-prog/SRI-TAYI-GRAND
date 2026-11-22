@@ -18,6 +18,8 @@ import {
   CreditCard,
   ShieldCheck,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Printer,
   FileCheck,
   BedDouble,
@@ -106,8 +108,17 @@ export default function AdminDailyClosingPage() {
   // New recipient form state
   const [showAddRecipientModal, setShowAddRecipientModal] = useState(false);
   const [newRecipientName, setNewRecipientName] = useState('');
+  const [newRecipientRole, setNewRecipientRole] = useState('General Manager');
   const [newRecipientChannel, setNewRecipientChannel] = useState<'email' | 'whatsapp'>('email');
   const [newRecipientAddress, setNewRecipientAddress] = useState('');
+
+  // Preview & Production Dispatch state
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [previewData, setPreviewData] = useState<any>(null);
+  const [dispatchingOfficial, setDispatchingOfficial] = useState(false);
+  const [retryingLogId, setRetryingLogId] = useState<string | null>(null);
+  const [expandedRunId, setExpandedRunId] = useState<string | null>(null);
 
   // Night Audit History & Channel Health state
   const [auditRuns, setAuditRuns] = useState<any[]>([]);
@@ -261,6 +272,7 @@ export default function AdminDailyClosingPage() {
       id: `rec-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       name: newRecipientName.trim(),
       recipient_name: newRecipientName.trim(),
+      role: newRecipientRole || 'General Manager',
       channel: newRecipientChannel,
       address: cleanAddr,
       recipient_address: cleanAddr,
@@ -283,6 +295,7 @@ export default function AdminDailyClosingPage() {
     handleSaveAuditConfig(updated);
     setNewRecipientName('');
     setNewRecipientAddress('');
+    setNewRecipientRole('General Manager');
     setShowAddRecipientModal(false);
   };
 
@@ -298,14 +311,101 @@ export default function AdminDailyClosingPage() {
     handleSaveAuditConfig(updated);
   };
 
-  const handleDeleteRecipient = (id: string) => {
-    if (!auditConfig) return;
-    const updated = {
-      ...auditConfig,
-      recipients: auditConfig.recipients.filter((r) => r.id !== id),
-    };
-    setAuditConfig(updated);
-    handleSaveAuditConfig(updated);
+  const handleDeleteRecipient = async (id: string) => {
+    if (!confirm('Are you sure you want to remove this report recipient?')) return;
+    if (auditConfig) {
+      const updated = {
+        ...auditConfig,
+        recipients: auditConfig.recipients.filter((r) => r.id !== id),
+      };
+      setAuditConfig(updated);
+      handleSaveAuditConfig(updated);
+    }
+    try {
+      await fetch(`/api/admin/night-audit/settings?recipientId=${encodeURIComponent(id)}`, {
+        method: 'DELETE',
+        headers: getAdminHeaders(),
+      });
+      fetchAuditConfig();
+    } catch (err: any) {
+      console.warn('Failed to delete recipient from cloud DB', err);
+    }
+  };
+
+  const handlePreviewAudit = async () => {
+    try {
+      setPreviewLoading(true);
+      const res = await fetch(`/api/admin/night-audit/preview?businessDate=${businessDate}`, {
+        headers: getAdminHeaders(),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setPreviewData(data.data);
+        setShowPreviewModal(true);
+      } else {
+        setFeedback({ type: 'error', message: data.error || 'Failed to generate preview.' });
+      }
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err.message || 'Error generating preview.' });
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handleDispatchOfficialAudit = async () => {
+    if (!confirm(`Confirm dispatch of official Night Audit report for ${businessDate} to all active stakeholders?`)) return;
+    try {
+      setDispatchingOfficial(true);
+      const res = await fetch('/api/admin/night-audit/execute', {
+        method: 'POST',
+        headers: {
+          ...getAdminHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          businessDate,
+          runType: 'manual',
+          forceReaudit: true,
+          triggeredBy: closedByName ? `${closedByName} (Manager On-Demand)` : 'Manager On-Demand',
+        }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setFeedback({ type: 'success', message: `Official Night Audit dispatched for ${businessDate}.` });
+        fetchAuditRuns();
+      } else {
+        setFeedback({ type: 'error', message: data.error || 'Failed to dispatch official audit.' });
+      }
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err.message || 'Error during official dispatch.' });
+    } finally {
+      setDispatchingOfficial(false);
+    }
+  };
+
+  const handleRetryDispatch = async (dispatchLogId: string) => {
+    try {
+      setRetryingLogId(dispatchLogId);
+      const res = await fetch('/api/admin/night-audit/retry', {
+        method: 'POST',
+        headers: {
+          ...getAdminHeaders(),
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ dispatchLogId }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setFeedback({ type: 'success', message: 'Delivery retry succeeded!' });
+        fetchAuditRuns();
+      } else {
+        setFeedback({ type: 'error', message: data.error || data.message || 'Retry failed.' });
+      }
+    } catch (err: any) {
+      setFeedback({ type: 'error', message: err.message || 'Network error retrying delivery.' });
+    } finally {
+      setRetryingLogId(null);
+    }
   };
 
   const fetchClosingData = useCallback(async () => {
@@ -1308,20 +1408,41 @@ export default function AdminDailyClosingPage() {
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center gap-3 shrink-0">
+              <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={handlePreviewAudit}
+                  disabled={previewLoading}
+                  className="px-3.5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-[#FAF7F2] font-semibold text-xs tracking-wide transition-all flex items-center gap-1.5 border border-white/20 disabled:opacity-50"
+                  title="Preview live real-time audit calculations without saving or dispatching"
+                >
+                  <Eye className={`w-3.5 h-3.5 text-[#D8AD56] ${previewLoading ? 'animate-spin' : ''}`} />
+                  <span>{previewLoading ? 'Inspecting...' : 'Preview Live Audit'}</span>
+                </button>
                 <button
                   type="button"
                   onClick={handleTriggerTestAudit}
                   disabled={testSending}
-                  className="px-4 py-2.5 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white font-semibold text-xs tracking-wide shadow-md hover:shadow-lg transition-all flex items-center gap-2 border border-[#D8AD56]/40 disabled:opacity-50"
+                  className="px-3.5 py-2.5 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white font-semibold text-xs tracking-wide shadow-md transition-all flex items-center gap-1.5 border border-[#D8AD56]/40 disabled:opacity-50"
+                  title="Sends watermarked test report to verify delivery channels"
                 >
                   <Send className={`w-3.5 h-3.5 ${testSending ? 'animate-spin' : ''}`} />
-                  <span>{testSending ? 'Generating & Sending...' : 'Send Test Report Now'}</span>
+                  <span>{testSending ? 'Sending Test...' : 'Send Test Report'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDispatchOfficialAudit}
+                  disabled={dispatchingOfficial}
+                  className="px-3.5 py-2.5 rounded-xl bg-emerald-800 hover:bg-emerald-700 text-white font-semibold text-xs tracking-wide shadow-md transition-all flex items-center gap-1.5 border border-emerald-500/50 disabled:opacity-50"
+                  title="Executes official end-of-day audit and dispatches official PDF certificate"
+                >
+                  <CheckCircle2 className={`w-3.5 h-3.5 text-emerald-300 ${dispatchingOfficial ? 'animate-spin' : ''}`} />
+                  <span>{dispatchingOfficial ? 'Dispatching...' : 'Dispatch Official Report'}</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setShowAddRecipientModal(true)}
-                  className="px-4 py-2.5 rounded-xl bg-[#D8AD56] hover:bg-[#c99f48] text-[#241912] font-bold text-xs tracking-wide shadow-md transition-all flex items-center gap-1.5"
+                  className="px-3.5 py-2.5 rounded-xl bg-[#D8AD56] hover:bg-[#c99f48] text-[#241912] font-bold text-xs tracking-wide shadow-md transition-all flex items-center gap-1.5"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Add Recipient</span>
@@ -1585,15 +1706,37 @@ export default function AdminDailyClosingPage() {
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-[#EFE3D6]">
+              <div className="pt-4 border-t border-[#EFE3D6] space-y-2.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={handlePreviewAudit}
+                    disabled={previewLoading}
+                    className="py-2.5 px-3 rounded-xl bg-[#FAF7F2] border border-[#EFE3D6] hover:bg-[#EFE3D6] text-[#241912] font-bold text-xs tracking-wide transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  >
+                    <Eye className={`w-3.5 h-3.5 text-[#D8AD56] ${previewLoading ? 'animate-spin' : ''}`} />
+                    <span>{previewLoading ? 'Inspecting Live Data...' : 'Preview Live Data'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleDispatchOfficialAudit}
+                    disabled={dispatchingOfficial}
+                    className="py-2.5 px-3 rounded-xl bg-emerald-800 hover:bg-emerald-700 text-white font-bold text-xs tracking-wide shadow-sm transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                  >
+                    <CheckCircle2 className={`w-3.5 h-3.5 ${dispatchingOfficial ? 'animate-spin' : ''}`} />
+                    <span>{dispatchingOfficial ? 'Dispatching Official...' : 'Dispatch Official Report'}</span>
+                  </button>
+                </div>
+
                 <button
                   type="button"
                   onClick={handleTriggerTestAudit}
                   disabled={testSending}
-                  className="w-full py-3 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                  className="w-full py-2.5 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                 >
-                  <Send className={`w-4 h-4 ${testSending ? 'animate-spin' : ''}`} />
-                  <span>{testSending ? 'Compiling PDF & Delivering...' : 'Dispatch Test Report to Active Recipients'}</span>
+                  <Send className={`w-3.5 h-3.5 ${testSending ? 'animate-spin' : ''}`} />
+                  <span>{testSending ? 'Compiling PDF & Delivering...' : 'Dispatch Test Report (Watermarked)'}</span>
                 </button>
               </div>
             </div>
@@ -1627,6 +1770,7 @@ export default function AdminDailyClosingPage() {
                 <thead className="bg-[#FAF7F2] text-[#786A5B] font-semibold uppercase tracking-wider border-b border-[#EFE3D6]">
                   <tr>
                     <th className="py-3 px-4">Recipient Name</th>
+                    <th className="py-3 px-4">Role / Stakeholder</th>
                     <th className="py-3 px-4">Delivery Channel</th>
                     <th className="py-3 px-4">Email / Phone Destination</th>
                     <th className="py-3 px-4">Status</th>
@@ -1636,7 +1780,7 @@ export default function AdminDailyClosingPage() {
                 <tbody className="divide-y divide-[#EFE3D6]">
                   {(!auditConfig?.recipients || auditConfig.recipients.length === 0) ? (
                     <tr>
-                      <td colSpan={5} className="py-8 text-center text-xs text-[#786A5B]">
+                      <td colSpan={6} className="py-8 text-center text-xs text-[#786A5B]">
                         No recipients added yet. Click &quot;Add Recipient&quot; to configure email or WhatsApp delivery.
                       </td>
                     </tr>
@@ -1645,6 +1789,11 @@ export default function AdminDailyClosingPage() {
                       <tr key={rec.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
                         <td className="py-3.5 px-4 font-semibold text-[#241912]">
                           {rec.name}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-[#FAF7F2] border border-[#EFE3D6] text-[#4A3E31]">
+                            {rec.role || 'General Manager'}
+                          </span>
                         </td>
                         <td className="py-3.5 px-4">
                           <span
@@ -1744,57 +1893,160 @@ export default function AdminDailyClosingPage() {
                       const coll = summary.collections?.totalCollections ?? summary.collections?.total ?? 0;
                       const occ = summary.overview?.occupancyRate ?? summary.occupancy?.occupancyRate ?? 0;
                       const isCompleted = run.status === 'completed';
+                      const isExpanded = expandedRunId === run.id;
+                      const deliveries = run.deliveries || [];
 
                       return (
-                        <tr key={run.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
-                          <td className="py-3.5 px-4 font-bold text-[#241912]">
-                            {run.business_date}
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                              run.run_type === 'scheduled'
-                                ? 'bg-purple-50 text-purple-800 border border-purple-200'
-                                : 'bg-stone-100 text-stone-700 border border-stone-300'
-                            }`}>
-                              {run.run_type === 'scheduled' ? 'Scheduled Cron' : 'Manual On-Demand'}
-                            </span>
-                          </td>
-                          <td className="py-3.5 px-4">
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                              isCompleted
-                                ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
-                                : run.status === 'in_progress'
-                                ? 'bg-blue-50 text-blue-800 border-blue-300'
-                                : 'bg-rose-50 text-rose-800 border-rose-300'
-                            }`}>
-                              {isCompleted ? <CheckCircle2 className="w-3 h-3 text-emerald-600" /> : null}
-                              <span>{run.status}</span>
-                            </span>
-                          </td>
-                          <td className="py-3.5 px-4 font-mono text-stone-600">
-                            {run.completed_at ? new Date(run.completed_at).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Pending'}
-                          </td>
-                          <td className="py-3.5 px-4 font-mono font-bold text-[#241912]">
-                            ₹{Number(rev).toLocaleString('en-IN')}
-                          </td>
-                          <td className="py-3.5 px-4 font-mono font-bold text-emerald-700">
-                            ₹{Number(coll).toLocaleString('en-IN')}
-                          </td>
-                          <td className="py-3.5 px-4 font-mono text-stone-700">
-                            {Number(occ).toFixed(1)}%
-                          </td>
-                          <td className="py-3.5 px-4 text-right">
-                            <a
-                              href={`/api/admin/night-audit/download?filename=${encodeURIComponent(run.pdf_filename || '')}&date=${run.business_date}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#241912] hover:bg-[#382216] text-[#D8AD56] font-bold text-[11px] transition-colors shadow-xs"
-                            >
-                              <Download className="w-3.5 h-3.5" />
-                              <span>Download PDF</span>
-                            </a>
-                          </td>
-                        </tr>
+                        <tbody key={run.id} className="divide-y divide-[#EFE3D6]">
+                          <tr className="hover:bg-[#FAF7F2]/60 transition-colors cursor-pointer" onClick={() => setExpandedRunId(isExpanded ? null : run.id)}>
+                            <td className="py-3.5 px-4 font-bold text-[#241912] flex items-center gap-2">
+                              {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-[#D8AD56]" /> : <ChevronRight className="w-3.5 h-3.5 text-[#786A5B]" />}
+                              <span>{run.business_date}</span>
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                                run.run_type === 'scheduled'
+                                  ? 'bg-purple-50 text-purple-800 border border-purple-200'
+                                  : run.run_type === 'test'
+                                  ? 'bg-sky-50 text-sky-800 border border-sky-200'
+                                  : 'bg-stone-100 text-stone-700 border border-stone-300'
+                              }`}>
+                                {run.run_type === 'scheduled' ? 'Scheduled Cron' : (run.run_type === 'test' ? 'Test Verification' : 'Manual On-Demand')}
+                              </span>
+                            </td>
+                            <td className="py-3.5 px-4">
+                              <div className="flex flex-col gap-0.5">
+                                <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                                  isCompleted
+                                    ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                                    : run.status === 'in_progress'
+                                    ? 'bg-blue-50 text-blue-800 border-blue-300'
+                                    : 'bg-rose-50 text-rose-800 border-rose-300'
+                                }`}>
+                                  {isCompleted ? <CheckCircle2 className="w-3 h-3 text-emerald-600" /> : null}
+                                  <span>{run.status}</span>
+                                </span>
+                                {run.discrepancy_amount > 0 && (
+                                  <span className="text-[10px] text-amber-700 font-bold">
+                                    Variance: ₹{run.discrepancy_amount}
+                                  </span>
+                                )}
+                              </div>
+                            </td>
+                            <td className="py-3.5 px-4 font-mono text-stone-600">
+                              {run.completed_at ? new Date(run.completed_at).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Pending'}
+                            </td>
+                            <td className="py-3.5 px-4 font-mono font-bold text-[#241912]">
+                              ₹{Number(rev).toLocaleString('en-IN')}
+                            </td>
+                            <td className="py-3.5 px-4 font-mono font-bold text-emerald-700">
+                              ₹{Number(coll).toLocaleString('en-IN')}
+                            </td>
+                            <td className="py-3.5 px-4 font-mono text-stone-700">
+                              {Number(occ).toFixed(1)}%
+                            </td>
+                            <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                              <a
+                                href={`/api/admin/night-audit/download?filename=${encodeURIComponent(run.pdf_filename || '')}&date=${run.business_date}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#241912] hover:bg-[#382216] text-[#D8AD56] font-bold text-[11px] transition-colors shadow-xs"
+                              >
+                                <Download className="w-3.5 h-3.5" />
+                                <span>Download PDF</span>
+                              </a>
+                            </td>
+                          </tr>
+
+                          {/* Collapsible Delivery Logs & Technical Details */}
+                          {isExpanded && (
+                            <tr className="bg-[#FAF7F2]/90">
+                              <td colSpan={8} className="p-4 sm:p-5">
+                                <div className="space-y-3">
+                                  <div className="flex items-center justify-between pb-2 border-b border-[#EFE3D6]">
+                                    <div className="flex items-center gap-2">
+                                      <Send className="w-4 h-4 text-[#D8AD56]" />
+                                      <span className="font-bold text-xs text-[#241912] uppercase tracking-wider">
+                                        Per-Recipient Delivery Audit Log ({deliveries.length} Recipient{deliveries.length !== 1 ? 's' : ''})
+                                      </span>
+                                    </div>
+                                    {run.files && run.files.length > 0 && run.files[0].sha256_checksum && (
+                                      <span className="text-[10px] font-mono text-[#786A5B]" title="SHA-256 PDF integrity hash">
+                                        SHA-256: {run.files[0].sha256_checksum.slice(0, 16)}...
+                                      </span>
+                                    )}
+                                  </div>
+
+                                  {deliveries.length === 0 ? (
+                                    <p className="text-xs text-[#786A5B] italic py-2">
+                                      No dispatch logs recorded for this execution.
+                                    </p>
+                                  ) : (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                                      {deliveries.map((del: any) => {
+                                        const isDelivered = del.status === 'delivered' || del.status === 'sent';
+                                        const isConfigReq = del.status === 'configuration_required';
+                                        const isFailed = del.status === 'failed';
+
+                                        return (
+                                          <div key={del.id || del.destination} className="p-3 rounded-2xl bg-white border border-[#EFE3D6] flex items-center justify-between gap-3 text-xs">
+                                            <div className="flex items-center gap-2.5 min-w-0">
+                                              <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${
+                                                del.channel === 'email' ? 'bg-blue-50 text-blue-700' : 'bg-emerald-50 text-emerald-700'
+                                              }`}>
+                                                {del.channel === 'email' ? <Mail className="w-3.5 h-3.5" /> : <Phone className="w-3.5 h-3.5" />}
+                                              </div>
+                                              <div className="min-w-0">
+                                                <div className="font-bold text-[#241912] truncate">
+                                                  {del.recipient_name || del.recipientName || 'Stakeholder'}
+                                                </div>
+                                                <div className="text-[11px] font-mono text-[#786A5B] truncate">
+                                                  {del.destination || del.address}
+                                                </div>
+                                                {del.error_message && (
+                                                  <div className="text-[10px] text-rose-600 truncate mt-0.5">
+                                                    {del.error_message}
+                                                  </div>
+                                                )}
+                                              </div>
+                                            </div>
+
+                                            <div className="flex items-center gap-2 shrink-0">
+                                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                                                isDelivered
+                                                  ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                                                  : isConfigReq
+                                                  ? 'bg-amber-50 text-amber-800 border-amber-300'
+                                                  : 'bg-rose-50 text-rose-800 border-rose-300'
+                                              }`}>
+                                                {isDelivered ? 'Delivered' : (isConfigReq ? 'Config Required' : 'Failed')}
+                                              </span>
+
+                                              {(isFailed || isConfigReq) && (
+                                                <button
+                                                  type="button"
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleRetryDispatch(del.id);
+                                                  }}
+                                                  disabled={retryingLogId === del.id}
+                                                  className="px-2 py-1 rounded bg-[#241912] text-[#D8AD56] hover:bg-[#382216] text-[10px] font-bold transition-colors flex items-center gap-1 disabled:opacity-50"
+                                                >
+                                                  <RefreshCw className={`w-2.5 h-2.5 ${retryingLogId === del.id ? 'animate-spin' : ''}`} />
+                                                  <span>Retry</span>
+                                                </button>
+                                              )}
+                                            </div>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </tbody>
                       );
                     })
                   )}
@@ -1971,9 +2223,27 @@ export default function AdminDailyClosingPage() {
                   required
                   value={newRecipientName}
                   onChange={(e) => setNewRecipientName(e.target.value)}
-                  placeholder="e.g. General Manager, Accounts Head"
+                  placeholder="e.g. Hari Achari, Accounts Head"
                   className="w-full px-3.5 py-2.5 rounded-xl border border-[#EFE3D6] text-xs font-semibold text-[#241912] outline-none focus:border-[#D8AD56]"
                 />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-[#786A5B] uppercase tracking-wider block mb-1">
+                  Role / Stakeholder Category
+                </label>
+                <select
+                  value={newRecipientRole}
+                  onChange={(e) => setNewRecipientRole(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#EFE3D6] text-xs font-semibold text-[#241912] outline-none focus:border-[#D8AD56] bg-white"
+                >
+                  <option value="General Manager">General Manager</option>
+                  <option value="Accounts Department">Accounts Department</option>
+                  <option value="Official">Sri Tayi Grand Official</option>
+                  <option value="Technical Admin">Technical Admin</option>
+                  <option value="Management">Management / Owner</option>
+                  <option value="Front Desk Supervisor">Front Desk Supervisor</option>
+                </select>
               </div>
 
               <div>
@@ -2039,6 +2309,179 @@ export default function AdminDailyClosingPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* LIVE AUDIT PREVIEW MODAL */}
+      {showPreviewModal && previewData && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-3xl w-full max-h-[90vh] overflow-y-auto border border-[#EFE3D6] shadow-2xl p-6 sm:p-8 space-y-6">
+            <div className="flex items-center justify-between pb-4 border-b border-[#EFE3D6]">
+              <div>
+                <span className="text-[10px] uppercase font-bold tracking-widest text-[#D8AD56]">
+                  Live Cutoff Snapshot
+                </span>
+                <h3 className="text-xl font-serif font-bold text-[#241912]">
+                  Sri Tayi Grand – Night Audit Real-Time Preview
+                </h3>
+                <p className="text-xs text-[#786A5B]">
+                  Business Date: {previewData.businessDate} | Cutoff: 23:59:59 IST | Generated: {previewData.generatedAt}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPreviewModal(false)}
+                className="w-8 h-8 rounded-full bg-[#FAF7F2] text-[#786A5B] hover:text-[#241912] flex items-center justify-center"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Sections A & B */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#EFE3D6] space-y-2">
+                <span className="text-[11px] font-bold text-[#786A5B] uppercase tracking-wider block">
+                  Section A: Room Occupancy
+                </span>
+                <div className="flex items-baseline justify-between">
+                  <span className="text-2xl font-bold font-serif text-[#241912]">
+                    {(previewData.overview?.occupancyRate || previewData.occupancy?.occupancyRate || 0).toFixed(1)}%
+                  </span>
+                  <span className="text-xs text-[#786A5B]">
+                    {previewData.overview?.occupiedRooms || previewData.occupancy?.occupiedRooms || 0} / {previewData.overview?.totalRooms || previewData.occupancy?.totalRooms || 0} Rooms Occupied
+                  </span>
+                </div>
+                <div className="grid grid-cols-3 gap-2 pt-2 text-[11px] border-t border-[#EFE3D6]">
+                  <div>Clean: <strong className="text-emerald-700">{previewData.overview?.cleanRooms || 0}</strong></div>
+                  <div>Cleaning: <strong className="text-amber-700">{previewData.overview?.dirtyRooms || 0}</strong></div>
+                  <div>Maint: <strong className="text-rose-700">{previewData.overview?.maintenanceRooms || 0}</strong></div>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#EFE3D6] space-y-2">
+                <span className="text-[11px] font-bold text-[#786A5B] uppercase tracking-wider block">
+                  Section B: Booking Breakdown
+                </span>
+                <div className="text-2xl font-bold font-serif text-[#241912]">
+                  {previewData.bookingSummary?.totalReservations || 0} Reservations
+                </div>
+                <div className="grid grid-cols-2 gap-2 pt-2 text-[11px] border-t border-[#EFE3D6]">
+                  <div>Walk-in: <strong>{previewData.bookingSummary?.walkInBookings || 0}</strong></div>
+                  <div>Direct Website: <strong>{previewData.bookingSummary?.websiteBookings || 0}</strong></div>
+                  <div>OTA Channels: <strong>{previewData.bookingSummary?.otaBookings || 0}</strong></div>
+                  <div>Check-ins Today: <strong>{previewData.bookingSummary?.checkIns || 0}</strong></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Sections C & D */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="p-4 rounded-2xl bg-white border border-[#EFE3D6] space-y-2">
+                <span className="text-[11px] font-bold text-[#786A5B] uppercase tracking-wider block">
+                  Section C: Revenue Summary
+                </span>
+                <div className="flex justify-between py-1 text-xs border-b border-[#EFE3D6]/60">
+                  <span className="text-[#786A5B]">Room Tariff</span>
+                  <span className="font-mono font-bold text-[#241912]">₹{Number(previewData.revenue?.roomRevenue || 0).toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between py-1 text-xs border-b border-[#EFE3D6]/60">
+                  <span className="text-[#786A5B]">Extra Folio Charges</span>
+                  <span className="font-mono text-[#241912]">₹{Number(previewData.revenue?.extraCharges || 0).toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between py-1 text-xs border-b border-[#EFE3D6]/60">
+                  <span className="text-[#786A5B]">Convention Hall</span>
+                  <span className="font-mono text-[#241912]">₹{Number(previewData.revenue?.hallRevenue || 0).toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between py-1 text-xs font-bold text-[#43001F] pt-1">
+                  <span>Gross Accrued Revenue</span>
+                  <span className="font-mono">₹{Number(previewData.revenue?.grossRevenue || 0).toLocaleString('en-IN')}</span>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-white border border-[#EFE3D6] space-y-2">
+                <span className="text-[11px] font-bold text-[#786A5B] uppercase tracking-wider block">
+                  Section D: Collections Reconciliation
+                </span>
+                <div className="flex justify-between py-1 text-xs border-b border-[#EFE3D6]/60">
+                  <span className="text-[#786A5B]">Cash Counter Inflow</span>
+                  <span className="font-mono text-[#241912]">₹{Number(previewData.collections?.cash || 0).toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between py-1 text-xs border-b border-[#EFE3D6]/60">
+                  <span className="text-[#786A5B]">UPI Digital Received</span>
+                  <span className="font-mono text-[#241912]">₹{Number(previewData.collections?.upi || 0).toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between py-1 text-xs border-b border-[#EFE3D6]/60">
+                  <span className="text-[#786A5B]">Card / Razorpay</span>
+                  <span className="font-mono text-[#241912]">₹{Number(previewData.collections?.card || 0).toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between py-1 text-xs font-bold text-emerald-800 pt-1">
+                  <span>Total Financial Collections</span>
+                  <span className="font-mono">₹{Number(previewData.collections?.totalCollections || previewData.collections?.total || 0).toLocaleString('en-IN')}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Section E: Cash Register & Drawer */}
+            <div className="p-4 rounded-2xl bg-[#FAF7F2] border border-[#EFE3D6] space-y-2">
+              <span className="text-[11px] font-bold text-[#786A5B] uppercase tracking-wider block">
+                Section E: Cash Register &amp; Drawer Reconciliation
+              </span>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div>
+                  <span className="text-[#786A5B] block text-[10px]">Opening Float</span>
+                  <strong className="font-mono text-[#241912]">₹{Number(previewData.cashRegister?.openingBalance || 5000).toLocaleString('en-IN')}</strong>
+                </div>
+                <div>
+                  <span className="text-[#786A5B] block text-[10px]">Expected in Drawer</span>
+                  <strong className="font-mono text-[#241912]">₹{Number(previewData.cashRegister?.expectedCashInDrawer || 0).toLocaleString('en-IN')}</strong>
+                </div>
+                <div>
+                  <span className="text-[#786A5B] block text-[10px]">Counted in Drawer</span>
+                  <strong className="font-mono text-[#241912]">₹{Number(previewData.cashRegister?.actualCashCounted || 0).toLocaleString('en-IN')}</strong>
+                </div>
+                <div>
+                  <span className="text-[#786A5B] block text-[10px]">Variance / Discrepancy</span>
+                  <strong className={`font-mono ${(previewData.cashRegister?.discrepancy || 0) === 0 ? 'text-emerald-700' : 'text-amber-700'}`}>
+                    ₹{previewData.cashRegister?.discrepancy || 0} ({(previewData.cashRegister?.discrepancy || 0) === 0 ? 'Balanced' : 'Overage/Shortage'})
+                  </strong>
+                </div>
+              </div>
+            </div>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-between pt-4 border-t border-[#EFE3D6]">
+              <button
+                type="button"
+                onClick={() => setShowPreviewModal(false)}
+                className="px-5 py-2.5 rounded-xl border border-[#EFE3D6] hover:bg-[#FAF7F2] text-[#241912] text-xs font-semibold"
+              >
+                Close Preview
+              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPreviewModal(false);
+                    handleTriggerTestAudit();
+                  }}
+                  className="px-4 py-2.5 rounded-xl bg-[#43001F] text-white text-xs font-bold hover:bg-[#2E0015] transition-colors"
+                >
+                  Send Test Report
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPreviewModal(false);
+                    handleDispatchOfficialAudit();
+                  }}
+                  className="px-5 py-2.5 rounded-xl bg-emerald-800 hover:bg-emerald-700 text-white text-xs font-bold shadow-md transition-colors flex items-center gap-1.5"
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
+                  <span>Dispatch Official Report</span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

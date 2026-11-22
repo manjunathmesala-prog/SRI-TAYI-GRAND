@@ -64,13 +64,20 @@ export class PdfGenerationService {
     drawText(p1Cmds, 'F1', 17, 50, 792, 'SRI TAYI GRAND');
     setColor(p1Cmds, 1, 1, 1);
     drawText(p1Cmds, 'F2', 9, 50, 776, 'LUXURY HOTEL & CONVENTION HALL | BYPASS ROAD, KADIRI');
-    drawText(p1Cmds, 'F1', 9, 50, 762, 'OFFICIAL END-OF-DAY NIGHT AUDIT & FINANCIAL CERTIFICATE');
+    drawText(p1Cmds, 'F1', 9, 50, 762, data.isTest ? 'OFFICIAL NIGHT AUDIT - [TEST REPORT - NOT PRODUCTION CERTIFICATE]' : 'OFFICIAL END-OF-DAY NIGHT AUDIT & FINANCIAL CERTIFICATE');
 
     setColor(p1Cmds, 0.85, 0.68, 0.34);
     drawText(p1Cmds, 'F1', 9, 410, 792, `Date: ${data.businessDate}`);
     setColor(p1Cmds, 0.9, 0.9, 0.9);
     drawText(p1Cmds, 'F2', 8, 410, 778, `Timezone: Asia/Kolkata`);
     drawText(p1Cmds, 'F2', 8, 410, 764, `Audit ID: ${data.auditId || 'STG-AUDIT-TODAY'}`);
+
+    if (data.isTest) {
+      setColor(p1Cmds, 0.85, 0.2, 0.1);
+      drawRect(p1Cmds, 36, 736, 523, 11, true, false);
+      setColor(p1Cmds, 1, 1, 1);
+      drawText(p1Cmds, 'F1', 7, 100, 739, '*** TEST DISPATCH - OPERATIONAL AUDIT SYSTEM VERIFICATION ONLY - NOT FOR LEDGER POSTING ***');
+    }
 
     // SECTION A: HOTEL OVERVIEW & OCCUPANCY
     let y = 725;
@@ -183,13 +190,20 @@ export class PdfGenerationService {
     drawText(p2Cmds, 'F1', 17, 50, 792, 'SRI TAYI GRAND');
     setColor(p2Cmds, 1, 1, 1);
     drawText(p2Cmds, 'F2', 9, 50, 776, 'OPERATIONAL AUDIT, CASH REGISTER, EXPENSES & SYSTEM RECONCILIATION');
-    drawText(p2Cmds, 'F1', 9, 50, 762, 'PAGE 2 OF 2 - CERTIFICATE & VERIFICATION LOGS');
+    drawText(p2Cmds, 'F1', 9, 50, 762, data.isTest ? 'PAGE 2 OF 2 - [TEST REPORT - SYSTEM VERIFICATION RUN]' : 'PAGE 2 OF 2 - CERTIFICATE & VERIFICATION LOGS');
 
     setColor(p2Cmds, 0.85, 0.68, 0.34);
     drawText(p2Cmds, 'F1', 9, 410, 792, `Date: ${data.businessDate}`);
     setColor(p2Cmds, 0.9, 0.9, 0.9);
     drawText(p2Cmds, 'F2', 8, 410, 778, `Cutoff: 00:00 IST Midnight`);
     drawText(p2Cmds, 'F2', 8, 410, 764, `Audit ID: ${data.auditId || 'STG-AUDIT-TODAY'}`);
+
+    if (data.isTest) {
+      setColor(p2Cmds, 0.85, 0.2, 0.1);
+      drawRect(p2Cmds, 36, 736, 523, 11, true, false);
+      setColor(p2Cmds, 1, 1, 1);
+      drawText(p2Cmds, 'F1', 7, 100, 739, '*** TEST DISPATCH - OPERATIONAL AUDIT SYSTEM VERIFICATION ONLY - NOT FOR LEDGER POSTING ***');
+    }
 
     // SECTION E: CASH REGISTER & SHIFTS
     y = 725;

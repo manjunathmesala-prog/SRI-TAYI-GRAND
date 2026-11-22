@@ -2914,30 +2914,87 @@ export async function syncNightAuditConfigToSupabase(config: NightAuditConfig): 
       }
 
       for (const r of config.recipients) {
-        const addr = r.address || r.recipient_address || '';
-        const name = r.name || r.recipient_name || 'Recipient';
+        const addr = (r.address || r.recipient_address || '').trim().toLowerCase();
+        const name = (r.name || r.recipient_name || 'Recipient').trim();
         const id = r.id || `rec-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+        const role = r.role || 'General Manager';
+        const createdBy = r.created_by || 'Super Admin';
+
         await client.query(`
-          INSERT INTO night_audit_recipients (id, hotel_id, channel, recipient_name, recipient_address, is_active, consent_status, created_at)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+          INSERT INTO night_audit_recipients (id, hotel_id, channel, recipient_name, recipient_address, role, is_active, consent_status, created_by, updated_at)
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())
           ON CONFLICT (id) DO UPDATE SET
             channel = EXCLUDED.channel,
             recipient_name = EXCLUDED.recipient_name,
             recipient_address = EXCLUDED.recipient_address,
-            is_active = EXCLUDED.is_active;
+            role = EXCLUDED.role,
+            is_active = EXCLUDED.is_active,
+            updated_at = NOW();
         `, [
           id,
           'sri-tayi-grand',
           r.channel || 'email',
           name,
           addr,
+          role,
           r.is_active !== false,
-          r.consent_status || 'granted'
+          r.consent_status || 'granted',
+          createdBy
         ]);
       }
     }
   } catch (err: any) {
     console.warn('[SUPABASE SYNC NIGHT AUDIT CONFIG WARN]', err.message);
+  } finally {
+    client.release();
+  }
+}
+
+export async function upsertNightAuditRecipientInSupabase(recipient: NightAuditRecipient): Promise<NightAuditRecipient | null> {
+  const db = getSupabasePgPool();
+  if (!db) return null;
+  const client = await db.connect();
+  try {
+    const id = recipient.id || `rec-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const addr = (recipient.address || recipient.recipient_address || '').trim().toLowerCase();
+    const name = (recipient.name || recipient.recipient_name || 'Recipient').trim();
+    const role = recipient.role || 'General Manager';
+    const channel = recipient.channel || 'email';
+    const isActive = recipient.is_active !== false;
+    const consent = recipient.consent_status || 'granted';
+    const createdBy = recipient.created_by || 'Super Admin';
+
+    const res = await client.query(`
+      INSERT INTO night_audit_recipients (id, hotel_id, channel, recipient_name, recipient_address, role, is_active, consent_status, created_by, updated_at)
+      VALUES ($1, 'sri-tayi-grand', $2, $3, $4, $5, $6, $7, $8, NOW())
+      ON CONFLICT (hotel_id, channel, lower(recipient_address)) DO UPDATE SET
+        recipient_name = EXCLUDED.recipient_name,
+        role = EXCLUDED.role,
+        is_active = EXCLUDED.is_active,
+        updated_at = NOW()
+      RETURNING *;
+    `, [id, channel, name, addr, role, isActive, consent, createdBy]);
+
+    if (res.rows.length === 0) return null;
+    const r = res.rows[0];
+    return {
+      id: r.id,
+      hotel_id: r.hotel_id,
+      channel: r.channel,
+      name: r.recipient_name,
+      recipient_name: r.recipient_name,
+      address: r.recipient_address,
+      recipient_address: r.recipient_address,
+      role: r.role,
+      is_active: r.is_active,
+      consent_status: r.consent_status,
+      created_by: r.created_by,
+      created_at: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
+      updated_at: r.updated_at ? new Date(r.updated_at).toISOString() : undefined
+    };
+  } catch (err: any) {
+    console.warn('[SUPABASE UPSERT NIGHT AUDIT RECIPIENT WARN]', err.message);
+    return null;
   } finally {
     client.release();
   }
@@ -2962,9 +3019,12 @@ export async function loadNightAuditConfigFromSupabase(): Promise<NightAuditConf
       recipient_name: r.recipient_name,
       address: r.recipient_address,
       recipient_address: r.recipient_address,
+      role: r.role || 'General Manager',
       is_active: r.is_active,
       consent_status: r.consent_status,
-      created_at: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString()
+      created_by: r.created_by,
+      created_at: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
+      updated_at: r.updated_at ? new Date(r.updated_at).toISOString() : undefined
     }));
 
     return {
@@ -2999,28 +3059,73 @@ export async function deleteNightAuditRecipientFromSupabase(recipientId: string)
 export interface DailyAuditRunRecord {
   id: string;
   business_date: string;
-  run_type: 'scheduled' | 'manual';
-  status: 'in_progress' | 'completed' | 'failed';
+  run_type: 'scheduled' | 'manual' | 'test';
+  status: 'pending' | 'in_progress' | 'completed' | 'failed' | 'exception';
   triggered_by: string;
   summary_json?: any;
   pdf_path?: string;
   pdf_filename?: string;
   error_log?: string;
+  reconciled?: boolean;
+  discrepancy_amount?: number;
   started_at?: string;
   completed_at?: string;
 }
 
 export interface AuditDispatchLogRecord {
-  id: string;
+  id?: string;
   audit_run_id: string;
+  recipient_id?: string;
   recipient_name: string;
   channel: 'email' | 'whatsapp';
   destination: string;
-  status: 'delivered' | 'failed' | 'disabled' | 'configuration_required' | 'pending';
+  status: 'delivered' | 'sent' | 'failed' | 'disabled' | 'configuration_required' | 'pending';
   provider?: string;
   provider_message_id?: string;
   error_message?: string;
+  retry_count?: number;
   sent_at?: string;
+  delivered_at?: string;
+}
+
+export interface AuditReportSnapshotRecord {
+  id?: string;
+  audit_run_id: string;
+  business_date: string;
+  snapshot_json: any;
+  cutoff_timestamp?: string;
+  created_at?: string;
+}
+
+export interface AuditReportFileRecord {
+  id?: string;
+  audit_run_id: string;
+  filename: string;
+  file_path: string;
+  file_size_bytes?: number;
+  mime_type?: string;
+  sha256_checksum?: string;
+  created_at?: string;
+}
+
+export interface AuditExceptionRecord {
+  id?: string;
+  audit_run_id?: string;
+  severity: 'critical' | 'warning' | 'info';
+  exception_type: string;
+  message: string;
+  resolved?: boolean;
+  resolved_by?: string;
+  resolved_at?: string;
+  created_at?: string;
+}
+
+export interface AuditExecutionLogRecord {
+  id?: string;
+  audit_run_id: string;
+  event_type: string;
+  event_details: string;
+  created_at?: string;
 }
 
 export async function recordDailyAuditRunToSupabase(run: DailyAuditRunRecord): Promise<void> {
@@ -3029,25 +3134,33 @@ export async function recordDailyAuditRunToSupabase(run: DailyAuditRunRecord): P
   const client = await db.connect();
   try {
     await client.query(`
-      INSERT INTO daily_audit_runs (id, business_date, run_type, status, triggered_by, summary_json, pdf_path, pdf_filename, error_log, started_at, completed_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, COALESCE($10, NOW()), $11)
+      INSERT INTO daily_audit_runs (
+        id, business_date, run_type, status, triggered_by, summary_json, 
+        pdf_path, pdf_filename, error_log, reconciled, discrepancy_amount, 
+        started_at, completed_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, COALESCE($12, NOW()), $13)
       ON CONFLICT (id) DO UPDATE SET
         status = EXCLUDED.status,
         summary_json = EXCLUDED.summary_json,
         pdf_path = EXCLUDED.pdf_path,
         pdf_filename = EXCLUDED.pdf_filename,
         error_log = EXCLUDED.error_log,
+        reconciled = EXCLUDED.reconciled,
+        discrepancy_amount = EXCLUDED.discrepancy_amount,
         completed_at = EXCLUDED.completed_at;
     `, [
       run.id,
       run.business_date,
-      run.run_type,
-      run.status,
+      run.run_type || 'scheduled',
+      run.status || 'in_progress',
       run.triggered_by || 'system',
       run.summary_json ? JSON.stringify(run.summary_json) : null,
       run.pdf_path || null,
       run.pdf_filename || null,
       run.error_log || null,
+      run.reconciled !== false,
+      Number(run.discrepancy_amount || 0),
       run.started_at ? new Date(run.started_at) : new Date(),
       run.completed_at ? new Date(run.completed_at) : null
     ]);
@@ -3099,6 +3212,14 @@ export async function updateDailyAuditRunInSupabase(
       fields.push(`error_log = $${idx++}`);
       values.push(updates.error_log);
     }
+    if (updates.reconciled !== undefined) {
+      fields.push(`reconciled = $${idx++}`);
+      values.push(updates.reconciled);
+    }
+    if (updates.discrepancy_amount !== undefined) {
+      fields.push(`discrepancy_amount = $${idx++}`);
+      values.push(Number(updates.discrepancy_amount));
+    }
     if (updates.completed_at !== undefined) {
       fields.push(`completed_at = $${idx++}`);
       values.push(updates.completed_at ? new Date(updates.completed_at) : new Date());
@@ -3115,17 +3236,83 @@ export async function updateDailyAuditRunInSupabase(
   }
 }
 
-export async function recordAuditDispatchLogToSupabase(log: AuditDispatchLogRecord): Promise<void> {
+export async function recordAuditReportSnapshotToSupabase(snapshot: AuditReportSnapshotRecord): Promise<void> {
   const db = getSupabasePgPool();
   if (!db) return;
   const client = await db.connect();
   try {
+    const id = snapshot.id || `snap-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
     await client.query(`
-      INSERT INTO audit_dispatch_logs (id, audit_run_id, recipient_name, channel, destination, status, provider, provider_message_id, error_message, sent_at)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, COALESCE($10, NOW()));
+      INSERT INTO audit_report_snapshots (id, audit_run_id, business_date, snapshot_json, cutoff_timestamp, created_at)
+      VALUES ($1, $2, $3, $4, COALESCE($5, NOW()), NOW())
+      ON CONFLICT (id) DO UPDATE SET
+        snapshot_json = EXCLUDED.snapshot_json;
     `, [
-      log.id || `disp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      id,
+      snapshot.audit_run_id,
+      snapshot.business_date,
+      JSON.stringify(snapshot.snapshot_json),
+      snapshot.cutoff_timestamp ? new Date(snapshot.cutoff_timestamp) : null
+    ]);
+  } catch (err: any) {
+    console.warn('[SUPABASE RECORD AUDIT SNAPSHOT WARN]', err.message);
+  } finally {
+    client.release();
+  }
+}
+
+export async function recordAuditReportFileToSupabase(file: AuditReportFileRecord): Promise<void> {
+  const db = getSupabasePgPool();
+  if (!db) return;
+  const client = await db.connect();
+  try {
+    const id = file.id || `file-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    await client.query(`
+      INSERT INTO audit_report_files (id, audit_run_id, filename, file_path, file_size_bytes, mime_type, sha256_checksum, created_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+      ON CONFLICT (id) DO UPDATE SET
+        file_path = EXCLUDED.file_path,
+        file_size_bytes = EXCLUDED.file_size_bytes,
+        sha256_checksum = EXCLUDED.sha256_checksum;
+    `, [
+      id,
+      file.audit_run_id,
+      file.filename,
+      file.file_path,
+      file.file_size_bytes || 0,
+      file.mime_type || 'application/pdf',
+      file.sha256_checksum || null
+    ]);
+  } catch (err: any) {
+    console.warn('[SUPABASE RECORD AUDIT FILE WARN]', err.message);
+  } finally {
+    client.release();
+  }
+}
+
+export async function recordAuditDispatchLogToSupabase(log: AuditDispatchLogRecord): Promise<string | null> {
+  const db = getSupabasePgPool();
+  if (!db) return null;
+  const client = await db.connect();
+  try {
+    const id = log.id || `disp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    await client.query(`
+      INSERT INTO audit_dispatch_logs (
+        id, audit_run_id, recipient_id, recipient_name, channel, destination, 
+        status, provider, provider_message_id, error_message, retry_count, sent_at, delivered_at
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, COALESCE($12, NOW()), $13)
+      ON CONFLICT (id) DO UPDATE SET
+        status = EXCLUDED.status,
+        provider = EXCLUDED.provider,
+        provider_message_id = EXCLUDED.provider_message_id,
+        error_message = EXCLUDED.error_message,
+        retry_count = EXCLUDED.retry_count,
+        delivered_at = EXCLUDED.delivered_at;
+    `, [
+      id,
       log.audit_run_id,
+      log.recipient_id || null,
       log.recipient_name || 'Recipient',
       log.channel,
       log.destination,
@@ -3133,16 +3320,166 @@ export async function recordAuditDispatchLogToSupabase(log: AuditDispatchLogReco
       log.provider || null,
       log.provider_message_id || null,
       log.error_message || null,
-      log.sent_at ? new Date(log.sent_at) : new Date()
+      log.retry_count || 0,
+      log.sent_at ? new Date(log.sent_at) : new Date(),
+      log.delivered_at ? new Date(log.delivered_at) : (log.status === 'delivered' ? new Date() : null)
     ]);
+
+    // Record delivery event
+    const eventType = log.status === 'delivered' ? 'delivered' : (log.status === 'failed' ? 'failed' : 'dispatched');
+    await client.query(`
+      INSERT INTO audit_delivery_events (id, dispatch_log_id, event_type, event_payload, created_at)
+      VALUES ($1, $2, $3, $4, NOW());
+    `, [
+      `evt-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      id,
+      eventType,
+      JSON.stringify({
+        channel: log.channel,
+        destination: log.destination,
+        provider: log.provider,
+        provider_message_id: log.provider_message_id,
+        error_message: log.error_message
+      })
+    ]);
+
+    return id;
   } catch (err: any) {
     console.warn('[SUPABASE RECORD AUDIT DISPATCH LOG WARN]', err.message);
+    return null;
   } finally {
     client.release();
   }
 }
 
-export async function loadDailyAuditRunsFromSupabase(limit = 15): Promise<Array<DailyAuditRunRecord & { deliveries?: AuditDispatchLogRecord[] }>> {
+export async function recordAuditDeliveryEventToSupabase(dispatchLogId: string, eventType: string, eventPayload?: any): Promise<void> {
+  const db = getSupabasePgPool();
+  if (!db) return;
+  const client = await db.connect();
+  try {
+    await client.query(`
+      INSERT INTO audit_delivery_events (id, dispatch_log_id, event_type, event_payload, created_at)
+      VALUES ($1, $2, $3, $4, NOW());
+    `, [
+      `evt-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      dispatchLogId,
+      eventType,
+      JSON.stringify(eventPayload || {})
+    ]);
+  } catch (err: any) {
+    console.warn('[SUPABASE RECORD AUDIT DELIVERY EVENT WARN]', err.message);
+  } finally {
+    client.release();
+  }
+}
+
+export async function recordAuditExceptionToSupabase(exception: AuditExceptionRecord): Promise<void> {
+  const db = getSupabasePgPool();
+  if (!db) return;
+  const client = await db.connect();
+  try {
+    const id = exception.id || `exc-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    await client.query(`
+      INSERT INTO audit_exceptions (id, audit_run_id, severity, exception_type, message, resolved, resolved_by, resolved_at, created_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())
+      ON CONFLICT (id) DO UPDATE SET
+        resolved = EXCLUDED.resolved,
+        resolved_by = EXCLUDED.resolved_by,
+        resolved_at = EXCLUDED.resolved_at;
+    `, [
+      id,
+      exception.audit_run_id || null,
+      exception.severity || 'warning',
+      exception.exception_type,
+      exception.message,
+      exception.resolved === true,
+      exception.resolved_by || null,
+      exception.resolved_at ? new Date(exception.resolved_at) : null
+    ]);
+  } catch (err: any) {
+    console.warn('[SUPABASE RECORD AUDIT EXCEPTION WARN]', err.message);
+  } finally {
+    client.release();
+  }
+}
+
+export async function recordAuditExecutionLogToSupabase(log: AuditExecutionLogRecord): Promise<void> {
+  const db = getSupabasePgPool();
+  if (!db) return;
+  const client = await db.connect();
+  try {
+    const id = log.id || `exe-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    await client.query(`
+      INSERT INTO audit_execution_logs (id, audit_run_id, event_type, event_details, created_at)
+      VALUES ($1, $2, $3, $4, NOW());
+    `, [
+      id,
+      log.audit_run_id,
+      log.event_type,
+      log.event_details
+    ]);
+  } catch (err: any) {
+    console.warn('[SUPABASE RECORD AUDIT EXECUTION LOG WARN]', err.message);
+  } finally {
+    client.release();
+  }
+}
+
+export async function retryFailedAuditDispatchInSupabase(dispatchLogId: string): Promise<AuditDispatchLogRecord | null> {
+  const db = getSupabasePgPool();
+  if (!db) return null;
+  const client = await db.connect();
+  try {
+    const checkRes = await client.query(`
+      SELECT * FROM audit_dispatch_logs WHERE id = $1;
+    `, [dispatchLogId]);
+
+    if (checkRes.rows.length === 0) return null;
+    const current = checkRes.rows[0];
+
+    const updatedRes = await client.query(`
+      UPDATE audit_dispatch_logs
+      SET status = 'pending',
+          retry_count = retry_count + 1,
+          sent_at = NOW()
+      WHERE id = $1
+      RETURNING *;
+    `, [dispatchLogId]);
+
+    await client.query(`
+      INSERT INTO audit_delivery_events (id, dispatch_log_id, event_type, event_payload, created_at)
+      VALUES ($1, $2, 'retried', $3, NOW());
+    `, [
+      `evt-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      dispatchLogId,
+      JSON.stringify({ previous_error: current.error_message, retry_count: current.retry_count + 1 })
+    ]);
+
+    const r = updatedRes.rows[0];
+    return {
+      id: r.id,
+      audit_run_id: r.audit_run_id,
+      recipient_id: r.recipient_id,
+      recipient_name: r.recipient_name,
+      channel: r.channel,
+      destination: r.destination,
+      status: r.status,
+      provider: r.provider,
+      provider_message_id: r.provider_message_id,
+      error_message: r.error_message,
+      retry_count: r.retry_count,
+      sent_at: r.sent_at ? new Date(r.sent_at).toISOString() : undefined,
+      delivered_at: r.delivered_at ? new Date(r.delivered_at).toISOString() : undefined
+    };
+  } catch (err: any) {
+    console.warn('[SUPABASE RETRY FAILED DISPATCH WARN]', err.message);
+    return null;
+  } finally {
+    client.release();
+  }
+}
+
+export async function loadDailyAuditRunsFromSupabase(limit = 20): Promise<Array<DailyAuditRunRecord & { deliveries?: AuditDispatchLogRecord[]; files?: AuditReportFileRecord[]; snapshot?: any }>> {
   const db = getSupabasePgPool();
   if (!db) return [];
   const client = await db.connect();
@@ -3162,12 +3499,19 @@ export async function loadDailyAuditRunsFromSupabase(limit = 15): Promise<Array<
       ORDER BY sent_at ASC;
     `, [runIds]);
 
+    const filesRes = await client.query(`
+      SELECT * FROM audit_report_files
+      WHERE audit_run_id = ANY($1)
+      ORDER BY created_at ASC;
+    `, [runIds]);
+
     const logsByRunId: Record<string, AuditDispatchLogRecord[]> = {};
     for (const l of logsRes.rows) {
       if (!logsByRunId[l.audit_run_id]) logsByRunId[l.audit_run_id] = [];
       logsByRunId[l.audit_run_id].push({
         id: l.id,
         audit_run_id: l.audit_run_id,
+        recipient_id: l.recipient_id,
         recipient_name: l.recipient_name,
         channel: l.channel,
         destination: l.destination,
@@ -3175,7 +3519,24 @@ export async function loadDailyAuditRunsFromSupabase(limit = 15): Promise<Array<
         provider: l.provider,
         provider_message_id: l.provider_message_id,
         error_message: l.error_message,
-        sent_at: l.sent_at ? new Date(l.sent_at).toISOString() : undefined
+        retry_count: l.retry_count,
+        sent_at: l.sent_at ? new Date(l.sent_at).toISOString() : undefined,
+        delivered_at: l.delivered_at ? new Date(l.delivered_at).toISOString() : undefined
+      });
+    }
+
+    const filesByRunId: Record<string, AuditReportFileRecord[]> = {};
+    for (const f of filesRes.rows) {
+      if (!filesByRunId[f.audit_run_id]) filesByRunId[f.audit_run_id] = [];
+      filesByRunId[f.audit_run_id].push({
+        id: f.id,
+        audit_run_id: f.audit_run_id,
+        filename: f.filename,
+        file_path: f.file_path,
+        file_size_bytes: f.file_size_bytes,
+        mime_type: f.mime_type,
+        sha256_checksum: f.sha256_checksum,
+        created_at: f.created_at ? new Date(f.created_at).toISOString() : undefined
       });
     }
 
@@ -3189,9 +3550,12 @@ export async function loadDailyAuditRunsFromSupabase(limit = 15): Promise<Array<
       pdf_path: r.pdf_path,
       pdf_filename: r.pdf_filename,
       error_log: r.error_log,
+      reconciled: r.reconciled,
+      discrepancy_amount: Number(r.discrepancy_amount || 0),
       started_at: r.started_at ? new Date(r.started_at).toISOString() : undefined,
       completed_at: r.completed_at ? new Date(r.completed_at).toISOString() : undefined,
-      deliveries: logsByRunId[r.id] || []
+      deliveries: logsByRunId[r.id] || [],
+      files: filesByRunId[r.id] || []
     }));
   } catch (err: any) {
     console.warn('[SUPABASE LOAD DAILY AUDIT RUNS WARN]', err.message);

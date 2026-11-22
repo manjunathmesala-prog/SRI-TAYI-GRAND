@@ -43,15 +43,27 @@ export async function GET(req: NextRequest) {
 
   const url = new URL(req.url);
   const businessDate = url.searchParams.get('businessDate') || new Date().toISOString().split('T')[0];
+  const force = url.searchParams.get('force') === 'true';
 
   try {
-    const result = await auditService.runNightAudit(businessDate, undefined, 'Vercel Cron Trigger');
+    const result = await auditService.runNightAudit({
+      businessDate,
+      runType: 'scheduled',
+      triggeredBy: 'Vercel Cron Engine (00:00 IST)',
+      forceReaudit: force,
+    });
+
     return NextResponse.json({
       success: true,
-      message: `Automated Night Audit executed successfully for ${businessDate}`,
+      message: result.isIdempotentReplay
+        ? `Audit for ${businessDate} was already completed (idempotent replay)`
+        : `Automated Night Audit executed successfully for ${businessDate}`,
       businessDate,
       auditId: result.auditId,
       pdfPath: result.pdfPath,
+      pdfFilename: result.pdfFilename,
+      sha256: result.sha256,
+      isIdempotentReplay: Boolean(result.isIdempotentReplay),
       deliveries: result.deliveries,
       result,
     });
@@ -66,7 +78,10 @@ export async function POST(req: NextRequest) {
   }
 
   let businessDate = new Date().toISOString().split('T')[0];
-  let triggeredBy = 'Vercel Cron Trigger';
+  let triggeredBy = 'Operational Dispatch (Staff Trigger)';
+  let runType: 'scheduled' | 'manual' = 'manual';
+  let forceReaudit = false;
+  let overrideRecipients = undefined;
 
   try {
     const body = await req.json().catch(() => ({}));
@@ -76,18 +91,39 @@ export async function POST(req: NextRequest) {
     if (body?.triggeredBy) {
       triggeredBy = body.triggeredBy;
     }
+    if (body?.runType) {
+      runType = body.runType;
+    }
+    if (body?.forceReaudit) {
+      forceReaudit = Boolean(body.forceReaudit);
+    }
+    if (Array.isArray(body?.overrideRecipients)) {
+      overrideRecipients = body.overrideRecipients;
+    }
   } catch {
     // Fallback to today
   }
 
   try {
-    const result = await auditService.runNightAudit(businessDate, undefined, triggeredBy);
+    const result = await auditService.runNightAudit({
+      businessDate,
+      runType,
+      triggeredBy,
+      forceReaudit,
+      overrideRecipients,
+    });
+
     return NextResponse.json({
       success: true,
-      message: `Automated Night Audit executed successfully for ${businessDate}`,
+      message: result.isIdempotentReplay
+        ? `Audit for ${businessDate} was already completed (idempotent replay)`
+        : `Night Audit (${runType}) executed successfully for ${businessDate}`,
       businessDate,
       auditId: result.auditId,
       pdfPath: result.pdfPath,
+      pdfFilename: result.pdfFilename,
+      sha256: result.sha256,
+      isIdempotentReplay: Boolean(result.isIdempotentReplay),
       deliveries: result.deliveries,
       result,
     });

@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 import { repo } from '../db/repository';
 import { Booking, PaymentRecord, Expense, FolioCharge, GoogleReview, NightAuditRecipient } from '@/types';
 import { parseISO, isSameDay } from 'date-fns';
@@ -11,6 +12,11 @@ import {
   updateDailyAuditRunInSupabase,
   recordAuditDispatchLogToSupabase,
   loadNightAuditConfigFromSupabase,
+  recordAuditReportSnapshotToSupabase,
+  recordAuditReportFileToSupabase,
+  recordAuditExceptionToSupabase,
+  recordAuditExecutionLogToSupabase,
+  loadDailyAuditRunsFromSupabase,
 } from '../db/supabase-sync';
 
 export interface AuditReportData {
@@ -19,6 +25,15 @@ export interface AuditReportData {
   generatedAt?: string;
   cutoffTime?: string;
   hotelName?: string;
+  isTest?: boolean;
+  outstandingBalancesList?: Array<{
+    bookingId: string;
+    guestName: string;
+    roomNumber?: string;
+    totalAmount: number;
+    paidAmount: number;
+    balance: number;
+  }>;
 
   // Section A: Overview & Occupancy
   occupancy: {
@@ -132,12 +147,33 @@ export interface NightAuditDeliveryStatus {
   provider?: string;
 }
 
+export interface RunNightAuditOptions {
+  businessDate: string;
+  runType?: 'scheduled' | 'manual' | 'test';
+  overrideRecipients?: Partial<NightAuditRecipient>[];
+  triggeredBy?: string;
+  forceReaudit?: boolean;
+  isTest?: boolean;
+}
+
+export interface NightAuditRunResult {
+  success: boolean;
+  businessDate: string;
+  auditId: string;
+  data: AuditReportData;
+  deliveries: NightAuditDeliveryStatus[];
+  pdfPath?: string;
+  pdfFilename?: string;
+  sha256?: string;
+  isIdempotentReplay?: boolean;
+}
+
 export class NightAuditService {
   private pdfService = new PdfGenerationService();
   private emailService = new EmailDeliveryService();
   private waService = new WhatsAppDeliveryService();
 
-  public async generateAuditData(businessDate: string, auditId?: string): Promise<AuditReportData> {
+  public async generateAuditData(businessDate: string, auditId?: string, isTest?: boolean): Promise<AuditReportData> {
     await repo.ensureSettingsLoaded();
 
     const targetDate = parseISO(businessDate);
@@ -237,9 +273,24 @@ export class NightAuditService {
 
     const refunds = payments.filter((p) => p.refunded_at?.startsWith(businessDate)).reduce((sum, p) => sum + (Number(p.refund_amount) || 0), 0);
 
-    const outstanding = bookings
+    const outstandingBookings = bookings
       .filter((b) => b.status !== 'cancelled' && b.status !== 'checked_out')
-      .reduce((sum, b) => sum + Math.max(0, (Number(b.total_amount) || 0) - (Number(b.paid_amount) || 0)), 0);
+      .map((b) => {
+        const total = Number(b.total_amount) || 0;
+        const paid = Number(b.paid_amount) || 0;
+        const bal = Math.max(0, total - paid);
+        return {
+          bookingId: b.id,
+          guestName: b.guest_name || 'Guest',
+          roomNumber: (b as any).room_number || (b as any).assigned_room || 'N/A',
+          totalAmount: total,
+          paidAmount: paid,
+          balance: bal,
+        };
+      })
+      .filter((b) => b.balance > 0);
+
+    const outstanding = outstandingBookings.reduce((sum, b) => sum + b.balance, 0);
 
     // --- Section E: Cash Register & Shifts ---
     const dailyExpensesList = (expenses || []).filter((e) => {
@@ -308,6 +359,8 @@ export class NightAuditService {
       generatedAt: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }),
       cutoffTime: '23:59:59 IST',
       hotelName: 'Sri Tayi Grand',
+      isTest: Boolean(isTest),
+      outstandingBalancesList: outstandingBookings,
       occupancy: {
         totalRooms,
         occupiedRooms,
@@ -395,18 +448,26 @@ export class NightAuditService {
   }
 
   public async runNightAudit(
-    businessDate: string,
-    overrideRecipients?: Partial<NightAuditRecipient>[],
-    triggeredBy = 'system'
-  ): Promise<{
-    success: boolean;
-    businessDate: string;
-    auditId: string;
-    data: AuditReportData;
-    deliveries: NightAuditDeliveryStatus[];
-    pdfPath?: string;
-    pdfFilename?: string;
-  }> {
+    arg: string | RunNightAuditOptions,
+    legacyOverrideRecipients?: Partial<NightAuditRecipient>[],
+    legacyTriggeredBy?: string
+  ): Promise<NightAuditRunResult> {
+    const options: RunNightAuditOptions =
+      typeof arg === 'string'
+        ? {
+            businessDate: arg,
+            overrideRecipients: legacyOverrideRecipients,
+            triggeredBy: legacyTriggeredBy || 'system',
+            runType: legacyOverrideRecipients ? 'manual' : 'scheduled',
+          }
+        : arg;
+
+    const businessDate = options.businessDate;
+    const runType = options.runType || (options.overrideRecipients ? 'manual' : 'scheduled');
+    const triggeredBy = options.triggeredBy || 'system';
+    const forceReaudit = Boolean(options.forceReaudit);
+    const isTest = options.isTest !== undefined ? options.isTest : runType === 'test';
+
     await repo.ensureSettingsLoaded();
     const settings = repo.getSettings();
     let config = settings.night_audit_config;
@@ -420,24 +481,64 @@ export class NightAuditService {
       }
     } catch {}
 
-    const auditId = `AUDIT-${businessDate.replace(/-/g, '')}-${Date.now().toString().slice(-4)}`;
+    // Idempotency check for scheduled executions:
+    // If a scheduled audit for this businessDate has already completed successfully, return the existing record unless forceReaudit is explicitly requested.
+    if (runType === 'scheduled' && !forceReaudit) {
+      try {
+        const recentRuns = await loadDailyAuditRunsFromSupabase(10);
+        const existingRun = recentRuns.find(
+          (r) => r.business_date === businessDate && r.status === 'completed' && r.run_type === 'scheduled'
+        );
+        if (existingRun && existingRun.summary_json) {
+          console.log(`[NIGHT AUDIT] Idempotent guard: Scheduled audit for ${businessDate} already exists (${existingRun.id}).`);
+          return {
+            success: true,
+            businessDate,
+            auditId: existingRun.id,
+            data: existingRun.summary_json,
+            deliveries: (existingRun.deliveries as any) || [],
+            pdfPath: existingRun.pdf_path,
+            pdfFilename: existingRun.pdf_filename,
+            isIdempotentReplay: true,
+          };
+        }
+      } catch (err: any) {
+        console.warn('[NIGHT AUDIT IDEMPOTENCY CHECK WARN]', err.message);
+      }
+    }
+
+    const typePrefix = runType === 'test' ? 'TEST' : runType === 'manual' ? 'MANUAL' : 'AUDIT';
+    const auditId = `STG-${typePrefix}-${businessDate.replace(/-/g, '')}-${Date.now().toString().slice(-4)}`;
 
     // 1. Record run as in_progress in Supabase
     await recordDailyAuditRunToSupabase({
       id: auditId,
       business_date: businessDate,
-      run_type: overrideRecipients ? 'manual' : 'scheduled',
+      run_type: runType,
       status: 'in_progress',
       triggered_by: triggeredBy,
       started_at: new Date().toISOString(),
     });
 
+    await recordAuditExecutionLogToSupabase({
+      audit_run_id: auditId,
+      event_type: 'AUDIT_INITIATED',
+      event_details: `Execution started for businessDate ${businessDate} (type: ${runType}, triggeredBy: ${triggeredBy}).`,
+    });
+
     try {
       // 2. Calculate Real-Time Audit Data
-      const data = await this.generateAuditData(businessDate, auditId);
+      const data = await this.generateAuditData(businessDate, auditId, isTest);
+
+      await recordAuditExecutionLogToSupabase({
+        audit_run_id: auditId,
+        event_type: 'DATA_EXTRACTED',
+        event_details: `Extracted live PMS metrics: ${data.bookingSummary?.totalReservations || 0} active bookings, Rs. ${(data.revenue?.grossRevenue || 0).toLocaleString('en-IN')} gross rev.`,
+      });
 
       // 3. Generate Official Multi-Page PDF
       const pdfBuffer = await this.pdfService.generateReportPdf(data);
+      const sha256Checksum = crypto.createHash('sha256').update(pdfBuffer).digest('hex');
 
       // 4. Save PDF to persistent disk storage
       const reportsDir = path.join(process.cwd(), 'public', 'reports', 'night-audit');
@@ -449,30 +550,72 @@ export class NightAuditService {
       fs.writeFileSync(fullPdfDiskPath, pdfBuffer);
       const publicPdfUrl = `/reports/night-audit/${pdfFilename}`;
 
-      // 5. Determine Active Recipients
+      await recordAuditExecutionLogToSupabase({
+        audit_run_id: auditId,
+        event_type: 'PDF_GENERATED',
+        event_details: `Saved PDF (${pdfFilename}, ${pdfBuffer.length} bytes, SHA-256: ${sha256Checksum.slice(0, 12)}...).`,
+      });
+
+      // 5. Persist immutable Report Snapshot & File metadata in Supabase
+      await recordAuditReportSnapshotToSupabase({
+        audit_run_id: auditId,
+        business_date: businessDate,
+        snapshot_json: data,
+        cutoff_timestamp: new Date().toISOString(),
+      });
+
+      await recordAuditReportFileToSupabase({
+        audit_run_id: auditId,
+        filename: pdfFilename,
+        file_path: publicPdfUrl,
+        file_size_bytes: pdfBuffer.length,
+        mime_type: 'application/pdf',
+        sha256_checksum: sha256Checksum,
+      });
+
+      // 6. Record exceptions if any discrepancy exists
+      const isReconciled = (data.cashRegister?.discrepancy || 0) === 0;
+      if (!isReconciled) {
+        await recordAuditExceptionToSupabase({
+          audit_run_id: auditId,
+          severity: 'warning',
+          exception_type: 'cash_discrepancy',
+          message: `Cash register variance of Rs. ${data.cashRegister?.discrepancy} noted during audit.`,
+        });
+      }
+      if ((data.occupancy?.maintenanceRooms || 0) > 0) {
+        await recordAuditExceptionToSupabase({
+          audit_run_id: auditId,
+          severity: 'info',
+          exception_type: 'maintenance_hold',
+          message: `${data.occupancy.maintenanceRooms} room(s) under maintenance hold.`,
+        });
+      }
+
+      // 7. Determine Active Recipients
       const deliveries: NightAuditDeliveryStatus[] = [];
       const activeRecipients: Partial<NightAuditRecipient>[] =
-        overrideRecipients ||
+        options.overrideRecipients ||
         (config?.recipients?.filter((r) => r.is_active) ?? [
-          { channel: 'email', address: 'byvaynex@gmail.com', name: 'Technical Director (Vaynex)' },
-          { channel: 'email', address: 'contact@sritayigrand.com', name: 'Sri Tayi Grand Management' },
+          { channel: 'email', address: 'byvaynex@gmail.com', name: 'Technical Admin (Vaynex)', role: 'Technical Admin' },
+          { channel: 'email', address: 'contact@sritayigrand.com', name: 'Sri Tayi Grand Official', role: 'Official' },
         ]);
 
       const isEmailEnabled = config ? config.email_enabled : true;
       const isWhatsappEnabled = config ? config.whatsapp_enabled : false;
 
-      // 6. Deliver to Each Recipient
+      // 8. Deliver to Each Recipient
       for (const r of activeRecipients) {
         const dest = (r.address || r.recipient_address || '').trim();
         const rName = r.name || r.recipient_name || 'Recipient';
         if (!dest) continue;
 
         if (r.channel === 'email') {
-          if (!isEmailEnabled && !overrideRecipients) {
+          if (!isEmailEnabled && !options.overrideRecipients) {
             deliveries.push({ address: dest, recipientName: rName, channel: 'email', status: 'disabled' });
             await recordAuditDispatchLogToSupabase({
-              id: `disp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
               audit_run_id: auditId,
+              recipient_id: r.id,
               recipient_name: rName,
               channel: 'email',
               destination: dest,
@@ -504,8 +647,8 @@ export class NightAuditService {
           });
 
           await recordAuditDispatchLogToSupabase({
-            id: `disp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
             audit_run_id: auditId,
+            recipient_id: r.id,
             recipient_name: rName,
             channel: 'email',
             destination: dest,
@@ -515,11 +658,11 @@ export class NightAuditService {
             error_message: sendResult.error,
           });
         } else if (r.channel === 'whatsapp') {
-          if (!isWhatsappEnabled && !overrideRecipients) {
+          if (!isWhatsappEnabled && !options.overrideRecipients) {
             deliveries.push({ address: dest, recipientName: rName, channel: 'whatsapp', status: 'disabled' });
             await recordAuditDispatchLogToSupabase({
-              id: `disp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
               audit_run_id: auditId,
+              recipient_id: r.id,
               recipient_name: rName,
               channel: 'whatsapp',
               destination: dest,
@@ -551,8 +694,8 @@ export class NightAuditService {
           });
 
           await recordAuditDispatchLogToSupabase({
-            id: `disp-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
             audit_run_id: auditId,
+            recipient_id: r.id,
             recipient_name: rName,
             channel: 'whatsapp',
             destination: dest,
@@ -564,21 +707,29 @@ export class NightAuditService {
         }
       }
 
-      // 7. Update Audit Run Status in Supabase
+      // 9. Update Audit Run Status in Supabase
       await updateDailyAuditRunInSupabase(auditId, {
         status: 'completed',
         summary_json: data,
         pdf_path: publicPdfUrl,
         pdf_filename: pdfFilename,
+        reconciled: isReconciled,
+        discrepancy_amount: Math.abs(data.cashRegister?.discrepancy || 0),
         completed_at: new Date().toISOString(),
       });
 
-      // 8. Record in System Audit Trail
+      await recordAuditExecutionLogToSupabase({
+        audit_run_id: auditId,
+        event_type: 'AUDIT_COMPLETED',
+        event_details: `Completed in-full. Reconciled=${isReconciled}. Delivered to ${deliveries.length} recipient(s).`,
+      });
+
+      // 10. Record in System Audit Trail
       repo.recordAuditLog({
         action: 'EXECUTE_NIGHT_AUDIT',
         entityType: 'system',
         entityId: auditId,
-        details: `Night Audit executed for ${businessDate}. PDF generated (${pdfFilename}). Dispatched to ${deliveries.length} recipient(s).`,
+        details: `Night Audit (${runType}) executed for ${businessDate}. PDF generated (${pdfFilename}). Dispatched to ${deliveries.length} recipient(s).`,
         userName: triggeredBy === 'system' ? 'Automated Cron Engine' : triggeredBy,
         userRole: 'System',
         userId: 'stf-sys-audit',
@@ -592,6 +743,7 @@ export class NightAuditService {
         deliveries,
         pdfPath: publicPdfUrl,
         pdfFilename,
+        sha256: sha256Checksum,
       };
     } catch (err: any) {
       console.error('[NIGHT AUDIT EXECUTION ERROR]', err);
@@ -599,6 +751,11 @@ export class NightAuditService {
         status: 'failed',
         error_log: err.message || 'Night audit execution failure',
         completed_at: new Date().toISOString(),
+      });
+      await recordAuditExecutionLogToSupabase({
+        audit_run_id: auditId,
+        event_type: 'AUDIT_FAILED',
+        event_details: `Execution failed: ${err.message}`,
       });
       throw err;
     }

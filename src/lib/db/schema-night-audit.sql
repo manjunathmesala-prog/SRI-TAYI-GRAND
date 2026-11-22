@@ -21,6 +21,12 @@ CREATE TABLE IF NOT EXISTS night_audit_settings (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE night_audit_settings ADD COLUMN IF NOT EXISTS auto_retry_enabled BOOLEAN NOT NULL DEFAULT TRUE;
+ALTER TABLE night_audit_settings ADD COLUMN IF NOT EXISTS max_retry_attempts INTEGER NOT NULL DEFAULT 3;
+ALTER TABLE night_audit_settings ADD COLUMN IF NOT EXISTS last_run_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE night_audit_settings ADD COLUMN IF NOT EXISTS next_run_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE night_audit_settings ADD COLUMN IF NOT EXISTS last_status TEXT DEFAULT 'pending';
+
 -- Alias view for audit_scheduler_settings
 CREATE OR REPLACE VIEW audit_scheduler_settings AS 
 SELECT * FROM night_audit_settings;
@@ -37,9 +43,14 @@ CREATE TABLE IF NOT EXISTS night_audit_recipients (
     consent_status TEXT NOT NULL DEFAULT 'granted',
     created_by TEXT DEFAULT 'Super Admin',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT uq_recipient_channel_address UNIQUE (hotel_id, channel, recipient_address)
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
+
+ALTER TABLE night_audit_recipients ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'General Manager';
+ALTER TABLE night_audit_recipients ADD COLUMN IF NOT EXISTS created_by TEXT DEFAULT 'Super Admin';
+ALTER TABLE night_audit_recipients ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP;
+
+CREATE UNIQUE INDEX IF NOT EXISTS uq_recipient_channel_address ON night_audit_recipients (hotel_id, channel, lower(recipient_address));
 
 -- Alias view for audit_recipients
 CREATE OR REPLACE VIEW audit_recipients AS 
@@ -61,6 +72,15 @@ CREATE TABLE IF NOT EXISTS daily_audit_runs (
     started_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     completed_at TIMESTAMP WITH TIME ZONE
 );
+
+ALTER TABLE daily_audit_runs ADD COLUMN IF NOT EXISTS reconciled BOOLEAN NOT NULL DEFAULT TRUE;
+ALTER TABLE daily_audit_runs ADD COLUMN IF NOT EXISTS discrepancy_amount NUMERIC(12, 2) NOT NULL DEFAULT 0.00;
+ALTER TABLE daily_audit_runs ADD COLUMN IF NOT EXISTS run_type TEXT NOT NULL DEFAULT 'scheduled';
+ALTER TABLE daily_audit_runs ADD COLUMN IF NOT EXISTS triggered_by TEXT NOT NULL DEFAULT 'Vercel Cron Trigger';
+ALTER TABLE daily_audit_runs ADD COLUMN IF NOT EXISTS summary_json JSONB NOT NULL DEFAULT '{}'::jsonb;
+ALTER TABLE daily_audit_runs ADD COLUMN IF NOT EXISTS pdf_path TEXT;
+ALTER TABLE daily_audit_runs ADD COLUMN IF NOT EXISTS pdf_filename TEXT;
+ALTER TABLE daily_audit_runs ADD COLUMN IF NOT EXISTS error_log TEXT;
 
 CREATE INDEX IF NOT EXISTS idx_audit_runs_date ON daily_audit_runs(business_date DESC);
 CREATE INDEX IF NOT EXISTS idx_audit_runs_status ON daily_audit_runs(status);
@@ -147,7 +167,7 @@ VALUES
     ('rec-accounts-dept', 'sri-tayi-grand', 'email', 'Accounts Department', 'accounts@sritayigrand.com', 'Accounts Department', true, 'granted', 'System Seed'),
     ('rec-mgmt-official', 'sri-tayi-grand', 'email', 'Sri Tayi Grand Official', 'contact@sritayigrand.com', 'Official', true, 'granted', 'System Seed'),
     ('rec-tech-vaynex', 'sri-tayi-grand', 'email', 'Technical Admin (Vaynex)', 'byvaynex@gmail.com', 'Technical Admin', true, 'granted', 'System Seed')
-ON CONFLICT (hotel_id, channel, recipient_address) 
+ON CONFLICT (hotel_id, channel, lower(recipient_address)) 
 DO UPDATE SET
     recipient_name = EXCLUDED.recipient_name,
     role = EXCLUDED.role,

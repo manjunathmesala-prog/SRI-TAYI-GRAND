@@ -24,8 +24,14 @@ export async function POST(req: NextRequest) {
       overrideRecipients = [{ channel: 'whatsapp' as const, address: String(body.testPhone).trim(), name: 'Test Recipient' }];
     }
 
-    const triggerName = auth.session?.name ? `${auth.session.name} (${auth.session.role})` : 'Authorized Staff';
-    const result = await auditService.runNightAudit(businessDate, overrideRecipients, triggerName);
+    const triggerName = auth.session?.name ? `${auth.session.name} (${auth.session.role})` : 'Authorized Staff (Manual Test)';
+    const result = await auditService.runNightAudit({
+      businessDate,
+      runType: 'test',
+      isTest: true,
+      overrideRecipients,
+      triggeredBy: triggerName,
+    });
 
     return NextResponse.json({
       success: true,

@@ -803,6 +803,8 @@ export interface NightAuditRecipient {
   id: string;
   channel: 'email' | 'whatsapp';
   is_active: boolean;
+  role?: string;
+  created_by?: string;
 
   // PMS / UI shorthand fields
   name?: string;
@@ -814,6 +816,7 @@ export interface NightAuditRecipient {
   hotel_id?: string;
   consent_status?: 'pending' | 'granted' | 'revoked';
   created_at?: string;
+  updated_at?: string;
 }
 
 export type NightAuditStatus = 'pending' | 'in_progress' | 'completed' | 'failed' | 'exception';

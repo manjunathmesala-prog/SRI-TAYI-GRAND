@@ -152,3 +152,49 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
+
+export async function DELETE(req: NextRequest) {
+  try {
+    const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Accounts']);
+    if (!auth.authorized) {
+      return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
+    }
+
+    const url = new URL(req.url);
+    const recipientId = url.searchParams.get('recipientId');
+
+    if (!recipientId) {
+      return NextResponse.json({ success: false, error: 'recipientId is required' }, { status: 400 });
+    }
+
+    await repo.ensureSettingsLoaded();
+    const currentSettings = repo.getSettings();
+    const currentConfig = currentSettings.night_audit_config;
+
+    if (currentConfig && Array.isArray(currentConfig.recipients)) {
+      currentConfig.recipients = currentConfig.recipients.filter((r) => r.id !== recipientId);
+      repo.updateSettings({ night_audit_config: currentConfig });
+    }
+
+    const { deleteNightAuditRecipientFromSupabase } = await import('@/lib/db/supabase-sync');
+    await deleteNightAuditRecipientFromSupabase(recipientId);
+
+    repo.recordAuditLog({
+      action: 'DELETE_NIGHT_AUDIT_RECIPIENT',
+      entityType: 'system',
+      entityId: recipientId,
+      details: `Removed night audit recipient ${recipientId}`,
+      userName: auth.session?.name || 'Authorized Staff',
+      userRole: auth.session?.role || 'Staff',
+      userId: auth.session?.userId || 'stf-sys',
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: 'Recipient removed successfully',
+      recipientId,
+    });
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+  }
+}
