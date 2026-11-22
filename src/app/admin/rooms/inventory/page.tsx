@@ -136,32 +136,22 @@ export default function RoomInventoryPage() {
   };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto">
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]/60">
         <div>
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
-            {isTelugu ? 'హోటల్ ఇన్వెంటరీ' : 'HOTEL INVENTORY'}
-          </span>
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-0.5 flex items-center gap-2">
-            <BedDouble className="w-6 h-6 text-[#D8AD56]" />
-            <span>{t('rooms.title', 'Physical Rooms Register')}</span>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] tracking-tight">
+            {t('rooms.title', 'Room Inventory')}
           </h1>
-          <p className="text-xs text-[#786B61] mt-0.5">
-            {t(
-              'rooms.subtitle',
-              'Monitor real-time room occupancies, housekeeping readiness, and maintenance statuses across Floors 1 to 3.'
-            )}
-          </p>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={() => fetchRooms()}
-            className="px-3.5 py-2 rounded-xl border border-[#D8AD56]/40 hover:bg-[#FAF7F2] text-xs font-semibold text-[#382216] transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+            className="p-2.5 rounded-xl border border-[#E6D9C5] bg-white text-[#786A5B] hover:text-[#2A1D13] hover:bg-[#FAF8F5] transition-colors shadow-xs cursor-pointer flex items-center gap-1.5"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-            <span>{t('common.refresh', 'Refresh State')}</span>
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#8D672F]' : ''}`} />
+            <span>{t('common.refresh', 'Refresh')}</span>
           </button>
         </div>
       </div>
@@ -174,11 +164,11 @@ export default function RoomInventoryPage() {
       )}
 
       {/* Filters Bar */}
-      <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-4 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-[#786B61]" />
-          <span className="text-xs font-semibold text-[#241912]">
-            {isTelugu ? 'ఫిల్టర్:' : 'Filter By:'}
+          <Filter className="w-4 h-4 text-[#786A5B]" />
+          <span className="text-xs font-semibold text-[#2A1D13]">
+            {isTelugu ? 'ఫిల్టర్:' : 'Filter:'}
           </span>
 
           <div className="w-44">
@@ -214,7 +204,7 @@ export default function RoomInventoryPage() {
           </div>
         </div>
 
-        <div className="text-xs text-[#786B61]">
+        <div className="text-xs text-[#786A5B]">
           {isTelugu ? (
             <>
               మొత్తం <strong>{rooms.length}</strong> గదులలో <strong>{filteredRooms.length}</strong> చూపిస్తోంది
@@ -233,7 +223,7 @@ export default function RoomInventoryPage() {
           return (
             <div
               key={room.id}
-              className="bg-white rounded-2xl border border-[#EFE3D6] p-4 shadow-xs hover:border-[#D8AD56]/60 transition-all flex flex-col justify-between space-y-3"
+              className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-4 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:border-[#8D672F]/60 transition-all flex flex-col justify-between space-y-3"
             >
               <div>
                 <div className="flex items-center justify-between pb-2 border-b border-[#FAF7F2]">

@@ -255,51 +255,38 @@ export default function AdminReviewsPage() {
       {/* =========================================================================
           TOP BANNER & ACTIONS
           ========================================================================= */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]/60">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
-              CONTENT & SOCIAL PROOF
-            </span>
-            <span className="text-gray-300">•</span>
-            <span className="text-[10px] text-[#786B61] font-medium">Sri Tayi Grand, Kadiri</span>
-          </div>
-
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-0.5 flex items-center gap-2.5">
-            <MessageSquareQuote className="w-7 h-7 text-[#D8AD56]" />
-            <span>Guest Reviews & Experiences</span>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] tracking-tight">
+            Guest Reviews
           </h1>
-
-          <p className="text-xs text-[#786B61] mt-0.5">
-            Curate, feature, and manage authentic 5-star Google Travel guest reviews shown on the public directory.
-          </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 shrink-0">
           <button
             onClick={fetchReviews}
             disabled={loading}
-            className="p-2.5 rounded-xl border border-[#D8AD56]/30 text-[#786B61] hover:text-[#241912] hover:bg-[#FAF7F2] transition-colors"
+            className="p-2.5 rounded-xl border border-[#E6D9C5] bg-white text-[#786A5B] hover:text-[#2A1D13] hover:bg-[#FAF8F5] transition-colors shadow-xs cursor-pointer"
             title="Refresh reviews"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#D8AD56]' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#8D672F]' : ''}`} />
           </button>
 
           <a
             href="/testimonials"
             target="_blank"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-[#D8AD56]/40 text-xs font-semibold text-[#241912] hover:bg-[#FAF7F2] transition-colors"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-[#E6D9C5] bg-white text-xs font-semibold text-[#2A1D13] hover:bg-[#FAF8F5] transition-colors shadow-xs cursor-pointer"
           >
-            <span>View Public Page</span>
-            <ExternalLink className="w-3.5 h-3.5 text-[#D8AD56]" />
+            <span>Public Page</span>
+            <ExternalLink className="w-3.5 h-3.5 text-[#8D672F]" />
           </a>
 
           <button
             onClick={() => setIsImportModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#25150F] hover:bg-[#382216] text-[#D8AD56] text-xs font-semibold tracking-wider transition-all duration-200 shadow-sm border border-[#D8AD56]/40"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] text-xs font-semibold tracking-wide transition-all shadow-sm cursor-pointer active:scale-98"
           >
             <Plus className="w-4 h-4" />
-            <span>Import Pasted Review</span>
+            <span>Import Review</span>
           </button>
         </div>
       </div>
@@ -336,48 +323,44 @@ export default function AdminReviewsPage() {
           KEY METRICS / STATS CARDS
           ========================================================================= */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-white rounded-2xl border border-[#EFE3D6] p-4 shadow-sm">
+        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] uppercase tracking-wider text-[#786B61] font-semibold">
+            <span className="text-[11px] uppercase tracking-wider text-[#786A5B] font-semibold">
               Total Reviews
             </span>
-            <span className="w-2 h-2 rounded-full bg-[#D8AD56]" />
+            <span className="w-2 h-2 rounded-full bg-[#8D672F]" />
           </div>
-          <div className="mt-2 text-2xl font-serif font-bold text-[#241912]">{totalCount}</div>
-          <div className="text-[10px] text-[#8C7A6B] mt-0.5">Strictly 5-Star Authenticated</div>
+          <div className="text-2xl font-serif font-bold text-[#2A1D13]">{totalCount}</div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#EFE3D6] p-4 shadow-sm">
+        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] uppercase tracking-wider text-[#786B61] font-semibold">
+            <span className="text-[11px] uppercase tracking-wider text-[#786A5B] font-semibold">
               Featured on Home
             </span>
-            <Sparkles className="w-3.5 h-3.5 text-[#D8AD56]" />
+            <Sparkles className="w-3.5 h-3.5 text-[#8D672F]" />
           </div>
-          <div className="mt-2 text-2xl font-serif font-bold text-[#241912]">{featuredCount}</div>
-          <div className="text-[10px] text-green-700 mt-0.5 font-medium">Highlighted Showcase</div>
+          <div className="text-2xl font-serif font-bold text-[#2A1D13]">{featuredCount}</div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#EFE3D6] p-4 shadow-sm">
+        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] uppercase tracking-wider text-[#786B61] font-semibold">
+            <span className="text-[11px] uppercase tracking-wider text-[#786A5B] font-semibold">
               Publicly Active
             </span>
             <Eye className="w-3.5 h-3.5 text-blue-600" />
           </div>
-          <div className="mt-2 text-2xl font-serif font-bold text-[#241912]">{publishedCount}</div>
-          <div className="text-[10px] text-[#8C7A6B] mt-0.5">Visible on /testimonials</div>
+          <div className="text-2xl font-serif font-bold text-[#2A1D13]">{publishedCount}</div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#EFE3D6] p-4 shadow-sm">
+        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] uppercase tracking-wider text-[#786B61] font-semibold">
+            <span className="text-[11px] uppercase tracking-wider text-[#786A5B] font-semibold">
               Rating Only
             </span>
-            <Star className="w-3.5 h-3.5 text-[#D8AD56]" />
+            <Star className="w-3.5 h-3.5 text-[#8D672F]" />
           </div>
-          <div className="mt-2 text-2xl font-serif font-bold text-[#241912]">{ratingOnlyCount}</div>
-          <div className="text-[10px] text-[#8C7A6B] mt-0.5">5-star rating without text</div>
+          <div className="text-2xl font-serif font-bold text-[#2A1D13]">{ratingOnlyCount}</div>
         </div>
       </div>
 

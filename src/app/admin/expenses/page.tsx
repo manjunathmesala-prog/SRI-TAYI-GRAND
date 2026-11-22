@@ -199,80 +199,67 @@ export default function AdminExpensesPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]/60">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#D8AD56] bg-[#D8AD56]/10 px-2 py-0.5 rounded-full">
-              Financial Disbursements
-            </span>
-            <span className="text-xs text-[#786B61]">Operational Outflows</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#241912] mt-1 flex items-center gap-2">
-            <TrendingDown className="w-7 h-7 text-[#D8AD56]" />
-            <span>Operating Expenses & Bills</span>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#2A1D13] tracking-tight">
+            Operating Expenses
           </h1>
-          <p className="text-xs text-[#786B61] mt-0.5">
-            Record hotel supplies, linen laundry, power & generator diesel, and vendor payments with automated cashbook deduction.
-          </p>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={fetchExpenses}
-            className="px-3.5 py-2 rounded-xl border border-[#EFE3D6] bg-white hover:bg-[#FAF7F2] text-xs font-semibold text-[#241912] flex items-center gap-1.5 transition-colors shadow-sm"
+            className="p-2.5 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF8F5] text-xs font-semibold text-[#786A5B] flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-[#D8AD56] ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-[#8D672F] ${loading ? 'animate-spin' : ''}`} />
             <span>Refresh</span>
           </button>
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="px-4 py-2 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-colors"
+            className="px-4 py-2.5 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] text-xs font-semibold tracking-wide flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer active:scale-98"
           >
             <Plus className="w-3.5 h-3.5" />
-            <span>Record New Expense</span>
+            <span>Record Expense</span>
           </button>
         </div>
       </div>
 
       {/* 3 Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-gradient-to-br from-[#241912] via-[#382216] to-[#1E110A] text-white rounded-2xl p-5 border border-[#D8AD56]/40 shadow-xl">
-          <span className="text-xs text-[#EFE3D6]/80 font-medium">Total Operating Outflows</span>
-          <div className="text-3xl font-serif font-black text-[#D8AD56] tracking-tight mt-2">
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
+          <span className="text-xs uppercase tracking-wider text-[#786A5B] font-semibold">Total Operating Outflows</span>
+          <div className="text-2xl sm:text-3xl font-serif font-bold text-[#2A1D13] tracking-tight mt-1">
             ₹{totalSpent.toLocaleString('en-IN')}
           </div>
-          <div className="text-[11px] text-[#EFE3D6]/70 mt-1">Across {expenses.length} approved expense vouchers</div>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-[#EFE3D6] shadow-sm space-y-1">
-          <div className="flex items-center justify-between text-xs text-rose-700 font-semibold">
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
+          <div className="flex items-center justify-between text-xs text-rose-700 font-semibold uppercase tracking-wider">
             <span>Cash Disbursements</span>
             <Banknote className="w-4 h-4 text-rose-600" />
           </div>
-          <div className="text-2xl font-serif font-bold text-rose-600">
+          <div className="text-2xl sm:text-3xl font-serif font-bold text-rose-600 mt-1">
             ₹{cashSpent.toLocaleString('en-IN')}
           </div>
-          <p className="text-[10px] text-[#786B61]">Auto-deducted from Front Desk Cash Drawer</p>
         </div>
 
-        <div className="bg-white rounded-2xl p-5 border border-[#EFE3D6] shadow-sm space-y-1">
-          <div className="flex items-center justify-between text-xs text-blue-700 font-semibold">
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
+          <div className="flex items-center justify-between text-xs text-blue-700 font-semibold uppercase tracking-wider">
             <span>UPI / Bank Transfer</span>
             <CreditCard className="w-4 h-4 text-blue-600" />
           </div>
-          <div className="text-2xl font-serif font-bold text-blue-600">
+          <div className="text-2xl sm:text-3xl font-serif font-bold text-blue-600 mt-1">
             ₹{upiSpent.toLocaleString('en-IN')}
           </div>
-          <p className="text-[10px] text-[#786B61]">Direct vendor QR / IMPS bank settlements</p>
         </div>
       </div>
 
       {/* Expense Ledger Table */}
-      <div className="bg-white rounded-3xl p-6 border border-[#EFE3D6] shadow-sm space-y-4">
+      <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <h2 className="font-serif font-bold text-lg text-[#241912] flex items-center gap-2">
-            <FileText className="w-5 h-5 text-[#D8AD56]" />
-            <span>Property Operating Expense Vouchers</span>
+          <h2 className="font-serif font-bold text-base text-[#2A1D13] flex items-center gap-2">
+            <FileText className="w-4 h-4 text-[#8D672F]" />
+            <span>Expense Vouchers</span>
           </h2>
 
           <div className="flex flex-wrap items-center gap-2">

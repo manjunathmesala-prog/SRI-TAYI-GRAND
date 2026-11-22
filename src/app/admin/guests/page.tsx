@@ -272,123 +272,117 @@ export default function GuestsAdminPage() {
       )}
 
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]/80">
         <div>
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
-            GUEST CRM & VIP REGISTRY
-          </span>
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-0.5 flex items-center gap-2">
-            <Users className="w-6 h-6 text-[#D8AD56]" />
-            <span>Guest Profiles & Lifetime Stays</span>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] flex items-center gap-2.5">
+            <Users className="w-6 h-6 text-[#8D672F]" />
+            <span>Guest Directory</span>
           </h1>
-          <p className="text-xs text-[#786B61] mt-0.5">
-            VIP tiers, stay frequency, cumulative spend, stay preferences, and security blacklisting.
-          </p>
         </div>
 
         {/* Search & Export */}
         <div className="flex items-center gap-2 w-full sm:w-auto">
           <div className="relative w-full sm:w-72">
-            <Search className="w-4 h-4 text-[#786B61] absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#786A5B] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search guest name, phone, preference..."
-              className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-[#EFE3D6] bg-white text-[#241912] focus:border-[#D8AD56] focus:outline-none shadow-sm"
+              className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-[#E6D9C5] bg-white text-[#2A1D13] focus:border-[#8D672F] focus:outline-none shadow-xs placeholder-[#A39587]"
             />
           </div>
           <button
             onClick={() => { window.location.href = '/api/admin/guests?export=csv'; }}
-            className="px-3.5 py-2.5 rounded-xl bg-white border border-[#EFE3D6] hover:bg-[#FAF7F2] text-[#382216] text-xs font-semibold flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer"
+            className="px-3.5 py-2.5 rounded-xl bg-white border border-[#E6D9C5] hover:bg-[#FAF6EE] text-[#2A1D13] text-xs font-semibold flex items-center gap-1.5 shadow-xs shrink-0 cursor-pointer transition-all"
             title="Export Guest Directory to CSV"
           >
-            <Download className="w-3.5 h-3.5 text-[#D8AD56]" />
+            <Download className="w-3.5 h-3.5 text-[#8D672F]" />
             <span className="hidden sm:inline">Export CSV</span>
           </button>
         </div>
       </div>
 
       {/* Tier Filter Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-[#EFE3D6] pb-2">
+      <div className="flex items-center gap-1.5 bg-[#FAF6EE] p-1.5 rounded-2xl overflow-x-auto no-scrollbar w-fit border border-[#E6D9C5]/60">
         <button
           onClick={() => setTierFilter('all')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
             tierFilter === 'all'
-              ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
-              : 'bg-white text-[#786B61] hover:bg-[#FAF7F2]'
+              ? 'bg-[#2A1D13] text-[#FAF6EE] shadow-xs'
+              : 'text-[#786A5B] hover:text-[#2A1D13]'
           }`}
         >
           All Guests ({guests.length})
         </button>
         <button
           onClick={() => setTierFilter('vip_platinum')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
             tierFilter === 'vip_platinum'
-              ? 'bg-purple-900 text-purple-100 shadow-sm'
-              : 'bg-white text-purple-800 hover:bg-purple-50'
+              ? 'bg-[#8D672F] text-white shadow-xs'
+              : 'text-[#786A5B] hover:text-[#2A1D13]'
           }`}
         >
-          Platinum VIP ({guests.filter((g) => g.vip_tier === 'vip_platinum').length})
+          Platinum ({guests.filter((g) => g.vip_tier === 'vip_platinum').length})
         </button>
         <button
           onClick={() => setTierFilter('gold')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
             tierFilter === 'gold'
-              ? 'bg-amber-600 text-white shadow-sm'
-              : 'bg-white text-amber-700 hover:bg-amber-50'
+              ? 'bg-[#8D672F] text-white shadow-xs'
+              : 'text-[#786A5B] hover:text-[#2A1D13]'
           }`}
         >
           Gold ({guests.filter((g) => g.vip_tier === 'gold').length})
         </button>
         <button
           onClick={() => setTierFilter('silver')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
             tierFilter === 'silver'
-              ? 'bg-slate-700 text-white shadow-sm'
-              : 'bg-white text-slate-700 hover:bg-slate-100'
+              ? 'bg-[#8D672F] text-white shadow-xs'
+              : 'text-[#786A5B] hover:text-[#2A1D13]'
           }`}
         >
           Silver ({guests.filter((g) => g.vip_tier === 'silver').length})
         </button>
         <button
           onClick={() => setTierFilter('regular')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
             tierFilter === 'regular'
-              ? 'bg-stone-700 text-white shadow-sm'
-              : 'bg-white text-stone-700 hover:bg-stone-100'
+              ? 'bg-[#2A1D13] text-[#FAF6EE] shadow-xs'
+              : 'text-[#786A5B] hover:text-[#2A1D13]'
           }`}
         >
           Regular ({guests.filter((g) => !g.vip_tier || g.vip_tier === 'regular').length})
         </button>
         <button
           onClick={() => setTierFilter('blacklisted')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
             tierFilter === 'blacklisted'
-              ? 'bg-rose-800 text-white shadow-sm'
-              : 'bg-white text-rose-700 hover:bg-rose-50'
+              ? 'bg-rose-700 text-white shadow-xs'
+              : 'text-rose-700 hover:bg-rose-50'
           }`}
         >
-          Blacklisted ({guests.filter((g) => g.is_blacklisted).length})
+          Blocked ({guests.filter((g) => g.is_blacklisted).length})
         </button>
       </div>
 
       {/* Guest Directory Table */}
-      <div className="bg-white rounded-2xl border border-[#D8AD56]/30 shadow-luxury overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#FAF7F2] text-[#786B61] uppercase tracking-wider text-[10px] border-b border-[#EFE3D6]">
+            <thead className="bg-[#FAF8F5] text-[#786A5B] font-semibold text-[11px] border-b border-[#E6D9C5]/80">
               <tr>
-                <th className="py-3.5 px-4 font-semibold">Guest & Tier</th>
-                <th className="py-3.5 px-4 font-semibold">Contact (Call / WhatsApp)</th>
+                <th className="py-3.5 px-4 font-semibold">Guest</th>
+                <th className="py-3.5 px-4 font-semibold">Contact</th>
                 <th className="py-3.5 px-4 font-semibold">Location</th>
-                <th className="py-3.5 px-4 font-semibold">Stays & Cumulative Spend</th>
+                <th className="py-3.5 px-4 font-semibold">Stays &amp; Spend</th>
                 <th className="py-3.5 px-4 font-semibold">Preferences</th>
-                <th className="py-3.5 px-4 font-semibold">Security Status</th>
+                <th className="py-3.5 px-4 font-semibold">Status</th>
                 <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#EFE3D6] text-[#241912]">
+            <tbody className="divide-y divide-[#E6D9C5]/60 text-[#2A1D13]">
               {filteredGuests.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="py-12 text-center text-[#786B61]">

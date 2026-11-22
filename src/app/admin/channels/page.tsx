@@ -307,118 +307,85 @@ export default function AdminChannelsPage() {
         </div>
       )}
 
-      {/* Header Banner */}
-      <div className="bg-[#241912] text-[#FAF7F2] rounded-2xl p-6 md:p-8 border border-[#D8AD56]/30 shadow-xl relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-96 h-96 bg-gradient-to-bl from-[#D8AD56]/15 via-[#382216]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]/60">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#2A1D13] tracking-tight">
+            Channel Manager
+          </h1>
+        </div>
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-          <div>
-            <div className="flex items-center gap-2.5 mb-2">
-              <span className="px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-[#D8AD56]/20 text-[#D8AD56] border border-[#D8AD56]/40">
-                Tier-2 Distribution
-              </span>
-              <div
-                className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
-                  isConnected
-                    ? 'bg-emerald-950/60 text-emerald-300 border-emerald-600/40'
-                    : 'bg-amber-950/60 text-amber-300 border-amber-600/40'
-                }`}
-              >
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
-                  }`}
-                />
-                {isConnected ? '2-Way Live WebSocket Active' : 'Connecting Stream...'}
-              </div>
-            </div>
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-white tracking-wide">
-              OTA Channel Manager & Inventory Distribution
-            </h1>
-            <p className="text-[#FAF7F2]/70 text-sm mt-1 max-w-2xl leading-relaxed">
-              Bi-directional ARI (Availability, Rates & Inventory) synchronization across global Online
-              Travel Agencies with automated rate parity protection.
-            </p>
-          </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => fetchChannelsData(true)}
+            disabled={loading}
+            className="p-2.5 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF8F5] text-xs font-semibold text-[#786A5B] flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+            title="Refresh Channels Data"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-[#8D672F] ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
+          </button>
 
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => fetchChannelsData(true)}
-              disabled={loading}
-              className="px-4 py-2.5 rounded-xl border border-[#D8AD56]/30 bg-[#382216]/70 hover:bg-[#382216] text-[#D8AD56] font-medium text-xs flex items-center gap-2 transition-all shadow-sm"
-              title="Refresh Channels Data"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-              <span>Refresh</span>
-            </button>
-
-            <button
-              onClick={handleSyncAll}
-              disabled={syncAllLoading}
-              className="px-5 py-2.5 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white font-semibold text-xs flex items-center gap-2 shadow-lg transition-all border border-[#D8AD56]/40"
-            >
-              <ArrowRightLeft className={`w-3.5 h-3.5 ${syncAllLoading ? 'animate-spin' : ''}`} />
-              <span>{syncAllLoading ? 'Synchronizing All...' : 'Sync All Channels Now'}</span>
-            </button>
-          </div>
+          <button
+            onClick={handleSyncAll}
+            disabled={syncAllLoading}
+            className="px-4 py-2.5 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] font-semibold text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer active:scale-98"
+          >
+            <ArrowRightLeft className={`w-3.5 h-3.5 ${syncAllLoading ? 'animate-spin' : ''}`} />
+            <span>{syncAllLoading ? 'Syncing...' : 'Sync All Channels'}</span>
+          </button>
         </div>
       </div>
 
       {/* KPI Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-5 border border-[#D8AD56]/20 shadow-sm flex items-center justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-wider font-semibold text-[#8A5A2B]">
+            <p className="text-xs uppercase tracking-wider font-semibold text-[#786A5B]">
               Active Channels
             </p>
-            <p className="text-2xl font-serif font-bold text-[#241912] mt-1">
+            <p className="text-2xl font-serif font-bold text-[#2A1D13] mt-1">
               {connectedChannelsCount} / {channels.length}
             </p>
-            <p className="text-[11px] text-emerald-700 font-medium mt-1">
-              {Math.round((connectedChannelsCount / (channels.length || 1)) * 100)}% Global Coverage
-            </p>
           </div>
-          <div className="w-11 h-11 rounded-xl bg-[#FAF7F2] border border-[#D8AD56]/30 flex items-center justify-center text-[#D8AD56]">
-            <Globe className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-xl bg-[#FAF8F5] border border-[#E6D9C5] flex items-center justify-center text-[#8D672F]">
+            <Globe className="w-4 h-4" />
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-5 border border-[#D8AD56]/20 shadow-sm flex items-center justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-wider font-semibold text-[#8A5A2B]">
+            <p className="text-xs uppercase tracking-wider font-semibold text-[#786A5B]">
               Parity Protection
             </p>
-            <p className="text-2xl font-serif font-bold text-[#241912] mt-1">+15% Markup</p>
-            <p className="text-[11px] text-stone-500 mt-1">Covers 15-18% OTA Commission</p>
+            <p className="text-2xl font-serif font-bold text-[#2A1D13] mt-1">+15% Markup</p>
           </div>
-          <div className="w-11 h-11 rounded-xl bg-[#FAF7F2] border border-[#D8AD56]/30 flex items-center justify-center text-[#D8AD56]">
-            <ShieldCheck className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-xl bg-[#FAF8F5] border border-[#E6D9C5] flex items-center justify-center text-[#8D672F]">
+            <ShieldCheck className="w-4 h-4" />
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-5 border border-[#D8AD56]/20 shadow-sm flex items-center justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-wider font-semibold text-[#8A5A2B]">
+            <p className="text-xs uppercase tracking-wider font-semibold text-[#786A5B]">
               Sync Frequency
             </p>
-            <p className="text-2xl font-serif font-bold text-[#241912] mt-1">Instant ARI</p>
-            <p className="text-[11px] text-emerald-700 font-medium mt-1">Push on reservation change</p>
+            <p className="text-2xl font-serif font-bold text-[#2A1D13] mt-1">Instant ARI</p>
           </div>
-          <div className="w-11 h-11 rounded-xl bg-[#FAF7F2] border border-[#D8AD56]/30 flex items-center justify-center text-[#D8AD56]">
-            <Zap className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-xl bg-[#FAF8F5] border border-[#E6D9C5] flex items-center justify-center text-[#8D672F]">
+            <Zap className="w-4 h-4" />
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-5 border border-[#D8AD56]/20 shadow-sm flex items-center justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-wider font-semibold text-[#8A5A2B]">
+            <p className="text-xs uppercase tracking-wider font-semibold text-[#786A5B]">
               Sync Activity Logs
             </p>
-            <p className="text-2xl font-serif font-bold text-[#241912] mt-1">{syncLogs.length}</p>
-            <p className="text-[11px] text-stone-500 mt-1">Live audit trail tracked</p>
+            <p className="text-2xl font-serif font-bold text-[#2A1D13] mt-1">{syncLogs.length}</p>
           </div>
-          <div className="w-11 h-11 rounded-xl bg-[#FAF7F2] border border-[#D8AD56]/30 flex items-center justify-center text-[#D8AD56]">
-            <Clock className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-xl bg-[#FAF8F5] border border-[#E6D9C5] flex items-center justify-center text-[#8D672F]">
+            <Clock className="w-4 h-4" />
           </div>
         </div>
       </div>
@@ -427,12 +394,9 @@ export default function AdminChannelsPage() {
       <div>
         <div className="flex items-center justify-between mb-3">
           <div>
-            <h2 className="text-lg font-serif font-bold text-[#241912]">
-              Connected OTA Channels & Distribution Endpoints
+            <h2 className="text-base font-serif font-bold text-[#2A1D13]">
+              Connected Channels
             </h2>
-            <p className="text-xs text-stone-500">
-              Configure 2-way live sync and customize commission markup buffers per portal.
-            </p>
           </div>
         </div>
 

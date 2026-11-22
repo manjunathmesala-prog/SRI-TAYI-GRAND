@@ -298,138 +298,104 @@ export default function AdminStaffAttendancePage() {
         </div>
       )}
 
-      {/* Header Banner */}
-      <div className="bg-[#241912] border border-[#D8AD56]/30 rounded-2xl p-6 sm:p-8 text-[#FAF7F2] shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[#D8AD56]/15 via-transparent to-transparent pointer-events-none rounded-full blur-3xl" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <span className="px-3 py-1 rounded-full text-[11px] font-semibold tracking-wider uppercase bg-[#D8AD56]/20 text-[#D8AD56] border border-[#D8AD56]/40 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
-                Staff Operations Tier-3
-              </span>
-              <span className="text-xs text-[#FAF7F2]/60 flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-[#D8AD56]" />
-                Live Attendance &amp; Shifts
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white tracking-wide">
-              Staff Attendance &amp; Shift Roster
-            </h1>
-            <p className="text-sm text-[#FAF7F2]/80 max-w-2xl font-light">
-              Biometric check-in and shift duty allocation for Sri Tayi Grand hotel staff. Monitor
-              on-duty personnel, morning/evening/night coverage, and automated work hours computation.
-            </p>
-          </div>
+      {/* Clean Luxury Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E6D9C5]">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#2A1D13] tracking-tight">
+            Staff Attendance
+          </h1>
+          <p className="text-xs text-[#786A5B] mt-0.5">
+            Shift roster and duty logs
+          </p>
+        </div>
 
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => fetchAttendance()}
-              disabled={loading}
-              className="px-4 py-2.5 rounded-xl border border-white/20 hover:border-[#D8AD56] text-white hover:text-[#D8AD56] bg-white/5 transition-all text-xs font-medium flex items-center gap-2"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#D8AD56]' : ''}`} />
-              <span>Refresh Roster</span>
-            </button>
-            <button
-              onClick={() => setIsClockInModalOpen(true)}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D8AD56] to-[#C99C44] text-[#241912] font-semibold text-xs tracking-wide shadow-lg hover:shadow-[#D8AD56]/20 hover:scale-[1.02] transition-all flex items-center gap-2"
-            >
-              <UserCheck className="w-4 h-4 stroke-[2.5]" />
-              <span>Clock-In Staff</span>
-            </button>
-          </div>
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => fetchAttendance()}
+            disabled={loading}
+            className="px-3.5 py-2 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF8F5] text-xs font-medium text-[#786A5B] hover:text-[#2A1D13] transition-all flex items-center gap-2 shadow-xs"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#8D672F]' : ''}`} />
+            <span>Refresh</span>
+          </button>
+          <button
+            onClick={() => setIsClockInModalOpen(true)}
+            className="px-4 py-2 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] font-medium text-xs tracking-wide transition-all shadow-xs flex items-center gap-2"
+          >
+            <UserCheck className="w-3.5 h-3.5" />
+            <span>Clock-In Staff</span>
+          </button>
         </div>
       </div>
 
-      {/* Shift Metrics Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        {/* Total Staff */}
-        <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] uppercase tracking-wider font-semibold text-stone-500">
-              Total Staff
-            </span>
-            <Users className="w-4 h-4 text-stone-400" />
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+        <div className="bg-white rounded-2xl p-4 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)]">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[11px] font-medium uppercase tracking-wider text-[#786A5B]">Total Staff</span>
+            <Users className="w-4 h-4 text-[#8D672F]" />
           </div>
-          <p className="text-2xl font-bold font-mono text-[#241912]">{stats.totalStaff}</p>
-          <p className="text-xs text-stone-400 mt-0.5">Enrolled Personnel</p>
+          <p className="text-2xl font-bold font-serif text-[#2A1D13]">{stats.totalStaff}</p>
         </div>
 
-        {/* On-Duty Today */}
-        <div className="bg-white rounded-2xl p-5 border border-emerald-300 shadow-sm bg-gradient-to-b from-white to-emerald-50/20">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] uppercase tracking-wider font-semibold text-emerald-800">
-              On-Duty Today
-            </span>
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+        <div className="bg-white rounded-2xl p-4 border border-[#8D672F]/30 shadow-[0_4px_20px_rgba(33,24,15,0.03)] bg-gradient-to-b from-white to-[#FAF8F5]">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[11px] font-medium uppercase tracking-wider text-[#8D672F]">On-Duty Now</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
           </div>
-          <p className="text-2xl font-bold font-mono text-emerald-700">{stats.onDutyCount}</p>
-          <p className="text-xs text-emerald-600 mt-0.5">Currently Stationed</p>
+          <p className="text-2xl font-bold font-serif text-[#2A1D13]">{stats.onDutyCount}</p>
         </div>
 
-        {/* Morning Shift */}
-        <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] uppercase tracking-wider font-semibold text-stone-500">
-              Morning Shift
-            </span>
-            <Sun className="w-4 h-4 text-amber-500" />
+        <div className="bg-white rounded-2xl p-4 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)]">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[11px] font-medium uppercase tracking-wider text-[#786A5B]">Morning Shift</span>
+            <Sun className="w-4 h-4 text-[#8D672F]" />
           </div>
-          <p className="text-2xl font-bold font-mono text-stone-800">{stats.morningShiftCount}</p>
-          <p className="text-xs text-stone-400 mt-0.5">06:00 - 14:00</p>
+          <p className="text-2xl font-bold font-serif text-[#2A1D13]">{stats.morningShiftCount}</p>
         </div>
 
-        {/* Evening Shift */}
-        <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] uppercase tracking-wider font-semibold text-stone-500">
-              Evening Shift
-            </span>
-            <Sunset className="w-4 h-4 text-orange-500" />
+        <div className="bg-white rounded-2xl p-4 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)]">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[11px] font-medium uppercase tracking-wider text-[#786A5B]">Evening Shift</span>
+            <Sunset className="w-4 h-4 text-[#8D672F]" />
           </div>
-          <p className="text-2xl font-bold font-mono text-stone-800">{stats.eveningShiftCount}</p>
-          <p className="text-xs text-stone-400 mt-0.5">14:00 - 22:00</p>
+          <p className="text-2xl font-bold font-serif text-[#2A1D13]">{stats.eveningShiftCount}</p>
         </div>
 
-        {/* Night Shift */}
-        <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-sm">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] uppercase tracking-wider font-semibold text-stone-500">
-              Night Shift
-            </span>
-            <Moon className="w-4 h-4 text-indigo-500" />
+        <div className="bg-white rounded-2xl p-4 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)]">
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[11px] font-medium uppercase tracking-wider text-[#786A5B]">Night Shift</span>
+            <Moon className="w-4 h-4 text-[#8D672F]" />
           </div>
-          <p className="text-2xl font-bold font-mono text-stone-800">{stats.nightShiftCount}</p>
-          <p className="text-xs text-stone-400 mt-0.5">22:00 - 06:00</p>
+          <p className="text-2xl font-bold font-serif text-[#2A1D13]">{stats.nightShiftCount}</p>
         </div>
       </div>
 
       {/* Date Picker Bar & Filter Controls */}
-      <div className="bg-white rounded-2xl p-4 border border-stone-200/80 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="bg-white rounded-2xl p-3 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex flex-col md:flex-row items-center justify-between gap-3">
         {/* Date Navigator */}
         <div className="flex items-center gap-2 w-full md:w-auto">
           <button
             onClick={() => handleDateChange(-1)}
-            className="p-2 rounded-xl border border-stone-200 hover:bg-stone-50 text-stone-600 transition-colors"
+            className="p-2 rounded-xl border border-[#E6D9C5] hover:bg-[#FAF8F5] text-[#786A5B] transition-colors"
             title="Previous Day"
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
 
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-stone-200 bg-stone-50 text-xs font-semibold text-stone-800">
-            <Calendar className="w-4 h-4 text-[#D8AD56]" />
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#E6D9C5] bg-[#FAF8F5] text-xs font-medium text-[#2A1D13]">
+            <Calendar className="w-3.5 h-3.5 text-[#8D672F]" />
             <input
               type="date"
               value={selectedDate}
               onChange={(e) => setSelectedDate(e.target.value)}
-              className="bg-transparent focus:outline-none cursor-pointer"
+              className="bg-transparent focus:outline-none cursor-pointer text-xs"
             />
           </div>
 
           <button
             onClick={() => handleDateChange(1)}
-            className="p-2 rounded-xl border border-stone-200 hover:bg-stone-50 text-stone-600 transition-colors"
+            className="p-2 rounded-xl border border-[#E6D9C5] hover:bg-[#FAF8F5] text-[#786A5B] transition-colors"
             title="Next Day"
           >
             <ChevronRight className="w-4 h-4" />
@@ -437,7 +403,7 @@ export default function AdminStaffAttendancePage() {
 
           <button
             onClick={() => setSelectedDate(new Date().toISOString().split('T')[0])}
-            className="px-3 py-2 rounded-xl text-xs font-medium text-[#D8AD56] hover:bg-[#FAF7F2] transition-colors"
+            className="px-3 py-1.5 rounded-xl text-xs font-medium text-[#8D672F] hover:bg-[#FAF8F5] transition-colors border border-transparent hover:border-[#E6D9C5]"
           >
             Today
           </button>
@@ -457,8 +423,8 @@ export default function AdminStaffAttendancePage() {
               onClick={() => setShiftFilter(s.id as any)}
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 shiftFilter === s.id
-                  ? 'bg-[#241912] text-[#D8AD56] font-semibold'
-                  : 'text-stone-600 hover:bg-stone-100'
+                  ? 'bg-[#2A1D13] text-[#EAD8B8] shadow-xs'
+                  : 'text-[#786A5B] hover:text-[#2A1D13] hover:bg-[#FAF8F5]'
               }`}
             >
               {s.label}
@@ -468,34 +434,34 @@ export default function AdminStaffAttendancePage() {
 
         {/* Search */}
         <div className="relative w-full md:w-64">
-          <Search className="w-4 h-4 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-3.5 h-3.5 text-[#786A5B] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search staff, role, notes..."
-            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-stone-200 focus:outline-none focus:border-[#D8AD56]"
+            className="w-full pl-9 pr-3.5 py-1.5 text-xs rounded-xl border border-[#E6D9C5] focus:outline-none focus:border-[#8D672F] bg-white text-[#2A1D13] placeholder-[#786A5B]/60"
           />
         </div>
       </div>
 
       {/* Attendance Roster Table */}
-      <div className="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden">
-        <div className="p-4 bg-[#FAF7F2] border-b border-stone-200 flex items-center justify-between">
+      <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] overflow-hidden">
+        <div className="p-3.5 bg-[#FAF8F5] border-b border-[#E6D9C5] flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-stone-700 uppercase tracking-wider">
+            <span className="text-xs font-semibold text-[#2A1D13] uppercase tracking-wider">
               Shift Attendance Register
             </span>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-stone-200 text-stone-700 font-bold">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-white border border-[#E6D9C5] text-[#786A5B] font-semibold">
               {filteredAttendance.length} Logged
             </span>
           </div>
-          <span className="text-[11px] text-stone-500">Date: {selectedDate}</span>
+          <span className="text-[11px] text-[#786A5B]">Date: {selectedDate}</span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-stone-50 border-b border-stone-200 text-stone-500 uppercase text-[10px] tracking-wider font-semibold">
+            <thead className="bg-[#FAF8F5]/50 border-b border-[#E6D9C5] text-[#786A5B] uppercase text-[10px] tracking-wider font-medium">
               <tr>
                 <th className="py-3 px-4">Staff Member</th>
                 <th className="py-3 px-4">Role</th>
@@ -508,22 +474,22 @@ export default function AdminStaffAttendancePage() {
                 <th className="py-3 px-4 text-center">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-stone-100 font-sans">
+            <tbody className="divide-y divide-[#E6D9C5]/40 font-sans">
               {filteredAttendance.map((item) => {
                 const isOnDuty = item.clock_in && !item.clock_out;
                 return (
-                  <tr key={item.id} className="hover:bg-amber-50/20 transition-colors">
+                  <tr key={item.id} className="hover:bg-[#FAF8F5]/60 transition-colors">
                     {/* Staff Member */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">
+                    <td className="py-3 px-4 whitespace-nowrap">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-[#241912] text-[#D8AD56] flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
+                        <div className="w-8 h-8 rounded-full bg-[#2A1D13] text-[#EAD8B8] flex items-center justify-center font-bold text-xs shrink-0 shadow-xs">
                           {item.staff_name.slice(0, 2).toUpperCase()}
                         </div>
                         <div>
-                          <span className="font-semibold text-stone-900 block leading-tight">
+                          <span className="font-medium text-[#2A1D13] block leading-tight">
                             {item.staff_name}
                           </span>
-                          <span className="text-[10px] text-stone-400 font-mono block">
+                          <span className="text-[10px] text-[#786A5B] font-mono block">
                             ID: {item.staff_id}
                           </span>
                         </div>
@@ -531,57 +497,57 @@ export default function AdminStaffAttendancePage() {
                     </td>
 
                     {/* Role */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-stone-100 text-stone-800 border border-stone-200">
+                    <td className="py-3 px-4 whitespace-nowrap">
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-[#FAF8F5] text-[#2A1D13] border border-[#E6D9C5]">
                         {item.role}
                       </span>
                     </td>
 
                     {/* Shift */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">{getShiftBadge(item.shift)}</td>
+                    <td className="py-3 px-4 whitespace-nowrap">{getShiftBadge(item.shift)}</td>
 
                     {/* Clock-In */}
-                    <td className="py-3.5 px-4 whitespace-nowrap font-mono text-stone-800 font-semibold">
+                    <td className="py-3 px-4 whitespace-nowrap font-mono text-[#2A1D13] font-medium">
                       {formatClockTime(item.clock_in)}
                     </td>
 
                     {/* Clock-Out */}
-                    <td className="py-3.5 px-4 whitespace-nowrap font-mono text-stone-800 font-semibold">
+                    <td className="py-3 px-4 whitespace-nowrap font-mono text-[#2A1D13] font-medium">
                       {item.clock_out ? (
                         formatClockTime(item.clock_out)
                       ) : (
-                        <span className="text-emerald-600 font-sans text-[11px] font-medium italic">
+                        <span className="text-emerald-700 font-sans text-[11px] font-medium">
                           Active On Duty
                         </span>
                       )}
                     </td>
 
                     {/* Work Hours */}
-                    <td className="py-3.5 px-4 text-center whitespace-nowrap font-mono font-bold text-stone-900">
+                    <td className="py-3 px-4 text-center whitespace-nowrap font-mono font-bold text-[#2A1D13]">
                       {item.work_hours !== undefined ? (
                         `${item.work_hours} hrs`
                       ) : isOnDuty ? (
-                        <span className="text-stone-400 font-normal text-[11px]">Calculating...</span>
+                        <span className="text-[#786A5B] font-normal text-[11px]">Calculating...</span>
                       ) : (
                         '—'
                       )}
                     </td>
 
                     {/* Status Badge */}
-                    <td className="py-3.5 px-4 whitespace-nowrap">{getStatusBadge(item)}</td>
+                    <td className="py-3 px-4 whitespace-nowrap">{getStatusBadge(item)}</td>
 
                     {/* Notes */}
-                    <td className="py-3.5 px-4 text-stone-500 max-w-xs truncate">
+                    <td className="py-3 px-4 text-[#786A5B] max-w-xs truncate">
                       {item.notes || '—'}
                     </td>
 
                     {/* Action */}
-                    <td className="py-3.5 px-4 text-center whitespace-nowrap">
+                    <td className="py-3 px-4 text-center whitespace-nowrap">
                       {isOnDuty ? (
                         <button
                           onClick={() => handleClockOut(item.id)}
                           disabled={clockingOutId === item.id}
-                          className="px-3 py-1.5 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 text-xs font-semibold flex items-center gap-1.5 transition-all mx-auto disabled:opacity-50"
+                          className="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 text-xs font-medium flex items-center gap-1.5 transition-all mx-auto disabled:opacity-50"
                         >
                           {clockingOutId === item.id ? (
                             <RefreshCw className="w-3.5 h-3.5 animate-spin" />
@@ -591,7 +557,7 @@ export default function AdminStaffAttendancePage() {
                           <span>Clock-Out</span>
                         </button>
                       ) : (
-                        <span className="text-[11px] text-stone-400 font-medium">Logged</span>
+                        <span className="text-[11px] text-[#786A5B] font-medium">Logged</span>
                       )}
                     </td>
                   </tr>
@@ -600,12 +566,12 @@ export default function AdminStaffAttendancePage() {
 
               {filteredAttendance.length === 0 && (
                 <tr>
-                  <td colSpan={9} className="py-12 text-center text-stone-400 space-y-2">
-                    <UserX className="w-10 h-10 text-stone-300 mx-auto" />
+                  <td colSpan={9} className="py-12 text-center text-[#786A5B] space-y-2">
+                    <UserX className="w-10 h-10 text-[#E6D9C5] mx-auto" />
                     <p className="text-sm">No attendance records logged for {selectedDate}.</p>
                     <button
                       onClick={() => setIsClockInModalOpen(true)}
-                      className="px-4 py-2 rounded-xl bg-[#241912] text-[#D8AD56] font-semibold text-xs inline-flex items-center gap-1.5 mt-2"
+                      className="px-4 py-2 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] font-medium text-xs inline-flex items-center gap-1.5 mt-2 transition-all shadow-xs"
                     >
                       <Plus className="w-4 h-4" />
                       Clock-In Staff Member
@@ -622,32 +588,32 @@ export default function AdminStaffAttendancePage() {
       {/* MODAL: QUICK CLOCK-IN STAFF */}
       {/* ========================================================================= */}
       {isClockInModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-stone-200 space-y-6">
-            <div className="flex items-center justify-between border-b border-stone-100 pb-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-[#E6D9C5] space-y-5">
+            <div className="flex items-center justify-between border-b border-[#E6D9C5]/60 pb-3.5">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#241912] text-[#D8AD56] flex items-center justify-center shadow-md">
-                  <UserCheck className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-xl bg-[#2A1D13] text-[#EAD8B8] flex items-center justify-center shadow-xs">
+                  <UserCheck className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="font-serif font-bold text-lg text-[#241912]">
+                  <h3 className="font-serif font-bold text-base text-[#2A1D13]">
                     Quick Staff Clock-In
                   </h3>
-                  <p className="text-xs text-stone-500">Record on-duty shift start timestamp</p>
+                  <p className="text-xs text-[#786A5B]">Record shift start</p>
                 </div>
               </div>
               <button
                 onClick={() => setIsClockInModalOpen(false)}
-                className="text-stone-400 hover:text-stone-700 p-1 rounded-lg"
+                className="text-[#786A5B] hover:text-[#2A1D13] p-1 rounded-lg"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
 
             <form onSubmit={handleClockInSubmit} className="space-y-4">
               {/* Select Staff Member */}
               <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1">
+                <label className="block text-xs font-semibold text-[#2A1D13] mb-1">
                   Staff Member <span className="text-rose-500">*</span>
                 </label>
                 <LuxurySelect
@@ -665,7 +631,7 @@ export default function AdminStaffAttendancePage() {
 
               {/* Select Shift */}
               <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1">
+                <label className="block text-xs font-semibold text-[#2A1D13] mb-1">
                   Allocated Shift <span className="text-rose-500">*</span>
                 </label>
                 <div className="grid grid-cols-2 gap-2">
@@ -681,8 +647,8 @@ export default function AdminStaffAttendancePage() {
                       onClick={() => setClockInShift(s.id as ShiftType)}
                       className={`p-2.5 rounded-xl text-left border text-xs font-medium transition-all ${
                         clockInShift === s.id
-                          ? 'bg-[#241912] text-[#D8AD56] border-[#241912] font-semibold'
-                          : 'border-stone-200 text-stone-700 hover:bg-stone-50'
+                          ? 'bg-[#2A1D13] text-[#EAD8B8] border-[#2A1D13] font-medium'
+                          : 'border-[#E6D9C5] text-[#2A1D13] hover:bg-[#FAF8F5]'
                       }`}
                     >
                       {s.label}
@@ -693,39 +659,39 @@ export default function AdminStaffAttendancePage() {
 
               {/* Duty Notes */}
               <div>
-                <label className="block text-xs font-semibold text-stone-700 mb-1">
-                  Station / Duty Notes <span className="text-stone-400 font-normal">(Optional)</span>
+                <label className="block text-xs font-semibold text-[#2A1D13] mb-1">
+                  Station / Duty Notes <span className="text-[#786A5B] font-normal">(Optional)</span>
                 </label>
                 <input
                   type="text"
                   value={clockInNotes}
                   onChange={(e) => setClockInNotes(e.target.value)}
                   placeholder="e.g. Front Desk Terminal 1, Floor 2 Housekeeping"
-                  className="w-full px-3 py-2 text-xs rounded-xl border border-stone-200 focus:outline-none focus:border-[#D8AD56]"
+                  className="w-full px-3 py-2 text-xs rounded-xl border border-[#E6D9C5] focus:outline-none focus:border-[#8D672F] text-[#2A1D13] placeholder-[#786A5B]/60"
                 />
               </div>
 
               {/* Current Time Preview */}
-              <div className="p-3 rounded-xl bg-stone-50 border border-stone-200 flex items-center justify-between text-xs">
-                <span className="text-stone-500">Clock-In Timestamp:</span>
-                <span className="font-mono font-bold text-[#241912]">
+              <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#E6D9C5] flex items-center justify-between text-xs">
+                <span className="text-[#786A5B]">Clock-In Timestamp:</span>
+                <span className="font-mono font-bold text-[#2A1D13]">
                   {new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
                 </span>
               </div>
 
               {/* Modal Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-stone-100">
+              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E6D9C5]/60">
                 <button
                   type="button"
                   onClick={() => setIsClockInModalOpen(false)}
-                  className="px-4 py-2.5 rounded-xl border border-stone-200 text-stone-600 hover:bg-stone-50 text-xs font-medium"
+                  className="px-3.5 py-2 rounded-xl border border-[#E6D9C5] text-[#786A5B] hover:text-[#2A1D13] hover:bg-[#FAF8F5] text-xs font-medium"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#D8AD56] to-[#C99C44] text-[#241912] font-semibold text-xs tracking-wide shadow-md hover:shadow-lg transition-all disabled:opacity-50 flex items-center gap-2"
+                  className="px-5 py-2 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] font-medium text-xs tracking-wide shadow-xs transition-all disabled:opacity-50 flex items-center gap-2"
                 >
                   {submitting ? (
                     <RefreshCw className="w-3.5 h-3.5 animate-spin" />

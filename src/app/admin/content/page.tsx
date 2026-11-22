@@ -95,40 +95,36 @@ export default function ContentCMSPage() {
   }
 
   return (
-    <div className="space-y-8 max-w-4xl mx-auto">
+    <div className="space-y-6 max-w-4xl mx-auto">
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]">
         <div>
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
-            LIVE CMS
-          </span>
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-0.5 flex items-center gap-2">
-            <Globe className="w-6 h-6 text-[#D8AD56]" />
-            <span>Website Content Management</span>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] tracking-tight">
+            Website Content
           </h1>
-          <p className="text-xs text-[#786B61] mt-0.5">
-            Modify public website copy, hero headlines, contact information, and address without redeploying code. Persisted directly to Supabase cloud.
+          <p className="text-xs text-[#786A5B] mt-0.5">
+            Public website copy, contact information, and address
           </p>
         </div>
       </div>
 
       {saved && (
-        <div className="p-4 rounded-xl bg-green-50 border border-green-200 text-green-800 text-xs flex items-center gap-2 shadow-xs">
-          <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0" />
-          <span>Website content updated successfully! Live changes are now visible across all public pages and Supabase cloud.</span>
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs flex items-center gap-2 shadow-xs">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+          <span>Website content updated successfully. Live changes are now visible.</span>
         </div>
       )}
 
       {error && (
-        <div className="p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs flex items-center gap-2 shadow-xs">
-          <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+        <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs flex items-center gap-2 shadow-xs">
+          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
           <span>{error}</span>
         </div>
       )}
 
-      <form onSubmit={handleSave} className="bg-white rounded-2xl border border-[#D8AD56]/30 p-6 sm:p-8 shadow-luxury space-y-5">
+      <form onSubmit={handleSave} className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-6 sm:p-8 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-4">
         <div>
-          <label className="block text-[11px] uppercase tracking-wider font-semibold text-[#786B61] mb-1">
+          <label className="block text-[11px] uppercase tracking-wider font-medium text-[#786A5B] mb-1">
             Official Hotel Brand Name
           </label>
           <input
@@ -136,12 +132,12 @@ export default function ContentCMSPage() {
             required
             value={hotelName}
             onChange={(e) => setHotelName(e.target.value)}
-            className="w-full text-xs font-medium p-3 rounded-lg border border-[#EFE3D6] bg-[#FAF7F2] text-[#241912]"
+            className="w-full text-xs font-medium p-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF8F5] text-[#2A1D13] focus:border-[#8D672F] focus:bg-white focus:outline-none transition-colors"
           />
         </div>
 
         <div>
-          <label className="block text-[11px] uppercase tracking-wider font-semibold text-[#786B61] mb-1">
+          <label className="block text-[11px] uppercase tracking-wider font-medium text-[#786A5B] mb-1">
             Hero Tagline / Subtitle
           </label>
           <input
@@ -149,13 +145,13 @@ export default function ContentCMSPage() {
             required
             value={tagline}
             onChange={(e) => setTagline(e.target.value)}
-            className="w-full text-xs font-medium p-3 rounded-lg border border-[#EFE3D6] bg-[#FAF7F2] text-[#241912]"
+            className="w-full text-xs font-medium p-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF8F5] text-[#2A1D13] focus:border-[#8D672F] focus:bg-white focus:outline-none transition-colors"
           />
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-[11px] uppercase tracking-wider font-semibold text-[#786B61] mb-1">
+            <label className="block text-[11px] uppercase tracking-wider font-medium text-[#786A5B] mb-1">
               Official Contact Phone
             </label>
             <input
@@ -163,12 +159,12 @@ export default function ContentCMSPage() {
               required
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              className="w-full text-xs font-medium p-3 rounded-lg border border-[#EFE3D6] bg-[#FAF7F2] text-[#241912]"
+              className="w-full text-xs font-medium p-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF8F5] text-[#2A1D13] focus:border-[#8D672F] focus:bg-white focus:outline-none transition-colors"
             />
           </div>
 
           <div>
-            <label className="block text-[11px] uppercase tracking-wider font-semibold text-[#786B61] mb-1">
+            <label className="block text-[11px] uppercase tracking-wider font-medium text-[#786A5B] mb-1">
               Official WhatsApp Number
             </label>
             <input
@@ -176,13 +172,13 @@ export default function ContentCMSPage() {
               required
               value={whatsapp}
               onChange={(e) => setWhatsapp(e.target.value)}
-              className="w-full text-xs font-medium p-3 rounded-lg border border-[#EFE3D6] bg-[#FAF7F2] text-[#241912]"
+              className="w-full text-xs font-medium p-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF8F5] text-[#2A1D13] focus:border-[#8D672F] focus:bg-white focus:outline-none transition-colors"
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-[11px] uppercase tracking-wider font-semibold text-[#786B61] mb-1">
+          <label className="block text-[11px] uppercase tracking-wider font-medium text-[#786A5B] mb-1">
             Official Email Address
           </label>
           <input
@@ -190,12 +186,12 @@ export default function ContentCMSPage() {
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full text-xs font-medium p-3 rounded-lg border border-[#EFE3D6] bg-[#FAF7F2] text-[#241912]"
+            className="w-full text-xs font-medium p-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF8F5] text-[#2A1D13] focus:border-[#8D672F] focus:bg-white focus:outline-none transition-colors"
           />
         </div>
 
         <div>
-          <label className="block text-[11px] uppercase tracking-wider font-semibold text-[#786B61] mb-1">
+          <label className="block text-[11px] uppercase tracking-wider font-medium text-[#786A5B] mb-1">
             Hotel Full Postal Address
           </label>
           <textarea
@@ -203,12 +199,12 @@ export default function ContentCMSPage() {
             required
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            className="w-full text-xs font-medium p-3 rounded-lg border border-[#EFE3D6] bg-[#FAF7F2] text-[#241912]"
+            className="w-full text-xs font-medium p-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF8F5] text-[#2A1D13] focus:border-[#8D672F] focus:bg-white focus:outline-none transition-colors"
           />
         </div>
 
         <div>
-          <label className="block text-[11px] uppercase tracking-wider font-semibold text-[#786B61] mb-1">
+          <label className="block text-[11px] uppercase tracking-wider font-medium text-[#786A5B] mb-1">
             Corridor / Landmark Road
           </label>
           <input
@@ -216,25 +212,25 @@ export default function ContentCMSPage() {
             required
             value={road}
             onChange={(e) => setRoad(e.target.value)}
-            className="w-full text-xs font-medium p-3 rounded-lg border border-[#EFE3D6] bg-[#FAF7F2] text-[#241912]"
+            className="w-full text-xs font-medium p-2.5 rounded-xl border border-[#E6D9C5] bg-[#FAF8F5] text-[#2A1D13] focus:border-[#8D672F] focus:bg-white focus:outline-none transition-colors"
           />
         </div>
 
-        <div className="pt-4 border-t border-[#EFE3D6] flex justify-end">
+        <div className="pt-4 border-t border-[#E6D9C5]/60 flex justify-end">
           <button
             type="submit"
             disabled={saving}
-            className="px-6 py-3 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold tracking-wide transition-colors flex items-center gap-2 shadow-sm disabled:opacity-50"
+            className="px-5 py-2.5 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] text-xs font-medium tracking-wide transition-all flex items-center gap-2 shadow-xs disabled:opacity-50"
           >
             {saving ? (
               <>
-                <RefreshCw className="w-4 h-4 animate-spin" />
-                <span>Saving to Cloud...</span>
+                <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                <span>Saving...</span>
               </>
             ) : (
               <>
-                <Save className="w-4 h-4" />
-                <span>Save & Publish Live Changes</span>
+                <Save className="w-3.5 h-3.5" />
+                <span>Save Changes</span>
               </>
             )}
           </button>

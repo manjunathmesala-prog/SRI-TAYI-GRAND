@@ -374,133 +374,116 @@ export default function AdminAccountingPage() {
         </div>
       )}
 
-      {/* Header Banner */}
-      <div className="bg-[#241912] border border-[#D8AD56]/30 rounded-2xl p-6 sm:p-8 text-[#FAF7F2] shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[#D8AD56]/15 via-transparent to-transparent pointer-events-none rounded-full blur-3xl" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <span className="px-3 py-1 rounded-full text-[11px] font-semibold tracking-wider uppercase bg-[#D8AD56]/20 text-[#D8AD56] border border-[#D8AD56]/40 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
-                Enterprise ERP Tier-3
-              </span>
-              <span className="text-xs text-[#FAF7F2]/60 flex items-center gap-1">
-                <Clock className="w-3.5 h-3.5 text-[#D8AD56]" />
-                Live Dual-Ledger Sync
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white tracking-wide">
-              General Ledger & Double-Entry Accounting
-            </h1>
-            <p className="text-sm text-[#FAF7F2]/80 max-w-2xl font-light">
-              Autonomous, audit-grade financial governance for Sri Tayi Grand. Manage real-time chart of
-              accounts, double-entry journal vouchers, dynamic P&amp;L surplus, and balance sheet equilibrium.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => fetchAccountingData()}
-              disabled={loading}
-              className="px-4 py-2.5 rounded-xl border border-white/20 hover:border-[#D8AD56] text-white hover:text-[#D8AD56] bg-white/5 transition-all text-xs font-medium flex items-center gap-2"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#D8AD56]' : ''}`} />
-              <span>Refresh Ledger</span>
-            </button>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="px-5 py-2.5 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white font-semibold text-xs tracking-wide shadow-lg border border-[#D8AD56]/40 hover:scale-[1.02] transition-all flex items-center gap-2"
-            >
-              <Plus className="w-4 h-4 stroke-[2.5]" />
-              <span>New Journal Entry</span>
-            </button>
-          </div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]/60">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#2A1D13] tracking-tight">
+            General Ledger & Accounting
+          </h1>
         </div>
 
-        {/* Tab Navigation Pill Bar */}
-        <div className="flex items-center gap-2 mt-8 pt-6 border-t border-white/10 overflow-x-auto no-scrollbar">
+        <div className="flex items-center gap-2 shrink-0">
           <button
-            onClick={() => setActiveTab('chart')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-medium tracking-wide transition-all whitespace-nowrap flex items-center gap-2 ${
-              activeTab === 'chart'
-                ? 'bg-[#D8AD56] text-[#241912] font-semibold shadow-md'
-                : 'text-white/70 hover:text-white hover:bg-white/5'
-            }`}
+            onClick={() => fetchAccountingData()}
+            disabled={loading}
+            className="p-2.5 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF8F5] text-xs font-semibold text-[#786A5B] flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
           >
-            <BookOpen className="w-4 h-4" />
-            <span>Chart of Accounts</span>
-            <span
-              className={`px-1.5 py-0.5 rounded-full text-[10px] ${
-                activeTab === 'chart' ? 'bg-[#241912]/20 text-[#241912]' : 'bg-white/10 text-white/80'
-              }`}
-            >
-              {glAccounts.length}
-            </span>
+            <RefreshCw className={`w-3.5 h-3.5 text-[#8D672F] ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
           </button>
-
           <button
-            onClick={() => setActiveTab('ledger')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-medium tracking-wide transition-all whitespace-nowrap flex items-center gap-2 ${
-              activeTab === 'ledger'
-                ? 'bg-[#D8AD56] text-[#241912] font-semibold shadow-md'
-                : 'text-white/70 hover:text-white hover:bg-white/5'
-            }`}
+            onClick={() => setIsModalOpen(true)}
+            className="px-4 py-2.5 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] text-xs font-semibold tracking-wide flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer active:scale-98"
           >
-            <FileSpreadsheet className="w-4 h-4" />
-            <span>Journal Entries Ledger</span>
-            <span
-              className={`px-1.5 py-0.5 rounded-full text-[10px] ${
-                activeTab === 'ledger' ? 'bg-[#241912]/20 text-[#241912]' : 'bg-white/10 text-white/80'
-              }`}
-            >
-              {journalEntries.length}
-            </span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('pnl')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-medium tracking-wide transition-all whitespace-nowrap flex items-center gap-2 ${
-              activeTab === 'pnl'
-                ? 'bg-[#D8AD56] text-[#241912] font-semibold shadow-md'
-                : 'text-white/70 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            <Calculator className="w-4 h-4" />
-            <span>Profit &amp; Loss (P&amp;L)</span>
-            {pnl && (
-              <span
-                className={`px-1.5 py-0.5 rounded-full text-[10px] font-mono ${
-                  pnl.netProfit >= 0 ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
-                }`}
-              >
-                ₹{pnl.netProfit.toLocaleString('en-IN')}
-              </span>
-            )}
-          </button>
-
-          <button
-            onClick={() => setActiveTab('balance_sheet')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-medium tracking-wide transition-all whitespace-nowrap flex items-center gap-2 ${
-              activeTab === 'balance_sheet'
-                ? 'bg-[#D8AD56] text-[#241912] font-semibold shadow-md'
-                : 'text-white/70 hover:text-white hover:bg-white/5'
-            }`}
-          >
-            <Scale className="w-4 h-4" />
-            <span>Balance Sheet</span>
-            {balanceSheet && (
-              <span
-                className={`px-1.5 py-0.5 rounded-full text-[10px] flex items-center gap-1 ${
-                  balanceSheet.isBalanced
-                    ? 'bg-emerald-500/20 text-emerald-300'
-                    : 'bg-amber-500/20 text-amber-300'
-                }`}
-              >
-                {balanceSheet.isBalanced ? 'Balanced' : 'Review'}
-              </span>
-            )}
+            <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+            <span>New Entry</span>
           </button>
         </div>
+      </div>
+
+      {/* Tab Navigation Pill Bar */}
+      <div className="inline-flex p-1 bg-[#FAF8F5] rounded-xl border border-[#E6D9C5]/80 overflow-x-auto no-scrollbar">
+        <button
+          onClick={() => setActiveTab('chart')}
+          className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+            activeTab === 'chart'
+              ? 'bg-[#2A1D13] text-[#EAD8B8] shadow-sm'
+              : 'text-[#786A5B] hover:text-[#2A1D13]'
+          }`}
+        >
+          <BookOpen className="w-4 h-4" />
+          <span>Chart of Accounts</span>
+          <span
+            className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+              activeTab === 'chart' ? 'bg-[#EAD8B8] text-[#2A1D13]' : 'bg-[#E6D9C5] text-[#2A1D13]'
+            }`}
+          >
+            {glAccounts.length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('ledger')}
+          className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+            activeTab === 'ledger'
+              ? 'bg-[#2A1D13] text-[#EAD8B8] shadow-sm'
+              : 'text-[#786A5B] hover:text-[#2A1D13]'
+          }`}
+        >
+          <FileSpreadsheet className="w-4 h-4" />
+          <span>Journal Ledger</span>
+          <span
+            className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+              activeTab === 'ledger' ? 'bg-[#EAD8B8] text-[#2A1D13]' : 'bg-[#E6D9C5] text-[#2A1D13]'
+            }`}
+          >
+            {journalEntries.length}
+          </span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('pnl')}
+          className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+            activeTab === 'pnl'
+              ? 'bg-[#2A1D13] text-[#EAD8B8] shadow-sm'
+              : 'text-[#786A5B] hover:text-[#2A1D13]'
+          }`}
+        >
+          <Calculator className="w-4 h-4" />
+          <span>Profit & Loss</span>
+          {pnl && (
+            <span
+              className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${
+                pnl.netProfit >= 0 ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+              }`}
+            >
+              ₹{pnl.netProfit.toLocaleString('en-IN')}
+            </span>
+          )}
+        </button>
+
+        <button
+          onClick={() => setActiveTab('balance_sheet')}
+          className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 ${
+            activeTab === 'balance_sheet'
+              ? 'bg-[#2A1D13] text-[#EAD8B8] shadow-sm'
+              : 'text-[#786A5B] hover:text-[#2A1D13]'
+          }`}
+        >
+          <Scale className="w-4 h-4" />
+          <span>Balance Sheet</span>
+          {balanceSheet && (
+            <span
+              className={`px-1.5 py-0.2 rounded-full text-[10px] ${
+                balanceSheet.isBalanced
+                  ? 'bg-emerald-100 text-emerald-800'
+                  : 'bg-amber-100 text-amber-800'
+              }`}
+            >
+              {balanceSheet.isBalanced ? 'Balanced' : 'Review'}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* ========================================================================= */}
@@ -511,103 +494,78 @@ export default function AdminAccountingPage() {
           {/* Top 5 Category Summary Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Assets */}
-            <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-sm hover:border-emerald-300 transition-all">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] font-semibold text-stone-500 tracking-wider uppercase">
-                  1000s Assets
+            <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-semibold text-[#786A5B] tracking-wider uppercase">
+                  Assets
                 </span>
-                <div className="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700">
-                  <Wallet className="w-4 h-4" />
+                <div className="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700">
+                  <Wallet className="w-3.5 h-3.5" />
                 </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-xl sm:text-2xl font-bold font-mono text-[#241912]">
-                  ₹{accountCategoryTotals.asset.sum.toLocaleString('en-IN')}
-                </p>
-                <p className="text-xs text-stone-500">
-                  {accountCategoryTotals.asset.count} active accounts
-                </p>
-              </div>
+              <p className="text-xl sm:text-2xl font-serif font-bold text-[#2A1D13]">
+                ₹{accountCategoryTotals.asset.sum.toLocaleString('en-IN')}
+              </p>
             </div>
 
             {/* Liabilities */}
-            <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-sm hover:border-amber-300 transition-all">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] font-semibold text-stone-500 tracking-wider uppercase">
-                  2000s Liabilities
+            <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-semibold text-[#786A5B] tracking-wider uppercase">
+                  Liabilities
                 </span>
-                <div className="w-8 h-8 rounded-xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700">
-                  <Landmark className="w-4 h-4" />
+                <div className="w-7 h-7 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700">
+                  <Landmark className="w-3.5 h-3.5" />
                 </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-xl sm:text-2xl font-bold font-mono text-[#241912]">
-                  ₹{accountCategoryTotals.liability.sum.toLocaleString('en-IN')}
-                </p>
-                <p className="text-xs text-stone-500">
-                  {accountCategoryTotals.liability.count} active accounts
-                </p>
-              </div>
+              <p className="text-xl sm:text-2xl font-serif font-bold text-[#2A1D13]">
+                ₹{accountCategoryTotals.liability.sum.toLocaleString('en-IN')}
+              </p>
             </div>
 
             {/* Equity */}
-            <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-sm hover:border-indigo-300 transition-all">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] font-semibold text-stone-500 tracking-wider uppercase">
-                  3000s Equity
+            <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-semibold text-[#786A5B] tracking-wider uppercase">
+                  Equity
                 </span>
-                <div className="w-8 h-8 rounded-xl bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700">
-                  <Shield className="w-4 h-4" />
+                <div className="w-7 h-7 rounded-lg bg-indigo-50 border border-indigo-200 flex items-center justify-center text-indigo-700">
+                  <Shield className="w-3.5 h-3.5" />
                 </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-xl sm:text-2xl font-bold font-mono text-[#241912]">
-                  ₹{accountCategoryTotals.equity.sum.toLocaleString('en-IN')}
-                </p>
-                <p className="text-xs text-stone-500">
-                  {accountCategoryTotals.equity.count} active accounts
-                </p>
-              </div>
+              <p className="text-xl sm:text-2xl font-serif font-bold text-[#2A1D13]">
+                ₹{accountCategoryTotals.equity.sum.toLocaleString('en-IN')}
+              </p>
             </div>
 
             {/* Revenue */}
-            <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-sm hover:border-blue-300 transition-all">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] font-semibold text-stone-500 tracking-wider uppercase">
-                  4000s Revenue
+            <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-semibold text-[#786A5B] tracking-wider uppercase">
+                  Revenue
                 </span>
-                <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700">
-                  <TrendingUp className="w-4 h-4" />
+                <div className="w-7 h-7 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700">
+                  <TrendingUp className="w-3.5 h-3.5" />
                 </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-xl sm:text-2xl font-bold font-mono text-[#241912]">
-                  ₹{accountCategoryTotals.revenue.sum.toLocaleString('en-IN')}
-                </p>
-                <p className="text-xs text-stone-500">
-                  {accountCategoryTotals.revenue.count} revenue streams
-                </p>
-              </div>
+              <p className="text-xl sm:text-2xl font-serif font-bold text-[#2A1D13]">
+                ₹{accountCategoryTotals.revenue.sum.toLocaleString('en-IN')}
+              </p>
             </div>
 
             {/* Expenses */}
-            <div className="bg-white rounded-2xl p-5 border border-stone-200/80 shadow-sm hover:border-rose-300 transition-all">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-[11px] font-semibold text-stone-500 tracking-wider uppercase">
-                  5000s Expenses
+            <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[11px] font-semibold text-[#786A5B] tracking-wider uppercase">
+                  Expenses
                 </span>
-                <div className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-700">
-                  <TrendingDown className="w-4 h-4" />
+                <div className="w-7 h-7 rounded-lg bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-700">
+                  <TrendingDown className="w-3.5 h-3.5" />
                 </div>
               </div>
-              <div className="space-y-1">
-                <p className="text-xl sm:text-2xl font-bold font-mono text-[#241912]">
-                  ₹{accountCategoryTotals.expense.sum.toLocaleString('en-IN')}
-                </p>
-                <p className="text-xs text-stone-500">
-                  {accountCategoryTotals.expense.count} expense heads
-                </p>
-              </div>
+              <p className="text-xl sm:text-2xl font-serif font-bold text-[#2A1D13]">
+                ₹{accountCategoryTotals.expense.sum.toLocaleString('en-IN')}
+              </p>
             </div>
           </div>
 

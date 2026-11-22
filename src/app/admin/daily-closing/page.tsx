@@ -338,24 +338,17 @@ export default function AdminDailyClosingPage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Top Banner / Breadcrumb */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]/80">
         <div>
-          <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-[#D8AD56] font-semibold">
-            <span>Accounts & Front Desk</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-            <span>Night Audit & Daily Closing</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#241912] mt-1">
-            End-of-Day Night Audit & Closing
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#2A1D13] flex items-center gap-2.5">
+            <Lock className="w-6 h-6 text-[#8D672F]" />
+            <span>Night Audit &amp; Daily Closing</span>
           </h1>
-          <p className="text-xs sm:text-sm text-[#786A5B]">
-            Sri Tayi Grand daily reconciliation: Room status audit, drawer float settlement, digital payment gateway audit, and GST tax records.
-          </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-[#EFE3D6] bg-white shadow-sm">
-            <Calendar className="w-4 h-4 text-[#D8AD56]" />
+          <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-[#E6D9C5] bg-white shadow-xs">
+            <Calendar className="w-4 h-4 text-[#8D672F]" />
             <input
               type="date"
               value={businessDate}
@@ -363,15 +356,15 @@ export default function AdminDailyClosingPage() {
                 setBusinessDate(e.target.value);
                 setActualCashInput('');
               }}
-              className="bg-transparent text-xs font-semibold text-[#241912] outline-none"
+              className="bg-transparent text-xs font-semibold text-[#2A1D13] outline-none"
             />
           </div>
           <button
             onClick={() => fetchClosingData()}
-            className="p-2.5 rounded-xl border border-[#EFE3D6] bg-white hover:bg-[#FAF7F2] text-[#786A5B] transition-colors shadow-sm"
+            className="p-2.5 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF6EE] text-[#786A5B] hover:text-[#2A1D13] transition-all shadow-xs cursor-pointer"
             title="Refresh Ledger"
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#D8AD56]' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#8D672F]' : ''}`} />
           </button>
         </div>
       </div>
@@ -379,7 +372,7 @@ export default function AdminDailyClosingPage() {
       {/* Alerts / Feedback */}
       {feedback && (
         <div
-          className={`p-4 rounded-2xl flex items-center justify-between gap-3 text-sm border shadow-sm ${
+          className={`p-4 rounded-2xl flex items-center justify-between gap-3 text-sm border shadow-xs ${
             feedback.type === 'success'
               ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
               : 'bg-rose-50 border-rose-200 text-rose-800'
@@ -391,11 +384,11 @@ export default function AdminDailyClosingPage() {
             ) : (
               <AlertCircle className="w-5 h-5 text-rose-600 shrink-0" />
             )}
-            <span className="font-medium">{feedback.message}</span>
+            <span className="font-medium text-xs">{feedback.message}</span>
           </div>
           <button
             onClick={() => setFeedback(null)}
-            className="text-xs font-semibold underline hover:opacity-80"
+            className="text-xs font-semibold underline hover:opacity-80 cursor-pointer"
           >
             Dismiss
           </button>
@@ -403,18 +396,18 @@ export default function AdminDailyClosingPage() {
       )}
 
       {/* Primary Tab Switcher */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-[#EFE3D6] pb-3">
+      <div className="flex items-center gap-1.5 bg-[#FAF6EE] p-1.5 rounded-2xl overflow-x-auto no-scrollbar w-fit border border-[#E6D9C5]/60">
         <button
           type="button"
           onClick={() => setActiveTab('closing')}
-          className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === 'closing'
-              ? 'bg-[#241912] text-[#D8AD56] shadow-md ring-2 ring-[#D8AD56]/40'
-              : 'bg-white hover:bg-[#FAF7F2] text-[#786A5B] border border-[#EFE3D6]'
+              ? 'bg-[#2A1D13] text-[#FAF6EE] shadow-xs'
+              : 'text-[#786A5B] hover:text-[#2A1D13]'
           }`}
         >
-          <Lock className="w-4 h-4" />
-          <span>Manual Closing &amp; Audit Wizard</span>
+          <Lock className="w-3.5 h-3.5 text-[#B18A4A]" />
+          <span>Daily Closing</span>
         </button>
 
         <button
@@ -423,19 +416,19 @@ export default function AdminDailyClosingPage() {
             setActiveTab('automated-dispatch');
             if (!auditConfig) fetchAuditConfig();
           }}
-          className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === 'automated-dispatch'
-              ? 'bg-[#241912] text-[#D8AD56] shadow-md ring-2 ring-[#D8AD56]/40'
-              : 'bg-white hover:bg-[#FAF7F2] text-[#786A5B] border border-[#EFE3D6]'
+              ? 'bg-[#2A1D13] text-[#FAF6EE] shadow-xs'
+              : 'text-[#786A5B] hover:text-[#2A1D13]'
           }`}
         >
-          <Mail className="w-4 h-4" />
-          <span>Automated Dispatch Settings</span>
+          <Mail className="w-3.5 h-3.5 text-[#B18A4A]" />
+          <span>Automated Dispatch</span>
           {auditConfig && (
             <span
-              className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+              className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
                 auditConfig.enabled
-                  ? 'bg-emerald-500/20 text-emerald-700 border border-emerald-400/40'
+                  ? 'bg-emerald-100 text-emerald-800'
                   : 'bg-stone-200 text-stone-600'
               }`}
             >

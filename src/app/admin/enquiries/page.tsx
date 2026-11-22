@@ -249,29 +249,13 @@ export default function EnquiriesPipelinePage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] text-[#33271D] p-4 md:p-8 space-y-6">
+    <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#E6D9C5] pb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#E6D9C5]/60 pb-4">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#43001F] text-[#D8AD56] tracking-wider uppercase border border-[#D8AD56]/40">
-              Customer Pipeline
-            </span>
-            <div className="flex items-center gap-1.5 text-xs text-[#786A5B]">
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
-                }`}
-              />
-              <span>{isConnected ? 'Real-time Pipeline' : 'Connecting...'}</span>
-            </div>
-          </div>
-          <h1 className="text-2xl md:text-3xl font-serif font-bold text-[#43001F] tracking-tight">
-            Customer Enquiries & Banquet Leads
+          <h1 className="text-2xl md:text-3xl font-serif font-bold text-[#2A1D13] tracking-tight">
+            Guest Enquiries
           </h1>
-          <p className="text-sm text-[#786A5B] mt-1">
-            Sri Tayi Grand • Rapid WhatsApp and Direct Call response pipeline for Convention Halls and Guest Stays
-          </p>
         </div>
 
         {/* Action Buttons */}
@@ -279,72 +263,72 @@ export default function EnquiriesPipelinePage() {
           <button
             onClick={() => fetchEnquiries()}
             disabled={isLoading}
-            className="p-2.5 rounded-xl bg-white border border-[#E6D9C5] text-[#786A5B] hover:text-[#43001F] hover:border-[#D8AD56] transition-all shadow-sm disabled:opacity-50"
+            className="p-2.5 rounded-xl bg-white border border-[#E6D9C5] text-[#786A5B] hover:text-[#2A1D13] hover:border-[#8D672F] transition-all shadow-xs disabled:opacity-50 cursor-pointer"
             title="Refresh pipeline"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-[#D8AD56]' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-[#8D672F]' : ''}`} />
           </button>
 
           <button
             onClick={() => setIsNewModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-[#D8AD56] font-semibold text-xs tracking-wide shadow-md transition-all border border-[#D8AD56]/40 hover:shadow-lg"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] font-semibold text-xs tracking-wide shadow-sm transition-all cursor-pointer active:scale-98"
           >
             <Plus className="w-4 h-4" />
-            <span>Record New Enquiry</span>
+            <span>New Enquiry</span>
           </button>
         </div>
       </div>
 
       {/* Summary Stats Row */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div className="bg-white p-3.5 rounded-xl border border-[#E6D9C5] shadow-sm">
-          <div className="text-[11px] text-[#786A5B] font-semibold uppercase">Total Leads</div>
-          <div className="text-xl font-bold font-serif text-[#43001F] mt-0.5">{counts.total}</div>
+        <div className="bg-white p-4 rounded-2xl border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)]">
+          <div className="text-[11px] text-[#786A5B] font-semibold uppercase tracking-wider">Total Leads</div>
+          <div className="text-xl font-bold font-serif text-[#2A1D13] mt-1">{counts.total}</div>
         </div>
-        <div className="bg-white p-3.5 rounded-xl border border-blue-200 shadow-sm">
-          <div className="text-[11px] text-blue-700 font-semibold uppercase">New Unread</div>
-          <div className="text-xl font-bold font-serif text-blue-800 mt-0.5">{counts.new}</div>
+        <div className="bg-white p-4 rounded-2xl border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)]">
+          <div className="text-[11px] text-blue-700 font-semibold uppercase tracking-wider">New</div>
+          <div className="text-xl font-bold font-serif text-blue-800 mt-1">{counts.new}</div>
         </div>
-        <div className="bg-white p-3.5 rounded-xl border border-amber-200 shadow-sm">
-          <div className="text-[11px] text-amber-700 font-semibold uppercase">Contacted</div>
-          <div className="text-xl font-bold font-serif text-amber-800 mt-0.5">{counts.contacted}</div>
+        <div className="bg-white p-4 rounded-2xl border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)]">
+          <div className="text-[11px] text-amber-700 font-semibold uppercase tracking-wider">Contacted</div>
+          <div className="text-xl font-bold font-serif text-amber-800 mt-1">{counts.contacted}</div>
         </div>
-        <div className="bg-white p-3.5 rounded-xl border border-purple-200 shadow-sm">
-          <div className="text-[11px] text-purple-700 font-semibold uppercase">Quotes Sent</div>
-          <div className="text-xl font-bold font-serif text-purple-800 mt-0.5">{counts.quotation_sent}</div>
+        <div className="bg-white p-4 rounded-2xl border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)]">
+          <div className="text-[11px] text-purple-700 font-semibold uppercase tracking-wider">Quotes Sent</div>
+          <div className="text-xl font-bold font-serif text-purple-800 mt-1">{counts.quotation_sent}</div>
         </div>
-        <div className="bg-white p-3.5 rounded-xl border border-emerald-200 shadow-sm">
-          <div className="text-[11px] text-emerald-700 font-semibold uppercase">Converted (Won)</div>
-          <div className="text-xl font-bold font-serif text-emerald-800 mt-0.5">{counts.converted}</div>
+        <div className="bg-white p-4 rounded-2xl border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)]">
+          <div className="text-[11px] text-emerald-700 font-semibold uppercase tracking-wider">Converted</div>
+          <div className="text-xl font-bold font-serif text-emerald-800 mt-1">{counts.converted}</div>
         </div>
-        <div className="bg-white p-3.5 rounded-xl border border-stone-200 shadow-sm">
-          <div className="text-[11px] text-stone-600 font-semibold uppercase">Closed / Lost</div>
-          <div className="text-xl font-bold font-serif text-stone-700 mt-0.5">{counts.closed}</div>
+        <div className="bg-white p-4 rounded-2xl border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)]">
+          <div className="text-[11px] text-stone-600 font-semibold uppercase tracking-wider">Closed</div>
+          <div className="text-xl font-bold font-serif text-stone-700 mt-1">{counts.closed}</div>
         </div>
       </div>
 
       {/* Dual Tab Switcher & Search Bar */}
-      <div className="bg-white p-4 rounded-2xl border border-[#E6D9C5] shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white p-4 rounded-2xl border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Dual Tabs */}
-        <div className="inline-flex p-1 bg-[#FDFBF7] rounded-xl border border-[#E6D9C5]">
+        <div className="inline-flex p-1 bg-[#FAF8F5] rounded-xl border border-[#E6D9C5]/80">
           <button
             onClick={() => {
               setActiveTab('convention');
               setStatusFilter('all');
             }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               activeTab === 'convention'
-                ? 'bg-[#43001F] text-[#D8AD56] shadow-sm'
-                : 'text-[#786A5B] hover:text-[#43001F]'
+                ? 'bg-[#2A1D13] text-[#EAD8B8] shadow-sm'
+                : 'text-[#786A5B] hover:text-[#2A1D13]'
             }`}
           >
             <Building className="w-4 h-4" />
-            <span>Convention & Banquet Enquiries</span>
+            <span>Convention & Banquet</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] ${
                 activeTab === 'convention'
-                  ? 'bg-[#D8AD56] text-[#43001F]'
-                  : 'bg-[#E6D9C5] text-[#33271D]'
+                  ? 'bg-[#EAD8B8] text-[#2A1D13]'
+                  : 'bg-[#E6D9C5] text-[#2A1D13]'
               }`}
             >
               {counts.convention}
@@ -356,19 +340,19 @@ export default function EnquiriesPipelinePage() {
               setActiveTab('general_stay');
               setStatusFilter('all');
             }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all ${
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               activeTab === 'general_stay'
-                ? 'bg-[#43001F] text-[#D8AD56] shadow-sm'
-                : 'text-[#786A5B] hover:text-[#43001F]'
+                ? 'bg-[#2A1D13] text-[#EAD8B8] shadow-sm'
+                : 'text-[#786A5B] hover:text-[#2A1D13]'
             }`}
           >
             <MessageSquare className="w-4 h-4" />
-            <span>General & Room Enquiries</span>
+            <span>Rooms & Stays</span>
             <span
               className={`px-1.5 py-0.2 rounded-full text-[10px] ${
                 activeTab === 'general_stay'
-                  ? 'bg-[#D8AD56] text-[#43001F]'
-                  : 'bg-[#E6D9C5] text-[#33271D]'
+                  ? 'bg-[#EAD8B8] text-[#2A1D13]'
+                  : 'bg-[#E6D9C5] text-[#2A1D13]'
               }`}
             >
               {counts.general_stay}
@@ -449,17 +433,17 @@ export default function EnquiriesPipelinePage() {
             return (
               <div
                 key={enquiry.id}
-                className="bg-white rounded-2xl border border-[#E6D9C5] p-5 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between space-y-4"
+                className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:shadow-[0_8px_30px_rgba(33,24,15,0.06)] transition-shadow flex flex-col justify-between space-y-4"
               >
                 {/* Card Top: Ref & Status */}
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className="font-mono text-[11px] font-bold text-[#43001F] bg-[#F8F3E9] px-2 py-0.5 rounded border border-[#E6D9C5]">
+                    <span className="font-mono text-[11px] font-bold text-[#2A1D13] bg-[#FAF8F5] px-2 py-0.5 rounded border border-[#E6D9C5]">
                       {enquiry.reference}
                     </span>
                     <button
                       onClick={() => setStatusModalEnquiry(enquiry)}
-                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border transition-transform hover:scale-105 ${badge.className}`}
+                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold border transition-transform hover:scale-105 cursor-pointer ${badge.className}`}
                       title="Click to update status"
                     >
                       {badge.label}
@@ -468,18 +452,18 @@ export default function EnquiriesPipelinePage() {
 
                   {/* Customer Information */}
                   <div className="space-y-1">
-                    <h3 className="font-serif font-bold text-base text-[#43001F]">
+                    <h3 className="font-serif font-bold text-base text-[#2A1D13]">
                       {enquiry.name}
                     </h3>
 
                     <div className="flex flex-col gap-1 text-xs text-[#786A5B] pt-1">
                       <div className="flex items-center gap-1.5">
-                        <Phone className="w-3.5 h-3.5 text-[#43001F]" />
-                        <span className="font-mono font-medium text-[#33271D]">{enquiry.phone}</span>
+                        <Phone className="w-3.5 h-3.5 text-[#8D672F]" />
+                        <span className="font-mono font-medium text-[#2A1D13]">{enquiry.phone}</span>
                       </div>
                       {enquiry.email && (
                         <div className="flex items-center gap-1.5 truncate">
-                          <Mail className="w-3.5 h-3.5 text-[#43001F]" />
+                          <Mail className="w-3.5 h-3.5 text-[#8D672F]" />
                           <span className="truncate">{enquiry.email}</span>
                         </div>
                       )}
@@ -489,14 +473,14 @@ export default function EnquiriesPipelinePage() {
                   {/* Event or Check-in Details */}
                   <div className="mt-3 pt-3 border-t border-[#E6D9C5]/50 flex flex-wrap items-center justify-between gap-2 text-xs">
                     {enquiry.event_or_checkin_date && (
-                      <div className="flex items-center gap-1.5 text-[#33271D] font-medium">
-                        <Calendar className="w-3.5 h-3.5 text-[#D8AD56]" />
+                      <div className="flex items-center gap-1.5 text-[#2A1D13] font-medium">
+                        <Calendar className="w-3.5 h-3.5 text-[#8D672F]" />
                         <span>Date: {enquiry.event_or_checkin_date}</span>
                       </div>
                     )}
                     {enquiry.guest_count && (
                       <div className="flex items-center gap-1.5 text-[#786A5B]">
-                        <Users className="w-3.5 h-3.5 text-[#D8AD56]" />
+                        <Users className="w-3.5 h-3.5 text-[#8D672F]" />
                         <span>{enquiry.guest_count} Guests</span>
                       </div>
                     )}
@@ -504,9 +488,9 @@ export default function EnquiriesPipelinePage() {
 
                   {/* Quoted Amount if present */}
                   {enquiry.quoted_amount ? (
-                    <div className="mt-2 flex items-center justify-between bg-[#F8F3E9] p-2 rounded-lg text-xs">
-                      <span className="text-[#786A5B] font-semibold">Quoted Budget:</span>
-                      <span className="font-mono font-bold text-[#43001F]">
+                    <div className="mt-2 flex items-center justify-between bg-[#FAF8F5] p-2 rounded-lg text-xs">
+                      <span className="text-[#786A5B] font-semibold">Quoted:</span>
+                      <span className="font-mono font-bold text-[#2A1D13]">
                         ₹{enquiry.quoted_amount.toLocaleString('en-IN')}
                       </span>
                     </div>
@@ -514,7 +498,7 @@ export default function EnquiriesPipelinePage() {
 
                   {/* Message / Details */}
                   {enquiry.details && (
-                    <div className="mt-3 p-3 bg-[#FDFBF7] rounded-xl border border-[#E6D9C5] text-xs text-[#33271D] leading-relaxed line-clamp-3">
+                    <div className="mt-3 p-3 bg-[#FAF8F5] rounded-xl border border-[#E6D9C5]/80 text-xs text-[#2A1D13] leading-relaxed line-clamp-3">
                       {enquiry.details}
                     </div>
                   )}
@@ -524,7 +508,7 @@ export default function EnquiriesPipelinePage() {
                     <div className="mt-2.5 p-2 rounded-lg bg-amber-50/80 border border-amber-200/80 text-[11px] text-amber-900 flex items-start gap-1.5">
                       <FileText className="w-3.5 h-3.5 text-amber-700 shrink-0 mt-0.5" />
                       <div className="flex-1">
-                        <strong className="block text-amber-800">Admin Notes:</strong>
+                        <strong className="block text-amber-800">Notes:</strong>
                         <span>{enquiry.admin_notes}</span>
                       </div>
                     </div>
@@ -532,12 +516,12 @@ export default function EnquiriesPipelinePage() {
                 </div>
 
                 {/* Card Action Buttons */}
-                <div className="pt-3 border-t border-[#E6D9C5] space-y-2">
+                <div className="pt-3 border-t border-[#E6D9C5]/60 space-y-2">
                   <div className="grid grid-cols-2 gap-2">
                     {/* One-click Direct Call */}
                     <a
                       href={`tel:${enquiry.phone.replace(/\s+/g, '')}`}
-                      className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white border border-[#E6D9C5] text-xs font-semibold text-[#43001F] hover:bg-[#F8F3E9] hover:border-[#D8AD56] transition-all shadow-sm"
+                      className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-white border border-[#E6D9C5] text-xs font-semibold text-[#2A1D13] hover:bg-[#FAF8F5] hover:border-[#8D672F] transition-all shadow-xs"
                     >
                       <Phone className="w-3.5 h-3.5 text-emerald-600" />
                       <span>Call Now</span>
@@ -548,7 +532,7 @@ export default function EnquiriesPipelinePage() {
                       href={waUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-xs font-semibold text-white shadow-sm transition-all"
+                      className="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-xs font-semibold text-white shadow-xs transition-all"
                     >
                       <MessageCircle className="w-3.5 h-3.5" />
                       <span>WhatsApp</span>
@@ -559,7 +543,7 @@ export default function EnquiriesPipelinePage() {
                     {/* Status Changer Modal Trigger */}
                     <button
                       onClick={() => setStatusModalEnquiry(enquiry)}
-                      className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-[#F8F3E9] hover:bg-[#E6D9C5] text-[11px] font-semibold text-[#43001F] transition-all border border-[#E6D9C5]"
+                      className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-[#FAF8F5] hover:bg-[#E6D9C5] text-[11px] font-semibold text-[#2A1D13] transition-all border border-[#E6D9C5] cursor-pointer"
                     >
                       <span>Update Status</span>
                     </button>
@@ -570,10 +554,10 @@ export default function EnquiriesPipelinePage() {
                         setNotesModalEnquiry(enquiry);
                         setCurrentNotes(enquiry.admin_notes || '');
                       }}
-                      className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-[#F8F3E9] hover:bg-[#E6D9C5] text-[11px] font-semibold text-[#43001F] transition-all border border-[#E6D9C5]"
+                      className="flex items-center justify-center gap-1 py-1.5 px-2 rounded-lg bg-[#FAF8F5] hover:bg-[#E6D9C5] text-[11px] font-semibold text-[#2A1D13] transition-all border border-[#E6D9C5] cursor-pointer"
                     >
                       <Edit3 className="w-3 h-3" />
-                      <span>{enquiry.admin_notes ? 'Edit Notes' : '+ Add Note'}</span>
+                      <span>{enquiry.admin_notes ? 'Edit Notes' : 'Add Note'}</span>
                     </button>
                   </div>
                 </div>

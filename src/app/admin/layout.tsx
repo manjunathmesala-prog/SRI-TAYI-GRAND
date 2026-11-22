@@ -26,7 +26,7 @@ export default function AdminLayout({
   return (
     <AdminLanguageProvider>
       <RBACProvider>
-        <div className="min-h-screen bg-[#FAF6EE] text-[#33271D] font-sans flex flex-col md:flex-row antialiased w-full overflow-x-hidden">
+        <div className="min-h-screen bg-[#FAF8F5] text-[#2A1D13] font-sans flex flex-col md:flex-row antialiased w-full overflow-x-hidden">
           <AdminSidebar />
           <div className="md:pl-72 flex-1 flex flex-col min-w-0 w-full">
             <AdminHeader />

@@ -241,44 +241,37 @@ export default function StaffAdminPage() {
       )}
 
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]/60">
         <div>
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
-            SECURITY & ACCESS CONTROL
-          </span>
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-0.5 flex items-center gap-2">
-            <UserCog className="w-6 h-6 text-[#D8AD56]" />
-            <span>Staff Directory & RBAC Permissions</span>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] tracking-tight">
+            Staff Directory
           </h1>
-          <p className="text-xs text-[#786B61] mt-0.5">
-            Department assignments, granular role privileges, rate override authority, and audit protection.
-          </p>
         </div>
 
         {/* Search */}
         <div className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 text-[#786B61] absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#786A5B] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search staff, role, email..."
-            className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-[#EFE3D6] bg-white text-[#241912] focus:border-[#D8AD56] focus:outline-none shadow-sm"
+            className="w-full text-xs font-medium pl-9 pr-3 py-2 rounded-xl border border-[#E6D9C5] bg-white text-[#2A1D13] focus:border-[#8D672F] focus:outline-none shadow-xs"
           />
         </div>
       </div>
 
       {/* Department Filter Tabs */}
-      <div className="flex flex-wrap items-center gap-2 border-b border-[#EFE3D6] pb-2">
+      <div className="flex flex-wrap items-center gap-1.5 pb-2">
         <button
           onClick={() => setDepartmentFilter('all')}
-          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
             departmentFilter === 'all'
-              ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
-              : 'bg-white text-[#786B61] hover:bg-[#FAF7F2]'
+              ? 'bg-[#2A1D13] text-[#EAD8B8] shadow-xs'
+              : 'bg-white border border-[#E6D9C5] text-[#786A5B] hover:bg-[#FAF8F5]'
           }`}
         >
-          All Departments ({staff.length})
+          All ({staff.length})
         </button>
 
         {DEPARTMENTS.map((dept) => {
@@ -289,10 +282,10 @@ export default function StaffAdminPage() {
             <button
               key={dept}
               onClick={() => setDepartmentFilter(dept.split(' ')[0])}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 isSelected
-                  ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
-                  : 'bg-white text-[#786B61] hover:bg-[#FAF7F2]'
+                  ? 'bg-[#2A1D13] text-[#EAD8B8] shadow-xs'
+                  : 'bg-white border border-[#E6D9C5] text-[#786A5B] hover:bg-[#FAF8F5]'
               }`}
             >
               {dept} ({count})
@@ -302,7 +295,7 @@ export default function StaffAdminPage() {
       </div>
 
       {/* Staff Table */}
-      <div className="bg-white rounded-2xl border border-[#D8AD56]/30 shadow-luxury overflow-hidden">
+      <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead className="bg-[#FAF7F2] text-[#786B61] uppercase tracking-wider text-[10px] border-b border-[#EFE3D6]">

@@ -222,53 +222,36 @@ export default function AdminAuditLogsPage() {
         </div>
       )}
 
-      {/* Header Banner */}
-      <div className="bg-[#241912] border border-[#D8AD56]/30 rounded-2xl p-6 sm:p-8 text-[#FAF7F2] shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-[#D8AD56]/15 via-transparent to-transparent pointer-events-none rounded-full blur-3xl" />
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-2">
-            <div className="flex items-center gap-3">
-              <span className="px-3 py-1 rounded-full text-[11px] font-semibold tracking-wider uppercase bg-[#D8AD56]/20 text-[#D8AD56] border border-[#D8AD56]/40 flex items-center gap-1.5">
-                <ShieldCheck className="w-3.5 h-3.5" />
-                Immutable Event Stream
-              </span>
-              <span className="text-xs text-[#FAF7F2]/60 flex items-center gap-1">
-                <Lock className="w-3.5 h-3.5 text-[#D8AD56]" />
-                Tamper-Evident Trail
-              </span>
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white tracking-wide">
-              System Audit &amp; Activity Trail
-            </h1>
-            <p className="text-sm text-[#FAF7F2]/80 max-w-2xl font-light">
-              Forensic log of critical events across Sri Tayi Grand PMS. Track front desk operations,
-              cash drawer reconciliations, rate adjustments, maintenance lockouts, and staff biometric shifts.
-            </p>
-          </div>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]/60">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#2A1D13] tracking-tight">
+            Audit Logs
+          </h1>
+        </div>
 
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => fetchAuditLogs()}
-              disabled={loading}
-              className="px-4 py-2.5 rounded-xl border border-white/20 hover:border-[#D8AD56] text-white hover:text-[#D8AD56] bg-white/5 transition-all text-xs font-medium flex items-center gap-2"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#D8AD56]' : ''}`} />
-              <span>Refresh Trail</span>
-            </button>
-            <button
-              onClick={handleExportCSV}
-              disabled={filteredLogs.length === 0}
-              className="px-4 py-2.5 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white font-semibold text-xs tracking-wide shadow-md hover:shadow-lg transition-all flex items-center gap-2 disabled:opacity-50 border border-[#D8AD56]/40"
-            >
-              <Download className="w-4 h-4" />
-              <span>Export CSV</span>
-            </button>
-          </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => fetchAuditLogs()}
+            disabled={loading}
+            className="p-2.5 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF8F5] text-xs font-semibold text-[#786A5B] flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-[#8D672F] ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
+          </button>
+          <button
+            onClick={handleExportCSV}
+            disabled={filteredLogs.length === 0}
+            className="px-4 py-2.5 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] font-semibold text-xs tracking-wide shadow-sm transition-all flex items-center gap-2 cursor-pointer active:scale-98 disabled:opacity-50"
+          >
+            <Download className="w-4 h-4" />
+            <span>Export CSV</span>
+          </button>
         </div>
       </div>
 
       {/* Filter and Search Navigation Bar */}
-      <div className="bg-white rounded-2xl p-4 border border-stone-200/80 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="bg-white rounded-2xl p-4 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex flex-col md:flex-row items-center justify-between gap-4">
         {/* Category Filter Pills */}
         <div className="flex items-center gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 no-scrollbar">
           {[
@@ -285,10 +268,10 @@ export default function AdminAuditLogsPage() {
             <button
               key={cat.id}
               onClick={() => setCategoryFilter(cat.id as any)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap ${
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap cursor-pointer ${
                 categoryFilter === cat.id
-                  ? 'bg-[#241912] text-[#D8AD56] font-semibold shadow-xs'
-                  : 'text-stone-600 hover:bg-stone-100'
+                  ? 'bg-[#2A1D13] text-[#EAD8B8] shadow-xs'
+                  : 'text-[#786A5B] hover:text-[#2A1D13] hover:bg-[#FAF8F5]'
               }`}
             >
               {cat.label}
@@ -303,26 +286,23 @@ export default function AdminAuditLogsPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search actor, action, entity ID, details..."
-            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-stone-200 focus:outline-none focus:border-[#D8AD56] focus:ring-1 focus:ring-[#D8AD56]"
+            placeholder="Search actor, action, details..."
+            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-[#E6D9C5] focus:outline-none focus:border-[#8D672F]"
           />
         </div>
       </div>
 
       {/* Audit Log Chronological Timeline & Table */}
-      <div className="bg-white rounded-2xl border border-stone-200/80 shadow-sm overflow-hidden">
-        <div className="p-4 bg-[#FAF7F2] border-b border-stone-200 flex items-center justify-between">
+      <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] overflow-hidden">
+        <div className="p-4 bg-[#FAF8F5] border-b border-[#E6D9C5]/60 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-stone-700 uppercase tracking-wider">
-              Audit Event Stream
+            <span className="text-xs font-bold text-[#2A1D13] uppercase tracking-wider">
+              Audit Events
             </span>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-stone-200 text-stone-700 font-bold">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-[#E6D9C5]/50 text-[#2A1D13] font-bold">
               {filteredLogs.length} Records
             </span>
           </div>
-          <span className="text-[11px] text-stone-500">
-            Sorted by Most Recent (IST Timezone)
-          </span>
         </div>
 
         <div className="overflow-x-auto">

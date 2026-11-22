@@ -394,40 +394,34 @@ export default function PaymentsAdminPage() {
       )}
 
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]/80">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
-              ACCOUNTS & RECONCILIATION
-            </span>
+          <div className="flex items-center gap-2 mb-1">
             <span
               className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
-                isConnected ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
+                isConnected ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200'
               }`}
             >
               <Radio className="w-2.5 h-2.5" />
-              {isConnected ? 'Real-Time Sync Active' : `Sync: ${status}`}
+              {isConnected ? 'Live Sync Active' : `Sync: ${status}`}
             </span>
           </div>
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-0.5 flex items-center gap-2">
-            <CreditCard className="w-6 h-6 text-[#D8AD56]" />
-            <span>Payments & Financial Ledger</span>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] flex items-center gap-2.5">
+            <CreditCard className="w-6 h-6 text-[#8D672F]" />
+            <span>Payments &amp; Ledger</span>
           </h1>
-          <p className="text-xs text-[#786B61] mt-0.5">
-            Razorpay reconciliation, instant payment requests, in-app refunds, and operational ledger tracking.
-          </p>
         </div>
 
         {/* Action Buttons & Search */}
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="relative w-full sm:w-60">
-            <Search className="w-4 h-4 text-[#786B61] absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-4 h-4 text-[#786A5B] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search ref, guest..."
-              className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-[#EFE3D6] bg-white text-[#241912] focus:border-[#D8AD56] focus:outline-none shadow-sm"
+              placeholder="Search reference, guest..."
+              className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-[#E6D9C5] bg-white text-[#2A1D13] focus:border-[#8D672F] focus:outline-none shadow-xs placeholder-[#A39587]"
             />
           </div>
 
@@ -440,25 +434,25 @@ export default function PaymentsAdminPage() {
               setLinkCopySuccess(false);
               setShowPaymentLinkModal(true);
             }}
-            className="px-3.5 py-2.5 rounded-xl bg-[#1E3A8A] hover:bg-[#1E40AF] text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
+            className="px-3.5 py-2.5 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF6EE] text-[#8D672F] text-xs font-semibold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
           >
             <Send className="w-3.5 h-3.5" />
-            <span>Send Payment Link</span>
+            <span>Payment Link</span>
           </button>
 
           <button
             onClick={() => setShowExpenseModal(true)}
-            className="px-3.5 py-2.5 rounded-xl bg-red-700 hover:bg-red-800 text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
+            className="px-3.5 py-2.5 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF6EE] text-[#2A1D13] text-xs font-semibold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
           >
-            <Receipt className="w-3.5 h-3.5" />
-            <span>{isTelugu ? '+ ఖర్చు నమోదు' : '+ Record Expense'}</span>
+            <Receipt className="w-3.5 h-3.5 text-[#8D672F]" />
+            <span>{isTelugu ? '+ ఖర్చు నమోదు' : '+ Expense'}</span>
           </button>
 
           <button
             onClick={() => setShowPaymentModal(true)}
-            className="px-3.5 py-2.5 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-[#2A1D13] hover:bg-black text-[#FAF6EE] text-xs font-semibold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
           >
-            <Plus className="w-3.5 h-3.5" />
+            <Plus className="w-3.5 h-3.5 text-[#B18A4A]" />
             <span>+ Record Collection</span>
           </button>
         </div>
@@ -466,7 +460,7 @@ export default function PaymentsAdminPage() {
 
       {/* Reconciliation Feedback Alert */}
       {reconcileFeedback && (
-        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs flex items-center justify-between">
+        <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
             <span className="font-semibold">{reconcileFeedback}</span>
@@ -477,119 +471,114 @@ export default function PaymentsAdminPage() {
         </div>
       )}
 
-      {/* KPI Cards: Reconciliation & Financial Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      {/* LUXURY KPI CARDS: Reconciliation & Financial Metrics */}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3.5">
         {/* Total Received */}
-        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] uppercase tracking-wider font-semibold text-[#786B61]">Total Received</span>
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex items-center justify-between">
+          <div>
+            <span className="text-[10px] font-semibold text-[#786A5B] block">Total Collections</span>
+            <div className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] mt-1">
+              ₹{totalReceived.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+            </div>
+            <span className="text-[10px] text-emerald-700 font-medium">
+              {payments.filter((p) => p.status === 'successful').length} successful transactions
+            </span>
           </div>
-          <div className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-2">
-            ₹ {totalReceived.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
-          </div>
-          <div className="text-xs text-[#2E7D32] mt-1 font-semibold">
-            {payments.filter((p) => p.status === 'successful').length} successful collections
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center font-bold">
+            <CreditCard className="w-5 h-5" />
           </div>
         </div>
 
         {/* Reconciled Count */}
-        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] uppercase tracking-wider font-semibold text-[#786B61]">Reconciled Count</span>
-            <ShieldCheck className="w-4 h-4 text-emerald-600" />
+        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex items-center justify-between">
+          <div>
+            <span className="text-[10px] font-semibold text-[#786A5B] block">Reconciled Payments</span>
+            <div className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] mt-1">
+              {reconciledCount} / {payments.length}
+            </div>
+            <span className="text-[10px] text-[#8D672F] font-medium">Bank &amp; Gateway verified</span>
           </div>
-          <div className="font-serif text-2xl sm:text-3xl font-bold text-[#1565C0] mt-2">
-            {reconciledCount} / {payments.length}
-          </div>
-          <div className="text-xs text-[#786B61] mt-1">
-            Bank & Gateway matched
+          <div className="w-10 h-10 rounded-xl bg-[#FAF6EE] text-[#8D672F] border border-[#E6D9C5]/60 flex items-center justify-center font-bold">
+            <ShieldCheck className="w-5 h-5" />
           </div>
         </div>
 
         {/* Pending Count */}
-        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-5 shadow-sm">
-          <div className="flex items-center justify-between">
-            <span className="text-[11px] uppercase tracking-wider font-semibold text-[#786B61]">Pending Count</span>
-            <Clock className="w-4 h-4 text-amber-600" />
+        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex items-center justify-between">
+          <div>
+            <span className="text-[10px] font-semibold text-[#786A5B] block">Pending Clearance</span>
+            <div className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] mt-1">
+              {pendingCount}
+            </div>
+            <span className="text-[10px] text-amber-700 font-medium">Awaiting gateway settlement</span>
           </div>
-          <div className="font-serif text-2xl sm:text-3xl font-bold text-amber-700 mt-2">
-            {pendingCount}
-          </div>
-          <div className="text-xs text-amber-700 mt-1">
-            Awaiting sync or settlement
+          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 border border-amber-200/60 flex items-center justify-center font-bold">
+            <Clock className="w-5 h-5" />
           </div>
         </div>
 
         {/* Reconciliation Action & Net Balance */}
-        <div className="bg-gradient-to-br from-[#2D1B13] to-[#43001F] text-white rounded-2xl p-5 shadow-sm flex flex-col justify-between">
+        <div className="bg-[#FAF8F5] rounded-2xl border border-[#E6D9C5]/80 p-5 shadow-[0_4px_20px_rgba(33,24,15,0.02)] flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] uppercase tracking-wider font-bold text-[#D8AD56]">Payment Reconciliation</span>
-              {totalRefunded > 0 && (
-                <span className="text-[9px] bg-red-500/30 text-red-200 px-1.5 py-0.5 rounded font-mono">
-                  -₹{totalRefunded.toLocaleString('en-IN')} Ref
-                </span>
-              )}
-            </div>
-            <div className="font-serif text-lg font-bold mt-1 text-white">
-              Net: ₹ {netBalance.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+            <span className="text-[10px] font-semibold text-[#786A5B] block">Net Operating Balance</span>
+            <div className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] mt-1">
+              ₹{netBalance.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
             </div>
           </div>
           <button
             onClick={handleReconcilePayments}
             disabled={isReconciling}
-            className="mt-3 w-full py-2 px-3 rounded-xl bg-[#D8AD56] hover:bg-[#C99E44] text-[#241912] text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-sm disabled:opacity-50 cursor-pointer"
+            className="mt-3 w-full py-2 px-3 rounded-xl bg-[#2A1D13] hover:bg-black text-[#FAF6EE] text-xs font-semibold transition-all flex items-center justify-center gap-1.5 shadow-xs disabled:opacity-50 cursor-pointer"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isReconciling ? 'animate-spin' : ''}`} />
-            <span>{isReconciling ? 'Reconciling...' : 'Reconcile Payments'}</span>
+            <span>{isReconciling ? 'Reconciling...' : 'Reconcile Ledger'}</span>
           </button>
         </div>
       </div>
 
       {/* View Switcher Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#EFE3D6] pb-2">
+      <div className="flex items-center gap-1.5 bg-[#FAF6EE] p-1.5 rounded-2xl overflow-x-auto no-scrollbar w-fit border border-[#E6D9C5]/60">
         <button
           onClick={() => setActiveTab('payments')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
             activeTab === 'payments'
-              ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
-              : 'bg-white text-[#786B61] hover:bg-[#FAF7F2]'
+              ? 'bg-[#2A1D13] text-[#FAF6EE] shadow-xs'
+              : 'text-[#786A5B] hover:text-[#2A1D13]'
           }`}
         >
-          Customer Collections & Folios ({payments.length})
+          Customer Collections ({payments.length})
         </button>
         <button
           onClick={() => setActiveTab('expenses')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
             activeTab === 'expenses'
-              ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
-              : 'bg-white text-[#786B61] hover:bg-[#FAF7F2]'
+              ? 'bg-[#2A1D13] text-[#FAF6EE] shadow-xs'
+              : 'text-[#786A5B] hover:text-[#2A1D13]'
           }`}
         >
-          Hotel Operating Expenses ({expenses.length})
+          Operating Expenses ({expenses.length})
         </button>
       </div>
 
       {/* Main Table */}
       {activeTab === 'payments' ? (
-        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 shadow-luxury overflow-hidden">
+        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF7F2] text-[#786B61] uppercase tracking-wider text-[10px] border-b border-[#EFE3D6]">
+              <thead className="bg-[#FAF8F5] text-[#786A5B] font-semibold text-[11px] border-b border-[#E6D9C5]/80">
                 <tr>
                   <th className="py-3.5 px-4 font-semibold">Payment Ref</th>
-                  <th className="py-3.5 px-4 font-semibold">Booking Ref</th>
-                  <th className="py-3.5 px-4 font-semibold">Guest Name</th>
+                  <th className="py-3.5 px-4 font-semibold">Booking</th>
+                  <th className="py-3.5 px-4 font-semibold">Guest</th>
                   <th className="py-3.5 px-4 font-semibold">Method</th>
                   <th className="py-3.5 px-4 font-semibold">Amount</th>
-                  <th className="py-3.5 px-4 font-semibold">Reconciliation</th>
-                  <th className="py-3.5 px-4 font-semibold">Status / Refund</th>
-                  <th className="py-3.5 px-4 font-semibold">Date & Time</th>
+                  <th className="py-3.5 px-4 font-semibold">Verification</th>
+                  <th className="py-3.5 px-4 font-semibold">Status</th>
+                  <th className="py-3.5 px-4 font-semibold">Date</th>
                   <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#EFE3D6] text-[#241912]">
+              <tbody className="divide-y divide-[#E6D9C5]/60 text-[#2A1D13]">
                 {filteredPayments.length === 0 ? (
                   <tr>
                     <td colSpan={9} className="py-12 text-center text-[#786B61]">

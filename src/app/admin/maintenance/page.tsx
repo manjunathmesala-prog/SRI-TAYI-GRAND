@@ -433,39 +433,29 @@ export default function AdminMaintenancePage() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]/60">
         <div>
-          <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-[#D8AD56] font-semibold">
-            <span>{isTelugu ? 'ఇంజనీరింగ్ & హౌస్‌కీపింగ్' : 'Engineering & Housekeeping'}</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-            <span>{isTelugu ? 'ఆస్తి నిర్వహణ & వర్క్ ఆర్డర్‌లు' : 'Property Maintenance & Work Orders'}</span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#241912] mt-1">
-            {isTelugu ? 'ఆస్తి నిర్వహణ & మరమ్మతులు (OOO బ్లాక్‌లు)' : 'Property Maintenance & Out-of-Order (OOO) Blocks'}
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#2A1D13] tracking-tight">
+            {isTelugu ? 'ఆస్తి నిర్వహణ & మరమ్మతులు' : 'Maintenance & Repairs'}
           </h1>
-          <p className="text-xs sm:text-sm text-[#786A5B]">
-            {isTelugu
-              ? 'AC, ప్లంబింగ్, స్మార్ట్ RFID లాక్‌ల కోసం వర్క్ ఆర్డర్‌లను సృష్టించండి మరియు తనిఖీ చేసే వరకు గదులను OOO లో ఉంచండి.'
-              : 'Create work orders for AC, plumbing, smart RFID locks, and automatically take physical rooms out-of-order until inspected.'}
-          </p>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
             onClick={() => fetchMaintenanceData()}
-            className="p-2.5 rounded-xl border border-[#EFE3D6] bg-white hover:bg-[#FAF7F2] text-[#786A5B] transition-colors shadow-xs cursor-pointer"
+            className="p-2.5 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF8F5] text-[#786A5B] transition-colors shadow-xs cursor-pointer"
             title={isTelugu ? 'రిఫ్రెష్ చేయండి' : 'Refresh'}
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#D8AD56]' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#8D672F]' : ''}`} />
           </button>
           <button
             type="button"
             onClick={() => setIsCreateModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl bg-[#241912] hover:bg-[#382216] text-[#D8AD56] text-xs font-bold uppercase tracking-wider shadow-sm flex items-center gap-2 transition-colors cursor-pointer active:scale-98"
+            className="px-4 py-2.5 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] text-xs font-semibold tracking-wider shadow-sm flex items-center gap-2 transition-colors cursor-pointer active:scale-98"
           >
             <Plus className="w-4 h-4" />
-            <span>{isTelugu ? '+ కొత్త వర్క్ ఆర్డర్' : '+ New Work Order'}</span>
+            <span>{isTelugu ? 'కొత్త వర్క్ ఆర్డర్' : 'New Work Order'}</span>
           </button>
         </div>
       </div>
@@ -499,78 +489,63 @@ export default function AdminMaintenancePage() {
 
       {/* METRICS CARDS */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="p-5 rounded-2xl bg-white border border-[#EFE3D6] shadow-xs space-y-2">
+        <div className="p-5 rounded-2xl bg-white border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
           <div className="flex items-center justify-between text-[#786A5B]">
             <span className="text-xs uppercase tracking-wider font-semibold">
               {isTelugu ? 'మొత్తం ఆర్డర్లు' : 'Total Orders'}
             </span>
-            <Wrench className="w-4 h-4 text-[#D8AD56]" />
+            <Wrench className="w-4 h-4 text-[#8D672F]" />
           </div>
-          <div className="text-2xl sm:text-3xl font-bold font-mono text-[#241912]">
+          <div className="text-2xl sm:text-3xl font-serif font-bold text-[#2A1D13]">
             {stats.totalTickets}
-          </div>
-          <div className="text-[11px] text-[#786A5B]">
-            {isTelugu ? 'అన్ని నమోదైన మరమ్మతులు' : 'All recorded repairs'}
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-[#EFE3D6] shadow-xs space-y-2">
+        <div className="p-5 rounded-2xl bg-white border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
           <div className="flex items-center justify-between text-[#786A5B]">
             <span className="text-xs uppercase tracking-wider font-semibold">
               {isTelugu ? 'ప్రస్తుతం పనిలో ఉన్నవి' : 'Active In Work'}
             </span>
             <Clock className="w-4 h-4 text-blue-600" />
           </div>
-          <div className="text-2xl sm:text-3xl font-bold font-mono text-blue-700">
+          <div className="text-2xl sm:text-3xl font-serif font-bold text-blue-700">
             {stats.activeCount}
-          </div>
-          <div className="text-[11px] text-[#786A5B]">
-            {isTelugu ? 'నివేదించబడిన లేదా పురోగతిలో ఉన్నవి' : 'Reported or in progress'}
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-[#EFE3D6] shadow-xs space-y-2">
+        <div className="p-5 rounded-2xl bg-white border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
           <div className="flex items-center justify-between text-[#786A5B]">
             <span className="text-xs uppercase tracking-wider font-semibold">
-              {isTelugu ? 'అత్యవసర ప్రాధాన్యత' : 'Urgent Priority'}
+              {isTelugu ? 'అత్యవసరం' : 'Urgent'}
             </span>
             <AlertTriangle className="w-4 h-4 text-rose-600" />
           </div>
-          <div className="text-2xl sm:text-3xl font-bold font-mono text-rose-700">
+          <div className="text-2xl sm:text-3xl font-serif font-bold text-rose-700">
             {stats.urgentCount}
-          </div>
-          <div className="text-[11px] text-[#786A5B]">
-            {isTelugu ? 'వెంటనే పరిష్కారం కావాలి' : 'Requires immediate lead fix'}
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-[#EFE3D6] shadow-xs space-y-2">
+        <div className="p-5 rounded-2xl bg-white border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
           <div className="flex items-center justify-between text-[#786A5B]">
             <span className="text-xs uppercase tracking-wider font-semibold">
               {isTelugu ? 'నిలిపివేసిన గదులు' : 'Rooms Blocked'}
             </span>
             <Lock className="w-4 h-4 text-purple-600" />
           </div>
-          <div className="text-2xl sm:text-3xl font-bold font-mono text-purple-700">
+          <div className="text-2xl sm:text-3xl font-serif font-bold text-purple-700">
             {stats.blockedCount}
-          </div>
-          <div className="text-[11px] text-[#786A5B]">
-            {isTelugu ? 'అందుబాటులో లేని గదుల స్థితి' : 'Out-of-order room state'}
           </div>
         </div>
 
-        <div className="p-5 rounded-2xl bg-white border border-[#EFE3D6] shadow-xs space-y-2 col-span-2 lg:col-span-1">
+        <div className="p-5 rounded-2xl bg-white border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1 col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between text-[#786A5B]">
             <span className="text-xs uppercase tracking-wider font-semibold">
               {isTelugu ? 'మరమ్మతు ఖర్చు' : 'Repair Spend'}
             </span>
             <DollarSign className="w-4 h-4 text-emerald-600" />
           </div>
-          <div className="text-2xl sm:text-3xl font-bold font-mono text-[#241912]">
+          <div className="text-2xl sm:text-3xl font-serif font-bold text-[#2A1D13]">
             ₹{stats.totalCost.toLocaleString('en-IN')}
-          </div>
-          <div className="text-[11px] text-[#786A5B]">
-            {isTelugu ? 'మొత్తం మరమ్మతు ఖర్చులు' : 'Combined repair outlays'}
           </div>
         </div>
       </div>
@@ -642,18 +617,13 @@ export default function AdminMaintenancePage() {
       </div>
 
       {/* WORK ORDERS TABLE */}
-      <div className="bg-white rounded-3xl border border-[#EFE3D6] shadow-xs overflow-hidden">
-        <div className="p-6 border-b border-[#EFE3D6] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] overflow-hidden">
+        <div className="p-5 border-b border-[#E6D9C5]/60 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h2 className="text-lg font-serif font-bold text-[#241912] flex items-center gap-2">
-              <Wrench className="w-5 h-5 text-[#D8AD56]" />
-              <span>{isTelugu ? 'క్రియాశీల వర్క్ ఆర్డర్‌లు & నిర్వహణ చరిత్ర' : 'Active Work Orders & Maintenance History'}</span>
+            <h2 className="text-base font-serif font-bold text-[#2A1D13] flex items-center gap-2">
+              <Wrench className="w-4 h-4 text-[#8D672F]" />
+              <span>{isTelugu ? 'క్రియాశీల వర్క్ ఆర్డర్‌లు' : 'Work Orders'}</span>
             </h2>
-            <p className="text-xs text-[#786A5B] mt-0.5">
-              {isTelugu
-                ? 'గది మరమ్మతుల స్థితి, టెక్నీషియన్ కేటాయింపులు మరియు Out-of-Order లాక్‌లు.'
-                : 'Live status of room repairs, technician allocations, and Out-of-Order locks.'}
-            </p>
           </div>
           <span className="text-xs font-mono font-bold text-[#786A5B]">
             {isTelugu

@@ -152,138 +152,91 @@ export default function ReportsAdminPage() {
   const cashDiscrepancy = actualCash - expectedDrawerCash;
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto">
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]/60">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
-              {isTelugu ? 'ఆర్థిక & విశ్లేషణ' : 'FINANCE & ANALYTICS'}
-            </span>
-            <span
-              className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
-                isConnected ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
-              }`}
-            >
-              <Radio className="w-2.5 h-2.5" />
-              {isConnected
-                ? (isTelugu ? 'ప్రత్యక్ష సింక్రనైజేషన్ సక్రియం' : 'Real-Time Sync Active')
-                : `${t('common.reconnecting', 'Sync')}: ${status}`}
-            </span>
-          </div>
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-0.5 flex items-center gap-2">
-            <BarChart3 className="w-6 h-6 text-[#D8AD56]" />
-            <span>{t('reports.title', 'Financial Reports & Night Audit')}</span>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] tracking-tight">
+            {t('reports.title', 'Financial Reports')}
           </h1>
-          <p className="text-xs text-[#786B61] mt-0.5">
-            {t(
-              'reports.subtitle',
-              'Revenue breakdowns, occupancy statistics, cash ledger reconciliation, and shift closings.'
-            )}
-          </p>
         </div>
 
         <div className="flex items-center gap-3">
           <button
             onClick={fetchReportsData}
-            className="p-2.5 rounded-xl border border-[#E6D9C5] bg-white text-[#786A5B] hover:text-[#33271D] hover:bg-[#FAF7F2] shadow-xs cursor-pointer"
+            className="p-2.5 rounded-xl border border-[#E6D9C5] bg-white text-[#786A5B] hover:text-[#2A1D13] hover:bg-[#FAF8F5] shadow-xs cursor-pointer"
             title={t('common.refresh', 'Refresh')}
           >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin text-[#8D672F]' : ''}`} />
           </button>
           <button
             onClick={handleExportCSV}
-            className="px-4 py-2.5 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold transition-colors flex items-center gap-2 shadow-sm cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] text-xs font-semibold tracking-wide transition-colors flex items-center gap-2 shadow-sm cursor-pointer active:scale-98"
           >
             <Download className="w-4 h-4" />
-            <span>{t('common.exportCsv', 'Export Bookings CSV')}</span>
+            <span>{t('common.exportCsv', 'Export CSV')}</span>
           </button>
         </div>
       </div>
 
       {/* Summary KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-5 shadow-sm">
-          <span className="text-[11px] uppercase tracking-wider font-semibold text-[#786B61]">
-            {isTelugu ? 'మొత్తం బుకింగ్స్ ఆదాయం' : 'Cumulative Revenue'}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
+          <span className="text-[11px] uppercase tracking-wider font-semibold text-[#786A5B]">
+            {isTelugu ? 'మొత్తం ఆదాయం' : 'Cumulative Revenue'}
           </span>
-          <div className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-2">
+          <div className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13]">
             {formatCurrency(totalRevenue)}
           </div>
-          <div className="text-xs text-[#2E7D32] mt-1 font-semibold">
-            {totalBookings} {isTelugu ? 'నమోదైన రిజర్వేషన్లు' : 'reservations recorded'}
-          </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-5 shadow-sm">
-          <span className="text-[11px] uppercase tracking-wider font-semibold text-[#786B61]">
+        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
+          <span className="text-[11px] uppercase tracking-wider font-semibold text-[#786A5B]">
             {t('payments.totalCollection', 'Total Collections')}
           </span>
-          <div className="font-serif text-2xl sm:text-3xl font-bold text-[#1565C0] mt-2">
+          <div className="font-serif text-2xl sm:text-3xl font-bold text-blue-700">
             {formatCurrency(collected)}
           </div>
-          <div className="text-xs text-[#786B61] mt-1">
-            {isTelugu ? 'ఆన్‌లైన్ & రిసెప్షన్ ద్వారా జమ చేయబడింది' : 'Settled online & reception'}
-          </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-5 shadow-sm">
-          <span className="text-[11px] uppercase tracking-wider font-semibold text-[#786B61]">
-            {t('dashboard.occupancyRate', 'Occupancy Benchmark')}
+        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
+          <span className="text-[11px] uppercase tracking-wider font-semibold text-[#786A5B]">
+            {t('dashboard.occupancyRate', 'Occupancy')}
           </span>
-          <div className="font-serif text-2xl sm:text-3xl font-bold text-[#382216] mt-2">
+          <div className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13]">
             {occupancy}%
           </div>
-          <div className="text-xs text-[#786B61] mt-1">
-            {isTelugu ? `${rooms.length} గదుల ఆధారంగా` : `Based on ${rooms.length} physical rooms`}
-          </div>
         </div>
 
-        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-5 shadow-sm">
-          <span className="text-[11px] uppercase tracking-wider font-semibold text-[#786B61]">
-            {isTelugu ? 'నైట్ ఆడిట్ స్థితి' : 'Night Audit Status'}
+        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
+          <span className="text-[11px] uppercase tracking-wider font-semibold text-[#786A5B]">
+            {isTelugu ? 'నైట్ ఆడిట్ స్థితి' : 'Night Audit'}
           </span>
-          <div className="font-serif text-xl sm:text-2xl font-bold text-[#D8AD56] mt-2 flex items-center gap-1.5">
-            <ShieldCheck className="w-5 h-5 text-green-600" />
+          <div className="font-serif text-xl sm:text-2xl font-bold text-[#2A1D13] flex items-center gap-1.5">
+            <ShieldCheck className="w-5 h-5 text-emerald-600" />
             <span>
               {closingSummary?.isAlreadyClosed
-                ? (isTelugu ? 'ఈ రోజు ముగిసింది' : 'Day Closed')
-                : (isTelugu ? 'ఆడిట్ సిద్ధంగా ఉంది' : 'Audit Ready')}
+                ? (isTelugu ? 'ఈ రోజు ముగిసింది' : 'Closed')
+                : (isTelugu ? 'సిద్ధంగా ఉంది' : 'Audit Ready')}
             </span>
-          </div>
-          <div className="text-xs text-[#786B61] mt-1">
-            {isTelugu ? 'నగదు మరియు లెడ్జర్ సరిచూడబడింది' : 'Drawer & Ledger Balanced'}
           </div>
         </div>
       </div>
 
       {/* NIGHT AUDIT & DAILY CLOSING WORKSTATION */}
-      <div className="bg-gradient-to-br from-[#25150F] via-[#382216] to-[#241912] rounded-3xl border border-[#D8AD56]/50 p-6 sm:p-8 text-white shadow-2xl space-y-6">
+      <div className="bg-[#2A1D13] rounded-2xl border border-[#D8AD56]/30 p-6 text-white shadow-xl space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] uppercase tracking-wider font-bold text-[#D8AD56] bg-[#D8AD56]/15 px-2.5 py-0.5 rounded-full border border-[#D8AD56]/30">
-                {isTelugu ? 'రోజువారీ రిజిస్టర్ ముగింపు & నైట్ ఆడిట్' : 'DAILY REGISTER CLOSING & NIGHT AUDIT'}
-              </span>
-              <span className="text-xs text-[#EFE3D6]/70">
-                {isTelugu ? 'తేదీ' : 'Date'}: {closingSummary?.closingDate || new Date().toISOString().split('T')[0]}
-              </span>
-            </div>
-            <h2 className="font-serif text-xl sm:text-2xl font-bold text-white mt-1 flex items-center gap-2">
+            <h2 className="font-serif text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
               <Lock className="w-5 h-5 text-[#D8AD56]" />
-              <span>{isTelugu ? 'షిఫ్ట్ ముగింపు & నగదు సరిచూడటం' : 'Shift Reconcile & Cash Drawer Verification'}</span>
+              <span>{isTelugu ? 'షిఫ్ట్ ముగింపు & నగదు సరిచూడటం' : 'Shift Reconcile'}</span>
             </h2>
-            <p className="text-xs text-[#EFE3D6]/80 mt-0.5">
-              {isTelugu
-                ? 'గదుల వసూళ్లు, నగదు రసీదులు, ఖర్చులు మరియు భౌతిక కౌంటర్ లెక్కింపుల మధ్య అధికారిక లెడ్జర్ సరిపోలిక.'
-                : 'Authoritative ledger balance check between room collections, cash receipts, payouts, and physical count.'}
-            </p>
           </div>
 
           {closingSummary?.isAlreadyClosed && (
-            <div className="px-3 py-1.5 rounded-xl bg-green-500/20 text-green-300 border border-green-500/40 text-xs font-bold flex items-center gap-1.5">
+            <div className="px-3 py-1.5 rounded-xl bg-green-500/20 text-green-300 border border-green-500/40 text-xs font-semibold flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-green-400" />
-              <span>{isTelugu ? 'ఈ రోజు షిఫ్ట్ ముగిసింది' : "Today's Shift is Closed"}</span>
+              <span>{isTelugu ? 'ఈ రోజు షిఫ్ట్ ముగిసింది' : "Shift Closed"}</span>
             </div>
           )}
         </div>
@@ -305,54 +258,44 @@ export default function ReportsAdminPage() {
 
         {/* Metric Grid */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-            <span className="text-[10px] uppercase font-bold text-[#D8AD56]">
-              {isTelugu ? 'నేటి నగదు రసీదులు' : "Today's Cash Receipts"}
+          <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1">
+            <span className="text-[10px] uppercase font-semibold text-[#D8AD56]">
+              {isTelugu ? 'నేటి నగదు రసీదులు' : "Cash Receipts"}
             </span>
-            <div className="font-serif text-2xl font-bold mt-1 text-white">
+            <div className="font-serif text-2xl font-bold text-white">
               {formatCurrency(closingSummary?.cashCollected || 0)}
             </div>
-            <span className="text-[10px] text-[#EFE3D6]/60">
-              {isTelugu ? 'కౌంటర్ వద్ద నగదు స్వీకరించబడింది' : 'Physical currency taken at desk'}
-            </span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-            <span className="text-[10px] uppercase font-bold text-[#D8AD56]">
-              {isTelugu ? 'నేటి నగదు ఖర్చులు' : "Today's Cash Expenses"}
+          <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1">
+            <span className="text-[10px] uppercase font-semibold text-[#D8AD56]">
+              {isTelugu ? 'నేటి నగదు ఖర్చులు' : "Cash Expenses"}
             </span>
-            <div className="font-serif text-2xl font-bold mt-1 text-red-300">
+            <div className="font-serif text-2xl font-bold text-red-300">
               {formatCurrency(closingSummary?.cashExpenses || 0)}
             </div>
-            <span className="text-[10px] text-[#EFE3D6]/60">
-              {isTelugu ? 'క్యాష్ డ్రాయర్ నుండి చెల్లించబడింది' : 'Disbursed from cash drawer'}
-            </span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
-            <span className="text-[10px] uppercase font-bold text-[#D8AD56]">
+          <div className="p-4 rounded-xl bg-white/5 border border-white/10 space-y-1">
+            <span className="text-[10px] uppercase font-semibold text-[#D8AD56]">
               {isTelugu ? 'డిజిటల్ & UPI వసూళ్లు' : 'Digital Collections'}
             </span>
-            <div className="font-serif text-2xl font-bold mt-1 text-blue-300">
+            <div className="font-serif text-2xl font-bold text-blue-300">
               {formatCurrency(
                 (closingSummary?.upiCollected || 0) +
                   (closingSummary?.cardCollected || 0) +
                   (closingSummary?.onlineCollected || 0)
               )}
             </div>
-            <span className="text-[10px] text-[#EFE3D6]/60">Razorpay / POS / UPI</span>
           </div>
 
-          <div className="p-4 rounded-2xl bg-[#D8AD56]/15 border border-[#D8AD56]/40">
-            <span className="text-[10px] uppercase font-bold text-[#D8AD56]">
-              {isTelugu ? 'డ్రాయర్‌లో ఉండాల్సిన నగదు' : 'Expected Cash in Drawer'}
+          <div className="p-4 rounded-xl bg-[#D8AD56]/15 border border-[#D8AD56]/40 space-y-1">
+            <span className="text-[10px] uppercase font-semibold text-[#D8AD56]">
+              {isTelugu ? 'డ్రాయర్‌లో ఉండాల్సిన నగదు' : 'Expected Drawer Cash'}
             </span>
-            <div className="font-serif text-2xl font-bold mt-1 text-[#D8AD56]">
+            <div className="font-serif text-2xl font-bold text-[#D8AD56]">
               {formatCurrency(expectedDrawerCash)}
             </div>
-            <span className="text-[10px] text-[#EFE3D6]/80">
-              {isTelugu ? 'నగదు రసీదులు - ఖర్చులు' : 'Cash Receipts - Cash Expenses'}
-            </span>
           </div>
         </div>
 

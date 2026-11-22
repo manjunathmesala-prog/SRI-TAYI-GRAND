@@ -388,34 +388,21 @@ export default function AdminCashbookPage() {
       )}
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]/80">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#D8AD56] bg-[#D8AD56]/10 px-2.5 py-0.5 rounded-full border border-[#D8AD56]/20">
-              {isTelugu ? 'క్యాష్ డ్రాయర్ ఆపరేషన్స్' : 'Cash Drawer Operations'}
-            </span>
-            <span className="text-xs text-[#786B61]">
-              {isTelugu ? 'ఫ్రంట్ డెస్క్ ఆర్థిక నిధులు' : 'Front Desk Financial Float'}
-            </span>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#241912] mt-1 flex items-center gap-2.5">
-            <Wallet className="w-7 h-7 text-[#D8AD56]" />
-            <span>{isTelugu ? 'క్యాష్‌బుక్ & డ్రాయర్ షిఫ్ట్‌లు' : 'Cashbook & Drawer Shifts'}</span>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#2A1D13] flex items-center gap-2.5">
+            <Wallet className="w-6 h-6 text-[#8D672F]" />
+            <span>{isTelugu ? 'క్యాష్‌బుక్ & డ్రాయర్ షిఫ్ట్‌లు' : 'Cash Drawer & Shifts'}</span>
           </h1>
-          <p className="text-xs text-[#786B61] mt-0.5">
-            {isTelugu
-              ? 'రిసెప్షన్ నగదు బ్యాలెన్స్, షిఫ్ట్ అప్పగింతలు, మరియు చిన్న ఖర్చుల ప్రత్యక్ష ఆడిట్.'
-              : 'Real-time reception drawer reconciliation, shift handovers, float balances, and petty cash disbursements.'}
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={fetchCashbook}
             disabled={loading}
-            className="px-3.5 py-2 rounded-xl border border-[#EFE3D6] bg-white hover:bg-[#FAF7F2] text-xs font-semibold text-[#241912] flex items-center gap-1.5 transition-colors shadow-2xs active:scale-95 disabled:opacity-60 cursor-pointer"
+            className="px-3.5 py-2.5 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF6EE] text-xs font-semibold text-[#2A1D13] flex items-center gap-1.5 transition-all shadow-xs cursor-pointer disabled:opacity-60"
           >
-            <RefreshCw className={`w-3.5 h-3.5 text-[#D8AD56] ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-3.5 h-3.5 text-[#8D672F] ${loading ? 'animate-spin' : ''}`} />
             <span>{isTelugu ? 'రీఫ్రెష్' : 'Refresh'}</span>
           </button>
 
@@ -423,111 +410,114 @@ export default function AdminCashbookPage() {
             <>
               <button
                 onClick={() => setIsAddTxModalOpen(true)}
-                className="px-4 py-2 rounded-xl bg-[#43001F] hover:bg-[#2E0015] active:bg-[#20000E] text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-all active:scale-95 cursor-pointer"
+                className="px-4 py-2.5 rounded-xl bg-[#2A1D13] hover:bg-black text-[#FAF6EE] text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
               >
-                <Plus className="w-3.5 h-3.5" />
-                <span>{isTelugu ? '+ నగదు నమోదు' : '+ Record Cash Flow'}</span>
+                <Plus className="w-3.5 h-3.5 text-[#B18A4A]" />
+                <span>{isTelugu ? '+ నగదు నమోదు' : '+ Cash Entry'}</span>
               </button>
               <button
                 onClick={() => {
                   setClosingCashCounted(balance);
                   setIsCloseShiftModalOpen(true);
                 }}
-                className="px-4 py-2 rounded-xl bg-[#241912] hover:bg-[#382216] active:bg-[#150B05] text-[#D8AD56] text-xs font-bold flex items-center gap-1.5 shadow-md transition-all active:scale-95 cursor-pointer"
+                className="px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF6EE] text-[#8D672F] text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
               >
                 <Lock className="w-3.5 h-3.5" />
                 <span>{isTelugu ? 'షిఫ్ట్ ముగించండి' : 'Close Shift'}</span>
               </button>
               <button
                 onClick={() => setSelectedShiftForPrint(activeShift)}
-                className="px-3.5 py-2 rounded-xl border border-[#D8AD56]/40 bg-[#F8F3E9] hover:bg-[#EFE3D6] text-[#43001F] text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
+                className="px-3.5 py-2.5 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF6EE] text-[#2A1D13] text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-all cursor-pointer"
                 title="Print Shift Handover Summary"
               >
-                <Printer className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{isTelugu ? 'రసీదు ముద్రణ' : 'Print Slip'}</span>
+                <Printer className="w-3.5 h-3.5 text-[#8D672F]" />
+                <span className="hidden sm:inline">{isTelugu ? 'రసీదు' : 'Print Slip'}</span>
               </button>
             </>
           ) : (
             <button
               onClick={() => setIsOpenShiftModalOpen(true)}
-              className="px-4 py-2 rounded-xl bg-[#43001F] hover:bg-[#2E0015] active:bg-[#20000E] text-white text-xs font-bold flex items-center gap-1.5 shadow-md transition-all active:scale-95 cursor-pointer"
+              className="px-4 py-2.5 rounded-xl bg-[#2A1D13] hover:bg-black text-[#FAF6EE] text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
             >
-              <Unlock className="w-3.5 h-3.5 text-[#D8AD56]" />
-              <span>{isTelugu ? 'కొత్త క్యాష్ షిఫ్ట్ ప్రారంభించండి' : 'Open New Cash Shift'}</span>
+              <Unlock className="w-3.5 h-3.5 text-[#B18A4A]" />
+              <span>{isTelugu ? 'కొత్త షిఫ్ట్ ప్రారంభించండి' : 'Open Shift'}</span>
             </button>
           )}
         </div>
       </div>
 
-      {/* 4 Financial Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 4 LUXURY FINANCIAL METRIC CARDS */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Drawer Current Cash Balance */}
-        <div className="bg-gradient-to-br from-[#241912] via-[#382216] to-[#1E110A] text-white rounded-2xl p-5 border border-[#D8AD56]/40 shadow-xl relative overflow-hidden">
-          <div className="flex items-center justify-between text-xs text-[#EFE3D6]/80 font-medium">
-            <span>{isTelugu ? 'కౌంటర్ వద్ద నగదు' : 'Physical Drawer Cash'}</span>
-            <span
-              className={`w-2.5 h-2.5 rounded-full ${
-                activeShift ? 'bg-emerald-400 animate-pulse' : 'bg-rose-400'
-              }`}
-            />
-          </div>
-          <div className="text-3xl font-serif font-black text-[#D8AD56] tracking-tight mt-2">
-            ₹{balance.toLocaleString('en-IN')}
-          </div>
-          <div className="text-[11px] text-[#EFE3D6]/70 mt-1 flex items-center justify-between">
-            <span>{isTelugu ? 'స్థితి:' : 'Status:'}</span>
-            <span className={`font-semibold ${activeShift ? 'text-emerald-400' : 'text-stone-400'}`}>
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex items-center justify-between">
+          <div>
+            <span className="text-[10px] font-semibold text-[#786A5B] block">
+              {isTelugu ? 'కౌంటర్ వద్ద నగదు' : 'Drawer Cash Balance'}
+            </span>
+            <div className="text-2xl sm:text-3xl font-serif font-bold text-[#2A1D13] mt-1">
+              ₹{balance.toLocaleString('en-IN')}
+            </div>
+            <span className={`text-[10px] font-medium ${activeShift ? 'text-emerald-700' : 'text-stone-500'}`}>
               {activeShift
                 ? isTelugu
                   ? `షిఫ్ట్ #${activeShift.shift_number} చురుకుగా ఉంది`
                   : `Shift #${activeShift.shift_number} Active`
                 : isTelugu
-                ? 'షిఫ్ట్ మూసివేయబడింది'
+                ? 'షిఫ్ట్ ముగిసింది'
                 : 'Shift Closed'}
             </span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-[#FAF6EE] text-[#8D672F] border border-[#E6D9C5]/60 flex items-center justify-center font-bold">
+            <Wallet className="w-5 h-5" />
           </div>
         </div>
 
         {/* Opening Float */}
-        <div className="bg-white rounded-2xl p-5 border border-[#EFE3D6] shadow-2xs space-y-1">
-          <div className="flex items-center justify-between text-xs text-[#786B61] font-semibold">
-            <span>{isTelugu ? 'ప్రారంభ ఫ్లోట్' : 'Opening Float'}</span>
-            <Clock className="w-4 h-4 text-[#D8AD56]" />
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex items-center justify-between">
+          <div>
+            <span className="text-[10px] font-semibold text-[#786A5B] block">
+              {isTelugu ? 'ప్రారంభ ఫ్లోట్' : 'Opening Float'}
+            </span>
+            <div className="text-2xl sm:text-3xl font-serif font-bold text-[#2A1D13] mt-1">
+              ₹{openingFloat.toLocaleString('en-IN')}
+            </div>
+            <span className="text-[10px] text-[#786A5B] font-medium">Float at shift start</span>
           </div>
-          <div className="text-2xl font-serif font-bold text-[#241912]">
-            ₹{openingFloat.toLocaleString('en-IN')}
+          <div className="w-10 h-10 rounded-xl bg-[#FAF6EE] text-[#8D672F] border border-[#E6D9C5]/60 flex items-center justify-center font-bold">
+            <Clock className="w-5 h-5" />
           </div>
-          <p className="text-[10px] text-[#786B61]">
-            {isTelugu ? 'షిఫ్ట్ ప్రారంభంలో అప్పగించిన నగదు' : 'Handed over at shift opening'}
-          </p>
         </div>
 
         {/* Total Cash In */}
-        <div className="bg-white rounded-2xl p-5 border border-[#EFE3D6] shadow-2xs space-y-1">
-          <div className="flex items-center justify-between text-xs text-emerald-700 font-semibold">
-            <span>{isTelugu ? 'మొత్తం నగదు జమ' : 'Total Cash In'}</span>
-            <ArrowDownLeft className="w-4 h-4 text-emerald-600" />
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex items-center justify-between">
+          <div>
+            <span className="text-[10px] font-semibold text-[#786A5B] block">
+              {isTelugu ? 'మొత్తం నగదు జమ' : 'Total Cash In'}
+            </span>
+            <div className="text-2xl sm:text-3xl font-serif font-bold text-emerald-700 mt-1">
+              +₹{totalCashIn.toLocaleString('en-IN')}
+            </div>
+            <span className="text-[10px] text-emerald-700 font-medium">Walk-ins &amp; collections</span>
           </div>
-          <div className="text-2xl font-serif font-bold text-emerald-600">
-            +₹{totalCashIn.toLocaleString('en-IN')}
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center font-bold">
+            <ArrowDownLeft className="w-5 h-5" />
           </div>
-          <p className="text-[10px] text-[#786B61]">
-            {isTelugu ? 'వాక్-ఇన్‌లు, అడ్వాన్సులు & రసీదులు' : 'Walk-ins, advances & change receipts'}
-          </p>
         </div>
 
         {/* Total Cash Out */}
-        <div className="bg-white rounded-2xl p-5 border border-[#EFE3D6] shadow-2xs space-y-1">
-          <div className="flex items-center justify-between text-xs text-rose-700 font-semibold">
-            <span>{isTelugu ? 'మొత్తం నగదు ఖర్చు' : 'Total Cash Out'}</span>
-            <ArrowUpRight className="w-4 h-4 text-rose-600" />
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex items-center justify-between">
+          <div>
+            <span className="text-[10px] font-semibold text-[#786A5B] block">
+              {isTelugu ? 'మొత్తం నగదు ఖర్చు' : 'Total Cash Out'}
+            </span>
+            <div className="text-2xl sm:text-3xl font-serif font-bold text-rose-700 mt-1">
+              -₹{totalCashOut.toLocaleString('en-IN')}
+            </div>
+            <span className="text-[10px] text-rose-700 font-medium">Disbursements &amp; payouts</span>
           </div>
-          <div className="text-2xl font-serif font-bold text-rose-600">
-            -₹{totalCashOut.toLocaleString('en-IN')}
+          <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-700 border border-rose-200/60 flex items-center justify-center font-bold">
+            <ArrowUpRight className="w-5 h-5" />
           </div>
-          <p className="text-[10px] text-[#786B61]">
-            {isTelugu ? 'చిల్లర ఖర్చులు, వెండర్ చెల్లింపులు' : 'Petty cash, vendor payouts & expenses'}
-          </p>
         </div>
       </div>
 
@@ -558,33 +548,33 @@ export default function AdminCashbookPage() {
       )}
 
       {/* Transactions Section */}
-      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-[#EFE3D6] shadow-sm space-y-4">
+      <div className="bg-white rounded-2xl p-5 sm:p-6 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <h2 className="font-serif font-bold text-lg text-[#241912] flex items-center gap-2">
-            <Receipt className="w-5 h-5 text-[#D8AD56]" />
-            <span>{isTelugu ? 'షిఫ్ట్ నగదు లావాదేవీల రికార్డు' : 'Shift Cash Transactions Ledger'}</span>
+          <h2 className="font-serif font-bold text-lg text-[#2A1D13] flex items-center gap-2">
+            <Receipt className="w-5 h-5 text-[#8D672F]" />
+            <span>{isTelugu ? 'లావాదేవీల రికార్డు' : 'Transactions Ledger'}</span>
           </h2>
 
           <div className="flex flex-wrap items-center gap-2">
             {/* Search Input */}
             <div className="relative">
-              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#786A5B]" />
               <input
                 type="text"
-                placeholder={isTelugu ? 'లావాదేవీలను వెతకండి...' : 'Search transactions...'}
+                placeholder={isTelugu ? 'శోధించండి...' : 'Search ledger...'}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 pr-3 py-1.5 rounded-xl border border-[#EFE3D6] text-xs text-[#241912] focus:outline-none focus:ring-1 focus:ring-[#D8AD56] min-w-[200px]"
+                className="pl-8 pr-3 py-1.5 rounded-xl border border-[#E6D9C5] text-xs text-[#2A1D13] focus:outline-none focus:border-[#8D672F] min-w-[200px]"
               />
             </div>
 
             {/* Type Filter Buttons */}
-            <div className="flex items-center rounded-xl border border-[#EFE3D6] p-0.5 bg-gray-50 text-xs font-semibold">
+            <div className="flex items-center rounded-xl border border-[#E6D9C5]/60 p-0.5 bg-[#FAF6EE] text-xs font-semibold">
               <button
                 type="button"
                 onClick={() => setTypeFilter('all')}
-                className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
-                  typeFilter === 'all' ? 'bg-[#241912] text-[#D8AD56]' : 'text-gray-600 hover:text-[#241912]'
+                className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                  typeFilter === 'all' ? 'bg-[#2A1D13] text-[#FAF6EE] shadow-xs' : 'text-[#786A5B] hover:text-[#2A1D13]'
                 }`}
               >
                 {isTelugu ? 'అన్నీ' : 'All'}
@@ -592,8 +582,8 @@ export default function AdminCashbookPage() {
               <button
                 type="button"
                 onClick={() => setTypeFilter('cash_in')}
-                className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
-                  typeFilter === 'cash_in' ? 'bg-emerald-700 text-white' : 'text-gray-600 hover:text-emerald-700'
+                className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                  typeFilter === 'cash_in' ? 'bg-emerald-700 text-white shadow-xs' : 'text-[#786A5B] hover:text-emerald-700'
                 }`}
               >
                 {isTelugu ? 'జమ' : 'Cash In'}
@@ -601,8 +591,8 @@ export default function AdminCashbookPage() {
               <button
                 type="button"
                 onClick={() => setTypeFilter('cash_out')}
-                className={`px-3 py-1 rounded-lg transition-colors cursor-pointer ${
-                  typeFilter === 'cash_out' ? 'bg-rose-700 text-white' : 'text-gray-600 hover:text-rose-700'
+                className={`px-3 py-1 rounded-lg transition-all cursor-pointer ${
+                  typeFilter === 'cash_out' ? 'bg-rose-700 text-white shadow-xs' : 'text-[#786A5B] hover:text-rose-700'
                 }`}
               >
                 {isTelugu ? 'ఖర్చు' : 'Cash Out'}
@@ -614,10 +604,10 @@ export default function AdminCashbookPage() {
               type="button"
               onClick={handleExportCSV}
               disabled={filteredTransactions.length === 0}
-              className="px-3 py-1.5 rounded-xl border border-[#EFE3D6] bg-white hover:bg-stone-50 text-xs font-semibold text-[#241912] flex items-center gap-1.5 transition-colors cursor-pointer disabled:opacity-40"
+              className="px-3 py-1.5 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF6EE] text-xs font-semibold text-[#2A1D13] flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-40 shadow-xs"
               title="Export Ledger to CSV"
             >
-              <Download className="w-3.5 h-3.5 text-[#D8AD56]" />
+              <Download className="w-3.5 h-3.5 text-[#8D672F]" />
               <span className="hidden sm:inline">CSV</span>
             </button>
           </div>
@@ -627,18 +617,18 @@ export default function AdminCashbookPage() {
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
-              <tr className="border-b border-[#EFE3D6] text-[#786B61] uppercase tracking-wider text-[10px]">
-                <th className="py-2.5 px-3">{isTelugu ? 'సమయం' : 'Time'}</th>
-                <th className="py-2.5 px-3">{isTelugu ? 'రకం' : 'Type'}</th>
-                <th className="py-2.5 px-3">{isTelugu ? 'వర్గం' : 'Category'}</th>
-                <th className="py-2.5 px-3">{isTelugu ? 'వివరణ / కారణం' : 'Description / Reason'}</th>
-                <th className="py-2.5 px-3">{isTelugu ? 'రిఫరెన్స్' : 'Ref'}</th>
-                <th className="py-2.5 px-3">{isTelugu ? 'సిబ్బంది' : 'Staff'}</th>
-                <th className="py-2.5 px-3 text-right">{isTelugu ? 'మొత్తం' : 'Amount'}</th>
-                <th className="py-2.5 px-3 text-right">{isTelugu ? 'చర్య' : 'Action'}</th>
+              <tr className="border-b border-[#E6D9C5]/80 bg-[#FAF8F5] text-[#786A5B] font-semibold text-[11px]">
+                <th className="py-3 px-3">{isTelugu ? 'సమయం' : 'Time'}</th>
+                <th className="py-3 px-3">{isTelugu ? 'రకం' : 'Type'}</th>
+                <th className="py-3 px-3">{isTelugu ? 'వర్గం' : 'Category'}</th>
+                <th className="py-3 px-3">{isTelugu ? 'వివరణ' : 'Description'}</th>
+                <th className="py-3 px-3">{isTelugu ? 'రిఫరెన్స్' : 'Ref'}</th>
+                <th className="py-3 px-3">{isTelugu ? 'సిబ్బంది' : 'Staff'}</th>
+                <th className="py-3 px-3 text-right">{isTelugu ? 'మొత్తం' : 'Amount'}</th>
+                <th className="py-3 px-3 text-right">{isTelugu ? 'చర్య' : 'Action'}</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#EFE3D6]/60">
+            <tbody className="divide-y divide-[#E6D9C5]/60 text-[#2A1D13]">
               {filteredTransactions.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-8 text-center text-gray-400">

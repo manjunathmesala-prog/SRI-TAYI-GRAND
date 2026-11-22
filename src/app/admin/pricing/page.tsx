@@ -338,119 +338,86 @@ export default function AdminPricingPage() {
         </div>
       )}
 
-      {/* Header Banner */}
-      <div className="bg-[#241912] text-[#FAF7F2] rounded-2xl p-6 md:p-8 border border-[#D8AD56]/30 shadow-xl relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-96 h-96 bg-gradient-to-bl from-[#D8AD56]/15 via-[#382216]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]/60">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#2A1D13] tracking-tight">
+            Dynamic Pricing & Rates
+          </h1>
+        </div>
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-          <div>
-            <div className="flex items-center gap-2.5 mb-2">
-              <span className="px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-[#D8AD56]/20 text-[#D8AD56] border border-[#D8AD56]/40">
-                Revenue & Yield Management
-              </span>
-              <div
-                className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
-                  isConnected
-                    ? 'bg-emerald-950/60 text-emerald-300 border-emerald-600/40'
-                    : 'bg-amber-950/60 text-amber-300 border-amber-600/40'
-                }`}
-              >
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
-                  }`}
-                />
-                {isConnected ? 'Real-Time Sync Connected' : 'Connecting Stream...'}
-              </div>
-            </div>
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-white tracking-wide">
-              Dynamic Tariff & Seasonal Pricing Rules
-            </h1>
-            <p className="text-[#FAF7F2]/70 text-sm mt-1 max-w-2xl leading-relaxed">
-              Program dynamic weekend uplifts, Brahmotsavam temple festival surcharges, and rollaway bed
-              tariffs with automatic rate calculations across all channels.
-            </p>
-          </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => fetchPricingData(true)}
+            disabled={loading}
+            className="p-2.5 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF8F5] text-xs font-semibold text-[#786A5B] flex items-center gap-1.5 transition-colors shadow-xs cursor-pointer"
+            title="Refresh Pricing Rules"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 text-[#8D672F] ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh</span>
+          </button>
 
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => fetchPricingData(true)}
-              disabled={loading}
-              className="px-4 py-2.5 rounded-xl border border-[#D8AD56]/30 bg-[#382216]/70 hover:bg-[#382216] text-[#D8AD56] font-medium text-xs flex items-center gap-2 transition-all shadow-sm"
-              title="Refresh Pricing Rules"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-              <span>Refresh</span>
-            </button>
-
-            <button
-              onClick={() => setModalOpen(true)}
-              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#D8AD56] to-[#b3883b] hover:from-[#e0b761] hover:to-[#c49744] text-[#241912] font-semibold text-xs flex items-center gap-2 shadow-lg transition-all"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Create Pricing Rule</span>
-            </button>
-          </div>
+          <button
+            onClick={() => setModalOpen(true)}
+            className="px-4 py-2.5 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] font-semibold text-xs flex items-center gap-2 shadow-sm transition-all cursor-pointer active:scale-98"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>New Pricing Rule</span>
+          </button>
         </div>
       </div>
 
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-5 border border-[#D8AD56]/20 shadow-sm flex items-center justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-wider font-semibold text-[#8A5A2B]">
+            <p className="text-xs uppercase tracking-wider font-semibold text-[#786A5B]">
               Active Rules
             </p>
-            <p className="text-2xl font-serif font-bold text-[#241912] mt-1">
+            <p className="text-2xl font-serif font-bold text-[#2A1D13] mt-1">
               {activeRulesCount} / {rules.length}
             </p>
-            <p className="text-[11px] text-emerald-700 font-medium mt-1">
-              Automated Yield Live
-            </p>
           </div>
-          <div className="w-11 h-11 rounded-xl bg-[#FAF7F2] border border-[#D8AD56]/30 flex items-center justify-center text-[#D8AD56]">
-            <TrendingUp className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-xl bg-[#FAF8F5] border border-[#E6D9C5] flex items-center justify-center text-[#8D672F]">
+            <TrendingUp className="w-4 h-4" />
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-5 border border-[#D8AD56]/20 shadow-sm flex items-center justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-wider font-semibold text-[#8A5A2B]">
+            <p className="text-xs uppercase tracking-wider font-semibold text-[#786A5B]">
               Weekend Uplift
             </p>
-            <p className="text-2xl font-serif font-bold text-[#241912] mt-1">+{avgWeekend}%</p>
-            <p className="text-[11px] text-stone-500 mt-1">Friday & Saturday stays</p>
+            <p className="text-2xl font-serif font-bold text-[#2A1D13] mt-1">+{avgWeekend}%</p>
           </div>
-          <div className="w-11 h-11 rounded-xl bg-[#FAF7F2] border border-[#D8AD56]/30 flex items-center justify-center text-[#D8AD56]">
-            <Percent className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-xl bg-[#FAF8F5] border border-[#E6D9C5] flex items-center justify-center text-[#8D672F]">
+            <Percent className="w-4 h-4" />
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-5 border border-[#D8AD56]/20 shadow-sm flex items-center justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-wider font-semibold text-[#8A5A2B]">
+            <p className="text-xs uppercase tracking-wider font-semibold text-[#786A5B]">
               Peak Festival Surge
             </p>
-            <p className="text-2xl font-serif font-bold text-[#241912] mt-1">+{peakFestival}%</p>
-            <p className="text-[11px] text-stone-500 mt-1">Kadiri Brahmotsavam</p>
+            <p className="text-2xl font-serif font-bold text-[#2A1D13] mt-1">+{peakFestival}%</p>
           </div>
-          <div className="w-11 h-11 rounded-xl bg-[#FAF7F2] border border-[#D8AD56]/30 flex items-center justify-center text-[#D8AD56]">
-            <Sparkles className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-xl bg-[#FAF8F5] border border-[#E6D9C5] flex items-center justify-center text-[#8D672F]">
+            <Sparkles className="w-4 h-4" />
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-5 border border-[#D8AD56]/20 shadow-sm flex items-center justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex items-center justify-between">
           <div>
-            <p className="text-xs uppercase tracking-wider font-semibold text-[#8A5A2B]">
+            <p className="text-xs uppercase tracking-wider font-semibold text-[#786A5B]">
               Room Categories
             </p>
-            <p className="text-2xl font-serif font-bold text-[#241912] mt-1">
+            <p className="text-2xl font-serif font-bold text-[#2A1D13] mt-1">
               {categories.length} Types
             </p>
-            <p className="text-[11px] text-emerald-700 font-medium mt-1">100% Monitored</p>
           </div>
-          <div className="w-11 h-11 rounded-xl bg-[#FAF7F2] border border-[#D8AD56]/30 flex items-center justify-center text-[#D8AD56]">
-            <Building className="w-5 h-5" />
+          <div className="w-9 h-9 rounded-xl bg-[#FAF8F5] border border-[#E6D9C5] flex items-center justify-center text-[#8D672F]">
+            <Building className="w-4 h-4" />
           </div>
         </div>
       </div>
@@ -458,24 +425,16 @@ export default function AdminPricingPage() {
       {/* Grid: Simulator Widget & Active Rules List */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Effective Rate Calculator / Simulator Widget */}
-        <div className="lg:col-span-5 bg-white rounded-2xl border border-[#D8AD56]/20 shadow-sm p-5 flex flex-col justify-between">
+        <div className="lg:col-span-5 bg-white rounded-2xl border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] p-5 flex flex-col justify-between">
           <div>
-            <div className="flex items-center justify-between pb-3 border-b border-[#D8AD56]/20 mb-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E6D9C5]/60 mb-4">
               <div className="flex items-center gap-2">
-                <Calculator className="w-4 h-4 text-[#D8AD56]" />
-                <h3 className="font-serif font-bold text-base text-[#241912]">
-                  Effective Rate Calculator & Simulator
+                <Calculator className="w-4 h-4 text-[#8D672F]" />
+                <h3 className="font-serif font-bold text-base text-[#2A1D13]">
+                  Rate Calculator
                 </h3>
               </div>
-              <span className="px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-50 text-emerald-800 border border-emerald-200">
-                Live Pricing Engine
-              </span>
             </div>
-
-            <p className="text-xs text-stone-500 mb-4">
-              Select room category and prospective stay date to view real-time calculated tariff breakdown
-              with active seasonal and weekend rules applied.
-            </p>
 
             <div className="space-y-3.5 text-xs">
               {/* Category Selector */}

@@ -65,49 +65,45 @@ export default function StandeeAdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#241912] p-4 sm:p-8">
+    <div className="min-h-screen bg-[#FAF8F5] text-[#2A1D13] p-4 sm:p-8">
       <div className="max-w-2xl mx-auto space-y-6">
         {/* Top Navigation */}
-        <div className="flex items-center justify-between pb-4 border-b border-[#EFE3D6]">
+        <div className="flex items-center justify-between pb-4 border-b border-[#E6D9C5]">
           <NextLink
             href="/admin/rfid"
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-[#786B61] hover:text-[#241912] transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-[#786A5B] hover:text-[#2A1D13] transition-colors"
           >
             <ArrowLeft className="w-4 h-4" />
-            <span>Back to RFID Dashboard</span>
+            <span>Back to Keycards</span>
           </NextLink>
 
-          <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 font-bold">
-            HD Native QR Engine: Active
+          <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium">
+            QR Engine Ready
           </span>
         </div>
 
         {/* Header Title */}
-        <div className="space-y-1">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[#D8AD56]">
-            ACRYLIC DESK STAND DESIGNER
-          </span>
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] flex items-center gap-2">
-            <QrCode className="w-7 h-7 text-[#D8AD56]" />
-            <span>Reception Walk-In QR Standee</span>
+        <div>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] tracking-tight">
+            Reception Standee
           </h1>
-          <p className="text-xs text-[#786B61]">
-            Print or download the official QR code standee placed on the Sri Tayi Grand front desk counter.
+          <p className="text-xs text-[#786A5B] mt-0.5">
+            Front desk QR standee for guest self check-in
           </p>
         </div>
 
         {/* Destination Host Display */}
-        <div className="p-4 rounded-2xl bg-white border border-[#EFE3D6] shadow-sm space-y-2">
-          <label className="text-xs font-bold text-[#241912] block">QR Code Destination Link:</label>
-          <div className="flex items-center justify-between text-xs bg-[#FAF7F2] px-3.5 py-2.5 rounded-xl border border-[#EFE3D6]">
-            <span className="font-mono text-xs text-[#241912] truncate max-w-md">{targetUrl}</span>
+        <div className="p-4 rounded-2xl bg-white border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-2">
+          <label className="text-xs font-medium text-[#2A1D13] block">Destination Link:</label>
+          <div className="flex items-center justify-between text-xs bg-[#FAF8F5] px-3.5 py-2 rounded-xl border border-[#E6D9C5]">
+            <span className="font-mono text-xs text-[#2A1D13] truncate max-w-md">{targetUrl}</span>
             <button
               type="button"
               onClick={handleCopyUrl}
-              className="text-[#D8AD56] hover:text-[#b58e3e] font-bold text-xs flex items-center gap-1 shrink-0 ml-3 cursor-pointer transition-colors"
+              className="text-[#8D672F] hover:text-[#2A1D13] font-medium text-xs flex items-center gap-1 shrink-0 ml-3 cursor-pointer transition-colors"
             >
-              {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-[#D8AD56]" />}
-              <span>{copied ? 'Copied Link' : 'Copy Link'}</span>
+              {copied ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5 text-[#8D672F]" />}
+              <span>{copied ? 'Copied' : 'Copy'}</span>
             </button>
           </div>
         </div>
@@ -166,24 +162,24 @@ export default function StandeeAdminPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 max-w-md mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2 max-w-md mx-auto">
           {/* Direct PNG Download */}
           <a
             href={downloadPngUrl}
             download="sri_tayi_grand_reception_qr.png"
-            className="py-3 px-4 rounded-xl bg-[#D8AD56] hover:bg-[#c69940] text-[#241912] font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all cursor-pointer text-center"
+            className="py-2.5 px-3.5 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] font-medium text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer text-center"
           >
-            <Download className="w-4 h-4" />
-            <span>Download QR (PNG)</span>
+            <Download className="w-3.5 h-3.5" />
+            <span>Download PNG</span>
           </a>
 
           {/* Print Standee */}
           <button
             type="button"
             onClick={() => window.print()}
-            className="py-3 px-4 rounded-xl bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all cursor-pointer"
+            className="py-2.5 px-3.5 rounded-xl border border-[#E6D9C5] bg-white text-[#786A5B] hover:text-[#2A1D13] hover:bg-[#FAF8F5] font-medium text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer"
           >
-            <Printer className="w-4 h-4 text-[#D8AD56]" />
+            <Printer className="w-3.5 h-3.5 text-[#8D672F]" />
             <span>Print Standee</span>
           </button>
 
@@ -192,9 +188,9 @@ export default function StandeeAdminPage() {
             href={targetUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="py-3 px-4 rounded-xl border border-gray-300 hover:bg-gray-100 text-[#382216] font-bold text-xs flex items-center justify-center gap-2 transition-all text-center"
+            className="py-2.5 px-3.5 rounded-xl border border-[#E6D9C5] bg-white text-[#786A5B] hover:text-[#2A1D13] hover:bg-[#FAF8F5] font-medium text-xs flex items-center justify-center gap-2 transition-all text-center shadow-xs"
           >
-            <ExternalLink className="w-4 h-4" />
+            <ExternalLink className="w-3.5 h-3.5" />
             <span>Open Portal</span>
           </a>
         </div>

@@ -195,27 +195,22 @@ export function AdminHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-[#FAF6EE]/95 backdrop-blur-md border-b border-[#E6D9C5] px-4 sm:px-6 py-2.5 flex flex-wrap gap-2 items-center justify-between shadow-xs">
-      {/* Left: Breadcrumbs & Page Title */}
+    <header className="sticky top-0 z-30 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-[#E6D9C5] px-4 sm:px-6 py-2 flex flex-wrap gap-2 items-center justify-between shadow-2xs">
+      {/* Left: Page Title */}
       <div className="flex items-center space-x-3">
-        <div>
-          <div className="text-[10px] uppercase font-bold tracking-widest text-[#8D672F]">
-            Sri Tayi Grand &bull; {t('nav.liveConsole', 'PMS Console')}
-          </div>
-          <h1 className="text-base sm:text-lg font-serif font-bold text-[#33271D] leading-tight">
-            {getPageTitle()}
-          </h1>
-        </div>
+        <h1 className="text-base sm:text-lg font-serif font-bold text-[#2A1D13] tracking-tight leading-tight">
+          {getPageTitle()}
+        </h1>
       </div>
 
       {/* Right: Live Telemetry, Language Switcher, Cash Float & Quick Action Shortcuts */}
-      <div className="flex flex-wrap min-w-0 items-center gap-2 sm:gap-3">
+      <div className="flex flex-wrap min-w-0 items-center gap-2 sm:gap-2.5">
         {/* Realtime Status Indicator */}
         <div
-          className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold tracking-wide border transition-all ${
+          className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium tracking-wide border transition-all ${
             isConnected
-              ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700'
-              : 'bg-amber-500/10 border-amber-500/30 text-amber-700'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              : 'bg-amber-50 border-amber-200 text-amber-800'
           }`}
           title="Server-Sent Events Realtime Connection"
         >
@@ -225,7 +220,7 @@ export function AdminHeader() {
             }`}
           />
           <span className="text-[11px] font-mono">
-            {isConnected ? t('common.live', 'LIVE SSE') : t('common.reconnecting', 'RECONNECTING')}
+            {isConnected ? t('common.live', 'Live') : t('common.reconnecting', 'Connecting')}
           </span>
         </div>
 
@@ -237,18 +232,18 @@ export function AdminHeader() {
           <Link
             href="/admin/cashbook"
             prefetch={false}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-[#B18A4A]/15 hover:bg-[#B18A4A]/25 border border-[#B18A4A]/30 text-[#8D672F] text-xs font-mono font-bold transition-all shadow-2xs group"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white hover:bg-[#FAF8F5] border border-[#E6D9C5] text-[#2A1D13] text-xs font-mono font-medium transition-all shadow-2xs group"
             title={t('header.cashInHand', 'Front Desk Cash Drawer Balance')}
           >
-            <Wallet className="w-3.5 h-3.5 text-[#8D672F] group-hover:scale-110 transition-transform" />
+            <Wallet className="w-3.5 h-3.5 text-[#8D672F] group-hover:scale-105 transition-transform" />
             <span>{formatCurrency(cashBalance)}</span>
           </Link>
         )}
 
         {/* Clock */}
         {currentTime && (
-          <div className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white/80 border border-[#E6D9C5] text-[#786A5B] text-xs font-mono">
-            <Clock className="w-3 h-3 text-stone-400" />
+          <div className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white border border-[#E6D9C5] text-[#786A5B] text-xs font-mono">
+            <Clock className="w-3 h-3 text-[#786A5B]" />
             <span>{currentTime}</span>
           </div>
         )}
@@ -260,7 +255,7 @@ export function AdminHeader() {
         <Link
           href="/admin/front-desk"
           prefetch={false}
-          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#8D672F] hover:bg-[#6D4E21] text-white text-xs uppercase tracking-wider font-semibold shadow-sm active:scale-95 transition-all"
+          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] text-xs font-medium shadow-2xs active:scale-95 transition-all"
         >
           <UserPlus className="w-3.5 h-3.5" />
           <span>{t('bookings.newBooking', 'Walk-In')}</span>
@@ -274,58 +269,52 @@ export function AdminHeader() {
           <button
             type="button"
             onClick={() => setProfileOpen(!profileOpen)}
-            className={`flex items-center gap-2 pl-2.5 pr-2 py-1 rounded-xl border transition-all text-xs font-semibold cursor-pointer ${
-              userRole === 'Super Admin'
-                ? 'bg-amber-500/10 border-amber-500/30 text-amber-900 hover:bg-amber-500/15'
-                : userRole === 'Hotel Manager'
-                ? 'bg-purple-500/10 border-purple-500/30 text-purple-900 hover:bg-purple-500/15'
-                : 'bg-blue-500/10 border-blue-500/30 text-blue-900 hover:bg-blue-500/15'
-            }`}
+            className="flex items-center gap-2 pl-2.5 pr-2 py-1 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF8F5] transition-all text-xs font-medium text-[#2A1D13] cursor-pointer shadow-2xs"
           >
-            <div className="w-6 h-6 rounded-lg bg-white shadow-2xs border border-black/5 flex items-center justify-center">
-              <RoleIcon className="w-3.5 h-3.5 text-[#43001F]" />
+            <div className="w-6 h-6 rounded-lg bg-[#2A1D13] text-[#EAD8B8] flex items-center justify-center">
+              <RoleIcon className="w-3.5 h-3.5" />
             </div>
             <div className="text-left hidden sm:block">
-              <span className="block text-[11px] font-bold leading-tight truncate max-w-[110px]">
+              <span className="block text-[11px] font-semibold leading-tight truncate max-w-[110px]">
                 {userName.split(' ')[0]}
               </span>
-              <span className="block text-[9px] uppercase tracking-wider opacity-70 leading-none">
+              <span className="block text-[9px] uppercase tracking-wider text-[#786A5B] leading-none">
                 {getRoleLabel(userRole)}
               </span>
             </div>
-            <ChevronDown className="w-3.5 h-3.5 opacity-60 ml-0.5" />
+            <ChevronDown className="w-3.5 h-3.5 text-[#786A5B] ml-0.5" />
           </button>
 
           {/* Dropdown Menu */}
           {profileOpen && (
-            <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-[#D8AD56]/40 p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-[#E6D9C5] p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
               {/* Profile Card Header */}
-              <div className="p-2.5 rounded-xl bg-[#F8F3E9] border border-[#E6D9C5] mb-2.5">
+              <div className="p-2.5 rounded-xl bg-[#FAF8F5] border border-[#E6D9C5] mb-2.5">
                 <div className="flex items-center justify-between">
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-[#43001F]">
-                    {t('common.status', 'Active Role Session')}
+                  <span className="text-[10px] uppercase font-medium tracking-wider text-[#786A5B]">
+                    {t('common.status', 'Session')}
                   </span>
-                  <span className="text-[9px] px-2 py-0.5 rounded-full font-bold bg-[#43001F] text-white">
+                  <span className="text-[9px] px-2 py-0.5 rounded-full font-medium bg-[#2A1D13] text-[#EAD8B8]">
                     {getRoleLabel(userRole)}
                   </span>
                 </div>
-                <div className="text-xs font-bold text-[#241912] mt-1 truncate">
+                <div className="text-xs font-semibold text-[#2A1D13] mt-1 truncate">
                   {userName}
                 </div>
-                <div className="text-[11px] text-[#786B61] font-mono truncate">
+                <div className="text-[11px] text-[#786A5B] font-mono truncate">
                   {userEmail}
                 </div>
               </div>
 
               {/* Sign Out Button */}
-              <div className="pt-2 border-t border-[#EFE3D6]">
+              <div className="pt-2 border-t border-[#E6D9C5]/60">
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 transition-colors cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl text-xs font-medium text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
                 >
                   <LogOut className="w-3.5 h-3.5" />
-                  <span>{t('header.signOut', 'Sign Out of Console')}</span>
+                  <span>{t('header.signOut', 'Sign Out')}</span>
                 </button>
               </div>
             </div>

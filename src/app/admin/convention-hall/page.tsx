@@ -363,100 +363,96 @@ export default function ConventionHallAdminPage() {
         </div>
       )}
 
-      {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
+      {/* Clean Luxury Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]">
         <div>
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
-            BANQUET & EVENT MANAGEMENT
-          </span>
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-0.5 flex items-center gap-2">
-            <Building className="w-6 h-6 text-[#D8AD56]" />
-            <span>Sri Tayi Grand Convention Hall</span>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] tracking-tight">
+            Convention Hall
           </h1>
-          <p className="text-xs text-[#786B61] mt-0.5">
-            Interactive quotation generator, seating layout visualization, Andhra catering packages, and proposal sheets.
+          <p className="text-xs text-[#786A5B] mt-0.5">
+            Event quotes, layouts, and banquet packages
           </p>
         </div>
 
         {/* Search */}
         <div className="relative w-full sm:w-72">
-          <Search className="w-4 h-4 text-[#786B61] absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-3.5 h-3.5 text-[#786A5B] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search quote ref, client, event..."
-            className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-[#EFE3D6] bg-white text-[#241912] focus:border-[#D8AD56] focus:outline-none shadow-sm"
+            placeholder="Search ref, client, event..."
+            className="w-full text-xs font-medium pl-9 pr-3.5 py-2 rounded-xl border border-[#E6D9C5] bg-white text-[#2A1D13] focus:border-[#8D672F] focus:outline-none placeholder-[#786A5B]/60 shadow-xs"
           />
         </div>
       </div>
 
-      {/* Hall Specs Banner */}
-      <div className="bg-[#25150F] text-white rounded-2xl p-6 border border-[#D8AD56]/30 grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div>
-          <span className="text-[10px] uppercase tracking-wider text-[#D8AD56] font-semibold">Max Venue Capacity</span>
-          <div className="font-serif text-2xl font-bold mt-1">100 – 800 Pax</div>
-          <div className="text-[11px] text-gray-300 mt-0.5">Central AC Grand Ballroom</div>
+      {/* Hall Specs Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
+        <div className="bg-white rounded-2xl p-4 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)]">
+          <span className="text-[11px] uppercase tracking-wider text-[#786A5B] font-medium block">Venue Capacity</span>
+          <div className="font-serif text-2xl font-bold text-[#2A1D13] mt-1">100 – 800 Pax</div>
+          <div className="text-[11px] text-[#786A5B] mt-0.5">Grand Ballroom</div>
         </div>
-        <div>
-          <span className="text-[10px] uppercase tracking-wider text-[#D8AD56] font-semibold">Banquet Area</span>
-          <div className="font-serif text-2xl font-bold mt-1">6,500 Sq Ft</div>
-          <div className="text-[11px] text-gray-300 mt-0.5">Pillar-Free Clear Span</div>
+        <div className="bg-white rounded-2xl p-4 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)]">
+          <span className="text-[11px] uppercase tracking-wider text-[#786A5B] font-medium block">Banquet Area</span>
+          <div className="font-serif text-2xl font-bold text-[#2A1D13] mt-1">6,500 Sq Ft</div>
+          <div className="text-[11px] text-[#786A5B] mt-0.5">Pillar-Free Span</div>
         </div>
-        <div>
-          <span className="text-[10px] uppercase tracking-wider text-[#D8AD56] font-semibold">Stage & AV</span>
-          <div className="font-serif text-2xl font-bold mt-1">40 x 20 Ft Stage</div>
-          <div className="text-[11px] text-gray-300 mt-0.5">4K Projector & Line-Array</div>
+        <div className="bg-white rounded-2xl p-4 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)]">
+          <span className="text-[11px] uppercase tracking-wider text-[#786A5B] font-medium block">Stage & AV</span>
+          <div className="font-serif text-2xl font-bold text-[#2A1D13] mt-1">40 x 20 Ft</div>
+          <div className="text-[11px] text-[#786A5B] mt-0.5">4K Projector & Audio</div>
         </div>
-        <div>
-          <span className="text-[10px] uppercase tracking-wider text-[#D8AD56] font-semibold">Power & Logistics</span>
-          <div className="font-serif text-2xl font-bold mt-1">100% DG Backup</div>
-          <div className="text-[11px] text-gray-300 mt-0.5">Dedicated Valet & 50+ Cars</div>
+        <div className="bg-white rounded-2xl p-4 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)]">
+          <span className="text-[11px] uppercase tracking-wider text-[#786A5B] font-medium block">Power & Parking</span>
+          <div className="font-serif text-2xl font-bold text-[#2A1D13] mt-1">100% DG</div>
+          <div className="text-[11px] text-[#786A5B] mt-0.5">Valet & 50+ Cars</div>
         </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div role="tablist" className="flex items-center gap-2 border-b border-[#EFE3D6] pb-2">
+      <div role="tablist" className="flex items-center gap-1.5 border-b border-[#E6D9C5] pb-2">
         <button
           role="tab"
           aria-selected={activeTab === 'builder'}
           onClick={() => setActiveTab('builder')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
             activeTab === 'builder'
-              ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
-              : 'bg-white text-[#786B61] hover:bg-[#FAF7F2]'
+              ? 'bg-[#2A1D13] text-[#EAD8B8] shadow-xs'
+              : 'text-[#786A5B] hover:text-[#2A1D13] hover:bg-[#FAF8F5]'
           }`}
         >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Interactive Quotation Builder</span>
+          <Sparkles className="w-3.5 h-3.5 text-[#8D672F]" />
+          <span>Quote Builder</span>
         </button>
 
         <button
           role="tab"
           aria-selected={activeTab === 'quotes'}
           onClick={() => setActiveTab('quotes')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
             activeTab === 'quotes'
-              ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
-              : 'bg-white text-[#786B61] hover:bg-[#FAF7F2]'
+              ? 'bg-[#2A1D13] text-[#EAD8B8] shadow-xs'
+              : 'text-[#786A5B] hover:text-[#2A1D13] hover:bg-[#FAF8F5]'
           }`}
         >
-          <FileText className="w-3.5 h-3.5" />
-          <span>Generated Quotations ({quotes.length})</span>
+          <FileText className="w-3.5 h-3.5 text-[#8D672F]" />
+          <span>Quotations ({quotes.length})</span>
         </button>
 
         <button
           role="tab"
           aria-selected={activeTab === 'enquiries'}
           onClick={() => setActiveTab('enquiries')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+          className={`px-3.5 py-1.5 rounded-xl text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
             activeTab === 'enquiries'
-              ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
-              : 'bg-white text-[#786B61] hover:bg-[#FAF7F2]'
+              ? 'bg-[#2A1D13] text-[#EAD8B8] shadow-xs'
+              : 'text-[#786A5B] hover:text-[#2A1D13] hover:bg-[#FAF8F5]'
           }`}
         >
-          <Mail className="w-3.5 h-3.5" />
-          <span>Incoming Enquiries ({enquiries.length})</span>
+          <Mail className="w-3.5 h-3.5 text-[#8D672F]" />
+          <span>Enquiries ({enquiries.length})</span>
         </button>
       </div>
 

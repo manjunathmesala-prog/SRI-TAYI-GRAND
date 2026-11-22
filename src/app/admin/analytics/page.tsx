@@ -134,45 +134,29 @@ export default function AnalyticsAdminPage() {
     : 1;
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] text-[#33271D] p-4 md:p-8 space-y-8">
+    <div className="space-y-6 max-w-7xl mx-auto">
       {/* Top Header Bar */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#E6D9C5] pb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-[#E6D9C5]/60 pb-4">
         <div>
-          <div className="flex items-center gap-2 mb-1.5">
-            <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#43001F] text-[#D8AD56] tracking-wider uppercase border border-[#D8AD56]/40">
-              Executive Command Center
-            </span>
-            <div className="flex items-center gap-1.5 text-xs text-[#786A5B]">
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
-                }`}
-              />
-              <span>{isConnected ? 'Live Telemetry' : 'Sync Standby'}</span>
-            </div>
-          </div>
-          <h1 className="text-2xl md:text-3xl font-serif font-bold text-[#43001F] tracking-tight">
-            Hospitality Revenue & Business Intelligence
+          <h1 className="text-2xl md:text-3xl font-serif font-bold text-[#2A1D13] tracking-tight">
+            Analytics & Performance
           </h1>
-          <p className="text-sm text-[#786A5B] mt-1">
-            Sri Tayi Grand, Kadiri • Real-time RevPAR yield, ADR metrics, channel distribution & room analytics
-          </p>
         </div>
 
         {/* Actions & Filters */}
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           {/* Timeframe Tabs */}
-          <div className="inline-flex p-1 bg-white rounded-xl border border-[#E6D9C5] shadow-sm">
+          <div className="inline-flex p-1 bg-white rounded-xl border border-[#E6D9C5] shadow-xs">
             {rangeLabels.map(({ key, label }) => {
               const isActive = selectedRange === key;
               return (
                 <button
                   key={key}
                   onClick={() => setSelectedRange(key)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                     isActive
-                      ? 'bg-[#43001F] text-[#D8AD56] shadow-sm'
-                      : 'text-[#786A5B] hover:text-[#43001F] hover:bg-[#F8F3E9]'
+                      ? 'bg-[#2A1D13] text-[#EAD8B8] shadow-xs'
+                      : 'text-[#786A5B] hover:text-[#2A1D13] hover:bg-[#FAF8F5]'
                   }`}
                 >
                   {label}
@@ -185,20 +169,20 @@ export default function AnalyticsAdminPage() {
           <button
             onClick={() => fetchAnalytics(selectedRange)}
             disabled={isLoading}
-            className="p-2 rounded-xl bg-white border border-[#E6D9C5] text-[#786A5B] hover:text-[#43001F] hover:border-[#D8AD56] transition-all shadow-sm disabled:opacity-50"
+            className="p-2.5 rounded-xl bg-white border border-[#E6D9C5] text-[#786A5B] hover:text-[#2A1D13] hover:border-[#8D672F] transition-all shadow-xs disabled:opacity-50 cursor-pointer"
             title="Refresh analytics data"
           >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-[#D8AD56]' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin text-[#8D672F]' : ''}`} />
           </button>
 
           {/* Export CSV Button */}
           <button
             onClick={handleExportCSV}
             disabled={isExporting || isLoading}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-[#D8AD56] font-semibold text-xs tracking-wide shadow-md transition-all border border-[#D8AD56]/40 hover:shadow-lg disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] font-semibold text-xs tracking-wide shadow-sm transition-all cursor-pointer active:scale-98 disabled:opacity-50"
           >
             <Download className="w-4 h-4" />
-            <span>{isExporting ? 'Generating CSV...' : 'Export CSV Report'}</span>
+            <span>{isExporting ? 'Generating...' : 'Export CSV'}</span>
           </button>
         </div>
       </div>
@@ -206,76 +190,68 @@ export default function AnalyticsAdminPage() {
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* Total Period Revenue */}
-        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5] shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#D8AD56]/10 to-transparent rounded-bl-full pointer-events-none" />
-          <div className="flex items-center justify-between text-[#786A5B] mb-2">
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
+          <div className="flex items-center justify-between text-[#786A5B] mb-1">
             <span className="text-xs font-semibold uppercase tracking-wider">Total Revenue</span>
-            <div className="p-2 rounded-lg bg-[#F8F3E9] text-[#43001F]">
+            <div className="p-1.5 rounded-lg bg-[#FAF8F5] text-[#8D672F]">
               <DollarSign className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold font-serif text-[#43001F]">
+          <div className="text-2xl font-serif font-bold text-[#2A1D13]">
             ₹{analytics?.kpis.totalRevenue.toLocaleString('en-IN') || '0'}
-          </div>
-          <div className="flex items-center gap-1.5 mt-2 text-xs text-emerald-700 font-medium">
-            <TrendingUp className="w-3.5 h-3.5" />
-            <span>Period gross hospitality yield</span>
           </div>
         </div>
 
         {/* RevPAR */}
-        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5] shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#43001F]/10 to-transparent rounded-bl-full pointer-events-none" />
-          <div className="flex items-center justify-between text-[#786A5B] mb-2">
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
+          <div className="flex items-center justify-between text-[#786A5B] mb-1">
             <span className="text-xs font-semibold uppercase tracking-wider">RevPAR</span>
-            <div className="p-2 rounded-lg bg-[#F8F3E9] text-[#D8AD56]">
+            <div className="p-1.5 rounded-lg bg-[#FAF8F5] text-[#8D672F]">
               <BarChart3 className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold font-serif text-[#43001F]">
+          <div className="text-2xl font-serif font-bold text-[#2A1D13]">
             ₹{analytics?.kpis.revPAR.toLocaleString('en-IN') || '0'}
           </div>
-          <p className="text-xs text-[#786A5B] mt-2">Revenue per available room night</p>
         </div>
 
         {/* ADR */}
-        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5] shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-          <div className="flex items-center justify-between text-[#786A5B] mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider">ADR (Daily Rate)</span>
-            <div className="p-2 rounded-lg bg-[#F8F3E9] text-[#43001F]">
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
+          <div className="flex items-center justify-between text-[#786A5B] mb-1">
+            <span className="text-xs font-semibold uppercase tracking-wider">ADR</span>
+            <div className="p-1.5 rounded-lg bg-[#FAF8F5] text-[#8D672F]">
               <Percent className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold font-serif text-[#43001F]">
+          <div className="text-2xl font-serif font-bold text-[#2A1D13]">
             ₹{analytics?.kpis.adr.toLocaleString('en-IN') || '0'}
           </div>
-          <p className="text-xs text-[#786A5B] mt-2">Average realized price per occupied night</p>
         </div>
 
         {/* Occupancy Rate */}
-        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5] shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-          <div className="flex items-center justify-between text-[#786A5B] mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider">Occupancy Rate</span>
-            <div className="p-2 rounded-lg bg-[#F8F3E9] text-emerald-700">
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
+          <div className="flex items-center justify-between text-[#786A5B] mb-1">
+            <span className="text-xs font-semibold uppercase tracking-wider">Occupancy</span>
+            <div className="p-1.5 rounded-lg bg-[#FAF8F5] text-emerald-700">
               <BedDouble className="w-4 h-4" />
             </div>
           </div>
-          <div className="text-2xl font-bold font-serif text-[#43001F]">
+          <div className="text-2xl font-serif font-bold text-[#2A1D13]">
             {analytics?.kpis.occupancyRate !== undefined ? `${analytics.kpis.occupancyRate}%` : '0%'}
           </div>
-          <div className="w-full bg-[#E6D9C5]/50 h-2 rounded-full overflow-hidden mt-3">
+          <div className="w-full bg-[#E6D9C5]/50 h-1.5 rounded-full overflow-hidden mt-2">
             <div
-              className="bg-[#43001F] h-full rounded-full transition-all duration-500"
+              className="bg-[#2A1D13] h-full rounded-full transition-all duration-500"
               style={{ width: `${Math.min(analytics?.kpis.occupancyRate || 0, 100)}%` }}
             />
           </div>
         </div>
 
         {/* Room Status Split */}
-        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5] shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
-          <div className="flex items-center justify-between text-[#786A5B] mb-2">
-            <span className="text-xs font-semibold uppercase tracking-wider">Rooms Inventory</span>
-            <span className="text-xs font-bold text-[#43001F]">
+        <div className="bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] space-y-1">
+          <div className="flex items-center justify-between text-[#786A5B] mb-1">
+            <span className="text-xs font-semibold uppercase tracking-wider">Rooms</span>
+            <span className="text-xs font-bold text-[#2A1D13]">
               {analytics?.kpis.totalRooms ?? '—'} Total
             </span>
           </div>
@@ -286,82 +262,81 @@ export default function AnalyticsAdminPage() {
               </div>
               <div className="text-[10px] text-emerald-600 font-semibold uppercase">Clean</div>
             </div>
-            <div className="bg-[#43001F]/5 rounded-lg p-1.5 border border-[#43001F]/20">
-              <div className="text-sm font-bold text-[#43001F]">
+            <div className="bg-[#FAF8F5] rounded-lg p-1.5 border border-[#E6D9C5]">
+              <div className="text-sm font-bold text-[#2A1D13]">
                 {analytics?.kpis.occupiedRooms ?? '—'}
               </div>
-              <div className="text-[10px] text-[#43001F]/80 font-semibold uppercase">Occupied</div>
+              <div className="text-[10px] text-[#786A5B] font-semibold uppercase">Occupied</div>
             </div>
             <div className="bg-amber-50 rounded-lg p-1.5 border border-amber-200">
               <div className="text-sm font-bold text-amber-800">
                 {analytics?.kpis.maintenanceRooms ?? '—'}
               </div>
-              <div className="text-[10px] text-amber-600 font-semibold uppercase">OOO / Mnt</div>
+              <div className="text-[10px] text-amber-600 font-semibold uppercase">OOO</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Middle Grid: Distribution Channels & Monthly Trajectory */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Distribution Channel Breakdown (5 cols) */}
-        <div className="lg:col-span-5 bg-white rounded-2xl p-6 border border-[#E6D9C5] shadow-sm flex flex-col justify-between">
+        <div className="lg:col-span-5 bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h3 className="font-serif font-bold text-lg text-[#43001F]">
-                  Distribution Channel Mix
+                <h3 className="font-serif font-bold text-base text-[#2A1D13]">
+                  Channel Mix
                 </h3>
-                <p className="text-xs text-[#786A5B]">Direct walk-ins vs OTA partners revenue</p>
               </div>
-              <div className="p-2 rounded-xl bg-[#F8F3E9] text-[#D8AD56]">
-                <Globe className="w-5 h-5" />
+              <div className="p-1.5 rounded-lg bg-[#FAF8F5] text-[#8D672F]">
+                <Globe className="w-4 h-4" />
               </div>
             </div>
 
             {/* Visual share bar */}
-            <div className="w-full h-3 rounded-full overflow-hidden flex bg-stone-100 mb-6 shadow-inner">
+            <div className="w-full h-2.5 rounded-full overflow-hidden flex bg-[#FAF8F5] mb-5">
               {analytics?.channelBreakdown && analytics.channelBreakdown.some((c) => c.percentage > 0) ? (
                 analytics.channelBreakdown.map((channel, index) => (
                   <div
                     key={channel.name}
                     style={{ width: `${Math.max(0, Math.min(100, channel.percentage))}%` }}
-                    className={['bg-[#43001F] h-full', 'bg-[#D8AD56] h-full', 'bg-[#786A5B] h-full'][index % 3]}
+                    className={['bg-[#2A1D13] h-full', 'bg-[#8D672F] h-full', 'bg-[#C5A880] h-full'][index % 3]}
                     title={`${channel.name} (${channel.percentage}%)`}
                   />
                 ))
               ) : (
-                <div className="w-full h-full bg-[#E6D9C5]/40" title="Awaiting booking transactions" />
+                <div className="w-full h-full bg-[#E6D9C5]/40" title="Awaiting transactions" />
               )}
             </div>
 
             {/* Channel Cards */}
-            <div className="space-y-3">
+            <div className="space-y-2.5">
               {analytics?.channelBreakdown.map((channel, idx) => {
                 const colorDots = [
-                  'bg-[#43001F]',
-                  'bg-[#D8AD56]',
-                  'bg-[#786A5B]',
+                  'bg-[#2A1D13]',
+                  'bg-[#8D672F]',
+                  'bg-[#C5A880]',
                 ];
                 return (
                   <div
                     key={channel.name}
-                    className="p-3.5 rounded-xl border border-[#E6D9C5] bg-[#FDFBF7] flex items-center justify-between hover:bg-[#F8F3E9] transition-colors"
+                    className="p-3 rounded-xl border border-[#E6D9C5]/70 bg-[#FAF8F5]/60 flex items-center justify-between hover:bg-[#FAF8F5] transition-colors"
                   >
-                    <div className="flex items-center gap-3">
-                      <span className={`w-3 h-3 rounded-full ${colorDots[idx % colorDots.length]}`} />
+                    <div className="flex items-center gap-2.5">
+                      <span className={`w-2.5 h-2.5 rounded-full ${colorDots[idx % colorDots.length]}`} />
                       <div>
-                        <h4 className="text-xs font-bold text-[#33271D]">{channel.name}</h4>
+                        <h4 className="text-xs font-bold text-[#2A1D13]">{channel.name}</h4>
                         <span className="text-[11px] text-[#786A5B]">
-                          {channel.count} bookings registered
+                          {channel.count} bookings
                         </span>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-xs font-bold text-[#43001F]">
+                      <div className="text-xs font-bold text-[#2A1D13]">
                         ₹{channel.revenue.toLocaleString('en-IN')}
                       </div>
-                      <span className="text-[11px] font-semibold text-[#D8AD56] bg-[#43001F] px-1.5 py-0.5 rounded">
+                      <span className="text-[10px] font-semibold text-[#EAD8B8] bg-[#2A1D13] px-1.5 py-0.5 rounded">
                         {channel.percentage}%
                       </span>
                     </div>
@@ -370,75 +345,65 @@ export default function AnalyticsAdminPage() {
               })}
             </div>
           </div>
-
-          <div className="mt-6 pt-4 border-t border-[#E6D9C5] text-xs text-[#786A5B] flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-[#D8AD56]" />
-            <span>
-              <strong>Strategic Note:</strong> Direct Desk bookings preserve 100% margin with zero OTA commission deduction.
-            </span>
-          </div>
         </div>
 
         {/* Monthly Revenue & Occupancy Trajectory (7 cols) */}
-        <div className="lg:col-span-7 bg-white rounded-2xl p-6 border border-[#E6D9C5] shadow-sm">
+        <div className="lg:col-span-7 bg-white rounded-2xl p-5 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)]">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="font-serif font-bold text-lg text-[#43001F]">
-                Revenue & Occupancy Trajectory
+              <h3 className="font-serif font-bold text-base text-[#2A1D13]">
+                Monthly Trajectory
               </h3>
-              <p className="text-xs text-[#786A5B]">
-                Last 6 months consecutive performance & seasonal trend analysis
-              </p>
             </div>
-            <div className="p-2 rounded-xl bg-[#F8F3E9] text-[#43001F]">
-              <TrendingUp className="w-5 h-5" />
+            <div className="p-1.5 rounded-lg bg-[#FAF8F5] text-[#8D672F]">
+              <TrendingUp className="w-4 h-4" />
             </div>
           </div>
 
           {/* Bar Chart Visualization */}
-          <div className="mt-6 pt-4 pb-2">
-            <div className="grid grid-cols-6 gap-2 sm:gap-4 items-end h-52 border-b border-[#E6D9C5] pb-2">
+          <div className="mt-4 pt-2 pb-2">
+            <div className="grid grid-cols-6 gap-2 sm:gap-4 items-end h-48 border-b border-[#E6D9C5]/60 pb-2">
               {analytics?.monthlyTrajectory.map((item) => {
                 const heightPercent =
                   maxMonthlyRevenue > 0 && item.revenue > 0
                     ? Math.max(8, Math.round((item.revenue / maxMonthlyRevenue) * 100))
                     : 0;
                 return (
-                  <div key={item.month} className="flex flex-col items-center gap-2 h-full justify-end group">
+                  <div key={item.month} className="flex flex-col items-center gap-1.5 h-full justify-end group">
                     {/* Hover tooltip */}
-                    <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-[#25150F] text-white text-[10px] p-2 rounded-lg pointer-events-none shadow-lg text-center whitespace-nowrap mb-1">
-                      <p className="font-bold text-[#D8AD56]">₹{item.revenue.toLocaleString('en-IN')}</p>
+                    <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-[#2A1D13] text-white text-[10px] p-2 rounded-lg pointer-events-none shadow-lg text-center whitespace-nowrap mb-1">
+                      <p className="font-bold text-[#EAD8B8]">₹{item.revenue.toLocaleString('en-IN')}</p>
                       <p>{item.occupancy}% Occupancy</p>
                       <p>{item.bookings} Stays</p>
                     </div>
 
                     {/* Occupancy chip */}
-                    <span className="text-[10px] font-bold text-[#786A5B] bg-[#F8F3E9] px-1.5 py-0.5 rounded">
+                    <span className="text-[10px] font-bold text-[#786A5B] bg-[#FAF8F5] px-1.5 py-0.5 rounded">
                       {item.occupancy}%
                     </span>
 
                     {/* Bar Pillar */}
-                    <div className="w-full max-w-[42px] bg-[#E6D9C5]/40 rounded-t-xl overflow-hidden flex flex-col justify-end h-36">
+                    <div className="w-full max-w-[40px] bg-[#E6D9C5]/30 rounded-t-lg overflow-hidden flex flex-col justify-end h-32">
                       <div
-                        className="w-full bg-gradient-to-t from-[#43001F] to-[#B18A4A] rounded-t-xl transition-all duration-500 group-hover:from-[#2E0015] group-hover:to-[#D8AD56]"
+                        className="w-full bg-[#2A1D13] hover:bg-[#3D2B1D] rounded-t-lg transition-all duration-300"
                         style={{ height: `${heightPercent}%` }}
                       />
                     </div>
 
                     {/* Month Label */}
-                    <span className="text-xs font-bold text-[#33271D]">{item.month}</span>
+                    <span className="text-xs font-semibold text-[#2A1D13]">{item.month}</span>
                   </div>
                 );
               })}
             </div>
             <div className="flex items-center justify-between text-[11px] text-[#786A5B] mt-3">
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-sm bg-gradient-to-r from-[#43001F] to-[#B18A4A]" />
-                <span>Monthly Realized Revenue (INR)</span>
+                <span className="w-2 h-2 rounded-xs bg-[#2A1D13]" />
+                <span>Monthly Revenue (₹)</span>
               </span>
               <span className="flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#E6D9C5]" />
-                <span>Occupancy % Badge</span>
+                <span className="w-2 h-2 rounded-full bg-[#E6D9C5]" />
+                <span>Occupancy %</span>
               </span>
             </div>
           </div>
@@ -446,69 +411,62 @@ export default function AnalyticsAdminPage() {
       </div>
 
       {/* Room Category Yield Performance Table */}
-      <div className="bg-white rounded-2xl border border-[#E6D9C5] shadow-sm overflow-hidden">
-        <div className="p-6 border-b border-[#E6D9C5] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] overflow-hidden">
+        <div className="p-5 border-b border-[#E6D9C5]/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
-            <h3 className="font-serif font-bold text-lg text-[#43001F]">
-              Room Category Yield & Inventory Performance
+            <h3 className="font-serif font-bold text-base text-[#2A1D13]">
+              Room Yield
             </h3>
-            <p className="text-xs text-[#786A5B]">
-              Yield comparison across Deluxe AC, Four Bed, Executive & Royal Suites
-            </p>
           </div>
-          <span className="self-start sm:self-auto px-3 py-1 rounded-full text-xs font-semibold bg-[#F8F3E9] text-[#43001F] border border-[#D8AD56]/40">
-            4 Signature Categories
-          </span>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-[#F8F3E9] text-[#786A5B] uppercase font-semibold border-b border-[#E6D9C5]">
+            <thead className="bg-[#FAF8F5] text-[#786A5B] uppercase tracking-wider font-semibold border-b border-[#E6D9C5]/60">
               <tr>
-                <th className="py-3.5 px-6">Room Category</th>
-                <th className="py-3.5 px-6">Base Rack Rate</th>
-                <th className="py-3.5 px-6 text-center">Period Bookings</th>
-                <th className="py-3.5 px-6">Total Category Revenue</th>
-                <th className="py-3.5 px-6">Capacity Utilization</th>
-                <th className="py-3.5 px-6 text-right">Yield Health</th>
+                <th className="py-3 px-5">Category</th>
+                <th className="py-3 px-5">Base Rate</th>
+                <th className="py-3 px-5 text-center">Bookings</th>
+                <th className="py-3 px-5">Revenue</th>
+                <th className="py-3 px-5">Occupancy</th>
+                <th className="py-3 px-5 text-right">Status</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-[#E6D9C5]/50">
               {analytics?.categoryYield.map((row) => (
-                <tr key={row.category} className="hover:bg-[#FDFBF7] transition-colors">
-                  <td className="py-4 px-6 font-bold text-[#43001F] text-sm">
+                <tr key={row.category} className="hover:bg-[#FAF8F5]/60 transition-colors">
+                  <td className="py-3.5 px-5 font-bold text-[#2A1D13]">
                     {row.category}
                   </td>
-                  <td className="py-4 px-6 font-mono text-[#33271D]">
-                    ₹{row.basePrice.toLocaleString('en-IN')}{' '}
-                    <span className="text-[10px] text-[#786A5B]">/ night</span>
+                  <td className="py-3.5 px-5 font-mono text-[#2A1D13]">
+                    ₹{row.basePrice.toLocaleString('en-IN')}
                   </td>
-                  <td className="py-4 px-6 text-center font-bold text-[#33271D]">
-                    {row.bookings} stays
+                  <td className="py-3.5 px-5 text-center font-semibold text-[#2A1D13]">
+                    {row.bookings}
                   </td>
-                  <td className="py-4 px-6 font-mono font-bold text-[#43001F]">
+                  <td className="py-3.5 px-5 font-mono font-bold text-[#2A1D13]">
                     ₹{row.revenue.toLocaleString('en-IN')}
                   </td>
-                  <td className="py-4 px-6">
+                  <td className="py-3.5 px-5">
                     <div className="flex items-center gap-2">
-                      <div className="w-24 bg-[#E6D9C5]/50 h-2 rounded-full overflow-hidden">
+                      <div className="w-20 bg-[#E6D9C5]/50 h-1.5 rounded-full overflow-hidden">
                         <div
-                          className="bg-[#43001F] h-full rounded-full"
+                          className="bg-[#2A1D13] h-full rounded-full"
                           style={{ width: `${Math.min(row.occupancy, 100)}%` }}
                         />
                       </div>
-                      <span className="font-semibold text-[#786A5B]">{row.occupancy}%</span>
+                      <span className="font-medium text-[#786A5B]">{row.occupancy}%</span>
                     </div>
                   </td>
-                  <td className="py-4 px-6 text-right">
+                  <td className="py-3.5 px-5 text-right">
                     <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold ${
+                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${
                         row.occupancy >= 70
-                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                          ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
                           : row.occupancy >= 50
-                          ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                          ? 'bg-amber-50 text-amber-800 border border-amber-200'
                           : row.bookings > 0
-                          ? 'bg-stone-100 text-stone-700 border border-stone-300'
+                          ? 'bg-stone-50 text-stone-700 border border-stone-200'
                           : 'bg-stone-50 text-stone-400 border border-stone-200'
                       }`}
                     >

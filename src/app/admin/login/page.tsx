@@ -222,14 +222,14 @@ function AdminLoginContent() {
         </div>
 
         {/* Credentials Selector Pills (Super Admin, Manager, Staff) */}
-        <div className="bg-[#2A1D15] border border-[#D8AD56]/30 rounded-2xl p-3 sm:p-4 mb-4 shadow-lg">
+        <div className="bg-[#1C140E] border border-[#E6D9C5]/20 rounded-2xl p-3 sm:p-4 mb-4 shadow-lg">
           <div className="flex flex-wrap items-center justify-between gap-1.5 mb-2.5">
-            <div className="flex items-center gap-1.5 text-xs text-[#D8AD56] font-semibold">
-              <Sparkles className="w-3.5 h-3.5 shrink-0" />
-              <span>{isTelugu ? 'ఖాతాను ఎంచుకోండి' : 'Select Staff Account'}</span>
+            <div className="flex items-center gap-1.5 text-xs text-[#EAD8B8] font-medium">
+              <Sparkles className="w-3.5 h-3.5 text-[#8D672F] shrink-0" />
+              <span>{isTelugu ? 'ఖాతాను ఎంచుకోండి' : 'Select Account'}</span>
             </div>
-            <span className="text-[10px] text-white/60 uppercase tracking-widest font-mono">
-              {isTelugu ? '4 ఖాతాలు అందుబాటులో ఉన్నాయి' : 'Select role to pre-fill'}
+            <span className="text-[10px] text-white/50 uppercase tracking-widest font-mono">
+              {isTelugu ? '4 ఖాతాలు' : 'Quick Fill'}
             </span>
           </div>
 
@@ -251,31 +251,31 @@ function AdminLoginContent() {
                       selectPreset(preset);
                     }
                   }}
-                  className={`p-3 rounded-xl text-left border transition-all cursor-pointer flex flex-col justify-between select-none outline-none focus-visible:ring-2 focus-visible:ring-[#D8AD56] ${
+                  className={`p-2.5 rounded-xl text-left border transition-all cursor-pointer flex flex-col justify-between select-none outline-none ${
                     isSelected
-                      ? 'bg-[#43001F] border-[#D8AD56] shadow-md ring-1 ring-[#D8AD56]'
+                      ? 'bg-[#2A1D13] border-[#8D672F] shadow-md ring-1 ring-[#8D672F]'
                       : 'bg-white/5 hover:bg-white/10 border-white/10 text-white/80'
                   }`}
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-1.5">
+                    <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center gap-1.5 min-w-0">
-                        <Icon className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-[#D8AD56]' : 'text-white/70'}`} />
-                        <span className="text-xs font-bold text-white tracking-tight truncate">
+                        <Icon className={`w-3.5 h-3.5 shrink-0 ${isSelected ? 'text-[#8D672F]' : 'text-white/60'}`} />
+                        <span className="text-xs font-semibold text-white tracking-tight truncate">
                           {isTelugu ? preset.roleLabelTe : preset.roleLabel}
                         </span>
                       </div>
-                      {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#D8AD56] shrink-0 ml-1" />}
+                      {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-[#8D672F] shrink-0 ml-1" />}
                     </div>
 
-                    <p className="text-[11px] text-[#FDFBF7]/80 truncate font-mono">
+                    <p className="text-[10px] text-[#FAF8F5]/70 truncate font-mono">
                       {preset.email}
                     </p>
                   </div>
 
-                  <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between gap-2">
-                    <span className="text-[10px] uppercase font-bold text-[#D8AD56]">
-                      {isSelected ? (isTelugu ? 'సక్రియం' : 'Active') : (isTelugu ? 'ఎంచుకోండి' : 'Tap to fill')}
+                  <div className="mt-2 pt-1.5 border-t border-white/10 flex items-center justify-between gap-2">
+                    <span className="text-[10px] uppercase font-medium text-[#8D672F]">
+                      {isSelected ? (isTelugu ? 'సక్రియం' : 'Active') : (isTelugu ? 'ఎంచుకోండి' : 'Select')}
                     </span>
                     <button
                       type="button"
@@ -285,9 +285,9 @@ function AdminLoginContent() {
                         e.stopPropagation();
                         selectPreset(preset);
                       }}
-                      className="text-[10px] px-2.5 py-1 rounded-md bg-white/20 hover:bg-[#D8AD56] hover:text-[#21180F] text-white font-semibold transition-all cursor-pointer disabled:opacity-50 shrink-0 min-h-[28px] flex items-center"
+                      className="text-[10px] px-2 py-0.5 rounded-md bg-white/15 hover:bg-[#8D672F] hover:text-[#2A1D13] text-white font-medium transition-all cursor-pointer disabled:opacity-50 shrink-0"
                     >
-                      {isTelugu ? 'ఎంచుకోండి' : 'Select Account'}
+                      {isTelugu ? 'ఎంచుకోండి' : 'Fill'}
                     </button>
                   </div>
                 </div>
@@ -297,17 +297,17 @@ function AdminLoginContent() {
         </div>
 
         {/* Main Sign-In Card */}
-        <div className="bg-white rounded-3xl border border-[#D8AD56]/40 p-5 sm:p-8 shadow-2xl space-y-5">
-          <div className="flex items-center justify-between border-b border-[#EFE3D6] pb-3.5 gap-2">
+        <div className="bg-white rounded-2xl border border-[#E6D9C5] p-5 sm:p-7 shadow-2xl space-y-4">
+          <div className="flex items-center justify-between border-b border-[#E6D9C5]/60 pb-3 gap-2">
             <div>
-              <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#241912] leading-tight">
-                {t('auth.loginTitle', 'Staff Authentication')}
+              <h2 className="font-serif text-xl sm:text-2xl font-bold text-[#2A1D13] leading-tight">
+                {t('auth.loginTitle', 'Staff Sign In')}
               </h2>
-              <p className="text-xs text-[#786B61] mt-0.5">
-                {t('auth.loginSubtitle', 'Role-Based Access Control verified by Edge security middleware.')}
+              <p className="text-xs text-[#786A5B] mt-0.5">
+                {t('auth.loginSubtitle', 'Management console sign-in')}
               </p>
             </div>
-            <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shrink-0">
+            <span className="text-[10px] bg-emerald-50 text-emerald-800 border border-emerald-200 font-medium px-2.5 py-0.5 rounded-full flex items-center gap-1 shrink-0">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
               {isTelugu ? 'RBAC రక్షితం' : 'RBAC Protected'}
             </span>
@@ -317,34 +317,25 @@ function AdminLoginContent() {
             <div
               role="alert"
               aria-live="assertive"
-              className="p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-xs flex items-start gap-2.5"
+              className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-700 text-xs flex items-start gap-2.5"
             >
-              <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
               <span className="font-medium leading-relaxed">{error}</span>
             </div>
           )}
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <div className="flex items-center justify-between mb-1.5 gap-2">
+              <div className="flex items-center justify-between mb-1 gap-2">
                 <label
                   htmlFor="staff-email-input"
-                  className="block text-xs font-semibold text-[#241912] uppercase tracking-wider"
+                  className="block text-xs font-semibold text-[#2A1D13] uppercase tracking-wider"
                 >
-                  {t('auth.email', 'Staff Email Address')}
+                  {t('auth.email', 'Email Address')}
                 </label>
-                <span className="text-[10px] text-[#786B61] font-mono truncate">
-                  {email === 'admin@sritayigrand.com'
-                    ? (isTelugu ? 'సూపర్ అడ్మిన్ ఖాతా' : 'Super Admin Account')
-                    : email === 'manager@sritayigrand.com'
-                    ? (isTelugu ? 'మేనేజర్ ఖాతా' : 'Manager Account')
-                    : email === 'staff@sritayigrand.com'
-                    ? (isTelugu ? 'రిసెప్షన్ ఖాతా' : 'Front Desk Account')
-                    : (isTelugu ? 'ఖాతా' : 'Account')}
-                </span>
               </div>
               <div className="relative">
-                <Mail className="w-4 h-4 text-[#8C7A6B] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Mail className="w-4 h-4 text-[#786A5B] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   id="staff-email-input"
                   type="email"
@@ -353,22 +344,22 @@ function AdminLoginContent() {
                   onChange={(e) => handleEmailChange(e.target.value)}
                   required
                   placeholder="staff@sritayigrand.com"
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#EFE3D6] focus:border-[#D8AD56] focus:ring-2 focus:ring-[#D8AD56]/20 text-sm text-[#241912] outline-none transition-all placeholder:text-[#8C7A6B]/80 font-medium disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[#E6D9C5] focus:border-[#8D672F] focus:outline-none text-xs text-[#2A1D13] transition-all placeholder:text-[#786A5B]/60 font-medium disabled:opacity-60 disabled:cursor-not-allowed bg-white"
                 />
               </div>
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-1.5">
+              <div className="flex items-center justify-between mb-1">
                 <label
                   htmlFor="staff-password-input"
-                  className="block text-xs font-semibold text-[#241912] uppercase tracking-wider"
+                  className="block text-xs font-semibold text-[#2A1D13] uppercase tracking-wider"
                 >
                   {t('auth.password', 'Password')}
                 </label>
               </div>
               <div className="relative">
-                <Lock className="w-4 h-4 text-[#8C7A6B] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Lock className="w-4 h-4 text-[#786A5B] absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   id="staff-password-input"
                   type={showPassword ? 'text' : 'password'}
@@ -377,7 +368,7 @@ function AdminLoginContent() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   placeholder="••••••••••••"
-                  className="w-full pl-10 pr-12 py-2.5 rounded-xl border border-[#EFE3D6] focus:border-[#D8AD56] focus:ring-2 focus:ring-[#D8AD56]/20 text-sm text-[#241912] outline-none transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full pl-10 pr-12 py-2.5 rounded-xl border border-[#E6D9C5] focus:border-[#8D672F] focus:outline-none text-xs text-[#2A1D13] transition-all font-mono disabled:opacity-60 disabled:cursor-not-allowed bg-white"
                 />
                 <button
                   type="button"
@@ -385,7 +376,7 @@ function AdminLoginContent() {
                   disabled={loading}
                   onClick={() => setShowPassword(!showPassword)}
                   aria-label={showPassword ? 'Hide password' : 'Show password'}
-                  className="absolute right-1.5 top-1/2 -translate-y-1/2 p-2 rounded-lg text-[#8C7A6B] hover:text-[#43001F] hover:bg-stone-100 transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center disabled:opacity-50"
+                  className="absolute right-1.5 top-1/2 -translate-y-1/2 p-2 rounded-lg text-[#786A5B] hover:text-[#2A1D13] hover:bg-[#FAF8F5] transition-colors cursor-pointer min-w-[36px] min-h-[36px] flex items-center justify-center disabled:opacity-50"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -394,17 +385,17 @@ function AdminLoginContent() {
 
             {/* Session Scope & Remember Me Selection */}
             <div className="flex items-center justify-between pt-1">
-              <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-[#786B61]">
+              <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-[#786A5B]">
                 <input
                   type="checkbox"
                   checked={rememberMe}
                   disabled={loading}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 rounded text-[#43001F] border-stone-300 focus:ring-[#D8AD56] cursor-pointer"
+                  className="w-4 h-4 rounded text-[#8D672F] border-[#E6D9C5] focus:ring-[#8D672F] cursor-pointer"
                 />
-                <span>{t('auth.rememberMe', 'Remember on this terminal (persistent)')}</span>
+                <span>{t('auth.rememberMe', 'Remember on this terminal')}</span>
               </label>
-              <span className="text-[10px] text-stone-400 hidden sm:inline">
+              <span className="text-[10px] text-[#786A5B] hidden sm:inline">
                 {rememberMe ? (isTelugu ? 'శాశ్వత సెషన్' : 'Persistent session') : (isTelugu ? 'టాబ్ సెషన్ మాత్రమే' : 'Tab session only')}
               </span>
             </div>
@@ -412,21 +403,21 @@ function AdminLoginContent() {
             <button
               type="submit"
               disabled={loading || loginSuccess}
-              className="w-full py-3.5 px-4 rounded-xl bg-[#8D672F] bg-gradient-to-r from-[#8D672F] via-[#B18A4A] to-[#8D672F] hover:from-[#6D4E21] hover:to-[#6D4E21] text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2 active:scale-[0.99] disabled:opacity-50 cursor-pointer min-h-[48px]"
+              className="w-full py-3 px-4 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] font-medium text-xs shadow-xs transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer min-h-[44px]"
             >
               {loading ? (
                 <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>{t('auth.authenticating', 'Authenticating Credentials...')}</span>
+                  <Loader2 className="w-4 h-4 animate-spin text-[#8D672F]" />
+                  <span>{t('auth.authenticating', 'Authenticating...')}</span>
                 </>
               ) : loginSuccess ? (
                 <>
-                  <CheckCircle2 className="w-4 h-4 text-emerald-300" />
-                  <span>{isTelugu ? 'ధృవీకరణ పూర్తయింది! ప్రవేశిస్తోంది...' : 'Authenticated! Redirecting...'}</span>
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                  <span>{isTelugu ? 'ధృవీకరణ పూర్తయింది!' : 'Authenticated! Redirecting...'}</span>
                 </>
               ) : (
                 <>
-                  <span>{t('auth.signIn', 'Sign In to Management Console')}</span>
+                  <span>{t('auth.signIn', 'Sign In')}</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -434,10 +425,10 @@ function AdminLoginContent() {
           </form>
 
           {/* Security Notice Footer */}
-          <div className="pt-2 border-t border-[#EFE3D6] text-center">
-            <p className="text-[11px] text-[#786B61] flex items-center justify-center gap-1.5">
+          <div className="pt-2 border-t border-[#E6D9C5]/60 text-center">
+            <p className="text-[11px] text-[#786A5B] flex items-center justify-center gap-1.5">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-              <span>{t('auth.securityNotice', 'Secured via Cryptographic JWT & Supabase Row-Level Security.')}</span>
+              <span>{t('auth.securityNotice', 'Secured session')}</span>
             </p>
           </div>
         </div>

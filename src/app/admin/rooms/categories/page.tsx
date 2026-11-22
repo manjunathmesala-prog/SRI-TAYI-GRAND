@@ -115,29 +115,20 @@ export default function RoomCategoriesAdminPage() {
   };
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-6 max-w-7xl mx-auto">
       {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]/60">
         <div>
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
-            {isTelugu ? 'కేటలాగ్ కాన్ఫిగరేషన్' : 'CATALOG CONFIGURATION'}
-          </span>
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-0.5 flex items-center gap-2">
-            <Layers className="w-6 h-6 text-[#D8AD56]" />
-            <span>{t('nav.roomCategories', 'Room Category Management')}</span>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] tracking-tight">
+            {t('nav.roomCategories', 'Room Categories')}
           </h1>
-          <p className="text-xs text-[#786B61] mt-0.5">
-            {isTelugu
-              ? 'రాత్రికి ధరలు, పడకల రకాలు, గరిష్ట అతిథుల పరిమితి, వివరణలు మరియు స్థితిని నిర్వహించండి.'
-              : 'Configure rates per night, bed types, guest limits, descriptions, and active status.'}
-          </p>
         </div>
 
         <button
           onClick={() => fetchCategories()}
-          className="px-3.5 py-2 rounded-xl border border-[#D8AD56]/40 hover:bg-[#FAF7F2] text-xs font-semibold text-[#382216] transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
+          className="p-2.5 rounded-xl border border-[#E6D9C5] bg-white text-[#786A5B] hover:text-[#2A1D13] hover:bg-[#FAF8F5] transition-colors shadow-xs cursor-pointer flex items-center gap-1.5"
         >
-          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#8D672F]' : ''}`} />
           <span>{t('common.refresh', 'Refresh')}</span>
         </button>
       </div>
@@ -154,7 +145,7 @@ export default function RoomCategoriesAdminPage() {
         {categories.map((cat) => (
           <div
             key={cat.id}
-            className="bg-white rounded-2xl border border-[#D8AD56]/30 overflow-hidden shadow-luxury flex flex-col justify-between"
+            className="bg-white rounded-2xl border border-[#E6D9C5]/80 overflow-hidden shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex flex-col justify-between"
           >
             <div className="relative aspect-[16/9] w-full">
               <Image
@@ -163,53 +154,53 @@ export default function RoomCategoriesAdminPage() {
                 fill
                 className="object-cover"
               />
-              <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-[#25150F]/80 backdrop-blur-sm text-[#D8AD56] text-xs font-bold">
+              <div className="absolute top-3 right-3 px-3 py-1 rounded-full bg-[#2A1D13]/80 backdrop-blur-sm text-[#EAD8B8] text-xs font-bold">
                 {formatCurrency(cat.base_price_per_night)} / {isTelugu ? 'రాత్రికి' : 'night'}
               </div>
             </div>
 
-            <div className="p-6 flex-1 flex flex-col justify-between">
+            <div className="p-5 flex-1 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between">
-                  <h3 className="font-serif text-xl font-bold text-[#241912]">{cat.name}</h3>
+                  <h3 className="font-serif text-lg font-bold text-[#2A1D13]">{cat.name}</h3>
                   <span
-                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                    className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ${
                       cat.is_active
-                        ? 'bg-emerald-100 text-emerald-800'
-                        : 'bg-stone-100 text-stone-600'
+                        ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                        : 'bg-stone-50 text-stone-600 border border-stone-200'
                     }`}
                   >
                     {cat.is_active ? t('common.active', 'Active') : t('common.inactive', 'Inactive')}
                   </span>
                 </div>
 
-                <p className="text-xs text-[#786B61] mt-2 line-clamp-2">
+                <p className="text-xs text-[#786A5B] mt-2 line-clamp-2">
                   {cat.short_description}
                 </p>
 
-                <div className="mt-4 pt-4 border-t border-[#EFE3D6] grid grid-cols-2 gap-3 text-xs">
+                <div className="mt-4 pt-4 border-t border-[#E6D9C5]/60 grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <span className="text-[10px] uppercase tracking-wider text-[#786B61] block">
+                    <span className="text-[10px] uppercase tracking-wider text-[#786A5B] block">
                       {isTelugu ? 'పడక రకం' : 'Bed Configuration'}
                     </span>
-                    <span className="font-semibold text-[#241912]">{cat.bed_type}</span>
+                    <span className="font-semibold text-[#2A1D13]">{cat.bed_type}</span>
                   </div>
                   <div>
-                    <span className="text-[10px] uppercase tracking-wider text-[#786B61] block">
+                    <span className="text-[10px] uppercase tracking-wider text-[#786A5B] block">
                       {isTelugu ? 'గరిష్ట అతిథులు' : 'Max Guests'}
                     </span>
-                    <span className="font-semibold text-[#241912]">
+                    <span className="font-semibold text-[#2A1D13]">
                       {cat.max_occupancy} {isTelugu ? 'మంది' : 'Guests'}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 pt-4 border-t border-[#EFE3D6] flex justify-end">
+              <div className="mt-5 pt-4 border-t border-[#E6D9C5]/60 flex justify-end">
                 <button
                   type="button"
                   onClick={() => handleOpenEdit(cat)}
-                  className="px-4 py-2 rounded-xl bg-[#43001F] hover:bg-[#2E0015] text-white text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer active:scale-98"
                 >
                   <Edit className="w-3.5 h-3.5" />
                   <span>{t('rooms.editRoom', 'Edit Category')}</span>
