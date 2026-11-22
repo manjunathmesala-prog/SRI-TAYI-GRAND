@@ -6,6 +6,7 @@ import fs from 'fs';
 import { spawn } from 'child_process';
 
 const DEFAULT_BRIDGE_URL = process.env.RFID_BRIDGE_URL || 'http://127.0.0.1:8989';
+const PERMANENT_TUNNEL_URL = process.env.RFID_PERMANENT_TUNNEL_URL || 'https://rfid.sritayigrand.com';
 
 let cachedTunnelUrl: string | null = null;
 let lastTunnelFetchTime = 0;
@@ -17,6 +18,7 @@ async function getResolvedTunnelUrl(forceFresh: boolean = false): Promise<string
     return cachedTunnelUrl;
   }
 
+  // 1. Direct Supabase integration registry check
   try {
     const supabaseUrl = await getRegisteredBridgeTunnelUrl();
     if (supabaseUrl) {
@@ -26,6 +28,7 @@ async function getResolvedTunnelUrl(forceFresh: boolean = false): Promise<string
     }
   } catch {}
 
+  // 2. Local status file check
   try {
     const tunnelFile = path.join(process.cwd(), 'latest_production_tunnel_url.txt');
     if (fs.existsSync(tunnelFile)) {
@@ -37,6 +40,13 @@ async function getResolvedTunnelUrl(forceFresh: boolean = false): Promise<string
       }
     }
   } catch {}
+
+  // 3. Fallback to permanent named domain in production cloud
+  if (PERMANENT_TUNNEL_URL && (process.env.NODE_ENV === 'production' || process.platform !== 'win32')) {
+    cachedTunnelUrl = PERMANENT_TUNNEL_URL;
+    lastTunnelFetchTime = now;
+    return PERMANENT_TUNNEL_URL;
+  }
 
   return cachedTunnelUrl;
 }

@@ -25,6 +25,7 @@ import { AdminLanguageSwitcher } from '@/components/admin/AdminLanguageSwitcher'
 import { OfflineSyncBadge } from '@/components/sync/OfflineSyncBadge';
 import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 import { authStorage } from '@/lib/auth-storage';
+import { UnifiedShiftControl } from '@/components/admin/UnifiedShiftControl';
 
 export function AdminHeader() {
   const pathname = usePathname();
@@ -226,6 +227,9 @@ export function AdminHeader() {
 
         {/* Offline & Sync Queue Status Badge */}
         <OfflineSyncBadge />
+
+        {/* Unified Shift Quick Controller */}
+        <UnifiedShiftControl compact={true} onShiftStateChange={() => fetchCashBalance(true)} />
 
         {/* Live Cash Drawer Counter */}
         {cashBalance !== null && (

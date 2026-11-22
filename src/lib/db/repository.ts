@@ -54,6 +54,7 @@ import {
   NightAuditRecipient,
   RoomTransferRecord,
   RoomTransferReasonCategory,
+  StayExtensionRecord,
   MaintenanceCategory,
 } from '@/types';
 
@@ -83,6 +84,8 @@ import {
   deleteMaintenanceTicketFromSupabase,
   syncRoomTransferToSupabase,
   loadRoomTransfersFromSupabase,
+  syncStayExtensionToSupabase,
+  loadStayExtensionsFromSupabase,
   syncCashShiftToSupabase,
   loadCashShiftsFromSupabase,
   deleteCashShiftFromSupabase,
@@ -112,6 +115,8 @@ import {
   loadGuestsFromSupabase,
   syncNightAuditConfigToSupabase,
   loadNightAuditConfigFromSupabase,
+  executeStartManagerShiftSupabase,
+  executeEndManagerShiftSupabase,
 } from './supabase-sync';
 import {
   loadPersistedCards,
@@ -184,6 +189,7 @@ export class HotelRepository {
   private folioCharges: FolioCharge[] = JSON.parse(JSON.stringify(INITIAL_FOLIO_CHARGES));
   private contactEnquiries: ContactEnquiry[] = JSON.parse(JSON.stringify(INITIAL_CONTACT_ENQUIRIES));
   private conventionQuotes: ConventionQuote[] = JSON.parse(JSON.stringify(INITIAL_CONVENTION_QUOTES));
+  private stayExtensions: StayExtensionRecord[] = [];
   private paymentOrders: PaymentOrder[] = [];
   private paymentTransactions: PaymentTransaction[] = [];
   private nightAuditSettings?: NightAuditSettings;
@@ -216,6 +222,8 @@ export class HotelRepository {
     if (pEnquiries.length > 0) this.hallEnquiries = pEnquiries;
     const pQuotes = loadPersistedData<ConventionQuote>('convention_quotes.json');
     if (pQuotes.length > 0) this.conventionQuotes = pQuotes;
+    const pExtensions = loadPersistedData<StayExtensionRecord>('stay_extensions.json');
+    if (pExtensions.length > 0) this.stayExtensions = pExtensions;
     const pJournals = loadPersistedData<JournalEntry>('journal_entries.json');
     if (pJournals.length > 0) this.journalEntries = pJournals;
     const pAttendance = loadPersistedData<StaffAttendance>('staff_attendance.json');
@@ -370,6 +378,13 @@ export class HotelRepository {
     loadReviewsFromSupabase().then((pgRev: any) => {
       if (pgRev && pgRev.length > 0) this.reviews = pgRev;
     }).catch(() => {});
+
+    loadStayExtensionsFromSupabase().then((pgExt: any) => {
+      if (pgExt && pgExt.length > 0) {
+        this.stayExtensions = pgExt;
+        savePersistedData('stay_extensions.json', this.stayExtensions);
+      }
+    }).catch(() => {});
   }
 
   // ==============================================================================
@@ -445,6 +460,7 @@ export class HotelRepository {
       auditLogs: this.getAuditLogs(),
       staffAttendance: this.getStaffAttendance(),
       settings: this.getSettings(),
+      stayExtensions: this.getStayExtensions(),
     };
   }
 
@@ -2932,6 +2948,148 @@ export class HotelRepository {
     return shift;
   }
 
+  async startUnifiedManagerShift(params: {
+    staffId: string;
+    staffName?: string;
+    role?: string;
+    openingFloat: number;
+    openingDenominations: Record<string, number>;
+    shiftType?: ShiftType;
+    notes?: string;
+    actor?: string;
+  }): Promise<{ attendance: StaffAttendance; shift: CashShift }> {
+    await this.ensureStaffLoaded();
+    await this.ensureStaffAttendanceLoaded();
+    await this.ensureCashbookLoaded();
+
+    // Verify authorized manager (Hari Achari or Sagar, or Super Admin)
+    const staff = this.staff.find(
+      (s) =>
+        s.id === params.staffId ||
+        s.email.toLowerCase() === params.staffId.toLowerCase() ||
+        (params.staffId === 'stf-sagar' && s.email.includes('sagar')) ||
+        (params.staffId === 'stf-hari' && s.email.includes('hari')) ||
+        (params.staffName && s.full_name.toLowerCase().includes(params.staffName.toLowerCase()))
+    );
+
+    const staffId = staff?.id || params.staffId;
+    const staffName = staff?.full_name || params.staffName || 'Duty Manager';
+    const role = staff?.role || params.role || 'Hotel Manager';
+
+    // Atomic execution in PostgreSQL
+    const result = await executeStartManagerShiftSupabase({
+      staffId,
+      staffName,
+      role,
+      openingFloat: Number(params.openingFloat) || 0,
+      openingDenominations: params.openingDenominations || {},
+      shiftType: params.shiftType || 'general',
+      notes: params.notes,
+      actorName: params.actor || staffName,
+    });
+
+    // Update repository in-memory state and disk caches
+    this.staffAttendance.unshift(result.attendance);
+    this.cashShifts.unshift(result.shift);
+    savePersistedData('staff_attendance.json', this.staffAttendance);
+    savePersistedData('cash_shifts.json', this.cashShifts);
+
+    // Broadcast synchronization events
+    this.broadcastEvent('manager_clocked_in', result.attendance, params.actor || staffName);
+    this.broadcastEvent('cash_shift_opened', result.shift, params.actor || staffName);
+    this.broadcastEvent(
+      'shift_lifecycle_changed',
+      { action: 'start', shift: result.shift, attendance: result.attendance },
+      params.actor || staffName
+    );
+
+    this.recordAuditLog({
+      action: 'UNIFIED_SHIFT_START',
+      entityType: 'shift',
+      entityId: result.shift.id,
+      details: `${staffName} started unified shift #${result.shift.shift_number} with opening float ₹${result.shift.opening_float}`,
+      userName: params.actor || staffName,
+    });
+
+    return result;
+  }
+
+  async endUnifiedManagerShift(params: {
+    shiftId: string;
+    closingCashCounted: number;
+    closingDenominations: Record<string, number>;
+    handoverNotes?: string;
+    discrepancyReason?: string;
+    actor?: string;
+  }): Promise<{
+    attendance: StaffAttendance | null;
+    shift: CashShift;
+    financials: {
+      openingFloat: number;
+      totalCashIn: number;
+      totalCashOut: number;
+      expectedClosingCash: number;
+      closingCashCounted: number;
+      discrepancy: number;
+      workHours: number;
+    };
+  }> {
+    await this.ensureStaffAttendanceLoaded();
+    await this.ensureCashbookLoaded();
+
+    const result = await executeEndManagerShiftSupabase({
+      shiftId: params.shiftId,
+      closingCashCounted: Number(params.closingCashCounted),
+      closingDenominations: params.closingDenominations || {},
+      handoverNotes: params.handoverNotes,
+      discrepancyReason: params.discrepancyReason,
+      actorName: params.actor || 'Duty Manager',
+    });
+
+    // Update in-memory caches
+    const sIdx = this.cashShifts.findIndex(
+      (s) => s.id === result.shift.id || s.shift_number === result.shift.shift_number
+    );
+    if (sIdx > -1) {
+      this.cashShifts[sIdx] = result.shift;
+    } else {
+      this.cashShifts.unshift(result.shift);
+    }
+
+    if (result.attendance) {
+      const aIdx = this.staffAttendance.findIndex((a) => a.id === result.attendance!.id);
+      if (aIdx > -1) {
+        this.staffAttendance[aIdx] = result.attendance;
+      } else {
+        this.staffAttendance.unshift(result.attendance);
+      }
+    }
+
+    savePersistedData('cash_shifts.json', this.cashShifts);
+    savePersistedData('staff_attendance.json', this.staffAttendance);
+
+    // Broadcast synchronization events
+    this.broadcastEvent('cash_shift_closed', result.shift, params.actor);
+    if (result.attendance) {
+      this.broadcastEvent('manager_clocked_out', result.attendance, params.actor);
+    }
+    this.broadcastEvent(
+      'shift_lifecycle_changed',
+      { action: 'end', shift: result.shift, attendance: result.attendance },
+      params.actor
+    );
+
+    this.recordAuditLog({
+      action: 'UNIFIED_SHIFT_END',
+      entityType: 'shift',
+      entityId: result.shift.id,
+      details: `Unified shift #${result.shift.shift_number} closed with counted cash ₹${params.closingCashCounted} (Discrepancy: ₹${result.financials.discrepancy})`,
+      userName: params.actor || result.shift.closed_by_name || 'Duty Manager',
+    });
+
+    return result;
+  }
+
   async deleteCashShift(id: string, actor?: string): Promise<boolean> {
     const idx = this.cashShifts.findIndex((s) => s.id === id || s.shift_number === id);
     if (idx === -1) return false;
@@ -5179,9 +5337,9 @@ export class HotelRepository {
       throw new Error(`Booking reference '${bookingReference}' not found.`);
     }
 
-    const currentRoomNumber = booking.assigned_room_number;
+    const currentRoomNumber = booking.assigned_room_number || booking.room_number;
     const oldRoom = this.rooms.find(
-      (r) => r.room_number === currentRoomNumber || r.id === booking.assigned_room_id
+      (r) => r.room_number === currentRoomNumber || (booking.assigned_room_id && r.id === booking.assigned_room_id)
     );
     if (!oldRoom) {
       throw new Error(`Current assigned room for booking '${bookingReference}' not found.`);
@@ -5251,6 +5409,7 @@ export class HotelRepository {
     // Update Booking Assignment
     booking.assigned_room_id = newRoom.id;
     booking.assigned_room_number = newRoom.room_number;
+    booking.room_number = newRoom.room_number;
     if (newRoom.category_id) {
       booking.category_id = newRoom.category_id;
     }
@@ -5310,6 +5469,448 @@ export class HotelRepository {
       newRoom,
       transferRecord,
       maintenanceTicket: maintTicket,
+    };
+  }
+
+  // ==============================================================================
+  // STAY EXTENSIONS (EXTEND STAY) REPOSITORY METHODS
+  // ==============================================================================
+
+  public getStayExtensions(bookingReference?: string): StayExtensionRecord[] {
+    if (bookingReference) {
+      return this.stayExtensions.filter(
+        (e) => e.booking_reference === bookingReference || e.booking_id === bookingReference
+      );
+    }
+    return this.stayExtensions;
+  }
+
+  public checkStayExtensionAvailability(params: {
+    bookingReference: string;
+    newCheckOutDate: string;
+    targetRoomNumber?: string;
+  }): {
+    available: boolean;
+    conflict?: Booking;
+    conflictBooking?: Booking;
+    message: string;
+    currentRoomNumber: string;
+    newCheckOutDate: string;
+    additionalNights: number;
+    availableRooms?: PhysicalRoom[];
+  } {
+    const { bookingReference, newCheckOutDate, targetRoomNumber } = params;
+    const booking = this.getBookingByReference(bookingReference);
+    if (!booking) {
+      throw new Error(`Booking '${bookingReference}' not found.`);
+    }
+
+    if (booking.status !== 'checked_in') {
+      throw new Error(`Only currently checked-in guests can extend stay. Booking status is '${booking.status}'.`);
+    }
+
+    const currentCheckOut = booking.check_out_date.slice(0, 10);
+    const proposedCheckOut = newCheckOutDate.slice(0, 10);
+
+    if (proposedCheckOut <= currentCheckOut) {
+      throw new Error(`New checkout date (${proposedCheckOut}) must be strictly after current checkout date (${currentCheckOut}).`);
+    }
+
+    const diffMs = new Date(proposedCheckOut).getTime() - new Date(currentCheckOut).getTime();
+    const additionalNights = Math.max(1, Math.round(diffMs / (1000 * 60 * 60 * 24)));
+
+    const roomNumberToCheck = targetRoomNumber || booking.assigned_room_number || booking.room_number;
+    if (!roomNumberToCheck) {
+      throw new Error(`No room assigned to booking '${bookingReference}'.`);
+    }
+
+    // 1. Conflict check for roomNumberToCheck during [currentCheckOut, proposedCheckOut]
+    const conflict = this.bookings.find(
+      (b) =>
+        b.booking_reference !== booking.booking_reference &&
+        b.status !== 'cancelled' &&
+        b.status !== 'checked_out' &&
+        (b.assigned_room_number === roomNumberToCheck ||
+          (b.assigned_room_numbers && b.assigned_room_numbers.includes(roomNumberToCheck)) ||
+          b.room_number === roomNumberToCheck) &&
+        b.check_in_date.slice(0, 10) < proposedCheckOut &&
+        b.check_out_date.slice(0, 10) > currentCheckOut
+    );
+
+    // Maintenance ticket block check
+    const isMaintenanceBlocked = this.maintenanceTickets.some(
+      (m) =>
+        m.room_number === roomNumberToCheck &&
+        m.room_blocked &&
+        m.status !== 'resolved' &&
+        m.status !== 'cancelled'
+    );
+
+    if (conflict) {
+      // Find candidate alternative rooms of same or compatible category that are available for [currentCheckOut, proposedCheckOut]
+      const availableRooms = this.rooms.filter((r) => {
+        if (r.room_number === roomNumberToCheck) return false;
+        if (r.operational_status === 'out_of_service' || r.operational_status === 'maintenance') return false;
+        const hasOverlap = this.bookings.some(
+          (b) =>
+            b.status !== 'cancelled' &&
+            b.status !== 'checked_out' &&
+            (b.assigned_room_number === r.room_number ||
+              (b.assigned_room_numbers && b.assigned_room_numbers.includes(r.room_number)) ||
+              b.room_number === r.room_number) &&
+            b.check_in_date.slice(0, 10) < proposedCheckOut &&
+            b.check_out_date.slice(0, 10) > currentCheckOut
+        );
+        return !hasOverlap;
+      });
+
+      return {
+        available: false,
+        conflict,
+        conflictBooking: conflict,
+        message: `Room ${roomNumberToCheck} is already booked from ${conflict.check_in_date.slice(0, 10)} to ${conflict.check_out_date.slice(0, 10)} (${conflict.guest_name}, Ref: ${conflict.booking_reference}).`,
+        currentRoomNumber: booking.assigned_room_number || '',
+        newCheckOutDate: proposedCheckOut,
+        additionalNights,
+        availableRooms,
+      };
+    }
+
+    if (isMaintenanceBlocked) {
+      const availableRooms = this.rooms.filter((r) => {
+        if (r.room_number === roomNumberToCheck) return false;
+        if (r.operational_status === 'out_of_service' || r.operational_status === 'maintenance') return false;
+        const hasOverlap = this.bookings.some(
+          (b) =>
+            b.status !== 'cancelled' &&
+            b.status !== 'checked_out' &&
+            (b.assigned_room_number === r.room_number ||
+              (b.assigned_room_numbers && b.assigned_room_numbers.includes(r.room_number)) ||
+              b.room_number === r.room_number) &&
+            b.check_in_date.slice(0, 10) < proposedCheckOut &&
+            b.check_out_date.slice(0, 10) > currentCheckOut
+        );
+        return !hasOverlap;
+      });
+
+      return {
+        available: false,
+        message: `Room ${roomNumberToCheck} has an active maintenance block scheduled.`,
+        currentRoomNumber: booking.assigned_room_number || '',
+        newCheckOutDate: proposedCheckOut,
+        additionalNights,
+        availableRooms,
+      };
+    }
+
+    return {
+      available: true,
+      message: `Room ${roomNumberToCheck} is fully available until ${proposedCheckOut}.`,
+      currentRoomNumber: booking.assigned_room_number || '',
+      newCheckOutDate: proposedCheckOut,
+      additionalNights,
+    };
+  }
+
+  public async extendStay(params: {
+    bookingReference: string;
+    newCheckOutDate: string;
+    additionalNights?: number;
+    dailyRoomCharge?: number;
+    taxRate?: number;
+    pricingMode?: PricingMode;
+    paidNow?: number;
+    paymentMethod?: PaymentMethod;
+    actor: string;
+    idempotencyKey?: string;
+    reason?: string;
+    targetRoomNumber?: string;
+  }): Promise<{
+    success: boolean;
+    alreadyProcessed?: boolean;
+    booking: Booking;
+    extension: StayExtensionRecord;
+    folioCharge: FolioCharge;
+    payment?: PaymentRecord;
+    cashTransaction?: CashTransaction;
+  }> {
+    const {
+      bookingReference,
+      newCheckOutDate,
+      actor,
+      idempotencyKey,
+      reason = 'Guest stay extension requested',
+      targetRoomNumber,
+    } = params;
+
+    // Idempotency check: prevent duplicate extensions on network retry
+    if (idempotencyKey) {
+      const existing = this.stayExtensions.find((e) => e.idempotency_key === idempotencyKey);
+      if (existing) {
+        const existingBooking = this.getBookingByReference(existing.booking_reference);
+        const existingFolio = this.folioCharges.find((fc) => fc.id === `fc-ext-${existing.id}`);
+        return {
+          success: true,
+          alreadyProcessed: true,
+          booking: existingBooking || (this.getBookingByReference(bookingReference) as Booking),
+          extension: existing,
+          folioCharge: existingFolio || ({} as FolioCharge),
+        };
+      }
+    }
+
+    const booking = this.getBookingByReference(bookingReference);
+    if (!booking) {
+      throw new Error(`Booking reference '${bookingReference}' not found.`);
+    }
+
+    if (booking.status !== 'checked_in') {
+      throw new Error(`Only active checked-in reservations can be extended. Current status is '${booking.status}'.`);
+    }
+
+    const previousCheckOutDate = booking.check_out_date.slice(0, 10);
+    const proposedCheckOutDate = newCheckOutDate.slice(0, 10);
+
+    if (proposedCheckOutDate <= previousCheckOutDate) {
+      throw new Error(`New checkout date (${proposedCheckOutDate}) must be strictly after current checkout date (${previousCheckOutDate}).`);
+    }
+
+    // Availability re-validation
+    const availCheck = this.checkStayExtensionAvailability({
+      bookingReference,
+      newCheckOutDate: proposedCheckOutDate,
+      targetRoomNumber,
+    });
+
+    if (!availCheck.available) {
+      throw new Error(availCheck.message || `Room is unavailable for extension until ${proposedCheckOutDate}.`);
+    }
+
+    // Calculate additional nights
+    const diffMs = new Date(proposedCheckOutDate).getTime() - new Date(previousCheckOutDate).getTime();
+    const additionalNights = params.additionalNights && params.additionalNights > 0
+      ? params.additionalNights
+      : Math.max(1, Math.round(diffMs / (1000 * 60 * 60 * 24)));
+
+    // Handle room transfer if targetRoomNumber is provided and different
+    let currentRoomNumber = booking.assigned_room_number || booking.room_number || '';
+    if (targetRoomNumber && targetRoomNumber !== currentRoomNumber) {
+      this.transferBookingRoom({
+        bookingReference: booking.booking_reference,
+        toRoomIdOrNumber: targetRoomNumber,
+        reasonCategory: 'upgrade',
+        reasonNotes: `Stay extension with room change to Room ${targetRoomNumber}`,
+        actor,
+        createMaintenanceTicket: false,
+        oldRoomAction: 'cleaning',
+      });
+      currentRoomNumber = targetRoomNumber;
+    }
+
+    // Determine nightly rate
+    const currentRoom = this.rooms.find((r) => r.room_number === currentRoomNumber);
+    const brItem = booking.booking_rooms?.find((br) => br.room_number === currentRoomNumber);
+    const originalNights = Math.max(
+      1,
+      Math.round(
+        (new Date(previousCheckOutDate).getTime() - new Date(booking.check_in_date.slice(0, 10)).getTime()) /
+          (1000 * 60 * 60 * 24)
+      )
+    );
+    const derivedNightly = brItem?.price_per_night ||
+      Math.round((booking.subtotal_amount || booking.total_amount || 1800) / originalNights);
+
+    const nightlyTariff = typeof params.dailyRoomCharge === 'number' && params.dailyRoomCharge > 0
+      ? params.dailyRoomCharge
+      : derivedNightly;
+
+    const pricingMode: PricingMode = params.pricingMode || booking.pricing_mode || 'gst_inclusive';
+
+    // Tax rate (5% standard or derived from booking)
+    const bookingTaxRate = booking.subtotal_amount && booking.tax_amount
+      ? booking.tax_amount / booking.subtotal_amount
+      : 0.05;
+    const taxRate = typeof params.taxRate === 'number' && params.taxRate >= 0
+      ? params.taxRate
+      : bookingTaxRate;
+
+    let additionalRoomCharge = 0;
+    let taxAmount = 0;
+    let totalExtensionCharge = 0;
+
+    if (pricingMode === 'gst_inclusive') {
+      const grossCharge = Math.round(nightlyTariff * additionalNights);
+      totalExtensionCharge = grossCharge;
+      additionalRoomCharge = taxRate > 0
+        ? Math.round(grossCharge / (1 + taxRate))
+        : grossCharge;
+      taxAmount = totalExtensionCharge - additionalRoomCharge;
+    } else {
+      additionalRoomCharge = Math.round(nightlyTariff * additionalNights);
+      taxAmount = Math.round(additionalRoomCharge * taxRate);
+      totalExtensionCharge = additionalRoomCharge + taxAmount;
+    }
+
+    // 1. Update Booking Dates and Financials
+    booking.check_out_date = proposedCheckOutDate;
+    booking.room_charges_amount = (booking.room_charges_amount || booking.subtotal_amount || 0) + additionalRoomCharge;
+    booking.subtotal_amount = (booking.subtotal_amount || 0) + additionalRoomCharge;
+    booking.tax_amount = (booking.tax_amount || 0) + taxAmount;
+    booking.total_amount = (booking.total_amount || 0) + totalExtensionCharge;
+
+    // Update booking_rooms if present
+    if (booking.booking_rooms && booking.booking_rooms.length > 0) {
+      const bRoom = booking.booking_rooms.find((br) => br.room_number === currentRoomNumber) || booking.booking_rooms[0];
+      if (bRoom) {
+        bRoom.status = 'checked_in';
+      }
+    }
+
+    // 2. Handle Payment Collection if paidNow > 0
+    let paymentRecord: PaymentRecord | undefined;
+    let cashTxRecord: CashTransaction | undefined;
+    const paidNow = Math.max(0, Number(params.paidNow) || 0);
+
+    if (paidNow > 0) {
+      const payRef = `PAY-EXT-${Date.now()}`;
+      booking.paid_amount = (booking.paid_amount || 0) + paidNow;
+      if (booking.paid_amount >= booking.total_amount) {
+        booking.payment_status = 'successful';
+      } else if (booking.paid_amount > 0) {
+        booking.payment_status = 'partial' as any;
+      }
+
+      paymentRecord = {
+        id: `pay-${Date.now()}`,
+        payment_reference: payRef,
+        booking_reference: booking.booking_reference,
+        guest_name: booking.guest_name,
+        amount: paidNow,
+        currency: 'INR',
+        payment_method: params.paymentMethod || 'cash',
+        status: 'successful',
+        paid_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      };
+      this.payments.unshift(paymentRecord);
+      savePersistedData('payments.json', this.payments);
+      await syncPaymentToSupabase(paymentRecord);
+
+      // Physical cash drawer tracking: Only if payment is cash
+      if (params.paymentMethod === 'cash') {
+        const activeShift = this.getActiveCashShift();
+        const cashTx: CashTransaction = {
+          id: `ctx-${Date.now()}`,
+          shift_id: activeShift?.id,
+          type: 'cash_in',
+          category: 'guest_payment',
+          amount: paidNow,
+          reason: `Stay extension for Room ${currentRoomNumber} (${booking.booking_reference}): +${additionalNights} night(s) to ${proposedCheckOutDate}`,
+          booking_reference: booking.booking_reference,
+          receipt_ref: payRef,
+          performed_by: actor,
+          performed_at: new Date().toISOString(),
+          created_at: new Date().toISOString(),
+          idempotency_key: idempotencyKey ? `ctx-${idempotencyKey}` : undefined,
+        };
+        cashTxRecord = cashTx;
+        this.cashTransactions.unshift(cashTx);
+        savePersistedData('cash_transactions.json', this.cashTransactions);
+        await syncCashTransactionToSupabase(cashTx);
+        this.broadcastEvent('cash_transaction_created', cashTx, actor);
+      }
+    }
+
+    // 3. Create Stay Extension Record
+    const extensionId = `ext-${Date.now()}`;
+    const extensionRecord: StayExtensionRecord = {
+      id: extensionId,
+      booking_id: booking.id,
+      booking_reference: booking.booking_reference,
+      guest_id: booking.guest_id,
+      guest_name: booking.guest_name,
+      room_id: currentRoom?.id,
+      room_number: currentRoomNumber,
+      previous_checkout_date: previousCheckOutDate,
+      new_checkout_date: proposedCheckOutDate,
+      additional_nights: additionalNights,
+      daily_room_charge: nightlyTariff,
+      additional_room_charge: additionalRoomCharge,
+      tax_rate: taxRate,
+      tax_amount: taxAmount,
+      total_extension_charge: totalExtensionCharge,
+      pricing_mode: pricingMode,
+      paid_now: paidNow,
+      payment_method: params.paymentMethod,
+      payment_reference: paymentRecord?.payment_reference,
+      status: 'active',
+      performed_by: actor,
+      idempotency_key: idempotencyKey,
+      reason,
+      created_at: new Date().toISOString(),
+    };
+
+    if (!booking.stay_extensions) {
+      booking.stay_extensions = [];
+    }
+    booking.stay_extensions.unshift(extensionRecord);
+    booking.last_stay_extension = extensionRecord;
+
+    this.stayExtensions.unshift(extensionRecord);
+    savePersistedData('stay_extensions.json', this.stayExtensions);
+    await syncStayExtensionToSupabase(extensionRecord);
+
+    // 4. Create Folio Charge for Audit & Folio Ledger Transparency
+    const folioCharge: FolioCharge = {
+      id: `fc-ext-${extensionId}`,
+      booking_id: booking.id,
+      booking_reference: booking.booking_reference,
+      description: `Room Stay Extension (${additionalNights} Night${additionalNights > 1 ? 's' : ''} to ${proposedCheckOutDate})`,
+      category: 'stay_extension',
+      amount: additionalRoomCharge,
+      tax_rate: taxRate,
+      tax_amount: taxAmount,
+      total_amount: totalExtensionCharge,
+      posted_by: actor,
+      created_at: new Date().toISOString(),
+    };
+    this.folioCharges.push(folioCharge);
+    savePersistedData('folio_charges.json', this.folioCharges);
+    await syncFolioChargeToSupabase(folioCharge);
+
+    // 5. Persist Booking & Sync to Supabase
+    savePersistedData('bookings.json', this.bookings);
+    await syncBookingToSupabase(booking);
+
+    // 6. Realtime Events & Audit Logging
+    this.broadcastEvent('stay_extended', {
+      extension: extensionRecord,
+      booking,
+      folioCharge,
+      payment: paymentRecord,
+    }, actor);
+
+    this.broadcastEvent('booking_updated', booking, actor);
+
+    this.recordAuditLog({
+      action: 'STAY_EXTENSION',
+      entityType: 'booking',
+      entityId: booking.id,
+      details: `Stay extended for ${booking.guest_name} (${booking.booking_reference}) in Room ${currentRoomNumber} from ${previousCheckOutDate} to ${proposedCheckOutDate} (+${additionalNights} nights, Total: ₹${totalExtensionCharge}, Paid: ₹${paidNow}). Reason: ${reason}`,
+      previousValue: { check_out_date: previousCheckOutDate },
+      newValue: extensionRecord,
+      userId: 'stf-stay-ext',
+      userName: actor,
+      userRole: 'Front Desk',
+    });
+
+    return {
+      success: true,
+      booking,
+      extension: extensionRecord,
+      folioCharge,
+      payment: paymentRecord,
+      cashTransaction: cashTxRecord,
     };
   }
 

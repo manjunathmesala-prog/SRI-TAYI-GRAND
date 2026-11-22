@@ -37,7 +37,9 @@ import {
   Calendar,
   DollarSign,
   AlertTriangle,
+  CalendarPlus,
 } from 'lucide-react';
+import { ExtendStayModal } from '@/components/admin/ExtendStayModal';
 import { RfidHistoryTable } from '@/components/admin/RfidHistoryTable';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
 
@@ -90,6 +92,7 @@ export default function RoomTapeChartPage() {
   const [newResChildren, setNewResChildren] = useState(0);
   const [newResSubmitting, setNewResSubmitting] = useState(false);
   const [modalFeedback, setModalFeedback] = useState<string | null>(null);
+  const [extendStayBooking, setExtendStayBooking] = useState<Booking | null>(null);
 
   // Real-time hook for live tape chart updates
   const { isConnected } = useRealtimeSync({
@@ -97,6 +100,7 @@ export default function RoomTapeChartPage() {
       if (
         event.eventType === 'booking_created' ||
         event.eventType === 'booking_updated' ||
+        event.eventType === 'stay_extended' ||
         event.eventType === 'room_assigned' ||
         event.eventType === 'check_in' ||
         event.eventType === 'check_out' ||
@@ -1146,15 +1150,31 @@ export default function RoomTapeChartPage() {
                   )}
 
                   {selectedBooking.status === 'checked_in' && (
-                    <button
-                      type="button"
-                      disabled={actionLoading}
-                      onClick={() => handleDirectCheckOut(selectedBooking)}
-                      className="py-2 px-3 rounded-xl bg-stone-800 hover:bg-stone-900 text-[#D8AD56] font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer"
-                    >
-                      <LogOut className="w-3.5 h-3.5" />
-                      <span>{actionLoading ? 'Processing...' : 'Checkout & Settle'}</span>
-                    </button>
+                    <>
+                      <button
+                        type="button"
+                        disabled={actionLoading}
+                        onClick={() => handleDirectCheckOut(selectedBooking)}
+                        className="py-2 px-3 rounded-xl bg-stone-800 hover:bg-stone-900 text-[#D8AD56] font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer"
+                      >
+                        <LogOut className="w-3.5 h-3.5" />
+                        <span>{actionLoading ? 'Processing...' : 'Checkout & Settle'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const b = selectedBooking;
+                          setSelectedBooking(null);
+                          setExtendStayBooking(b);
+                        }}
+                        className="py-2 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-900 font-bold text-xs flex items-center justify-center gap-1.5 shadow-xs transition-all cursor-pointer"
+                        title="Extend guest stay"
+                      >
+                        <CalendarPlus className="w-3.5 h-3.5 text-amber-700" />
+                        <span>Extend Stay</span>
+                      </button>
+                    </>
                   )}
 
                   <NextLink
@@ -1418,6 +1438,17 @@ export default function RoomTapeChartPage() {
           </div>
         </div>
       )}
+
+      {/* EXTEND GUEST STAY MODAL */}
+      <ExtendStayModal
+        isOpen={!!extendStayBooking}
+        onClose={() => setExtendStayBooking(null)}
+        booking={extendStayBooking}
+        rooms={rooms}
+        onStayExtended={async () => {
+          await fetchData(false);
+        }}
+      />
     </div>
   );
 }

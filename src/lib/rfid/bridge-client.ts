@@ -5,6 +5,7 @@
  */
 
 export const RFID_BRIDGE_URL = 'http://127.0.0.1:8989';
+export const RFID_PRODUCTION_PERMANENT_URL = 'https://rfid.sritayigrand.com';
 
 export interface BridgeHealthStatus {
   isOnline: boolean;
@@ -83,14 +84,6 @@ export function playChimeSound(success: boolean = true): void {
   } catch {}
 }
 
-export function getSavedBridgeHost(): string {
-  let host = RFID_BRIDGE_URL;
-  if (typeof window !== 'undefined') {
-    host = localStorage.getItem('stg_rfid_bridge_url') || RFID_BRIDGE_URL;
-  }
-  return host.trim().replace(/\/+$/, '');
-}
-
 /**
  * Check if code is running in a local developer environment
  */
@@ -98,6 +91,24 @@ function isLocalBrowser(): boolean {
   if (typeof window === 'undefined') return true;
   const h = window.location.hostname;
   return h === 'localhost' || h === '127.0.0.1' || h === '::1';
+}
+
+export function getSavedBridgeHost(): string {
+  const isLocal = isLocalBrowser();
+  const defaultHost = isLocal ? RFID_BRIDGE_URL : RFID_PRODUCTION_PERMANENT_URL;
+  let host = defaultHost;
+  if (typeof window !== 'undefined') {
+    const saved = localStorage.getItem('stg_rfid_bridge_url');
+    if (saved) {
+      if (!isLocal && (saved.includes('127.0.0.1') || saved.includes('localhost'))) {
+        host = RFID_PRODUCTION_PERMANENT_URL;
+        localStorage.setItem('stg_rfid_bridge_url', RFID_PRODUCTION_PERMANENT_URL);
+      } else {
+        host = saved;
+      }
+    }
+  }
+  return host.trim().replace(/\/+$/, '');
 }
 
 /**

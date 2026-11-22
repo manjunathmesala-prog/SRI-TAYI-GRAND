@@ -31,7 +31,7 @@ foreach ($testP in @($bridgePort, 8989, 8990)) {
 
 if (-not $bridgeRunning) {
     Write-Host "[1/3] Starting local RFID Bridge service..." -ForegroundColor Yellow
-    $appDataExe = "C:\Users\M S T C\AppData\Local\SriTayiGrand\RFIDBridge\SriTayiGrandKeycardBridge.exe"
+    $appDataExe = Join-Path $env:LOCALAPPDATA "SriTayiGrand\RFIDBridge\SriTayiGrandKeycardBridge.exe"
     $localExe = Join-Path $workspaceDir "rfid-bridge\bin\SriTayiGrandKeycardBridge.exe"
     $exeToStart = if (Test-Path $appDataExe) { $appDataExe } else { $localExe }
 

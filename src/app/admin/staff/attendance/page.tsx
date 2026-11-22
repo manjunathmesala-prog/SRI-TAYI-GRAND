@@ -5,6 +5,7 @@ import { StaffAttendance, StaffMember, ShiftType, AttendanceStatus } from '@/typ
 import { useRealtimeSync } from '@/lib/realtime-client';
 import { getAdminHeaders } from '@/lib/auth-storage';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
+import { UnifiedShiftControl } from '@/components/admin/UnifiedShiftControl';
 import {
   UserCheck,
   Users,
@@ -373,6 +374,9 @@ export default function AdminStaffAttendancePage() {
           </button>
         </div>
       </div>
+
+      {/* Unified Manager Shift & Shared Cash Drawer Hero Controller */}
+      <UnifiedShiftControl onShiftStateChange={fetchAttendance} />
 
       {/* ========================================================================= */}
       {/* MANAGER ON DUTY (MOD) BANNER: SINGLE ACTIVE SHIFT PROTOCOL */}

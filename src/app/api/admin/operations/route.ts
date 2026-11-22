@@ -558,6 +558,111 @@ export async function POST(req: NextRequest) {
         }
       }
 
+      case 'check_extension_availability': {
+        const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Front Desk', 'Receptionist']);
+        if (!auth.authorized) {
+          return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
+        }
+
+        const { bookingReference, newCheckOutDate, targetRoomNumber } = body;
+        if (!bookingReference || !newCheckOutDate) {
+          return NextResponse.json(
+            { success: false, error: 'bookingReference and newCheckOutDate are required' },
+            { status: 400 }
+          );
+        }
+
+        try {
+          const availResult = repo.checkStayExtensionAvailability({
+            bookingReference,
+            newCheckOutDate,
+            targetRoomNumber,
+          });
+          return NextResponse.json({ success: true, ...availResult });
+        } catch (err: any) {
+          return NextResponse.json({ success: false, error: err.message || 'Availability check failed' }, { status: 400 });
+        }
+      }
+
+      case 'extend_stay': {
+        const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Front Desk', 'Receptionist']);
+        if (!auth.authorized) {
+          return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
+        }
+
+        const {
+          bookingReference,
+          newCheckOutDate,
+          additionalNights,
+          dailyRoomCharge,
+          taxRate,
+          pricingMode,
+          paidNow,
+          paymentMethod,
+          reason,
+          targetRoomNumber,
+          idempotencyKey,
+        } = body;
+
+        if (!bookingReference || !newCheckOutDate) {
+          return NextResponse.json(
+            { success: false, error: 'bookingReference and newCheckOutDate are required' },
+            { status: 400 }
+          );
+        }
+
+        const staffName = auth.session?.name || body.staffName || 'Front Desk Staff';
+
+        try {
+          const result = await repo.extendStay({
+            bookingReference,
+            newCheckOutDate,
+            additionalNights,
+            dailyRoomCharge,
+            taxRate,
+            pricingMode,
+            paidNow,
+            paymentMethod,
+            actor: staffName,
+            idempotencyKey,
+            reason,
+            targetRoomNumber,
+          });
+
+          notifySuperAdmin({
+            eventType: 'EVENT_CHECK_IN',
+            payload: {
+              bookingReference,
+              guestName: result.booking.guest_name,
+              roomNumber: result.extension.room_number,
+              nights: result.extension.additional_nights,
+              source: 'front_desk_extension',
+            },
+            title: `Stay Extended: Room ${result.extension.room_number} (${bookingReference})`,
+            message: `Guest ${result.booking.guest_name} stay extended by ${result.extension.additional_nights} night(s) to ${result.extension.new_checkout_date}. Total: ₹${result.extension.total_extension_charge}. Paid: ₹${result.extension.paid_now}.`,
+            metadata: {
+              bookingReference,
+              guestName: result.booking.guest_name,
+              roomNumber: result.extension.room_number,
+              previousCheckout: result.extension.previous_checkout_date,
+              newCheckout: result.extension.new_checkout_date,
+              additionalNights: result.extension.additional_nights,
+              totalCharge: result.extension.total_extension_charge,
+              paidNow: result.extension.paid_now,
+              paymentMethod: result.extension.payment_method,
+              staffName,
+            },
+          });
+
+          return NextResponse.json({
+            ...result,
+            message: `Stay successfully extended for ${result.booking.guest_name} to ${result.extension.new_checkout_date}.`,
+          });
+        } catch (extErr: any) {
+          return NextResponse.json({ success: false, error: extErr.message || 'Stay extension failed' }, { status: 400 });
+        }
+      }
+
       case 'housekeeping': {
         const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Housekeeping', 'Front Desk']);
         if (!auth.authorized) {

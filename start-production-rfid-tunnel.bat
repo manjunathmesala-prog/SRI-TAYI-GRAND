@@ -1,21 +1,24 @@
 @echo off
-title Sri Tayi Grand - Production RFID Cloud Tunnel
+title Sri Tayi Grand - Production RFID Cloud Connector
 echo ==========================================================
 echo   SRI TAYI GRAND - PRODUCTION RFID CLOUD CONNECTOR
+echo   Fixed Domain: https://rfid.sritayigrand.com
 echo ==========================================================
 echo.
-echo 1. Ensuring local Be-Tech RFID Bridge is running on port 8989...
-powershell -NoProfile -ExecutionPolicy Bypass -Command "& { if (-not (Get-Process -Name 'SriTayiGrandKeycardBridge' -ErrorAction SilentlyContinue)) { Start-Process 'C:\Users\M S T C\AppData\Local\SriTayiGrand\RFIDBridge\SriTayiGrandKeycardBridge.exe' -WorkingDirectory 'C:\Users\M S T C\AppData\Local\SriTayiGrand\RFIDBridge' -WindowStyle Minimized; Start-Sleep -Seconds 1 } }"
+
+:: 1. Check if permanent service is already installed and running
+sc query cloudflared | findstr /I "RUNNING" >nul 2>&1
+if %errorlevel% equ 0 (
+    echo [OK] Permanent Cloudflare Tunnel Windows Service is ALIVE and RUNNING!
+    echo Target Domain: https://rfid.sritayigrand.com
+    echo.
+    echo RFID operations are active across https://sritayigrand.com
+    timeout /t 5
+    exit /b 0
+)
+
+:: 2. If not running as service, run via powershell runner
+echo Launching RFID Bridge and Tunnel Connector...
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0rfid-bridge\start-tunnel.ps1"
 echo.
-echo 2. Launching secure HTTPS Tunnel for sritayigrand.com production...
-echo.
-echo ==========================================================
-echo  INSTRUCTIONS:
-echo  1. KEEP THIS WINDOW OPEN while operating RFID at the desk.
-echo  2. Copy the 'https://...trycloudflare.com' address shown below.
-echo  3. In https://sritayigrand.com/admin/rfid, click 'Bridge Host'.
-echo  4. Paste the URL and click 'Save Host Setting'.
-echo ==========================================================
-echo.
-"C:\Program Files (x86)\cloudflared\cloudflared.exe" tunnel --url http://127.0.0.1:8989 --no-prechecks --protocol http2
 pause

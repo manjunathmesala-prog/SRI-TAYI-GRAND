@@ -218,6 +218,8 @@ export interface Booking {
   tariff_override_reason?: string;
   room_transfers?: RoomTransferRecord[];
   last_room_transfer?: RoomTransferRecord;
+  stay_extensions?: StayExtensionRecord[];
+  last_stay_extension?: StayExtensionRecord;
   created_at: string;
 }
 
@@ -246,6 +248,33 @@ export interface RoomTransferRecord {
   maintenance_ticket_id?: string;
   transferred_at: string;
   created_at?: string;
+}
+
+export interface StayExtensionRecord {
+  id: string;
+  booking_id?: string;
+  booking_reference: string;
+  guest_id?: string;
+  guest_name: string;
+  room_id?: string;
+  room_number: string;
+  previous_checkout_date: string;
+  new_checkout_date: string;
+  additional_nights: number;
+  daily_room_charge: number;
+  additional_room_charge: number;
+  tax_rate: number;
+  tax_amount: number;
+  total_extension_charge: number;
+  pricing_mode?: PricingMode;
+  paid_now: number;
+  payment_method?: PaymentMethod;
+  payment_reference?: string;
+  status: 'active' | 'cancelled';
+  performed_by: string;
+  idempotency_key?: string;
+  reason?: string;
+  created_at: string;
 }
 
 export interface PaymentRecord {
@@ -584,9 +613,9 @@ export interface CashTransaction {
   booking_reference?: string;
   receipt_ref?: string;
   performed_by: string;
-  created_at: string;
+  performed_at: string;
+  created_at?: string;
   idempotency_key?: string;
-  performed_at?: string;
 }
 
 // ==============================================================================
@@ -654,6 +683,11 @@ export type RealtimeEventType =
   | 'cash_shift_deleted'
   | 'cash_transaction_created'
   | 'cash_transaction_deleted'
+  | 'manager_clocked_in'
+  | 'manager_clocked_out'
+  | 'shift_lifecycle_changed'
+  | 'manager_handover_completed'
+  | 'cash_discrepancy_recorded'
   | 'maintenance_ticket_created'
   | 'maintenance_ticket_updated'
   | 'maintenance_ticket_deleted'
@@ -674,6 +708,7 @@ export type RealtimeEventType =
   | 'housekeeping_inspected'
   | 'guest_profile_updated'
   | 'staff_permissions_updated'
+  | 'stay_extended'
   | 'full_sync';
 
 export interface RealtimeMessage {
@@ -893,6 +928,7 @@ export type AuditActionCategory =
   | 'housekeeping'
   | 'rfid'
   | 'staff'
+  | 'shift'
   | 'system'
   | 'finance'
   | 'cashbook'
@@ -965,7 +1001,8 @@ export type FolioChargeCategory =
   | 'early_checkin'
   | 'minibar' 
   | 'damage' 
-  | 'misc';
+  | 'misc'
+  | 'stay_extension';
 
 export interface FolioCharge {
   id: string;

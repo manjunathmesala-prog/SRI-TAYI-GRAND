@@ -2958,10 +2958,26 @@ export default function RFIDAdminPage() {
                   value={customHost}
                   onChange={(e) => setCustomHost(e.target.value)}
                   className="w-full text-xs font-mono font-medium p-2.5 rounded-lg border border-[#EFE3D6] text-[#241912]"
-                  placeholder="http://127.0.0.1:8989"
+                  placeholder="https://rfid.sritayigrand.com"
                 />
-                <p className="text-[11px] text-[#786B61] mt-1.5">
-                  If accessing this dashboard from another computer, tablet, or phone on the hotel Wi-Fi, you can set this to the IP of the PC running the USB card encoder (e.g. <code className="text-[#D8AD56]">http://192.168.1.50:8989</code>) or leave as default.
+                <div className="flex items-center gap-2 mt-2">
+                  <button
+                    type="button"
+                    onClick={() => setCustomHost('https://rfid.sritayigrand.com')}
+                    className="text-[10px] px-2.5 py-1 rounded-md bg-[#D8AD56]/15 hover:bg-[#D8AD56]/30 text-[#8B651B] font-semibold transition-colors cursor-pointer"
+                  >
+                    Use Permanent Cloud Domain (rfid.sritayigrand.com)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setCustomHost('http://127.0.0.1:8989')}
+                    className="text-[10px] px-2.5 py-1 rounded-md bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold transition-colors cursor-pointer"
+                  >
+                    Use Localhost (Port 8989)
+                  </button>
+                </div>
+                <p className="text-[11px] text-[#786B61] mt-2 leading-relaxed">
+                  On <code className="text-[#8B651B] font-bold">https://sritayigrand.com</code>, the browser strictly requires <code className="text-[#8B651B]">https://rfid.sritayigrand.com</code> via Cloudflare Tunnel to prevent Mixed Content security blocking.
                 </p>
               </div>
 

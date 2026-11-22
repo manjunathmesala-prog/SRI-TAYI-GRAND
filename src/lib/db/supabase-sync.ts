@@ -20,6 +20,7 @@ import {
   AuditLogEntry,
   GoogleReview,
   RoomTransferRecord,
+  StayExtensionRecord,
   JournalEntry,
   JournalLine,
   NightAuditConfig,
@@ -201,6 +202,8 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
           NOW()
         )
         ON CONFLICT (booking_reference) DO UPDATE SET
+          check_in_date = EXCLUDED.check_in_date,
+          check_out_date = EXCLUDED.check_out_date,
           status = EXCLUDED.status,
           payment_status = EXCLUDED.payment_status,
           rooms_count = EXCLUDED.rooms_count,
@@ -1737,13 +1740,16 @@ export async function syncCashShiftToSupabase(shift: CashShift): Promise<void> {
     try {
       await client.query(
         `INSERT INTO cash_shifts (
-          id, shift_number, cashier_id, cashier_name, opened_by_name, opened_at, closed_at,
-          opening_float, closing_cash_counted, expected_closing_cash, discrepancy, notes, status, created_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
+          id, shift_number, cashier_id, cashier_name, opened_by_name, opened_by_role, opened_at, closed_at,
+          opening_float, closing_cash_counted, expected_closing_cash, discrepancy, notes, status,
+          attendance_id, opening_denominations, closing_denominations, handover_notes, discrepancy_reason,
+          closed_by_name, closed_by_role, total_cash_in, total_cash_out, created_at
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24)
         ON CONFLICT (shift_number) DO UPDATE SET
           cashier_id = EXCLUDED.cashier_id,
           cashier_name = EXCLUDED.cashier_name,
           opened_by_name = EXCLUDED.opened_by_name,
+          opened_by_role = EXCLUDED.opened_by_role,
           opened_at = EXCLUDED.opened_at,
           closed_at = EXCLUDED.closed_at,
           opening_float = EXCLUDED.opening_float,
@@ -1751,13 +1757,23 @@ export async function syncCashShiftToSupabase(shift: CashShift): Promise<void> {
           expected_closing_cash = EXCLUDED.expected_closing_cash,
           discrepancy = EXCLUDED.discrepancy,
           notes = EXCLUDED.notes,
-          status = EXCLUDED.status;`,
+          status = EXCLUDED.status,
+          attendance_id = EXCLUDED.attendance_id,
+          opening_denominations = EXCLUDED.opening_denominations,
+          closing_denominations = EXCLUDED.closing_denominations,
+          handover_notes = EXCLUDED.handover_notes,
+          discrepancy_reason = EXCLUDED.discrepancy_reason,
+          closed_by_name = EXCLUDED.closed_by_name,
+          closed_by_role = EXCLUDED.closed_by_role,
+          total_cash_in = EXCLUDED.total_cash_in,
+          total_cash_out = EXCLUDED.total_cash_out;`,
         [
           shift.id,
           shift.shift_number,
           shift.cashier_id,
           shift.cashier_name,
-          shift.cashier_name || 'Front Desk Staff',
+          shift.opened_by_name || shift.cashier_name || 'Front Desk Staff',
+          shift.opened_by_role || 'Hotel Manager',
           shift.opened_at,
           shift.closed_at || null,
           Number(shift.opening_float || 0),
@@ -1766,6 +1782,15 @@ export async function syncCashShiftToSupabase(shift: CashShift): Promise<void> {
           Number(shift.discrepancy || 0),
           shift.notes || null,
           shift.status,
+          shift.attendance_id || null,
+          shift.opening_denominations ? JSON.stringify(shift.opening_denominations) : null,
+          shift.closing_denominations ? JSON.stringify(shift.closing_denominations) : null,
+          shift.handover_notes || null,
+          shift.discrepancy_reason || null,
+          shift.closed_by_name || null,
+          shift.closed_by_role || null,
+          shift.total_cash_in !== undefined ? Number(shift.total_cash_in) : null,
+          shift.total_cash_out !== undefined ? Number(shift.total_cash_out) : null,
           shift.opened_at,
         ]
       );
@@ -1788,11 +1813,15 @@ export async function loadCashShiftsFromSupabase(): Promise<CashShift[] | null> 
     try {
       const res = await client.query(`
         SELECT 
-          id, shift_number, cashier_id, cashier_name, opened_by_name, opened_at, closed_at,
+          id, shift_number, cashier_id, cashier_name, opened_by_name, opened_by_role, opened_at, closed_at,
           opening_float::float as opening_float,
           closing_cash_counted::float as closing_cash_counted,
           expected_closing_cash::float as expected_closing_cash,
-          discrepancy::float as discrepancy, notes, status
+          discrepancy::float as discrepancy, notes, status,
+          attendance_id, opening_denominations, closing_denominations, handover_notes, discrepancy_reason,
+          closed_by_name, closed_by_role,
+          total_cash_in::float as total_cash_in,
+          total_cash_out::float as total_cash_out
         FROM cash_shifts
         ORDER BY opened_at DESC;
       `);
@@ -1802,6 +1831,8 @@ export async function loadCashShiftsFromSupabase(): Promise<CashShift[] | null> 
         shift_number: row.shift_number,
         cashier_id: row.cashier_id,
         cashier_name: row.cashier_name,
+        opened_by_name: row.opened_by_name || undefined,
+        opened_by_role: row.opened_by_role || undefined,
         opened_at: row.opened_at ? new Date(row.opened_at).toISOString() : new Date().toISOString(),
         closed_at: row.closed_at ? new Date(row.closed_at).toISOString() : undefined,
         opening_float: Number(row.opening_float) || 0,
@@ -1810,6 +1841,15 @@ export async function loadCashShiftsFromSupabase(): Promise<CashShift[] | null> 
         discrepancy: Number(row.discrepancy) || 0,
         notes: row.notes || undefined,
         status: row.status,
+        attendance_id: row.attendance_id || undefined,
+        opening_denominations: row.opening_denominations || undefined,
+        closing_denominations: row.closing_denominations || undefined,
+        handover_notes: row.handover_notes || undefined,
+        discrepancy_reason: row.discrepancy_reason || undefined,
+        closed_by_name: row.closed_by_name || undefined,
+        closed_by_role: row.closed_by_role || undefined,
+        total_cash_in: row.total_cash_in !== null ? Number(row.total_cash_in) : undefined,
+        total_cash_out: row.total_cash_out !== null ? Number(row.total_cash_out) : undefined,
       }));
     } finally {
       client.release();
@@ -1817,6 +1857,97 @@ export async function loadCashShiftsFromSupabase(): Promise<CashShift[] | null> 
   } catch (err: unknown) {
     console.warn('[SUPABASE LOAD CASH SHIFTS WARN]', err instanceof Error ? err.message : String(err));
     return null;
+  }
+}
+
+export async function executeStartManagerShiftSupabase(params: {
+  staffId: string;
+  staffName: string;
+  role: string;
+  openingFloat: number;
+  openingDenominations: Record<string, number>;
+  shiftType?: string;
+  notes?: string;
+  actorName?: string;
+}): Promise<{ attendance: StaffAttendance; shift: CashShift }> {
+  const db = getSupabasePgPool();
+  if (!db) throw new Error('Database connection pool unavailable.');
+
+  const client = await db.connect();
+  try {
+    const res = await client.query(
+      `SELECT public.start_manager_shift($1, $2, $3, $4, $5, $6, $7, $8) as result;`,
+      [
+        params.staffId,
+        params.staffName,
+        params.role,
+        params.openingFloat,
+        JSON.stringify(params.openingDenominations || {}),
+        params.shiftType || 'general',
+        params.notes || null,
+        params.actorName || params.staffName,
+      ]
+    );
+    const result = res.rows[0]?.result;
+    if (!result || !result.success) {
+      throw new Error(result?.error || 'Failed to start unified shift in PostgreSQL.');
+    }
+    return {
+      attendance: result.attendance,
+      shift: result.shift,
+    };
+  } finally {
+    client.release();
+  }
+}
+
+export async function executeEndManagerShiftSupabase(params: {
+  shiftId: string;
+  closingCashCounted: number;
+  closingDenominations: Record<string, number>;
+  handoverNotes?: string;
+  discrepancyReason?: string;
+  actorName?: string;
+}): Promise<{
+  attendance: StaffAttendance | null;
+  shift: CashShift;
+  financials: {
+    openingFloat: number;
+    totalCashIn: number;
+    totalCashOut: number;
+    expectedClosingCash: number;
+    closingCashCounted: number;
+    discrepancy: number;
+    workHours: number;
+  };
+}> {
+  const db = getSupabasePgPool();
+  if (!db) throw new Error('Database connection pool unavailable.');
+
+  const client = await db.connect();
+  try {
+    const res = await client.query(
+      `SELECT public.end_manager_shift($1, $2, $3, $4, $5, $6) as result;`,
+      [
+        params.shiftId,
+        params.closingCashCounted,
+        JSON.stringify(params.closingDenominations || {}),
+        params.handoverNotes || null,
+        params.discrepancyReason || null,
+        params.actorName || 'Duty Manager',
+      ]
+    );
+    const result = res.rows[0]?.result;
+    if (!result || !result.success) {
+      throw new Error(result?.error || 'Failed to end unified shift in PostgreSQL.');
+    }
+    return {
+      attendance: result.attendance,
+      shift: result.shift,
+      financials: result.financials,
+    };
+  } finally {
+    client.release();
   }
 }
 
@@ -2314,7 +2445,7 @@ export async function syncFolioChargeToSupabase(charge: FolioCharge): Promise<vo
   if (typeof window !== 'undefined' || !charge) return;
 
   const db = getSupabasePgPool();
-  if (!db) throw new Error('Database pool not available for folio charge persistence');
+  if (!db) return;
 
   try {
     const client = await db.connect();
@@ -2858,6 +2989,157 @@ export async function loadRoomTransfersFromSupabase(): Promise<RoomTransferRecor
     }
   } catch (err: unknown) {
     console.warn('[SUPABASE LOAD ROOM TRANSFERS WARN]', err instanceof Error ? err.message : String(err));
+    return [];
+  }
+}
+
+// ==============================================================================
+// 18B. STAY EXTENSIONS SYNCHRONIZATION
+// ==============================================================================
+
+export async function syncStayExtensionToSupabase(ext: StayExtensionRecord): Promise<void> {
+  if (typeof window !== 'undefined' || !ext) return;
+
+  const db = getSupabasePgPool();
+  if (!db) return;
+
+  try {
+    const client = await db.connect();
+    try {
+      let bookingUuid: string | null = null;
+      let guestUuid: string | null = null;
+      if (ext.booking_reference) {
+        const bRes = await client.query('SELECT id, guest_id FROM bookings WHERE booking_reference = $1 OR id::text = $1 LIMIT 1;', [ext.booking_reference]);
+        if (bRes.rows.length > 0) {
+          bookingUuid = bRes.rows[0].id;
+          guestUuid = bRes.rows[0].guest_id;
+        }
+      }
+
+      await client.query(
+        `INSERT INTO stay_extensions (
+          id,
+          booking_id,
+          booking_reference,
+          guest_id,
+          guest_name,
+          room_id,
+          room_number,
+          previous_checkout_date,
+          new_checkout_date,
+          additional_nights,
+          daily_room_charge,
+          additional_room_charge,
+          tax_rate,
+          tax_amount,
+          total_extension_charge,
+          pricing_mode,
+          paid_now,
+          payment_method,
+          payment_reference,
+          status,
+          performed_by,
+          idempotency_key,
+          reason,
+          created_at
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+          $11, $12, $13, $14, $15, $16, $17, $18, $19, $20,
+          $21, $22, $23, COALESCE($24::timestamptz, NOW())
+        )
+        ON CONFLICT (id) DO UPDATE SET
+          new_checkout_date = EXCLUDED.new_checkout_date,
+          additional_nights = EXCLUDED.additional_nights,
+          daily_room_charge = EXCLUDED.daily_room_charge,
+          additional_room_charge = EXCLUDED.additional_room_charge,
+          tax_amount = EXCLUDED.tax_amount,
+          total_extension_charge = EXCLUDED.total_extension_charge,
+          paid_now = EXCLUDED.paid_now,
+          payment_method = EXCLUDED.payment_method,
+          payment_reference = EXCLUDED.payment_reference,
+          status = EXCLUDED.status,
+          reason = EXCLUDED.reason;`,
+        [
+          ext.id,
+          bookingUuid,
+          ext.booking_reference,
+          guestUuid,
+          ext.guest_name,
+          ext.room_id || null,
+          ext.room_number,
+          ext.previous_checkout_date,
+          ext.new_checkout_date,
+          Number(ext.additional_nights || 1),
+          Number(ext.daily_room_charge || 0),
+          Number(ext.additional_room_charge || 0),
+          Number(ext.tax_rate || 0.12),
+          Number(ext.tax_amount || 0),
+          Number(ext.total_extension_charge || 0),
+          ext.pricing_mode || 'gst_inclusive',
+          Number(ext.paid_now || 0),
+          ext.payment_method || null,
+          ext.payment_reference || null,
+          ext.status || 'active',
+          ext.performed_by || 'Front Desk',
+          ext.idempotency_key || null,
+          ext.reason || null,
+          ext.created_at || new Date().toISOString(),
+        ]
+      );
+    } finally {
+      client.release();
+    }
+  } catch (err: unknown) {
+    console.warn(
+      `[SUPABASE STAY EXTENSION SYNC WARN] (${ext.booking_reference}):`,
+      err instanceof Error ? err.message : String(err)
+    );
+  }
+}
+
+export async function loadStayExtensionsFromSupabase(): Promise<StayExtensionRecord[]> {
+  if (typeof window !== 'undefined') return [];
+
+  const db = getSupabasePgPool();
+  if (!db) return [];
+
+  try {
+    const client = await db.connect();
+    try {
+      const res = await client.query(
+        `SELECT * FROM stay_extensions ORDER BY created_at DESC;`
+      );
+      return res.rows.map((r: any) => ({
+        id: r.id,
+        booking_id: r.booking_id || undefined,
+        booking_reference: r.booking_reference,
+        guest_id: r.guest_id || undefined,
+        guest_name: r.guest_name,
+        room_id: r.room_id || undefined,
+        room_number: r.room_number,
+        previous_checkout_date: r.previous_checkout_date,
+        new_checkout_date: r.new_checkout_date,
+        additional_nights: Number(r.additional_nights) || 1,
+        daily_room_charge: Number(r.daily_room_charge) || 0,
+        additional_room_charge: Number(r.additional_room_charge) || 0,
+        tax_rate: Number(r.tax_rate) || 0.12,
+        tax_amount: Number(r.tax_amount) || 0,
+        total_extension_charge: Number(r.total_extension_charge) || 0,
+        pricing_mode: r.pricing_mode || 'gst_inclusive',
+        paid_now: Number(r.paid_now) || 0,
+        payment_method: r.payment_method || undefined,
+        payment_reference: r.payment_reference || undefined,
+        status: r.status || 'active',
+        performed_by: r.performed_by || 'Front Desk',
+        idempotency_key: r.idempotency_key || undefined,
+        reason: r.reason || undefined,
+        created_at: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
+      }));
+    } finally {
+      client.release();
+    }
+  } catch (err: unknown) {
+    console.warn('[SUPABASE LOAD STAY EXTENSIONS WARN]', err instanceof Error ? err.message : String(err));
     return [];
   }
 }

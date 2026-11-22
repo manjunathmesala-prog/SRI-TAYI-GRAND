@@ -41,12 +41,14 @@ import {
   X,
   Trash2,
   ArrowRightLeft,
+  CalendarPlus,
 } from 'lucide-react';
 import TayiBrandIcon from '@/components/anantha/TayiBrandIcon';
 const LotusBrandIcon = TayiBrandIcon;
 import LuxurySelect from '@/components/anantha/LuxurySelect';
 import { RecordOtaBookingModal } from '@/components/admin/RecordOtaBookingModal';
 import { ChangeRoomModal } from '@/components/admin/ChangeRoomModal';
+import { ExtendStayModal } from '@/components/admin/ExtendStayModal';
 import { GuestFolioModal } from '@/components/admin/GuestFolioModal';
 import { PrintGstInvoiceModal } from '@/components/admin/PrintGstInvoiceModal';
 import { RfidHistoryTable } from '@/components/admin/RfidHistoryTable';
@@ -117,6 +119,9 @@ export default function BookingsAdminPage() {
   const [chargeDescription, setChargeDescription] = useState('');
   const [chargeAmount, setChargeAmount] = useState('');
 
+  // Extend Stay modal
+  const [extendStayBooking, setExtendStayBooking] = useState<Booking | null>(null);
+
   // Payment Link modal state
   const [generatedPaymentLink, setGeneratedPaymentLink] = useState<{ url: string; qr?: string } | null>(null);
   const [generatingLink, setGeneratingLink] = useState(false);
@@ -173,6 +178,7 @@ export default function BookingsAdminPage() {
         setRfidAuditBooking(null);
         setFolioModalBooking(null);
         setPrintInvoiceBooking(null);
+        setExtendStayBooking(null);
         setGeneratedPaymentLink(null);
         setShowOtaModal(false);
       }
@@ -1087,6 +1093,14 @@ export default function BookingsAdminPage() {
                               <span>Change Room</span>
                             </button>
                             <button
+                              onClick={() => setExtendStayBooking(r)}
+                              className="py-2 px-3 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-bold text-xs flex items-center justify-center space-x-1.5 min-h-[40px] cursor-pointer shadow-xs"
+                              title="Extend guest stay for 1 or more nights"
+                            >
+                              <CalendarPlus className="w-3.5 h-3.5 text-amber-700" />
+                              <span>Extend Stay</span>
+                            </button>
+                            <button
                               onClick={() => {
                                 setCheckOutTarget(r);
                                 setSettlementAmount(balance.toString());
@@ -1400,6 +1414,15 @@ export default function BookingsAdminPage() {
                                   >
                                     <LogOut className="w-3 h-3 text-white" />
                                     <span>Check Out</span>
+                                  </button>
+
+                                  <button
+                                    onClick={() => setExtendStayBooking(r)}
+                                    className="px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 font-semibold text-[11px] flex items-center space-x-1 shadow-xs cursor-pointer"
+                                    title="Extend guest stay for 1 or more nights"
+                                  >
+                                    <CalendarPlus className="w-3 h-3 text-amber-700" />
+                                    <span>Extend Stay</span>
                                   </button>
 
                                   <button
@@ -2826,6 +2849,17 @@ export default function BookingsAdminPage() {
         booking={changeRoomTarget}
         rooms={physicalRooms}
         onRoomChanged={async () => {
+          await fetchBookings();
+        }}
+      />
+
+      {/* --- MODAL 10: EXTEND GUEST STAY MODAL --- */}
+      <ExtendStayModal
+        isOpen={!!extendStayBooking}
+        onClose={() => setExtendStayBooking(null)}
+        booking={extendStayBooking}
+        rooms={physicalRooms}
+        onStayExtended={async () => {
           await fetchBookings();
         }}
       />

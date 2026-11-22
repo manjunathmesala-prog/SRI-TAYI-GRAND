@@ -6,6 +6,7 @@ import { useRealtimeSync, cashbookClient } from '@/lib/realtime-client';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 import { authStorage } from '@/lib/auth-storage';
+import { UnifiedShiftControl } from '@/components/admin/UnifiedShiftControl';
 import {
   Wallet,
   ArrowDownLeft,
@@ -345,7 +346,7 @@ export default function AdminCashbookPage() {
     if (filteredTransactions.length === 0) return;
     const headers = ['Time', 'Type', 'Category', 'Description / Reason', 'Reference', 'Staff', 'Amount (INR)'];
     const rows = filteredTransactions.map((tx) => [
-      `"${new Date(tx.performed_at).toLocaleString('en-IN')}"`,
+      `"${new Date(tx.performed_at || tx.created_at || Date.now()).toLocaleString('en-IN')}"`,
       `"${tx.type.toUpperCase()}"`,
       `"${tx.category.replace(/_/g, ' ')}"`,
       `"${tx.reason.replace(/"/g, '""')}"`,
@@ -449,6 +450,9 @@ export default function AdminCashbookPage() {
           )}
         </div>
       </div>
+
+      {/* Unified Manager Shift & Shared Cash Drawer Hero Controller */}
+      <UnifiedShiftControl onShiftStateChange={fetchCashbook} />
 
       {/* 4 LUXURY FINANCIAL METRIC CARDS */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">

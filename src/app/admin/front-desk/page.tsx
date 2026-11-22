@@ -8,6 +8,7 @@ import { PrintGrcModal } from '@/components/admin/PrintGrcModal';
 import { PrintGstInvoiceModal } from '@/components/admin/PrintGstInvoiceModal';
 import { GuestFolioModal } from '@/components/admin/GuestFolioModal';
 import { ChangeRoomModal } from '@/components/admin/ChangeRoomModal';
+import { ExtendStayModal } from '@/components/admin/ExtendStayModal';
 import { Booking, PhysicalRoom, RoomCategory, PaymentRecord } from '@/types';
 import {
   issuePhysicalKeycard,
@@ -44,6 +45,7 @@ import {
   Receipt,
   ExternalLink,
   ArrowRightLeft,
+  CalendarPlus,
 } from 'lucide-react';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
@@ -64,6 +66,7 @@ export default function FrontDeskPage() {
   const [invoiceModalBooking, setInvoiceModalBooking] = useState<Booking | null>(null);
   const [folioModalBooking, setFolioModalBooking] = useState<Booking | null>(null);
   const [changeRoomModalBooking, setChangeRoomModalBooking] = useState<Booking | null>(null);
+  const [extendStayModalBooking, setExtendStayModalBooking] = useState<Booking | null>(null);
   const [showStatutoryModal, setShowStatutoryModal] = useState(false);
   const [statutoryInitialData, setStatutoryInitialData] = useState<any>(null);
 
@@ -1163,6 +1166,17 @@ export default function FrontDeskPage() {
                         <span>{isTelugu ? 'గది మార్పు' : 'Change Room'}</span>
                       </button>
 
+                      {/* Extend Stay */}
+                      <button
+                        type="button"
+                        onClick={() => setExtendStayModalBooking(b)}
+                        className="px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-[11px] font-bold transition-all flex items-center gap-1 cursor-pointer shadow-xs"
+                        title={isTelugu ? 'బసను పొడిగించండి' : 'Extend Guest Stay'}
+                      >
+                        <CalendarPlus className="w-3.5 h-3.5 text-amber-700" />
+                        <span>{isTelugu ? 'పొడిగించు' : 'Extend Stay'}</span>
+                      </button>
+
                       {/* Duplicate Keycard */}
                       {b.assigned_room_number && (
                         <button
@@ -1663,6 +1677,17 @@ export default function FrontDeskPage() {
         booking={changeRoomModalBooking}
         rooms={rooms}
         onRoomChanged={async () => {
+          await fetchLiveState();
+        }}
+      />
+
+      {/* EXTEND GUEST STAY MODAL */}
+      <ExtendStayModal
+        isOpen={!!extendStayModalBooking}
+        onClose={() => setExtendStayModalBooking(null)}
+        booking={extendStayModalBooking}
+        rooms={rooms}
+        onStayExtended={async () => {
           await fetchLiveState();
         }}
       />

@@ -160,6 +160,7 @@ class RealtimeSingleton {
         'maintenance_ticket_deleted',
         'folio_charge_added',
         'folio_charge_deleted',
+        'stay_extended',
         'full_sync',
       ];
 
@@ -699,6 +700,54 @@ export const adminOperations = {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to complete turnaround inspection');
     adminOperations.invalidateFullState();
+    return data;
+  },
+
+  async checkExtensionAvailability(params: {
+    bookingReference: string;
+    newCheckOutDate: string;
+    targetRoomNumber?: string;
+  }) {
+    const res = await fetch('/api/admin/operations', {
+      method: 'POST',
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({
+        action: 'check_extension_availability',
+        ...params,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to check extension availability');
+    return data;
+  },
+
+  async extendStay(params: {
+    bookingReference: string;
+    newCheckOutDate: string;
+    additionalNights?: number;
+    dailyRoomCharge?: number;
+    taxRate?: number;
+    pricingMode?: string;
+    paidNow?: number;
+    paymentMethod?: string;
+    reason?: string;
+    targetRoomNumber?: string;
+    idempotencyKey?: string;
+    staffName?: string;
+  }) {
+    adminOperations.invalidateFullState();
+    const res = await fetch('/api/admin/operations', {
+      method: 'POST',
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({
+        action: 'extend_stay',
+        ...params,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to extend stay');
+    adminOperations.invalidateFullState();
+    cashbookClient.invalidate();
     return data;
   },
 };

@@ -39,6 +39,7 @@ import { authStorage } from '@/lib/auth-storage';
 import { normalizeRole, RoleEnum } from '@/lib/rbac/types';
 import { playChimeSound } from '@/lib/rfid/bridge-client';
 import { StatutoryWalkInModal } from '@/components/admin/StatutoryWalkInModal';
+import { UnifiedShiftControl } from '@/components/admin/UnifiedShiftControl';
 
 export default function AdminDashboardPage() {
   const router = useRouter();
@@ -567,6 +568,9 @@ export default function AdminDashboardPage() {
           </button>
         </div>
       </div>
+
+      {/* Unified Manager Shift & Shared Cash Drawer Hero Controller */}
+      <UnifiedShiftControl onShiftStateChange={() => fetchDashboardData(true)} />
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-6">

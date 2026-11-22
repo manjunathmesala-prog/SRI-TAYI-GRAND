@@ -84,9 +84,11 @@ export function PrintGstInvoiceModal({
   const roomSgst = Math.round((taxAmount - roomCgst) * 100) / 100;
   const roomTotal = Math.round((baseRoomTariff + taxAmount) * 100) / 100;
 
-  // Filter charges for this booking
+  // Filter incidentals for this booking (stay_extension excluded from incidental sum since baseRoomTariff already includes room extension)
   const charges = folioCharges.filter(
-    (c) => c.booking_id === booking.id || c.booking_reference === booking.booking_reference
+    (c) =>
+      (c.booking_id === booking.id || c.booking_reference === booking.booking_reference) &&
+      c.category !== 'stay_extension'
   );
 
   // Compute grand totals

@@ -19,8 +19,10 @@ import {
   CheckCircle2,
   RefreshCw,
   IndianRupee,
+  CalendarPlus,
 } from 'lucide-react';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
+import { ExtendStayModal } from '@/components/admin/ExtendStayModal';
 
 interface GuestFolioModalProps {
   isOpen: boolean;
@@ -51,6 +53,7 @@ export function GuestFolioModal({
 
   // Settlement payment form state
   const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [showExtendStayModal, setShowExtendStayModal] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('cash');
   const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
@@ -78,6 +81,7 @@ export function GuestFolioModal({
       loadFolioCharges();
       setShowAddForm(false);
       setShowPaymentForm(false);
+      setShowExtendStayModal(false);
       setErrorMsg(null);
       setSuccessMsg(null);
     }
@@ -120,10 +124,11 @@ export function GuestFolioModal({
   const roomSgst = Math.round((roomTax - roomCgst) * 100) / 100;
   const roomTotal = Math.round((baseRoomTariff + roomTax) * 100) / 100;
 
-  // Running Ledger Computations
-  const totalIncidentalsBase = folioCharges.reduce((acc, c) => acc + (c.amount || 0), 0);
-  const totalIncidentalsTax = folioCharges.reduce((acc, c) => acc + (c.tax_amount || 0), 0);
-  const totalIncidentalsGross = folioCharges.reduce((acc, c) => acc + (c.total_amount || 0), 0);
+  // Running Ledger Computations (stay_extension excluded from incidentals sum to prevent double counting with roomTotal)
+  const nonExtensionCharges = folioCharges.filter((c) => c.category !== 'stay_extension');
+  const totalIncidentalsBase = nonExtensionCharges.reduce((acc, c) => acc + (c.amount || 0), 0);
+  const totalIncidentalsTax = nonExtensionCharges.reduce((acc, c) => acc + (c.tax_amount || 0), 0);
+  const totalIncidentalsGross = nonExtensionCharges.reduce((acc, c) => acc + (c.total_amount || 0), 0);
 
   const totalFolioBill = Math.round((roomTotal + totalIncidentalsGross) * 100) / 100;
   const totalPaidAmount = booking.paid_amount || 0;
@@ -263,6 +268,13 @@ export function GuestFolioModal({
             <span>Late Checkout</span>
           </span>
         );
+      case 'stay_extension':
+        return (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-bold">
+            <CalendarPlus className="w-3 h-3 text-amber-700" />
+            <span>Stay Extension</span>
+          </span>
+        );
       default:
         return (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-100 text-gray-800 text-[10px] font-bold">
@@ -304,6 +316,17 @@ export function GuestFolioModal({
           </div>
 
           <div className="flex items-center gap-2">
+            {booking.status === 'checked_in' && (
+              <button
+                type="button"
+                onClick={() => setShowExtendStayModal(true)}
+                className="px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-300 text-[#382216] text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
+                title="Extend Guest Stay"
+              >
+                <CalendarPlus className="w-3.5 h-3.5 text-amber-700" />
+                <span>Extend Stay</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => onOpenPrintInvoice(booking, folioCharges)}
@@ -728,6 +751,18 @@ export function GuestFolioModal({
           </div>
         </div>
       </div>
+
+      {showExtendStayModal && (
+        <ExtendStayModal
+          isOpen={showExtendStayModal}
+          onClose={() => setShowExtendStayModal(false)}
+          booking={booking}
+          onStayExtended={() => {
+            loadFolioCharges();
+            if (onBookingUpdated) onBookingUpdated();
+          }}
+        />
+      )}
     </div>
   );
 }
