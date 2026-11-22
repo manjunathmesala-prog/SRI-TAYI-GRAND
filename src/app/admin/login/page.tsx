@@ -39,6 +39,7 @@ const PRESET_ACCOUNTS = [
     roleLabelTe: 'సూపర్ అడ్మిన్',
     name: 'Sri Tayi Grand Admin',
     email: 'admin@sritayigrand.com',
+    defaultPassword: 'SuperAdmin@TayiGrand2026!',
     icon: Crown,
     badgeColor: 'bg-amber-100 text-amber-900 border-amber-300',
     scopeEn: 'Full Unrestricted Access • Settings • Audit Logs • P&L',
@@ -46,10 +47,11 @@ const PRESET_ACCOUNTS = [
   },
   {
     roleId: 'HARI',
-    roleLabel: 'Manager Hari',
+    roleLabel: 'Hari Achari (Manager)',
     roleLabelTe: 'మేనేజర్ హరి ఆచారి',
     name: 'Hari Achari',
     email: 'hari@sritayigrand.com',
+    defaultPassword: 'GrandHotel@Kadiri2026!',
     icon: Briefcase,
     badgeColor: 'bg-purple-100 text-purple-900 border-purple-300',
     scopeEn: 'Operations • ERP • Expenses • Attendance • Night Audit',
@@ -57,10 +59,11 @@ const PRESET_ACCOUNTS = [
   },
   {
     roleId: 'SAGAR',
-    roleLabel: 'Manager Sagar',
+    roleLabel: 'Sagar (Manager)',
     roleLabelTe: 'మేనేజర్ సాగర్',
     name: 'Sagar',
     email: 'sagar@sritayigrand.com',
+    defaultPassword: 'GrandHotel@Kadiri2026!',
     icon: Briefcase,
     badgeColor: 'bg-purple-100 text-purple-900 border-purple-300',
     scopeEn: 'Operations • ERP • Expenses • Attendance • Night Audit',
@@ -72,6 +75,7 @@ const PRESET_ACCOUNTS = [
     roleLabelTe: 'రిసెప్షన్ సిబ్బంది',
     name: 'Sri Tayi Grand Staff',
     email: 'staff@sritayigrand.com',
+    defaultPassword: 'Staff@TayiGrand2026!',
     icon: Users,
     badgeColor: 'bg-blue-100 text-blue-900 border-blue-300',
     scopeEn: 'Reception • Check-In / Walk-In • Room Board • RFID Keycards',
@@ -171,7 +175,7 @@ function AdminLoginContent() {
 
   const selectPreset = (preset: (typeof PRESET_ACCOUNTS)[0]) => {
     setEmail(preset.email);
-    setPassword('');
+    setPassword(preset.defaultPassword || '');
     setActivePreset(preset.roleId);
     setError(null);
   };
@@ -239,6 +243,7 @@ function AdminLoginContent() {
                   role="button"
                   tabIndex={0}
                   aria-pressed={isSelected}
+                  data-testid={`preset-${preset.roleId.toLowerCase()}`}
                   onClick={() => selectPreset(preset)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
@@ -275,6 +280,7 @@ function AdminLoginContent() {
                     <button
                       type="button"
                       disabled={loading}
+                      data-testid={`select-${preset.roleId.toLowerCase()}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         selectPreset(preset);

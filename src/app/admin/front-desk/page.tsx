@@ -489,20 +489,20 @@ export default function FrontDeskPage() {
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
-      {/* Top Banner & Title */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
+      {/* Top Welcome & Telemetry Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]/80">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
-              OPERATIONAL WORKFLOW
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8D672F]">
+              Front Office Operations
             </span>
             <span
               className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
-                isConnected ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'
+                isConnected ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200'
               }`}
             >
               <Radio className="w-2.5 h-2.5" />
-              {isConnected ? 'Real-Time Sync Active' : `Sync: ${status}`}
+              {isConnected ? 'Live Sync Active' : `Sync: ${status}`}
             </span>
             <span
               className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
@@ -513,124 +513,116 @@ export default function FrontDeskPage() {
               {rfidOnline ? 'RFID Bridge: 8989 Online' : 'RFID Bridge: Offline'}
             </span>
           </div>
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-0.5 flex items-center gap-2">
-            <ConciergeBell className="w-6 h-6 text-[#D8AD56]" />
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] flex items-center gap-2.5">
+            <ConciergeBell className="w-6 h-6 text-[#8D672F]" />
             <span>{isTelugu ? 'ఫ్రంట్ డెస్క్ & రిసెప్షన్' : 'Front Desk & Reception'}</span>
           </h1>
-          <p className="text-xs text-[#786B61] mt-0.5">
+          <p className="text-xs text-[#786A5B] mt-0.5">
             {t(
               'frontDesk.subtitle',
-              'Rapid guest check in, room key issuance, active stay folios, and checkout settlement.'
+              'Guest arrivals, active in-house stays, keycard allocation, and departure settlements.'
             )}
           </p>
         </div>
 
         {/* Action Buttons & Search */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 w-full sm:w-auto">
-          <Link
-            href="/admin/walk-in"
-            className="px-4 py-2.5 rounded-xl bg-[#382216] hover:bg-[#25150F] text-[#D8AD56] text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-md cursor-pointer shrink-0"
-          >
-            <BedDouble className="w-4 h-4 text-[#D8AD56]" />
-            <span>{isTelugu ? 'వాక్-ఇన్ డెస్క్' : 'Walk-In Registration Desk'}</span>
-          </Link>
-
-          <div className="relative w-full sm:w-64">
-            <Search className="w-4 h-4 text-[#786B61] absolute left-3 top-1/2 -translate-y-1/2" />
+          <div className="relative w-full sm:w-72">
+            <Search className="w-4 h-4 text-[#786A5B] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={isTelugu ? 'అతిథి, ఫోన్, రూమ్ శోధించండి...' : 'Search guest, phone, room, or ref...'}
-              className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-[#EFE3D6] bg-white text-[#241912] focus:border-[#D8AD56] focus:outline-none shadow-xs"
+              className="w-full text-xs font-medium pl-9 pr-3 py-2.5 rounded-xl border border-[#E6D9C5] bg-white text-[#2A1D13] focus:border-[#8D672F] focus:outline-none shadow-xs placeholder-[#A39587]"
             />
           </div>
         </div>
       </div>
 
-      {/* LIVE FRONT DESK TELEMETRY KPI STRIP */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        <div className="p-3.5 rounded-2xl bg-white border border-[#EFE3D6] shadow-xs hover:border-[#D8AD56]/60 transition-all flex items-center justify-between">
+      {/* LUXURY KPI TELEMETRY STRIP */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5">
+        <div className="p-4 rounded-2xl bg-white border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:border-[#8D672F]/50 transition-all flex items-center justify-between">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#786B61] block">
-              {isTelugu ? 'నేటి రాకడలు' : "Expected Arrivals"}
+            <span className="text-[10px] font-semibold text-[#786A5B] block">
+              {isTelugu ? 'నేటి రాకడలు' : 'Expected Arrivals'}
             </span>
-            <span className="font-serif text-2xl font-bold text-[#1565C0] mt-0.5 block">
+            <span className="font-serif text-2xl font-bold text-[#2A1D13] mt-1 block">
               {todayArrivalsCount}
             </span>
-            <span className="text-[10px] text-[#786B61]">
+            <span className="text-[10px] text-[#8D672F] font-medium">
               {pendingArrivals.length} {isTelugu ? 'పెండింగ్' : 'pending check-in'}
             </span>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+          <div className="w-10 h-10 rounded-xl bg-[#FAF6EE] text-[#8D672F] border border-[#E6D9C5]/60 flex items-center justify-center">
             <CalendarCheck className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="p-3.5 rounded-2xl bg-white border border-[#EFE3D6] shadow-xs hover:border-[#D8AD56]/60 transition-all flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-white border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:border-[#8D672F]/50 transition-all flex items-center justify-between">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#786B61] block">
+            <span className="text-[10px] font-semibold text-[#786A5B] block">
               {isTelugu ? 'ఇన్-హౌస్ గదులు' : 'In-House Stays'}
             </span>
-            <span className="font-serif text-2xl font-bold text-[#2E7D32] mt-0.5 block">
+            <span className="font-serif text-2xl font-bold text-[#2A1D13] mt-1 block">
               {activeStays.length}
             </span>
-            <span className="text-[10px] text-[#786B61]">
-              {isTelugu ? 'ప్రస్తుతం ఆక్యుపైడ్' : 'Active occupied rooms'}
+            <span className="text-[10px] text-emerald-700 font-medium">
+              {isTelugu ? 'ప్రస్తుతం ఆక్యుపైడ్' : 'Active occupied'}
             </span>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center">
             <BedDouble className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="p-3.5 rounded-2xl bg-white border border-[#EFE3D6] shadow-xs hover:border-[#D8AD56]/60 transition-all flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-white border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:border-[#8D672F]/50 transition-all flex items-center justify-between">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#786B61] block">
-              {isTelugu ? 'నేటి నిష్క్రమణలు' : 'Due Today'}
+            <span className="text-[10px] font-semibold text-[#786A5B] block">
+              {isTelugu ? 'నేటి నిష్క్రమణలు' : 'Departures Due'}
             </span>
-            <span className="font-serif text-2xl font-bold text-[#E65100] mt-0.5 block">
+            <span className="font-serif text-2xl font-bold text-[#2A1D13] mt-1 block">
               {todayDeparturesCount}
             </span>
-            <span className="text-[10px] text-[#786B61]">
-              {isTelugu ? '11:00 AM వరకు' : 'Departing by 11:00 AM'}
+            <span className="text-[10px] text-amber-700 font-medium">
+              {isTelugu ? '11:00 AM వరకు' : 'By 11:00 AM standard'}
             </span>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 border border-amber-200/60 flex items-center justify-center">
             <Clock className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="p-3.5 rounded-2xl bg-white border border-[#EFE3D6] shadow-xs hover:border-[#D8AD56]/60 transition-all flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-white border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:border-[#8D672F]/50 transition-all flex items-center justify-between">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#786B61] block">
+            <span className="text-[10px] font-semibold text-[#786A5B] block">
               {isTelugu ? 'సిద్ధమైన గదులు' : 'Clean & Ready'}
             </span>
-            <span className="font-serif text-2xl font-bold text-[#241912] mt-0.5 block">
+            <span className="font-serif text-2xl font-bold text-[#2A1D13] mt-1 block">
               {availableCleanRooms.length}
             </span>
-            <span className="text-[10px] text-emerald-700 font-semibold">
+            <span className="text-[10px] text-[#786A5B] font-medium">
               {rooms.length} {isTelugu ? 'మొత్తం గదులు' : 'total rooms'}
             </span>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-[#FAF7F2] text-[#D8AD56] flex items-center justify-center font-bold border border-[#EFE3D6]">
+          <div className="w-10 h-10 rounded-xl bg-[#FAF6EE] text-[#8D672F] border border-[#E6D9C5]/60 flex items-center justify-center">
             <Sparkles className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="p-3.5 rounded-2xl bg-white border border-[#EFE3D6] shadow-xs hover:border-[#D8AD56]/60 transition-all flex items-center justify-between col-span-2 sm:col-span-1">
+        <div className="p-4 rounded-2xl bg-white border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:border-[#8D672F]/50 transition-all flex items-center justify-between col-span-2 sm:col-span-1">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#786B61] block">
+            <span className="text-[10px] font-semibold text-[#786A5B] block">
               {isTelugu ? 'నేటి వసూళ్లు' : "Today's Collections"}
             </span>
-            <span className="font-serif text-2xl font-bold text-[#241912] mt-0.5 block">
-              ₹ {todayCollections.toLocaleString('en-IN')}
+            <span className="font-serif text-2xl font-bold text-[#2A1D13] mt-1 block">
+              ₹{todayCollections.toLocaleString('en-IN')}
             </span>
-            <span className="text-[10px] text-[#786B61]">
-              {isTelugu ? 'కౌంటర్ + యూపీఐ' : 'Desk cash + UPI'}
+            <span className="text-[10px] text-emerald-700 font-medium">
+              {isTelugu ? 'కౌంటర్ + యూపీఐ' : 'Counter cash + UPI'}
             </span>
           </div>
-          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold">
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center">
             <Banknote className="w-5 h-5" />
           </div>
         </div>
@@ -638,9 +630,9 @@ export default function FrontDeskPage() {
 
       {/* Checkout Success Banner with Instant Print Invoice Shortcut */}
       {checkOutSuccessRef && (
-        <div className="p-4 rounded-xl bg-green-50 border border-green-200 text-green-900 text-xs flex items-center justify-between shadow-xs">
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 text-xs flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-5 h-5 text-green-600 shrink-0" />
+            <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />
             <span>
               Stay <strong>{checkOutSuccessRef}</strong> successfully checked out and settled. Room released for housekeeping turnover.
             </span>
@@ -650,15 +642,15 @@ export default function FrontDeskPage() {
               <button
                 type="button"
                 onClick={() => setInvoiceModalBooking(lastCheckedOutBooking)}
-                className="px-3 py-1 rounded-lg bg-green-700 hover:bg-green-800 text-white font-bold text-xs flex items-center gap-1 cursor-pointer"
+                className="px-3 py-1 rounded-lg bg-[#2A1D13] hover:bg-black text-[#FAF6EE] font-medium text-xs flex items-center gap-1.5 cursor-pointer shadow-xs"
               >
-                <Printer className="w-3.5 h-3.5" />
+                <Printer className="w-3.5 h-3.5 text-[#B18A4A]" />
                 <span>{isTelugu ? 'ఇన్‌వాయిస్ ప్రింట్' : 'Print GST Invoice'}</span>
               </button>
             )}
             <button
               onClick={() => setCheckOutSuccessRef(null)}
-              className="text-green-800 font-bold hover:underline px-2"
+              className="text-emerald-800 font-semibold hover:underline px-2"
             >
               Dismiss
             </button>
@@ -673,14 +665,14 @@ export default function FrontDeskPage() {
             'p-4 rounded-xl text-xs flex items-center justify-between shadow-xs ' +
             (walkInAlert.type === 'success'
               ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
-              : 'bg-red-50 border border-red-200 text-red-800')
+              : 'bg-rose-50 border border-rose-200 text-rose-800')
           }
         >
           <div className="flex items-center gap-2">
             {walkInAlert.type === 'success' ? (
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
             ) : (
-              <AlertCircle className="w-4 h-4 text-red-600 shrink-0" />
+              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
             )}
             <span>{walkInAlert.message}</span>
           </div>
@@ -690,30 +682,30 @@ export default function FrontDeskPage() {
         </div>
       )}
 
-      {/* LIVE RECEPTION WALK-IN QUEUE PANEL */}
-      <div className="bg-gradient-to-r from-[#241912] via-[#382216] to-[#25150F] rounded-2xl border border-[#D8AD56]/40 p-5 shadow-lg text-white">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-white/10">
+      {/* REFINED RECEPTION WALK-IN QUEUE PANEL */}
+      <div className="bg-[#FAF8F5] rounded-2xl border border-[#E6D9C5]/80 p-5 shadow-[0_4px_20px_rgba(33,24,15,0.02)]">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E6D9C5]/60">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#D8AD56] text-[#241912] flex items-center justify-center font-bold shadow-md">
+            <div className="w-10 h-10 rounded-xl bg-white text-[#8D672F] border border-[#E6D9C5] flex items-center justify-center font-bold shadow-xs">
               <QrCode className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="font-serif text-lg font-bold text-white tracking-wide">
-                  Reception QR Walk-In Counter Queue
+                <h2 className="font-serif text-lg font-bold text-[#2A1D13] tracking-wide">
+                  Reception QR Walk-In Queue
                 </h2>
                 {walkInQueue.length > 0 ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-400 text-[#241912] animate-pulse">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300 animate-pulse">
                     {walkInQueue.length} Guests Waiting
                   </span>
                 ) : (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200">
                     Counter Ready
                   </span>
                 )}
               </div>
-              <p className="text-xs text-[#EFE3D6]/70">
-                Self-service QR bookings appear here automatically. Select physical room and encode keycard in 1 click.
+              <p className="text-xs text-[#786A5B]">
+                Live customer queue from front desk QR scans. Allocate room and encode keycards.
               </p>
             </div>
           </div>
@@ -722,18 +714,18 @@ export default function FrontDeskPage() {
             <button
               type="button"
               onClick={() => setShowStandeeModal(true)}
-              className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-[#D8AD56]/40 text-[#D8AD56] text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+              className="px-3.5 py-2 rounded-xl bg-white hover:bg-[#FAF6EE] border border-[#E6D9C5] text-[#8D672F] text-xs font-semibold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
             >
               <Printer className="w-3.5 h-3.5" />
-              <span>Print Desk Standee QR</span>
+              <span>Desk Standee QR</span>
             </button>
             <a
               href="/walk-in"
               target="_blank"
               rel="noopener noreferrer"
-              className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/80 text-xs font-semibold flex items-center gap-1"
+              className="px-3 py-2 rounded-xl bg-white hover:bg-[#FAF6EE] border border-[#E6D9C5] text-[#786A5B] hover:text-[#2A1D13] text-xs font-medium flex items-center gap-1 transition-all"
             >
-              <ExternalLink className="w-3.5 h-3.5 text-[#D8AD56]" />
+              <ExternalLink className="w-3.5 h-3.5 text-[#8D672F]" />
               <span>Open Walk-In Form</span>
             </a>
           </div>
@@ -741,9 +733,9 @@ export default function FrontDeskPage() {
 
         {/* Queue Items List */}
         {walkInQueue.length === 0 ? (
-          <div className="py-6 text-center text-xs text-[#EFE3D6]/60 flex items-center justify-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-[#D8AD56]" />
-            <span>Reception counter is clear. Any walk-in customer scanning the acrylic desk QR will appear here instantly.</span>
+          <div className="py-6 text-center text-xs text-[#786A5B] flex items-center justify-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-[#8D672F]" />
+            <span>Reception counter is clear. Self-service walk-in arrivals appear here automatically.</span>
           </div>
         ) : (
           <div className="grid gap-3 pt-4 sm:grid-cols-2">

@@ -1,0 +1,507 @@
+{
+  "startedAt": "2026-11-21T23:03:00.666Z",
+  "databaseConnection": {
+    "connected": true,
+    "latencyMs": 1039,
+    "databaseName": "postgres",
+    "host": "aws-0-ap-northeast-1.pooler.supabase.com:6543",
+    "preCounts": {
+      "hotel_settings": 1,
+      "room_categories": 4,
+      "rooms": 25,
+      "guests": 80,
+      "bookings": 194,
+      "booking_rooms": 286,
+      "booking_guests": 201,
+      "payments": 110,
+      "expenses": 6,
+      "room_maintenance": 12,
+      "hall_enquiries": 0,
+      "convention_quotes": 3,
+      "cash_shifts": 2,
+      "cash_transactions": 81,
+      "staff_attendance": 2,
+      "daily_closings": 5,
+      "rfid_cards": 109,
+      "audit_logs": 135,
+      "reviews": 45
+    },
+    "postCounts": {
+      "hotel_settings": 1,
+      "room_categories": 4,
+      "rooms": 25,
+      "guests": 81,
+      "bookings": 195,
+      "booking_rooms": 287,
+      "booking_guests": 202,
+      "payments": 110,
+      "expenses": 6,
+      "room_maintenance": 13,
+      "hall_enquiries": 0,
+      "convention_quotes": 4,
+      "cash_shifts": 2,
+      "cash_transactions": 82,
+      "staff_attendance": 3,
+      "daily_closings": 5,
+      "rfid_cards": 110,
+      "audit_logs": 137,
+      "reviews": 46
+    }
+  },
+  "loginFlow": {
+    "tested": true,
+    "redirectedToDashboard": true,
+    "authCookieSet": true,
+    "localStorageSet": true,
+    "loginDurationMs": 8548,
+    "evidenceScreenshot": "flow_01_login_to_dashboard.png"
+  },
+  "pmsFlows": [
+    {
+      "flowName": "Guest Walk-In -> Room Assignment -> Turnaround Lifecycle",
+      "module": "Reservations, Front Desk, Housekeeping Matrix",
+      "endpoint": "POST /api/admin/bookings, /api/admin/housekeeping",
+      "status": "SUCCESS",
+      "dbTables": [
+        "bookings",
+        "booking_rooms",
+        "booking_guests",
+        "guests",
+        "rooms"
+      ],
+      "verification": "EXACT_MATCH (Ref: STG-20261121-6299, Room 104, Clean & Available)",
+      "pass": true
+    },
+    {
+      "flowName": "Front Desk Cash Drawer Float & Shift Ledger Sync",
+      "module": "Cashbook & Cash Drawer",
+      "endpoint": "POST /api/admin/cashbook",
+      "status": "SUCCESS",
+      "dbTables": [
+        "cash_transactions"
+      ],
+      "verification": "EXACT_MATCH (Txn: ctx-1795302879750-751, ₹1,500 Float)",
+      "pass": true
+    },
+    {
+      "flowName": "Room Preventive Maintenance & Work Order Flow",
+      "module": "Maintenance & OOO",
+      "endpoint": "POST /api/admin/maintenance",
+      "status": "SUCCESS",
+      "dbTables": [
+        "room_maintenance"
+      ],
+      "verification": "EXACT_MATCH (Ticket: maint-1795302882039, Room 307, ₹650)",
+      "pass": true
+    },
+    {
+      "flowName": "Convention Hall & Banquet Quotation Package Flow",
+      "module": "Convention Hall & Banquets",
+      "endpoint": "POST /api/admin/convention-hall",
+      "status": "SUCCESS",
+      "dbTables": [
+        "convention_quotes"
+      ],
+      "verification": "EXACT_MATCH (Quote: STG-QT-2026-004, 200 Guests, ₹1,44,900)",
+      "pass": true
+    },
+    {
+      "flowName": "Hotel Master Policies & 5% GST Slab Setup",
+      "module": "Hotel & Property Settings",
+      "endpoint": "POST /api/admin/settings",
+      "status": "SUCCESS",
+      "dbTables": [
+        "hotel_settings"
+      ],
+      "verification": "EXACT_MATCH (SRI TAYI GRAND, GST 5%, 12:00 Check-In)",
+      "pass": true
+    },
+    {
+      "flowName": "Guest Review Moderation & Multi-Tier Cloud Persistence",
+      "module": "Guest Reviews & Feedback",
+      "endpoint": "POST /api/reviews",
+      "status": "SUCCESS",
+      "dbTables": [
+        "reviews"
+      ],
+      "verification": "EXACT_MATCH (5-Star Review, Prof. S. R. Murthy 9090)",
+      "pass": true
+    },
+    {
+      "flowName": "RFID Keycard Encoding & Security Access Management",
+      "module": "RFID Keycard Center",
+      "endpoint": "POST /api/rfid/cards",
+      "status": "SUCCESS",
+      "dbTables": [
+        "rfid_cards"
+      ],
+      "verification": "EXACT_MATCH (Cleaner Card, UID: TEST869090, Postgres UUID: e71801e1-d715-409c-a535-baf5e90d85a4)",
+      "pass": true
+    }
+  ],
+  "pagesSummary": [
+    {
+      "path": "/admin/dashboard",
+      "name": "Dashboard Overview",
+      "category": "Overview",
+      "buttonsFound": 5,
+      "buttonsTested": 4,
+      "buttonsPassed": 4,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_01.png"
+    },
+    {
+      "path": "/admin/analytics",
+      "name": "Analytics & KPIs",
+      "category": "Overview",
+      "buttonsFound": 7,
+      "buttonsTested": 6,
+      "buttonsPassed": 6,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_02.png"
+    },
+    {
+      "path": "/admin/reports",
+      "name": "Reports Center",
+      "category": "Overview",
+      "buttonsFound": 3,
+      "buttonsTested": 1,
+      "buttonsPassed": 1,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_03.png"
+    },
+    {
+      "path": "/admin/front-desk",
+      "name": "Front Desk / Reception",
+      "category": "Operations",
+      "buttonsFound": 1,
+      "buttonsTested": 1,
+      "buttonsPassed": 1,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_04.png"
+    },
+    {
+      "path": "/admin/walk-in",
+      "name": "Walk-In Registration",
+      "category": "Operations",
+      "buttonsFound": 15,
+      "buttonsTested": 9,
+      "buttonsPassed": 9,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_05.png"
+    },
+    {
+      "path": "/admin/bookings",
+      "name": "Reservations & Bookings",
+      "category": "Operations",
+      "buttonsFound": 8,
+      "buttonsTested": 8,
+      "buttonsPassed": 8,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_06.png"
+    },
+    {
+      "path": "/admin/reservations",
+      "name": "Reservations Timeline",
+      "category": "Operations",
+      "buttonsFound": 8,
+      "buttonsTested": 8,
+      "buttonsPassed": 8,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_07.png"
+    },
+    {
+      "path": "/admin/rooms",
+      "name": "Rooms Overview",
+      "category": "Operations",
+      "buttonsFound": 10,
+      "buttonsTested": 8,
+      "buttonsPassed": 8,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_08.png"
+    },
+    {
+      "path": "/admin/rooms/board",
+      "name": "Room Tape Chart / Matrix",
+      "category": "Operations",
+      "buttonsFound": 10,
+      "buttonsTested": 8,
+      "buttonsPassed": 8,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_09.png"
+    },
+    {
+      "path": "/admin/rooms/inventory",
+      "name": "Room Inventory Grid",
+      "category": "Operations",
+      "buttonsFound": 3,
+      "buttonsTested": 3,
+      "buttonsPassed": 3,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_10.png"
+    },
+    {
+      "path": "/admin/rooms/categories",
+      "name": "Room Categories & Tariffs",
+      "category": "Operations",
+      "buttonsFound": 1,
+      "buttonsTested": 1,
+      "buttonsPassed": 1,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_11.png"
+    },
+    {
+      "path": "/admin/guests",
+      "name": "Guest Directory & CRM",
+      "category": "Operations",
+      "buttonsFound": 7,
+      "buttonsTested": 7,
+      "buttonsPassed": 7,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_12.png"
+    },
+    {
+      "path": "/admin/housekeeping",
+      "name": "Housekeeping Matrix",
+      "category": "Operations",
+      "buttonsFound": 7,
+      "buttonsTested": 6,
+      "buttonsPassed": 6,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_13.png"
+    },
+    {
+      "path": "/admin/maintenance",
+      "name": "Maintenance & OOO",
+      "category": "Operations",
+      "buttonsFound": 5,
+      "buttonsTested": 4,
+      "buttonsPassed": 4,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_14.png"
+    },
+    {
+      "path": "/admin/convention-hall",
+      "name": "Convention Hall & Banquets",
+      "category": "Operations",
+      "buttonsFound": 4,
+      "buttonsTested": 3,
+      "buttonsPassed": 3,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_15.png"
+    },
+    {
+      "path": "/admin/enquiries",
+      "name": "Guest Enquiries & Leads",
+      "category": "Operations",
+      "buttonsFound": 6,
+      "buttonsTested": 5,
+      "buttonsPassed": 5,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_16.png"
+    },
+    {
+      "path": "/admin/rfid",
+      "name": "RFID Keycard Center (Safety Mode)",
+      "category": "Operations",
+      "buttonsFound": 14,
+      "buttonsTested": 9,
+      "buttonsPassed": 9,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_17.png"
+    },
+    {
+      "path": "/admin/rfid/standee",
+      "name": "RFID Public QR Standee",
+      "category": "Operations",
+      "buttonsFound": 3,
+      "buttonsTested": 2,
+      "buttonsPassed": 2,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_18.png"
+    },
+    {
+      "path": "/admin/payments",
+      "name": "Payments & Revenue Ledger",
+      "category": "Financial",
+      "buttonsFound": 6,
+      "buttonsTested": 6,
+      "buttonsPassed": 6,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_19.png"
+    },
+    {
+      "path": "/admin/cashbook",
+      "name": "Cashbook & Drawer Shift",
+      "category": "Financial",
+      "buttonsFound": 6,
+      "buttonsTested": 6,
+      "buttonsPassed": 6,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_20.png"
+    },
+    {
+      "path": "/admin/expenses",
+      "name": "Operating Expenses",
+      "category": "Financial",
+      "buttonsFound": 3,
+      "buttonsTested": 3,
+      "buttonsPassed": 3,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_21.png"
+    },
+    {
+      "path": "/admin/accounting",
+      "name": "General Ledger ERP & P&L",
+      "category": "Financial",
+      "buttonsFound": 12,
+      "buttonsTested": 6,
+      "buttonsPassed": 6,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_22.png"
+    },
+    {
+      "path": "/admin/daily-closing",
+      "name": "Daily Financial Closing",
+      "category": "Financial",
+      "buttonsFound": 3,
+      "buttonsTested": 2,
+      "buttonsPassed": 2,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_23.png"
+    },
+    {
+      "path": "/admin/night-audit",
+      "name": "Night Audit System",
+      "category": "Financial",
+      "buttonsFound": 11,
+      "buttonsTested": 6,
+      "buttonsPassed": 6,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_24.png"
+    },
+    {
+      "path": "/admin/staff",
+      "name": "Staff & Roles Directory",
+      "category": "Business",
+      "buttonsFound": 7,
+      "buttonsTested": 7,
+      "buttonsPassed": 7,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_25.png"
+    },
+    {
+      "path": "/admin/staff/attendance",
+      "name": "Staff Attendance & Shifts",
+      "category": "Business",
+      "buttonsFound": 11,
+      "buttonsTested": 8,
+      "buttonsPassed": 8,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_26.png"
+    },
+    {
+      "path": "/admin/pricing",
+      "name": "Dynamic Pricing & Tariffs",
+      "category": "Website",
+      "buttonsFound": 9,
+      "buttonsTested": 9,
+      "buttonsPassed": 9,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_27.png"
+    },
+    {
+      "path": "/admin/channels",
+      "name": "OTA Channel Manager",
+      "category": "Website",
+      "buttonsFound": 9,
+      "buttonsTested": 7,
+      "buttonsPassed": 7,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_28.png"
+    },
+    {
+      "path": "/admin/reviews",
+      "name": "Guest Reviews & Feedback",
+      "category": "Website",
+      "buttonsFound": 139,
+      "buttonsTested": 8,
+      "buttonsPassed": 8,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_29.png"
+    },
+    {
+      "path": "/admin/content",
+      "name": "Website CMS & Banners",
+      "category": "Website",
+      "buttonsFound": 5,
+      "buttonsTested": 4,
+      "buttonsPassed": 4,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_30.png"
+    },
+    {
+      "path": "/admin/settings",
+      "name": "Hotel & Property Settings",
+      "category": "Website",
+      "buttonsFound": 5,
+      "buttonsTested": 3,
+      "buttonsPassed": 3,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_31.png"
+    },
+    {
+      "path": "/admin/audit-logs",
+      "name": "System Security Audit Logs",
+      "category": "System",
+      "buttonsFound": 11,
+      "buttonsTested": 10,
+      "buttonsPassed": 10,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_32.png"
+    },
+    {
+      "path": "/admin/403",
+      "name": "Access Denied 403 Handler",
+      "category": "System",
+      "buttonsFound": 1,
+      "buttonsTested": 0,
+      "buttonsPassed": 0,
+      "standardsPass": true,
+      "screenshot": "real_qa_page_33.png"
+    }
+  ],
+  "industryStandards": {
+    "currencyFormatINR": {
+      "evaluated": 65,
+      "valid": 65,
+      "invalidExamples": []
+    },
+    "roomNumberingStandards": {
+      "evaluated": 14,
+      "valid": 14,
+      "invalidExamples": []
+    },
+    "brandNameFidelity": {
+      "evaluated": 33,
+      "valid": 32,
+      "invalidExamples": [
+        "Missing on /admin/403"
+      ]
+    },
+    "bookingCodeStandard": {
+      "evaluated": 0,
+      "valid": 0,
+      "invalidExamples": []
+    }
+  },
+  "summary": {
+    "totalPagesTested": 33,
+    "totalPagesPassed": 33,
+    "totalButtonsTested": 178,
+    "totalButtonsPassed": 178,
+    "totalFlowsTested": 7,
+    "totalFlowsPassed": 7,
+    "totalScreenshots": 35
+  }
+}

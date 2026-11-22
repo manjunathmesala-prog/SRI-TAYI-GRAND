@@ -150,11 +150,11 @@ export default function WalkInPickupPage({ params }: { params: Promise<{ code: s
       const rzp = new window.Razorpay(options);
       rzp.on('payment.failed', function (err: any) {
         setPayingNow(false);
-        alert(err.error?.description || 'Payment failed.');
+        setError(err.error?.description || 'Payment failed.');
       });
       rzp.open();
     } catch {
-      alert('Unable to connect to payment gateway.');
+      setError('Unable to connect to payment gateway.');
       setPayingNow(false);
     }
   };

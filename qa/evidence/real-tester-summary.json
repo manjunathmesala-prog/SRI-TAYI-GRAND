@@ -1,0 +1,4209 @@
+{
+  "startedAt": "2026-11-21T18:52:34.589Z",
+  "environment": {
+    "baseUrl": "http://localhost:3000",
+    "browser": "Google Chrome (Playwright Core)",
+    "chromePath": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+  },
+  "summary": {
+    "totalPublicPagesTested": 19,
+    "totalAdminPagesTested": 33,
+    "totalPagesPassed": 52,
+    "totalPagesFailed": 0,
+    "totalButtonsFound": 904,
+    "totalButtonsTested": 270,
+    "totalButtonsPassed": 270,
+    "totalButtonsFailed": 0,
+    "totalModalsTested": 37,
+    "totalScreenshots": 54
+  },
+  "publicPages": [
+    {
+      "route": "/",
+      "name": "Home Page",
+      "httpStatus": 200,
+      "headings": [
+        "Sri Tayi Grand",
+        "Celebrated Guests at Sri Tayi Grand",
+        "Rooms for Every Journey",
+        "Double Room",
+        "Four Bed Room"
+      ],
+      "buttonsFound": 20,
+      "buttonsTested": 6,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "FIND YOUR STAY",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Rotate previous",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Rotate next",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Jump to photo 1",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Jump to photo 2",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "Jump to photo 3",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "public_home.png"
+    },
+    {
+      "route": "/rooms",
+      "name": "Room Catalog",
+      "httpStatus": 200,
+      "headings": [
+        "Rooms & Suites",
+        "Double Room",
+        "Four Bed Room",
+        "Suite Room",
+        "Single Room"
+      ],
+      "buttonsFound": 4,
+      "buttonsTested": 4,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "CHECK AVAILABILITY",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Scroll to top",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Install App ↓",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal/Lightbox opened and closed cleanly"
+        },
+        {
+          "index": 4,
+          "name": "Back to Top",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "public_rooms.png"
+    },
+    {
+      "route": "/rooms/double-room",
+      "name": "Deluxe Double Room Details",
+      "httpStatus": 200,
+      "headings": [
+        "About This Room",
+        "Included Amenities & Features",
+        "Stay Policies",
+        "Double Room",
+        "Explore Other Accommodations"
+      ],
+      "buttonsFound": 15,
+      "buttonsTested": 6,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "Previous image",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Next image",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Button-4",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Button-5",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Button-6",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "Button-7",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "public_rooms_double-room.png"
+    },
+    {
+      "route": "/rooms/four-bed-room",
+      "name": "Family Four-Bed Room Details",
+      "httpStatus": 200,
+      "headings": [
+        "About This Room",
+        "Included Amenities & Features",
+        "Stay Policies",
+        "Four Bed Room",
+        "Explore Other Accommodations"
+      ],
+      "buttonsFound": 15,
+      "buttonsTested": 6,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "Previous image",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Next image",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Button-4",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Button-5",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Button-6",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "Button-7",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "public_rooms_four-bed-room.png"
+    },
+    {
+      "route": "/rooms/suite-room",
+      "name": "Executive Suite Details",
+      "httpStatus": 200,
+      "headings": [
+        "About This Room",
+        "Included Amenities & Features",
+        "Stay Policies",
+        "Suite Room",
+        "Explore Other Accommodations"
+      ],
+      "buttonsFound": 15,
+      "buttonsTested": 6,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "Previous image",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Next image",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Button-4",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Button-5",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Button-6",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "Button-7",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "public_rooms_suite-room.png"
+    },
+    {
+      "route": "/rooms/single-room",
+      "name": "Standard Single Room Details",
+      "httpStatus": 200,
+      "headings": [
+        "About This Room",
+        "Included Amenities & Features",
+        "Stay Policies",
+        "Single Room",
+        "Explore Other Accommodations"
+      ],
+      "buttonsFound": 8,
+      "buttonsTested": 6,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "Previous image",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Next image",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Button-4",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Button-5",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Button-6",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "Scroll to top",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "public_rooms_single-room.png"
+    },
+    {
+      "route": "/availability",
+      "name": "Live Availability Checker",
+      "httpStatus": 200,
+      "headings": [
+        "Available Sanctuaries",
+        "Double Room",
+        "Four Bed Room",
+        "Suite Room"
+      ],
+      "buttonsFound": 10,
+      "buttonsTested": 6,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "21-11-2026",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "22-11-2026",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "2 Adults",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "0 Children",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "UPDATE SEARCH",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "RESERVE SUITE",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "public_availability.png"
+    },
+    {
+      "route": "/booking",
+      "name": "Online Booking Funnel",
+      "httpStatus": 200,
+      "headings": [
+        "Manage Your Reservation",
+        "Find Existing Booking",
+        "Reserve a New Stay"
+      ],
+      "buttonsFound": 3,
+      "buttonsTested": 3,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "FIND RESERVATION",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Install App ↓",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal/Lightbox opened and closed cleanly"
+        },
+        {
+          "index": 3,
+          "name": "Back to Top",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "public_booking.png"
+    },
+    {
+      "route": "/booking/checkout",
+      "name": "Booking Checkout",
+      "httpStatus": 200,
+      "headings": [
+        "Guest Details & Confirmation",
+        "Primary Guest Details",
+        "Stay Preferences (Optional)",
+        "Payment Option",
+        "Reservation Summary"
+      ],
+      "buttonsFound": 3,
+      "buttonsTested": 3,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "CONFIRM RESERVATION",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Install App ↓",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal/Lightbox opened and closed cleanly"
+        },
+        {
+          "index": 3,
+          "name": "Back to Top",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "public_booking_checkout.png"
+    },
+    {
+      "route": "/booking/confirmation",
+      "name": "Booking Confirmation Lookup",
+      "httpStatus": 200,
+      "headings": [
+        "Manage Your Reservation",
+        "Find Existing Booking",
+        "Reserve a New Stay"
+      ],
+      "buttonsFound": 3,
+      "buttonsTested": 3,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "FIND RESERVATION",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Install App ↓",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal/Lightbox opened and closed cleanly"
+        },
+        {
+          "index": 3,
+          "name": "Back to Top",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "public_booking_confirmation.png"
+    },
+    {
+      "route": "/booking/pickup",
+      "name": "Pickup Code Portal",
+      "httpStatus": 200,
+      "headings": [
+        "Sri Tayi Grand",
+        "Welcome to Sri Tayi Grand Hotel",
+        "Step 1: Choose Your Room",
+        "Step 2: Guest Information (Government ID)"
+      ],
+      "buttonsFound": 5,
+      "buttonsTested": 2,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "View Room Images",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal/Lightbox opened and closed cleanly"
+        },
+        {
+          "index": 4,
+          "name": "Confirm Check-In & Get Key Pass",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "public_booking_pickup.png"
+    },
+    {
+      "route": "/amenities",
+      "name": "Hotel Amenities",
+      "httpStatus": 200,
+      "headings": [
+        "Hotel Amenities",
+        "Fully AC Rooms",
+        "Car Parking",
+        "Convention Hall",
+        "High-Speed Wi-Fi"
+      ],
+      "buttonsFound": 3,
+      "buttonsTested": 3,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "Scroll to top",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Install App ↓",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal/Lightbox opened and closed cleanly"
+        },
+        {
+          "index": 3,
+          "name": "Back to Top",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "public_amenities.png"
+    },
+    {
+      "route": "/convention-hall",
+      "name": "Convention Hall & Banquets",
+      "httpStatus": 200,
+      "headings": [
+        "Grandeur in Every Celebration.",
+        "An Exquisite Setting",
+        "Enquire for Your Event"
+      ],
+      "buttonsFound": 6,
+      "buttonsTested": 6,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "Wedding Reception",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Select event date",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "SUBMIT PROPOSAL REQUEST",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Scroll to top",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Install App ↓",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "Back to Top",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "public_convention-hall.png"
+    },
+    {
+      "route": "/gallery",
+      "name": "Photo Gallery",
+      "httpStatus": 200,
+      "headings": [
+        "Property Gallery"
+      ],
+      "buttonsFound": 8,
+      "buttonsTested": 6,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "ALL PHOTOS",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "HOTEL & FACADE",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "ROOMS & SUITES",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "CONVENTION HALL",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "RECEPTION & LOBBY",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "Scroll to top",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "public_gallery.png"
+    },
+    {
+      "route": "/about",
+      "name": "About Sri Tayi Grand",
+      "httpStatus": 200,
+      "headings": [
+        "Hospitality & Heritage",
+        "A Landmark of Care & Serenity"
+      ],
+      "buttonsFound": 3,
+      "buttonsTested": 3,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "Scroll to top",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Install App ↓",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal/Lightbox opened and closed cleanly"
+        },
+        {
+          "index": 3,
+          "name": "Back to Top",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "public_about.png"
+    },
+    {
+      "route": "/contact",
+      "name": "Contact & Location",
+      "httpStatus": 200,
+      "headings": [
+        "Contact & Location",
+        "Sri Tayi Grand",
+        "How May We Assist You?"
+      ],
+      "buttonsFound": 5,
+      "buttonsTested": 5,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "Room Booking Enquiry",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "SEND MESSAGE",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Scroll to top",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Install App ↓",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal/Lightbox opened and closed cleanly"
+        },
+        {
+          "index": 5,
+          "name": "Back to Top",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "public_contact.png"
+    },
+    {
+      "route": "/policies",
+      "name": "Hotel Policies & Rules",
+      "httpStatus": 200,
+      "headings": [
+        "Policies & Terms",
+        "Check-In & Check-Out",
+        "Cancellation & Refunds",
+        "Privacy & Data Security"
+      ],
+      "buttonsFound": 2,
+      "buttonsTested": 2,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "Install App ↓",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal/Lightbox opened and closed cleanly"
+        },
+        {
+          "index": 2,
+          "name": "Back to Top",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "public_policies.png"
+    },
+    {
+      "route": "/testimonials",
+      "name": "Guest Testimonials & Reviews",
+      "httpStatus": 200,
+      "headings": [
+        "Guest Testimonials"
+      ],
+      "buttonsFound": 8,
+      "buttonsTested": 6,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "ALL REVIEWS (44)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "DETAILED REVIEWS (26)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "STAR RATINGS (18)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Button-6",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "Scroll to top",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 7,
+          "name": "Install App ↓",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal/Lightbox opened and closed cleanly"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "public_testimonials.png"
+    },
+    {
+      "route": "/walk-in",
+      "name": "Public Walk-In Fast Booking",
+      "httpStatus": 200,
+      "headings": [
+        "Sri Tayi Grand",
+        "Welcome to Sri Tayi Grand Hotel",
+        "Step 1: Choose Your Room",
+        "Step 2: Guest Information (Government ID)"
+      ],
+      "buttonsFound": 5,
+      "buttonsTested": 2,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "View Room Images",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal/Lightbox opened and closed cleanly"
+        },
+        {
+          "index": 4,
+          "name": "Confirm Check-In & Get Key Pass",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "public_walk-in.png"
+    }
+  ],
+  "adminPages": [
+    {
+      "route": "/admin/dashboard",
+      "name": "Admin Dashboard Overview",
+      "httpStatus": 200,
+      "headings": [
+        "Executive Dashboard",
+        "Executive Hotel Overview",
+        "Room Inventory & Housekeeping Board",
+        "Quick Actions",
+        "Recent Activities"
+      ],
+      "buttonsFound": 5,
+      "buttonsTested": 5,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Today",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 1,
+          "name": "Last 7 Days",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "This Month",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Refresh",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "+ New Walk-In",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_dashboard.png"
+    },
+    {
+      "route": "/admin/front-desk",
+      "name": "Front Desk Operations",
+      "httpStatus": 200,
+      "headings": [
+        "Front Desk",
+        "Front Desk & Reception",
+        "Reception QR Walk-In Counter Queue",
+        "Expected Arrivals (0)",
+        "In-House Active Stays (0)"
+      ],
+      "buttonsFound": 1,
+      "buttonsTested": 1,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Print Desk Standee QR",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_front-desk.png"
+    },
+    {
+      "route": "/admin/walk-in",
+      "name": "Reception Walk-In Booking",
+      "httpStatus": 200,
+      "headings": [
+        "Walk-in QR & Kiosk",
+        "Walk-in Guest QR & Reception Kiosk",
+        "Room Category & Physical Room Allocation",
+        "Guest Identification & Statutory Compliance",
+        "Rate Override, Services & Front-Desk Discounts"
+      ],
+      "buttonsFound": 16,
+      "buttonsTested": 8,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Print Reception Standee",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully"
+        },
+        {
+          "index": 1,
+          "name": "Refresh Room Matrix",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Single Room",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Multi-Room Party",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "2 Adults",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "0 Children",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "Aadhaar Card (UIDAI)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 7,
+          "name": "GST Exclusive (+5%)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_walk-in.png"
+    },
+    {
+      "route": "/admin/bookings",
+      "name": "Bookings & Reservations Manager",
+      "httpStatus": 200,
+      "headings": [
+        "Bookings",
+        "Room Bookings & Reservations"
+      ],
+      "buttonsFound": 8,
+      "buttonsTested": 7,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "+ RECORD OTA BOOKING",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        },
+        {
+          "index": 1,
+          "name": "Export CSV",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "All Sources",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Walk-In",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Website",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "MakeMyTrip & OTAs",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 7,
+          "name": "All Lifecycle Statuses",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_bookings.png"
+    },
+    {
+      "route": "/admin/reservations",
+      "name": "Timeline Calendar Reservations",
+      "httpStatus": 200,
+      "headings": [
+        "Reservations",
+        "Room Bookings & Reservations"
+      ],
+      "buttonsFound": 8,
+      "buttonsTested": 7,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "+ RECORD OTA BOOKING",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        },
+        {
+          "index": 1,
+          "name": "Export CSV",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "All Sources",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Walk-In",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Website",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "MakeMyTrip & OTAs",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 7,
+          "name": "All Lifecycle Statuses",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_reservations.png"
+    },
+    {
+      "route": "/admin/rooms",
+      "name": "Rooms Management",
+      "httpStatus": 200,
+      "headings": [
+        "Room Tape Chart",
+        "Visual Room Tape Chart & Dynamic Matrix"
+      ],
+      "buttonsFound": 10,
+      "buttonsTested": 8,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "Previous 7 Days",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Today",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Next 7 Days",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "All Floors",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Floor 1",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "Floor 2",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 7,
+          "name": "Floor 3",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 8,
+          "name": "All Categories",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_rooms.png"
+    },
+    {
+      "route": "/admin/rooms/board",
+      "name": "Visual Room Board",
+      "httpStatus": 200,
+      "headings": [
+        "Room Tape Chart",
+        "Visual Room Tape Chart & Dynamic Matrix"
+      ],
+      "buttonsFound": 10,
+      "buttonsTested": 8,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "Previous 7 Days",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Today",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Next 7 Days",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "All Floors",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Floor 1",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "Floor 2",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 7,
+          "name": "Floor 3",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 8,
+          "name": "All Categories",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_rooms_board.png"
+    },
+    {
+      "route": "/admin/rooms/categories",
+      "name": "Room Categories & Tariffs",
+      "httpStatus": 200,
+      "headings": [
+        "Room Categories",
+        "Room Categories",
+        "Double Room",
+        "Four Bed Room",
+        "Suite Room"
+      ],
+      "buttonsFound": 5,
+      "buttonsTested": 2,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Refresh",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 1,
+          "name": "Edit Room",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_rooms_categories.png"
+    },
+    {
+      "route": "/admin/rooms/inventory",
+      "name": "Daily Room Inventory Grid",
+      "httpStatus": 200,
+      "headings": [
+        "Room Inventory",
+        "Room Inventory & Housekeeping Board"
+      ],
+      "buttonsFound": 3,
+      "buttonsTested": 3,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Refresh",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 1,
+          "name": "All Floors",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "All Statuses",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_rooms_inventory.png"
+    },
+    {
+      "route": "/admin/guests",
+      "name": "Guest Directory & CRM",
+      "httpStatus": 200,
+      "headings": [
+        "Guests",
+        "Guest Profiles & Lifetime Stays"
+      ],
+      "buttonsFound": 147,
+      "buttonsTested": 8,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Export CSV",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Download triggered: sri-tayi-grand-guests.csv"
+        },
+        {
+          "index": 1,
+          "name": "All Guests (70)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Platinum VIP (0)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Gold (0)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Silver (0)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Regular (70)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "Blacklisted (0)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 7,
+          "name": "Edit",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_guests.png"
+    },
+    {
+      "route": "/admin/housekeeping",
+      "name": "Housekeeping & Turndown",
+      "httpStatus": 200,
+      "headings": [
+        "Housekeeping",
+        "Housekeeping Turnaround & Inspections",
+        "Turnaround Required",
+        "Cleaning In Progress",
+        "Clean & Certified Ready"
+      ],
+      "buttonsFound": 57,
+      "buttonsTested": 8,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Print Turnaround Sheet",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 1,
+          "name": "Refresh Housekeeping Data",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "All Floors",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Floor 1",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Floor 2",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Floor 3",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "All Attendants",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 7,
+          "name": "Re-Inspect",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_housekeeping.png"
+    },
+    {
+      "route": "/admin/maintenance",
+      "name": "Maintenance & Work Orders",
+      "httpStatus": 200,
+      "headings": [
+        "Maintenance",
+        "Property Maintenance & Out-of-Order (OOO) Blocks",
+        "Active Work Orders & Maintenance History"
+      ],
+      "buttonsFound": 17,
+      "buttonsTested": 8,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Refresh",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 1,
+          "name": "+ NEW WORK ORDER",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        },
+        {
+          "index": 2,
+          "name": "All Categories",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "All Priorities",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "All Statuses",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Block Room (OOO)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "Resolve",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        },
+        {
+          "index": 7,
+          "name": "Delete Ticket",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_maintenance.png"
+    },
+    {
+      "route": "/admin/convention-hall",
+      "name": "Convention Hall Reservations",
+      "httpStatus": 200,
+      "headings": [
+        "Convention Hall",
+        "Sri Tayi Grand Convention Hall",
+        "Client & Event Schedule",
+        "Seating Layout Visualizer",
+        "Andhra Catering & Banquet F&B Package"
+      ],
+      "buttonsFound": 4,
+      "buttonsTested": 4,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Interactive Quotation Builder",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 1,
+          "name": "Generated Quotations (0)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Incoming Enquiries (0)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "GENERATE OFFICIAL QUOTE",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_convention-hall.png"
+    },
+    {
+      "route": "/admin/enquiries",
+      "name": "Guest Enquiries & Leads",
+      "httpStatus": 200,
+      "headings": [
+        "Enquiries",
+        "Customer Enquiries & Banquet Leads",
+        "No enquiries found"
+      ],
+      "buttonsFound": 6,
+      "buttonsTested": 6,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Refresh pipeline",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 1,
+          "name": "Record New Enquiry",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        },
+        {
+          "index": 2,
+          "name": "Convention & Banquet Enquiries 0",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "General & Room Enquiries 0",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "All Statuses",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Reset active filters",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_enquiries.png"
+    },
+    {
+      "route": "/admin/rfid",
+      "name": "RFID Keycard Operations (Protected Safety Mode)",
+      "httpStatus": 200,
+      "headings": [
+        "RFID Management",
+        "RFID Keycards & Be-Tech Hardware Bridge",
+        "Super Admin Cards",
+        "Housekeeping Cleaning Cards"
+      ],
+      "buttonsFound": 14,
+      "buttonsTested": 8,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "+ Super Admin Card",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        },
+        {
+          "index": 1,
+          "name": "+ Cleaner Card",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        },
+        {
+          "index": 2,
+          "name": "+ Issue Customer Card",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        },
+        {
+          "index": 3,
+          "name": "Recheck RFID Connection",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Refresh Cards",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Host Settings",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        },
+        {
+          "index": 6,
+          "name": "Card Roles & Master Keys 0",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 7,
+          "name": "Hardware Encoder Station",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_rfid.png"
+    },
+    {
+      "route": "/admin/rfid/standee",
+      "name": "RFID QR Standee Kiosk",
+      "httpStatus": 200,
+      "headings": [
+        "Reception Walk-In QR Standee"
+      ],
+      "buttonsFound": 0,
+      "buttonsTested": 0,
+      "buttonInteractions": [],
+      "status": "PASS",
+      "screenshot": "admin_rfid_standee.png"
+    },
+    {
+      "route": "/admin/payments",
+      "name": "Payment Transactions & Settlements",
+      "httpStatus": 200,
+      "headings": [
+        "Payments",
+        "Payments & Financial Ledger"
+      ],
+      "buttonsFound": 116,
+      "buttonsTested": 7,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Send Payment Link",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        },
+        {
+          "index": 1,
+          "name": "+ Record Expense",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        },
+        {
+          "index": 2,
+          "name": "+ Record Collection",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        },
+        {
+          "index": 3,
+          "name": "Reconcile Payments",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Customer Collections & Folios (110)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Hotel Operating Expenses (2)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "Refund",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_payments.png"
+    },
+    {
+      "route": "/admin/cashbook",
+      "name": "Cashbook & Shift Register",
+      "httpStatus": 200,
+      "headings": [
+        "Cashbook & Drawer",
+        "Cashbook & Drawer Shifts",
+        "Shift Cash Transactions Ledger",
+        "Shift History & Drawer Audits"
+      ],
+      "buttonsFound": 83,
+      "buttonsTested": 8,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Refresh",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 1,
+          "name": "Open New Cash Shift",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        },
+        {
+          "index": 2,
+          "name": "All",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Cash In",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Cash Out",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "CSV",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Download triggered: SriTayiGrand_Cashbook_Ledger_2026-11-21.csv"
+        },
+        {
+          "index": 6,
+          "name": "Delete Transaction",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 79,
+          "name": "Print Handover Report",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_cashbook.png"
+    },
+    {
+      "route": "/admin/expenses",
+      "name": "Expense Tracker & Vouchers",
+      "httpStatus": 200,
+      "headings": [
+        "Expenses",
+        "Operating Expenses & Bills",
+        "Property Operating Expense Vouchers"
+      ],
+      "buttonsFound": 5,
+      "buttonsTested": 4,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Refresh",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 1,
+          "name": "Record New Expense",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        },
+        {
+          "index": 2,
+          "name": "All Expense Categories",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Delete Expense Record",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_expenses.png"
+    },
+    {
+      "route": "/admin/accounting",
+      "name": "Hotel Accounting & P&L",
+      "httpStatus": 200,
+      "headings": [
+        "Accounting",
+        "General Ledger & Double-Entry Accounting"
+      ],
+      "buttonsFound": 12,
+      "buttonsTested": 8,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "New Journal Entry",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        },
+        {
+          "index": 2,
+          "name": "Chart of Accounts 0",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Journal Entries Ledger 0",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Profit & Loss (P&L)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Balance Sheet",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "All Accounts (0)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 7,
+          "name": "Assets (0)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 8,
+          "name": "Liabilities (0)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_accounting.png"
+    },
+    {
+      "route": "/admin/daily-closing",
+      "name": "Daily Financial Closing",
+      "httpStatus": 200,
+      "headings": [
+        "Daily Shift Closing",
+        "End-of-Day Night Audit & Closing",
+        "Historical Daily Closings & Audited Ledgers"
+      ],
+      "buttonsFound": 3,
+      "buttonsTested": 3,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Refresh Ledger",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 1,
+          "name": "Manual Closing & Audit Wizard",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Automated Dispatch Settings",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_daily-closing.png"
+    },
+    {
+      "route": "/admin/night-audit",
+      "name": "Night Audit Automation",
+      "httpStatus": 200,
+      "headings": [
+        "Night Audit",
+        "End-of-Day Night Audit & Closing",
+        "Automated Daily Audit & Report Distribution",
+        "Scheduler & Channel Policies",
+        "Manual Test & On-Demand Generation"
+      ],
+      "buttonsFound": 11,
+      "buttonsTested": 8,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Refresh Ledger",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 1,
+          "name": "Manual Closing & Audit Wizard",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Automated Dispatch Settings",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Send Test Report Now",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Add Recipient",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        },
+        {
+          "index": 5,
+          "name": "Save Settings",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "AdminBtn-7",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 7,
+          "name": "AdminBtn-8",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_night-audit.png"
+    },
+    {
+      "route": "/admin/analytics",
+      "name": "Revenue Analytics & KPIs",
+      "httpStatus": 200,
+      "headings": [
+        "Analytics",
+        "Hospitality Revenue & Business Intelligence",
+        "Distribution Channel Mix",
+        "Revenue & Occupancy Trajectory",
+        "Room Category Yield & Inventory Performance"
+      ],
+      "buttonsFound": 7,
+      "buttonsTested": 5,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Today",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 1,
+          "name": "7 Days",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "30 Days",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "90 Days",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Year-to-Date",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_analytics.png"
+    },
+    {
+      "route": "/admin/reports",
+      "name": "Reports Generator & CSV/PDF",
+      "httpStatus": 200,
+      "headings": [
+        "Reports & Analytics",
+        "Financial Reports & Performance Analytics",
+        "Shift Reconcile & Cash Drawer Verification",
+        "Historical Night Audit Records"
+      ],
+      "buttonsFound": 3,
+      "buttonsTested": 3,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Refresh",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 1,
+          "name": "Export CSV",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Download triggered: sri_tayi_grand_bookings_1795287287113.csv"
+        },
+        {
+          "index": 2,
+          "name": "EXECUTE NIGHT AUDIT & CLOSE DAY",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_reports.png"
+    },
+    {
+      "route": "/admin/staff",
+      "name": "Staff Management & Payroll",
+      "httpStatus": 200,
+      "headings": [
+        "Staff Management",
+        "Staff Directory & RBAC Permissions"
+      ],
+      "buttonsFound": 16,
+      "buttonsTested": 8,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "All Departments (9)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 1,
+          "name": "Executive Management (1)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Hotel Operations (1)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Front Desk (2)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Housekeeping (3)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Accounts & Finance (1)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "Banquets (1)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 7,
+          "name": "Permissions",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_staff.png"
+    },
+    {
+      "route": "/admin/staff/attendance",
+      "name": "Staff Shifts & Attendance",
+      "httpStatus": 200,
+      "headings": [
+        "Staff Attendance",
+        "Staff Attendance & Shift Roster"
+      ],
+      "buttonsFound": 11,
+      "buttonsTested": 8,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Refresh Roster",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 1,
+          "name": "Clock-In Staff",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        },
+        {
+          "index": 2,
+          "name": "Previous Day",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Next Day",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Today",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "All Shifts",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "Morning",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 7,
+          "name": "Evening",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_staff_attendance.png"
+    },
+    {
+      "route": "/admin/pricing",
+      "name": "Tariff Rules & Dynamic Pricing",
+      "httpStatus": 200,
+      "headings": [
+        "Pricing",
+        "Dynamic Tariff & Seasonal Pricing Rules",
+        "Effective Rate Calculator & Simulator",
+        "Configured Pricing Rules & Automated Surges"
+      ],
+      "buttonsFound": 15,
+      "buttonsTested": 8,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Refresh",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 1,
+          "name": "Create Pricing Rule",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        },
+        {
+          "index": 2,
+          "name": "Double Room (Base ₹1800)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Today",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "This Friday (Weekend)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Brahmotsavam Peak",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "None",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 7,
+          "name": "+1 Adult",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_pricing.png"
+    },
+    {
+      "route": "/admin/channels",
+      "name": "OTA Channel Manager",
+      "httpStatus": 200,
+      "headings": [
+        "Channels",
+        "OTA Channel Manager & Inventory Distribution",
+        "Connected OTA Channels & Distribution Endpoints",
+        "MakeMyTrip",
+        "Goibibo"
+      ],
+      "buttonsFound": 19,
+      "buttonsTested": 8,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Refresh",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 1,
+          "name": "Sync All Channels Now",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 2,
+          "name": "Click to Activate Sync",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Click to Pause Sync",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Sync Channel Now",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 12,
+          "name": "MMT Suite",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 13,
+          "name": "Booking.com 4-Bed",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 14,
+          "name": "Agoda Double",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_channels.png"
+    },
+    {
+      "route": "/admin/reviews",
+      "name": "Google Reviews Moderation",
+      "httpStatus": 200,
+      "headings": [
+        "Google Reviews",
+        "Guest Reviews & Experiences"
+      ],
+      "buttonsFound": 139,
+      "buttonsTested": 8,
+      "buttonInteractions": [
+        {
+          "index": 1,
+          "name": "Import Pasted Review",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS",
+          "notes": "Modal opened successfully and cleanly dismissed"
+        },
+        {
+          "index": 2,
+          "name": "All (44)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Featured (6)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Published (44)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Hidden (0)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "Rating Only (18)",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 7,
+          "name": "Featured",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 8,
+          "name": "Live",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_reviews.png"
+    },
+    {
+      "route": "/admin/content",
+      "name": "Content & CMS Management",
+      "httpStatus": 200,
+      "headings": [
+        "Website Content",
+        "Website Content Management"
+      ],
+      "buttonsFound": 1,
+      "buttonsTested": 1,
+      "buttonInteractions": [
+        {
+          "index": 0,
+          "name": "Save & Publish Live Changes",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_content.png"
+    },
+    {
+      "route": "/admin/settings",
+      "name": "Hotel & Property Settings",
+      "httpStatus": 200,
+      "headings": [
+        "Settings"
+      ],
+      "buttonsFound": 0,
+      "buttonsTested": 0,
+      "buttonInteractions": [],
+      "status": "PASS",
+      "screenshot": "admin_settings.png"
+    },
+    {
+      "route": "/admin/audit-logs",
+      "name": "Security Audit Logs",
+      "httpStatus": 200,
+      "headings": [
+        "Audit Logs",
+        "System Audit & Activity Trail"
+      ],
+      "buttonsFound": 11,
+      "buttonsTested": 8,
+      "buttonInteractions": [
+        {
+          "index": 2,
+          "name": "All Events",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 3,
+          "name": "Bookings",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 4,
+          "name": "Payments",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 5,
+          "name": "Cashbook",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 6,
+          "name": "Accounting",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 7,
+          "name": "Pricing",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 8,
+          "name": "Rooms",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        },
+        {
+          "index": 9,
+          "name": "Maintenance",
+          "disabled": false,
+          "tested": true,
+          "result": "PASS"
+        }
+      ],
+      "status": "PASS",
+      "screenshot": "admin_audit-logs.png"
+    },
+    {
+      "route": "/admin/403",
+      "name": "Role Access Denied Page",
+      "httpStatus": 200,
+      "headings": [
+        "Restricted Permission Area"
+      ],
+      "buttonsFound": 0,
+      "buttonsTested": 0,
+      "buttonInteractions": [],
+      "status": "PASS",
+      "screenshot": "admin_403.png"
+    }
+  ],
+  "systemErrors": [
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/availability?checkIn=2026-11-22&checkOut=2026-11-23&adults=2&children=0&rooms=1&roomsCount=1",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/availability?checkIn=2026-11-22&checkOut=2026-11-23&adults=2&children=0&rooms=1&roomsCount=1",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/availability?checkIn=2026-11-22&checkOut=2026-11-23&adults=2&children=0&rooms=1&roomsCount=1",
+      "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/availability?checkIn=2026-11-22&checkOut=2026-11-23&adults=2&children=0&rooms=1&roomsCount=1",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/availability?checkIn=2026-11-22&checkOut=2026-11-23&adults=2&children=0&rooms=1&roomsCount=1",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/availability?checkIn=2026-11-22&checkOut=2026-11-23&adults=2&children=0&rooms=1&roomsCount=1",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms?checkIn=2026-11-21&checkOut=2026-11-23&rooms=1&adults=2&children=0",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms?checkIn=2026-11-21&checkOut=2026-11-23&rooms=1&adults=2&children=0",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms?checkIn=2026-11-21&checkOut=2026-11-23&rooms=1&adults=2&children=0",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/double-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/double-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/double-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/double-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/double-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/double-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/double-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/double-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/double-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/double-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/double-room",
+      "message": "A bad HTTP response code (404) was received when fetching the script.",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/double-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/double-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/double-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/double-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/double-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/four-bed-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/four-bed-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/four-bed-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/four-bed-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/four-bed-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/four-bed-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/four-bed-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/four-bed-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/four-bed-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/four-bed-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/four-bed-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/four-bed-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/four-bed-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/four-bed-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/four-bed-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/suite-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/suite-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/suite-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/suite-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/suite-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/suite-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/suite-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/suite-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/suite-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/suite-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/suite-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/suite-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/suite-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/suite-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/suite-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/suite-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/single-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/single-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/single-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/single-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/single-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/single-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/single-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/single-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/single-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/single-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/single-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/single-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/single-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/rooms/single-room",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/availability",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/availability",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/availability",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/availability",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/availability",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/booking",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/booking",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/booking",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/booking/checkout",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/booking/checkout",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/booking/checkout",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/booking/checkout",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/booking/checkout",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/booking",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/booking",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/booking",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/amenities",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/amenities",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/amenities",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/amenities",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/amenities",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/amenities",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/amenities",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/amenities",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/convention-hall",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/convention-hall",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/convention-hall",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/convention-hall",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/convention-hall",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/gallery",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/about",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/about",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/about",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/about",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/about",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/about",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/about",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/about",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/about",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/contact",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/contact",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/contact",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/contact",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/contact",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/policies",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/policies",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/policies",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/testimonials",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/testimonials",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/testimonials",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/testimonials",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/testimonials",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/login",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/dashboard",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/dashboard",
+      "message": "Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "type": "pageerror"
+    },
+    {
+      "url": "http://localhost:3000/admin/dashboard",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/dashboard",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/dashboard",
+      "message": "Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "type": "pageerror"
+    },
+    {
+      "url": "http://localhost:3000/admin/dashboard",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/front-desk",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/front-desk",
+      "message": "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/walk-in",
+      "message": "Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "type": "pageerror"
+    },
+    {
+      "url": "http://localhost:3000/admin/walk-in",
+      "message": "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/walk-in",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/bookings",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/bookings",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/reservations",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/reservations",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/rooms/board",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/rooms/board",
+      "message": "Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "type": "pageerror"
+    },
+    {
+      "url": "http://localhost:3000/admin/rooms/board",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/rooms/board",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/rooms/board",
+      "message": "Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "type": "pageerror"
+    },
+    {
+      "url": "http://localhost:3000/admin/rooms/board",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/rooms/categories",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/rooms/categories",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/rooms/categories",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/rooms/categories",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/rooms/categories",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/rooms/categories",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/rooms/inventory",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/guests",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/housekeeping",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/maintenance",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/convention-hall",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/enquiries",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/rfid",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/rfid",
+      "message": "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/rfid",
+      "message": "Failed to load resource: net::ERR_CONNECTION_REFUSED",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/payments",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/cashbook",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/expenses",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/accounting",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/daily-closing",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/night-audit",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/analytics",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/reports",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/reports",
+      "message": "Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "type": "pageerror"
+    },
+    {
+      "url": "http://localhost:3000/admin/reports",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/staff",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/staff/attendance",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/staff/attendance",
+      "message": "Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "type": "pageerror"
+    },
+    {
+      "url": "http://localhost:3000/admin/staff/attendance",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/pricing",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/channels",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/reviews",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/content",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/settings",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/audit-logs",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 404 (Not Found)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/dashboard",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/dashboard",
+      "message": "Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "type": "pageerror"
+    },
+    {
+      "url": "http://localhost:3000/admin/dashboard",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/dashboard",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/dashboard",
+      "message": "Minified React error #418; visit https://react.dev/errors/418?args[]=text&args[]= for the full message or use the non-minified dev environment for full errors and additional helpful warnings.",
+      "type": "pageerror"
+    },
+    {
+      "url": "http://localhost:3000/admin/dashboard",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    },
+    {
+      "url": "http://localhost:3000/admin/login",
+      "message": "Failed to load resource: the server responded with a status of 400 (Bad Request)",
+      "type": "console.error"
+    }
+  ],
+  "completedAt": "2026-11-21T18:55:11.574Z"
+}

@@ -102,6 +102,7 @@ import {
   syncAuditLogToSupabase,
   loadAuditLogsFromSupabase,
   loadReviewsFromSupabase,
+  syncReviewToSupabase,
   deleteReviewFromSupabase,
   syncWebsiteContentToSupabase,
   loadWebsiteContentFromSupabase,
@@ -3037,7 +3038,7 @@ export class HotelRepository {
       (a) => a.staff_id === params.staffId && a.date === todayStr
     );
     if (existing && existing.clock_in && !existing.clock_out) {
-      throw new Error(`${staff.full_name} is already clocked in today.`);
+      return existing;
     }
 
     const attendance: StaffAttendance = {
@@ -3171,6 +3172,8 @@ export class HotelRepository {
     const review = this.reviews.find((r) => r.id === id);
     if (!review) return null;
     review.is_published = published;
+    savePersistedData('reviews.json', this.reviews);
+    syncReviewToSupabase(review);
     return { ...review };
   }
 
@@ -3178,6 +3181,8 @@ export class HotelRepository {
     const review = this.reviews.find((r) => r.id === id);
     if (!review) return null;
     review.is_featured = featured;
+    savePersistedData('reviews.json', this.reviews);
+    syncReviewToSupabase(review);
     return { ...review };
   }
 
@@ -3191,6 +3196,8 @@ export class HotelRepository {
       display_order: data.display_order ?? nextNum,
     };
     this.reviews.push(newReview);
+    savePersistedData('reviews.json', this.reviews);
+    syncReviewToSupabase(newReview);
     return { ...newReview };
   }
 

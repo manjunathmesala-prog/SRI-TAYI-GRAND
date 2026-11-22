@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import Link from 'next/link';
@@ -698,23 +698,23 @@ export default function BookingsAdminPage() {
   return (
     <div className="space-y-6 sm:space-y-8 max-w-7xl mx-auto w-full">
       {/* Header matching exact luxury design */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]/80">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-[0.25em] font-semibold text-[#8D672F] inline-flex items-center gap-1.5">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8D672F] inline-flex items-center gap-1.5">
               <LotusBrandIcon size={14} className="w-3.5 h-3.5" />
-              PMS RESERVATION OPERATIONS
+              PMS Reservation Operations
             </span>
             <span
               className={`text-[9px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1 ${
-                isConnected ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                isConnected ? 'bg-emerald-50 text-emerald-800 border border-emerald-200' : 'bg-amber-50 text-amber-800 border border-amber-200'
               }`}
             >
               <Radio className="w-2.5 h-2.5" />
-              {isConnected ? 'Real-Time Sync Active' : `Sync: ${syncStatus}`}
+              {isConnected ? 'Live Sync Active' : `Sync: ${syncStatus}`}
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-serif text-[#33271D] font-bold">
+          <h1 className="text-2xl sm:text-3xl font-serif text-[#2A1D13] font-bold">
             {t('bookings.title', 'Guest Reservations & In-House Folios')}
           </h1>
           <p className="text-xs text-[#786A5B] mt-0.5">
@@ -725,7 +725,7 @@ export default function BookingsAdminPage() {
         <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 w-full sm:w-auto">
           <button
             onClick={() => setShowOtaModal(true)}
-            className="flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-xl bg-[#21180F] hover:bg-black text-[#FAF6EE] text-xs uppercase tracking-wider font-bold border border-[#B18A4A]/50 shadow-md transition-all flex items-center space-x-1.5 min-h-[42px] cursor-pointer"
+            className="flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-xl bg-[#2A1D13] hover:bg-black text-[#FAF6EE] text-xs font-semibold shadow-sm transition-all flex items-center space-x-1.5 min-h-[40px] cursor-pointer"
           >
             <Globe className="w-3.5 h-3.5 text-[#B18A4A]" />
             <span>{t('bookings.recordOta', '+ Record OTA Booking')}</span>
@@ -733,25 +733,25 @@ export default function BookingsAdminPage() {
 
           <Link
             href="/admin/front-desk"
-            className="flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-xl bg-[#8D672F] hover:bg-[#6D4E21] text-white text-xs uppercase tracking-wider font-semibold shadow-md transition-all flex items-center space-x-1.5 min-h-[42px] cursor-pointer"
+            className="flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-xl bg-[#8D672F] hover:bg-[#6D4E21] text-white text-xs font-semibold shadow-sm transition-all flex items-center space-x-1.5 min-h-[40px] cursor-pointer"
           >
             <Zap className="w-3.5 h-3.5 text-amber-300" />
-            <span>{t('bookings.newBooking', 'New Walk-In')}</span>
+            <span>{t('bookings.newBooking', 'Front Desk Walk-In')}</span>
           </Link>
 
           <button
             onClick={handleExportCsv}
-            className="flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-white text-xs font-semibold text-[#33271D] hover:bg-[#F8F3E9] shadow-sm transition-all flex items-center space-x-1.5 min-h-[42px] cursor-pointer"
+            className="flex-1 sm:flex-none justify-center px-3.5 py-2.5 rounded-xl border border-[#E6D9C5] bg-white text-xs font-semibold text-[#2A1D13] hover:bg-[#FAF6EE] shadow-xs transition-all flex items-center space-x-1.5 min-h-[40px] cursor-pointer"
           >
-            <Download className="w-3.5 h-3.5 text-[#B18A4A]" />
+            <Download className="w-3.5 h-3.5 text-[#8D672F]" />
             <span>{t('common.exportCsv', 'Export CSV')}</span>
           </button>
 
           <Link
             href="/admin/rooms/board"
-            className="flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-white text-xs font-semibold text-[#33271D] hover:bg-[#F8F3E9] transition-all flex items-center space-x-1.5 min-h-[42px] cursor-pointer"
+            className="flex-1 sm:flex-none justify-center px-3.5 py-2.5 rounded-xl border border-[#E6D9C5] bg-white text-xs font-semibold text-[#2A1D13] hover:bg-[#FAF6EE] shadow-xs transition-all flex items-center space-x-1.5 min-h-[40px] cursor-pointer"
           >
-            <BedDouble className="w-3.5 h-3.5 text-[#B18A4A]" />
+            <BedDouble className="w-3.5 h-3.5 text-[#8D672F]" />
             <span>Tape Chart</span>
           </Link>
         </div>

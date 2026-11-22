@@ -416,8 +416,10 @@ export default function ConventionHallAdminPage() {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex items-center gap-2 border-b border-[#EFE3D6] pb-2">
+      <div role="tablist" className="flex items-center gap-2 border-b border-[#EFE3D6] pb-2">
         <button
+          role="tab"
+          aria-selected={activeTab === 'builder'}
           onClick={() => setActiveTab('builder')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
             activeTab === 'builder'
@@ -430,6 +432,8 @@ export default function ConventionHallAdminPage() {
         </button>
 
         <button
+          role="tab"
+          aria-selected={activeTab === 'quotes'}
           onClick={() => setActiveTab('quotes')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
             activeTab === 'quotes'
@@ -442,6 +446,8 @@ export default function ConventionHallAdminPage() {
         </button>
 
         <button
+          role="tab"
+          aria-selected={activeTab === 'enquiries'}
           onClick={() => setActiveTab('enquiries')}
           className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
             activeTab === 'enquiries'

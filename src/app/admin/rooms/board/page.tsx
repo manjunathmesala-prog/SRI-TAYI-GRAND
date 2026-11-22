@@ -487,114 +487,114 @@ export default function RoomTapeChartPage() {
 
   return (
     <div className="space-y-6 max-w-[1600px] mx-auto pb-16">
-      {/* Top Banner */}
-      <div className="bg-[#241912] text-[#FAF7F2] rounded-2xl p-6 md:p-8 border border-[#D8AD56]/30 shadow-xl relative overflow-hidden">
-        <div className="absolute right-0 top-0 w-96 h-96 bg-gradient-to-bl from-[#D8AD56]/15 via-[#382216]/10 to-transparent rounded-full blur-3xl pointer-events-none" />
-
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
-          <div>
-            <div className="flex items-center gap-2.5 mb-2">
-              <span className="px-2.5 py-0.5 rounded text-[11px] font-bold uppercase tracking-wider bg-[#D8AD56]/20 text-[#D8AD56] border border-[#D8AD56]/40">
-                Front Office Operations
-              </span>
-              <div
-                className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
-                  isConnected
-                    ? 'bg-emerald-950/60 text-emerald-300 border-emerald-600/40'
-                    : 'bg-amber-950/60 text-amber-300 border-amber-600/40'
-                }`}
-              >
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${
-                    isConnected ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
-                  }`}
-                />
-                {isConnected ? 'Real-Time Sync Active' : 'Connecting Stream...'}
-              </div>
-            </div>
-            <h1 className="text-2xl md:text-3xl font-serif font-bold text-white tracking-wide">
-              Visual Room Tape Chart & Dynamic Matrix
-            </h1>
-            <p className="text-[#FAF7F2]/70 text-sm mt-1 max-w-2xl leading-relaxed">
-              14-Day Gantt-style timeline across all 25 physical rooms and 3 floors. Manage room locks,
-              guest check-ins, cleaning schedules, and maintenance OOO blocks.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3 shrink-0">
-            <button
-              onClick={() => fetchData(true)}
-              disabled={loading}
-              className="px-4 py-2.5 rounded-xl border border-[#D8AD56]/30 bg-[#382216]/70 hover:bg-[#382216] text-[#D8AD56] font-medium text-xs flex items-center gap-2 transition-all shadow-sm active:scale-95 cursor-pointer"
+      {/* Top Welcome & Telemetry Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]/80">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8D672F]">
+              Front Office Operations
+            </span>
+            <div
+              className={`flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[9px] font-bold border ${
+                isConnected
+                  ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                  : 'bg-amber-50 text-amber-800 border-amber-200'
+              }`}
             >
-              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-              <span>Refresh Matrix</span>
-            </button>
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'
+                }`}
+              />
+              {isConnected ? 'Live Sync Active' : 'Connecting Stream...'}
+            </div>
           </div>
+          <h1 className="text-2xl sm:text-3xl font-serif font-bold text-[#2A1D13] flex items-center gap-2.5">
+            <CalendarRange className="w-6 h-6 text-[#8D672F]" />
+            <span>Room Tape Chart &amp; Inventory Matrix</span>
+          </h1>
+          <p className="text-[#786A5B] text-xs mt-0.5">
+            14-Day Gantt visual room inventory, guest allocations, cleaning turnaround, and maintenance blocks.
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5 shrink-0">
+          <button
+            onClick={() => fetchData(true)}
+            disabled={loading}
+            className="px-4 py-2.5 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF6EE] text-[#8D672F] font-semibold text-xs flex items-center gap-2 transition-all shadow-xs active:scale-95 cursor-pointer"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+            <span>Refresh Matrix</span>
+          </button>
         </div>
       </div>
 
-      {/* Live Operational Metrics Summary Strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div className="bg-white rounded-xl p-3 border border-[#D8AD56]/20 shadow-xs flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-[#FAF7F2] border border-[#D8AD56]/30 flex items-center justify-center text-[#8A5A2B] shrink-0 font-bold">
-            {metrics.total}
-          </div>
+      {/* LUXURY OPERATIONAL METRICS STRIP */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+        <div className="bg-white rounded-2xl p-4 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:border-[#8D672F]/50 transition-all flex items-center justify-between">
           <div>
-            <span className="text-[10px] uppercase font-mono tracking-wider text-stone-500 block">Total Rooms</span>
-            <span className="text-sm font-bold text-[#241912]">3 Floors</span>
+            <span className="text-[10px] font-semibold text-[#786A5B] block">Total Inventory</span>
+            <span className="text-2xl font-serif font-bold text-[#2A1D13] mt-1 block">{metrics.total}</span>
+            <span className="text-[10px] text-[#8D672F] font-medium">3 Floors</span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-[#FAF6EE] text-[#8D672F] border border-[#E6D9C5]/60 flex items-center justify-center font-bold">
+            <BedDouble className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-3 border border-blue-200/60 shadow-xs flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-700 shrink-0 font-bold">
-            {metrics.occupied}
-          </div>
+        <div className="bg-white rounded-2xl p-4 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:border-[#8D672F]/50 transition-all flex items-center justify-between">
           <div>
-            <span className="text-[10px] uppercase font-mono tracking-wider text-stone-500 block">Occupied</span>
-            <span className="text-sm font-bold text-blue-900">In-House Stays</span>
+            <span className="text-[10px] font-semibold text-[#786A5B] block">Occupied</span>
+            <span className="text-2xl font-serif font-bold text-[#2A1D13] mt-1 block">{metrics.occupied}</span>
+            <span className="text-[10px] text-blue-700 font-medium">In-House Stays</span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-700 border border-blue-200/60 flex items-center justify-center font-bold">
+            <Users className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-3 border border-amber-200/60 shadow-xs flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 shrink-0 font-bold">
-            {metrics.reserved}
-          </div>
+        <div className="bg-white rounded-2xl p-4 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:border-[#8D672F]/50 transition-all flex items-center justify-between">
           <div>
-            <span className="text-[10px] uppercase font-mono tracking-wider text-stone-500 block">Reserved</span>
-            <span className="text-sm font-bold text-amber-900">Expected Today</span>
+            <span className="text-[10px] font-semibold text-[#786A5B] block">Reserved</span>
+            <span className="text-2xl font-serif font-bold text-[#2A1D13] mt-1 block">{metrics.reserved}</span>
+            <span className="text-[10px] text-amber-700 font-medium">Expected Today</span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-700 border border-amber-200/60 flex items-center justify-center font-bold">
+            <Clock className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-3 border border-emerald-200/60 shadow-xs flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shrink-0 font-bold">
-            {metrics.availableClean}
-          </div>
+        <div className="bg-white rounded-2xl p-4 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:border-[#8D672F]/50 transition-all flex items-center justify-between">
           <div>
-            <span className="text-[10px] uppercase font-mono tracking-wider text-stone-500 block">Clean Ready</span>
-            <span className="text-sm font-bold text-emerald-900">Immediate Walk-In</span>
+            <span className="text-[10px] font-semibold text-[#786A5B] block">Clean &amp; Ready</span>
+            <span className="text-2xl font-serif font-bold text-[#2A1D13] mt-1 block">{metrics.availableClean}</span>
+            <span className="text-[10px] text-emerald-700 font-medium">Immediate Walk-In</span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center font-bold">
+            <Sparkles className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-3 border border-yellow-200/60 shadow-xs flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-yellow-50 border border-yellow-200 flex items-center justify-center text-yellow-700 shrink-0 font-bold">
-            {metrics.cleaningDirty}
-          </div>
+        <div className="bg-white rounded-2xl p-4 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:border-[#8D672F]/50 transition-all flex items-center justify-between">
           <div>
-            <span className="text-[10px] uppercase font-mono tracking-wider text-stone-500 block">Housekeeping</span>
-            <span className="text-sm font-bold text-yellow-900">Turnaround Dirty</span>
+            <span className="text-[10px] font-semibold text-[#786A5B] block">Turnaround</span>
+            <span className="text-2xl font-serif font-bold text-[#2A1D13] mt-1 block">{metrics.cleaningDirty}</span>
+            <span className="text-[10px] text-amber-800 font-medium">Needs Cleaning</span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-800 border border-amber-200/60 flex items-center justify-center font-bold">
+            <Layers className="w-5 h-5" />
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-3 border border-[#D8AD56]/40 shadow-xs flex items-center gap-3 bg-gradient-to-br from-white to-[#FAF7F2]">
-          <div className="w-9 h-9 rounded-lg bg-[#382216] border border-[#D8AD56]/40 flex items-center justify-center text-[#D8AD56] shrink-0 font-bold">
-            {metrics.occupancyRate}%
-          </div>
+        <div className="bg-white rounded-2xl p-4 border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:border-[#8D672F]/50 transition-all flex items-center justify-between">
           <div>
-            <span className="text-[10px] uppercase font-mono tracking-wider text-stone-500 block">Occupancy Rate</span>
-            <span className="text-sm font-bold text-[#8A5A2B]">
-              {metrics.occupied + metrics.reserved} / {metrics.total} Active
-            </span>
+            <span className="text-[10px] font-semibold text-[#786A5B] block">Occupancy Rate</span>
+            <span className="text-2xl font-serif font-bold text-[#8D672F] mt-1 block">{metrics.occupancyRate}%</span>
+            <span className="text-[10px] text-[#786A5B] font-medium">{metrics.occupied + metrics.reserved} / {metrics.total} active</span>
+          </div>
+          <div className="w-10 h-10 rounded-xl bg-[#FAF6EE] text-[#8D672F] border border-[#E6D9C5]/60 flex items-center justify-center font-bold">
+            <ShieldCheck className="w-5 h-5" />
           </div>
         </div>
       </div>

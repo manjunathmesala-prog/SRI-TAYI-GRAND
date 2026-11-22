@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 import QRCode from 'qrcode';
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -819,10 +819,10 @@ export default function AnanthaWalkInPage() {
         fetchData();
       } else {
         const d = await res.json();
-        alert(d.error || 'Failed to assign room.');
+        setError(d.error || 'Failed to assign room.');
       }
     } catch {
-      alert('Error connecting to front desk queue.');
+      setError('Error connecting to front desk queue.');
     } finally {
       setAssigningKey(false);
     }

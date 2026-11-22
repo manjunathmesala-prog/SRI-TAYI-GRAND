@@ -1,1 +1,53 @@
-[]
+[
+  {
+    "id": "att-1795328051900",
+    "staff_id": "50aba2e5-0000-4fbd-bb89-000000000001",
+    "staff_name": "Hari Achari",
+    "role": "Hotel Manager",
+    "date": "2026-11-22",
+    "shift": "morning",
+    "clock_in": "2026-11-22T06:14:11.900Z",
+    "status": "present",
+    "work_hours": 0,
+    "notes": "Manager Hari Achari Morning Shift Operational Duty",
+    "created_at": "2026-11-22T06:14:11.900Z"
+  },
+  {
+    "id": "att-1795302380332",
+    "staff_id": "50aba2e5-0000-4fbd-bb89-000000000001",
+    "staff_name": "Hari Achari",
+    "role": "Hotel Manager",
+    "date": "2026-11-21",
+    "shift": "morning",
+    "clock_in": "2026-11-21T23:06:20.332Z",
+    "status": "present",
+    "work_hours": 0,
+    "notes": "Manager Hari Achari Morning Shift Operational Duty",
+    "created_at": "2026-11-21T23:06:20.332Z"
+  },
+  {
+    "id": "att-1795300147815",
+    "staff_id": "stf-02",
+    "staff_name": "G. Mohan Kumar",
+    "role": "Hotel Manager",
+    "date": "2026-11-21",
+    "shift": "morning",
+    "clock_in": "2026-11-21T22:29:07.815Z",
+    "status": "present",
+    "work_hours": 0,
+    "notes": "Super Admin Verified Morning Duty Roster 1795300116809",
+    "created_at": "2026-11-21T22:29:07.815Z"
+  },
+  {
+    "id": "att-1795176883689",
+    "staff_id": "stf-01",
+    "staff_name": "Sri Tayi Grand Admin",
+    "role": "Super Admin",
+    "date": "2026-11-20",
+    "shift": "morning",
+    "clock_in": "2026-11-20T12:14:43.689Z",
+    "status": "present",
+    "work_hours": 0,
+    "created_at": "2026-11-20T12:14:43.689Z"
+  }
+]

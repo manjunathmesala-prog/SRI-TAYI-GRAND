@@ -1,0 +1,421 @@
+{
+  "startedAt": "2026-11-22T06:13:55.911Z",
+  "environment": {
+    "baseUrl": "http://localhost:3000",
+    "browser": "Google Chrome",
+    "database": "Supabase PostgreSQL (aws-0-ap-northeast-1.pooler.supabase.com)"
+  },
+  "accountsTested": {
+    "hari": {
+      "email": "hari@sritayigrand.com",
+      "name": "Hari Achari",
+      "role": "Hotel Manager"
+    },
+    "sagar": {
+      "email": "sagar@sritayigrand.com",
+      "name": "Sagar",
+      "role": "Hotel Manager"
+    },
+    "superAdmin": {
+      "email": "admin@sritayigrand.com",
+      "name": "Sri Tayi Grand Admin",
+      "role": "Super Admin"
+    }
+  },
+  "tests": [
+    {
+      "category": "Frontend Login",
+      "description": "Quick preset cards present for Super Admin, Hari Achari, Sagar, and Front Desk",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:14:00.221Z"
+    },
+    {
+      "category": "Frontend Login",
+      "description": "Hari Achari preset pre-fills email and password correctly",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:14:00.685Z"
+    },
+    {
+      "category": "Authentication",
+      "description": "Hari Achari successfully authenticated and redirected to /admin/dashboard",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:14:06.599Z"
+    },
+    {
+      "category": "Dashboard Identity",
+      "description": "Dashboard displays Hari Achari identity and purple \"Hotel Manager\" badge",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:14:06.649Z"
+    },
+    {
+      "category": "Dashboard Shortcuts",
+      "description": "All 6 Manager Operational Shortcuts rendered (Walk-In, Attendance, Expenses, Hall, Night Audit, ERP)",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:14:06.686Z"
+    },
+    {
+      "category": "Sidebar RBAC",
+      "description": "All 7 Super Admin exclusive links are strictly HIDDEN from Manager sidebar",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:14:06.693Z"
+    },
+    {
+      "category": "Sidebar RBAC",
+      "description": "Staff Management base directory hidden while Staff Attendance is permitted",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:14:06.694Z"
+    },
+    {
+      "category": "Operations Flow",
+      "description": "Manager Hari Achari executed Staff Attendance Clock-In",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:14:13.213Z"
+    },
+    {
+      "category": "Supabase Sync",
+      "description": "Live attendance row verified in PostgreSQL table staff_attendance",
+      "status": "PASSED",
+      "details": {
+        "id": "att-1795328051900",
+        "staff_id": "50aba2e5-0000-4fbd-bb89-000000000001",
+        "shift": "morning",
+        "status": "present",
+        "clock_in": "2026-11-22T06:14:11.900Z",
+        "notes": "Manager Hari Achari Morning Shift Operational Duty"
+      },
+      "timestamp": "2026-11-22T06:14:14.352Z"
+    },
+    {
+      "category": "Operations Flow",
+      "description": "Manager Hari Achari successfully recorded operational expense (₹250)",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:14:18.911Z"
+    },
+    {
+      "category": "Supabase Sync",
+      "description": "Live expense record verified in PostgreSQL table expenses",
+      "status": "PASSED",
+      "details": {
+        "id": "exp-1795328057576-215",
+        "title": "Staff Operational Tea & Refreshments - Manager Hari",
+        "amount": "250.00",
+        "category": "staff_welfare",
+        "payment_method": "cash",
+        "created_at": "2026-11-22T06:14:17.576Z"
+      },
+      "timestamp": "2026-11-22T06:14:19.040Z"
+    },
+    {
+      "category": "Permitted Route",
+      "description": "Manager can access Walk-In Quick Desk (/admin/walk-in) without restriction",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:14:23.610Z"
+    },
+    {
+      "category": "Permitted Route",
+      "description": "Manager can access Bookings & Reservations (/admin/bookings) without restriction",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:14:28.306Z"
+    },
+    {
+      "category": "Permitted Route",
+      "description": "Manager can access Room Categories & Tariffs (/admin/rooms/categories) without restriction",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:14:32.088Z"
+    },
+    {
+      "category": "Permitted Route",
+      "description": "Manager can access Convention & Function Hall (/admin/convention-hall) without restriction",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:14:35.908Z"
+    },
+    {
+      "category": "Permitted Route",
+      "description": "Manager can access Night Audit System (/admin/night-audit) without restriction",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:14:40.627Z"
+    },
+    {
+      "category": "Permitted Route",
+      "description": "Manager can access General Ledger ERP (/admin/accounting) without restriction",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:14:45.216Z"
+    },
+    {
+      "category": "Permitted Route",
+      "description": "Manager can access RFID Keycards Management (/admin/rfid) without restriction",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:14:49.330Z"
+    },
+    {
+      "category": "Security 403 Guard",
+      "description": "Edge Middleware correctly intercepted Analytics & KPIs (/admin/analytics) -> Redirected to 403",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:14:53.725Z"
+    },
+    {
+      "category": "Security 403 Guard",
+      "description": "Edge Middleware correctly intercepted Financial Reports (/admin/reports) -> Redirected to 403",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:14:56.245Z"
+    },
+    {
+      "category": "Security 403 Guard",
+      "description": "Edge Middleware correctly intercepted Dynamic Pricing (/admin/pricing) -> Redirected to 403",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:14:58.710Z"
+    },
+    {
+      "category": "Security 403 Guard",
+      "description": "Edge Middleware correctly intercepted Hotel Settings (/admin/settings) -> Redirected to 403",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:15:01.289Z"
+    },
+    {
+      "category": "Security 403 Guard",
+      "description": "Edge Middleware correctly intercepted System Audit Logs (/admin/audit-logs) -> Redirected to 403",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:15:03.846Z"
+    },
+    {
+      "category": "Security 403 Guard",
+      "description": "Edge Middleware correctly intercepted Channel Manager (/admin/channels) -> Redirected to 403",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:15:06.483Z"
+    },
+    {
+      "category": "Backend API RBAC",
+      "description": "POST /api/admin/settings blocked with HTTP 403 Forbidden for Manager",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:15:12.116Z"
+    },
+    {
+      "category": "Backend API RBAC",
+      "description": "POST /api/admin/pricing blocked with HTTP 403 Forbidden for Manager",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:15:12.116Z"
+    },
+    {
+      "category": "Backend API RBAC",
+      "description": "POST /api/admin/staff blocked with HTTP 403 Forbidden for Manager",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:15:12.116Z"
+    },
+    {
+      "category": "Backend API RBAC",
+      "description": "GET /api/admin/expenses accessible with HTTP 200 OK for Manager",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:15:12.116Z"
+    },
+    {
+      "category": "Backend API RBAC",
+      "description": "GET /api/admin/night-audit/settings accessible with HTTP 200 OK for Manager",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:15:12.116Z"
+    },
+    {
+      "category": "Frontend Login",
+      "description": "Sagar preset pre-fills email and password correctly",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:15:15.916Z"
+    },
+    {
+      "category": "Dashboard Identity",
+      "description": "Dashboard displays Sagar identity and purple \"Hotel Manager\" badge",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:15:23.310Z"
+    },
+    {
+      "category": "Security 403 Guard",
+      "description": "Manager Sagar correctly intercepted from /admin/pricing -> Redirected to 403",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:15:25.841Z"
+    },
+    {
+      "category": "Super Admin Access",
+      "description": "All Super Admin exclusive links (Analytics, Reports, Pricing, Channels, Settings, Audit Logs, Content) visible in sidebar",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:15:33.528Z"
+    },
+    {
+      "category": "Super Admin Access",
+      "description": "Super Admin accesses /admin/analytics with 200 OK (no 403 redirect)",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:15:38.813Z"
+    },
+    {
+      "category": "Super Admin Access",
+      "description": "Super Admin accesses /admin/settings with 200 OK (no 403 redirect)",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T06:15:45.334Z"
+    },
+    {
+      "category": "Database Integrity",
+      "description": "Hari Achari profile strictly verified in Supabase PostgreSQL (Role: Hotel Manager)",
+      "status": "PASSED",
+      "details": {
+        "id": "50aba2e5-0000-4fbd-bb89-000000000001",
+        "full_name": "Hari Achari",
+        "role": "Hotel Manager",
+        "is_active": true,
+        "phone": "9440812346",
+        "email": "hari@sritayigrand.com"
+      },
+      "timestamp": "2026-11-22T06:15:46.286Z"
+    },
+    {
+      "category": "Database Integrity",
+      "description": "Sagar profile strictly verified in Supabase PostgreSQL (Role: Hotel Manager)",
+      "status": "PASSED",
+      "details": {
+        "id": "50aba2e5-0000-4fbd-bb89-000000000002",
+        "full_name": "Sagar",
+        "role": "Hotel Manager",
+        "is_active": true,
+        "phone": "9440812347",
+        "email": "sagar@sritayigrand.com"
+      },
+      "timestamp": "2026-11-22T06:15:46.286Z"
+    },
+    {
+      "category": "Database Integrity",
+      "description": "Super Admin profile strictly verified in Supabase PostgreSQL (Role: Super Admin)",
+      "status": "PASSED",
+      "details": {
+        "id": "e6e40243-6f98-44dc-94ad-3c56303cf61a",
+        "full_name": "Sri Tayi Grand Admin",
+        "role": "Super Admin",
+        "is_active": true,
+        "phone": "084942 23379",
+        "email": "admin@sritayigrand.com"
+      },
+      "timestamp": "2026-11-22T06:15:46.286Z"
+    },
+    {
+      "category": "Database Integrity",
+      "description": "Hotel Manager role definition verified in Supabase PostgreSQL roles table",
+      "status": "PASSED",
+      "details": {
+        "id": "b0000000-0000-0000-0000-000000000002",
+        "name": "Hotel Manager",
+        "description": "Operational management, walk-ins, folios, expenditure, general ledger, banquet, attendance, and night audit"
+      },
+      "timestamp": "2026-11-22T06:15:46.428Z"
+    }
+  ],
+  "screenshots": [
+    "01_login_portal_chips.png",
+    "02_hari_dashboard_view.png",
+    "03_hari_sidebar_menu.png",
+    "04_hari_attendance_initial.png",
+    "05_hari_clockin_verified.png",
+    "06_hari_expenses_initial.png",
+    "07_hari_expenses_created.png",
+    "08_hari_walkin_desk.png",
+    "09_hari_bookings.png",
+    "10_hari_room_categories.png",
+    "11_hari_function_hall.png",
+    "12_hari_night_audit.png",
+    "13_hari_accounting_erp.png",
+    "14_hari_rfid_center.png",
+    "15_hari_security_403_analytics.png",
+    "16_hari_security_403_reports.png",
+    "17_hari_security_403_pricing.png",
+    "18_hari_security_403_settings.png",
+    "19_hari_security_403_audit_logs.png",
+    "20_hari_security_403_channels.png",
+    "21_sagar_dashboard_view.png",
+    "22_sagar_security_403_pricing.png",
+    "23_superadmin_dashboard.png",
+    "24_superadmin_analytics_allowed.png",
+    "25_superadmin_settings_allowed.png"
+  ],
+  "databaseRecords": {
+    "attendance": {
+      "id": "att-1795328051900",
+      "staff_id": "50aba2e5-0000-4fbd-bb89-000000000001",
+      "shift": "morning",
+      "status": "present",
+      "clock_in": "2026-11-22T06:14:11.900Z",
+      "notes": "Manager Hari Achari Morning Shift Operational Duty"
+    },
+    "expense": {
+      "id": "exp-1795328057576-215",
+      "title": "Staff Operational Tea & Refreshments - Manager Hari",
+      "amount": "250.00",
+      "category": "staff_welfare",
+      "payment_method": "cash",
+      "created_at": "2026-11-22T06:14:17.576Z"
+    },
+    "profiles": [
+      {
+        "id": "50aba2e5-0000-4fbd-bb89-000000000001",
+        "full_name": "Hari Achari",
+        "role": "Hotel Manager",
+        "is_active": true,
+        "phone": "9440812346",
+        "email": "hari@sritayigrand.com"
+      },
+      {
+        "id": "50aba2e5-0000-4fbd-bb89-000000000002",
+        "full_name": "Sagar",
+        "role": "Hotel Manager",
+        "is_active": true,
+        "phone": "9440812347",
+        "email": "sagar@sritayigrand.com"
+      },
+      {
+        "id": "e6e40243-6f98-44dc-94ad-3c56303cf61a",
+        "full_name": "Sri Tayi Grand Admin",
+        "role": "Super Admin",
+        "is_active": true,
+        "phone": "084942 23379",
+        "email": "admin@sritayigrand.com"
+      }
+    ],
+    "roles": {
+      "id": "b0000000-0000-0000-0000-000000000002",
+      "name": "Hotel Manager",
+      "description": "Operational management, walk-ins, folios, expenditure, general ledger, banquet, attendance, and night audit"
+    }
+  },
+  "summary": {
+    "totalTests": 39,
+    "passed": 39,
+    "failed": 0
+  },
+  "completedAt": "2026-11-22T06:15:46.605Z"
+}

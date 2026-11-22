@@ -34,9 +34,24 @@ export function AdminHeader() {
 
   const [cashBalance, setCashBalance] = useState<number | null>(null);
   const [currentTime, setCurrentTime] = useState<string>('');
-  const [userName, setUserName] = useState<string>('Sri Tayi Grand Admin');
-  const [userRole, setUserRole] = useState<string>('Super Admin');
-  const [userEmail, setUserEmail] = useState<string>('admin@sritayigrand.com');
+  const [userName, setUserName] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return authStorage.getUserName() || 'Staff';
+    }
+    return 'Staff';
+  });
+  const [userRole, setUserRole] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return authStorage.getRole() || 'Staff';
+    }
+    return 'Staff';
+  });
+  const [userEmail, setUserEmail] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return authStorage.getUserEmail() || 'staff@sritayigrand.com';
+    }
+    return 'staff@sritayigrand.com';
+  });
   const [profileOpen, setProfileOpen] = useState(false);
 
   const fetchCashBalance = async (force = false) => {

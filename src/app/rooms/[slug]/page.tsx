@@ -62,6 +62,7 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
   const [adults, setAdults] = useState(Math.min(2, room.max_adults));
   const [children, setChildren] = useState(0);
   const [roomsCount, setRoomsCount] = useState(1);
+  const [bookingNotice, setBookingNotice] = useState<string | null>(null);
 
   const tariffCalc = calculateBookingTariff({
     categoryId: room.id,
@@ -80,7 +81,7 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
   const handleProceedBooking = (e: React.FormEvent) => {
     e.preventDefault();
     if (room.walk_in_only) {
-      alert('The Single Room is available for front-desk walk-in reservations only and cannot be booked online.');
+      setBookingNotice('The Single Room is available for front-desk walk-in reservations only and cannot be booked online.');
       return;
     }
     const query = new URLSearchParams({
@@ -286,6 +287,11 @@ export default function RoomDetailsPage({ params }: RoomDetailsPageProps) {
                   </div>
                 ) : (
                   <>
+                    {bookingNotice && (
+                      <div className="p-3 mb-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-900 font-medium leading-relaxed">
+                        {bookingNotice}
+                      </div>
+                    )}
                     {/* Reservation Form */}
                 <form onSubmit={handleProceedBooking} className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">

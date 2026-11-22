@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sri Tayi Grand — Admin QA Visual Inspection Gallery</title>
+  <style>
+    :root {
+      --bg: #120b06;
+      --card-bg: #1f140d;
+      --border: #3b281c;
+      --gold: #d4af37;
+      --gold-light: #f3e5ab;
+      --text: #f5ede4;
+      --text-muted: #a89587;
+      --accent: #22c55e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background: var(--bg); color: var(--text); padding-bottom: 60px; }
+    
+    header {
+      background: linear-gradient(180deg, #1f140d 0%, #120b06 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 32px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .header-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .badge {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid #22c55e;
+      color: #22c55e;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--gold-light);
+      letter-spacing: -0.3px;
+    }
+    .stats {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .filter-bar {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      background: #2a1b12;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn:hover, .filter-btn.active {
+      background: var(--gold);
+      color: #120b06;
+      font-weight: 600;
+      border-color: var(--gold);
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 32px auto 0;
+      padding: 0 24px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+      gap: 24px;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+      display: flex;
+      flex-col;
+      flex-direction: column;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: var(--gold);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+    }
+    .img-wrap {
+      width: 100%;
+      height: 220px;
+      background: #090503;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
+      transition: transform 0.3s;
+    }
+    .card:hover .img-wrap img {
+      transform: scale(1.03);
+    }
+    .card-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+    .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .page-index {
+      font-size: 11px;
+      color: var(--gold);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .page-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .page-route {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: monospace;
+      background: rgba(0,0,0,0.3);
+      padding: 3px 8px;
+      border-radius: 4px;
+      width: fit-content;
+    }
+    .btn-row {
+      margin-top: auto;
+      padding-top: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-top: 1px solid rgba(255,255,255,0.06);
+    }
+    .view-full-btn {
+      color: var(--gold-light);
+      font-size: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .view-full-btn:hover {
+      text-decoration: underline;
+    }
+
+    /* Lightbox Modal */
+    .lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.92);
+      z-index: 100;
+      padding: 24px;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .lightbox.open { display: flex; }
+    .lightbox-header {
+      width: 100%;
+      max-width: 1400px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      color: #fff;
+    }
+    .lightbox-close {
+      background: #2a1b12;
+      border: 1px solid var(--border);
+      color: #fff;
+      font-size: 20px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .lightbox-content {
+      max-width: 95vw;
+      max-height: 85vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+    }
+    .lightbox-content img {
+      max-width: 100%;
+      max-height: 85vh;
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+      border: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-content">
+      <div class="brand-title">
+        <span class="badge">100% VERIFIED</span>
+        <h1>Sri Tayi Grand — Admin QA Visual Inspection Gallery</h1>
+      </div>
+      <div class="stats">
+        <span>33 Pages Audited</span> • 
+        <span>178 Buttons Passed</span> • 
+        <span>19 Supabase Tables Active (7 PMS Flows)</span>
+      </div>
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterCategory('all')">All Pages (33)</button>
+        <button class="filter-btn" onclick="filterCategory('Overview')">Overview</button>
+        <button class="filter-btn" onclick="filterCategory('Operations')">Operations</button>
+        <button class="filter-btn" onclick="filterCategory('Financial')">Financial</button>
+        <button class="filter-btn" onclick="filterCategory('Website')">Website</button>
+        <button class="filter-btn" onclick="filterCategory('System')">System</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="grid" id="galleryGrid"></div>
+  </main>
+
+  <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+    <div class="lightbox-header">
+      <div>
+        <h2 id="modalTitle" style="color: var(--gold-light); font-size: 18px;"></h2>
+        <p id="modalRoute" style="font-size: 13px; color: var(--text-muted); font-family: monospace;"></p>
+      </div>
+      <button class="lightbox-close" onclick="closeLightboxDirect()">&times;</button>
+    </div>
+    <div class="lightbox-content">
+      <img id="modalImg" src="" alt="QA Full Evidence" />
+    </div>
+  </div>
+
+  <script>
+    const PAGES = [
+  {
+    "id": 1,
+    "name": "Dashboard Overview",
+    "path": "/admin/dashboard",
+    "category": "Overview",
+    "file": "real_qa_page_01.png",
+    "buttons": 4
+  },
+  {
+    "id": 2,
+    "name": "Analytics & KPIs",
+    "path": "/admin/analytics",
+    "category": "Overview",
+    "file": "real_qa_page_02.png",
+    "buttons": 6
+  },
+  {
+    "id": 3,
+    "name": "Reports Center",
+    "path": "/admin/reports",
+    "category": "Overview",
+    "file": "real_qa_page_03.png",
+    "buttons": 1
+  },
+  {
+    "id": 4,
+    "name": "Front Desk / Reception",
+    "path": "/admin/front-desk",
+    "category": "Operations",
+    "file": "real_qa_page_04.png",
+    "buttons": 1
+  },
+  {
+    "id": 5,
+    "name": "Walk-In Registration",
+    "path": "/admin/walk-in",
+    "category": "Operations",
+    "file": "real_qa_page_05.png",
+    "buttons": 9
+  },
+  {
+    "id": 6,
+    "name": "Reservations & Bookings",
+    "path": "/admin/bookings",
+    "category": "Operations",
+    "file": "real_qa_page_06.png",
+    "buttons": 8
+  },
+  {
+    "id": 7,
+    "name": "Reservations Timeline",
+    "path": "/admin/reservations",
+    "category": "Operations",
+    "file": "real_qa_page_07.png",
+    "buttons": 8
+  },
+  {
+    "id": 8,
+    "name": "Rooms Overview",
+    "path": "/admin/rooms",
+    "category": "Operations",
+    "file": "real_qa_page_08.png",
+    "buttons": 8
+  },
+  {
+    "id": 9,
+    "name": "Room Tape Chart / Matrix",
+    "path": "/admin/rooms/board",
+    "category": "Operations",
+    "file": "real_qa_page_09.png",
+    "buttons": 8
+  },
+  {
+    "id": 10,
+    "name": "Room Inventory Grid",
+    "path": "/admin/rooms/inventory",
+    "category": "Operations",
+    "file": "real_qa_page_10.png",
+    "buttons": 3
+  },
+  {
+    "id": 11,
+    "name": "Room Categories & Tariffs",
+    "path": "/admin/rooms/categories",
+    "category": "Operations",
+    "file": "real_qa_page_11.png",
+    "buttons": 1
+  },
+  {
+    "id": 12,
+    "name": "Guest Directory & CRM",
+    "path": "/admin/guests",
+    "category": "Operations",
+    "file": "real_qa_page_12.png",
+    "buttons": 7
+  },
+  {
+    "id": 13,
+    "name": "Housekeeping Matrix",
+    "path": "/admin/housekeeping",
+    "category": "Operations",
+    "file": "real_qa_page_13.png",
+    "buttons": 6
+  },
+  {
+    "id": 14,
+    "name": "Maintenance & OOO",
+    "path": "/admin/maintenance",
+    "category": "Operations",
+    "file": "real_qa_page_14.png",
+    "buttons": 4
+  },
+  {
+    "id": 15,
+    "name": "Convention Hall & Banquets",
+    "path": "/admin/convention-hall",
+    "category": "Operations",
+    "file": "real_qa_page_15.png",
+    "buttons": 3
+  },
+  {
+    "id": 16,
+    "name": "Guest Enquiries & Leads",
+    "path": "/admin/enquiries",
+    "category": "Operations",
+    "file": "real_qa_page_16.png",
+    "buttons": 5
+  },
+  {
+    "id": 17,
+    "name": "RFID Keycard Center (Safety Mode)",
+    "path": "/admin/rfid",
+    "category": "Operations",
+    "file": "real_qa_page_17.png",
+    "buttons": 9
+  },
+  {
+    "id": 18,
+    "name": "RFID Public QR Standee",
+    "path": "/admin/rfid/standee",
+    "category": "Operations",
+    "file": "real_qa_page_18.png",
+    "buttons": 2
+  },
+  {
+    "id": 19,
+    "name": "Payments & Revenue Ledger",
+    "path": "/admin/payments",
+    "category": "Financial",
+    "file": "real_qa_page_19.png",
+    "buttons": 6
+  },
+  {
+    "id": 20,
+    "name": "Cashbook & Drawer Shift",
+    "path": "/admin/cashbook",
+    "category": "Financial",
+    "file": "real_qa_page_20.png",
+    "buttons": 6
+  },
+  {
+    "id": 21,
+    "name": "Operating Expenses",
+    "path": "/admin/expenses",
+    "category": "Financial",
+    "file": "real_qa_page_21.png",
+    "buttons": 3
+  },
+  {
+    "id": 22,
+    "name": "General Ledger ERP & P&L",
+    "path": "/admin/accounting",
+    "category": "Financial",
+    "file": "real_qa_page_22.png",
+    "buttons": 6
+  },
+  {
+    "id": 23,
+    "name": "Daily Financial Closing",
+    "path": "/admin/daily-closing",
+    "category": "Financial",
+    "file": "real_qa_page_23.png",
+    "buttons": 2
+  },
+  {
+    "id": 24,
+    "name": "Night Audit System",
+    "path": "/admin/night-audit",
+    "category": "Financial",
+    "file": "real_qa_page_24.png",
+    "buttons": 6
+  },
+  {
+    "id": 25,
+    "name": "Staff & Roles Directory",
+    "path": "/admin/staff",
+    "category": "Business",
+    "file": "real_qa_page_25.png",
+    "buttons": 7
+  },
+  {
+    "id": 26,
+    "name": "Staff Attendance & Shifts",
+    "path": "/admin/staff/attendance",
+    "category": "Business",
+    "file": "real_qa_page_26.png",
+    "buttons": 8
+  },
+  {
+    "id": 27,
+    "name": "Dynamic Pricing & Tariffs",
+    "path": "/admin/pricing",
+    "category": "Website",
+    "file": "real_qa_page_27.png",
+    "buttons": 9
+  },
+  {
+    "id": 28,
+    "name": "OTA Channel Manager",
+    "path": "/admin/channels",
+    "category": "Website",
+    "file": "real_qa_page_28.png",
+    "buttons": 7
+  },
+  {
+    "id": 29,
+    "name": "Guest Reviews & Feedback",
+    "path": "/admin/reviews",
+    "category": "Website",
+    "file": "real_qa_page_29.png",
+    "buttons": 8
+  },
+  {
+    "id": 30,
+    "name": "Website CMS & Banners",
+    "path": "/admin/content",
+    "category": "Website",
+    "file": "real_qa_page_30.png",
+    "buttons": 4
+  },
+  {
+    "id": 31,
+    "name": "Hotel & Property Settings",
+    "path": "/admin/settings",
+    "category": "Website",
+    "file": "real_qa_page_31.png",
+    "buttons": 3
+  },
+  {
+    "id": 32,
+    "name": "System Security Audit Logs",
+    "path": "/admin/audit-logs",
+    "category": "System",
+    "file": "real_qa_page_32.png",
+    "buttons": 10
+  },
+  {
+    "id": 33,
+    "name": "Access Denied 403 Handler",
+    "path": "/admin/403",
+    "category": "System",
+    "file": "real_qa_page_33.png",
+    "buttons": 0
+  }
+];
+
+    let currentCategory = 'all';
+
+    function renderGallery() {
+      const grid = document.getElementById('galleryGrid');
+      grid.innerHTML = '';
+      const filtered = currentCategory === 'all' ? PAGES : PAGES.filter(p => p.category === currentCategory);
+
+      filtered.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.onclick = () => openLightbox(p);
+        card.innerHTML = `
+          <div class="img-wrap">
+            <img src="/qa-screenshots/${p.file}" alt="${p.name}" loading="lazy" />
+          </div>
+          <div class="card-body">
+            <div class="card-header-row">
+              <span class="page-index">PAGE ${String(p.id).padStart(2, '0')} • ${p.category}</span>
+              <span style="font-size: 11px; color: var(--accent); font-weight: 600;">${p.buttons} Buttons Tested</span>
+            </div>
+            <h3 class="page-name">${p.name}</h3>
+            <span class="page-route">${p.path}</span>
+            <div class="btn-row">
+              <span style="color: var(--text-muted); font-size: 12px;">Click to expand</span>
+              <a href="/qa-screenshots/${p.file}" target="_blank" class="view-full-btn" onclick="event.stopPropagation()">
+                Open Original ↗
+              </a>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function filterCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.innerText.includes(cat) || (cat === 'all' && btn.innerText.includes('All')));
+      });
+      renderGallery();
+    }
+
+    function openLightbox(p) {
+      document.getElementById('modalTitle').innerText = `Page ${String(p.id).padStart(2, '0')}: ${p.name}`;
+      document.getElementById('modalRoute').innerText = `Route: ${p.path} | Category: ${p.category} | Tested: ${p.buttons} buttons`;
+      document.getElementById('modalImg').src = `/qa-screenshots/${p.file}`;
+      document.getElementById('lightbox').classList.add('open');
+    }
+
+    function closeLightbox(e) {
+      if (e.target.id === 'lightbox' || e.target.classList.contains('lightbox-content')) {
+        document.getElementById('lightbox').classList.remove('open');
+      }
+    }
+
+    function closeLightboxDirect() {
+      document.getElementById('lightbox').classList.remove('open');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeLightboxDirect();
+    });
+
+    renderGallery();
+  </script>
+</body>
+</html>

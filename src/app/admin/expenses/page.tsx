@@ -379,7 +379,7 @@ export default function AdminExpensesPage() {
       {/* MODAL: Record Expense */}
       {isAddModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-[#EFE3D6] animate-scaleUp">
+          <div role="dialog" aria-modal="true" data-testid="record-expense-modal" className="bg-white rounded-3xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-[#EFE3D6] animate-scaleUp">
             <div className="flex items-center justify-between pb-3 border-b border-[#EFE3D6]">
               <h3 className="font-serif font-bold text-lg text-[#241912] flex items-center gap-2">
                 <Plus className="w-5 h-5 text-[#D8AD56]" />

@@ -958,48 +958,49 @@ export default function RFIDAdminPage() {
   const onlineDevicesCount = devices.filter((d) => d.status === 'online').length;
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
-      {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#EFE3D6]">
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Top Welcome & Actions Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E6D9C5]/80">
         <div>
-          <span className="text-[10px] uppercase tracking-wider font-semibold text-[#D8AD56]">
-            IOT &amp; DOOR LOCK INTEGRATION · REAL-TIME ACCESS LOGS &amp; CARD ROLES
-          </span>
-          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#241912] mt-0.5 flex items-center gap-2">
-            <KeyRound className="w-6 h-6 text-[#D8AD56]" />
-            <span>{t('rfid.title', 'RFID Smart Room Key Integration')}</span>
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-[10px] uppercase tracking-[0.2em] font-semibold text-[#8D672F]">
+              Hardware &amp; Security Integration
+            </span>
+          </div>
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] flex items-center gap-2.5">
+            <KeyRound className="w-6 h-6 text-[#8D672F]" />
+            <span>{t('rfid.title', 'RFID Keycard & Access Management')}</span>
           </h1>
-          <p className="text-xs text-[#786B61] mt-0.5">
-            {t('rfid.subtitle', 'Super Admin lifetime keys, Cleaner dual-tap turnover tracking, Customer room keys with extra time extension, and live audit telemetry.')}
+          <p className="text-xs text-[#786A5B] mt-0.5">
+            {t('rfid.subtitle', 'Be-Tech BIS 5.7 physical keycard encoding, staff access clearances, and door lock audits.')}
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => { setSaModalError(null); setShowSuperAdminModal(true); }}
-            className="px-3.5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+            className="px-3.5 py-2.5 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF6EE] text-[#8D672F] text-xs font-semibold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
           >
-            <Crown className="w-4 h-4" />
+            <Crown className="w-4 h-4 text-amber-600" />
             <span>{t('rfid.issueSuperAdminCard', '+ Super Admin Card')}</span>
           </button>
 
           <button
             onClick={() => { setCleanerModalError(null); setShowCleanerModal(true); }}
-            className="px-3.5 py-2.5 rounded-xl bg-cyan-700 hover:bg-cyan-800 text-white text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+            className="px-3.5 py-2.5 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF6EE] text-[#2A1D13] text-xs font-semibold transition-all flex items-center gap-1.5 shadow-xs cursor-pointer"
           >
-            <Sparkles className="w-4 h-4" />
+            <Sparkles className="w-4 h-4 text-[#8D672F]" />
             <span>{t('rfid.issueCleanerCard', '+ Cleaner Card')}</span>
           </button>
 
           <button
             onClick={() => {
               setIssueModalError(null);
-
               setIsIssuingCard(true);
             }}
-            className="px-4 py-2.5 rounded-xl bg-[#D8AD56] hover:bg-[#C69940] text-[#25150F] text-xs font-bold transition-colors flex items-center gap-2 shadow-sm cursor-pointer"
+            className="px-4 py-2.5 rounded-xl bg-[#2A1D13] hover:bg-black text-[#FAF6EE] text-xs font-semibold transition-all flex items-center gap-2 shadow-sm cursor-pointer"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 text-[#B18A4A]" />
             <span>{t('rfid.issueCustomerCard', '+ Issue Customer Card')}</span>
           </button>
         </div>

@@ -2326,6 +2326,63 @@ export async function deleteReviewFromSupabase(id: string): Promise<void> {
   }
 }
 
+export async function syncReviewToSupabase(review: GoogleReview): Promise<void> {
+  if (typeof window !== 'undefined' || !review || !review.id) return;
+
+  const db = getSupabasePgPool();
+  if (!db) return;
+
+  try {
+    const client = await db.connect();
+    try {
+      await client.query(`
+        INSERT INTO reviews (
+          id, hotel_name, reviewer_name, rating, rating_label, review_date_display,
+          retrieval_date, excerpt, full_text, is_rating_only,
+          is_translated, source_platform, source_url, is_featured, is_published, display_order
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+        ON CONFLICT (id) DO UPDATE SET
+          hotel_name = EXCLUDED.hotel_name,
+          reviewer_name = EXCLUDED.reviewer_name,
+          rating = EXCLUDED.rating,
+          rating_label = EXCLUDED.rating_label,
+          review_date_display = EXCLUDED.review_date_display,
+          retrieval_date = EXCLUDED.retrieval_date,
+          excerpt = EXCLUDED.excerpt,
+          full_text = EXCLUDED.full_text,
+          is_rating_only = EXCLUDED.is_rating_only,
+          is_translated = EXCLUDED.is_translated,
+          source_platform = EXCLUDED.source_platform,
+          source_url = EXCLUDED.source_url,
+          is_featured = EXCLUDED.is_featured,
+          is_published = EXCLUDED.is_published,
+          display_order = EXCLUDED.display_order;
+      `, [
+        review.id,
+        review.hotel_name || 'SRI TAYI GRAND',
+        review.reviewer_name,
+        review.rating || 5,
+        review.rating_label || '5 stars',
+        review.review_date_display || 'Recently added',
+        review.retrieval_date || new Date().toISOString().split('T')[0],
+        review.excerpt || '',
+        review.full_text || review.excerpt || null,
+        Boolean(review.is_rating_only),
+        Boolean(review.is_translated),
+        review.source_platform || 'Google',
+        review.source_url || 'https://www.google.com/travel/search?q=sri%20tayi%20grand%20kadiri',
+        Boolean(review.is_featured),
+        review.is_published !== undefined ? Boolean(review.is_published) : true,
+        Number(review.display_order) || 99
+      ]);
+    } finally {
+      client.release();
+    }
+  } catch (err: unknown) {
+    console.warn(`[SUPABASE SYNC REVIEW WARN] (${review.id}):`, err instanceof Error ? err.message : String(err));
+  }
+}
+
 // ==============================================================================
 // 15. WEBSITE CONTENT SYNCHRONIZATION
 // ==============================================================================

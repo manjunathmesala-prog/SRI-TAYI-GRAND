@@ -59,8 +59,18 @@ export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [userName, setUserName] = useState('Admin Console');
-  const [userRole, setUserRole] = useState('Super Admin');
+  const [userName, setUserName] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return authStorage.getUserName() || 'Staff';
+    }
+    return 'Staff';
+  });
+  const [userRole, setUserRole] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return authStorage.getRole() || 'Staff';
+    }
+    return 'Staff';
+  });
   const [cashBalance, setCashBalance] = useState<number | null>(null);
 
   const { t, formatCurrency, isTelugu } = useAdminLanguage();
@@ -129,12 +139,12 @@ export function AdminSidebar() {
 
   const getSectionTitle = (title: string) => {
     if (!isTelugu) return title;
-    if (title.includes('OVERVIEW')) return 'A. స్థూలదృష్టి';
-    if (title.includes('OPERATIONS')) return 'B. హోటల్ కార్యకలాపాలు';
-    if (title.includes('FINANCIAL')) return 'C. ఆర్థిక నిర్వహణ';
-    if (title.includes('BUSINESS')) return 'D. వ్యాపార నిర్వహణ';
-    if (title.includes('WEBSITE')) return 'E. వెబ్‌సైట్ నిర్వహణ';
-    if (title.includes('SYSTEM')) return 'F. సిస్టమ్ నిర్వహణ';
+    if (title.includes('OVERVIEW')) return 'స్థూలదృష్టి';
+    if (title.includes('OPERATIONS')) return 'హోటల్ కార్యకలాపాలు';
+    if (title.includes('FINANCIAL')) return 'ఆర్థిక నిర్వహణ';
+    if (title.includes('STAFF')) return 'సిబ్బంది & రోస్టర్స్';
+    if (title.includes('WEBSITE')) return 'వెబ్‌సైట్ & ఛానెల్స్';
+    if (title.includes('SECURITY')) return 'సిస్టమ్ & ఆడిట్';
     return title;
   };
 
@@ -143,13 +153,13 @@ export function AdminSidebar() {
       case '/admin/dashboard':
         return t('nav.dashboard', fallback);
       case '/admin/analytics':
-        return isTelugu ? 'విశ్లేషణ & గణాంకాలు' : 'Analytics';
+        return isTelugu ? 'విశ్లేషణ & గణాంకాలు' : 'Analytics & Yield';
       case '/admin/reports':
         return t('nav.reports', fallback);
       case '/admin/front-desk':
         return t('nav.frontDesk', fallback);
       case '/admin/walk-in':
-        return t('nav.walkIn', fallback);
+        return isTelugu ? 'వాక్-ఇన్ నమోదు' : 'Walk-In Desk';
       case '/admin/bookings':
         return t('nav.bookings', fallback);
       case '/admin/rooms/board':
@@ -159,36 +169,36 @@ export function AdminSidebar() {
       case '/admin/rooms/categories':
         return t('nav.roomCategories', fallback);
       case '/admin/guests':
-        return t('nav.guests', fallback);
+        return isTelugu ? 'అతిథుల వివరాలు' : 'Guest Directory';
       case '/admin/housekeeping':
         return t('nav.housekeeping', fallback);
       case '/admin/maintenance':
-        return t('nav.maintenance', fallback);
+        return isTelugu ? 'గదుల మరమ్మతులు' : 'Room Maintenance';
       case '/admin/convention-hall':
         return t('nav.conventionHall', fallback);
       case '/admin/enquiries':
-        return t('nav.enquiries', fallback);
+        return isTelugu ? 'విచారణలు & లీడ్స్' : 'Enquiries & Leads';
       case '/admin/rfid':
-        return t('nav.rfid', fallback);
+        return isTelugu ? 'RFID కీకార్డులు' : 'RFID Keycards';
       case '/admin/payments':
-        return t('nav.payments', fallback);
+        return isTelugu ? 'చెల్లింపులు & ఫోలియోలు' : 'Payments Ledger';
       case '/admin/cashbook':
-        return t('nav.cashbook', fallback);
+        return isTelugu ? 'నగదు రిజిస్టర్' : 'Cashbook Drawer';
       case '/admin/expenses':
         return t('nav.expenses', fallback);
       case '/admin/accounting':
-        return isTelugu ? 'జనరల్ లెడ్జర్ ERP' : 'General Ledger ERP';
+        return isTelugu ? 'జనరల్ లెడ్జర్ ERP' : 'General Ledger';
       case '/admin/night-audit':
       case '/admin/daily-closing':
-        return t('nav.dailyClosing', fallback);
+        return isTelugu ? 'నైట్ ఆడిట్ & క్లోజింగ్' : 'Night Audit & Closing';
       case '/admin/staff/attendance':
         return t('nav.attendance', fallback);
       case '/admin/staff':
-        return t('nav.staff', fallback);
+        return isTelugu ? 'సిబ్బంది డైరెక్టరీ' : 'Staff Directory';
       case '/admin/pricing':
         return isTelugu ? 'డైనమిక్ ధరలు' : 'Dynamic Pricing';
       case '/admin/channels':
-        return isTelugu ? 'ఛానల్ మేనేజర్' : 'Channel Manager (OTAs)';
+        return isTelugu ? 'ఛానల్ మేనేజర్' : 'OTA Channel Manager';
       case '/admin/reviews':
         return t('nav.reviews', fallback);
       case '/admin/content':
@@ -196,7 +206,7 @@ export function AdminSidebar() {
       case '/admin/settings':
         return t('nav.settings', fallback);
       case '/admin/audit-logs':
-        return t('nav.auditLogs', fallback);
+        return isTelugu ? 'భద్రతా ఆడిట్ లాగ్స్' : 'Security Audit Logs';
       default:
         return fallback;
     }
@@ -204,79 +214,68 @@ export function AdminSidebar() {
 
   const getTranslatedBadge = (badge?: string) => {
     if (!badge || !isTelugu) return badge;
-    if (badge === 'Executive') return 'ఎగ్జిక్యూటివ్';
-    if (badge === 'Counter') return 'కౌంటర్';
-    if (badge === 'Matrix') return 'మ్యాట్రిక్స్';
-    if (badge === 'OOO') return 'OOO';
-    if (badge === 'Leads') return 'లీడ్స్';
-    if (badge === 'Hardware') return 'హార్డ్‌వేర్';
     if (badge === 'Live') return 'ప్రత్యక్షం';
-    if (badge === 'GL') return 'GL';
-    if (badge === 'Roster') return 'రోస్టర్';
-    if (badge === 'Yield') return 'ఈల్డ్';
-    if (badge === '2-Way') return '2-వే';
-    if (badge === 'Audit') return 'ఆడిట్';
     return badge;
   };
 
   const navSections: NavSection[] = [
     {
-      title: 'A. OVERVIEW',
+      title: 'OVERVIEW',
       items: [
         { label: 'Dashboard Overview', href: '/admin/dashboard', icon: LayoutDashboard },
-        { label: 'Analytics', href: '/admin/analytics', icon: BarChart3, badge: 'Executive' },
+        { label: 'Analytics & Yield', href: '/admin/analytics', icon: BarChart3 },
         { label: 'Reports Center', href: '/admin/reports', icon: FileText },
       ],
     },
     {
-      title: 'B. HOTEL OPERATIONS',
+      title: 'HOTEL OPERATIONS',
       items: [
         { label: 'Front Desk / Reception', href: '/admin/front-desk', icon: ConciergeBell, highlight: true },
-        { label: 'Walk-In Registration', href: '/admin/walk-in', icon: UserCheck, badge: 'Counter' },
+        { label: 'Walk-In Desk', href: '/admin/walk-in', icon: UserCheck },
         { label: 'Reservations & Bookings', href: '/admin/bookings', icon: CalendarCheck },
-        { label: 'Room Tape Chart', href: '/admin/rooms/board', icon: CalendarRange, badge: 'Matrix' },
+        { label: 'Room Tape Chart', href: '/admin/rooms/board', icon: CalendarRange },
         { label: 'Room Inventory', href: '/admin/rooms/inventory', icon: BedDouble },
         { label: 'Room Categories', href: '/admin/rooms/categories', icon: Layers },
-        { label: 'Guest Directory (CRM)', href: '/admin/guests', icon: Users },
+        { label: 'Guest Directory', href: '/admin/guests', icon: Users },
         { label: 'Housekeeping Matrix', href: '/admin/housekeeping', icon: Sparkles },
-        { label: 'Maintenance & OOO', href: '/admin/maintenance', icon: Wrench, badge: 'OOO' },
+        { label: 'Room Maintenance', href: '/admin/maintenance', icon: Wrench },
         { label: 'Convention Hall', href: '/admin/convention-hall', icon: Building, highlight: true },
-        { label: 'Enquiries Pipeline', href: '/admin/enquiries', icon: MessageSquare, badge: 'Leads' },
-        { label: 'RFID Door Keycards', href: '/admin/rfid', icon: KeyRound, badge: 'Hardware' },
+        { label: 'Enquiries & Leads', href: '/admin/enquiries', icon: MessageSquare },
+        { label: 'RFID Keycards', href: '/admin/rfid', icon: KeyRound },
       ],
     },
     {
-      title: 'C. FINANCIAL MANAGEMENT',
+      title: 'FINANCIAL MANAGEMENT',
       items: [
-        { label: 'Payments & Revenue', href: '/admin/payments', icon: CreditCard },
-        { label: 'Cashbook & Drawer', href: '/admin/cashbook', icon: Wallet, highlight: true, badge: 'Live' },
+        { label: 'Payments Ledger', href: '/admin/payments', icon: CreditCard },
+        { label: 'Cashbook Drawer', href: '/admin/cashbook', icon: Wallet, highlight: true, badge: 'Live' },
         { label: 'Operating Expenses', href: '/admin/expenses', icon: TrendingDown },
-        { label: 'General Ledger ERP', href: '/admin/accounting', icon: Calculator, badge: 'GL' },
+        { label: 'General Ledger', href: '/admin/accounting', icon: Calculator },
         { label: 'Night Audit & Closing', href: '/admin/daily-closing', icon: Lock },
       ],
     },
     {
-      title: 'D. BUSINESS MANAGEMENT',
+      title: 'STAFF & ROSTERS',
       items: [
-        { label: 'Staff Attendance', href: '/admin/staff/attendance', icon: UserCheck, badge: 'Roster' },
-        { label: 'Staff & Roles', href: '/admin/staff', icon: UserCog },
+        { label: 'Staff Attendance', href: '/admin/staff/attendance', icon: UserCheck },
+        { label: 'Staff Directory', href: '/admin/staff', icon: UserCog },
       ],
     },
     {
-      title: 'E. WEBSITE MANAGEMENT',
+      title: 'WEBSITE & CHANNELS',
       items: [
-        { label: 'Dynamic Pricing', href: '/admin/pricing', icon: TrendingUp, badge: 'Yield' },
-        { label: 'Channel Manager (OTAs)', href: '/admin/channels', icon: Globe, badge: '2-Way' },
+        { label: 'Dynamic Pricing', href: '/admin/pricing', icon: TrendingUp },
+        { label: 'OTA Channel Manager', href: '/admin/channels', icon: Globe },
         { label: 'Guest Reviews', href: '/admin/reviews', icon: MessageSquareQuote },
         { label: 'Website CMS', href: '/admin/content', icon: Globe },
         { label: 'Hotel Settings', href: '/admin/settings', icon: Settings },
       ],
     },
     {
-      title: 'F. SYSTEM MANAGEMENT',
+      title: 'SECURITY & AUDIT',
       items: [
-        { label: 'Night Audit', href: '/admin/night-audit', icon: Lock, badge: 'Audit' },
-        { label: 'System Audit Logs', href: '/admin/audit-logs', icon: ShieldCheck, badge: 'Audit' },
+        { label: 'Night Audit Dispatch', href: '/admin/night-audit', icon: Lock },
+        { label: 'Security Audit Logs', href: '/admin/audit-logs', icon: ShieldCheck },
       ],
     },
   ];
@@ -378,12 +377,12 @@ export function AdminSidebar() {
                           key={item.href}
                           href={item.href}
                           prefetch={false}
-                          className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs uppercase tracking-wider font-sans font-medium transition-all ${
+                          className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-sans font-medium transition-all ${
                             isActive
-                              ? 'bg-[#8D672F] text-white shadow-md font-semibold'
+                              ? 'bg-[#8D672F] text-white shadow-[0_2px_12px_rgba(141,103,47,0.35)] font-semibold'
                               : item.highlight
-                              ? 'bg-[#B18A4A]/15 text-[#E6D9C5] border border-[#B18A4A]/30 hover:bg-[#B18A4A]/25 font-semibold'
-                              : 'text-[#E6D9C5]/80 hover:bg-white/5 hover:text-white'
+                              ? 'bg-[#B18A4A]/10 text-[#F5EDE1] border border-[#B18A4A]/25 hover:bg-[#B18A4A]/20'
+                              : 'text-[#E6D9C5]/75 hover:bg-white/5 hover:text-white'
                           }`}
                         >
                           <div className="flex items-center space-x-2.5 truncate">
@@ -596,12 +595,12 @@ export function AdminSidebar() {
                               href={item.href}
                               prefetch={false}
                               onClick={() => setMobileOpen(false)}
-                              className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs uppercase tracking-wider font-sans font-medium transition-colors ${
+                              className={`flex items-center justify-between px-3 py-2 rounded-xl text-xs font-sans font-medium transition-colors ${
                                 isActive
                                   ? 'bg-[#8D672F] text-white shadow-md font-semibold'
                                   : item.highlight
-                                  ? 'bg-[#B18A4A]/15 text-[#E6D9C5] border border-[#B18A4A]/30'
-                                  : 'text-[#E6D9C5]/80 hover:bg-white/5 hover:text-white'
+                                  ? 'bg-[#B18A4A]/10 text-[#F5EDE1] border border-[#B18A4A]/25'
+                                  : 'text-[#E6D9C5]/75 hover:bg-white/5 hover:text-white'
                               }`}
                             >
                               <div className="flex items-center space-x-2.5 truncate">

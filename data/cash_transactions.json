@@ -1,5 +1,113 @@
 [
   {
+    "id": "ctx-1795328057576-689",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 250,
+    "reason": "Expense Payout: Staff Operational Tea & Refreshments - Manager Hari (staff_welfare)",
+    "performed_by": "Hari Achari",
+    "performed_at": "2026-11-22T06:14:17.576Z"
+  },
+  {
+    "id": "ctx-1795303896664-642",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 250,
+    "reason": "Expense Payout: Staff Operational Tea & Refreshments - Manager Hari (staff_welfare)",
+    "performed_by": "Hari Achari",
+    "performed_at": "2026-11-21T23:31:36.664Z"
+  },
+  {
+    "id": "ctx-1795303620288-638",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 250,
+    "reason": "Expense Payout: Staff Operational Tea & Refreshments - Manager Hari (staff_welfare)",
+    "performed_by": "Hari Achari",
+    "performed_at": "2026-11-21T23:27:00.288Z"
+  },
+  {
+    "id": "ctx-1795302879750-751",
+    "type": "cash_in",
+    "category": "front_desk",
+    "amount": 1500,
+    "reason": "Audited Float Infusion 1795302869090",
+    "performed_by": "Sri Tayi Grand Admin",
+    "performed_at": "2026-11-21T23:14:39.750Z"
+  },
+  {
+    "id": "ctx-1795302131946-855",
+    "type": "cash_in",
+    "category": "front_desk",
+    "amount": 1500,
+    "reason": "Audited Float Infusion 1795302129581",
+    "performed_by": "Sri Tayi Grand Admin",
+    "performed_at": "2026-11-21T23:02:11.946Z"
+  },
+  {
+    "id": "ctx-1795300629540-423",
+    "type": "cash_in",
+    "category": "front_desk",
+    "amount": 1000,
+    "reason": "Manager Emergency Float Adjustment 1795300626916",
+    "performed_by": "G. Mohan Kumar",
+    "performed_at": "2026-11-21T22:37:09.540Z"
+  },
+  {
+    "id": "ctx-1795300134209-347",
+    "type": "cash_in",
+    "category": "front_desk",
+    "amount": 1000,
+    "reason": "Manager Emergency Float Adjustment 1795300116809",
+    "performed_by": "G. Mohan Kumar",
+    "performed_at": "2026-11-21T22:28:54.209Z"
+  },
+  {
+    "id": "ctx-1795296353874-305",
+    "type": "cash_in",
+    "category": "front_desk",
+    "amount": 500,
+    "reason": "QA Audit Cash Float Adjustment 1795296350732",
+    "performed_by": "Sri Tayi Grand Admin",
+    "performed_at": "2026-11-21T21:25:53.874Z"
+  },
+  {
+    "id": "ctx-1795296351581-108",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 350,
+    "reason": "Expense Payout: QA Audit Supplies 1795296350732 (maintenance)",
+    "performed_by": "Sri Tayi Grand Admin",
+    "performed_at": "2026-11-21T21:25:51.581Z"
+  },
+  {
+    "id": "ctx-1795293158560-621",
+    "type": "cash_in",
+    "category": "front_desk",
+    "amount": 500,
+    "reason": "QA Audit Cash Float Adjustment 1795293127989",
+    "performed_by": "Sri Tayi Grand Admin",
+    "performed_at": "2026-11-21T20:32:38.560Z"
+  },
+  {
+    "id": "ctx-1795293141183-408",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 350,
+    "reason": "Expense Payout: QA Audit Supplies 1795293127989 (maintenance)",
+    "performed_by": "Sri Tayi Grand Admin",
+    "performed_at": "2026-11-21T20:32:21.183Z"
+  },
+  {
+    "id": "ctx-1795292631370-829",
+    "type": "cash_in",
+    "category": "front_desk",
+    "amount": 500,
+    "reason": "QA Audit Cash Float Adjustment 1795292623477",
+    "performed_by": "Sri Tayi Grand Admin",
+    "performed_at": "2026-11-21T20:23:51.370Z"
+  },
+  {
     "id": "ctx-1794893662602-133",
     "type": "cash_in",
     "category": "guest_payment",

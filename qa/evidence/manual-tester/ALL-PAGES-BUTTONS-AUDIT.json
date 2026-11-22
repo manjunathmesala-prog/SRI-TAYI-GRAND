@@ -1,0 +1,369 @@
+{
+  "staticIssues": [],
+  "runtimeResults": {
+    "publicPages": [
+      {
+        "name": "Home",
+        "path": "/",
+        "status": 200,
+        "buttonCount": 22,
+        "linkCount": 73,
+        "hasContent": true,
+        "ok": true
+      },
+      {
+        "name": "About Hotel",
+        "path": "/about",
+        "status": 200,
+        "buttonCount": 5,
+        "linkCount": 34,
+        "hasContent": true,
+        "ok": true
+      },
+      {
+        "name": "Amenities",
+        "path": "/amenities",
+        "status": 200,
+        "buttonCount": 5,
+        "linkCount": 34,
+        "hasContent": true,
+        "ok": true
+      },
+      {
+        "name": "Availability Check",
+        "path": "/availability",
+        "status": 200,
+        "buttonCount": 9,
+        "linkCount": 29,
+        "hasContent": true,
+        "ok": true
+      },
+      {
+        "name": "Booking Desk",
+        "path": "/booking",
+        "status": 200,
+        "buttonCount": 5,
+        "linkCount": 31,
+        "hasContent": true,
+        "ok": true
+      },
+      {
+        "name": "Contact Us",
+        "path": "/contact",
+        "status": 200,
+        "buttonCount": 7,
+        "linkCount": 38,
+        "hasContent": true,
+        "ok": true
+      },
+      {
+        "name": "Convention Hall Public",
+        "path": "/convention-hall",
+        "status": 200,
+        "buttonCount": 8,
+        "linkCount": 34,
+        "hasContent": true,
+        "ok": true
+      },
+      {
+        "name": "Photo Gallery",
+        "path": "/gallery",
+        "status": 200,
+        "buttonCount": 10,
+        "linkCount": 33,
+        "hasContent": true,
+        "ok": true
+      },
+      {
+        "name": "Hotel Policies",
+        "path": "/policies",
+        "status": 200,
+        "buttonCount": 4,
+        "linkCount": 29,
+        "hasContent": true,
+        "ok": true
+      },
+      {
+        "name": "Rooms & Suites",
+        "path": "/rooms",
+        "status": 200,
+        "buttonCount": 6,
+        "linkCount": 40,
+        "hasContent": true,
+        "ok": true
+      },
+      {
+        "name": "Guest Reviews",
+        "path": "/testimonials",
+        "status": 200,
+        "buttonCount": 10,
+        "linkCount": 34,
+        "hasContent": true,
+        "ok": true
+      },
+      {
+        "name": "Direct Guest Walk-In",
+        "path": "/walk-in",
+        "status": 200,
+        "buttonCount": 1,
+        "linkCount": 0,
+        "hasContent": true,
+        "ok": true
+      }
+    ],
+    "managerPages": [
+      {
+        "name": "Manager Dashboard",
+        "path": "/admin/dashboard",
+        "status": 200,
+        "buttonCount": 12,
+        "linkCount": 28,
+        "ok": true
+      },
+      {
+        "name": "Walk-In Desk",
+        "path": "/admin/walk-in",
+        "status": 200,
+        "buttonCount": 28,
+        "linkCount": 32,
+        "ok": true
+      },
+      {
+        "name": "Front Desk Console",
+        "path": "/admin/front-desk",
+        "status": 200,
+        "buttonCount": 12,
+        "linkCount": 32,
+        "ok": true
+      },
+      {
+        "name": "Bookings & Sales",
+        "path": "/admin/bookings",
+        "status": 200,
+        "buttonCount": 19,
+        "linkCount": 33,
+        "ok": true
+      },
+      {
+        "name": "Physical Rooms",
+        "path": "/admin/rooms",
+        "status": 200,
+        "buttonCount": 21,
+        "linkCount": 31,
+        "ok": true
+      },
+      {
+        "name": "Room Rack Board",
+        "path": "/admin/rooms/board",
+        "status": 200,
+        "buttonCount": 21,
+        "linkCount": 31,
+        "ok": true
+      },
+      {
+        "name": "Room Categories & Tariffs",
+        "path": "/admin/rooms/categories",
+        "status": 200,
+        "buttonCount": 12,
+        "linkCount": 31,
+        "ok": true
+      },
+      {
+        "name": "Room Inventory",
+        "path": "/admin/rooms/inventory",
+        "status": 200,
+        "buttonCount": 11,
+        "linkCount": 21,
+        "ok": true
+      },
+      {
+        "name": "Convention Hall ERP",
+        "path": "/admin/convention-hall",
+        "status": 200,
+        "buttonCount": 15,
+        "linkCount": 31,
+        "ok": true
+      },
+      {
+        "name": "Staff Attendance",
+        "path": "/admin/staff/attendance",
+        "status": 200,
+        "buttonCount": 22,
+        "linkCount": 31,
+        "ok": true
+      },
+      {
+        "name": "Operating Expenditure",
+        "path": "/admin/expenses",
+        "status": 200,
+        "buttonCount": 11,
+        "linkCount": 21,
+        "ok": true
+      },
+      {
+        "name": "Night Audit",
+        "path": "/admin/night-audit",
+        "status": 200,
+        "buttonCount": 19,
+        "linkCount": 21,
+        "ok": true
+      },
+      {
+        "name": "Daily Closing Shift",
+        "path": "/admin/daily-closing",
+        "status": 200,
+        "buttonCount": 11,
+        "linkCount": 21,
+        "ok": true
+      },
+      {
+        "name": "Cash Drawer Ledger",
+        "path": "/admin/cashbook",
+        "status": 200,
+        "buttonCount": 14,
+        "linkCount": 21,
+        "ok": true
+      },
+      {
+        "name": "General Ledger ERP",
+        "path": "/admin/accounting",
+        "status": 200,
+        "buttonCount": 23,
+        "linkCount": 31,
+        "ok": true
+      },
+      {
+        "name": "Payment Transactions",
+        "path": "/admin/payments",
+        "status": 200,
+        "buttonCount": 14,
+        "linkCount": 31,
+        "ok": true
+      },
+      {
+        "name": "Guest Directory",
+        "path": "/admin/guests",
+        "status": 200,
+        "buttonCount": 18,
+        "linkCount": 31,
+        "ok": true
+      },
+      {
+        "name": "Housekeeping Duty",
+        "path": "/admin/housekeeping",
+        "status": 200,
+        "buttonCount": 15,
+        "linkCount": 21,
+        "ok": true
+      },
+      {
+        "name": "Maintenance Log",
+        "path": "/admin/maintenance",
+        "status": 200,
+        "buttonCount": 16,
+        "linkCount": 31,
+        "ok": true
+      },
+      {
+        "name": "Guest Enquiries",
+        "path": "/admin/enquiries",
+        "status": 200,
+        "buttonCount": 17,
+        "linkCount": 31,
+        "ok": true
+      },
+      {
+        "name": "Review Management",
+        "path": "/admin/reviews",
+        "status": 200,
+        "buttonCount": 147,
+        "linkCount": 66,
+        "ok": true
+      },
+      {
+        "name": "RFID Keycards Console",
+        "path": "/admin/rfid",
+        "status": 200,
+        "buttonCount": 22,
+        "linkCount": 21,
+        "ok": true
+      },
+      {
+        "name": "RFID Reception Standee",
+        "path": "/admin/rfid/standee",
+        "status": 200,
+        "buttonCount": 3,
+        "linkCount": 3,
+        "ok": true
+      }
+    ],
+    "superAdminPages": [
+      {
+        "name": "Analytics & Revenue KPIs",
+        "path": "/admin/analytics",
+        "status": 200,
+        "buttonCount": 18,
+        "linkCount": 39,
+        "ok": true
+      },
+      {
+        "name": "Financial & Tax Reports",
+        "path": "/admin/reports",
+        "status": 200,
+        "buttonCount": 11,
+        "linkCount": 21,
+        "ok": true
+      },
+      {
+        "name": "Dynamic Pricing Engine",
+        "path": "/admin/pricing",
+        "status": 200,
+        "buttonCount": 20,
+        "linkCount": 39,
+        "ok": true
+      },
+      {
+        "name": "Global Hotel Settings",
+        "path": "/admin/settings",
+        "status": 200,
+        "buttonCount": 11,
+        "linkCount": 39,
+        "ok": true
+      },
+      {
+        "name": "System Security Audit Logs",
+        "path": "/admin/audit-logs",
+        "status": 200,
+        "buttonCount": 19,
+        "linkCount": 21,
+        "ok": true
+      },
+      {
+        "name": "OTA Channel Manager",
+        "path": "/admin/channels",
+        "status": 200,
+        "buttonCount": 20,
+        "linkCount": 39,
+        "ok": true
+      },
+      {
+        "name": "Website Content Management",
+        "path": "/admin/content",
+        "status": 200,
+        "buttonCount": 11,
+        "linkCount": 39,
+        "ok": true
+      },
+      {
+        "name": "Staff Management Directory",
+        "path": "/admin/staff",
+        "status": 200,
+        "buttonCount": 18,
+        "linkCount": 39,
+        "ok": true
+      }
+    ],
+    "consoleErrors": [],
+    "networkErrors": []
+  }
+}
