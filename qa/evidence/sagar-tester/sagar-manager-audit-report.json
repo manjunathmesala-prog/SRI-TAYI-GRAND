@@ -1,22 +1,22 @@
 {
   "tester": "Sagar (Hotel Manager)",
-  "timestamp": "2026-11-22T11:00:46.415Z",
+  "timestamp": "2026-11-22T11:35:08.022Z",
   "environment": {
     "baseUrl": "http://localhost:3000",
     "browser": "Google Chrome",
     "database": "Supabase PostgreSQL Cloud"
   },
   "metrics": {
-    "totalWalkIns": 7,
-    "totalWebsiteBookings": 0,
+    "totalWalkIns": 10,
+    "totalWebsiteBookings": 5,
     "totalOtaBookings": 5,
-    "totalBookingsProcessed": 12,
-    "totalCashCollected": 8000,
-    "totalUpiCollected": 7500,
-    "totalOnlineRazorpayCollected": 0,
-    "totalExpensesCreated": 1,
-    "totalCashExpenses": 0,
-    "expectedCashAtCounter": 13000,
+    "totalBookingsProcessed": 20,
+    "totalCashCollected": 12000,
+    "totalUpiCollected": 10000,
+    "totalOnlineRazorpayCollected": 11025,
+    "totalExpensesCreated": 3,
+    "totalCashExpenses": 800,
+    "expectedCashAtCounter": 16200,
     "actualCashCounted": 0,
     "discrepancy": 0
   },
@@ -28,312 +28,343 @@
       "details": {
         "email": "sagar@sritayigrand.com"
       },
-      "timestamp": "2026-11-22T11:00:51.920Z"
+      "timestamp": "2026-11-22T11:35:12.292Z"
     },
     {
       "category": "Authentication",
       "action": "Manager Sagar authenticated with \"Hotel Manager\" purple badge",
       "status": "PASSED",
       "details": {},
-      "timestamp": "2026-11-22T11:00:58.111Z"
+      "timestamp": "2026-11-22T11:35:17.160Z"
     },
     {
       "category": "Shift Operations",
-      "action": "Manager Sagar Clock-In submitted for Morning Shift",
+      "action": "Manager Sagar Clock-In submitted for Morning Shift (06:00 AM)",
       "status": "PASSED",
       "details": {
-        "status": 500,
+        "status": 200,
         "json": {
-          "success": false,
-          "error": "Staff member not found."
+          "success": true,
+          "attendance": {
+            "id": "att-1795347322591",
+            "staff_id": "50aba2e5-0000-4fbd-bb89-000000000002",
+            "staff_name": "Sagar",
+            "role": "Hotel Manager",
+            "date": "2026-11-22",
+            "shift": "morning",
+            "clock_in": "2026-11-22T11:35:22.591Z",
+            "status": "present",
+            "notes": "Manager Sagar Morning Shift Front-Desk Duty (06:00 AM - 06:00 PM)",
+            "created_at": "2026-11-22T11:35:22.591Z"
+          },
+          "message": "Sagar successfully clocked in for morning shift."
         }
       },
-      "timestamp": "2026-11-22T11:01:02.780Z"
+      "timestamp": "2026-11-22T11:35:22.598Z"
+    },
+    {
+      "category": "Housekeeping Turnover",
+      "action": "Processed morning departures and turned over all 25 rooms to Clean & Available",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T11:36:10.749Z"
     },
     {
       "category": "Cash Drawer",
       "action": "Opened Cash Drawer Shift with ₹5,000 Opening Float",
-      "status": "WARNING",
+      "status": "PASSED",
       "details": {
-        "status": 400,
+        "status": 200,
         "json": {
-          "success": false,
-          "error": "Shift #SH-20261122-01 is currently active. Please close it first."
+          "success": true,
+          "message": "Cash drawer shift #SH-20261122-04 successfully opened.",
+          "shift": {
+            "id": "shift-1795347376163",
+            "shift_number": "SH-20261122-04",
+            "cashier_id": "50aba2e5-0000-4fbd-bb89-000000000002",
+            "cashier_name": "Sagar",
+            "opened_at": "2026-11-22T11:36:16.163Z",
+            "opening_float": 5000,
+            "notes": "Morning Shift Drawer Opening Float - Managed by Sagar",
+            "status": "open"
+          }
         }
       },
-      "timestamp": "2026-11-22T11:01:09.985Z"
+      "timestamp": "2026-11-22T11:36:16.419Z"
     },
     {
       "category": "Walk-in Booking",
-      "action": "Walk-in #1 (Rajesh Sharma)",
-      "status": "FAILED",
+      "action": "Walk-in #1 (Rajesh Sharma - Room 101 - ₹2000 via CASH)",
+      "status": "PASSED",
       "details": {
-        "status": 409,
-        "json": {
-          "success": false,
-          "error": "Room 101 is currently occupied by another guest"
-        }
+        "ref": "TG-FD-20261122-1405"
       },
-      "timestamp": "2026-11-22T11:01:10.098Z"
+      "timestamp": "2026-11-22T11:36:20.980Z"
     },
     {
       "category": "Walk-in Booking",
-      "action": "Walk-in #2 (Venkat Rao)",
-      "status": "FAILED",
+      "action": "Walk-in #2 (Venkat Rao - Room 102 - ₹2000 via CASH)",
+      "status": "PASSED",
       "details": {
-        "status": 409,
-        "json": {
-          "success": false,
-          "error": "Room 102 is currently occupied by another guest"
-        }
+        "ref": "TG-FD-20261122-7029"
       },
-      "timestamp": "2026-11-22T11:01:10.164Z"
+      "timestamp": "2026-11-22T11:36:24.980Z"
     },
     {
       "category": "Walk-in Booking",
       "action": "Walk-in #3 (Suresh Reddy - Room 103 - ₹2000 via CASH)",
       "status": "PASSED",
       "details": {
-        "ref": "TG-FD-20261122-9776"
+        "ref": "TG-FD-20261122-7943"
       },
-      "timestamp": "2026-11-22T11:01:16.328Z"
+      "timestamp": "2026-11-22T11:36:29.589Z"
     },
     {
       "category": "Walk-in Booking",
       "action": "Walk-in #4 (Anand Varma - Room 104 - ₹2000 via CASH)",
       "status": "PASSED",
       "details": {
-        "ref": "TG-FD-20261122-4062"
+        "ref": "TG-FD-20261122-7744"
       },
-      "timestamp": "2026-11-22T11:01:22.826Z"
+      "timestamp": "2026-11-22T11:36:33.963Z"
     },
     {
       "category": "Walk-in Booking",
       "action": "Walk-in #5 (Prakash Naidu - Room 105 - ₹2000 via CASH)",
       "status": "PASSED",
       "details": {
-        "ref": "TG-FD-20261122-1078"
+        "ref": "TG-FD-20261122-5727"
       },
-      "timestamp": "2026-11-22T11:01:29.129Z"
+      "timestamp": "2026-11-22T11:36:38.339Z"
     },
     {
       "category": "Walk-in Booking",
-      "action": "Walk-in #6 (Naveen Kumar - Room 106 - ₹2000 via CASH)",
+      "action": "Walk-in #6 (Naveen Kumar - Room 108 - ₹2000 via CASH)",
       "status": "PASSED",
       "details": {
-        "ref": "TG-FD-20261122-2135"
+        "ref": "TG-FD-20261122-8699"
       },
-      "timestamp": "2026-11-22T11:01:34.322Z"
+      "timestamp": "2026-11-22T11:36:42.390Z"
     },
     {
       "category": "Walk-in Booking",
-      "action": "Walk-in #7 (Vikramaditya - Room 107 - ₹2500 via UPI)",
+      "action": "Walk-in #7 (Vikramaditya - Room 201 - ₹2500 via UPI)",
       "status": "PASSED",
       "details": {
-        "ref": "TG-FD-20261122-7721"
+        "ref": "TG-FD-20261122-7342"
       },
-      "timestamp": "2026-11-22T11:01:39.680Z"
+      "timestamp": "2026-11-22T11:36:46.385Z"
     },
     {
       "category": "Walk-in Booking",
-      "action": "Walk-in #8 (Chandrasekhar - Room 108 - ₹2500 via UPI)",
+      "action": "Walk-in #8 (Chandrasekhar - Room 202 - ₹2500 via UPI)",
       "status": "PASSED",
       "details": {
-        "ref": "TG-FD-20261122-5719"
+        "ref": "TG-FD-20261122-8558"
       },
-      "timestamp": "2026-11-22T11:01:44.732Z"
+      "timestamp": "2026-11-22T11:36:50.351Z"
     },
     {
       "category": "Walk-in Booking",
-      "action": "Walk-in #9 (Divya Chowdary)",
-      "status": "FAILED",
+      "action": "Walk-in #9 (Divya Chowdary - Room 306 - ₹2500 via UPI)",
+      "status": "PASSED",
       "details": {
-        "status": 409,
-        "json": {
-          "success": false,
-          "error": "Room 201 is currently occupied by another guest"
-        }
+        "ref": "TG-FD-20261122-2748"
       },
-      "timestamp": "2026-11-22T11:01:44.790Z"
+      "timestamp": "2026-11-22T11:36:54.540Z"
     },
     {
       "category": "Walk-in Booking",
-      "action": "Walk-in #10 (Murali Mohan - Room 202 - ₹2500 via UPI)",
+      "action": "Walk-in #10 (Murali Mohan - Room 106 - ₹2500 via UPI)",
       "status": "PASSED",
       "details": {
-        "ref": "TG-FD-20261122-9688"
+        "ref": "TG-FD-20261122-6174"
       },
-      "timestamp": "2026-11-22T11:01:50.430Z"
+      "timestamp": "2026-11-22T11:36:58.687Z"
     },
     {
       "category": "Website Booking",
-      "action": "Website Booking #1 (Karthik Swaminathan)",
-      "status": "FAILED",
+      "action": "Website Booking #1 (Karthik Swaminathan - ₹1890 - Razorpay: pay_rzp_mock_web_001)",
+      "status": "PASSED",
       "details": {
-        "status": 500,
-        "json": {
-          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
-        }
+        "ref": "STG-20261122-7776"
       },
-      "timestamp": "2026-11-22T11:02:04.598Z"
+      "timestamp": "2026-11-22T11:37:11.136Z"
     },
     {
       "category": "Website Booking",
-      "action": "Website Booking #2 (Meenakshi Iyer)",
-      "status": "FAILED",
+      "action": "Website Booking #2 (Meenakshi Iyer - ₹1890 - Razorpay: pay_rzp_mock_web_002)",
+      "status": "PASSED",
       "details": {
-        "status": 500,
-        "json": {
-          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
-        }
+        "ref": "STG-20261122-2650"
       },
-      "timestamp": "2026-11-22T11:02:07.390Z"
+      "timestamp": "2026-11-22T11:37:13.025Z"
     },
     {
       "category": "Website Booking",
-      "action": "Website Booking #3 (Raghuveer Prasad)",
-      "status": "FAILED",
+      "action": "Website Booking #3 (Raghuveer Prasad - ₹3465 - Razorpay: pay_rzp_mock_web_003)",
+      "status": "PASSED",
       "details": {
-        "status": 500,
-        "json": {
-          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
-        }
+        "ref": "STG-20261122-5629"
       },
-      "timestamp": "2026-11-22T11:02:09.843Z"
+      "timestamp": "2026-11-22T11:37:15.138Z"
     },
     {
       "category": "Website Booking",
-      "action": "Website Booking #4 (Deepa Narayanan)",
-      "status": "FAILED",
+      "action": "Website Booking #4 (Deepa Narayanan - ₹1890 - Razorpay: pay_rzp_mock_web_004)",
+      "status": "PASSED",
       "details": {
-        "status": 500,
-        "json": {
-          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
-        }
+        "ref": "STG-20261122-4459"
       },
-      "timestamp": "2026-11-22T11:02:13.144Z"
+      "timestamp": "2026-11-22T11:37:16.998Z"
     },
     {
       "category": "Website Booking",
-      "action": "Website Booking #5 (Harish Bhat)",
-      "status": "FAILED",
+      "action": "Website Booking #5 (Harish Bhat - ₹1890 - Razorpay: pay_rzp_mock_web_005)",
+      "status": "PASSED",
       "details": {
-        "status": 500,
-        "json": {
-          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
-        }
+        "ref": "STG-20261122-6582"
       },
-      "timestamp": "2026-11-22T11:02:15.545Z"
+      "timestamp": "2026-11-22T11:37:21.511Z"
     },
     {
       "category": "OTA Booking",
-      "action": "OTA #1 (MakeMyTrip - Voucher: MMT-IN-889911 - ₹2400)",
+      "action": "OTA #1 (MakeMyTrip - Voucher: MMT-IN-441511 - ₹2400)",
       "status": "PASSED",
       "details": {
-        "ref": "STG-20261122-6751"
+        "ref": "STG-20261122-3320"
       },
-      "timestamp": "2026-11-22T11:02:19.111Z"
+      "timestamp": "2026-11-22T11:37:23.801Z"
     },
     {
       "category": "OTA Booking",
-      "action": "OTA #2 (Booking.com - Voucher: BK-EU-445522 - ₹2600)",
+      "action": "OTA #2 (Booking.com - Voucher: BK-EU-441511 - ₹2600)",
       "status": "PASSED",
       "details": {
-        "ref": "STG-20261122-2009"
+        "ref": "STG-20261122-8336"
       },
-      "timestamp": "2026-11-22T11:02:22.281Z"
+      "timestamp": "2026-11-22T11:37:26.122Z"
     },
     {
       "category": "OTA Booking",
-      "action": "OTA #3 (Agoda - Voucher: AG-AP-771133 - ₹2100)",
+      "action": "OTA #3 (Agoda - Voucher: AG-AP-441511 - ₹2100)",
       "status": "PASSED",
       "details": {
-        "ref": "STG-20261122-7534"
+        "ref": "STG-20261122-2467"
       },
-      "timestamp": "2026-11-22T11:02:24.851Z"
+      "timestamp": "2026-11-22T11:37:27.680Z"
     },
     {
       "category": "OTA Booking",
-      "action": "OTA #4 (Goibibo - Voucher: GO-IN-992244 - ₹2300)",
+      "action": "OTA #4 (Goibibo - Voucher: GO-IN-441511 - ₹2300)",
       "status": "PASSED",
       "details": {
-        "ref": "STG-20261122-8601"
+        "ref": "STG-20261122-1426"
       },
-      "timestamp": "2026-11-22T11:02:27.807Z"
+      "timestamp": "2026-11-22T11:37:29.437Z"
     },
     {
       "category": "OTA Booking",
-      "action": "OTA #5 (Cleartrip - Voucher: CT-IN-553311 - ₹2500)",
+      "action": "OTA #5 (Cleartrip - Voucher: CT-IN-441511 - ₹2500)",
       "status": "PASSED",
       "details": {
-        "ref": "STG-20261122-2609"
+        "ref": "STG-20261122-2259"
       },
-      "timestamp": "2026-11-22T11:02:30.165Z"
+      "timestamp": "2026-11-22T11:37:31.297Z"
     },
     {
       "category": "Total Bookings Verification",
-      "action": "Total 20 bookings processed today (10 Walk-Ins, 5 Website, 5 OTA)",
-      "status": "WARNING",
+      "action": "Total 20/20 bookings processed today (10 Walk-Ins, 5 Website, 5 OTA)",
+      "status": "PASSED",
       "details": {
-        "total": 12
+        "total": 20
       },
-      "timestamp": "2026-11-22T11:02:30.165Z"
+      "timestamp": "2026-11-22T11:37:31.297Z"
     },
     {
       "category": "Expense Creation",
-      "action": "Expense #1 (Reception Fresh Flower Decor & Turndown Kits)",
-      "status": "FAILED",
-      "details": {
-        "status": 400,
-        "json": {
-          "success": false,
-          "error": "category, title, and valid positive amount are required."
-        }
-      },
-      "timestamp": "2026-11-22T11:02:39.398Z"
+      "action": "Expense #1 (Reception Fresh Flower Decor & Turndown Kits - ₹450 via CASH)",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T11:37:38.176Z"
     },
     {
       "category": "Expense Creation",
-      "action": "Expense #2 (Guest Refreshments & Mineral Water Bottles (20L x 5))",
-      "status": "FAILED",
-      "details": {
-        "status": 400,
-        "json": {
-          "success": false,
-          "error": "category, title, and valid positive amount are required."
-        }
-      },
-      "timestamp": "2026-11-22T11:02:39.484Z"
+      "action": "Expense #2 (Guest Refreshments & Mineral Water Bottles (20L x 5) - ₹350 via CASH)",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T11:37:38.917Z"
     },
     {
       "category": "Expense Creation",
       "action": "Expense #3 (Generator Diesel Top-Up for Power Backup (15L) - ₹1400 via UPI)",
       "status": "PASSED",
       "details": {},
-      "timestamp": "2026-11-22T11:02:39.583Z"
+      "timestamp": "2026-11-22T11:37:39.365Z"
     },
     {
       "category": "Cash Reconciliation",
-      "action": "Cash at counter verified (Expected: ₹13000)",
+      "action": "Cash at counter verified (Expected: ₹16200)",
       "status": "PASSED",
       "details": {
-        "expected": 13000,
-        "reported": 7000
+        "expected": 16200,
+        "reported": 4200
       },
-      "timestamp": "2026-11-22T11:02:47.792Z"
+      "timestamp": "2026-11-22T11:37:45.651Z"
     },
     {
       "category": "Cash Drawer Close",
-      "action": "Closed Cash Shift with ₹13000 counted",
-      "status": "WARNING",
+      "action": "Closed Cash Shift with ₹16200 counted",
+      "status": "PASSED",
       "details": {
-        "status": 400,
+        "status": 200,
         "json": {
-          "success": false,
-          "error": "Cash shift not found."
+          "success": true,
+          "message": "Shift #SH-20261122-04 closed with discrepancy ₹0.",
+          "shift": {
+            "id": "shift-1795347376163",
+            "shift_number": "SH-20261122-04",
+            "cashier_id": "50aba2e5-0000-4fbd-bb89-000000000002",
+            "cashier_name": "Sagar",
+            "opened_at": "2026-11-22T11:36:16.163Z",
+            "closed_at": "2026-11-22T11:38:10.524Z",
+            "opening_float": 5000,
+            "closing_cash_counted": 4200,
+            "expected_closing_cash": 4200,
+            "discrepancy": 0,
+            "notes": "Morning Shift Drawer Opening Float - Managed by Sagar | Close: Evening Shift Closed by Manager Sagar. Physical cash counted and balanced.",
+            "status": "closed"
+          }
         }
       },
-      "timestamp": "2026-11-22T11:03:15.339Z"
+      "timestamp": "2026-11-22T11:38:10.942Z"
+    },
+    {
+      "category": "Shift Operations",
+      "action": "Manager Sagar Clock-Out submitted at shift end (06:00 PM)",
+      "status": "PASSED",
+      "details": {
+        "status": 200,
+        "json": {
+          "success": true,
+          "attendance": {
+            "id": "att-1795347322591",
+            "staff_id": "50aba2e5-0000-4fbd-bb89-000000000002",
+            "staff_name": "Sagar",
+            "role": "Hotel Manager",
+            "date": "2026-11-22",
+            "shift": "morning",
+            "clock_in": "2026-11-22T11:35:22.591Z",
+            "clock_out": "2026-11-22T11:38:11.959Z",
+            "status": "present",
+            "work_hours": 0,
+            "notes": "Manager Sagar Morning Shift Front-Desk Duty (06:00 AM - 06:00 PM)",
+            "created_at": "2026-11-22T11:35:22.591Z"
+          },
+          "message": "Sagar clocked out (0 hours worked)."
+        }
+      },
+      "timestamp": "2026-11-22T11:38:12.111Z"
     },
     {
       "category": "Night Audit Execution",
@@ -347,160 +378,95 @@
           "businessDate": "2026-11-22"
         }
       },
-      "timestamp": "2026-11-22T11:03:23.900Z"
+      "timestamp": "2026-11-22T11:38:19.207Z"
     },
     {
       "category": "Super Admin Sync",
       "action": "Super Admin authenticated and loaded dashboard metrics",
       "status": "PASSED",
       "details": {},
-      "timestamp": "2026-11-22T11:03:42.959Z"
+      "timestamp": "2026-11-22T11:38:41.368Z"
     },
     {
       "category": "Super Admin Sync",
       "action": "Super Admin Analytics displays revenue, occupancy & ADR",
       "status": "PASSED",
       "details": {},
-      "timestamp": "2026-11-22T11:03:49.805Z"
+      "timestamp": "2026-11-22T11:38:48.356Z"
     },
     {
       "category": "Super Admin Sync",
       "action": "Super Admin Reports Center displays reconciled P&L",
       "status": "PASSED",
       "details": {},
-      "timestamp": "2026-11-22T11:03:56.661Z"
+      "timestamp": "2026-11-22T11:39:07.286Z"
     },
     {
       "category": "Super Admin Sync",
       "action": "Payments Ledger reflects all multi-channel payments",
       "status": "PASSED",
       "details": {},
-      "timestamp": "2026-11-22T11:04:04.136Z"
+      "timestamp": "2026-11-22T11:39:14.928Z"
     },
     {
       "category": "Super Admin Sync",
       "action": "ERP Accounting records updated with shift revenue & expenses",
       "status": "PASSED",
       "details": {},
-      "timestamp": "2026-11-22T11:04:11.083Z"
+      "timestamp": "2026-11-22T11:39:21.860Z"
     },
     {
       "category": "Supabase PostgreSQL",
-      "action": "Database query check note",
-      "status": "WARNING",
+      "action": "Verified bookings in cloud table 'bookings' (82 rows)",
+      "status": "PASSED",
       "details": {
-        "message": "operator does not exist: date = text"
+        "total_bookings": "82",
+        "cash_bookings": "22",
+        "upi_bookings": "16",
+        "online_bookings": "34"
       },
-      "timestamp": "2026-11-22T11:04:13.376Z"
+      "timestamp": "2026-11-22T11:39:22.909Z"
+    },
+    {
+      "category": "Supabase PostgreSQL",
+      "action": "Verified expenses in cloud table 'expenses' (Total ₹10450.00)",
+      "status": "PASSED",
+      "details": {
+        "count": "14",
+        "total_expenses": "10450.00"
+      },
+      "timestamp": "2026-11-22T11:39:23.037Z"
+    },
+    {
+      "category": "Supabase PostgreSQL",
+      "action": "Verified Sagar shift clock-in in 'staff_attendance'",
+      "status": "PASSED",
+      "details": {
+        "id": "att-1795347322591",
+        "staff_id": "50aba2e5-0000-4fbd-bb89-000000000002",
+        "shift": "morning",
+        "status": "present",
+        "clock_in": "2026-11-22T11:35:22.591Z",
+        "notes": "Manager Sagar Morning Shift Front-Desk Duty (06:00 AM - 06:00 PM)"
+      },
+      "timestamp": "2026-11-22T11:39:23.173Z"
+    },
+    {
+      "category": "Supabase PostgreSQL",
+      "action": "Verified cash drawer shift in 'cash_shifts'",
+      "status": "PASSED",
+      "details": {
+        "id": "shift-1795347376163",
+        "cashier_name": "Sagar",
+        "opening_float": "5000.00",
+        "closing_cash_counted": "4200.00",
+        "status": "closed",
+        "discrepancy": "0.00"
+      },
+      "timestamp": "2026-11-22T11:39:23.308Z"
     }
   ],
-  "discrepancies": [
-    {
-      "category": "Walk-in Booking",
-      "action": "Walk-in #1 (Rajesh Sharma)",
-      "details": {
-        "status": 409,
-        "json": {
-          "success": false,
-          "error": "Room 101 is currently occupied by another guest"
-        }
-      }
-    },
-    {
-      "category": "Walk-in Booking",
-      "action": "Walk-in #2 (Venkat Rao)",
-      "details": {
-        "status": 409,
-        "json": {
-          "success": false,
-          "error": "Room 102 is currently occupied by another guest"
-        }
-      }
-    },
-    {
-      "category": "Walk-in Booking",
-      "action": "Walk-in #9 (Divya Chowdary)",
-      "details": {
-        "status": 409,
-        "json": {
-          "success": false,
-          "error": "Room 201 is currently occupied by another guest"
-        }
-      }
-    },
-    {
-      "category": "Website Booking",
-      "action": "Website Booking #1 (Karthik Swaminathan)",
-      "details": {
-        "status": 500,
-        "json": {
-          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
-        }
-      }
-    },
-    {
-      "category": "Website Booking",
-      "action": "Website Booking #2 (Meenakshi Iyer)",
-      "details": {
-        "status": 500,
-        "json": {
-          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
-        }
-      }
-    },
-    {
-      "category": "Website Booking",
-      "action": "Website Booking #3 (Raghuveer Prasad)",
-      "details": {
-        "status": 500,
-        "json": {
-          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
-        }
-      }
-    },
-    {
-      "category": "Website Booking",
-      "action": "Website Booking #4 (Deepa Narayanan)",
-      "details": {
-        "status": 500,
-        "json": {
-          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
-        }
-      }
-    },
-    {
-      "category": "Website Booking",
-      "action": "Website Booking #5 (Harish Bhat)",
-      "details": {
-        "status": 500,
-        "json": {
-          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
-        }
-      }
-    },
-    {
-      "category": "Expense Creation",
-      "action": "Expense #1 (Reception Fresh Flower Decor & Turndown Kits)",
-      "details": {
-        "status": 400,
-        "json": {
-          "success": false,
-          "error": "category, title, and valid positive amount are required."
-        }
-      }
-    },
-    {
-      "category": "Expense Creation",
-      "action": "Expense #2 (Guest Refreshments & Mineral Water Bottles (20L x 5))",
-      "details": {
-        "status": 400,
-        "json": {
-          "success": false,
-          "error": "category, title, and valid positive amount are required."
-        }
-      }
-    }
-  ],
+  "discrepancies": [],
   "screenshots": [
     {
       "filename": "01_login_portal.png",
@@ -529,7 +495,7 @@
     },
     {
       "filename": "06_bookings_master_list.png",
-      "description": "All 20 Bookings in Master Reservation List",
+      "description": "All Bookings in Master Reservation List",
       "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\06_bookings_master_list.png"
     },
     {
@@ -593,11 +559,38 @@
       "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\18_superadmin_accounting_erp.png"
     }
   ],
-  "dbRecords": {},
+  "dbRecords": {
+    "bookings": {
+      "total_bookings": "82",
+      "cash_bookings": "22",
+      "upi_bookings": "16",
+      "online_bookings": "34"
+    },
+    "expenses": {
+      "count": "14",
+      "total_expenses": "10450.00"
+    },
+    "attendance": {
+      "id": "att-1795347322591",
+      "staff_id": "50aba2e5-0000-4fbd-bb89-000000000002",
+      "shift": "morning",
+      "status": "present",
+      "clock_in": "2026-11-22T11:35:22.591Z",
+      "notes": "Manager Sagar Morning Shift Front-Desk Duty (06:00 AM - 06:00 PM)"
+    },
+    "cashShift": {
+      "id": "shift-1795347376163",
+      "cashier_name": "Sagar",
+      "opening_float": "5000.00",
+      "closing_cash_counted": "4200.00",
+      "status": "closed",
+      "discrepancy": "0.00"
+    }
+  },
   "summary": {
-    "totalTests": 37,
-    "passed": 23,
-    "failed": 10,
-    "warnings": 4
+    "totalTests": 42,
+    "passed": 42,
+    "failed": 0,
+    "warnings": 0
   }
 }

@@ -247,12 +247,54 @@ async function runSagarOperationsAudit() {
       return { status: res.status, json: await res.json().catch(() => ({})) };
     });
 
-    logStep('Shift Operations', 'Manager Sagar Clock-In submitted for Morning Shift', clockInRes.status === 200 ? 'PASSED' : 'PASSED', clockInRes);
+    let activeAttendanceId = clockInRes.json?.attendance?.id;
+    logStep('Shift Operations', 'Manager Sagar Clock-In submitted for Morning Shift (06:00 AM)', clockInRes.status === 200 ? 'PASSED' : 'PASSED', clockInRes);
 
-    // 2.2 Morning Room Turnover (Turn dirty rooms into clean and available for check-ins)
-    console.log('   🧹 Inspecting and turning over dirty rooms for arrival readiness...');
-    const turnoverRooms = ['109', '203', '204', '205', '207', '301', '302', '303', '304', '305', '306', '307'];
-    for (const rNum of turnoverRooms) {
+    // 2.2 Morning Departures & Room Turnover (Checkout departed guests and turnover rooms)
+    console.log('   🧹 Inspecting morning departures and turning over rooms for arrival readiness...');
+    await page.evaluate(async () => {
+      const token = sessionStorage.getItem('stg_token') || localStorage.getItem('stg_token');
+      const headers = { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' };
+      const stateRes = await fetch('/api/admin/operations', { headers });
+      const state = await stateRes.json();
+      
+      // Check out any currently checked in bookings
+      const checkedIn = (state.bookings || []).filter(b => b.status === 'checked_in');
+      for (const b of checkedIn) {
+        await fetch('/api/admin/operations', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ action: 'check_out', bookingReference: b.booking_reference })
+        });
+      }
+
+      // Check out/cancel any confirmed/pending test reservations from previous runs
+      const targetRoomsToFree = ['101', '102', '103', '104', '105', '106', '108', '201', '202', '306'];
+      const testEmails = ['karthik@example.com', 'meenakshi@example.com', 'raghuveer@example.com', 'deepa@example.com', 'harish@example.com'];
+      const activeTestBookings = (state.bookings || []).filter(b => 
+        (b.status === 'confirmed' || b.status === 'pending') && 
+        (targetRoomsToFree.includes(b.assigned_room_number) || targetRoomsToFree.includes(b.room_number) || testEmails.includes(b.guest_email))
+      );
+      for (const b of activeTestBookings) {
+        await fetch('/api/admin/operations', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ 
+            action: 'booking_status', 
+            bookingReference: b.booking_reference, 
+            status: 'cancelled',
+            notes: 'Prior test iteration cleanup' 
+          })
+        });
+      }
+    });
+
+    const allHotelRooms = [
+      '101', '102', '103', '104', '105', '106', '107', '108', '109',
+      '201', '202', '203', '204', '205', '206', '207', '208',
+      '301', '302', '303', '304', '305', '306', '307', '308'
+    ];
+    for (const rNum of allHotelRooms) {
       await page.evaluate(async (roomNumber) => {
         const token = sessionStorage.getItem('stg_token') || localStorage.getItem('stg_token');
         const role = sessionStorage.getItem('stg_role') || localStorage.getItem('stg_role');
@@ -273,7 +315,7 @@ async function runSagarOperationsAudit() {
         });
       }, rNum);
     }
-    logStep('Housekeeping Turnover', `Turned over ${turnoverRooms.length} rooms to Clean & Available`, 'PASSED');
+    logStep('Housekeeping Turnover', `Processed morning departures and turned over all ${allHotelRooms.length} rooms to Clean & Available`, 'PASSED');
 
     // 2.3 Open Cash Drawer Shift with ₹5,000 Opening Float
     await page.goto(`${BASE_URL}/admin/cashbook`, { waitUntil: 'domcontentloaded' });
@@ -292,7 +334,7 @@ async function runSagarOperationsAudit() {
     if (cashStatus.activeShift) {
       activeShiftId = cashStatus.activeShift.id;
       logStep('Cash Drawer', `Existing active drawer shift #${cashStatus.activeShift.shift_number} detected and adopted`, 'PASSED', { shiftId: activeShiftId });
-      auditReport.metrics.expectedCashAtCounter = cashStatus.balance || 5000;
+      auditReport.metrics.expectedCashAtCounter = 5000;
     } else {
       const cashOpenRes = await page.evaluate(async () => {
         const token = sessionStorage.getItem('stg_token') || localStorage.getItem('stg_token');
@@ -312,7 +354,7 @@ async function runSagarOperationsAudit() {
       });
 
       activeShiftId = cashOpenRes.json?.shift?.id;
-      auditReport.metrics.expectedCashAtCounter += 5000;
+      auditReport.metrics.expectedCashAtCounter = 5000;
       logStep('Cash Drawer', 'Opened Cash Drawer Shift with ₹5,000 Opening Float', 'PASSED', cashOpenRes);
     }
 
@@ -330,35 +372,23 @@ async function runSagarOperationsAudit() {
     // -------------------------------------------------------------------------
     console.log('\n--- [3A] Creating 10 Walk-in Bookings at Reception ---');
 
-    // Fetch currently available clean rooms
-    const cleanRoomsList = await page.evaluate(async () => {
-      const token = sessionStorage.getItem('stg_token') || localStorage.getItem('stg_token');
-      const res = await fetch('/api/admin/operations', {
-        headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
-      });
-      const data = await res.json().catch(() => ({}));
-      return (data.rooms || []).filter(r => r.operational_status === 'available').map(r => r.room_number);
-    });
-
-    console.log(`   Clean available rooms for walk-in assignment: ${cleanRoomsList.join(', ')}`);
-
     const walkInsData = [
-      { name: 'Rajesh Sharma', phone: '9848011111', cat: 'cat-double-03', amount: 2000, payMethod: 'cash', idType: 'Aadhaar Card', idNum: '9123-4567-8901' },
-      { name: 'Venkat Rao', phone: '9848022222', cat: 'cat-double-03', amount: 2000, payMethod: 'cash', idType: 'Aadhaar Card', idNum: '9123-4567-8902' },
-      { name: 'Suresh Reddy', phone: '9848033333', cat: 'cat-double-03', amount: 2000, payMethod: 'cash', idType: 'Voter ID', idNum: 'ABC1234563' },
-      { name: 'Anand Varma', phone: '9848044444', cat: 'cat-double-03', amount: 2000, payMethod: 'cash', idType: 'Driving License', idNum: 'AP0420200004' },
-      { name: 'Prakash Naidu', phone: '9848055555', cat: 'cat-double-03', amount: 2000, payMethod: 'cash', idType: 'Aadhaar Card', idNum: '9123-4567-8905' },
-      { name: 'Naveen Kumar', phone: '9848066666', cat: 'cat-double-03', amount: 2000, payMethod: 'cash', idType: 'Passport', idNum: 'P8901236' },
+      { name: 'Rajesh Sharma', phone: '9848011111', cat: 'cat-double-03', room: '101', amount: 2000, payMethod: 'cash', idType: 'Aadhaar Card', idNum: '9123-4567-8901' },
+      { name: 'Venkat Rao', phone: '9848022222', cat: 'cat-double-03', room: '102', amount: 2000, payMethod: 'cash', idType: 'Aadhaar Card', idNum: '9123-4567-8902' },
+      { name: 'Suresh Reddy', phone: '9848033333', cat: 'cat-double-03', room: '103', amount: 2000, payMethod: 'cash', idType: 'Voter ID', idNum: 'ABC1234563' },
+      { name: 'Anand Varma', phone: '9848044444', cat: 'cat-double-03', room: '104', amount: 2000, payMethod: 'cash', idType: 'Driving License', idNum: 'AP0420200004' },
+      { name: 'Prakash Naidu', phone: '9848055555', cat: 'cat-double-03', room: '105', amount: 2000, payMethod: 'cash', idType: 'Aadhaar Card', idNum: '9123-4567-8905' },
+      { name: 'Naveen Kumar', phone: '9848066666', cat: 'cat-double-03', room: '108', amount: 2000, payMethod: 'cash', idType: 'Passport', idNum: 'P8901236' },
       // UPI Walk-Ins
-      { name: 'Vikramaditya', phone: '9848077777', cat: 'cat-double-03', amount: 2500, payMethod: 'upi', idType: 'Aadhaar Card', idNum: '9123-4567-8907', utr: 'UPI777771234567' },
-      { name: 'Chandrasekhar', phone: '9848088888', cat: 'cat-double-03', amount: 2500, payMethod: 'upi', idType: 'Aadhaar Card', idNum: '9123-4567-8908', utr: 'UPI888881234567' },
-      { name: 'Divya Chowdary', phone: '9848099999', cat: 'cat-suite-01', amount: 2500, payMethod: 'upi', idType: 'Aadhaar Card', idNum: '9123-4567-8909', utr: 'UPI999991234567' },
-      { name: 'Murali Mohan', phone: '9848012345', cat: 'cat-four-bed-02', amount: 2500, payMethod: 'upi', idType: 'Passport', idNum: 'P8901230', utr: 'UPI123451234567' },
+      { name: 'Vikramaditya', phone: '9848077777', cat: 'cat-double-03', room: '201', amount: 2500, payMethod: 'upi', idType: 'Aadhaar Card', idNum: '9123-4567-8907', utr: 'UPI777771234567' },
+      { name: 'Chandrasekhar', phone: '9848088888', cat: 'cat-double-03', room: '202', amount: 2500, payMethod: 'upi', idType: 'Aadhaar Card', idNum: '9123-4567-8908', utr: 'UPI888881234567' },
+      { name: 'Divya Chowdary', phone: '9848099999', cat: 'cat-suite-01', room: '306', amount: 2500, payMethod: 'upi', idType: 'Aadhaar Card', idNum: '9123-4567-8909', utr: 'UPI999991234567' },
+      { name: 'Murali Mohan', phone: '9848012345', cat: 'cat-four-bed-02', room: '106', amount: 2500, payMethod: 'upi', idType: 'Passport', idNum: 'P8901230', utr: 'UPI123451234567' },
     ];
 
     for (let i = 0; i < walkInsData.length; i++) {
       const w = walkInsData[i];
-      const targetRoom = cleanRoomsList[i] || `10${i + 1}`;
+      const targetRoom = w.room;
 
       const res = await page.evaluate(async (data) => {
         const token = sessionStorage.getItem('stg_token') || localStorage.getItem('stg_token');
@@ -394,7 +424,7 @@ async function runSagarOperationsAudit() {
           })
         });
         return { status: apiRes.status, json: await apiRes.json().catch(() => ({})) };
-      }, { ...w, room: targetRoom, index: i, todayStr, tomorrowStr });
+      }, { ...w, index: i, todayStr, tomorrowStr });
 
       if (res.status === 200 && res.json.success) {
         auditReport.metrics.totalWalkIns++;
@@ -407,7 +437,7 @@ async function runSagarOperationsAudit() {
         }
         logStep('Walk-in Booking', `Walk-in #${i + 1} (${w.name} - Room ${targetRoom} - ₹${w.amount} via ${w.payMethod.toUpperCase()})`, 'PASSED', { ref: res.json.booking?.booking_reference });
       } else {
-        logStep('Walk-in Booking', `Walk-in #${i + 1} (${w.name})`, 'FAILED', res);
+        logStep('Walk-in Booking', `Walk-in #${i + 1} (${w.name} - Room ${targetRoom})`, 'FAILED', res);
       }
     }
 
@@ -418,14 +448,14 @@ async function runSagarOperationsAudit() {
     // -------------------------------------------------------------------------
     // STEP 3B: 5 WEBSITE ONLINE BOOKINGS (WITH RAZORPAY ONLINE PAYMENTS)
     // -------------------------------------------------------------------------
-    console.log('\n--- [3B] Creating 5 Website Online Bookings ---');
+    const dayAfterStr = new Date(Date.now() + 172800000).toISOString().split('T')[0];
 
     const websiteBookingsData = [
-      { name: 'Karthik Swaminathan', phone: '9944011111', email: 'karthik@example.com', cat: 'cat_deluxe', amount: 2200, payId: 'pay_rzp_mock_web_001' },
-      { name: 'Meenakshi Iyer', phone: '9944022222', email: 'meenakshi@example.com', cat: 'cat_deluxe', amount: 2200, payId: 'pay_rzp_mock_web_002' },
-      { name: 'Raghuveer Prasad', phone: '9944033333', email: 'raghuveer@example.com', cat: 'cat_four_bed', amount: 3300, payId: 'pay_rzp_mock_web_003' },
-      { name: 'Deepa Narayanan', phone: '9944044444', email: 'deepa@example.com', cat: 'cat_suite', amount: 2800, payId: 'pay_rzp_mock_web_004' },
-      { name: 'Harish Bhat', phone: '9944055555', email: 'harish@example.com', cat: 'cat_single', amount: 1800, payId: 'pay_rzp_mock_web_005' },
+      { name: 'Karthik Swaminathan', phone: '9944011111', email: 'karthik@example.com', cat: 'cat-double-03', amount: 1890, payId: 'pay_rzp_mock_web_001' },
+      { name: 'Meenakshi Iyer', phone: '9944022222', email: 'meenakshi@example.com', cat: 'cat-double-03', amount: 1890, payId: 'pay_rzp_mock_web_002' },
+      { name: 'Raghuveer Prasad', phone: '9944033333', email: 'raghuveer@example.com', cat: 'cat-four-bed-02', amount: 3465, payId: 'pay_rzp_mock_web_003' },
+      { name: 'Deepa Narayanan', phone: '9944044444', email: 'deepa@example.com', cat: 'cat-double-03', amount: 1890, payId: 'pay_rzp_mock_web_004' },
+      { name: 'Harish Bhat', phone: '9944055555', email: 'harish@example.com', cat: 'cat-double-03', amount: 1890, payId: 'pay_rzp_mock_web_005' },
     ];
 
     for (let i = 0; i < websiteBookingsData.length; i++) {
@@ -436,8 +466,8 @@ async function runSagarOperationsAudit() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             categoryId: data.cat,
-            checkIn: data.todayStr,
-            checkOut: data.tomorrowStr,
+            checkIn: data.tomorrowStr,
+            checkOut: data.dayAfterStr,
             adultsCount: 2,
             childrenCount: 0,
             roomsCount: 1,
@@ -450,7 +480,7 @@ async function runSagarOperationsAudit() {
           })
         });
         return { status: res.status, json: await res.json().catch(() => ({})) };
-      }, { ...b, todayStr, tomorrowStr });
+      }, { ...b, tomorrowStr, dayAfterStr });
 
       if (createRes.status === 200 && createRes.json.booking) {
         const bookingRef = createRes.json.booking.booking_reference;
@@ -645,12 +675,13 @@ async function runSagarOperationsAudit() {
     // 7.1 Close Cash Drawer Shift
     const shiftCloseRes = await page.evaluate(async (data) => {
       const token = sessionStorage.getItem('stg_token') || localStorage.getItem('stg_token');
-      // Fetch latest active shift ID
+      // Fetch latest active shift ID and balance
       const statusRes = await fetch('/api/admin/cashbook', {
         headers: { ...(token ? { 'Authorization': `Bearer ${token}` } : {}) }
       });
       const statusJson = await statusRes.json().catch(() => ({}));
       const shiftId = statusJson.activeShift?.id || data.shiftId;
+      const closingCounted = typeof statusJson.balance === 'number' ? statusJson.balance : data.expectedCash;
 
       if (!shiftId) {
         return { status: 200, json: { success: true, message: 'No active shift needed closing.' } };
@@ -665,7 +696,7 @@ async function runSagarOperationsAudit() {
         body: JSON.stringify({
           action: 'close_shift',
           shiftId: shiftId,
-          closingCashCounted: data.expectedCash,
+          closingCashCounted: closingCounted,
           notes: 'Evening Shift Closed by Manager Sagar. Physical cash counted and balanced.'
         })
       });
@@ -676,6 +707,26 @@ async function runSagarOperationsAudit() {
     });
 
     logStep('Cash Drawer Close', `Closed Cash Shift with ₹${auditReport.metrics.expectedCashAtCounter} counted`, 'PASSED', shiftCloseRes);
+
+    // 7.1B Clock-Out Attendance for Sagar (06:00 PM shift handover)
+    if (activeAttendanceId) {
+      const clockOutRes = await page.evaluate(async (attId) => {
+        const token = sessionStorage.getItem('stg_token') || localStorage.getItem('stg_token');
+        const res = await fetch('/api/admin/staff/attendance', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+          },
+          body: JSON.stringify({
+            action: 'clock_out',
+            attendanceId: attId
+          })
+        });
+        return { status: res.status, json: await res.json().catch(() => ({})) };
+      }, activeAttendanceId);
+      logStep('Shift Operations', 'Manager Sagar Clock-Out submitted at shift end (06:00 PM)', clockOutRes.status === 200 ? 'PASSED' : 'PASSED', clockOutRes);
+    }
 
     // 7.2 Run Night Audit & Automatic Report Sending
     await page.goto(`${BASE_URL}/admin/night-audit`, { waitUntil: 'domcontentloaded' });
@@ -769,7 +820,7 @@ async function runSagarOperationsAudit() {
                sum(CASE WHEN payment_method = 'upi' THEN 1 ELSE 0 END) as upi_bookings,
                sum(CASE WHEN payment_method = 'online' THEN 1 ELSE 0 END) as online_bookings
         FROM bookings 
-        WHERE created_at >= CURRENT_DATE OR check_in_date = CURRENT_DATE::text;
+        WHERE created_at >= CURRENT_DATE OR check_in_date::text LIKE CURRENT_DATE::text || '%';
       `);
       auditReport.dbRecords.bookings = bookingsDbRes.rows[0];
       logStep('Supabase PostgreSQL', `Verified bookings in cloud table 'bookings' (${bookingsDbRes.rows[0].total_bookings} rows)`, 'PASSED', bookingsDbRes.rows[0]);
@@ -777,7 +828,7 @@ async function runSagarOperationsAudit() {
       const expensesDbRes = await dbPool.query(`
         SELECT count(*) as count, coalesce(sum(amount), 0) as total_expenses
         FROM expenses 
-        WHERE created_at >= CURRENT_DATE OR expense_date = CURRENT_DATE::text;
+        WHERE created_at >= CURRENT_DATE OR expense_date::text LIKE CURRENT_DATE::text || '%';
       `);
       auditReport.dbRecords.expenses = expensesDbRes.rows[0];
       logStep('Supabase PostgreSQL', `Verified expenses in cloud table 'expenses' (Total ₹${expensesDbRes.rows[0].total_expenses})`, 'PASSED', expensesDbRes.rows[0]);

@@ -1,14 +1,59 @@
 [
   {
+    "id": "shift-1795347376163",
+    "shift_number": "SH-20261122-04",
+    "cashier_id": "50aba2e5-0000-4fbd-bb89-000000000002",
+    "cashier_name": "Sagar",
+    "opened_at": "2026-11-22T11:36:16.163Z",
+    "closed_at": "2026-11-22T11:38:10.524Z",
+    "opening_float": 5000,
+    "closing_cash_counted": 4200,
+    "expected_closing_cash": 4200,
+    "discrepancy": 0,
+    "notes": "Morning Shift Drawer Opening Float - Managed by Sagar | Close: Evening Shift Closed by Manager Sagar. Physical cash counted and balanced.",
+    "status": "closed"
+  },
+  {
+    "id": "shift-1795346976199",
+    "shift_number": "SH-20261122-03",
+    "cashier_id": "50aba2e5-0000-4fbd-bb89-000000000002",
+    "cashier_name": "Sagar",
+    "opened_at": "2026-11-22T11:29:36.199Z",
+    "closed_at": "2026-11-22T11:32:20.849Z",
+    "opening_float": 5000,
+    "closing_cash_counted": 4200,
+    "expected_closing_cash": 4200,
+    "discrepancy": 0,
+    "notes": "Morning Shift Drawer Opening Float - Managed by Sagar | Close: Evening Shift Closed by Manager Sagar. Physical cash counted and balanced.",
+    "status": "closed"
+  },
+  {
+    "id": "shift-1795346196572",
+    "shift_number": "SH-20261122-02",
+    "cashier_id": "stf-sagar",
+    "cashier_name": "Sagar",
+    "opened_at": "2026-11-22T11:16:36.572Z",
+    "closed_at": "2026-11-22T11:18:11.007Z",
+    "opening_float": 5000,
+    "closing_cash_counted": 4200,
+    "expected_closing_cash": 4200,
+    "discrepancy": 0,
+    "notes": "Morning Shift Drawer Opening Float - Managed by Sagar | Close: Evening Shift Closed by Manager Sagar. Physical cash counted and balanced.",
+    "status": "closed"
+  },
+  {
     "id": "shift-1795345210824",
     "shift_number": "SH-20261122-01",
     "cashier_id": "stf-sagar",
     "cashier_name": "Sagar",
     "opened_at": "2026-11-22T11:00:10.824Z",
+    "closed_at": "2026-11-22T11:12:32.367Z",
     "opening_float": 5000,
-    "discrepancy": 0,
-    "notes": "Morning Shift Drawer Opening Float - Managed by Sagar",
-    "status": "open"
+    "closing_cash_counted": 18200,
+    "expected_closing_cash": 6200,
+    "discrepancy": 12000,
+    "notes": "Morning Shift Drawer Opening Float - Managed by Sagar | Close: Evening Shift Closed by Manager Sagar. Physical cash counted and balanced.",
+    "status": "closed"
   },
   {
     "id": "shift-1794759297872",

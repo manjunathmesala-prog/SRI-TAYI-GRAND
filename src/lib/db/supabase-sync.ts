@@ -1871,7 +1871,16 @@ export async function syncStaffAttendanceToSupabase(attendance: StaffAttendance)
       client.release();
     }
   } catch (err: unknown) {
-    console.warn(`[SUPABASE ATTENDANCE SYNC WARN] (${attendance.id}):`, err instanceof Error ? err.message : String(err));
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn(`[SUPABASE ATTENDANCE SYNC WARN] (${attendance.id}):`, msg);
+    if (
+      msg.includes('MANAGER_DUTY_COLLISION') ||
+      msg.includes('idx_single_active_duty_manager') ||
+      msg.includes('Duty Manager') ||
+      msg.includes('clock')
+    ) {
+      throw err;
+    }
   }
 }
 

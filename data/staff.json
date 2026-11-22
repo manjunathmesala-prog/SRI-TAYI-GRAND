@@ -7,43 +7,7 @@
     "role": "Super Admin",
     "department": "Executive Management",
     "is_active": true,
-    "last_login": "2026-11-22T11:06:12.395Z",
-    "permissions": {
-      "can_override_rates": true,
-      "can_process_refunds": true,
-      "can_view_accounting": true,
-      "can_encode_rfid": true,
-      "can_run_night_audit": true,
-      "can_manage_inventory": true
-    }
-  },
-  {
-    "id": "50aba2e5-3266-4fbd-bb89-00a09f86cc5c",
-    "full_name": "G. Mohan Kumar",
-    "email": "manager@sritayigrand.com",
-    "phone": "9440812345",
-    "role": "Hotel Manager",
-    "department": "Hotel Operations & Management",
-    "is_active": true,
-    "last_login": "2026-11-22T11:06:12.395Z",
-    "permissions": {
-      "can_override_rates": true,
-      "can_process_refunds": true,
-      "can_view_accounting": true,
-      "can_encode_rfid": true,
-      "can_run_night_audit": true,
-      "can_manage_inventory": true
-    }
-  },
-  {
-    "id": "50aba2e5-0000-4fbd-bb89-000000000001",
-    "full_name": "Hari Achari",
-    "email": "hari@sritayigrand.com",
-    "phone": "9440812346",
-    "role": "Hotel Manager",
-    "department": "Hotel Operations & Management",
-    "is_active": true,
-    "last_login": "2026-11-22T11:06:12.395Z",
+    "last_login": "2026-11-22T11:49:40.635Z",
     "permissions": {
       "can_override_rates": true,
       "can_process_refunds": true,
@@ -61,7 +25,7 @@
     "role": "Hotel Manager",
     "department": "Hotel Operations & Management",
     "is_active": true,
-    "last_login": "2026-11-22T11:06:12.395Z",
+    "last_login": "2026-11-22T11:49:40.635Z",
     "permissions": {
       "can_override_rates": true,
       "can_process_refunds": true,
@@ -72,128 +36,20 @@
     }
   },
   {
-    "id": "stf-03",
-    "full_name": "B. Lakshmi Devi",
-    "email": "frontdesk@sritayigrand.com",
-    "phone": "9848123456",
-    "role": "Front Desk",
-    "department": "Front Desk & Reception",
+    "id": "50aba2e5-0000-4fbd-bb89-000000000001",
+    "full_name": "Hari Achari",
+    "email": "hari@sritayigrand.com",
+    "phone": "9440812346",
+    "role": "Hotel Manager",
+    "department": "Hotel Operations & Management",
     "is_active": true,
-    "last_login": "2026-11-04T21:45:00+05:30",
+    "last_login": "2026-11-22T11:49:40.635Z",
     "permissions": {
       "can_override_rates": true,
-      "can_process_refunds": false,
-      "can_view_accounting": false,
-      "can_encode_rfid": true,
-      "can_run_night_audit": true,
-      "can_manage_inventory": true
-    }
-  },
-  {
-    "id": "441e2ee2-844d-4f80-8adf-6be01a38fbd3",
-    "full_name": "Sri Tayi Grand Staff",
-    "email": "staff@sritayigrand.com",
-    "phone": "9848123457",
-    "role": "Front Desk",
-    "department": "Front Desk & Reception",
-    "is_active": true,
-    "last_login": "2026-11-22T11:06:12.395Z",
-    "permissions": {
-      "can_override_rates": false,
-      "can_process_refunds": false,
-      "can_view_accounting": false,
-      "can_encode_rfid": true,
-      "can_run_night_audit": false,
-      "can_manage_inventory": true
-    }
-  },
-  {
-    "id": "stf-04",
-    "full_name": "K. Ramesh",
-    "email": "housekeeping@sritayigrand.com",
-    "phone": "9177123456",
-    "role": "Housekeeping",
-    "department": "Housekeeping & Facilities",
-    "is_active": true,
-    "last_login": "2026-11-04T18:00:00+05:30",
-    "permissions": {
-      "can_override_rates": false,
-      "can_process_refunds": false,
-      "can_view_accounting": false,
-      "can_encode_rfid": false,
-      "can_run_night_audit": false,
-      "can_manage_inventory": true
-    }
-  },
-  {
-    "id": "stf-05",
-    "full_name": "S. Chandrasekhar",
-    "email": "accounts@sritayigrand.com",
-    "phone": "9989123456",
-    "role": "Accounts",
-    "department": "Accounts & Finance",
-    "is_active": true,
-    "last_login": "2026-11-04T17:30:00+05:30",
-    "permissions": {
-      "can_override_rates": false,
       "can_process_refunds": true,
       "can_view_accounting": true,
-      "can_encode_rfid": false,
+      "can_encode_rfid": true,
       "can_run_night_audit": true,
-      "can_manage_inventory": false
-    }
-  },
-  {
-    "id": "stf-06",
-    "full_name": "V. Naresh Reddy",
-    "email": "events@sritayigrand.com",
-    "phone": "9652123456",
-    "role": "Event Manager",
-    "department": "Banquets & Conventions",
-    "is_active": true,
-    "last_login": "2026-11-04T19:00:00+05:30",
-    "permissions": {
-      "can_override_rates": true,
-      "can_process_refunds": false,
-      "can_view_accounting": false,
-      "can_encode_rfid": false,
-      "can_run_night_audit": false,
-      "can_manage_inventory": true
-    }
-  },
-  {
-    "id": "stf-07",
-    "full_name": "M. Anjaneyulu",
-    "email": "anjaneyulu.hk@sritayigrand.com",
-    "phone": "9440187654",
-    "role": "Housekeeping",
-    "department": "Housekeeping & Facilities",
-    "is_active": true,
-    "last_login": "2026-11-09T08:00:00+05:30",
-    "permissions": {
-      "can_override_rates": false,
-      "can_process_refunds": false,
-      "can_view_accounting": false,
-      "can_encode_rfid": false,
-      "can_run_night_audit": false,
-      "can_manage_inventory": true
-    }
-  },
-  {
-    "id": "stf-08",
-    "full_name": "P. Parvathamma",
-    "email": "parvathi.hk@sritayigrand.com",
-    "phone": "9848198765",
-    "role": "Housekeeping",
-    "department": "Housekeeping & Facilities",
-    "is_active": true,
-    "last_login": "2026-11-09T08:30:00+05:30",
-    "permissions": {
-      "can_override_rates": false,
-      "can_process_refunds": false,
-      "can_view_accounting": false,
-      "can_encode_rfid": false,
-      "can_run_night_audit": false,
       "can_manage_inventory": true
     }
   }

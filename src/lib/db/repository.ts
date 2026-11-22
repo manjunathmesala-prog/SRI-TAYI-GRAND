@@ -220,6 +220,12 @@ export class HotelRepository {
     if (pJournals.length > 0) this.journalEntries = pJournals;
     const pAttendance = loadPersistedData<StaffAttendance>('staff_attendance.json');
     if (pAttendance.length > 0) this.staffAttendance = pAttendance;
+    const pStaff = loadPersistedData<StaffMember>('staff.json');
+    if (pStaff.length > 0) {
+      const ALLOWED = new Set(['admin@sritayigrand.com', 'hari@sritayigrand.com', 'sagar@sritayigrand.com']);
+      const filtered = pStaff.filter((s) => s.is_active && ALLOWED.has(s.email.toLowerCase()));
+      if (filtered.length > 0) this.staff = filtered;
+    }
     const pFolios = loadPersistedData<FolioCharge>('folio_charges.json');
     if (pFolios.length > 0) this.folioCharges = pFolios;
     const pAudit = loadPersistedData<AuditLogEntry>('audit_logs.json');
@@ -3030,6 +3036,9 @@ export class HotelRepository {
   }
 
   async clockInStaff(params: { staffId: string; shift?: ShiftType; notes?: string }, actor?: string): Promise<StaffAttendance> {
+    await this.ensureStaffAttendanceLoaded();
+    await this.ensureStaffLoaded();
+
     const staff = this.staff.find(
       (s) =>
         s.id === params.staffId ||
@@ -3039,19 +3048,39 @@ export class HotelRepository {
     );
     if (!staff) throw new Error('Staff member not found.');
 
-    const todayStr = new Date().toISOString().split('T')[0];
-    const existing = this.staffAttendance.find(
-      (a) => a.staff_id === params.staffId && a.date === todayStr
-    );
-    if (existing && existing.clock_in && !existing.clock_out) {
-      return existing;
+    const email = staff.email.toLowerCase();
+    const isHari = email.includes('hari');
+    const isSagar = email.includes('sagar');
+
+    // Rule 1: Exclusively permitted for Duty Managers (Hari Achari and Sagar)
+    if (!isHari && !isSagar) {
+      throw new Error(`Clock-in is exclusively reserved for Duty Managers (Hari Achari & Sagar). Super Admin and other roles do not track attendance.`);
     }
 
+    // Rule 2: Single Active Manager on Duty (MOD) Hospitality Rule
+    // Check if any manager is currently clocked in without a clock_out
+    const activeDutyShift = this.staffAttendance.find((a) => Boolean(a.clock_in) && !a.clock_out);
+    if (activeDutyShift) {
+      const activeIsCurrent =
+        activeDutyShift.staff_id === staff.id ||
+        (isHari && activeDutyShift.staff_name.toLowerCase().includes('hari')) ||
+        (isSagar && activeDutyShift.staff_name.toLowerCase().includes('sagar'));
+
+      if (activeIsCurrent) {
+        return activeDutyShift;
+      }
+
+      throw new Error(
+        `Manager Duty Collision: ${activeDutyShift.staff_name} is currently clocked in as Manager on Duty. As per hotel protocol, ${activeDutyShift.staff_name} must clock out before ${staff.full_name} can clock in.`
+      );
+    }
+
+    const todayStr = new Date().toISOString().split('T')[0];
     const attendance: StaffAttendance = {
       id: `att-${Date.now()}`,
       staff_id: staff.id,
       staff_name: staff.full_name,
-      role: staff.role,
+      role: staff.role || 'Hotel Manager',
       date: todayStr,
       shift: params.shift || 'general',
       clock_in: new Date().toISOString(),
@@ -3059,8 +3088,25 @@ export class HotelRepository {
       notes: params.notes,
       created_at: new Date().toISOString(),
     };
+
+    try {
+      await syncStaffAttendanceToSupabase(attendance);
+    } catch (dbErr: any) {
+      const msg = dbErr instanceof Error ? dbErr.message : String(dbErr);
+      if (
+        msg.includes('MANAGER_DUTY_COLLISION') ||
+        msg.includes('idx_single_active_duty_manager') ||
+        msg.includes('already clocked in')
+      ) {
+        throw new Error(
+          `Manager Duty Collision: Another manager is already clocked in on duty. The active manager must clock out before another manager can clock in.`
+        );
+      }
+      throw dbErr;
+    }
+
     this.staffAttendance.unshift(attendance);
-    syncStaffAttendanceToSupabase(attendance);
+    savePersistedData('staff_attendance.json', this.staffAttendance);
     this.broadcastEvent('attendance_recorded', attendance, actor);
     this.recordAuditLog({
       action: 'STAFF_CLOCK_IN',
@@ -3073,6 +3119,7 @@ export class HotelRepository {
   }
 
   async clockOutStaff(attendanceId: string, actor?: string): Promise<StaffAttendance> {
+    await this.ensureStaffAttendanceLoaded();
     const record = this.staffAttendance.find((a) => a.id === attendanceId);
     if (!record) throw new Error('Attendance record not found.');
     if (record.clock_out) throw new Error('Staff member is already clocked out.');
@@ -3152,7 +3199,8 @@ export class HotelRepository {
 
   // --- STAFF ---
   getStaff(): StaffMember[] {
-    return [...this.staff];
+    const ALLOWED = new Set(['admin@sritayigrand.com', 'hari@sritayigrand.com', 'sagar@sritayigrand.com']);
+    return this.staff.filter((s) => s.is_active && ALLOWED.has(s.email.toLowerCase()));
   }
 
   // --- GOOGLE REVIEWS & TESTIMONIALS ---
@@ -5001,15 +5049,15 @@ export class HotelRepository {
   async ensureStaffLoaded(): Promise<void> {
     try {
       const pgStaff = await loadStaffFromSupabase();
+      const ALLOWED = new Set(['admin@sritayigrand.com', 'hari@sritayigrand.com', 'sagar@sritayigrand.com']);
       if (pgStaff && pgStaff.length > 0) {
-        const staffMap = new Map(this.staff.map((s) => [s.email.toLowerCase(), s]));
-        for (const s of pgStaff) {
-          staffMap.set(s.email.toLowerCase(), {
-            ...(staffMap.get(s.email.toLowerCase()) || {}),
-            ...s,
-          });
+        const validPgStaff = pgStaff.filter((s) => s.is_active && ALLOWED.has(s.email.toLowerCase()));
+        if (validPgStaff.length > 0) {
+          this.staff = validPgStaff;
+          savePersistedData('staff.json', this.staff);
         }
-        this.staff = Array.from(staffMap.values());
+      } else {
+        this.staff = this.staff.filter((s) => s.is_active && ALLOWED.has(s.email.toLowerCase()));
         savePersistedData('staff.json', this.staff);
       }
     } catch (err) {

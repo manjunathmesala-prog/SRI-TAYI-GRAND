@@ -39,7 +39,7 @@ const PRESET_ACCOUNTS = [
     roleLabelTe: 'సూపర్ అడ్మిన్',
     name: 'Sri Tayi Grand Admin',
     email: 'admin@sritayigrand.com',
-    defaultPassword: 'SuperAdmin@TayiGrand2026!',
+    defaultPassword: 'GrandHotel@Kadiri2026!',
     icon: Crown,
     badgeColor: 'bg-amber-100 text-amber-900 border-amber-300',
     scopeEn: 'Full Unrestricted Access • Settings • Audit Logs • P&L',
@@ -68,18 +68,6 @@ const PRESET_ACCOUNTS = [
     badgeColor: 'bg-purple-100 text-purple-900 border-purple-300',
     scopeEn: 'Operations • ERP • Expenses • Attendance • Night Audit',
     scopeTe: 'కార్యకలాపాలు • ERP • ఖర్చులు • హాజరు • నైట్ ఆడిట్',
-  },
-  {
-    roleId: 'STAFF',
-    roleLabel: 'Front Desk',
-    roleLabelTe: 'రిసెప్షన్ సిబ్బంది',
-    name: 'Sri Tayi Grand Staff',
-    email: 'staff@sritayigrand.com',
-    defaultPassword: 'Staff@TayiGrand2026!',
-    icon: Users,
-    badgeColor: 'bg-blue-100 text-blue-900 border-blue-300',
-    scopeEn: 'Reception • Check-In / Walk-In • Room Board • RFID Keycards',
-    scopeTe: 'రిసెప్షన్ • చెక్-ఇన్ / వాక్-ఇన్ • రూమ్ బోర్డు • RFID కీకార్డులు',
   },
 ];
 

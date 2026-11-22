@@ -205,7 +205,9 @@ export default function StaffAdminPage() {
     );
   };
 
+  const ALLOWED_STAFF_EMAILS = new Set(['admin@sritayigrand.com', 'hari@sritayigrand.com', 'sagar@sritayigrand.com']);
   const filteredStaff = staff.filter((s) => {
+    if (!ALLOWED_STAFF_EMAILS.has(s.email.toLowerCase())) return false;
     const matchesSearch =
       s.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.email.toLowerCase().includes(searchQuery.toLowerCase()) ||

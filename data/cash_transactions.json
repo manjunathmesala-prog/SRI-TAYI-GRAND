@@ -1,5 +1,96 @@
 [
   {
+    "id": "ctx-1795347458231-682",
+    "shift_id": "shift-1795347376163",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 350,
+    "reason": "Expense Payout: Guest Refreshments & Mineral Water Bottles (20L x 5) (fnb_supplies)",
+    "performed_by": "Sagar",
+    "performed_at": "2026-11-22T11:37:38.231Z"
+  },
+  {
+    "id": "ctx-1795347457536-833",
+    "shift_id": "shift-1795347376163",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 450,
+    "reason": "Expense Payout: Reception Fresh Flower Decor & Turndown Kits (maintenance)",
+    "performed_by": "Sagar",
+    "performed_at": "2026-11-22T11:37:37.536Z"
+  },
+  {
+    "id": "ctx-1795347107894-446",
+    "shift_id": "shift-1795346976199",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 350,
+    "reason": "Expense Payout: Guest Refreshments & Mineral Water Bottles (20L x 5) (fnb_supplies)",
+    "performed_by": "Sagar",
+    "performed_at": "2026-11-22T11:31:47.894Z"
+  },
+  {
+    "id": "ctx-1795347106505-909",
+    "shift_id": "shift-1795346976199",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 450,
+    "reason": "Expense Payout: Reception Fresh Flower Decor & Turndown Kits (maintenance)",
+    "performed_by": "Sagar",
+    "performed_at": "2026-11-22T11:31:46.505Z"
+  },
+  {
+    "id": "ctx-1795346440525-718",
+    "type": "cash_in",
+    "category": "guest_payment",
+    "amount": 1890,
+    "reason": "Guest Payment: Bhavani Shankar (TG-W-20261116-9854)",
+    "booking_reference": "TG-W-20261116-9854",
+    "receipt_ref": "PAY-STG-440521-672",
+    "performed_by": "Sagar",
+    "performed_at": "2026-11-22T11:20:40.525Z"
+  },
+  {
+    "id": "ctx-1795346251390-779",
+    "shift_id": "shift-1795346196572",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 350,
+    "reason": "Expense Payout: Guest Refreshments & Mineral Water Bottles (20L x 5) (fnb_supplies)",
+    "performed_by": "Sagar",
+    "performed_at": "2026-11-22T11:17:31.390Z"
+  },
+  {
+    "id": "ctx-1795346250526-279",
+    "shift_id": "shift-1795346196572",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 450,
+    "reason": "Expense Payout: Reception Fresh Flower Decor & Turndown Kits (maintenance)",
+    "performed_by": "Sagar",
+    "performed_at": "2026-11-22T11:17:30.526Z"
+  },
+  {
+    "id": "ctx-1795345905737-420",
+    "shift_id": "shift-1795345210824",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 350,
+    "reason": "Expense Payout: Guest Refreshments & Mineral Water Bottles (20L x 5) (fnb_supplies)",
+    "performed_by": "Sagar",
+    "performed_at": "2026-11-22T11:11:45.737Z"
+  },
+  {
+    "id": "ctx-1795345903302-985",
+    "shift_id": "shift-1795345210824",
+    "type": "cash_out",
+    "category": "expense_payout",
+    "amount": 450,
+    "reason": "Expense Payout: Reception Fresh Flower Decor & Turndown Kits (maintenance)",
+    "performed_by": "Sagar",
+    "performed_at": "2026-11-22T11:11:43.302Z"
+  },
+  {
     "id": "ctx-1795345270406-836",
     "shift_id": "shift-1795345210824",
     "type": "cash_in",

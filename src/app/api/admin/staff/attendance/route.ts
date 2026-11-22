@@ -117,6 +117,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ success: false, error: `Invalid action: ${action}` }, { status: 400 });
   } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message }, { status: 500 });
+    const errorMsg = err?.message || 'Failed to process attendance request.';
+    const isConflict = errorMsg.includes('Manager Duty Collision') || errorMsg.includes('already clocked in') || errorMsg.includes('Duty Manager');
+    return NextResponse.json(
+      { success: false, error: errorMsg, collision: isConflict },
+      { status: isConflict ? 409 : 400 }
+    );
   }
 }

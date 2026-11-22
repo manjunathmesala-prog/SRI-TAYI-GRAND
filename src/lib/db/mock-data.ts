@@ -348,14 +348,14 @@ export const INITIAL_PAYMENTS: PaymentRecord[] = [];
 
 export const INITIAL_STAFF: StaffMember[] = [
   { 
-    id: 'stf-01', 
+    id: 'e6e40243-6f98-44dc-94ad-3c56303cf61a', 
     full_name: 'Sri Tayi Grand Admin', 
     email: 'admin@sritayigrand.com', 
     phone: '084942 23379', 
     role: 'Super Admin', 
     department: 'Executive Management',
     is_active: true, 
-    last_login: '2026-11-04T22:30:00+05:30',
+    last_login: '2026-11-22T08:00:00+05:30',
     permissions: {
       can_override_rates: true,
       can_process_refunds: true,
@@ -366,25 +366,7 @@ export const INITIAL_STAFF: StaffMember[] = [
     }
   },
   { 
-    id: 'stf-02', 
-    full_name: 'G. Mohan Kumar', 
-    email: 'manager@sritayigrand.com', 
-    phone: '9440812345', 
-    role: 'Hotel Manager', 
-    department: 'Hotel Operations',
-    is_active: true, 
-    last_login: '2026-11-04T20:15:00+05:30',
-    permissions: {
-      can_override_rates: true,
-      can_process_refunds: true,
-      can_view_accounting: true,
-      can_encode_rfid: true,
-      can_run_night_audit: true,
-      can_manage_inventory: true
-    }
-  },
-  { 
-    id: 'stf-hari', 
+    id: '50aba2e5-0000-4fbd-bb89-000000000001', 
     full_name: 'Hari Achari', 
     email: 'hari@sritayigrand.com', 
     phone: '9440812346', 
@@ -402,7 +384,7 @@ export const INITIAL_STAFF: StaffMember[] = [
     }
   },
   { 
-    id: 'stf-sagar', 
+    id: '50aba2e5-0000-4fbd-bb89-000000000002', 
     full_name: 'Sagar', 
     email: 'sagar@sritayigrand.com', 
     phone: '9440812347', 
@@ -416,132 +398,6 @@ export const INITIAL_STAFF: StaffMember[] = [
       can_view_accounting: true,
       can_encode_rfid: true,
       can_run_night_audit: true,
-      can_manage_inventory: true
-    }
-  },
-  { 
-    id: 'stf-03', 
-    full_name: 'B. Lakshmi Devi', 
-    email: 'frontdesk@sritayigrand.com', 
-    phone: '9848123456', 
-    role: 'Front Desk', 
-    department: 'Front Desk & Reception',
-    is_active: true, 
-    last_login: '2026-11-04T21:45:00+05:30',
-    permissions: {
-      can_override_rates: true,
-      can_process_refunds: false,
-      can_view_accounting: false,
-      can_encode_rfid: true,
-      can_run_night_audit: true,
-      can_manage_inventory: true
-    }
-  },
-  { 
-    id: 'stf-staff', 
-    full_name: 'Sri Tayi Grand Staff', 
-    email: 'staff@sritayigrand.com', 
-    phone: '9848123457', 
-    role: 'Front Desk', 
-    department: 'Front Desk & Operations',
-    is_active: true, 
-    last_login: '2026-11-09T10:00:00+05:30',
-    permissions: {
-      can_override_rates: false,
-      can_process_refunds: false,
-      can_view_accounting: false,
-      can_encode_rfid: true,
-      can_run_night_audit: false,
-      can_manage_inventory: true
-    }
-  },
-  { 
-    id: 'stf-04', 
-    full_name: 'K. Ramesh', 
-    email: 'housekeeping@sritayigrand.com', 
-    phone: '9177123456', 
-    role: 'Housekeeping', 
-    department: 'Housekeeping & Facilities',
-    is_active: true, 
-    last_login: '2026-11-04T18:00:00+05:30',
-    permissions: {
-      can_override_rates: false,
-      can_process_refunds: false,
-      can_view_accounting: false,
-      can_encode_rfid: false,
-      can_run_night_audit: false,
-      can_manage_inventory: true
-    }
-  },
-  { 
-    id: 'stf-05', 
-    full_name: 'S. Chandrasekhar', 
-    email: 'accounts@sritayigrand.com', 
-    phone: '9989123456', 
-    role: 'Accounts', 
-    department: 'Accounts & Finance',
-    is_active: true, 
-    last_login: '2026-11-04T17:30:00+05:30',
-    permissions: {
-      can_override_rates: false,
-      can_process_refunds: true,
-      can_view_accounting: true,
-      can_encode_rfid: false,
-      can_run_night_audit: true,
-      can_manage_inventory: false
-    }
-  },
-  { 
-    id: 'stf-06', 
-    full_name: 'V. Naresh Reddy', 
-    email: 'events@sritayigrand.com', 
-    phone: '9652123456', 
-    role: 'Event Manager', 
-    department: 'Banquets & Conventions',
-    is_active: true, 
-    last_login: '2026-11-04T19:00:00+05:30',
-    permissions: {
-      can_override_rates: true,
-      can_process_refunds: false,
-      can_view_accounting: false,
-      can_encode_rfid: false,
-      can_run_night_audit: false,
-      can_manage_inventory: true
-    }
-  },
-  {
-    id: 'stf-07',
-    full_name: 'M. Anjaneyulu',
-    email: 'anjaneyulu.hk@sritayigrand.com',
-    phone: '9440187654',
-    role: 'Housekeeping',
-    department: 'Housekeeping & Facilities',
-    is_active: true,
-    last_login: '2026-11-09T08:00:00+05:30',
-    permissions: {
-      can_override_rates: false,
-      can_process_refunds: false,
-      can_view_accounting: false,
-      can_encode_rfid: false,
-      can_run_night_audit: false,
-      can_manage_inventory: true
-    }
-  },
-  {
-    id: 'stf-08',
-    full_name: 'P. Parvathamma',
-    email: 'parvathi.hk@sritayigrand.com',
-    phone: '9848198765',
-    role: 'Housekeeping',
-    department: 'Housekeeping & Facilities',
-    is_active: true,
-    last_login: '2026-11-09T08:30:00+05:30',
-    permissions: {
-      can_override_rates: false,
-      can_process_refunds: false,
-      can_view_accounting: false,
-      can_encode_rfid: false,
-      can_run_night_audit: false,
       can_manage_inventory: true
     }
   },

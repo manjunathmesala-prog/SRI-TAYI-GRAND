@@ -1,5 +1,369 @@
 [
   {
+    "id": "crd-1795347417031",
+    "card_uid": "BT-57-1000116588",
+    "card_label": "Guest Card (Room 106)",
+    "card_type": "guest",
+    "assigned_room_number": "106",
+    "booking_reference": "TG-FD-20261122-6174",
+    "guest_name": "Murali Mohan",
+    "holder_name": "Murali Mohan",
+    "status": "active",
+    "activated_at": "2026-11-22T11:36:57.031Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 106 (Stay: TG-FD-20261122-6174)",
+    "created_at": "2026-11-22T11:36:57.031Z"
+  },
+  {
+    "id": "crd-1795347412978",
+    "card_uid": "RFID-BT57-306-1008",
+    "card_label": "Guest Card (Room 306)",
+    "card_type": "guest",
+    "assigned_room_number": "306",
+    "booking_reference": "TG-FD-20261122-2748",
+    "guest_name": "Divya Chowdary",
+    "holder_name": "Divya Chowdary",
+    "status": "active",
+    "activated_at": "2026-11-22T11:36:52.978Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 306 (Stay: TG-FD-20261122-2748)",
+    "created_at": "2026-11-22T11:36:52.978Z"
+  },
+  {
+    "id": "crd-1795347408807",
+    "card_uid": "RFID-BT57-202-1007",
+    "card_label": "Guest Card (Room 202)",
+    "card_type": "guest",
+    "assigned_room_number": "202",
+    "booking_reference": "TG-FD-20261122-8558",
+    "guest_name": "Chandrasekhar",
+    "holder_name": "Chandrasekhar",
+    "status": "active",
+    "activated_at": "2026-11-22T11:36:48.807Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 202 (Stay: TG-FD-20261122-8558)",
+    "created_at": "2026-11-22T11:36:48.807Z"
+  },
+  {
+    "id": "crd-1795347404854",
+    "card_uid": "RFID-BT57-201-1006",
+    "card_label": "Guest Card (Room 201)",
+    "card_type": "guest",
+    "assigned_room_number": "201",
+    "booking_reference": "TG-FD-20261122-7342",
+    "guest_name": "Vikramaditya",
+    "holder_name": "Vikramaditya",
+    "status": "active",
+    "activated_at": "2026-11-22T11:36:44.854Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261122-7342)",
+    "created_at": "2026-11-22T11:36:44.854Z"
+  },
+  {
+    "id": "crd-1795347400803",
+    "card_uid": "RFID-BT57-108-1005",
+    "card_label": "Guest Card (Room 108)",
+    "card_type": "guest",
+    "assigned_room_number": "108",
+    "booking_reference": "TG-FD-20261122-8699",
+    "guest_name": "Naveen Kumar",
+    "holder_name": "Naveen Kumar",
+    "status": "active",
+    "activated_at": "2026-11-22T11:36:40.803Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 108 (Stay: TG-FD-20261122-8699)",
+    "created_at": "2026-11-22T11:36:40.803Z"
+  },
+  {
+    "id": "crd-1795347396416",
+    "card_uid": "RFID-BT57-105-1004",
+    "card_label": "Guest Card (Room 105)",
+    "card_type": "guest",
+    "assigned_room_number": "105",
+    "booking_reference": "TG-FD-20261122-5727",
+    "guest_name": "Prakash Naidu",
+    "holder_name": "Prakash Naidu",
+    "status": "active",
+    "activated_at": "2026-11-22T11:36:36.416Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 105 (Stay: TG-FD-20261122-5727)",
+    "created_at": "2026-11-22T11:36:36.416Z"
+  },
+  {
+    "id": "crd-1795347392330",
+    "card_uid": "RFID-BT57-104-1003",
+    "card_label": "Guest Card (Room 104)",
+    "card_type": "guest",
+    "assigned_room_number": "104",
+    "booking_reference": "TG-FD-20261122-7744",
+    "guest_name": "Anand Varma",
+    "holder_name": "Anand Varma",
+    "status": "active",
+    "activated_at": "2026-11-22T11:36:32.330Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 104 (Stay: TG-FD-20261122-7744)",
+    "created_at": "2026-11-22T11:36:32.330Z"
+  },
+  {
+    "id": "crd-1795347388049",
+    "card_uid": "RFID-BT57-103-1002",
+    "card_label": "Guest Card (Room 103)",
+    "card_type": "guest",
+    "assigned_room_number": "103",
+    "booking_reference": "TG-FD-20261122-7943",
+    "guest_name": "Suresh Reddy",
+    "holder_name": "Suresh Reddy",
+    "status": "active",
+    "activated_at": "2026-11-22T11:36:28.049Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 103 (Stay: TG-FD-20261122-7943)",
+    "created_at": "2026-11-22T11:36:28.049Z"
+  },
+  {
+    "id": "crd-1795347383431",
+    "card_uid": "RFID-BT57-102-1001",
+    "card_label": "Guest Card (Room 102)",
+    "card_type": "guest",
+    "assigned_room_number": "102",
+    "booking_reference": "TG-FD-20261122-7029",
+    "guest_name": "Venkat Rao",
+    "holder_name": "Venkat Rao",
+    "status": "active",
+    "activated_at": "2026-11-22T11:36:23.431Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 102 (Stay: TG-FD-20261122-7029)",
+    "created_at": "2026-11-22T11:36:23.431Z"
+  },
+  {
+    "id": "crd-1795347379200",
+    "card_uid": "RFID-BT57-101-1000",
+    "card_label": "Guest Card (Room 101)",
+    "card_type": "guest",
+    "assigned_room_number": "101",
+    "booking_reference": "TG-FD-20261122-1405",
+    "guest_name": "Rajesh Sharma",
+    "holder_name": "Rajesh Sharma",
+    "status": "active",
+    "activated_at": "2026-11-22T11:36:19.200Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 101 (Stay: TG-FD-20261122-1405)",
+    "created_at": "2026-11-22T11:36:19.200Z"
+  },
+  {
+    "id": "crd-1795347017768",
+    "card_uid": "BT-57-1000114690",
+    "card_label": "Guest Card (Room 106)",
+    "card_type": "guest",
+    "assigned_room_number": "106",
+    "booking_reference": "TG-FD-20261122-2661",
+    "guest_name": "Murali Mohan",
+    "holder_name": "Murali Mohan",
+    "status": "inactive",
+    "activated_at": "2026-11-22T11:30:17.768Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 106 (Stay: TG-FD-20261122-2661)",
+    "created_at": "2026-11-22T11:30:17.768Z",
+    "deactivated_at": "2026-11-22T11:35:24.951Z"
+  },
+  {
+    "id": "crd-1795346201636",
+    "card_uid": "BT-57-1000087116",
+    "card_label": "Guest Card (Room 305)",
+    "card_type": "guest",
+    "assigned_room_number": "305",
+    "booking_reference": "TG-FD-20261122-7184",
+    "guest_name": "Murali Mohan",
+    "holder_name": "Murali Mohan",
+    "status": "inactive",
+    "activated_at": "2026-11-22T11:16:41.636Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 305 (Stay: TG-FD-20261122-7184)",
+    "created_at": "2026-11-22T11:16:41.636Z",
+    "deactivated_at": "2026-11-22T11:19:50.268Z"
+  },
+  {
+    "id": "crd-1795345822069",
+    "card_uid": "BT-57-1000093482",
+    "card_label": "Guest Card (Room 304)",
+    "card_type": "guest",
+    "assigned_room_number": "304",
+    "booking_reference": "TG-FD-20261122-8176",
+    "guest_name": "Murali Mohan",
+    "holder_name": "Murali Mohan",
+    "status": "inactive",
+    "activated_at": "2026-11-22T11:10:22.069Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 304 (Stay: TG-FD-20261122-8176)",
+    "created_at": "2026-11-22T11:10:22.069Z",
+    "deactivated_at": "2026-11-22T11:19:52.374Z"
+  },
+  {
+    "id": "crd-1795345814791",
+    "card_uid": "RFID-BT57-303-1008",
+    "card_label": "Guest Card (Room 303)",
+    "card_type": "guest",
+    "assigned_room_number": "303",
+    "booking_reference": "TG-FD-20261122-2540",
+    "guest_name": "Divya Chowdary",
+    "holder_name": "Divya Chowdary",
+    "status": "inactive",
+    "activated_at": "2026-11-22T11:10:14.791Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 303 (Stay: TG-FD-20261122-2540)",
+    "created_at": "2026-11-22T11:10:14.791Z",
+    "deactivated_at": "2026-11-22T11:19:56.894Z"
+  },
+  {
+    "id": "crd-1795345808506",
+    "card_uid": "RFID-BT57-302-1007",
+    "card_label": "Guest Card (Room 302)",
+    "card_type": "guest",
+    "assigned_room_number": "302",
+    "booking_reference": "TG-FD-20261122-9511",
+    "guest_name": "Chandrasekhar",
+    "holder_name": "Chandrasekhar",
+    "status": "inactive",
+    "activated_at": "2026-11-22T11:10:08.506Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 302 (Stay: TG-FD-20261122-9511)",
+    "created_at": "2026-11-22T11:10:08.506Z",
+    "deactivated_at": "2026-11-22T11:19:58.731Z"
+  },
+  {
+    "id": "crd-1795345803420",
+    "card_uid": "RFID-BT57-301-1006",
+    "card_label": "Guest Card (Room 301)",
+    "card_type": "guest",
+    "assigned_room_number": "301",
+    "booking_reference": "TG-FD-20261122-8719",
+    "guest_name": "Vikramaditya",
+    "holder_name": "Vikramaditya",
+    "status": "inactive",
+    "activated_at": "2026-11-22T11:10:03.420Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 301 (Stay: TG-FD-20261122-8719)",
+    "created_at": "2026-11-22T11:10:03.420Z",
+    "deactivated_at": "2026-11-22T11:20:02.279Z"
+  },
+  {
+    "id": "crd-1795345796991",
+    "card_uid": "RFID-BT57-207-1005",
+    "card_label": "Guest Card (Room 207)",
+    "card_type": "guest",
+    "assigned_room_number": "207",
+    "booking_reference": "TG-FD-20261122-5765",
+    "guest_name": "Naveen Kumar",
+    "holder_name": "Naveen Kumar",
+    "status": "inactive",
+    "activated_at": "2026-11-22T11:09:56.991Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 207 (Stay: TG-FD-20261122-5765)",
+    "created_at": "2026-11-22T11:09:56.991Z",
+    "deactivated_at": "2026-11-22T11:20:04.887Z"
+  },
+  {
+    "id": "crd-1795345791917",
+    "card_uid": "RFID-BT57-206-1004",
+    "card_label": "Guest Card (Room 206)",
+    "card_type": "guest",
+    "assigned_room_number": "206",
+    "booking_reference": "TG-FD-20261122-5887",
+    "guest_name": "Prakash Naidu",
+    "holder_name": "Prakash Naidu",
+    "status": "inactive",
+    "activated_at": "2026-11-22T11:09:51.917Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 206 (Stay: TG-FD-20261122-5887)",
+    "created_at": "2026-11-22T11:09:51.917Z",
+    "deactivated_at": "2026-11-22T11:20:43.932Z"
+  },
+  {
+    "id": "crd-1795345786891",
+    "card_uid": "RFID-BT57-205-1003",
+    "card_label": "Guest Card (Room 205)",
+    "card_type": "guest",
+    "assigned_room_number": "205",
+    "booking_reference": "TG-FD-20261122-1689",
+    "guest_name": "Anand Varma",
+    "holder_name": "Anand Varma",
+    "status": "inactive",
+    "activated_at": "2026-11-22T11:09:46.891Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 205 (Stay: TG-FD-20261122-1689)",
+    "created_at": "2026-11-22T11:09:46.891Z",
+    "deactivated_at": "2026-11-22T11:20:35.231Z"
+  },
+  {
+    "id": "crd-1795345781874",
+    "card_uid": "RFID-BT57-204-1002",
+    "card_label": "Guest Card (Room 204)",
+    "card_type": "guest",
+    "assigned_room_number": "204",
+    "booking_reference": "TG-FD-20261122-7356",
+    "guest_name": "Suresh Reddy",
+    "holder_name": "Suresh Reddy",
+    "status": "inactive",
+    "activated_at": "2026-11-22T11:09:41.874Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 204 (Stay: TG-FD-20261122-7356)",
+    "created_at": "2026-11-22T11:09:41.874Z",
+    "deactivated_at": "2026-11-22T11:20:35.227Z"
+  },
+  {
+    "id": "crd-1795345775729",
+    "card_uid": "RFID-BT57-203-1001",
+    "card_label": "Guest Card (Room 203)",
+    "card_type": "guest",
+    "assigned_room_number": "203",
+    "booking_reference": "TG-FD-20261122-7860",
+    "guest_name": "Venkat Rao",
+    "holder_name": "Venkat Rao",
+    "status": "inactive",
+    "activated_at": "2026-11-22T11:09:35.729Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 203 (Stay: TG-FD-20261122-7860)",
+    "created_at": "2026-11-22T11:09:35.729Z",
+    "deactivated_at": "2026-11-22T11:20:12.095Z"
+  },
+  {
+    "id": "crd-1795345769381",
+    "card_uid": "RFID-BT57-109-1000",
+    "card_label": "Guest Card (Room 109)",
+    "card_type": "guest",
+    "assigned_room_number": "109",
+    "booking_reference": "TG-FD-20261122-5856",
+    "guest_name": "Rajesh Sharma",
+    "holder_name": "Rajesh Sharma",
+    "status": "inactive",
+    "activated_at": "2026-11-22T11:09:29.381Z",
+    "expires_at": "2026-11-23T05:30:00.000Z",
+    "issued_by_name": "Sagar",
+    "notes": "Customer Keycard for Room 109 (Stay: TG-FD-20261122-5856)",
+    "created_at": "2026-11-22T11:09:29.381Z",
+    "deactivated_at": "2026-11-22T11:20:13.918Z"
+  },
+  {
     "id": "crd-1795345308106",
     "card_uid": "BT-57-1000098590",
     "card_label": "Guest Card (Room 202)",
@@ -8,12 +372,13 @@
     "booking_reference": "TG-FD-20261122-9688",
     "guest_name": "Murali Mohan",
     "holder_name": "Murali Mohan",
-    "status": "active",
+    "status": "inactive",
     "activated_at": "2026-11-22T11:01:48.106Z",
     "expires_at": "2026-11-23T05:30:00.000Z",
     "issued_by_name": "Sagar",
     "notes": "Customer Keycard for Room 202 (Stay: TG-FD-20261122-9688)",
-    "created_at": "2026-11-22T11:01:48.106Z"
+    "created_at": "2026-11-22T11:01:48.106Z",
+    "deactivated_at": "2026-11-22T11:35:28.380Z"
   },
   {
     "id": "crd-1795345302587",
@@ -24,12 +389,13 @@
     "booking_reference": "TG-FD-20261122-5719",
     "guest_name": "Chandrasekhar",
     "holder_name": "Chandrasekhar",
-    "status": "active",
+    "status": "inactive",
     "activated_at": "2026-11-22T11:01:42.587Z",
     "expires_at": "2026-11-23T05:30:00.000Z",
     "issued_by_name": "Sagar",
     "notes": "Customer Keycard for Room 108 (Stay: TG-FD-20261122-5719)",
-    "created_at": "2026-11-22T11:01:42.587Z"
+    "created_at": "2026-11-22T11:01:42.587Z",
+    "deactivated_at": "2026-11-22T11:35:32.184Z"
   },
   {
     "id": "crd-1795345297474",
@@ -40,12 +406,13 @@
     "booking_reference": "TG-FD-20261122-7721",
     "guest_name": "Vikramaditya",
     "holder_name": "Vikramaditya",
-    "status": "active",
+    "status": "inactive",
     "activated_at": "2026-11-22T11:01:37.474Z",
     "expires_at": "2026-11-23T05:30:00.000Z",
     "issued_by_name": "Sagar",
     "notes": "Customer Keycard for Room 107 (Stay: TG-FD-20261122-7721)",
-    "created_at": "2026-11-22T11:01:37.474Z"
+    "created_at": "2026-11-22T11:01:37.474Z",
+    "deactivated_at": "2026-11-22T11:20:19.054Z"
   },
   {
     "id": "crd-1795345291889",
@@ -56,60 +423,13 @@
     "booking_reference": "TG-FD-20261122-2135",
     "guest_name": "Naveen Kumar",
     "holder_name": "Naveen Kumar",
-    "status": "active",
+    "status": "inactive",
     "activated_at": "2026-11-22T11:01:31.889Z",
     "expires_at": "2026-11-23T05:30:00.000Z",
     "issued_by_name": "Sagar",
     "notes": "Customer Keycard for Room 106 (Stay: TG-FD-20261122-2135)",
-    "created_at": "2026-11-22T11:01:31.889Z"
-  },
-  {
-    "id": "crd-1795345286359",
-    "card_uid": "RFID-BT57-105-1004",
-    "card_label": "Guest Card (Room 105)",
-    "card_type": "guest",
-    "assigned_room_number": "105",
-    "booking_reference": "TG-FD-20261122-1078",
-    "guest_name": "Prakash Naidu",
-    "holder_name": "Prakash Naidu",
-    "status": "active",
-    "activated_at": "2026-11-22T11:01:26.359Z",
-    "expires_at": "2026-11-23T05:30:00.000Z",
-    "issued_by_name": "Sagar",
-    "notes": "Customer Keycard for Room 105 (Stay: TG-FD-20261122-1078)",
-    "created_at": "2026-11-22T11:01:26.359Z"
-  },
-  {
-    "id": "crd-1795345280158",
-    "card_uid": "RFID-BT57-104-1003",
-    "card_label": "Guest Card (Room 104)",
-    "card_type": "guest",
-    "assigned_room_number": "104",
-    "booking_reference": "TG-FD-20261122-4062",
-    "guest_name": "Anand Varma",
-    "holder_name": "Anand Varma",
-    "status": "active",
-    "activated_at": "2026-11-22T11:01:20.158Z",
-    "expires_at": "2026-11-23T05:30:00.000Z",
-    "issued_by_name": "Sagar",
-    "notes": "Customer Keycard for Room 104 (Stay: TG-FD-20261122-4062)",
-    "created_at": "2026-11-22T11:01:20.158Z"
-  },
-  {
-    "id": "crd-1795345273355",
-    "card_uid": "RFID-BT57-103-1002",
-    "card_label": "Guest Card (Room 103)",
-    "card_type": "guest",
-    "assigned_room_number": "103",
-    "booking_reference": "TG-FD-20261122-9776",
-    "guest_name": "Suresh Reddy",
-    "holder_name": "Suresh Reddy",
-    "status": "active",
-    "activated_at": "2026-11-22T11:01:13.355Z",
-    "expires_at": "2026-11-23T05:30:00.000Z",
-    "issued_by_name": "Sagar",
-    "notes": "Customer Keycard for Room 103 (Stay: TG-FD-20261122-9776)",
-    "created_at": "2026-11-22T11:01:13.355Z"
+    "created_at": "2026-11-22T11:01:31.889Z",
+    "deactivated_at": "2026-11-22T11:35:24.952Z"
   },
   {
     "id": "crd-cln-1795302891043",
@@ -176,12 +496,13 @@
     "booking_reference": "TG-FD-20261117-7314",
     "guest_name": "E2E GST-Inclusive 2316",
     "holder_name": "E2E GST-Inclusive 2316",
-    "status": "active",
+    "status": "inactive",
     "activated_at": "2026-11-17T05:34:31.072Z",
     "expires_at": "2027-05-18T05:30:00.000Z",
     "issued_by_name": "Sri Tayi Grand Admin",
     "notes": "Customer Keycard for Room 202 (Stay: TG-FD-20261117-7314)",
-    "created_at": "2026-11-17T05:34:31.072Z"
+    "created_at": "2026-11-17T05:34:31.072Z",
+    "deactivated_at": "2026-11-22T11:35:28.380Z"
   },
   {
     "id": "crd-1794893665569",
@@ -192,12 +513,13 @@
     "booking_reference": "TG-FD-20261117-5010",
     "guest_name": "E2E GST-Exclusive 2316",
     "holder_name": "E2E GST-Exclusive 2316",
-    "status": "active",
+    "status": "inactive",
     "activated_at": "2026-11-17T05:34:25.569Z",
     "expires_at": "2027-04-13T05:30:00.000Z",
     "issued_by_name": "Sri Tayi Grand Admin",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-5010)",
-    "created_at": "2026-11-17T05:34:25.569Z"
+    "created_at": "2026-11-17T05:34:25.569Z",
+    "deactivated_at": "2026-11-22T11:35:30.310Z"
   },
   {
     "id": "crd-1794893641838",
@@ -208,12 +530,13 @@
     "booking_reference": "TG-FD-20261117-6125",
     "guest_name": "E2E GST-Exclusive 8519",
     "holder_name": "E2E GST-Exclusive 8519",
-    "status": "active",
+    "status": "inactive",
     "activated_at": "2026-11-17T05:34:01.838Z",
     "expires_at": "2027-04-14T05:30:00.000Z",
     "issued_by_name": "Sri Tayi Grand Admin",
     "notes": "Customer Keycard for Room 107 (Stay: TG-FD-20261117-6125)",
-    "created_at": "2026-11-17T05:34:01.838Z"
+    "created_at": "2026-11-17T05:34:01.838Z",
+    "deactivated_at": "2026-11-22T11:20:19.054Z"
   },
   {
     "id": "crd-1794893549590",
@@ -224,12 +547,13 @@
     "booking_reference": "TG-FD-20261117-2648",
     "guest_name": "E2E GST-Exclusive 2969",
     "holder_name": "E2E GST-Exclusive 2969",
-    "status": "active",
+    "status": "inactive",
     "activated_at": "2026-11-17T05:32:29.590Z",
     "expires_at": "2027-02-17T05:30:00.000Z",
     "issued_by_name": "Sri Tayi Grand Admin",
     "notes": "Customer Keycard for Room 304 (Stay: TG-FD-20261117-2648)",
-    "created_at": "2026-11-17T05:32:29.590Z"
+    "created_at": "2026-11-17T05:32:29.590Z",
+    "deactivated_at": "2026-11-22T11:19:52.374Z"
   },
   {
     "id": "crd-1794893380225",
@@ -240,12 +564,13 @@
     "booking_reference": "TG-FD-20261117-3783",
     "guest_name": "Reschedule Test Guest",
     "holder_name": "Reschedule Test Guest",
-    "status": "active",
+    "status": "inactive",
     "activated_at": "2026-11-17T05:29:40.225Z",
     "expires_at": "2026-12-14T05:30:00.000Z",
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-3783)",
-    "created_at": "2026-11-17T05:29:40.225Z"
+    "created_at": "2026-11-17T05:29:40.225Z",
+    "deactivated_at": "2026-11-22T11:35:30.310Z"
   },
   {
     "id": "crd-1794893368822",
@@ -262,7 +587,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-4785)",
     "created_at": "2026-11-17T05:29:28.822Z",
-    "deactivated_at": "2026-11-17T05:29:34.629Z"
+    "deactivated_at": "2026-11-22T11:35:30.310Z"
   },
   {
     "id": "crd-1794893357389",
@@ -279,7 +604,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-6773)",
     "created_at": "2026-11-17T05:29:17.389Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.310Z"
   },
   {
     "id": "crd-1794893346049",
@@ -296,7 +621,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-4582)",
     "created_at": "2026-11-17T05:29:06.049Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.310Z"
   },
   {
     "id": "crd-1794893338767",
@@ -313,7 +638,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-6278)",
     "created_at": "2026-11-17T05:28:58.767Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.310Z"
   },
   {
     "id": "crd-1794893332045",
@@ -330,7 +655,7 @@
     "issued_by_name": "Receptionist Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-6214)",
     "created_at": "2026-11-17T05:28:52.045Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.310Z"
   },
   {
     "id": "crd-1794893306315",
@@ -347,7 +672,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-8117)",
     "created_at": "2026-11-17T05:28:26.315Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.310Z"
   },
   {
     "id": "crd-1794893294439",
@@ -364,7 +689,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-2792)",
     "created_at": "2026-11-17T05:28:14.439Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.310Z"
   },
   {
     "id": "crd-1794893286574",
@@ -381,7 +706,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-2691)",
     "created_at": "2026-11-17T05:28:06.574Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.310Z"
   },
   {
     "id": "crd-1794893279086",
@@ -398,7 +723,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-2762)",
     "created_at": "2026-11-17T05:27:59.086Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.310Z"
   },
   {
     "id": "crd-1794893272681",
@@ -415,7 +740,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-2489)",
     "created_at": "2026-11-17T05:27:52.681Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.311Z"
   },
   {
     "id": "crd-1794893265041",
@@ -432,7 +757,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-2423)",
     "created_at": "2026-11-17T05:27:45.041Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.311Z"
   },
   {
     "id": "crd-1794893257825",
@@ -449,7 +774,7 @@
     "issued_by_name": "Front Desk Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-6572)",
     "created_at": "2026-11-17T05:27:37.825Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.311Z"
   },
   {
     "id": "crd-1794893251111",
@@ -466,7 +791,7 @@
     "issued_by_name": "Front Desk Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-6701)",
     "created_at": "2026-11-17T05:27:31.111Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.311Z"
   },
   {
     "id": "crd-1794893210644",
@@ -483,7 +808,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-4373)",
     "created_at": "2026-11-17T05:26:50.644Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.311Z"
   },
   {
     "id": "crd-1794893199156",
@@ -500,7 +825,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-6658)",
     "created_at": "2026-11-17T05:26:39.156Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.312Z"
   },
   {
     "id": "crd-1794893191715",
@@ -517,7 +842,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-4645)",
     "created_at": "2026-11-17T05:26:31.715Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.312Z"
   },
   {
     "id": "crd-1794893184958",
@@ -534,7 +859,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-7158)",
     "created_at": "2026-11-17T05:26:24.958Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.312Z"
   },
   {
     "id": "crd-1794893178568",
@@ -551,7 +876,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-5445)",
     "created_at": "2026-11-17T05:26:18.568Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.312Z"
   },
   {
     "id": "crd-1794893171219",
@@ -568,7 +893,7 @@
     "issued_by_name": "Front Desk Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-6881)",
     "created_at": "2026-11-17T05:26:11.219Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.312Z"
   },
   {
     "id": "crd-1794893164233",
@@ -585,7 +910,7 @@
     "issued_by_name": "Front Desk Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-4743)",
     "created_at": "2026-11-17T05:26:04.233Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.313Z"
   },
   {
     "id": "crd-1794893138436",
@@ -596,12 +921,13 @@
     "booking_reference": "TG-FD-20261117-8376",
     "guest_name": "Kavitha Devi 9726",
     "holder_name": "Kavitha Devi 9726",
-    "status": "active",
+    "status": "inactive",
     "activated_at": "2026-11-17T05:25:38.436Z",
     "expires_at": "2027-07-05T05:30:00.000Z",
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 204 (Stay: TG-FD-20261117-8376)",
-    "created_at": "2026-11-17T05:25:38.436Z"
+    "created_at": "2026-11-17T05:25:38.436Z",
+    "deactivated_at": "2026-11-22T11:20:35.231Z"
   },
   {
     "id": "crd-1794893131614",
@@ -612,12 +938,13 @@
     "booking_reference": "TG-FD-20261117-7673",
     "guest_name": "Suresh Reddy 9726",
     "holder_name": "Suresh Reddy 9726",
-    "status": "active",
+    "status": "inactive",
     "activated_at": "2026-11-17T05:25:31.614Z",
     "expires_at": "2027-06-25T05:30:00.000Z",
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 205 (Stay: TG-FD-20261117-7673)",
-    "created_at": "2026-11-17T05:25:31.614Z"
+    "created_at": "2026-11-17T05:25:31.614Z",
+    "deactivated_at": "2026-11-22T11:20:35.231Z"
   },
   {
     "id": "crd-1794893125907",
@@ -628,12 +955,13 @@
     "booking_reference": "TG-FD-20261117-1092",
     "guest_name": "Anand Kumar 9726",
     "holder_name": "Anand Kumar 9726",
-    "status": "active",
+    "status": "inactive",
     "activated_at": "2026-11-17T05:25:25.907Z",
     "expires_at": "2027-06-15T05:30:00.000Z",
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 204 (Stay: TG-FD-20261117-1092)",
-    "created_at": "2026-11-17T05:25:25.907Z"
+    "created_at": "2026-11-17T05:25:25.907Z",
+    "deactivated_at": "2026-11-22T11:20:35.228Z"
   },
   {
     "id": "crd-1794893076021",
@@ -644,12 +972,13 @@
     "booking_reference": "TG-FD-20261117-4313",
     "guest_name": "Suresh Reddy",
     "holder_name": "Suresh Reddy",
-    "status": "active",
+    "status": "inactive",
     "activated_at": "2026-11-17T05:24:36.021Z",
     "expires_at": "2026-12-28T05:30:00.000Z",
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 104 (Stay: TG-FD-20261117-4313)",
-    "created_at": "2026-11-17T05:24:36.021Z"
+    "created_at": "2026-11-17T05:24:36.021Z",
+    "deactivated_at": "2026-11-22T11:35:35.569Z"
   },
   {
     "id": "crd-1794893028134",
@@ -666,7 +995,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 202 (Stay: TG-FD-20261117-1180)",
     "created_at": "2026-11-17T05:23:48.134Z",
-    "deactivated_at": "2026-11-17T05:29:34.629Z"
+    "deactivated_at": "2026-11-22T11:35:28.380Z"
   },
   {
     "id": "crd-1794893022667",
@@ -677,12 +1006,13 @@
     "booking_reference": "TG-FD-20261117-9963",
     "guest_name": "Suresh Reddy",
     "holder_name": "Suresh Reddy",
-    "status": "active",
+    "status": "inactive",
     "activated_at": "2026-11-17T05:23:42.667Z",
     "expires_at": "2026-12-28T05:30:00.000Z",
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 102 (Stay: TG-FD-20261117-9963)",
-    "created_at": "2026-11-17T05:23:42.667Z"
+    "created_at": "2026-11-17T05:23:42.667Z",
+    "deactivated_at": "2026-11-22T11:35:39.040Z"
   },
   {
     "id": "crd-1794893017209",
@@ -693,12 +1023,13 @@
     "booking_reference": "TG-FD-20261117-9356",
     "guest_name": "Anand Kumar",
     "holder_name": "Anand Kumar",
-    "status": "active",
+    "status": "inactive",
     "activated_at": "2026-11-17T05:23:37.209Z",
     "expires_at": "2026-12-26T05:30:00.000Z",
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 101 (Stay: TG-FD-20261117-9356)",
-    "created_at": "2026-11-17T05:23:37.209Z"
+    "created_at": "2026-11-17T05:23:37.209Z",
+    "deactivated_at": "2026-11-22T11:35:40.763Z"
   },
   {
     "id": "crd-1794891770205",
@@ -715,7 +1046,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-8761)",
     "created_at": "2026-11-17T05:02:50.205Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.313Z"
   },
   {
     "id": "crd-1794891758798",
@@ -732,7 +1063,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-5849)",
     "created_at": "2026-11-17T05:02:38.798Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.313Z"
   },
   {
     "id": "crd-1794891746504",
@@ -749,7 +1080,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-3293)",
     "created_at": "2026-11-17T05:02:26.504Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.313Z"
   },
   {
     "id": "crd-1794891735137",
@@ -766,7 +1097,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-2809)",
     "created_at": "2026-11-17T05:02:15.137Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.314Z"
   },
   {
     "id": "crd-1794891727740",
@@ -783,7 +1114,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-8075)",
     "created_at": "2026-11-17T05:02:07.740Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.314Z"
   },
   {
     "id": "crd-1794891720865",
@@ -800,7 +1131,7 @@
     "issued_by_name": "Receptionist Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-3967)",
     "created_at": "2026-11-17T05:02:00.865Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.314Z"
   },
   {
     "id": "crd-1794891646867",
@@ -817,7 +1148,7 @@
     "issued_by_name": "Sri Tayi Grand Admin",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-9408)",
     "created_at": "2026-11-17T05:00:46.867Z",
-    "deactivated_at": "2026-11-17T05:29:34.626Z"
+    "deactivated_at": "2026-11-22T11:35:30.314Z"
   },
   {
     "id": "crd-1794891548674",
@@ -834,7 +1165,7 @@
     "issued_by_name": "Sri Tayi Grand Admin",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-2418)",
     "created_at": "2026-11-17T04:59:08.674Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.314Z"
   },
   {
     "id": "crd-1794891420809",
@@ -851,7 +1182,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-3573)",
     "created_at": "2026-11-17T04:57:00.809Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.314Z"
   },
   {
     "id": "crd-1794891409430",
@@ -868,7 +1199,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-1961)",
     "created_at": "2026-11-17T04:56:49.430Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.314Z"
   },
   {
     "id": "crd-1794891402234",
@@ -885,7 +1216,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-2568)",
     "created_at": "2026-11-17T04:56:42.234Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.315Z"
   },
   {
     "id": "crd-1794891394903",
@@ -902,7 +1233,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-4229)",
     "created_at": "2026-11-17T04:56:34.903Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.315Z"
   },
   {
     "id": "crd-1794891388523",
@@ -919,7 +1250,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-7518)",
     "created_at": "2026-11-17T04:56:28.523Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.315Z"
   },
   {
     "id": "crd-1794891381101",
@@ -936,7 +1267,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-2134)",
     "created_at": "2026-11-17T04:56:21.101Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.315Z"
   },
   {
     "id": "crd-1794891373813",
@@ -953,7 +1284,7 @@
     "issued_by_name": "Front Desk Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-8406)",
     "created_at": "2026-11-17T04:56:13.813Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.315Z"
   },
   {
     "id": "crd-1794891367103",
@@ -970,7 +1301,7 @@
     "issued_by_name": "Front Desk Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-7193)",
     "created_at": "2026-11-17T04:56:07.103Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.315Z"
   },
   {
     "id": "crd-1794891335036",
@@ -987,7 +1318,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-1744)",
     "created_at": "2026-11-17T04:55:35.036Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.315Z"
   },
   {
     "id": "crd-1794891323351",
@@ -1004,7 +1335,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-5396)",
     "created_at": "2026-11-17T04:55:23.351Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.315Z"
   },
   {
     "id": "crd-1794891316033",
@@ -1021,7 +1352,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-4255)",
     "created_at": "2026-11-17T04:55:16.033Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.315Z"
   },
   {
     "id": "crd-1794891308451",
@@ -1038,7 +1369,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-6958)",
     "created_at": "2026-11-17T04:55:08.451Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.315Z"
   },
   {
     "id": "crd-1794891301883",
@@ -1055,7 +1386,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-7242)",
     "created_at": "2026-11-17T04:55:01.883Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.315Z"
   },
   {
     "id": "crd-1794891295517",
@@ -1072,7 +1403,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-1952)",
     "created_at": "2026-11-17T04:54:55.517Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.315Z"
   },
   {
     "id": "crd-1794891288209",
@@ -1089,7 +1420,7 @@
     "issued_by_name": "Front Desk Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-3317)",
     "created_at": "2026-11-17T04:54:48.209Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.316Z"
   },
   {
     "id": "crd-1794891280876",
@@ -1106,7 +1437,7 @@
     "issued_by_name": "Front Desk Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-3697)",
     "created_at": "2026-11-17T04:54:40.876Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.316Z"
   },
   {
     "id": "crd-1794891235439",
@@ -1123,7 +1454,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-6655)",
     "created_at": "2026-11-17T04:53:55.439Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.316Z"
   },
   {
     "id": "crd-1794891223876",
@@ -1140,7 +1471,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-6804)",
     "created_at": "2026-11-17T04:53:43.876Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.316Z"
   },
   {
     "id": "crd-1794891216572",
@@ -1157,7 +1488,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-2617)",
     "created_at": "2026-11-17T04:53:36.572Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.316Z"
   },
   {
     "id": "crd-1794891209184",
@@ -1174,7 +1505,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-9842)",
     "created_at": "2026-11-17T04:53:29.184Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.316Z"
   },
   {
     "id": "crd-1794891202791",
@@ -1191,7 +1522,7 @@
     "issued_by_name": "Front Desk Reception",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-6368)",
     "created_at": "2026-11-17T04:53:22.791Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.316Z"
   },
   {
     "id": "crd-1794891196467",
@@ -1208,7 +1539,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-6331)",
     "created_at": "2026-11-17T04:53:16.467Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.316Z"
   },
   {
     "id": "crd-1794891189099",
@@ -1225,7 +1556,7 @@
     "issued_by_name": "Front Desk Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-9285)",
     "created_at": "2026-11-17T04:53:09.099Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.316Z"
   },
   {
     "id": "crd-1794891182228",
@@ -1242,7 +1573,7 @@
     "issued_by_name": "Front Desk Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261117-8507)",
     "created_at": "2026-11-17T04:53:02.228Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.316Z"
   },
   {
     "id": "crd-1794849975593",
@@ -1259,7 +1590,7 @@
     "issued_by_name": "Sri Tayi Grand Admin",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-4322)",
     "created_at": "2026-11-16T17:26:15.593Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.316Z"
   },
   {
     "id": "crd-1794849950485",
@@ -1276,7 +1607,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-3761)",
     "created_at": "2026-11-16T17:25:50.485Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.316Z"
   },
   {
     "id": "crd-1794849938767",
@@ -1293,7 +1624,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-4238)",
     "created_at": "2026-11-16T17:25:38.767Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.316Z"
   },
   {
     "id": "crd-1794849926583",
@@ -1310,7 +1641,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-8490)",
     "created_at": "2026-11-16T17:25:26.583Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.316Z"
   },
   {
     "id": "crd-1794849915259",
@@ -1327,7 +1658,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-2266)",
     "created_at": "2026-11-16T17:25:15.259Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.317Z"
   },
   {
     "id": "crd-1794849907733",
@@ -1344,7 +1675,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-1680)",
     "created_at": "2026-11-16T17:25:07.733Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.317Z"
   },
   {
     "id": "crd-1794849900855",
@@ -1361,7 +1692,7 @@
     "issued_by_name": "Receptionist Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-5021)",
     "created_at": "2026-11-16T17:25:00.855Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.317Z"
   },
   {
     "id": "crd-1794849759448",
@@ -1378,7 +1709,7 @@
     "issued_by_name": "Sri Tayi Grand Admin",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-9315)",
     "created_at": "2026-11-16T17:22:39.448Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.317Z"
   },
   {
     "id": "crd-1794849609031",
@@ -1395,7 +1726,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-1795)",
     "created_at": "2026-11-16T17:20:09.031Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.317Z"
   },
   {
     "id": "crd-1794849597627",
@@ -1412,7 +1743,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-3602)",
     "created_at": "2026-11-16T17:19:57.627Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.317Z"
   },
   {
     "id": "crd-1794849586102",
@@ -1429,7 +1760,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-9903)",
     "created_at": "2026-11-16T17:19:46.102Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.317Z"
   },
   {
     "id": "crd-1794849574492",
@@ -1446,7 +1777,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-6335)",
     "created_at": "2026-11-16T17:19:34.492Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.317Z"
   },
   {
     "id": "crd-1794849567044",
@@ -1463,7 +1794,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-8741)",
     "created_at": "2026-11-16T17:19:27.044Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.317Z"
   },
   {
     "id": "crd-1794849560263",
@@ -1480,7 +1811,7 @@
     "issued_by_name": "Receptionist Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-9418)",
     "created_at": "2026-11-16T17:19:20.263Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.317Z"
   },
   {
     "id": "crd-1794849423903",
@@ -1497,7 +1828,7 @@
     "issued_by_name": "Receptionist Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-9794)",
     "created_at": "2026-11-16T17:17:03.903Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.317Z"
   },
   {
     "id": "crd-1794849317365",
@@ -1514,7 +1845,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-9161)",
     "created_at": "2026-11-16T17:15:17.365Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.317Z"
   },
   {
     "id": "crd-1794849305416",
@@ -1531,7 +1862,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-3345)",
     "created_at": "2026-11-16T17:15:05.416Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.317Z"
   },
   {
     "id": "crd-1794849293707",
@@ -1548,7 +1879,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-7218)",
     "created_at": "2026-11-16T17:14:53.707Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.317Z"
   },
   {
     "id": "crd-1794849282053",
@@ -1565,7 +1896,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-1163)",
     "created_at": "2026-11-16T17:14:42.053Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.318Z"
   },
   {
     "id": "crd-1794849274707",
@@ -1582,7 +1913,7 @@
     "issued_by_name": "Front Desk Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-4925)",
     "created_at": "2026-11-16T17:14:34.707Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.318Z"
   },
   {
     "id": "crd-1794849267745",
@@ -1599,7 +1930,7 @@
     "issued_by_name": "Receptionist Duty Officer",
     "notes": "Customer Keycard for Room 201 (Stay: TG-FD-20261116-4983)",
     "created_at": "2026-11-16T17:14:27.745Z",
-    "deactivated_at": "2026-11-17T05:29:34.627Z"
+    "deactivated_at": "2026-11-22T11:35:30.318Z"
   },
   {
     "id": "crd-1794847912206",
@@ -1610,11 +1941,12 @@
     "booking_reference": "TG-FD-20261116-7840",
     "guest_name": "Mallemdheeraj Royal",
     "holder_name": "Mallemdheeraj Royal",
-    "status": "active",
+    "status": "inactive",
     "activated_at": "2026-11-16T16:51:52.206Z",
     "expires_at": "2026-11-17T05:30:00.000Z",
     "issued_by_name": "Sri Tayi Grand Admin",
     "notes": "Customer Keycard for Room 101 (Stay: TG-FD-20261116-7840)",
-    "created_at": "2026-11-16T16:51:52.206Z"
+    "created_at": "2026-11-16T16:51:52.206Z",
+    "deactivated_at": "2026-11-22T11:35:40.764Z"
   }
 ]

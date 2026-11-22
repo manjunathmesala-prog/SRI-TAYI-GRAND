@@ -28,6 +28,7 @@ import {
   ChevronRight,
   UserX,
   ShieldAlert,
+  ShieldCheck,
 } from 'lucide-react';
 
 export default function AdminStaffAttendancePage() {
@@ -56,6 +57,18 @@ export default function AdminStaffAttendancePage() {
 
   // Clock-out in progress
   const [clockingOutId, setClockingOutId] = useState<string | null>(null);
+
+  // Identify active on-duty manager (Single Active Manager on Duty rule)
+  const activeDutyManager = useMemo(() => {
+    return attendanceList.find((a) => a.clock_in && !a.clock_out);
+  }, [attendanceList]);
+
+  // Eligible duty managers (Exclusively Hari Achari and Sagar)
+  const eligibleManagers = useMemo(() => {
+    return staffList.filter(
+      (s) => s.role === 'Hotel Manager' || s.email.toLowerCase().includes('hari') || s.email.toLowerCase().includes('sagar')
+    );
+  }, [staffList]);
 
   const showNotification = useCallback((type: 'success' | 'error', message: string) => {
     setFeedback({ type, message });
@@ -86,7 +99,10 @@ export default function AdminStaffAttendancePage() {
             }
           );
           if (data.staff && data.staff.length > 0 && !clockInStaffId) {
-            setClockInStaffId(data.staff[0].id);
+            const managers = (data.staff as StaffMember[]).filter(
+              (s) => s.role === 'Hotel Manager' || s.email.toLowerCase().includes('hari') || s.email.toLowerCase().includes('sagar')
+            );
+            setClockInStaffId(managers[0]?.id || data.staff[0].id);
           }
         }
       } else {
@@ -98,6 +114,36 @@ export default function AdminStaffAttendancePage() {
       setLoading(false);
     }
   }, [selectedDate, clockInStaffId, showNotification]);
+
+  const quickClockInManager = async (staffId: string) => {
+    try {
+      setSubmitting(true);
+      const res = await fetch('/api/admin/staff/attendance', {
+        method: 'POST',
+        headers: getAdminHeaders({
+          'Content-Type': 'application/json',
+        }),
+        body: JSON.stringify({
+          action: 'clock_in',
+          staffId,
+          shift: 'general',
+          notes: 'Direct Shift Start',
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification('success', data.message || 'Duty Manager clocked in successfully!');
+        fetchAttendance();
+      } else {
+        showNotification('error', data.error || 'Failed to clock in Duty Manager.');
+      }
+    } catch {
+      showNotification('error', 'Network error clocking in staff.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   // Real-time synchronization
   useRealtimeSync({
@@ -325,6 +371,109 @@ export default function AdminStaffAttendancePage() {
             <UserCheck className="w-3.5 h-3.5" />
             <span>Clock-In Staff</span>
           </button>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* MANAGER ON DUTY (MOD) BANNER: SINGLE ACTIVE SHIFT PROTOCOL */}
+      {/* ========================================================================= */}
+      <div
+        className={`p-4 sm:p-5 rounded-2xl border transition-all shadow-[0_4px_20px_rgba(33,24,15,0.04)] ${
+          activeDutyManager
+            ? 'bg-gradient-to-r from-emerald-50 via-teal-50 to-white border-emerald-300'
+            : 'bg-gradient-to-r from-amber-50/70 via-[#FAF8F5] to-white border-[#E6D9C5]'
+        }`}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div
+              className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-xs ${
+                activeDutyManager
+                  ? 'bg-emerald-600 text-white ring-4 ring-emerald-100'
+                  : 'bg-[#2A1D13] text-[#EAD8B8] ring-4 ring-[#E6D9C5]/50'
+              }`}
+            >
+              {activeDutyManager ? (
+                <ShieldCheck className="w-6 h-6 animate-pulse" />
+              ) : (
+                <Briefcase className="w-5 h-5" />
+              )}
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span
+                  className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${
+                    activeDutyManager
+                      ? 'bg-emerald-200/80 text-emerald-950 border border-emerald-300'
+                      : 'bg-amber-200/80 text-amber-950 border border-amber-300'
+                  }`}
+                >
+                  {activeDutyManager ? 'Active Manager on Duty (MOD)' : 'Duty Handover State • No Manager on Duty'}
+                </span>
+                <span className="text-[11px] text-[#786A5B] font-medium">
+                  Sequential Shift Handover Protocol
+                </span>
+              </div>
+              <h2 className="text-lg font-serif font-bold text-[#2A1D13] mt-0.5">
+                {activeDutyManager ? (
+                  <span className="flex items-center gap-2 flex-wrap">
+                    <span>{activeDutyManager.staff_name}</span>
+                    <span className="text-xs font-sans font-normal text-emerald-800 bg-emerald-100/70 px-2 py-0.5 rounded-md border border-emerald-200">
+                      Shift: {(activeDutyManager.shift || 'general').toUpperCase()}
+                    </span>
+                  </span>
+                ) : (
+                  <span>Front Desk Between Shifts</span>
+                )}
+              </h2>
+              <p className="text-xs text-[#786A5B] mt-0.5">
+                {activeDutyManager ? (
+                  <span>
+                    Clocked in at <strong className="font-mono text-[#2A1D13]">{formatClockTime(activeDutyManager.clock_in)}</strong>. 
+                    {eligibleManagers.find((m) => m.id !== activeDutyManager.staff_id)?.full_name 
+                      ? ` ${eligibleManagers.find((m) => m.id !== activeDutyManager.staff_id)?.full_name} cannot clock in until ${activeDutyManager.staff_name} clocks out.`
+                      : ' Outgoing manager must clock out before incoming manager can begin duty.'}
+                  </span>
+                ) : (
+                  <span>
+                    No manager currently on duty. Exactly one manager (Hari Achari or Sagar) must clock in to assume operational responsibility.
+                  </span>
+                )}
+              </p>
+            </div>
+          </div>
+
+          {/* Quick Handover Action Buttons */}
+          <div className="flex items-center gap-2.5 shrink-0 self-end md:self-center">
+            {activeDutyManager ? (
+              <button
+                onClick={() => handleClockOut(activeDutyManager.id)}
+                disabled={clockingOutId === activeDutyManager.id}
+                className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-medium text-xs shadow-xs transition-all flex items-center gap-2 disabled:opacity-50"
+              >
+                {clockingOutId === activeDutyManager.id ? (
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                ) : (
+                  <LogOut className="w-4 h-4" />
+                )}
+                <span>Clock Out & Handover Shift</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 flex-wrap">
+                {eligibleManagers.map((mgr) => (
+                  <button
+                    key={mgr.id}
+                    onClick={() => quickClockInManager(mgr.id)}
+                    disabled={submitting}
+                    className="px-3.5 py-2 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] font-medium text-xs shadow-xs transition-all flex items-center gap-1.5 disabled:opacity-50"
+                  >
+                    <UserCheck className="w-3.5 h-3.5 text-[#EAD8B8]" />
+                    <span>Clock In {mgr.full_name}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -611,22 +760,53 @@ export default function AdminStaffAttendancePage() {
             </div>
 
             <form onSubmit={handleClockInSubmit} className="space-y-4">
-              {/* Select Staff Member */}
+              {/* Active Duty Collision Alert */}
+              {activeDutyManager && activeDutyManager.staff_id !== clockInStaffId && (
+                <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-300 text-amber-950 text-xs space-y-2 animate-fade-in">
+                  <div className="flex items-center gap-2 font-bold text-amber-900">
+                    <ShieldAlert className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span>Manager Handover Required</span>
+                  </div>
+                  <p className="text-amber-800 leading-relaxed">
+                    <strong>{activeDutyManager.staff_name}</strong> is currently on duty ({activeDutyManager.shift || 'general'} shift). In accordance with Sri Tayi Grand hospitality protocol, <strong>{activeDutyManager.staff_name}</strong> must clock out before another manager can clock in.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await handleClockOut(activeDutyManager.id);
+                    }}
+                    disabled={clockingOutId === activeDutyManager.id}
+                    className="px-3 py-1.5 bg-amber-800 hover:bg-amber-900 text-white rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all shadow-xs disabled:opacity-50"
+                  >
+                    {clockingOutId === activeDutyManager.id ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <LogOut className="w-3.5 h-3.5" />
+                    )}
+                    <span>Clock Out {activeDutyManager.staff_name} Now</span>
+                  </button>
+                </div>
+              )}
+
+              {/* Select Staff Member (Duty Managers Only) */}
               <div>
                 <label className="block text-xs font-semibold text-[#2A1D13] mb-1">
-                  Staff Member <span className="text-rose-500">*</span>
+                  Duty Manager <span className="text-rose-500">*</span>
                 </label>
                 <LuxurySelect
                   size="md"
                   variant="admin"
                   value={clockInStaffId}
                   onChange={(val) => setClockInStaffId(String(val))}
-                  placeholder="Select staff member..."
-                  options={staffList.map((stf) => ({
+                  placeholder="Select duty manager..."
+                  options={eligibleManagers.map((stf) => ({
                     value: stf.id,
-                    label: `${stf.full_name} — ${stf.role}`,
+                    label: `${stf.full_name} — Duty Manager`,
                   }))}
                 />
+                <p className="text-[11px] text-[#786A5B] mt-1">
+                  Clock-in is exclusively reserved for Duty Managers (Hari Achari & Sagar).
+                </p>
               </div>
 
               {/* Select Shift */}
@@ -666,7 +846,7 @@ export default function AdminStaffAttendancePage() {
                   type="text"
                   value={clockInNotes}
                   onChange={(e) => setClockInNotes(e.target.value)}
-                  placeholder="e.g. Front Desk Terminal 1, Floor 2 Housekeeping"
+                  placeholder="e.g. Front Desk Terminal 1, Reception Handover"
                   className="w-full px-3 py-2 text-xs rounded-xl border border-[#E6D9C5] focus:outline-none focus:border-[#8D672F] text-[#2A1D13] placeholder-[#786A5B]/60"
                 />
               </div>
@@ -680,26 +860,36 @@ export default function AdminStaffAttendancePage() {
               </div>
 
               {/* Modal Buttons */}
-              <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-[#E6D9C5]/60">
-                <button
-                  type="button"
-                  onClick={() => setIsClockInModalOpen(false)}
-                  className="px-3.5 py-2 rounded-xl border border-[#E6D9C5] text-[#786A5B] hover:text-[#2A1D13] hover:bg-[#FAF8F5] text-xs font-medium"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="px-5 py-2 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] font-medium text-xs tracking-wide shadow-xs transition-all disabled:opacity-50 flex items-center gap-2"
-                >
-                  {submitting ? (
-                    <RefreshCw className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <UserCheck className="w-3.5 h-3.5" />
+              <div className="flex items-center justify-between gap-2.5 pt-3 border-t border-[#E6D9C5]/60">
+                <div className="text-[11px] text-[#786A5B]">
+                  {activeDutyManager && activeDutyManager.staff_id !== clockInStaffId && (
+                    <span className="text-amber-700 font-medium">Handover required first</span>
                   )}
-                  <span>Confirm Clock-In</span>
-                </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsClockInModalOpen(false)}
+                    className="px-3.5 py-2 rounded-xl border border-[#E6D9C5] text-[#786A5B] hover:text-[#2A1D13] hover:bg-[#FAF8F5] text-xs font-medium"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={
+                      submitting ||
+                      (Boolean(activeDutyManager) && activeDutyManager?.staff_id !== clockInStaffId)
+                    }
+                    className="px-5 py-2 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] font-medium text-xs tracking-wide shadow-xs transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    {submitting ? (
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <UserCheck className="w-3.5 h-3.5" />
+                    )}
+                    <span>Confirm Clock-In</span>
+                  </button>
+                </div>
               </div>
             </form>
           </div>
