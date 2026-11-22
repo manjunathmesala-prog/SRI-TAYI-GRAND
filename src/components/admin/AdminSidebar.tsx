@@ -682,7 +682,7 @@ export function AdminSidebar() {
       {/* ------------------------------------------------------------- */}
       <nav
         aria-label="Mobile Bottom Navigation"
-        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#21180F]/95 backdrop-blur-md border-t border-[#3a2c1f] px-2 py-1.5 flex items-center justify-around shadow-2xl"
+        className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#21180F]/95 backdrop-blur-md border-t border-[#3a2c1f] px-1.5 py-1 pb-[max(0.375rem,env(safe-area-inset-bottom))] flex items-center justify-around shadow-2xl"
       >
         {bottomBarItems.map((item) => {
           const Icon = item.icon;
@@ -696,7 +696,7 @@ export function AdminSidebar() {
               key={item.href}
               href={item.href}
               prefetch={false}
-              className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-sans font-medium transition-all ${
+              className={`flex flex-col items-center justify-center min-h-[44px] min-w-[44px] py-1 px-1.5 rounded-lg text-[10px] font-sans font-medium transition-all ${
                 isActive
                   ? 'text-[#D8AD56] font-bold scale-105'
                   : item.highlight
@@ -705,7 +705,7 @@ export function AdminSidebar() {
               }`}
             >
               <Icon className={`w-5 h-5 mb-0.5 ${isActive ? 'text-[#D8AD56]' : ''}`} />
-              <span className="truncate max-w-[64px]">{item.label}</span>
+              <span className="truncate max-w-[62px]">{item.label}</span>
             </NextLink>
           );
         })}

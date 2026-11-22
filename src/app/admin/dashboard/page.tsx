@@ -569,9 +569,9 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* KPI Cards Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-6">
         {/* Card 1: Occupancy Rate */}
-        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:shadow-[0_8px_30px_rgba(33,24,15,0.06)] hover:-translate-y-0.5 transition-all">
+        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-4 sm:p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:shadow-[0_8px_30px_rgba(33,24,15,0.06)] hover:-translate-y-0.5 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-[11px] uppercase tracking-wider font-semibold text-[#8D7D71]">
               {t('dashboard.occupancyRate', 'Occupancy Rate')}
@@ -581,7 +581,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="font-serif text-3xl font-bold text-[#2A1D13] tabular-nums">{occupancyRate}%</span>
+            <span className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] tabular-nums">{occupancyRate}%</span>
             <span className="text-xs text-[#2E7D32] font-semibold">
               {occupiedRooms + reservedRooms} / {totalRooms} {isTelugu ? 'గదులు' : 'Rooms'}
             </span>
@@ -595,7 +595,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Card 2: Current In-House Guests */}
-        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:shadow-[0_8px_30px_rgba(33,24,15,0.06)] hover:-translate-y-0.5 transition-all">
+        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-4 sm:p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:shadow-[0_8px_30px_rgba(33,24,15,0.06)] hover:-translate-y-0.5 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-[11px] uppercase tracking-wider font-semibold text-[#8D7D71]">
               {t('frontDesk.currentInHouse', 'In-House Guests')}
@@ -605,7 +605,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="font-serif text-3xl font-bold text-[#2A1D13] tabular-nums">{checkedInCount}</span>
+            <span className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] tabular-nums">{checkedInCount}</span>
             <span className="text-xs text-[#786A5B]">
               {isTelugu ? 'గదులు' : 'Rooms Occupied'}
             </span>
@@ -616,7 +616,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Card 3: Financial Card */}
-        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:shadow-[0_8px_30px_rgba(33,24,15,0.06)] hover:-translate-y-0.5 transition-all">
+        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-4 sm:p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:shadow-[0_8px_30px_rgba(33,24,15,0.06)] hover:-translate-y-0.5 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-[11px] uppercase tracking-wider font-semibold text-[#8D7D71]">
               {canViewRevenue
@@ -631,14 +631,14 @@ export default function AdminDashboardPage() {
           </div>
 
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] tabular-nums">
+            <span className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] tabular-nums truncate">
               {canViewRevenue
                 ? formatCurrency(totalPeriodRevenue)
                 : formatCurrency(cashBalance !== null ? cashBalance : 0)}
             </span>
           </div>
 
-          <p className="text-[11px] text-[#2E7D32] mt-2 font-semibold">
+          <p className="text-[11px] text-[#2E7D32] mt-2 font-semibold truncate">
             {canViewRevenue ? (
               <>
                 {formatCurrency(totalPeriodCollections)}{' '}
@@ -654,7 +654,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Card 4: Housekeeping & Room Readiness */}
-        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:shadow-[0_8px_30px_rgba(33,24,15,0.06)] hover:-translate-y-0.5 transition-all">
+        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-4 sm:p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] hover:shadow-[0_8px_30px_rgba(33,24,15,0.06)] hover:-translate-y-0.5 transition-all">
           <div className="flex items-center justify-between">
             <span className="text-[11px] uppercase tracking-wider font-semibold text-[#8D7D71]">
               {t('rooms.available', 'Inventory Ready')}
@@ -664,7 +664,7 @@ export default function AdminDashboardPage() {
             </div>
           </div>
           <div className="mt-3 flex items-baseline gap-2">
-            <span className="font-serif text-3xl font-bold text-[#2A1D13] tabular-nums">{availableRooms}</span>
+            <span className="font-serif text-2xl sm:text-3xl font-bold text-[#2A1D13] tabular-nums">{availableRooms}</span>
             <span className="text-xs text-[#2E7D32] font-semibold">
               {isTelugu ? 'సిద్ధంగా ఉన్నాయి' : 'Clean & Ready'}
             </span>

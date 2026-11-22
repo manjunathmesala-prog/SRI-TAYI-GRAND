@@ -1,1 +1,1396 @@
-[]
+[
+  {
+    "id": "tap-1795374442945-tdp1rf",
+    "cardUid": "TEST-MIF-101-2115",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:07:22.943Z"
+  },
+  {
+    "id": "tap-1795374443010-vcaqil",
+    "cardUid": "TEST-MIF-101-2115",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:07:23.008Z"
+  },
+  {
+    "id": "tap-1795374443066-a6jzz3",
+    "cardUid": "TEST-MIF-101-2115",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:07:23.065Z"
+  },
+  {
+    "id": "tap-1795374444725-fqwrj4",
+    "cardUid": "TEST-MIF-101-2115",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:07:24.721Z"
+  },
+  {
+    "id": "tap-1795374444783-nt2xkg",
+    "cardUid": "INVALID-CARD-99999",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Guest",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: Unregistered card scanned.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:07:24.782Z"
+  },
+  {
+    "id": "tap-1795374444844-xf88rv",
+    "cardUid": "TEST-MIF-101-2115",
+    "cardType": "GUEST",
+    "roomNumber": "205",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "WRONG_ROOM",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: This keycard belongs to Room 101, not Room 205.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-205",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:07:24.842Z"
+  },
+  {
+    "id": "tap-1795374444983-1lcg6n",
+    "cardUid": "SA-QA-MASTER-001",
+    "cardType": "MASTER",
+    "roomNumber": "308",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Sri Tayi Grand MD",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Super Admin Master Clearance: Door unlocked for Sri Tayi Grand MD.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-308",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:07:24.981Z"
+  },
+  {
+    "id": "tap-1795374445852-msmb3h",
+    "cardUid": "CLN-QA-HOUSEKEEP-01",
+    "cardType": "STAFF",
+    "roomNumber": "108",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Ramesh (Housekeeping)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Cleaner started: Room 108 status moved to In-Progress. Door unlocked.",
+    "metadata": {
+      "roomStatus": "cleaning",
+      "housekeepingStatus": "in_progress",
+      "actionType": "cleaning_started",
+      "device": "Lock-Room-108",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:07:25.851Z"
+  },
+  {
+    "id": "tap-1795374446538-fdj131",
+    "cardUid": "CLN-QA-HOUSEKEEP-01",
+    "cardType": "STAFF",
+    "roomNumber": "108",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Ramesh (Housekeeping)",
+    "accessResult": "GRANTED",
+    "doorStatus": "LOCKED (CLEAN)",
+    "reason": "Cleaner finished: Room 108 is now Clean & Available for new guests.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "cleaning_completed",
+      "device": "Lock-Room-108",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:07:26.536Z"
+  },
+  {
+    "id": "tap-1795374450053-yzjy3u",
+    "cardUid": "BT-57-WLK-8207",
+    "cardType": "GUEST",
+    "roomNumber": "104",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Guest",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: Unregistered card scanned.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-104",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:07:30.052Z"
+  },
+  {
+    "id": "tap-1795374450244-2p7mxc",
+    "cardUid": "BT-57-WLK-8207",
+    "cardType": "GUEST",
+    "roomNumber": "104",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Guest",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: Unregistered card scanned.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-104",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:07:30.243Z"
+  },
+  {
+    "id": "tap-1795374450302-frq1hl",
+    "cardUid": "BT-57-TRANS-0056",
+    "cardType": "GUEST",
+    "roomNumber": "107",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Antigravity QA Guest (Transferred)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer Antigravity QA Guest (Transferred) tapped and unlocked Room 107.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-107",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:07:30.300Z"
+  },
+  {
+    "id": "tap-1795374450432-wb4dpc",
+    "cardUid": "BT-57-TRANS-0056",
+    "cardType": "GUEST",
+    "roomNumber": "107",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Antigravity QA Guest (Transferred)",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: Card is INACTIVE.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-107",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:07:30.431Z"
+  },
+  {
+    "id": "tap-1795374450540-ilyj2q",
+    "cardUid": "SYNC-TEST-0435",
+    "cardType": "GUEST",
+    "roomNumber": "202",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Telemetry Guest",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer Telemetry Guest tapped and unlocked Room 202.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-202",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:07:30.537Z"
+  },
+  {
+    "id": "tap-1795374523452-5rbaki",
+    "cardUid": "BT-57-1000020501",
+    "cardType": "GUEST",
+    "roomNumber": "104",
+    "bookingId": "bk-walkin-1795374504761",
+    "customerId": "gst-1795374504761",
+    "customerName": "Antigravity QA Guest",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "No RFID card detected on reader or encoder USB disconnected. Please ensure the Mifare keycard is placed flat on the reader.",
+    "metadata": {
+      "actionType": "door_unlock",
+      "device": "Lock-Room-104",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:08:43.000Z"
+  },
+  {
+    "id": "tap-1795374524185-p6o82o",
+    "cardUid": "BT-57-WLK-TEST",
+    "cardType": "GUEST",
+    "roomNumber": "104",
+    "bookingId": "bk-walkin-1795374504761",
+    "customerId": "gst-1795374504761",
+    "customerName": "Antigravity QA Guest",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: Unregistered card scanned.",
+    "metadata": {
+      "roomStatus": "occupied",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-104",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:08:44.183Z"
+  },
+  {
+    "id": "tap-1795374950944-61shzb",
+    "cardUid": "TEST-MIF-101-9420",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:15:50.941Z"
+  },
+  {
+    "id": "tap-1795374951170-5ok5dd",
+    "cardUid": "TEST-MIF-101-9420",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:15:51.166Z"
+  },
+  {
+    "id": "tap-1795374951575-x61pij",
+    "cardUid": "TEST-MIF-101-9420",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:15:51.569Z"
+  },
+  {
+    "id": "tap-1795374953368-1w4iuu",
+    "cardUid": "TEST-MIF-101-9420",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:15:53.365Z"
+  },
+  {
+    "id": "tap-1795374953535-clyopq",
+    "cardUid": "INVALID-CARD-99999",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Guest",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: Unregistered card scanned.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:15:53.532Z"
+  },
+  {
+    "id": "tap-1795374953713-xsdoan",
+    "cardUid": "TEST-MIF-101-9420",
+    "cardType": "GUEST",
+    "roomNumber": "205",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "WRONG_ROOM",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: This keycard belongs to Room 101, not Room 205.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-205",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:15:53.711Z"
+  },
+  {
+    "id": "tap-1795374954135-xy6rhg",
+    "cardUid": "SA-QA-MASTER-001",
+    "cardType": "MASTER",
+    "roomNumber": "308",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Sri Tayi Grand MD",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Super Admin Master Clearance: Door unlocked for Sri Tayi Grand MD.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-308",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:15:54.132Z"
+  },
+  {
+    "id": "tap-1795374959158-hbjvq5",
+    "cardUid": "CLN-QA-HOUSEKEEP-01",
+    "cardType": "STAFF",
+    "roomNumber": "108",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Ramesh (Housekeeping)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Cleaner started: Room 108 status moved to In-Progress. Door unlocked.",
+    "metadata": {
+      "roomStatus": "cleaning",
+      "housekeepingStatus": "in_progress",
+      "actionType": "cleaning_started",
+      "device": "Lock-Room-108",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:15:59.154Z"
+  },
+  {
+    "id": "tap-1795374960079-1gp2bt",
+    "cardUid": "CLN-QA-HOUSEKEEP-01",
+    "cardType": "STAFF",
+    "roomNumber": "108",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Ramesh (Housekeeping)",
+    "accessResult": "GRANTED",
+    "doorStatus": "LOCKED (CLEAN)",
+    "reason": "Cleaner finished: Room 108 is now Clean & Available for new guests.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "cleaning_completed",
+      "device": "Lock-Room-108",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:16:00.075Z"
+  },
+  {
+    "id": "tap-1795374970739-pwe3k1",
+    "cardUid": "BT-57-WLK-6023",
+    "cardType": "GUEST",
+    "roomNumber": "105",
+    "bookingId": "bk-walkin-1795374963173",
+    "customerId": "gst-1795374963173",
+    "customerName": "Antigravity QA Guest",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer Antigravity QA Guest tapped and unlocked Room 105.",
+    "metadata": {
+      "roomStatus": "occupied",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-105",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:16:10.736Z"
+  },
+  {
+    "id": "tap-1795374971352-dq4bwr",
+    "cardUid": "BT-57-WLK-6023",
+    "cardType": "GUEST",
+    "roomNumber": "105",
+    "bookingId": "bk-walkin-1795374963173",
+    "customerId": "gst-1795374963173",
+    "customerName": "Antigravity QA Guest",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: Card is INACTIVE.",
+    "metadata": {
+      "roomStatus": "occupied",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-105",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:16:11.349Z"
+  },
+  {
+    "id": "tap-1795374971535-934ih9",
+    "cardUid": "BT-57-TRANS-0750",
+    "cardType": "GUEST",
+    "roomNumber": "107",
+    "bookingId": "bk-walkin-1795374963173",
+    "customerId": "gst-1795374963173",
+    "customerName": "Antigravity QA Guest",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer Antigravity QA Guest (Transferred) tapped and unlocked Room 107.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-107",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:16:11.530Z"
+  },
+  {
+    "id": "tap-1795374972016-esrt4b",
+    "cardUid": "BT-57-TRANS-0750",
+    "cardType": "GUEST",
+    "roomNumber": "107",
+    "bookingId": "bk-walkin-1795374963173",
+    "customerId": "gst-1795374963173",
+    "customerName": "Antigravity QA Guest",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: Card is INACTIVE.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-107",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:16:12.013Z"
+  },
+  {
+    "id": "tap-1795374972745-fgjzhh",
+    "cardUid": "SYNC-TEST-2027",
+    "cardType": "GUEST",
+    "roomNumber": "202",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Telemetry Guest",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer Telemetry Guest tapped and unlocked Room 202.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-202",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:16:12.743Z"
+  },
+  {
+    "id": "tap-1795374975509-p4u4lw",
+    "cardUid": "BT-57-1000020502",
+    "cardType": "GUEST",
+    "roomNumber": "105",
+    "bookingId": "bk-walkin-1795374963173",
+    "customerId": "gst-1795374963173",
+    "customerName": "Antigravity QA Guest",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "No RFID card detected on reader or encoder USB disconnected. Please ensure the Mifare keycard is placed flat on the reader.",
+    "metadata": {
+      "actionType": "door_unlock",
+      "device": "Lock-Room-105",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:16:15.000Z"
+  },
+  {
+    "id": "tap-1795375157498-nvoqw9",
+    "cardUid": "TEST-MIF-101-5963",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:19:17.491Z"
+  },
+  {
+    "id": "tap-1795375157847-6kubyg",
+    "cardUid": "TEST-MIF-101-5963",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:19:17.843Z"
+  },
+  {
+    "id": "tap-1795375158019-npmkq1",
+    "cardUid": "TEST-MIF-101-5963",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:19:18.012Z"
+  },
+  {
+    "id": "tap-1795375159802-52i9zh",
+    "cardUid": "TEST-MIF-101-5963",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:19:19.797Z"
+  },
+  {
+    "id": "tap-1795375160013-2silgp",
+    "cardUid": "INVALID-CARD-99999",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Guest",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: Unregistered card scanned.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:19:20.010Z"
+  },
+  {
+    "id": "tap-1795375160204-ti9hpl",
+    "cardUid": "TEST-MIF-101-5963",
+    "cardType": "GUEST",
+    "roomNumber": "205",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "WRONG_ROOM",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: This keycard belongs to Room 101, not Room 205.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-205",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:19:20.199Z"
+  },
+  {
+    "id": "tap-1795375160605-y2rb4g",
+    "cardUid": "SA-QA-MASTER-001",
+    "cardType": "MASTER",
+    "roomNumber": "308",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Sri Tayi Grand MD",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Super Admin Master Clearance: Door unlocked for Sri Tayi Grand MD.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-308",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:19:20.603Z"
+  },
+  {
+    "id": "tap-1795375163261-g67lgj",
+    "cardUid": "CLN-QA-HOUSEKEEP-01",
+    "cardType": "STAFF",
+    "roomNumber": "108",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Ramesh (Housekeeping)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Cleaner started: Room 108 status moved to In-Progress. Door unlocked.",
+    "metadata": {
+      "roomStatus": "cleaning",
+      "housekeepingStatus": "in_progress",
+      "actionType": "cleaning_started",
+      "device": "Lock-Room-108",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:19:23.257Z"
+  },
+  {
+    "id": "tap-1795375164099-ago0ot",
+    "cardUid": "CLN-QA-HOUSEKEEP-01",
+    "cardType": "STAFF",
+    "roomNumber": "108",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Ramesh (Housekeeping)",
+    "accessResult": "GRANTED",
+    "doorStatus": "LOCKED (CLEAN)",
+    "reason": "Cleaner finished: Room 108 is now Clean & Available for new guests.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "cleaning_completed",
+      "device": "Lock-Room-108",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:19:24.093Z"
+  },
+  {
+    "id": "tap-1795375277992-713hmj",
+    "cardUid": "INVALID-123",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Guest",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: Unregistered card scanned.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:21:17.989Z"
+  },
+  {
+    "id": "tap-1795375305338-nc3grm",
+    "cardUid": "TEST-MIF-101-4262",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:21:45.335Z"
+  },
+  {
+    "id": "tap-1795375305723-syf0vx",
+    "cardUid": "TEST-MIF-101-4262",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:21:45.718Z"
+  },
+  {
+    "id": "tap-1795375305830-ev3pq9",
+    "cardUid": "TEST-MIF-101-4262",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:21:45.825Z"
+  },
+  {
+    "id": "tap-1795375307672-um0j48",
+    "cardUid": "TEST-MIF-101-4262",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:21:47.669Z"
+  },
+  {
+    "id": "tap-1795375307979-mhbfj6",
+    "cardUid": "INVALID-CARD-99999",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Guest",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: Unregistered card scanned.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:21:47.976Z"
+  },
+  {
+    "id": "tap-1795375308311-bvpaom",
+    "cardUid": "TEST-MIF-101-4262",
+    "cardType": "GUEST",
+    "roomNumber": "205",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "WRONG_ROOM",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: This keycard belongs to Room 101, not Room 205.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-205",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:21:48.309Z"
+  },
+  {
+    "id": "tap-1795375308878-08qziy",
+    "cardUid": "SA-QA-MASTER-001",
+    "cardType": "MASTER",
+    "roomNumber": "308",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Sri Tayi Grand MD",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Super Admin Master Clearance: Door unlocked for Sri Tayi Grand MD.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-308",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:21:48.874Z"
+  },
+  {
+    "id": "tap-1795375310679-k1ce3o",
+    "cardUid": "CLN-QA-HOUSEKEEP-01",
+    "cardType": "STAFF",
+    "roomNumber": "108",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Ramesh (Housekeeping)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Cleaner started: Room 108 status moved to In-Progress. Door unlocked.",
+    "metadata": {
+      "roomStatus": "cleaning",
+      "housekeepingStatus": "in_progress",
+      "actionType": "cleaning_started",
+      "device": "Lock-Room-108",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:21:50.676Z"
+  },
+  {
+    "id": "tap-1795375311705-w3xnoa",
+    "cardUid": "CLN-QA-HOUSEKEEP-01",
+    "cardType": "STAFF",
+    "roomNumber": "108",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Ramesh (Housekeeping)",
+    "accessResult": "GRANTED",
+    "doorStatus": "LOCKED (CLEAN)",
+    "reason": "Cleaner finished: Room 108 is now Clean & Available for new guests.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "cleaning_completed",
+      "device": "Lock-Room-108",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:21:51.701Z"
+  },
+  {
+    "id": "tap-1795375329925-ej1uqt",
+    "cardUid": "BT-57-WLK-4988",
+    "cardType": "GUEST",
+    "roomNumber": "105",
+    "bookingId": "bk-walkin-1795375321175",
+    "customerId": "gst-1795375321175",
+    "customerName": "Antigravity QA Guest",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer Antigravity QA Guest tapped and unlocked Room 105.",
+    "metadata": {
+      "roomStatus": "occupied",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-105",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:22:09.921Z"
+  },
+  {
+    "id": "tap-1795375330523-sz21b4",
+    "cardUid": "BT-57-WLK-4988",
+    "cardType": "GUEST",
+    "roomNumber": "105",
+    "bookingId": "bk-walkin-1795375321175",
+    "customerId": "gst-1795375321175",
+    "customerName": "Antigravity QA Guest",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: Card is INACTIVE.",
+    "metadata": {
+      "roomStatus": "occupied",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-105",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:22:10.519Z"
+  },
+  {
+    "id": "tap-1795375330695-oa3iwf",
+    "cardUid": "BT-57-TRANS-9936",
+    "cardType": "GUEST",
+    "roomNumber": "107",
+    "bookingId": "bk-walkin-1795375321175",
+    "customerId": "gst-1795375321175",
+    "customerName": "Antigravity QA Guest",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer Antigravity QA Guest (Transferred) tapped and unlocked Room 107.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-107",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:22:10.691Z"
+  },
+  {
+    "id": "tap-1795375331127-9bpcvn",
+    "cardUid": "BT-57-TRANS-9936",
+    "cardType": "GUEST",
+    "roomNumber": "107",
+    "bookingId": "bk-walkin-1795375321175",
+    "customerId": "gst-1795375321175",
+    "customerName": "Antigravity QA Guest",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: Card is INACTIVE.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-107",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:22:11.124Z"
+  },
+  {
+    "id": "tap-1795375331503-teu8ys",
+    "cardUid": "SYNC-TEST-1133",
+    "cardType": "GUEST",
+    "roomNumber": "202",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Telemetry Guest",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer Telemetry Guest tapped and unlocked Room 202.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-202",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:22:11.498Z"
+  },
+  {
+    "id": "tap-1795375338634-g3pmpg",
+    "cardUid": "BT-57-1000020504",
+    "cardType": "GUEST",
+    "roomNumber": "105",
+    "bookingId": "bk-walkin-1795375321175",
+    "customerId": "gst-1795375321175",
+    "customerName": "Antigravity QA Guest",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "No RFID card detected on reader or encoder USB disconnected. Please ensure the Mifare keycard is placed flat on the reader.",
+    "metadata": {
+      "actionType": "door_unlock",
+      "device": "Lock-Room-105",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:22:14.000Z"
+  },
+  {
+    "id": "tap-1795375459060-27r6va",
+    "cardUid": "TEST-MIF-101-3637",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:24:19.053Z"
+  },
+  {
+    "id": "tap-1795375459478-dbar7r",
+    "cardUid": "TEST-MIF-101-3637",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:24:19.474Z"
+  },
+  {
+    "id": "tap-1795375459541-g235p0",
+    "cardUid": "TEST-MIF-101-3637",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:24:19.537Z"
+  },
+  {
+    "id": "tap-1795375461393-skfic5",
+    "cardUid": "TEST-MIF-101-3637",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:24:21.389Z"
+  },
+  {
+    "id": "tap-1795375461588-d359vi",
+    "cardUid": "INVALID-CARD-99999",
+    "cardType": "GUEST",
+    "roomNumber": "101",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Guest",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: Unregistered card scanned.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-101",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:24:21.583Z"
+  },
+  {
+    "id": "tap-1795375461803-yyz0dv",
+    "cardUid": "TEST-MIF-101-3637",
+    "cardType": "GUEST",
+    "roomNumber": "205",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "QA Test Guest (Sagar Audit)",
+    "accessResult": "WRONG_ROOM",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: This keycard belongs to Room 101, not Room 205.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-205",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:24:21.800Z"
+  },
+  {
+    "id": "tap-1795375462353-ggm6cd",
+    "cardUid": "SA-QA-MASTER-001",
+    "cardType": "MASTER",
+    "roomNumber": "308",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Sri Tayi Grand MD",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Super Admin Master Clearance: Door unlocked for Sri Tayi Grand MD.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-308",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:24:22.350Z"
+  },
+  {
+    "id": "tap-1795375465842-ot75qe",
+    "cardUid": "CLN-QA-HOUSEKEEP-01",
+    "cardType": "STAFF",
+    "roomNumber": "108",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Ramesh (Housekeeping)",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Cleaner started: Room 108 status moved to In-Progress. Door unlocked.",
+    "metadata": {
+      "roomStatus": "cleaning",
+      "housekeepingStatus": "in_progress",
+      "actionType": "cleaning_started",
+      "device": "Lock-Room-108",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:24:25.838Z"
+  },
+  {
+    "id": "tap-1795375466846-uto0xz",
+    "cardUid": "CLN-QA-HOUSEKEEP-01",
+    "cardType": "STAFF",
+    "roomNumber": "108",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Ramesh (Housekeeping)",
+    "accessResult": "GRANTED",
+    "doorStatus": "LOCKED (CLEAN)",
+    "reason": "Cleaner finished: Room 108 is now Clean & Available for new guests.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "cleaning_completed",
+      "device": "Lock-Room-108",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:24:26.839Z"
+  },
+  {
+    "id": "tap-1795375481822-79ku8a",
+    "cardUid": "BT-57-WLK-6438",
+    "cardType": "GUEST",
+    "roomNumber": "105",
+    "bookingId": "bk-walkin-1795375472432",
+    "customerId": "gst-1795375472432",
+    "customerName": "Antigravity QA Guest",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer Antigravity QA Guest tapped and unlocked Room 105.",
+    "metadata": {
+      "roomStatus": "occupied",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-105",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:24:41.819Z"
+  },
+  {
+    "id": "tap-1795375482429-inzhs9",
+    "cardUid": "BT-57-WLK-6438",
+    "cardType": "GUEST",
+    "roomNumber": "105",
+    "bookingId": "bk-walkin-1795375472432",
+    "customerId": "gst-1795375472432",
+    "customerName": "Antigravity QA Guest",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: Card is INACTIVE.",
+    "metadata": {
+      "roomStatus": "occupied",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-105",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:24:42.424Z"
+  },
+  {
+    "id": "tap-1795375482610-77amne",
+    "cardUid": "BT-57-TRANS-1834",
+    "cardType": "GUEST",
+    "roomNumber": "107",
+    "bookingId": "bk-walkin-1795375472432",
+    "customerId": "gst-1795375472432",
+    "customerName": "Antigravity QA Guest",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer Antigravity QA Guest (Transferred) tapped and unlocked Room 107.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-107",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:24:42.606Z"
+  },
+  {
+    "id": "tap-1795375482911-vgm0kv",
+    "cardUid": "BT-57-TRANS-1834",
+    "cardType": "GUEST",
+    "roomNumber": "107",
+    "bookingId": "bk-walkin-1795375472432",
+    "customerId": "gst-1795375472432",
+    "customerName": "Antigravity QA Guest",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "Access Denied: Card is INACTIVE.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "unauthorized_attempt",
+      "device": "Lock-Room-107",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:24:42.906Z"
+  },
+  {
+    "id": "tap-1795375483302-mpmesn",
+    "cardUid": "SYNC-TEST-2917",
+    "cardType": "GUEST",
+    "roomNumber": "202",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Telemetry Guest",
+    "accessResult": "GRANTED",
+    "doorStatus": "UNLOCKED",
+    "reason": "Customer Telemetry Guest tapped and unlocked Room 202.",
+    "metadata": {
+      "roomStatus": "available",
+      "housekeepingStatus": "clean",
+      "actionType": "door_unlock",
+      "device": "Lock-Room-202",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-22T19:24:43.297Z"
+  }
+]

@@ -61,9 +61,8 @@ export async function POST(request: Request) {
               booking.status = 'confirmed';
               booking.payment_status = 'successful';
               booking.payment_method = 'online';
-              booking.paid_amount = booking.total_amount;
 
-              repo.recordPayment({
+              await repo.recordPayment({
                 booking_reference: booking.booking_reference,
                 guest_name: booking.guest_name,
                 amount: booking.total_amount,
@@ -134,9 +133,8 @@ export async function POST(request: Request) {
             if (booking && booking.payment_status !== 'successful') {
               booking.status = 'confirmed';
               booking.payment_status = 'successful';
-              booking.paid_amount = amountRupees;
 
-              repo.recordPayment({
+              await repo.recordPayment({
                 booking_reference: booking.booking_reference,
                 guest_name: booking.guest_name,
                 amount: amountRupees,

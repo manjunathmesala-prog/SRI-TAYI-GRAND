@@ -77,13 +77,13 @@ export function Header({ transparentInitially = false }: HeaderProps) {
         </div>
 
         {/* Header content bar */}
-        <div className="relative z-10 w-full h-[78px] max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-10 flex items-center justify-between">
+        <div className="relative z-10 w-full h-[78px] max-w-[1440px] mx-auto px-2.5 xs:px-4 sm:px-8 lg:px-10 flex items-center justify-between">
           
           {/* Mobile hamburger menu button */}
           <div className="flex lg:hidden items-center">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-[#3a3126] hover:text-[#9b7a3e] hover:bg-black/5 transition-colors focus:outline-none"
+              className="p-1.5 xs:p-2 rounded-lg text-[#3a3126] hover:text-[#9b7a3e] hover:bg-black/5 transition-colors focus:outline-none min-h-[44px] min-w-[44px] flex items-center justify-center cursor-pointer"
               aria-label="Toggle navigation menu"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -120,7 +120,7 @@ export function Header({ transparentInitially = false }: HeaderProps) {
             aria-label="Sri Tayi Grand Hotel — Return to Home"
           >
             <div className="relative transition-transform duration-300 group-hover:scale-105 flex flex-col items-center justify-center">
-              <div className="relative w-8 h-8 sm:w-10 sm:h-10 mb-1">
+              <div className="relative w-7 h-7 xs:w-8 xs:h-8 sm:w-10 sm:h-10 mb-0.5 xs:mb-1">
                 <Image
                   src="/images/hotel/tayi-grand-logo.png"
                   alt="Sri Tayi Grand Official Emblem"
@@ -130,7 +130,7 @@ export function Header({ transparentInitially = false }: HeaderProps) {
                   sizes="(max-width: 640px) 32px, 40px"
                 />
               </div>
-              <span className="font-serif text-[10.5px] sm:text-[12px] font-bold tracking-[0.22em] text-[#2b241c] uppercase leading-none text-center whitespace-nowrap">
+              <span className="font-serif text-[9.5px] xs:text-[10.5px] sm:text-[12px] font-bold tracking-[0.15em] xs:tracking-[0.22em] text-[#2b241c] uppercase leading-none text-center whitespace-nowrap">
                 Sri Tayi Grand
               </span>
             </div>
@@ -174,7 +174,7 @@ export function Header({ transparentInitially = false }: HeaderProps) {
           <div className="flex lg:hidden items-center">
             <NextLink
               href="/rooms"
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-[3.5px] bg-[#9b7a3e] text-white font-serif text-[10.5px] tracking-wider uppercase font-semibold shadow-sm active:scale-95"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 xs:px-3.5 xs:py-1.5 rounded-[3.5px] bg-[#9b7a3e] text-white font-serif text-[10px] xs:text-[10.5px] tracking-wider uppercase font-semibold shadow-sm active:scale-95 min-h-[38px]"
             >
               <span>BOOK</span>
               <ArrowRight className="w-3 h-3" />

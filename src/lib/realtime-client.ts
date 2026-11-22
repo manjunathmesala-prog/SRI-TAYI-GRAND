@@ -284,6 +284,11 @@ export const cashbookClient = {
     cachedCashBalanceTimestamp = 0;
   },
 
+  setBalance(bal: number) {
+    cachedCashBalance = typeof bal === 'number' ? bal : 0;
+    cachedCashBalanceTimestamp = Date.now();
+  },
+
   async getBalance(force = false): Promise<number | null> {
     const now = Date.now();
     if (!force && cachedCashBalance !== null && (now - cachedCashBalanceTimestamp < 15000)) {

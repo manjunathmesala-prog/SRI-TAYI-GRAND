@@ -7,7 +7,7 @@
     "role": "Super Admin",
     "department": "Executive Management",
     "is_active": true,
-    "last_login": "2026-11-22T14:16:23.826Z",
+    "last_login": "2026-11-22T18:55:04.444Z",
     "permissions": {
       "can_override_rates": true,
       "can_process_refunds": true,
@@ -25,7 +25,7 @@
     "role": "Hotel Manager",
     "department": "Hotel Operations & Management",
     "is_active": true,
-    "last_login": "2026-11-22T14:16:23.826Z",
+    "last_login": "2026-11-22T18:55:04.444Z",
     "permissions": {
       "can_override_rates": true,
       "can_process_refunds": true,
@@ -43,7 +43,7 @@
     "role": "Hotel Manager",
     "department": "Hotel Operations & Management",
     "is_active": true,
-    "last_login": "2026-11-22T14:16:23.826Z",
+    "last_login": "2026-11-22T18:55:04.445Z",
     "permissions": {
       "can_override_rates": true,
       "can_process_refunds": true,

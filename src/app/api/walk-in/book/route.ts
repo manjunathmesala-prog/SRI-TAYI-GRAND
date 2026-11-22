@@ -29,6 +29,8 @@ export async function POST(request: Request) {
       kiosk_token,
       categoryId,
       category_id,
+      roomTypeId,
+      room_type_id,
       guestName,
       guest_name,
       guestPhone,
@@ -64,15 +66,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const name = (guestName || guest_name || '').trim();
-    const phone = (guestPhone || guest_phone || '').trim();
-    const catId = categoryId || category_id;
+    const name = (guestName || guest_name || (body as any).name || '').trim();
+    const phone = (guestPhone || guest_phone || (body as any).phone || '').trim();
+    const catId = categoryId || category_id || roomTypeId || room_type_id || (body as any).category;
 
     if (!name || !phone || !catId) {
       return NextResponse.json(
         {
           success: false,
-          error: 'Missing required booking fields: guest name, phone number, and room category are required.',
+          error: 'Missing required booking fields: guest name, phone number, and room category (categoryId or room_type_id) are required.',
         },
         { status: 400 }
       );

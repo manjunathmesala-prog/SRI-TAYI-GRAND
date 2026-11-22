@@ -87,12 +87,12 @@ export default function HomePage() {
           </div>
 
           {/* Highlighted Title: SRI TAYI GRAND with Premium Serif Font */}
-          <h1 className="font-serif text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-normal text-white uppercase tracking-[0.08em] sm:tracking-[0.14em] leading-none drop-shadow-[0_4px_30px_rgba(0,0,0,0.7)] select-none whitespace-nowrap">
+          <h1 className="font-serif text-2xl xs:text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-normal text-white uppercase tracking-[0.06em] xs:tracking-[0.08em] sm:tracking-[0.14em] leading-tight sm:leading-none drop-shadow-[0_4px_30px_rgba(0,0,0,0.7)] select-none whitespace-normal sm:whitespace-nowrap">
             Sri Tayi Grand
           </h1>
 
           {/* Subtitle: A UNIT OF SRI TAYI GROUP */}
-          <p className="mt-2.5 sm:mt-3.5 text-xs sm:text-sm md:text-base text-[#F2E8D8]/90 font-serif uppercase tracking-[0.18em] sm:tracking-[0.24em] drop-shadow-md">
+          <p className="mt-2 sm:mt-3.5 text-[11px] xs:text-xs sm:text-sm md:text-base text-[#F2E8D8]/90 font-serif uppercase tracking-[0.14em] sm:tracking-[0.24em] drop-shadow-md">
             A UNIT OF SRI TAYI GROUP
           </p>
         </div>

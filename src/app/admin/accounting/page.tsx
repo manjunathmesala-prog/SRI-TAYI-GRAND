@@ -402,7 +402,7 @@ export default function AdminAccountingPage() {
       </div>
 
       {/* Tab Navigation Pill Bar */}
-      <div className="inline-flex p-1 bg-[#FAF8F5] rounded-xl border border-[#E6D9C5]/80 overflow-x-auto no-scrollbar">
+      <div className="inline-flex p-1 bg-[#FAF8F5] rounded-xl border border-[#E6D9C5]/80 overflow-x-auto no-scrollbar max-w-full w-full sm:w-auto">
         <button
           onClick={() => setActiveTab('chart')}
           className={`px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer flex items-center gap-2 ${

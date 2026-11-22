@@ -1110,10 +1110,10 @@ export default function RFIDAdminPage() {
       )}
 
       {/* Main Navigation Tabs */}
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1 max-w-full">
         <button
           onClick={() => setActiveTab('roles')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap ${
             activeTab === 'roles'
               ? 'bg-[#382216] text-[#D8AD56] shadow-sm ring-1 ring-[#D8AD56]/50'
               : 'bg-white text-[#786B61] hover:text-[#241912] border border-[#EFE3D6]'
@@ -1128,7 +1128,7 @@ export default function RFIDAdminPage() {
 
         <button
           onClick={() => setActiveTab('hardware')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap ${
             activeTab === 'hardware'
               ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
               : 'bg-white text-[#786B61] hover:text-[#241912] border border-[#EFE3D6]'
@@ -1140,7 +1140,7 @@ export default function RFIDAdminPage() {
 
         <button
           onClick={() => setActiveTab('cards')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap ${
             activeTab === 'cards'
               ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
               : 'bg-white text-[#786B61] hover:text-[#241912] border border-[#EFE3D6]'
@@ -1152,7 +1152,7 @@ export default function RFIDAdminPage() {
 
         <button
           onClick={() => setActiveTab('devices')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap ${
             activeTab === 'devices'
               ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
               : 'bg-white text-[#786B61] hover:text-[#241912] border border-[#EFE3D6]'
@@ -1167,7 +1167,7 @@ export default function RFIDAdminPage() {
 
         <button
           onClick={() => setActiveTab('logs')}
-          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer ${
+          className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-1.5 cursor-pointer shrink-0 whitespace-nowrap ${
             activeTab === 'logs'
               ? 'bg-[#382216] text-[#D8AD56] shadow-sm'
               : 'bg-white text-[#786B61] hover:text-[#241912] border border-[#EFE3D6]'
@@ -2339,7 +2339,87 @@ export default function RFIDAdminPage() {
 
           {/* Access Logs Table */}
           <div className="bg-white rounded-2xl border border-[#D8AD56]/30 shadow-luxury overflow-hidden">
-            <div className="overflow-x-auto">
+            {/* Mobile Access Logs Card View */}
+            <div className="md:hidden space-y-2.5 p-3">
+              {paginatedEvents.length === 0 ? (
+                <div className="py-8 text-center text-xs text-[#786B61]">
+                  No tap events match the selected filters.
+                </div>
+              ) : (
+                paginatedEvents.map((evt) => (
+                  <div
+                    key={evt.id}
+                    className="p-3.5 rounded-xl border border-[#EFE3D6] bg-white shadow-2xs space-y-2"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="font-bold text-sm text-[#382216]">Room {evt.room_number}</span>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 ${
+                          evt.event_type === 'access_granted'
+                            ? 'bg-[#E8F5E9] text-[#2E7D32]'
+                            : 'bg-rose-100 text-rose-800'
+                        }`}
+                      >
+                        {evt.event_type === 'access_granted' ? (
+                          <CheckCircle2 className="w-3 h-3" />
+                        ) : (
+                          <XCircle className="w-3 h-3" />
+                        )}
+                        <span>
+                          {evt.action_type
+                            ? evt.action_type.replace('_', ' ')
+                            : evt.event_type.replace('_', ' ')}
+                        </span>
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-1.5 text-[11px]">
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase inline-flex items-center gap-1 ${
+                          evt.card_type === 'super_admin'
+                            ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                            : evt.card_type === 'cleaner'
+                            ? 'bg-cyan-100 text-cyan-900 border border-cyan-300'
+                            : 'bg-emerald-100 text-emerald-900 border border-emerald-300'
+                        }`}
+                      >
+                        {evt.card_type === 'super_admin' ? (
+                          <Crown className="w-3 h-3 text-amber-700" />
+                        ) : evt.card_type === 'cleaner' ? (
+                          <Sparkles className="w-3 h-3 text-cyan-700" />
+                        ) : (
+                          <KeyRound className="w-3 h-3 text-emerald-700" />
+                        )}
+                        <span>{evt.card_type ? evt.card_type.replace('_', ' ') : 'guest'}</span>
+                      </span>
+                      <span className="font-mono text-[10px] text-[#786B61]">{evt.card_uid || 'N/A'}</span>
+                    </div>
+
+                    <div className="text-xs text-[#241912] font-medium">
+                      {evt.holder_name || 'Staff / Guest'}
+                      {evt.booking_reference && (
+                        <span className="text-[10px] text-[#786B61] font-mono ml-1.5">
+                          ({evt.booking_reference})
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center justify-between text-[10px] text-[#786B61] pt-1.5 border-t border-[#EFE3D6]/60">
+                      <span>{evt.device_name} &bull; {evt.reason || 'Verified tap'}</span>
+                      <span className="font-mono">
+                        {new Date(evt.occurred_at).toLocaleTimeString('en-IN', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-[#FAF7F2] text-[#786B61] uppercase tracking-wider text-[10px] border-b border-[#EFE3D6]">
                   <tr>

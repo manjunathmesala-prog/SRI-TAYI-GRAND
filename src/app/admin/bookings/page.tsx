@@ -71,6 +71,8 @@ export default function BookingsAdminPage() {
   // Full Folio / Details inspection modal
   const [selectedRes, setSelectedRes] = useState<Booking | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
+  const [resPayments, setResPayments] = useState<any[]>([]);
+  const [loadingResPayments, setLoadingResPayments] = useState(false);
 
   // Add / Assign Room modal
   const [assignRoomTarget, setAssignRoomTarget] = useState<Booking | null>(null);
@@ -178,6 +180,30 @@ export default function BookingsAdminPage() {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Fetch real-time authoritative payment records for selected reservation
+  useEffect(() => {
+    if (!selectedRes?.booking_reference) {
+      setResPayments([]);
+      return;
+    }
+    let isMounted = true;
+    setLoadingResPayments(true);
+    fetch(`/api/admin/payments?bookingReference=${encodeURIComponent(selectedRes.booking_reference)}`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (isMounted && data.success && Array.isArray(data.payments)) {
+          setResPayments(data.payments);
+        }
+      })
+      .catch((err) => console.warn('Failed to load reservation payments:', err))
+      .finally(() => {
+        if (isMounted) setLoadingResPayments(false);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedRes?.booking_reference]);
 
   // Filter reservations by source, search term, and status
   const displayedReservations = useMemo(() => {
@@ -2333,107 +2359,150 @@ export default function BookingsAdminPage() {
               </button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs">
-              <div><span className="text-[#786A5B]">Guest Name:</span> <span className="font-semibold text-[#33271D]">{selectedRes.guest_name}</span></div>
-              <div><span className="text-[#786A5B]">Contact Phone:</span> <span className="font-semibold text-[#33271D]">{selectedRes.guest_phone}</span></div>
-              <div><span className="text-[#786A5B]">Email:</span> <span className="font-semibold text-[#33271D]">{selectedRes.guest_email || 'Not specified'}</span></div>
-              <div><span className="text-[#786A5B]">Rooms & Category:</span> <span className="font-semibold text-[#33271D]">{selectedRes.rooms_count || 1} room(s) &bull; {selectedRes.category_name}</span></div>
-              <div><span className="text-[#786A5B]">Check-in Date:</span> <span className="font-semibold text-[#33271D]">{selectedRes.check_in_date}</span></div>
-              <div><span className="text-[#786A5B]">Check-out Date:</span> <span className="font-semibold text-[#33271D]">{selectedRes.check_out_date}</span></div>
-              <div><span className="text-[#786A5B]">Reservation Status:</span> <span className="font-bold uppercase text-[#8D672F]">{selectedRes.status}</span></div>
-              <div><span className="text-[#786A5B]">Payment Status:</span> <span className="font-bold uppercase text-[#8D672F]">{selectedRes.payment_status}</span></div>
+            {(() => {
+              const actualRoomsCount =
+                selectedRes.booking_rooms && selectedRes.booking_rooms.length > 0
+                  ? selectedRes.booking_rooms.length
+                  : selectedRes.assigned_room_numbers && selectedRes.assigned_room_numbers.length > 0
+                  ? selectedRes.assigned_room_numbers.length
+                  : Number(selectedRes.rooms_count) || 1;
 
-              {/* Linked Rooms Breakdown for Multi-Room Bookings */}
-              {((selectedRes.booking_rooms && selectedRes.booking_rooms.length > 0) ||
-                (selectedRes.assigned_room_numbers && selectedRes.assigned_room_numbers.length > 1)) && (
-                <div className="col-span-2 p-3 rounded-2xl bg-[#FAF6EE] border border-[#E6D9C5] space-y-2">
-                  <div className="flex items-center justify-between text-xs font-bold text-[#33271D]">
-                    <span className="flex items-center gap-1.5">
-                      <BedDouble className="w-4 h-4 text-[#8D672F]" />
-                      <span>Linked Rooms in this Reservation ({selectedRes.booking_rooms?.length || selectedRes.assigned_room_numbers?.length || selectedRes.rooms_count} Rooms)</span>
-                    </span>
-                    <span className="text-[10px] bg-[#8D672F]/10 text-[#8D672F] px-2 py-0.5 rounded-full font-bold">
-                      Multi-Room Party
-                    </span>
-                  </div>
-                  {selectedRes.booking_rooms && selectedRes.booking_rooms.length > 0 ? (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                      {selectedRes.booking_rooms.map((rm, idx) => {
-                        const canRemove =
-                          (selectedRes.booking_rooms?.length || 0) > 1 &&
-                          rm.status !== 'checked_out' &&
-                          selectedRes.status !== 'checked_out' &&
-                          selectedRes.status !== 'cancelled';
-                        return (
-                          <div key={idx} className="p-2.5 bg-white rounded-xl border border-[#E6D9C5] flex items-center justify-between gap-2 shadow-2xs">
-                            <div>
-                              <div className="flex items-center gap-1.5">
-                                <span className="font-bold text-[#33271D]">Room #{rm.room_number}</span>
-                                <span
-                                  className={`text-[9px] px-1.5 py-0.2 rounded-md font-semibold ${
-                                    rm.status === 'checked_in'
-                                      ? 'bg-emerald-100 text-emerald-800'
-                                      : rm.status === 'checked_out'
-                                      ? 'bg-slate-100 text-slate-700'
-                                      : 'bg-blue-100 text-blue-800'
-                                  }`}
-                                >
-                                  {rm.status === 'checked_in' ? 'In-House' : rm.status === 'checked_out' ? 'Checked Out' : 'Confirmed'}
-                                </span>
-                              </div>
-                              <div className="text-[10px] text-[#786A5B] mt-0.5">{rm.category_name || selectedRes.category_name}</div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <div className="text-right">
-                                <div className="font-semibold text-[#8D672F]">₹{rm.price_per_night?.toLocaleString('en-IN')}<span className="text-[9px] text-[#786A5B]">/nt</span></div>
-                              </div>
-                              {canRemove && rm.room_number && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleRemoveRoomFromBooking(rm.room_number!)}
-                                  disabled={actionLoading}
-                                  className="p-1 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
-                                  title={`Remove Room #${rm.room_number} from this booking`}
-                                >
-                                  <Trash2 className="w-3.5 h-3.5" />
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap gap-2 text-xs">
-                      {selectedRes.assigned_room_numbers?.map((rNum) => (
-                        <span key={rNum} className="px-2.5 py-1 bg-white rounded-lg border border-[#E6D9C5] font-bold text-[#33271D]">
-                          Room #{rNum}
+              return (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs">
+                  <div><span className="text-[#786A5B]">Guest Name:</span> <span className="font-semibold text-[#33271D]">{selectedRes.guest_name}</span></div>
+                  <div><span className="text-[#786A5B]">Contact Phone:</span> <span className="font-semibold text-[#33271D]">{selectedRes.guest_phone}</span></div>
+                  <div><span className="text-[#786A5B]">Email:</span> <span className="font-semibold text-[#33271D]">{selectedRes.guest_email || 'Not specified'}</span></div>
+                  <div><span className="text-[#786A5B]">Rooms & Category:</span> <span className="font-semibold text-[#33271D]">{actualRoomsCount} room(s) &bull; {selectedRes.category_name}</span></div>
+                  <div><span className="text-[#786A5B]">Check-in Date:</span> <span className="font-semibold text-[#33271D]">{selectedRes.check_in_date}</span></div>
+                  <div><span className="text-[#786A5B]">Check-out Date:</span> <span className="font-semibold text-[#33271D]">{selectedRes.check_out_date}</span></div>
+                  <div><span className="text-[#786A5B]">Reservation Status:</span> <span className="font-bold uppercase text-[#8D672F]">{selectedRes.status}</span></div>
+                  <div><span className="text-[#786A5B]">Payment Status:</span> <span className="font-bold uppercase text-[#8D672F]">{selectedRes.payment_status}</span></div>
+
+                  {/* Room Allocation Breakdown */}
+                  {((selectedRes.booking_rooms && selectedRes.booking_rooms.length > 0) ||
+                    (selectedRes.assigned_room_numbers && selectedRes.assigned_room_numbers.length > 0) ||
+                    selectedRes.assigned_room_number) && (
+                    <div className="col-span-2 p-3 rounded-2xl bg-[#FAF6EE] border border-[#E6D9C5] space-y-2">
+                      <div className="flex items-center justify-between text-xs font-bold text-[#33271D]">
+                        <span className="flex items-center gap-1.5">
+                          <BedDouble className="w-4 h-4 text-[#8D672F]" />
+                          <span>
+                            {actualRoomsCount > 1
+                              ? `Linked Rooms in this Reservation (${actualRoomsCount} Rooms)`
+                              : 'Assigned Room Allocation'}
+                          </span>
                         </span>
-                      ))}
+                        {actualRoomsCount > 1 ? (
+                          <span className="text-[10px] bg-[#8D672F]/10 text-[#8D672F] px-2 py-0.5 rounded-full font-bold">
+                            Multi-Room Party
+                          </span>
+                        ) : (
+                          <span className="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">
+                            Single Room
+                          </span>
+                        )}
+                      </div>
+                      {selectedRes.booking_rooms && selectedRes.booking_rooms.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                          {selectedRes.booking_rooms.map((rm, idx) => {
+                            const roomNum =
+                              rm.room_number ||
+                              selectedRes.assigned_room_number ||
+                              selectedRes.assigned_room_numbers?.[idx] ||
+                              'Pending Assignment';
+                            const canRemove =
+                              actualRoomsCount > 1 &&
+                              rm.status !== 'checked_out' &&
+                              selectedRes.status !== 'checked_out' &&
+                              selectedRes.status !== 'cancelled';
+                            return (
+                              <div key={idx} className="p-2.5 bg-white rounded-xl border border-[#E6D9C5] flex items-center justify-between gap-2 shadow-2xs">
+                                <div>
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-bold text-[#33271D]">
+                                      {roomNum.startsWith('Pending') ? roomNum : `Room #${roomNum}`}
+                                    </span>
+                                    <span
+                                      className={`text-[9px] px-1.5 py-0.2 rounded-md font-semibold ${
+                                        rm.status === 'checked_in'
+                                          ? 'bg-emerald-100 text-emerald-800'
+                                          : rm.status === 'checked_out'
+                                          ? 'bg-slate-100 text-slate-700'
+                                          : 'bg-blue-100 text-blue-800'
+                                      }`}
+                                    >
+                                      {rm.status === 'checked_in' ? 'In-House' : rm.status === 'checked_out' ? 'Checked Out' : 'Confirmed'}
+                                    </span>
+                                  </div>
+                                  <div className="text-[10px] text-[#786A5B] mt-0.5">{rm.category_name || selectedRes.category_name}</div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <div className="text-right">
+                                    <div className="font-semibold text-[#8D672F]">
+                                      ₹{(Number(rm.price_per_night) || Math.round(Number(selectedRes.subtotal_amount || 0) / actualRoomsCount)).toLocaleString('en-IN')}
+                                      <span className="text-[9px] text-[#786A5B]">/nt</span>
+                                    </div>
+                                  </div>
+                                  {canRemove && rm.room_number && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveRoomFromBooking(rm.room_number!)}
+                                      disabled={actionLoading}
+                                      className="p-1 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
+                                      title={`Remove Room #${rm.room_number} from this booking`}
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap gap-2 text-xs">
+                          {(selectedRes.assigned_room_numbers && selectedRes.assigned_room_numbers.length > 0
+                            ? selectedRes.assigned_room_numbers
+                            : selectedRes.assigned_room_number
+                            ? [selectedRes.assigned_room_number]
+                            : []
+                          ).map((rNum) => (
+                            <span key={rNum} className="px-2.5 py-1 bg-white rounded-lg border border-[#E6D9C5] font-bold text-[#33271D]">
+                              Room #{rNum}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   )}
-                </div>
-              )}
 
-              {/* HIGHLIGHTED STATUTORY GOVERNMENT ID PROOF CARD */}
-              <div className="col-span-2 p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-300 space-y-2 shadow-xs">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-extrabold text-amber-950 flex items-center gap-1.5 uppercase tracking-wider">
-                    <ShieldCheck className="w-4 h-4 text-amber-700" />
-                    <span>Statutory Government ID Proof ({selectedRes.id_proof_type?.replace(/_/g, ' ').toUpperCase() || 'GOVT ID'})</span>
-                  </span>
-                  <span className="text-[10px] bg-amber-200 text-amber-900 font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
-                    Reception Physical Verification Required
-                  </span>
+                  {/* HIGHLIGHTED STATUTORY GOVERNMENT ID PROOF CARD */}
+                  <div className="col-span-2 p-3.5 rounded-2xl bg-amber-50 border-2 border-amber-300 space-y-2 shadow-xs">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-extrabold text-amber-950 flex items-center gap-1.5 uppercase tracking-wider">
+                        <ShieldCheck className="w-4 h-4 text-amber-700" />
+                        <span>Statutory Government ID Proof ({selectedRes.id_proof_type?.replace(/_/g, ' ').toUpperCase() || 'GOVT ID'})</span>
+                      </span>
+                      <span className="text-[10px] bg-amber-200 text-amber-900 font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+                        Reception Physical Verification Required
+                      </span>
+                    </div>
+                    <div className="font-mono font-black text-sm text-[#21180F] tracking-widest bg-white p-2.5 rounded-xl border border-amber-300 flex items-center justify-between">
+                      <span>
+                        {selectedRes.id_proof_number
+                          ? (selectedRes.id_proof_type?.toLowerCase().includes('aadhaar') && selectedRes.id_proof_number.length >= 8
+                              ? `XXXX-XXXX-${selectedRes.id_proof_number.slice(-4)}`
+                              : selectedRes.id_proof_number)
+                          : 'NO ID SUBMITTED'}
+                      </span>
+                      <span className="text-[10px] font-sans font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
+                        Cross-verify with physical original card
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="font-mono font-black text-sm text-[#21180F] tracking-widest bg-white p-2.5 rounded-xl border border-amber-300 flex items-center justify-between">
-                  <span>{selectedRes.id_proof_number || 'NO ID SUBMITTED'}</span>
-                  <span className="text-[10px] font-sans font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded">
-                    Cross-verify with physical original card
-                  </span>
-                </div>
-              </div>
-            </div>
+              );
+            })()}
 
             {/* Financial breakdown */}
             <div className="p-4 rounded-xl bg-[#F8F3E9]/50 border border-[#E6D9C5] space-y-1.5 text-xs">
@@ -2510,7 +2579,7 @@ export default function BookingsAdminPage() {
               <div className="flex items-center justify-between pb-2 border-b border-[#E6D9C5]">
                 <span className="font-bold text-[#33271D] uppercase tracking-wider text-[11px] flex items-center space-x-1.5">
                   <CreditCard className="w-3.5 h-3.5 text-[#8D672F]" />
-                  <span>Razorpay Payment System & Gateway Audit</span>
+                  <span>Authoritative Payment Ledger & Gateway Audit</span>
                 </span>
                 <Link
                   href={`/admin/payments?search=${selectedRes.booking_reference}`}
@@ -2519,6 +2588,42 @@ export default function BookingsAdminPage() {
                   <span>View in Financial Ledger &rarr;</span>
                 </Link>
               </div>
+
+              {/* Verified Authoritative Transactions List */}
+              {loadingResPayments ? (
+                <div className="py-2 text-center text-xs text-[#786A5B]">Verifying payment transactions...</div>
+              ) : resPayments.length > 0 ? (
+                <div className="space-y-2">
+                  {resPayments.map((p: any, idx: number) => (
+                    <div key={p.id || idx} className="p-2.5 rounded-xl bg-[#FAF6EE] border border-[#E6D9C5] flex items-center justify-between gap-3 text-xs">
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-mono font-bold text-[#33271D]">{p.payment_reference}</span>
+                          <span className={`text-[9px] px-1.5 py-0.5 rounded font-bold uppercase ${
+                            p.status === 'successful' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                          }`}>
+                            {p.status || 'SUCCESSFUL'}
+                          </span>
+                        </div>
+                        <div className="text-[10px] text-[#786A5B] mt-0.5 flex items-center gap-2">
+                          <span>Method: <strong className="uppercase text-[#33271D]">{p.payment_method || 'Online'}</strong></span>
+                          {p.gateway_payment_id && <span>&bull; Gateway ID: <strong className="font-mono text-[#33271D]">{p.gateway_payment_id}</strong></span>}
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-bold text-emerald-700 text-sm">₹{Number(p.amount).toLocaleString('en-IN')}</div>
+                        <div className="text-[9px] text-[#786A5B]">
+                          {p.paid_at || p.created_at ? new Date(p.paid_at || p.created_at).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' }) : ''}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-2.5 rounded-xl bg-gray-50 border border-gray-200 text-gray-500 text-center text-[11px]">
+                  No payment transactions recorded for this reservation.
+                </div>
+              )}
 
               {/* Digital Payment Link Button or Display */}
               {Math.max(0, selectedRes.total_amount - selectedRes.paid_amount) > 0 && selectedRes.status !== 'cancelled' && (

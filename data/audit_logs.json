@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "id": "ccc946da-4e59-4a31-afad-ad6a6b9f153e",
+    "timestamp": "2026-11-22T18:38:46.311Z",
+    "userId": "admin-user",
+    "userName": "Admin",
+    "userRole": "admin",
+    "action": "DELETE_BOOKING",
+    "entityType": "booking",
+    "entityId": "STG-20261122-4216",
+    "details": "",
+    "ipAddress": "127.0.0.1"
+  }
+]

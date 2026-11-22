@@ -8,6 +8,9 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      screens: {
+        xs: '375px',
+      },
       colors: {
         anantha: {
           ivory: '#F8F3E9',

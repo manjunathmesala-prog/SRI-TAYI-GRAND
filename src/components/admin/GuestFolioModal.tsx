@@ -212,9 +212,14 @@ export function GuestFolioModal({
       });
 
       if (res.success) {
-        booking.paid_amount = (booking.paid_amount || 0) + Number(paymentAmount);
-        if (booking.paid_amount >= totalFolioBill) {
-          booking.payment_status = 'successful';
+        if (res.booking) {
+          booking.paid_amount = res.booking.paid_amount;
+          booking.payment_status = res.booking.payment_status;
+        } else {
+          booking.paid_amount = (booking.paid_amount || 0) + Number(paymentAmount);
+          if (booking.paid_amount >= totalFolioBill) {
+            booking.payment_status = 'successful';
+          }
         }
         setSuccessMsg(`Payment of ₹${paymentAmount.toLocaleString('en-IN')} recorded via ${paymentMethod.toUpperCase()}.`);
         setShowPaymentForm(false);

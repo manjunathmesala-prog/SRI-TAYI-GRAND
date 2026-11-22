@@ -310,10 +310,27 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
           if (rmRes.rows.length > 0) roomUuid = rmRes.rows[0].id;
         }
 
-        const pricePerNight = Number(booking.subtotal_amount || booking.total_amount || 1800);
+        const totalRooms = Math.max(1, Number(booking.rooms_count) || (booking.booking_rooms ? booking.booking_rooms.length : 1));
+        const nights = Math.max(
+          1,
+          Math.round(
+            (new Date(booking.check_out_date).getTime() - new Date(booking.check_in_date).getTime()) /
+              (1000 * 60 * 60 * 24)
+          ) || 1
+        );
+        const derivedPricePerNight = Math.round(Number(booking.subtotal_amount || booking.total_amount || 1800) / (totalRooms * nights));
+
+        // Authoritative booking_rooms synchronization without ghost duplicates
+        const existingBrRes = await client.query(
+          `SELECT id, room_number, assigned_room_id FROM booking_rooms WHERE booking_id = $1 ORDER BY created_at ASC;`,
+          [bookingUuid]
+        );
+        const existingRows = existingBrRes.rows;
+
         if (Array.isArray(booking.booking_rooms) && booking.booking_rooms.length > 0) {
-          const syncedRoomNumbers: string[] = [];
-          for (const brItem of booking.booking_rooms) {
+          const syncedIds: string[] = [];
+          for (let i = 0; i < booking.booking_rooms.length; i++) {
+            const brItem = booking.booking_rooms[i];
             let itemRoomUuid: string | null = null;
             let itemRoomNumber = brItem.room_number || '';
             if (brItem.room_number || brItem.room_id) {
@@ -325,8 +342,10 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
                 itemRoomUuid = rRes.rows[0].id;
                 itemRoomNumber = rRes.rows[0].room_number;
               }
+            } else if (booking.assigned_room_number && booking.rooms_count === 1) {
+              itemRoomUuid = roomUuid;
+              itemRoomNumber = booking.assigned_room_number;
             }
-            if (itemRoomNumber) syncedRoomNumbers.push(itemRoomNumber);
 
             let itemCatUuid = catUuid;
             if (brItem.category_id || brItem.category_name) {
@@ -336,65 +355,54 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
               );
               if (cRes.rows.length > 0) itemCatUuid = cRes.rows[0].id;
             }
-            const itemPrice = Number(brItem.price_per_night || pricePerNight);
+            const itemPrice = Number(brItem.price_per_night || derivedPricePerNight);
             const itemStatus = brItem.status || (booking.status === 'checked_in' ? 'checked_in' : (booking.status === 'checked_out' ? 'checked_out' : 'confirmed'));
             const itemCheckedIn = brItem.checked_in_at || (itemStatus === 'checked_in' ? (booking.checked_in_at || new Date().toISOString()) : null);
             const itemCheckedOut = brItem.checked_out_at || (itemStatus === 'checked_out' ? (booking.checked_out_at || new Date().toISOString()) : null);
             const itemGuestName = brItem.assigned_guest_name || guestName;
             const itemKeycardUid = brItem.keycard_uid || (booking.assigned_room_number === itemRoomNumber ? booking.keycard_uid : null);
 
-            let existingItemRes;
-            if (itemRoomUuid || itemRoomNumber) {
-              existingItemRes = await client.query(
-                `SELECT id FROM booking_rooms WHERE booking_id = $1 AND (assigned_room_id = $2 OR room_number = $3) LIMIT 1;`,
-                [bookingUuid, itemRoomUuid, itemRoomNumber]
-              );
-            }
-            if (!existingItemRes || existingItemRes.rows.length === 0) {
+            if (i < existingRows.length) {
+              const rowId = existingRows[i].id;
+              syncedIds.push(rowId);
               await client.query(
+                `UPDATE booking_rooms 
+                 SET category_id = COALESCE($1, category_id),
+                     assigned_room_id = $2,
+                     price_per_night = $3,
+                     room_number = $4,
+                     status = $5,
+                     checked_in_at = $6,
+                     checked_out_at = $7,
+                     assigned_guest_name = $8,
+                     keycard_uid = $9
+                 WHERE id = $10;`,
+                [itemCatUuid, itemRoomUuid, itemPrice, itemRoomNumber, itemStatus, itemCheckedIn, itemCheckedOut, itemGuestName, itemKeycardUid, rowId]
+              );
+            } else {
+              const insRes = await client.query(
                 `INSERT INTO booking_rooms (
                    booking_id, category_id, assigned_room_id, price_per_night,
                    room_number, status, checked_in_at, checked_out_at, assigned_guest_name, keycard_uid, created_at
                  )
-                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW());`,
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())
+                 RETURNING id;`,
                 [bookingUuid, itemCatUuid, itemRoomUuid, itemPrice, itemRoomNumber, itemStatus, itemCheckedIn, itemCheckedOut, itemGuestName, itemKeycardUid]
               );
-            } else {
-              await client.query(
-                `UPDATE booking_rooms 
-                 SET category_id = COALESCE($1, category_id),
-                     assigned_room_id = COALESCE($2, assigned_room_id),
-                     price_per_night = COALESCE($3, price_per_night),
-                     room_number = COALESCE($4, room_number),
-                     status = COALESCE($5, status),
-                     checked_in_at = COALESCE($6, checked_in_at),
-                     checked_out_at = COALESCE($7, checked_out_at),
-                     assigned_guest_name = COALESCE($8, assigned_guest_name),
-                     keycard_uid = COALESCE($9, keycard_uid)
-                 WHERE id = $10;`,
-                [itemCatUuid, itemRoomUuid, itemPrice, itemRoomNumber, itemStatus, itemCheckedIn, itemCheckedOut, itemGuestName, itemKeycardUid, existingItemRes.rows[0].id]
-              );
+              if (insRes.rows.length > 0) syncedIds.push(insRes.rows[0].id);
             }
           }
 
-          // Clean up removed rooms if any
-          if (syncedRoomNumbers.length > 0) {
+          // Delete ghost/duplicate rows beyond valid allocations
+          if (syncedIds.length > 0) {
             await client.query(
-              `DELETE FROM booking_rooms 
-               WHERE booking_id = $1 
-                 AND room_number IS NOT NULL 
-                 AND room_number != '' 
-                 AND NOT (room_number = ANY($2));`,
-              [bookingUuid, syncedRoomNumbers]
+              `DELETE FROM booking_rooms WHERE booking_id = $1 AND NOT (id = ANY($2::uuid[]));`,
+              [bookingUuid, syncedIds]
             );
           }
         } else {
-          const brCheck = await client.query(
-            `SELECT id FROM booking_rooms WHERE booking_id = $1 LIMIT 1;`,
-            [bookingUuid]
-          );
           const roomStatus = booking.status === 'checked_in' ? 'checked_in' : (booking.status === 'checked_out' ? 'checked_out' : 'confirmed');
-          if (brCheck.rows.length === 0 && catUuid) {
+          if (existingRows.length === 0 && catUuid) {
             await client.query(
               `INSERT INTO booking_rooms (
                  booking_id, category_id, assigned_room_id, price_per_night,
@@ -405,7 +413,7 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
                 bookingUuid,
                 catUuid,
                 roomUuid,
-                pricePerNight,
+                derivedPricePerNight,
                 booking.assigned_room_number || null,
                 roomStatus,
                 booking.checked_in_at || null,
@@ -414,32 +422,39 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
                 booking.keycard_uid || null,
               ]
             );
-          } else if (brCheck.rows.length > 0) {
+          } else if (existingRows.length > 0) {
             await client.query(
               `UPDATE booking_rooms 
-               SET assigned_room_id = COALESCE($1, assigned_room_id),
+               SET assigned_room_id = $1,
                    category_id = COALESCE($2, category_id),
-                   price_per_night = COALESCE($3, price_per_night),
-                   room_number = COALESCE($4, room_number),
-                   status = COALESCE($5, status),
-                   checked_in_at = COALESCE($6, checked_in_at),
-                   checked_out_at = COALESCE($7, checked_out_at),
-                   assigned_guest_name = COALESCE($8, assigned_guest_name),
-                   keycard_uid = COALESCE($9, keycard_uid)
+                   price_per_night = $3,
+                   room_number = $4,
+                   status = $5,
+                   checked_in_at = $6,
+                   checked_out_at = $7,
+                   assigned_guest_name = $8,
+                   keycard_uid = $9
                WHERE id = $10;`,
               [
                 roomUuid,
                 catUuid,
-                pricePerNight,
+                derivedPricePerNight,
                 booking.assigned_room_number || null,
                 roomStatus,
                 booking.checked_in_at || null,
                 booking.checked_out_at || null,
                 guestName,
                 booking.keycard_uid || null,
-                brCheck.rows[0].id,
+                existingRows[0].id,
               ]
             );
+            // Prune duplicate ghost allocations if any
+            if (existingRows.length > 1) {
+              await client.query(
+                `DELETE FROM booking_rooms WHERE booking_id = $1 AND id != $2;`,
+                [bookingUuid, existingRows[0].id]
+              );
+            }
           }
         }
 
@@ -524,12 +539,28 @@ export async function loadBookingsFromSupabase(): Promise<Booking[] | null> {
           COALESCE(b.children_count, 0) as children_count,
           COALESCE(b.rooms_count, 1) as rooms_count,
           b.status,
-          b.payment_status,
+          CASE
+            WHEN COALESCE(
+              (SELECT SUM(amount) FROM payments WHERE (booking_id = b.id OR booking_reference = b.booking_reference) AND (status = 'successful' OR status IS NULL)),
+              b.paid_amount,
+              0
+            ) >= b.total_amount AND b.total_amount > 0 THEN 'successful'
+            WHEN COALESCE(
+              (SELECT SUM(amount) FROM payments WHERE (booking_id = b.id OR booking_reference = b.booking_reference) AND (status = 'successful' OR status IS NULL)),
+              b.paid_amount,
+              0
+            ) > 0 THEN 'partial'
+            ELSE b.payment_status
+          END as payment_status,
           COALESCE(b.payment_method, 'online') as payment_method,
           COALESCE(b.subtotal_amount, 0)::float as subtotal_amount,
           COALESCE(b.tax_amount, 0)::float as tax_amount,
           COALESCE(b.total_amount, 0)::float as total_amount,
-          COALESCE(b.paid_amount, 0)::float as paid_amount,
+          COALESCE(
+            (SELECT SUM(amount) FROM payments WHERE (booking_id = b.id OR booking_reference = b.booking_reference) AND (status = 'successful' OR status IS NULL)),
+            b.paid_amount,
+            0
+          )::float as paid_amount,
           COALESCE(b.booking_source, 'online') as booking_source,
           b.walk_in_token,
           b.pickup_code,
@@ -547,17 +578,17 @@ export async function loadBookingsFromSupabase(): Promise<Booking[] | null> {
           b.created_at,
           COALESCE(
             b.assigned_room_numbers,
-            ARRAY_REMOVE(ARRAY_AGG(DISTINCT COALESCE(br.room_number, r.room_number)), NULL)
+            ARRAY_REMOVE(ARRAY_AGG(DISTINCT COALESCE(NULLIF(br.room_number, ''), r.room_number, b.assigned_room_number)), NULL)
           ) as assigned_room_numbers,
           COALESCE(
             JSON_AGG(
               JSON_BUILD_OBJECT(
                 'id', br.id::text,
                 'room_id', COALESCE(br.assigned_room_id::text, r.id::text),
-                'room_number', COALESCE(br.room_number, r.room_number),
+                'room_number', COALESCE(NULLIF(br.room_number, ''), r.room_number, b.assigned_room_number),
                 'category_id', COALESCE(br.category_id::text, b.category_id),
                 'category_name', b.category_name,
-                'price_per_night', COALESCE(br.price_per_night, b.subtotal_amount, 1800)::float,
+                'price_per_night', COALESCE(br.price_per_night, (b.subtotal_amount / GREATEST(1, b.rooms_count)), 1800)::float,
                 'status', COALESCE(br.status, b.status, 'confirmed'),
                 'checked_in_at', br.checked_in_at,
                 'checked_out_at', br.checked_out_at,
@@ -594,7 +625,9 @@ export async function loadBookingsFromSupabase(): Promise<Booking[] | null> {
         booking_rooms: Array.isArray(row.booking_rooms) ? row.booking_rooms : [],
         adults_count: Number(row.adults_count) || 1,
         children_count: Number(row.children_count) || 0,
-        rooms_count: Number(row.rooms_count) || 1,
+        rooms_count: Array.isArray(row.booking_rooms) && row.booking_rooms.length > 0
+          ? row.booking_rooms.length
+          : (Number(row.rooms_count) || 1),
         status: row.status,
         payment_status: row.payment_status,
         payment_method: row.payment_method,
@@ -651,12 +684,28 @@ export async function getBookingFromSupabase(code?: string, ref?: string): Promi
           COALESCE(b.children_count, 0) as children_count,
           COALESCE(b.rooms_count, 1) as rooms_count,
           b.status,
-          b.payment_status,
+          CASE
+            WHEN COALESCE(
+              (SELECT SUM(amount) FROM payments WHERE (booking_id = b.id OR booking_reference = b.booking_reference) AND (status = 'successful' OR status IS NULL)),
+              b.paid_amount,
+              0
+            ) >= b.total_amount AND b.total_amount > 0 THEN 'successful'
+            WHEN COALESCE(
+              (SELECT SUM(amount) FROM payments WHERE (booking_id = b.id OR booking_reference = b.booking_reference) AND (status = 'successful' OR status IS NULL)),
+              b.paid_amount,
+              0
+            ) > 0 THEN 'partial'
+            ELSE b.payment_status
+          END as payment_status,
           COALESCE(b.payment_method, 'cash') as payment_method,
           COALESCE(b.subtotal_amount, 0)::float as subtotal_amount,
           COALESCE(b.tax_amount, 0)::float as tax_amount,
           COALESCE(b.total_amount, 0)::float as total_amount,
-          COALESCE(b.paid_amount, 0)::float as paid_amount,
+          COALESCE(
+            (SELECT SUM(amount) FROM payments WHERE (booking_id = b.id OR booking_reference = b.booking_reference) AND (status = 'successful' OR status IS NULL)),
+            b.paid_amount,
+            0
+          )::float as paid_amount,
           COALESCE(b.booking_source, 'walk_in_qr') as booking_source,
           b.walk_in_token,
           b.pickup_code,
@@ -714,6 +763,11 @@ export async function getBookingFromSupabase(code?: string, ref?: string): Promi
         ? row.assigned_room_numbers
         : (row.assigned_room_number ? [row.assigned_room_number] : undefined);
 
+      const bookingRooms = (brRes.rows || []).map((br: any) => ({
+        ...br,
+        room_number: br.room_number || row.assigned_room_number || assignedRoomsArr?.[0] || '',
+      }));
+
       return {
         id: `bk-pg-${row.id}`,
         booking_reference: row.booking_reference,
@@ -728,10 +782,10 @@ export async function getBookingFromSupabase(code?: string, ref?: string): Promi
         assigned_room_id: row.assigned_room_id || undefined,
         assigned_room_number: row.assigned_room_number || (assignedRoomsArr?.[0]) || undefined,
         assigned_room_numbers: assignedRoomsArr,
-        booking_rooms: brRes.rows || [],
+        booking_rooms: bookingRooms,
         adults_count: Number(row.adults_count) || 1,
         children_count: Number(row.children_count) || 0,
-        rooms_count: Number(row.rooms_count) || 1,
+        rooms_count: bookingRooms.length > 0 ? bookingRooms.length : (Number(row.rooms_count) || 1),
         status: row.status,
         payment_status: row.payment_status,
         payment_method: row.payment_method,
@@ -776,10 +830,20 @@ export async function syncPaymentToSupabase(payment: PaymentRecord): Promise<voi
   try {
     const client = await db.connect();
     try {
+      let bookingUuid: string | null = null;
+      if (payment.booking_reference) {
+        const bRes = await client.query(
+          `SELECT id FROM bookings WHERE booking_reference = $1 LIMIT 1;`,
+          [payment.booking_reference]
+        );
+        if (bRes.rows.length > 0) bookingUuid = bRes.rows[0].id;
+      }
+
       await client.query(
         `INSERT INTO payments (
           payment_reference,
           booking_reference,
+          booking_id,
           guest_name,
           amount,
           currency,
@@ -793,9 +857,10 @@ export async function syncPaymentToSupabase(payment: PaymentRecord): Promise<voi
           created_at,
           updated_at
         ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, NOW(), NOW()
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW()
         )
         ON CONFLICT (payment_reference) DO UPDATE SET
+          booking_id = COALESCE(EXCLUDED.booking_id, payments.booking_id),
           amount = EXCLUDED.amount,
           status = EXCLUDED.status,
           payment_method = EXCLUDED.payment_method,
@@ -804,6 +869,7 @@ export async function syncPaymentToSupabase(payment: PaymentRecord): Promise<voi
         [
           payment.payment_reference,
           payment.booking_reference,
+          bookingUuid,
           (payment as any).guest_name || null,
           Number(payment.amount || 0),
           payment.currency || 'INR',
@@ -820,6 +886,37 @@ export async function syncPaymentToSupabase(payment: PaymentRecord): Promise<voi
           payment.paid_at || new Date().toISOString(),
         ]
       );
+
+      // Reconcile booking paid_amount and payment_status directly in Supabase
+      if (bookingUuid) {
+        await client.query(
+          `UPDATE bookings b
+           SET paid_amount = (
+             SELECT COALESCE(SUM(amount), 0)
+             FROM payments p
+             WHERE (p.booking_id = b.id OR p.booking_reference = b.booking_reference)
+               AND (p.status = 'successful' OR p.status IS NULL)
+           ),
+           payment_status = CASE
+             WHEN (
+               SELECT COALESCE(SUM(amount), 0)
+               FROM payments p
+               WHERE (p.booking_id = b.id OR p.booking_reference = b.booking_reference)
+                 AND (p.status = 'successful' OR p.status IS NULL)
+             ) >= b.total_amount AND b.total_amount > 0 THEN 'successful'
+             WHEN (
+               SELECT COALESCE(SUM(amount), 0)
+               FROM payments p
+               WHERE (p.booking_id = b.id OR p.booking_reference = b.booking_reference)
+                 AND (p.status = 'successful' OR p.status IS NULL)
+             ) > 0 THEN 'partial'
+             ELSE b.payment_status
+           END,
+           updated_at = NOW()
+           WHERE id = $1;`,
+          [bookingUuid]
+        );
+      }
     } finally {
       client.release();
     }

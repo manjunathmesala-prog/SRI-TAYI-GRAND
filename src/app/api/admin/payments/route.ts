@@ -12,7 +12,21 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
     }
 
-    const payments = repo.getPayments();
+    await repo.ensurePaymentsLoaded();
+
+    const { searchParams } = new URL(req.url);
+    const search = searchParams.get('search') || searchParams.get('bookingReference');
+
+    let payments = repo.getPayments();
+
+    if (search && search.trim()) {
+      const q = search.trim().toLowerCase();
+      payments = payments.filter((p) =>
+        p.booking_reference?.toLowerCase().includes(q) ||
+        p.payment_reference?.toLowerCase().includes(q) ||
+        p.guest_name?.toLowerCase().includes(q)
+      );
+    }
 
     const totalReceived = payments
       .filter((p) => p.status === 'successful')

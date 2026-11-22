@@ -95,7 +95,11 @@ export async function POST(request: NextRequest) {
       if (bridgeRes && bridgeRes.ok) {
         bridgeResult = await bridgeRes.json();
         if (bridgeResult.cardNo) {
-          result.card.card_uid = `BT-57-${bridgeResult.cardNo}`;
+          const hardwareUid = `BT-57-${bridgeResult.cardNo}`;
+          result.card.card_uid = hardwareUid;
+          result.booking.keycard_uid = hardwareUid;
+          repo.updateRFIDCardUid(result.card.id, hardwareUid);
+          repo.upsertBooking(result.booking);
         }
       }
     } catch {

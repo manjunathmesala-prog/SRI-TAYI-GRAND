@@ -289,7 +289,64 @@ export default function AdminExpensesPage() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
+        {/* Mobile Expenses Card List */}
+        <div className="md:hidden space-y-2.5">
+          {filteredExpenses.length === 0 ? (
+            <div className="py-8 text-center text-gray-400 text-xs">
+              No operating expenses match your selected filters.
+            </div>
+          ) : (
+            filteredExpenses.map((exp) => (
+              <div
+                key={exp.id}
+                className="p-3.5 rounded-xl border border-[#EFE3D6] bg-white shadow-2xs space-y-2"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="font-bold text-xs text-[#241912] truncate">{exp.title}</span>
+                  <span className="font-mono font-bold text-sm text-[#241912] shrink-0">
+                    ₹{exp.amount.toLocaleString('en-IN')}
+                  </span>
+                </div>
+
+                {exp.description && (
+                  <p className="text-[11px] text-gray-500 line-clamp-2">{exp.description}</p>
+                )}
+
+                <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#EFE3D6]/60 text-[11px]">
+                  <div className="flex items-center gap-1.5">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#D8AD56]/15 text-[#382216]">
+                      {CATEGORY_LABELS[exp.category] || exp.category}
+                    </span>
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] ${
+                        exp.payment_method === 'cash'
+                          ? 'bg-rose-100 text-rose-800'
+                          : 'bg-blue-100 text-blue-800'
+                      }`}
+                    >
+                      {exp.payment_method === 'cash' ? <Banknote className="w-3 h-3" /> : <CreditCard className="w-3 h-3" />}
+                      <span>{exp.payment_method.toUpperCase()}</span>
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2 ml-auto">
+                    <span className="text-gray-500 font-mono text-[10px]">{exp.expense_date}</span>
+                    <button
+                      onClick={() => handleDeleteExpense(exp.id, exp.title)}
+                      className="p-1 rounded-lg text-gray-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                      title="Delete Expense Record"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-[#EFE3D6] text-[#786B61] uppercase tracking-wider text-[10px]">

@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
         const targetRoomIdentifier = roomId || roomNumber || booking.assigned_room_id;
         if (targetRoomIdentifier && !booking.assigned_room_id) {
           try {
-            repo.assignRoomToBooking(targetRoomIdentifier, booking.booking_reference, booking.guest_name, staffName);
+            await repo.assignRoomToBooking(targetRoomIdentifier, booking.booking_reference, booking.guest_name, staffName);
           } catch (assignErr: any) {
             return NextResponse.json({ success: false, error: assignErr.message }, { status: 409 });
           }
@@ -116,7 +116,9 @@ export async function POST(req: NextRequest) {
 
         // Record check-in advance / room payment if requested
         if (body.collectPayment && Number(body.paymentAmount) > 0 && updatedBooking) {
-          const payAmt = Number(body.paymentAmount);
+          const outstanding = Math.max(0, updatedBooking.total_amount - (updatedBooking.paid_amount || 0));
+          const requestedAmt = Number(body.paymentAmount);
+          const payAmt = Math.min(requestedAmt, outstanding > 0 ? outstanding : requestedAmt);
           const payMethod = (body.paymentMethod as PaymentMethod) || 'cash';
           await repo.recordPayment(
             {
@@ -127,7 +129,6 @@ export async function POST(req: NextRequest) {
               currency: 'INR',
               status: 'successful',
               paid_at: new Date().toISOString(),
-
             },
             staffName
           );
@@ -251,8 +252,6 @@ export async function POST(req: NextRequest) {
             },
             staffName
           );
-          booking.paid_amount = booking.total_amount;
-          booking.payment_status = 'successful';
         }
 
         // Support partial checkout if roomNumbers is specified as an array

@@ -472,7 +472,7 @@ export default function PaymentsAdminPage() {
       )}
 
       {/* LUXURY KPI CARDS: Reconciliation & Financial Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3.5">
+      <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Total Received */}
         <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-5 shadow-[0_4px_20px_rgba(33,24,15,0.03)] flex items-center justify-between">
           <div>
@@ -562,226 +562,415 @@ export default function PaymentsAdminPage() {
 
       {/* Main Table */}
       {activeTab === 'payments' ? (
-        <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF8F5] text-[#786A5B] font-semibold text-[11px] border-b border-[#E6D9C5]/80">
-                <tr>
-                  <th className="py-3.5 px-4 font-semibold">Payment Ref</th>
-                  <th className="py-3.5 px-4 font-semibold">Booking</th>
-                  <th className="py-3.5 px-4 font-semibold">Guest</th>
-                  <th className="py-3.5 px-4 font-semibold">Method</th>
-                  <th className="py-3.5 px-4 font-semibold">Amount</th>
-                  <th className="py-3.5 px-4 font-semibold">Verification</th>
-                  <th className="py-3.5 px-4 font-semibold">Status</th>
-                  <th className="py-3.5 px-4 font-semibold">Date</th>
-                  <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#E6D9C5]/60 text-[#2A1D13]">
-                {filteredPayments.length === 0 ? (
-                  <tr>
-                    <td colSpan={9} className="py-12 text-center text-[#786B61]">
-                      <div className="flex flex-col items-center justify-center space-y-2">
-                        <CreditCard className="w-8 h-8 text-stone-300" />
-                        <span className="font-semibold text-sm text-[#241912]">No Payment Transactions Found</span>
-                        <p className="text-xs text-[#786B61] max-w-sm">
-                          {searchQuery
-                            ? 'No payment records match your search filter.'
-                            : 'No guest payments have been recorded yet.'}
-                        </p>
-                        {searchQuery && (
+        <div className="space-y-3">
+          {/* Mobile Payments Card View */}
+          <div className="md:hidden space-y-2.5">
+            {filteredPayments.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-8 text-center text-[#786B61] shadow-2xs">
+                <CreditCard className="w-8 h-8 text-stone-300 mx-auto mb-2" />
+                <span className="font-semibold text-sm text-[#241912] block">No Payment Transactions Found</span>
+                <p className="text-xs text-[#786B61] mt-1">
+                  {searchQuery
+                    ? 'No payment records match your search filter.'
+                    : 'No guest payments have been recorded yet.'}
+                </p>
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="mt-3 px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold cursor-pointer transition-colors"
+                  >
+                    Clear Search
+                  </button>
+                )}
+              </div>
+            ) : (
+              filteredPayments.map((p) => {
+                const isFullyRefunded = p.refund_status === 'full' || (p.refund_amount !== undefined && p.refund_amount >= p.amount);
+                const canRefund = p.status === 'successful' && !isFullyRefunded;
+
+                return (
+                  <div
+                    key={p.id}
+                    className="bg-white rounded-2xl border border-[#E6D9C5]/80 p-4 shadow-2xs space-y-2.5"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <span className="font-mono font-bold text-xs text-[#382216] block truncate">
+                          {p.payment_reference}
+                        </span>
+                        <span className="font-mono text-[10px] text-[#786B61]">
+                          Booking: {p.booking_reference}
+                        </span>
+                      </div>
+                      <span className="font-serif font-bold text-sm text-[#241912] shrink-0">
+                        ₹ {p.amount.toLocaleString('en-IN')}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-xs text-stone-700 font-medium">
+                      <span>{p.guest_name}</span>
+                      <span className="text-[10px] text-[#786B61] font-mono">
+                        {new Date(p.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-1.5 pt-1">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gray-100 text-gray-800">
+                        {p.payment_method}
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                          p.status === 'successful'
+                            ? 'bg-[#E8F5E9] text-[#2E7D32]'
+                            : p.status === 'pending'
+                            ? 'bg-amber-100 text-amber-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}
+                      >
+                        {p.status}
+                      </span>
+                      {p.reconciled ? (
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 inline-flex items-center gap-0.5">
+                          <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
+                          <span>Reconciled</span>
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-200 inline-flex items-center gap-0.5">
+                          <Clock className="w-2.5 h-2.5 text-amber-600" />
+                          <span>Unreconciled</span>
+                        </span>
+                      )}
+                      {p.refund_status && p.refund_status !== 'none' && (
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                          {p.refund_status === 'full' ? 'Full Refund' : `Refund: ₹${p.refund_amount}`}
+                        </span>
+                      )}
+                    </div>
+
+                    {(p.payment_link_url || canRefund) && (
+                      <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E6D9C5]/40">
+                        {p.payment_link_url && (
                           <button
                             type="button"
-                            onClick={() => setSearchQuery('')}
-                            className="mt-2 px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold cursor-pointer transition-colors"
+                            onClick={() => {
+                              navigator.clipboard.writeText(p.payment_link_url || '');
+                              showToast('success', 'Payment link copied to clipboard!');
+                            }}
+                            className="px-2.5 py-1 rounded-lg border border-[#E6D9C5] text-blue-600 hover:bg-blue-50 text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
                           >
-                            Clear Search
+                            <Copy className="w-3 h-3" />
+                            <span>Copy Link</span>
+                          </button>
+                        )}
+                        {canRefund && (
+                          <button
+                            type="button"
+                            onClick={() => handleOpenRefund(p)}
+                            className="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold border border-rose-200 flex items-center gap-1 cursor-pointer transition-colors"
+                          >
+                            <RotateCcw className="w-3 h-3" />
+                            <span>Refund</span>
                           </button>
                         )}
                       </div>
-                    </td>
-                  </tr>
-                ) : (
-                  filteredPayments.map((p) => {
-                    const isFullyRefunded = p.refund_status === 'full' || (p.refund_amount !== undefined && p.refund_amount >= p.amount);
-                    const canRefund = p.status === 'successful' && !isFullyRefunded;
+                    )}
+                  </div>
+                );
+              })
+            )}
+          </div>
 
-                    return (
-                      <tr key={p.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
-                        <td className="py-3.5 px-4">
-                          <div className="font-mono font-bold text-[#382216]">{p.payment_reference}</div>
-                          {p.gateway_payment_id && (
-                            <span className="font-mono text-[10px] text-[#786B61] block">{p.gateway_payment_id}</span>
-                          )}
-                        </td>
-                        <td className="py-3.5 px-4 font-mono font-medium text-[#786B61]">
-                          {p.booking_reference}
-                        </td>
-                        <td className="py-3.5 px-4 font-semibold">{p.guest_name}</td>
-                        <td className="py-3.5 px-4">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gray-100 text-gray-800">
-                            {p.payment_method}
-                          </span>
-                        </td>
-                        <td className="py-3.5 px-4 font-bold text-sm text-[#241912]">
-                          ₹ {p.amount.toLocaleString('en-IN')}
-                        </td>
-                        <td className="py-3.5 px-4">
-                          {p.reconciled ? (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 inline-flex items-center gap-1">
-                              <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                              <span>Reconciled</span>
-                            </span>
-                          ) : (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 inline-flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-amber-600" />
-                              <span>Unreconciled</span>
-                            </span>
-                          )}
-                        </td>
-                        <td className="py-3.5 px-4">
-                          <div className="flex flex-col gap-1 items-start">
-                            <span
-                              className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
-                                p.status === 'successful'
-                                  ? 'bg-[#E8F5E9] text-[#2E7D32]'
-                                  : p.status === 'pending'
-                                  ? 'bg-amber-100 text-amber-800'
-                                  : 'bg-red-100 text-red-800'
-                              }`}
+          {/* Desktop Table View */}
+          <div className="hidden md:block bg-white rounded-2xl border border-[#E6D9C5]/80 shadow-[0_4px_20px_rgba(33,24,15,0.03)] overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#FAF8F5] text-[#786A5B] font-semibold text-[11px] border-b border-[#E6D9C5]/80">
+                  <tr>
+                    <th className="py-3.5 px-4 font-semibold">Payment Ref</th>
+                    <th className="py-3.5 px-4 font-semibold">Booking</th>
+                    <th className="py-3.5 px-4 font-semibold">Guest</th>
+                    <th className="py-3.5 px-4 font-semibold">Method</th>
+                    <th className="py-3.5 px-4 font-semibold">Amount</th>
+                    <th className="py-3.5 px-4 font-semibold">Verification</th>
+                    <th className="py-3.5 px-4 font-semibold">Status</th>
+                    <th className="py-3.5 px-4 font-semibold">Date</th>
+                    <th className="py-3.5 px-4 font-semibold text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#E6D9C5]/60 text-[#2A1D13]">
+                  {filteredPayments.length === 0 ? (
+                    <tr>
+                      <td colSpan={9} className="py-12 text-center text-[#786B61]">
+                        <div className="flex flex-col items-center justify-center space-y-2">
+                          <CreditCard className="w-8 h-8 text-stone-300" />
+                          <span className="font-semibold text-sm text-[#241912]">No Payment Transactions Found</span>
+                          <p className="text-xs text-[#786B61] max-w-sm">
+                            {searchQuery
+                              ? 'No payment records match your search filter.'
+                              : 'No guest payments have been recorded yet.'}
+                          </p>
+                          {searchQuery && (
+                            <button
+                              type="button"
+                              onClick={() => setSearchQuery('')}
+                              className="mt-2 px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold cursor-pointer transition-colors"
                             >
-                              {p.status}
+                              Clear Search
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredPayments.map((p) => {
+                      const isFullyRefunded = p.refund_status === 'full' || (p.refund_amount !== undefined && p.refund_amount >= p.amount);
+                      const canRefund = p.status === 'successful' && !isFullyRefunded;
+
+                      return (
+                        <tr key={p.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
+                          <td className="py-3.5 px-4">
+                            <div className="font-mono font-bold text-[#382216]">{p.payment_reference}</div>
+                            {p.gateway_payment_id && (
+                              <span className="font-mono text-[10px] text-[#786B61] block">{p.gateway_payment_id}</span>
+                            )}
+                          </td>
+                          <td className="py-3.5 px-4 font-mono font-medium text-[#786B61]">
+                            {p.booking_reference}
+                          </td>
+                          <td className="py-3.5 px-4 font-semibold">{p.guest_name}</td>
+                          <td className="py-3.5 px-4">
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gray-100 text-gray-800">
+                              {p.payment_method}
                             </span>
-                            {p.refund_status && p.refund_status !== 'none' && (
-                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
-                                {p.refund_status === 'full' ? 'Full Refund' : `Refund: ₹${p.refund_amount}`}
+                          </td>
+                          <td className="py-3.5 px-4 font-bold text-sm text-[#241912]">
+                            ₹ {p.amount.toLocaleString('en-IN')}
+                          </td>
+                          <td className="py-3.5 px-4">
+                            {p.reconciled ? (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 inline-flex items-center gap-1">
+                                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                                <span>Reconciled</span>
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 inline-flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-amber-600" />
+                                <span>Unreconciled</span>
                               </span>
                             )}
-                          </div>
-                        </td>
-                        <td className="py-3.5 px-4 text-[#786B61]">
-                          {new Date(p.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
-                        </td>
-                        <td className="py-3.5 px-4 text-right">
-                          <div className="flex items-center justify-end gap-1.5">
-                            {p.payment_link_url && (
-                              <button
-                                onClick={() => {
-                                  navigator.clipboard.writeText(p.payment_link_url || '');
-                                  showToast('success', 'Payment link copied to clipboard!');
-                                }}
-                                className="p-1 rounded text-blue-600 hover:bg-blue-50 cursor-pointer"
-                                title="Copy Payment Link"
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <div className="flex flex-col gap-1 items-start">
+                              <span
+                                className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                  p.status === 'successful'
+                                    ? 'bg-[#E8F5E9] text-[#2E7D32]'
+                                    : p.status === 'pending'
+                                    ? 'bg-amber-100 text-amber-800'
+                                    : 'bg-red-100 text-red-800'
+                                }`}
                               >
-                                <Copy className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                            {canRefund && (
-                              <button
-                                onClick={() => handleOpenRefund(p)}
-                                className="px-2 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold border border-rose-200 flex items-center gap-1 cursor-pointer transition-colors"
-                                title="Process Refund"
-                              >
-                                <RotateCcw className="w-3 h-3" />
-                                <span>Refund</span>
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+                                {p.status}
+                              </span>
+                              {p.refund_status && p.refund_status !== 'none' && (
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-100 text-rose-800 border border-rose-200">
+                                  {p.refund_status === 'full' ? 'Full Refund' : `Refund: ₹${p.refund_amount}`}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4 text-[#786B61]">
+                            {new Date(p.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              {p.payment_link_url && (
+                                <button
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(p.payment_link_url || '');
+                                    showToast('success', 'Payment link copied to clipboard!');
+                                  }}
+                                  className="p-1 rounded text-blue-600 hover:bg-blue-50 cursor-pointer"
+                                  title="Copy Payment Link"
+                                >
+                                  <Copy className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                              {canRefund && (
+                                <button
+                                  onClick={() => handleOpenRefund(p)}
+                                  className="px-2 py-1 rounded bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-bold border border-rose-200 flex items-center gap-1 cursor-pointer transition-colors"
+                                  title="Process Refund"
+                                >
+                                  <RotateCcw className="w-3 h-3" />
+                                  <span>Refund</span>
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       ) : (
-        <div className="bg-white rounded-2xl border border-[#D8AD56]/30 shadow-luxury overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[#FAF7F2] text-[#786B61] uppercase tracking-wider text-[10px] border-b border-[#EFE3D6]">
-                <tr>
-                  <th className="py-3.5 px-4 font-semibold">Title & Description</th>
-                  <th className="py-3.5 px-4 font-semibold">Category</th>
-                  <th className="py-3.5 px-4 font-semibold">Method</th>
-                  <th className="py-3.5 px-4 font-semibold">Receipt Ref</th>
-                  <th className="py-3.5 px-4 font-semibold">Amount</th>
-                  <th className="py-3.5 px-4 font-semibold">Recorded By</th>
-                  <th className="py-3.5 px-4 font-semibold">Date</th>
-                  <th className="py-3.5 px-4 font-semibold text-right">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#EFE3D6] text-[#241912]">
-                {filteredExpenses.length === 0 ? (
+        <div className="space-y-3">
+          {/* Mobile Expenses Card View */}
+          <div className="md:hidden space-y-2.5">
+            {filteredExpenses.length === 0 ? (
+              <div className="bg-white rounded-2xl border border-[#D8AD56]/30 p-8 text-center text-[#786B61] shadow-2xs">
+                <TrendingDown className="w-8 h-8 text-stone-300 mx-auto mb-2" />
+                <span className="font-semibold text-sm text-[#241912] block">No Expenses Logged</span>
+                <p className="text-xs text-[#786B61] mt-1">
+                  {searchQuery
+                    ? 'No operational expenses match your search query.'
+                    : 'No operating expenses logged yet.'}
+                </p>
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery('')}
+                    className="mt-3 px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold cursor-pointer transition-colors"
+                  >
+                    Clear Search
+                  </button>
+                )}
+              </div>
+            ) : (
+              filteredExpenses.map((e) => (
+                <div
+                  key={e.id}
+                  className="bg-white rounded-2xl border border-[#D8AD56]/30 p-4 shadow-2xs space-y-2"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <strong className="block text-xs text-[#241912] font-semibold truncate">{e.title}</strong>
+                    <span className="font-mono font-bold text-sm text-red-600 shrink-0">
+                      ₹ {e.amount.toLocaleString('en-IN')}
+                    </span>
+                  </div>
+
+                  {e.description && (
+                    <p className="text-[11px] text-[#786B61] line-clamp-2">{e.description}</p>
+                  )}
+
+                  <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-[#EFE3D6] text-[11px]">
+                    <div className="flex items-center gap-1.5">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-50 text-amber-800 border border-amber-200">
+                        {e.category.replace(/_/g, ' ')}
+                      </span>
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gray-100 text-gray-800">
+                        {e.payment_method}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-2 ml-auto">
+                      <span className="text-[#786B61] text-[10px]">{e.expense_date}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteExpense(e.id)}
+                        className="p-1 rounded text-red-400 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                        title="Delete Expense"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop Expenses Table View */}
+          <div className="hidden md:block bg-white rounded-2xl border border-[#D8AD56]/30 shadow-luxury overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#FAF7F2] text-[#786B61] uppercase tracking-wider text-[10px] border-b border-[#EFE3D6]">
                   <tr>
-                    <td colSpan={8} className="py-12 text-center text-[#786B61]">
-                      <div className="flex flex-col items-center justify-center space-y-2">
-                        <TrendingDown className="w-8 h-8 text-stone-300" />
-                        <span className="font-semibold text-sm text-[#241912]">No Expenses Logged</span>
-                        <p className="text-xs text-[#786B61] max-w-sm">
-                          {searchQuery
-                            ? 'No operational expenses match your search query.'
-                            : 'No operating expenses logged yet.'}
-                        </p>
-                        {searchQuery && (
-                          <button
-                            type="button"
-                            onClick={() => setSearchQuery('')}
-                            className="mt-2 px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold cursor-pointer transition-colors"
-                          >
-                            Clear Search
-                          </button>
-                        )}
-                      </div>
-                    </td>
+                    <th className="py-3.5 px-4 font-semibold">Title & Description</th>
+                    <th className="py-3.5 px-4 font-semibold">Category</th>
+                    <th className="py-3.5 px-4 font-semibold">Method</th>
+                    <th className="py-3.5 px-4 font-semibold">Receipt Ref</th>
+                    <th className="py-3.5 px-4 font-semibold">Amount</th>
+                    <th className="py-3.5 px-4 font-semibold">Recorded By</th>
+                    <th className="py-3.5 px-4 font-semibold">Date</th>
+                    <th className="py-3.5 px-4 font-semibold text-right">Action</th>
                   </tr>
-                ) : (
-                  filteredExpenses.map((e) => (
-                    <tr key={e.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
-                      <td className="py-3.5 px-4">
-                        <strong className="block text-[#241912]">{e.title}</strong>
-                        {e.description && (
-                          <span className="text-[11px] text-[#786B61] block">{e.description}</span>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-50 text-amber-800 border border-amber-200">
-                          {e.category.replace(/_/g, ' ')}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gray-100 text-gray-800">
-                          {e.payment_method}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 font-mono text-[11px] text-[#786B61]">
-                        {e.receipt_ref || 'N/A'}
-                      </td>
-                      <td className="py-3.5 px-4 font-bold text-sm text-red-600">
-                        ₹ {e.amount.toLocaleString('en-IN')}
-                      </td>
-                      <td className="py-3.5 px-4 text-[#786B61] text-[11px]">
-                        {e.recorded_by}
-                      </td>
-                      <td className="py-3.5 px-4 text-[#786B61]">
-                        {e.expense_date}
-                      </td>
-                      <td className="py-3.5 px-4 text-right">
-                        <button
-                          onClick={() => handleDeleteExpense(e.id)}
-                          className="p-1 rounded text-red-400 hover:text-red-700 hover:bg-red-50 cursor-pointer"
-                          title="Delete Expense"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
+                </thead>
+                <tbody className="divide-y divide-[#EFE3D6] text-[#241912]">
+                  {filteredExpenses.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="py-12 text-center text-[#786B61]">
+                        <div className="flex flex-col items-center justify-center space-y-2">
+                          <TrendingDown className="w-8 h-8 text-stone-300" />
+                          <span className="font-semibold text-sm text-[#241912]">No Expenses Logged</span>
+                          <p className="text-xs text-[#786B61] max-w-sm">
+                            {searchQuery
+                              ? 'No operational expenses match your search query.'
+                              : 'No operating expenses logged yet.'}
+                          </p>
+                          {searchQuery && (
+                            <button
+                              type="button"
+                              onClick={() => setSearchQuery('')}
+                              className="mt-2 px-3 py-1.5 rounded-lg bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-semibold cursor-pointer transition-colors"
+                            >
+                              Clear Search
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                  ) : (
+                    filteredExpenses.map((e) => (
+                      <tr key={e.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
+                        <td className="py-3.5 px-4">
+                          <strong className="block text-[#241912]">{e.title}</strong>
+                          {e.description && (
+                            <span className="text-[11px] text-[#786B61] block">{e.description}</span>
+                          )}
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-amber-50 text-amber-800 border border-amber-200">
+                            {e.category.replace(/_/g, ' ')}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-gray-100 text-gray-800">
+                            {e.payment_method}
+                          </span>
+                        </td>
+                        <td className="py-3.5 px-4 font-mono text-[11px] text-[#786B61]">
+                          {e.receipt_ref || 'N/A'}
+                        </td>
+                        <td className="py-3.5 px-4 font-bold text-sm text-red-600">
+                          ₹ {e.amount.toLocaleString('en-IN')}
+                        </td>
+                        <td className="py-3.5 px-4 text-[#786B61] text-[11px]">
+                          {e.recorded_by}
+                        </td>
+                        <td className="py-3.5 px-4 text-[#786B61]">
+                          {e.expense_date}
+                        </td>
+                        <td className="py-3.5 px-4 text-right">
+                          <button
+                            onClick={() => handleDeleteExpense(e.id)}
+                            className="p-1 rounded text-red-400 hover:text-red-700 hover:bg-red-50 cursor-pointer"
+                            title="Delete Expense"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}

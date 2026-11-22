@@ -1,1 +1,21 @@
-[]
+[
+  {
+    "id": "58f2157c-aeab-409f-b32a-2e690a94c606",
+    "full_name": "Manjunath Mesala",
+    "phone": "09966764859",
+    "email": "manjunathmesala8110@gmail.com",
+    "address": "",
+    "city": "",
+    "state": "",
+    "country": "India",
+    "id_type": "Aadhaar Card",
+    "id_number": "644770234314",
+    "total_stays": 6,
+    "total_spend": 0,
+    "vip_tier": "regular",
+    "is_blacklisted": false,
+    "notes": "",
+    "created_at": "2026-11-22T18:33:42.537Z",
+    "updated_at": "2026-11-22T18:37:57.697Z"
+  }
+]

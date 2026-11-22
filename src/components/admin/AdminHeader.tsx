@@ -195,10 +195,10 @@ export function AdminHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-[#E6D9C5] px-4 sm:px-6 py-2 flex flex-wrap gap-2 items-center justify-between shadow-2xs">
+    <header className="relative md:sticky md:top-0 z-30 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-[#E6D9C5] px-3 sm:px-6 py-2 flex flex-wrap gap-2 items-center justify-between shadow-2xs">
       {/* Left: Page Title */}
       <div className="flex items-center space-x-3">
-        <h1 className="text-base sm:text-lg font-serif font-bold text-[#2A1D13] tracking-tight leading-tight">
+        <h1 className="text-sm sm:text-lg font-serif font-bold text-[#2A1D13] tracking-tight leading-tight truncate">
           {getPageTitle()}
         </h1>
       </div>
@@ -287,7 +287,7 @@ export function AdminHeader() {
 
           {/* Dropdown Menu */}
           {profileOpen && (
-            <div className="absolute right-0 mt-2 w-72 bg-white rounded-2xl shadow-2xl border border-[#E6D9C5] p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
+            <div className="absolute right-0 mt-2 w-72 max-w-[calc(100vw-1.5rem)] bg-white rounded-2xl shadow-2xl border border-[#E6D9C5] p-3 z-50 animate-in fade-in zoom-in-95 duration-150">
               {/* Profile Card Header */}
               <div className="p-2.5 rounded-xl bg-[#FAF8F5] border border-[#E6D9C5] mb-2.5">
                 <div className="flex items-center justify-between">

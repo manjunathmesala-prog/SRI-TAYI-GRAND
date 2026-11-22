@@ -25,6 +25,7 @@ export type BookingStatus =
 export type PaymentStatus = 
   | 'pending' 
   | 'successful' 
+  | 'partial'
   | 'failed' 
   | 'refunded' 
   | 'partially_refunded' 
@@ -549,6 +550,19 @@ export interface CashShift {
   discrepancy?: number;
   notes?: string;
   status: 'open' | 'closed';
+  attendance_id?: string;
+  opening_denominations?: Record<string, number>;
+  closing_denominations?: Record<string, number>;
+  handover_notes?: string;
+  discrepancy_reason?: string;
+  opened_by_name?: string;
+  opened_by_role?: string;
+  closed_by_name?: string;
+  closed_by_role?: string;
+  total_cash_in?: number;
+  total_cash_out?: number;
+  closing_balance_counted?: number;
+  closing_discrepancy?: number;
 }
 
 export type CashTransactionCategory =
@@ -570,7 +584,9 @@ export interface CashTransaction {
   booking_reference?: string;
   receipt_ref?: string;
   performed_by: string;
-  performed_at: string;
+  created_at: string;
+  idempotency_key?: string;
+  performed_at?: string;
 }
 
 // ==============================================================================

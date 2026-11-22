@@ -694,6 +694,39 @@ export class HotelRepository {
     booking.assigned_room_number = room.room_number;
     booking.room_assigned_by = actor || 'Front Desk';
 
+    if (!booking.assigned_room_numbers) {
+      booking.assigned_room_numbers = [room.room_number];
+    } else if (!booking.assigned_room_numbers.includes(room.room_number)) {
+      booking.assigned_room_numbers.push(room.room_number);
+    }
+
+    // Ensure booking_rooms has valid allocation for this room
+    if (!booking.booking_rooms || booking.booking_rooms.length === 0) {
+      booking.booking_rooms = [
+        {
+          id: `br-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
+          room_id: room.id,
+          room_number: room.room_number,
+          category_id: room.category_id || booking.category_id,
+          category_name: room.category_name || booking.category_name,
+          price_per_night: booking.subtotal_amount ? Math.round(booking.subtotal_amount / Math.max(1, booking.rooms_count || 1)) : 0,
+          status: booking.status === 'checked_in' ? 'checked_in' : 'confirmed',
+          assigned_guest_name: booking.guest_name,
+        },
+      ];
+    } else {
+      const existingAlloc =
+        booking.booking_rooms.find((br) => br.room_number === room.room_number || br.room_id === room.id) ||
+        booking.booking_rooms.find((br) => !br.room_number);
+      if (existingAlloc) {
+        existingAlloc.room_id = room.id;
+        existingAlloc.room_number = room.room_number;
+        existingAlloc.category_id = room.category_id || existingAlloc.category_id || booking.category_id;
+        existingAlloc.category_name = room.category_name || existingAlloc.category_name || booking.category_name;
+        if (!existingAlloc.assigned_guest_name) existingAlloc.assigned_guest_name = booking.guest_name;
+      }
+    }
+
     this.broadcastEvent(
       'room_assigned',
       {
@@ -705,7 +738,7 @@ export class HotelRepository {
       actor
     );
 
-    await await syncBookingToSupabase(booking);
+    await syncBookingToSupabase(booking);
     await syncRoomStatusToSupabase({
       roomNumber: room.room_number,
       operationalStatus: room.operational_status,
@@ -1388,7 +1421,7 @@ export class HotelRepository {
       tax_amount: tax,
       additional_charges_amount: 0,
       total_amount: total,
-      paid_amount: paidAmount,
+      paid_amount: 0,
       tariff_override_amount: params.isTariffOverridden ? params.baseTariff : undefined,
       tariff_override_reason: params.isTariffOverridden ? params.tariffOverrideReason : undefined,
       checked_in_at: new Date().toISOString(),
@@ -1666,6 +1699,11 @@ export class HotelRepository {
         const room = this.rooms.find((r) => r.id === rmIdOrNum || r.room_number === rmIdOrNum);
         if (room) {
           this.updateRoomStatus(room.id, 'occupied', 'clean', undefined, actor);
+          await syncRoomStatusToSupabase({
+            roomNumber: room.room_number,
+            operationalStatus: 'occupied',
+            housekeepingStatus: 'clean',
+          });
         }
       }
       this.broadcastEvent('check_in', { booking, roomNumber: booking.assigned_room_number }, actor);
@@ -1689,6 +1727,11 @@ export class HotelRepository {
         const room = this.rooms.find((r) => r.id === rmIdOrNum || r.room_number === rmIdOrNum);
         if (room) {
           this.updateRoomStatus(room.id, 'cleaning', 'dirty', undefined, actor);
+          await syncRoomStatusToSupabase({
+            roomNumber: room.room_number,
+            operationalStatus: 'cleaning',
+            housekeepingStatus: 'dirty',
+          });
           const roomCards = this.rfidCards.filter(
             (c) =>
               (c.assigned_room_number === room.room_number || c.room_number === room.room_number || c.booking_reference === booking.booking_reference) &&
@@ -1697,7 +1740,7 @@ export class HotelRepository {
           for (const card of roomCards) {
             card.status = 'inactive';
             card.deactivated_at = new Date().toISOString();
-            syncCardToSupabase(card);
+            await syncCardToSupabase(card);
           }
           if (roomCards.length > 0) {
             savePersistedCards(this.rfidCards);
@@ -1804,7 +1847,14 @@ export class HotelRepository {
         });
       }
 
-      const brItem = booking.booking_rooms.find((br) => br.room_number === rNum);
+      let brItem = booking.booking_rooms.find((br) => br.room_number === rNum);
+      if (!brItem) {
+        brItem = booking.booking_rooms.find((br) => !br.room_number);
+        if (brItem) {
+          brItem.room_number = rNum;
+          brItem.room_id = room?.id;
+        }
+      }
       if (brItem) {
         brItem.status = 'checked_in';
         brItem.checked_in_at = nowIso;
@@ -1812,10 +1862,8 @@ export class HotelRepository {
       }
     }
 
-    // Determine overall booking status:
-    // If all rooms checked in -> checked_in, else partially_checked_in
-    const allCheckedIn = booking.booking_rooms.every((br) => br.status === 'checked_in');
-    booking.status = allCheckedIn ? 'checked_in' : 'partially_checked_in';
+    // Determine overall booking status using authoritative derivation
+    booking.status = this.deriveMasterBookingStatus(booking);
 
     await syncBookingToSupabase(booking);
     savePersistedData('bookings.json', this.bookings);
@@ -1825,7 +1873,7 @@ export class HotelRepository {
       {
         booking,
         roomNumbers: targetRoomNums,
-        partial: !allCheckedIn,
+        partial: booking.status === 'partially_checked_in',
       },
       actor
     );
@@ -1920,13 +1968,10 @@ export class HotelRepository {
       }
     }
 
-    // If all rooms are checked out -> checked_out; if some remain -> partially_checked_out
-    const allCheckedOut = booking.booking_rooms.every((br) => br.status === 'checked_out');
-    if (allCheckedOut) {
-      booking.status = 'checked_out';
+    // Determine overall booking status using authoritative derivation
+    booking.status = this.deriveMasterBookingStatus(booking);
+    if (booking.status === 'checked_out') {
       booking.checked_out_at = nowIso;
-    } else {
-      booking.status = 'partially_checked_out';
     }
 
     await syncBookingToSupabase(booking);
@@ -1937,7 +1982,7 @@ export class HotelRepository {
       {
         booking,
         roomNumbers: targetRoomNums,
-        partial: !allCheckedOut,
+        partial: booking.status === 'partially_checked_out',
       },
       actor
     );
@@ -2172,7 +2217,7 @@ export class HotelRepository {
       tax_amount: tax,
       additional_charges_amount: 0,
       total_amount: total,
-      paid_amount: paidAmount,
+      paid_amount: 0,
       special_requests: params.specialRequests,
       early_check_in_requested: true,
       late_check_out_requested: false,
@@ -2262,24 +2307,60 @@ export class HotelRepository {
     booking.status = 'checked_in';
     booking.checked_in_at = new Date().toISOString();
 
+    if (!booking.assigned_room_numbers) {
+      booking.assigned_room_numbers = [room.room_number];
+    } else if (!booking.assigned_room_numbers.includes(room.room_number)) {
+      booking.assigned_room_numbers.push(room.room_number);
+    }
+
+    if (!booking.booking_rooms || booking.booking_rooms.length === 0) {
+      booking.booking_rooms = [
+        {
+          id: `br-${Date.now()}-${Math.floor(100 + Math.random() * 900)}`,
+          room_id: room.id,
+          room_number: room.room_number,
+          category_id: room.category_id || booking.category_id,
+          category_name: room.category_name || booking.category_name,
+          price_per_night: booking.subtotal_amount ? Math.round(booking.subtotal_amount / Math.max(1, booking.rooms_count || 1)) : 0,
+          status: 'checked_in',
+          checked_in_at: booking.checked_in_at,
+          assigned_guest_name: booking.guest_name,
+        },
+      ];
+    } else {
+      const brSlot =
+        booking.booking_rooms.find((br) => br.room_number === room.room_number || br.room_id === room.id) ||
+        booking.booking_rooms.find((br) => !br.room_number);
+      if (brSlot) {
+        brSlot.room_id = room.id;
+        brSlot.room_number = room.room_number;
+        brSlot.status = 'checked_in';
+        brSlot.checked_in_at = booking.checked_in_at;
+        brSlot.category_id = room.category_id || brSlot.category_id || booking.category_id;
+        brSlot.category_name = room.category_name || brSlot.category_name || booking.category_name;
+        if (!brSlot.assigned_guest_name) brSlot.assigned_guest_name = booking.guest_name;
+      }
+    }
+
     // 2. Handle counter payment if marked paid at front desk
     if (params.markPaid || booking.payment_status === 'pay_at_hotel') {
-      booking.payment_status = 'successful';
-      booking.paid_amount = booking.total_amount;
+      const remainingUnpaid = Math.max(0, booking.total_amount - (booking.paid_amount || 0));
       if (params.paymentMethod) booking.payment_method = params.paymentMethod;
 
-      this.recordPayment(
-        {
-          booking_reference: booking.booking_reference,
-          guest_name: booking.guest_name,
-          amount: booking.total_amount,
-          currency: 'INR',
-          payment_method: params.paymentMethod || 'cash',
-          status: 'successful',
-          paid_at: new Date().toISOString(),
-        },
-        params.staffName
-      );
+      if (remainingUnpaid > 0) {
+        this.recordPayment(
+          {
+            booking_reference: booking.booking_reference,
+            guest_name: booking.guest_name,
+            amount: remainingUnpaid,
+            currency: 'INR',
+            payment_method: params.paymentMethod || 'cash',
+            status: 'successful',
+            paid_at: new Date().toISOString(),
+          },
+          params.staffName
+        );
+      }
     }
 
     // 3. Update room status to occupied
@@ -2299,11 +2380,14 @@ export class HotelRepository {
       booking.booking_reference,
       booking.guest_name,
       params.staffName,
-      expiryIso
+      expiryIso,
+      params.cardUid
     );
 
-    if (params.cardUid) {
+    if (params.cardUid && card.card_uid !== params.cardUid) {
       card.card_uid = params.cardUid;
+      savePersistedCards(this.rfidCards);
+      syncCardToSupabase(card);
     }
 
     booking.keycard_issued_at = new Date().toISOString();
@@ -2362,6 +2446,42 @@ export class HotelRepository {
     );
   }
 
+  calculateBookingPaidAmount(bookingReference: string): number {
+    if (!bookingReference) return 0;
+    const cleanRef = bookingReference.trim().toLowerCase();
+    const relevantPayments = this.payments.filter(
+      (p) =>
+        p.booking_reference &&
+        p.booking_reference.trim().toLowerCase() === cleanRef &&
+        (p.status === 'successful' || !p.status)
+    );
+    const sum = relevantPayments.reduce((acc, p) => acc + (Number(p.amount) || 0), 0);
+    return Math.round(sum * 100) / 100;
+  }
+
+  deriveMasterBookingStatus(booking: Booking): BookingStatus {
+    if (!booking) return 'confirmed';
+    if (Array.isArray(booking.booking_rooms) && booking.booking_rooms.length > 0) {
+      const allCancelled = booking.booking_rooms.every((br) => br.status === 'cancelled');
+      if (allCancelled) return 'cancelled';
+
+      const allCheckedOut = booking.booking_rooms.every((br) => br.status === 'checked_out');
+      if (allCheckedOut) return 'checked_out';
+
+      const anyCheckedOut = booking.booking_rooms.some((br) => br.status === 'checked_out');
+      const allCheckedIn = booking.booking_rooms.every((br) => br.status === 'checked_in');
+      const anyCheckedIn = booking.booking_rooms.some((br) => br.status === 'checked_in');
+
+      if (allCheckedIn) return 'checked_in';
+      if (anyCheckedIn && anyCheckedOut) return 'partially_checked_out';
+      if (anyCheckedIn) return 'partially_checked_in';
+      if (anyCheckedOut) return 'partially_checked_out';
+
+      return 'confirmed';
+    }
+    return booking.status || 'confirmed';
+  }
+
   async recordPayment(
     record: Omit<PaymentRecord, 'id' | 'payment_reference' | 'created_at'> & { payment_reference?: string },
     actor?: string
@@ -2387,12 +2507,16 @@ export class HotelRepository {
     this.payments.unshift(newPayment);
     savePersistedData('payments.json', this.payments);
 
-    // Update booking paid amount
+    // Update booking paid amount from authoritative financial ledger
     const booking = this.getBookingByReference(record.booking_reference);
     if (booking) {
-      booking.paid_amount += record.amount;
-      if (booking.paid_amount >= booking.total_amount) {
+      booking.paid_amount = this.calculateBookingPaidAmount(record.booking_reference);
+      if (booking.paid_amount >= booking.total_amount && booking.total_amount > 0) {
         booking.payment_status = 'successful';
+      } else if (booking.paid_amount > 0) {
+        booking.payment_status = 'partial';
+      } else {
+        booking.payment_status = 'pending';
       }
     }
 
@@ -2919,17 +3043,11 @@ export class HotelRepository {
         loadCashTransactionsFromSupabase(),
       ]);
       if (pgCS !== null && Array.isArray(pgCS)) {
-        const localActive = this.getActiveCashShift();
-        if (localActive && !pgCS.some(s => s.id === localActive.id || s.shift_number === localActive.shift_number)) {
-          this.cashShifts = [localActive, ...pgCS];
-        } else {
-          this.cashShifts = pgCS;
-        }
+        this.cashShifts = pgCS;
         savePersistedData('cash_shifts.json', this.cashShifts);
       }
       if (pgCT !== null && Array.isArray(pgCT)) {
-        const uncommitted = this.cashTransactions.filter(lt => !pgCT.some(pt => pt.id === lt.id));
-        this.cashTransactions = [...uncommitted, ...pgCT];
+        this.cashTransactions = pgCT;
         savePersistedData('cash_transactions.json', this.cashTransactions);
       }
     } catch (err) {
@@ -3049,8 +3167,9 @@ export class HotelRepository {
   async ensureMaintenanceLoaded(): Promise<void> {
     try {
       const pgMT = await loadMaintenanceTicketsFromSupabase();
-      if (pgMT && pgMT.length > 0) {
+      if (pgMT !== null && Array.isArray(pgMT)) {
         this.maintenanceTickets = pgMT;
+        savePersistedData('maintenance.json', this.maintenanceTickets);
       }
     } catch (err) {
       console.warn('[ENSURE MAINTENANCE LOAD WARN]', err);
@@ -3937,6 +4056,15 @@ export class HotelRepository {
     return this.toggleRFIDCardStatus(cardId, 'inactive');
   }
 
+  updateRFIDCardUid(cardId: string, newCardUid: string): RFIDCard | null {
+    const card = this.rfidCards.find((c) => c.id === cardId || c.card_uid === cardId);
+    if (!card) return null;
+    card.card_uid = newCardUid;
+    savePersistedCards(this.rfidCards);
+    syncCardToSupabase(card);
+    return card;
+  }
+
   purgeAllRFIDCards(): void {
     this.rfidCards = [];
     savePersistedCards([]);
@@ -4127,9 +4255,20 @@ export class HotelRepository {
     message: string;
     cardType?: string;
   } {
-    const card = this.rfidCards.find(
-      (c) => c.card_uid.toLowerCase() === cardUid.toLowerCase()
+    let card = this.rfidCards.find(
+      (c) => c.card_uid && c.card_uid.toLowerCase() === cardUid.toLowerCase()
     );
+
+    if (!card) {
+      const persisted = loadPersistedCards();
+      const found = persisted.find(
+        (c) => c.card_uid && c.card_uid.toLowerCase() === cardUid.toLowerCase()
+      );
+      if (found) {
+        this.rfidCards.unshift(found);
+        card = found;
+      }
+    }
 
     const room = this.rooms.find((r) => r.room_number === roomNumber);
 
@@ -5256,7 +5395,7 @@ export class HotelRepository {
   async ensureJournalsLoaded(): Promise<void> {
     try {
       const pgJ = await loadJournalEntriesFromSupabase();
-      if (pgJ && pgJ.length > 0) {
+      if (pgJ !== null && Array.isArray(pgJ)) {
         this.journalEntries = pgJ;
         savePersistedData('journal_entries.json', this.journalEntries);
       }
@@ -5271,11 +5410,11 @@ export class HotelRepository {
         loadHallEnquiriesFromSupabase(),
         loadConventionQuotesFromSupabase(),
       ]);
-      if (pgH && pgH.length > 0) {
+      if (pgH !== null && Array.isArray(pgH)) {
         this.hallEnquiries = pgH;
         savePersistedData('hall_enquiries.json', this.hallEnquiries);
       }
-      if (pgQ && pgQ.length > 0) {
+      if (pgQ !== null && Array.isArray(pgQ)) {
         this.conventionQuotes = pgQ;
         savePersistedData('convention_quotes.json', this.conventionQuotes);
       }
@@ -5287,7 +5426,7 @@ export class HotelRepository {
   async ensureConventionQuotesLoaded(): Promise<void> {
     try {
       const pgQ = await loadConventionQuotesFromSupabase();
-      if (pgQ && pgQ.length > 0) {
+      if (pgQ !== null && Array.isArray(pgQ)) {
         this.conventionQuotes = pgQ;
         savePersistedData('convention_quotes.json', this.conventionQuotes);
       }
@@ -5381,7 +5520,7 @@ export class HotelRepository {
   async ensureGuestsLoaded(): Promise<void> {
     try {
       const pgG = await loadGuestsFromSupabase();
-      if (pgG && pgG.length > 0) {
+      if (pgG !== null && Array.isArray(pgG)) {
         this.guests = pgG;
         savePersistedData('guests.json', this.guests);
       }
@@ -5393,7 +5532,7 @@ export class HotelRepository {
   async ensureStaffAttendanceLoaded(): Promise<void> {
     try {
       const pgA = await loadStaffAttendanceFromSupabase();
-      if (pgA && pgA.length > 0) {
+      if (pgA !== null && Array.isArray(pgA)) {
         this.staffAttendance = pgA;
         savePersistedData('staff_attendance.json', this.staffAttendance);
       }
@@ -5424,7 +5563,7 @@ export class HotelRepository {
   async ensureContactEnquiriesLoaded(): Promise<void> {
     try {
       const pgC = await loadContactEnquiriesFromSupabase();
-      if (pgC && pgC.length > 0) {
+      if (pgC !== null && Array.isArray(pgC)) {
         this.contactEnquiries = pgC;
         savePersistedData('contact_enquiries.json', this.contactEnquiries);
       }
@@ -5436,7 +5575,7 @@ export class HotelRepository {
   async ensureFolioChargesLoaded(): Promise<void> {
     try {
       const pgFC = await loadFolioChargesFromSupabase();
-      if (pgFC && pgFC.length > 0) {
+      if (pgFC !== null && Array.isArray(pgFC)) {
         this.folioCharges = pgFC;
         savePersistedData('folio_charges.json', this.folioCharges);
       }
@@ -5448,7 +5587,7 @@ export class HotelRepository {
   async ensureAuditLogsLoaded(): Promise<void> {
     try {
       const pgAL = await loadAuditLogsFromSupabase();
-      if (pgAL && pgAL.length > 0) {
+      if (pgAL !== null && Array.isArray(pgAL)) {
         this.auditLogs = pgAL;
         savePersistedData('audit_logs.json', this.auditLogs);
       }

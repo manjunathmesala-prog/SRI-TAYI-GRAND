@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { CashShift, CashTransaction, CashTransactionCategory } from '@/types';
-import { useRealtimeSync } from '@/lib/realtime-client';
+import { useRealtimeSync, cashbookClient } from '@/lib/realtime-client';
 import { LuxurySelect } from '@/components/ui/LuxurySelect';
 import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
 import { authStorage } from '@/lib/auth-storage';
@@ -139,7 +139,9 @@ export default function AdminCashbookPage() {
       if (res.ok) {
         const data = await res.json();
         setActiveShift(data.activeShift);
-        setBalance(data.balance || 0);
+        const resolvedBalance = typeof data.balance === 'number' ? data.balance : 0;
+        setBalance(resolvedBalance);
+        cashbookClient.setBalance(resolvedBalance);
         setOpeningFloat(data.openingFloat || 0);
         setTotalCashIn(data.totalCashIn || 0);
         setTotalCashOut(data.totalCashOut || 0);
@@ -164,12 +166,14 @@ export default function AdminCashbookPage() {
         event.eventType === 'cash_transaction_created' ||
         event.eventType === 'expense_created'
       ) {
+        cashbookClient.invalidate();
         fetchCashbook();
       }
     },
   });
 
   useEffect(() => {
+    cashbookClient.invalidate();
     fetchCashbook();
   }, [fetchCashbook]);
 
@@ -613,8 +617,73 @@ export default function AdminCashbookPage() {
           </div>
         </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
+        {/* Mobile Transactions Card View */}
+        <div className="md:hidden space-y-2.5">
+          {filteredTransactions.length === 0 ? (
+            <div className="py-8 text-center text-gray-400 text-xs">
+              {isTelugu ? 'లావాదేవీలు ఏవీ లేవు.' : 'No cash transactions recorded for this criteria.'}
+            </div>
+          ) : (
+            filteredTransactions.map((tx) => (
+              <div
+                key={tx.id}
+                className="p-3.5 rounded-xl border border-[#E6D9C5]/80 bg-white shadow-2xs space-y-2 hover:border-[#8D672F]/40 transition-colors"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                        tx.type === 'cash_in'
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                          : 'bg-rose-100 text-rose-800 border border-rose-200'
+                      }`}
+                    >
+                      {tx.type === 'cash_in' ? <ArrowDownLeft className="w-3 h-3" /> : <ArrowUpRight className="w-3 h-3" />}
+                      <span>{tx.type === 'cash_in' ? 'Cash In' : 'Cash Out'}</span>
+                    </span>
+                    <span className="text-[11px] text-gray-500 font-mono">
+                      {new Date(tx.performed_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <span className={`font-mono font-bold text-sm ${tx.type === 'cash_in' ? 'text-emerald-700' : 'text-rose-700'}`}>
+                    {tx.type === 'cash_in' ? '+' : '-'}₹{tx.amount.toLocaleString('en-IN')}
+                  </span>
+                </div>
+
+                <div className="text-xs font-semibold text-[#241912] leading-snug">
+                  {tx.reason}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between text-[11px] text-[#786A5B] pt-1.5 border-t border-[#E6D9C5]/40 gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="px-2 py-0.5 rounded-md bg-[#FAF8F5] border border-[#E6D9C5]/60 capitalize text-[10px] font-medium text-gray-700">
+                      {tx.category.replace(/_/g, ' ')}
+                    </span>
+                    {(tx.booking_reference || tx.receipt_ref) && (
+                      <span className="font-mono text-[10px] text-gray-500">
+                        {tx.booking_reference || tx.receipt_ref}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 ml-auto">
+                    <span className="text-gray-600 text-[10px]">{tx.performed_by}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteTransaction(tx.id, tx.reason)}
+                      className="p-1.5 rounded-md text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                      title={isTelugu ? 'లావాదేవీ తొలగించు' : 'Delete Transaction'}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-[#E6D9C5]/80 bg-[#FAF8F5] text-[#786A5B] font-semibold text-[11px]">
@@ -691,7 +760,90 @@ export default function AdminCashbookPage() {
           <span>{isTelugu ? 'గత షిఫ్ట్‌లు & ఆడిట్ రికార్డులు' : 'Shift History & Drawer Audits'}</span>
         </h2>
 
-        <div className="overflow-x-auto">
+        {/* Mobile Shift History Card View */}
+        <div className="md:hidden space-y-2.5">
+          {shifts.length === 0 ? (
+            <div className="py-8 text-center text-gray-400 text-xs">
+              {isTelugu ? 'గత షిఫ్ట్ రికార్డులు ఏవీ లేవు.' : 'No cash shift records found in database.'}
+            </div>
+          ) : (
+            shifts.map((s) => (
+              <div
+                key={s.id}
+                className="p-3.5 rounded-xl border border-[#EFE3D6] bg-white shadow-2xs space-y-2"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono font-bold text-xs text-[#241912]">Shift #{s.shift_number}</span>
+                    <span
+                      className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${
+                        s.status === 'open'
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                          : 'bg-gray-100 text-gray-700 border border-gray-200'
+                      }`}
+                    >
+                      {s.status === 'open' ? 'Active' : 'Closed'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedShiftForPrint(s)}
+                      className="p-1.5 rounded-lg hover:bg-stone-100 text-[#43001F] transition-colors cursor-pointer"
+                      title="Print Handover Report"
+                    >
+                      <Printer className="w-4 h-4 text-[#D8AD56]" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteShift(s.id, s.shift_number)}
+                      className="p-1.5 rounded-lg hover:bg-rose-50 text-rose-500 hover:text-rose-700 transition-colors cursor-pointer"
+                      title="Delete Shift Record"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-[11px] pt-1">
+                  <div>
+                    <span className="text-gray-400 block text-[10px]">Cashier</span>
+                    <span className="font-semibold text-gray-700">{s.cashier_name}</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400 block text-[10px]">Opened</span>
+                    <span className="font-mono text-gray-600">
+                      {new Date(s.opened_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400 block text-[10px]">Float / Count</span>
+                    <span className="font-mono text-gray-700">
+                      ₹{s.opening_float.toLocaleString('en-IN')} / {s.closing_cash_counted !== undefined ? `₹${s.closing_cash_counted.toLocaleString('en-IN')}` : '—'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400 block text-[10px]">Discrepancy</span>
+                    <span className="font-mono font-bold text-[11px]">
+                      {s.discrepancy === undefined ? (
+                        <span className="text-gray-400">—</span>
+                      ) : s.discrepancy === 0 ? (
+                        <span className="text-emerald-700">Balanced (₹0)</span>
+                      ) : s.discrepancy > 0 ? (
+                        <span className="text-blue-700">+₹{s.discrepancy} (Over)</span>
+                      ) : (
+                        <span className="text-rose-700">₹{s.discrepancy} (Short)</span>
+                      )}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Desktop Shift Table View */}
+        <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left text-xs">
             <thead>
               <tr className="border-b border-[#EFE3D6] text-[#786B61] uppercase tracking-wider text-[10px]">
