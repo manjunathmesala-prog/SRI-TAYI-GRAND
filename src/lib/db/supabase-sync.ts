@@ -2996,3 +2996,209 @@ export async function deleteNightAuditRecipientFromSupabase(recipientId: string)
   }
 }
 
+export interface DailyAuditRunRecord {
+  id: string;
+  business_date: string;
+  run_type: 'scheduled' | 'manual';
+  status: 'in_progress' | 'completed' | 'failed';
+  triggered_by: string;
+  summary_json?: any;
+  pdf_path?: string;
+  pdf_filename?: string;
+  error_log?: string;
+  started_at?: string;
+  completed_at?: string;
+}
+
+export interface AuditDispatchLogRecord {
+  id: string;
+  audit_run_id: string;
+  recipient_name: string;
+  channel: 'email' | 'whatsapp';
+  destination: string;
+  status: 'delivered' | 'failed' | 'disabled' | 'configuration_required' | 'pending';
+  provider?: string;
+  provider_message_id?: string;
+  error_message?: string;
+  sent_at?: string;
+}
+
+export async function recordDailyAuditRunToSupabase(run: DailyAuditRunRecord): Promise<void> {
+  const db = getSupabasePgPool();
+  if (!db) return;
+  const client = await db.connect();
+  try {
+    await client.query(`
+      INSERT INTO daily_audit_runs (id, business_date, run_type, status, triggered_by, summary_json, pdf_path, pdf_filename, error_log, started_at, completed_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, COALESCE($10, NOW()), $11)
+      ON CONFLICT (id) DO UPDATE SET
+        status = EXCLUDED.status,
+        summary_json = EXCLUDED.summary_json,
+        pdf_path = EXCLUDED.pdf_path,
+        pdf_filename = EXCLUDED.pdf_filename,
+        error_log = EXCLUDED.error_log,
+        completed_at = EXCLUDED.completed_at;
+    `, [
+      run.id,
+      run.business_date,
+      run.run_type,
+      run.status,
+      run.triggered_by || 'system',
+      run.summary_json ? JSON.stringify(run.summary_json) : null,
+      run.pdf_path || null,
+      run.pdf_filename || null,
+      run.error_log || null,
+      run.started_at ? new Date(run.started_at) : new Date(),
+      run.completed_at ? new Date(run.completed_at) : null
+    ]);
+
+    // Also update night_audit_settings last_run_at and last_status
+    await client.query(`
+      UPDATE night_audit_settings
+      SET last_run_at = NOW(),
+          last_status = $1,
+          updated_at = NOW()
+      WHERE id = 'stg-audit-settings';
+    `, [run.status === 'completed' ? 'operational' : (run.status === 'failed' ? 'failed' : 'in_progress')]);
+  } catch (err: any) {
+    console.warn('[SUPABASE RECORD DAILY AUDIT RUN WARN]', err.message);
+  } finally {
+    client.release();
+  }
+}
+
+export async function updateDailyAuditRunInSupabase(
+  runId: string,
+  updates: Partial<DailyAuditRunRecord>
+): Promise<void> {
+  const db = getSupabasePgPool();
+  if (!db) return;
+  const client = await db.connect();
+  try {
+    const fields: string[] = [];
+    const values: any[] = [];
+    let idx = 1;
+
+    if (updates.status !== undefined) {
+      fields.push(`status = $${idx++}`);
+      values.push(updates.status);
+    }
+    if (updates.summary_json !== undefined) {
+      fields.push(`summary_json = $${idx++}`);
+      values.push(JSON.stringify(updates.summary_json));
+    }
+    if (updates.pdf_path !== undefined) {
+      fields.push(`pdf_path = $${idx++}`);
+      values.push(updates.pdf_path);
+    }
+    if (updates.pdf_filename !== undefined) {
+      fields.push(`pdf_filename = $${idx++}`);
+      values.push(updates.pdf_filename);
+    }
+    if (updates.error_log !== undefined) {
+      fields.push(`error_log = $${idx++}`);
+      values.push(updates.error_log);
+    }
+    if (updates.completed_at !== undefined) {
+      fields.push(`completed_at = $${idx++}`);
+      values.push(updates.completed_at ? new Date(updates.completed_at) : new Date());
+    }
+
+    if (fields.length > 0) {
+      values.push(runId);
+      await client.query(`UPDATE daily_audit_runs SET ${fields.join(', ')} WHERE id = $${idx};`, values);
+    }
+  } catch (err: any) {
+    console.warn('[SUPABASE UPDATE DAILY AUDIT RUN WARN]', err.message);
+  } finally {
+    client.release();
+  }
+}
+
+export async function recordAuditDispatchLogToSupabase(log: AuditDispatchLogRecord): Promise<void> {
+  const db = getSupabasePgPool();
+  if (!db) return;
+  const client = await db.connect();
+  try {
+    await client.query(`
+      INSERT INTO audit_dispatch_logs (id, audit_run_id, recipient_name, channel, destination, status, provider, provider_message_id, error_message, sent_at)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, COALESCE($10, NOW()));
+    `, [
+      log.id || `disp-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      log.audit_run_id,
+      log.recipient_name || 'Recipient',
+      log.channel,
+      log.destination,
+      log.status,
+      log.provider || null,
+      log.provider_message_id || null,
+      log.error_message || null,
+      log.sent_at ? new Date(log.sent_at) : new Date()
+    ]);
+  } catch (err: any) {
+    console.warn('[SUPABASE RECORD AUDIT DISPATCH LOG WARN]', err.message);
+  } finally {
+    client.release();
+  }
+}
+
+export async function loadDailyAuditRunsFromSupabase(limit = 15): Promise<Array<DailyAuditRunRecord & { deliveries?: AuditDispatchLogRecord[] }>> {
+  const db = getSupabasePgPool();
+  if (!db) return [];
+  const client = await db.connect();
+  try {
+    const runsRes = await client.query(`
+      SELECT * FROM daily_audit_runs
+      ORDER BY started_at DESC
+      LIMIT $1;
+    `, [limit]);
+
+    if (runsRes.rows.length === 0) return [];
+
+    const runIds = runsRes.rows.map((r: any) => r.id);
+    const logsRes = await client.query(`
+      SELECT * FROM audit_dispatch_logs
+      WHERE audit_run_id = ANY($1)
+      ORDER BY sent_at ASC;
+    `, [runIds]);
+
+    const logsByRunId: Record<string, AuditDispatchLogRecord[]> = {};
+    for (const l of logsRes.rows) {
+      if (!logsByRunId[l.audit_run_id]) logsByRunId[l.audit_run_id] = [];
+      logsByRunId[l.audit_run_id].push({
+        id: l.id,
+        audit_run_id: l.audit_run_id,
+        recipient_name: l.recipient_name,
+        channel: l.channel,
+        destination: l.destination,
+        status: l.status,
+        provider: l.provider,
+        provider_message_id: l.provider_message_id,
+        error_message: l.error_message,
+        sent_at: l.sent_at ? new Date(l.sent_at).toISOString() : undefined
+      });
+    }
+
+    return runsRes.rows.map((r: any) => ({
+      id: r.id,
+      business_date: r.business_date ? new Date(r.business_date).toISOString().split('T')[0] : '',
+      run_type: r.run_type,
+      status: r.status,
+      triggered_by: r.triggered_by,
+      summary_json: r.summary_json,
+      pdf_path: r.pdf_path,
+      pdf_filename: r.pdf_filename,
+      error_log: r.error_log,
+      started_at: r.started_at ? new Date(r.started_at).toISOString() : undefined,
+      completed_at: r.completed_at ? new Date(r.completed_at).toISOString() : undefined,
+      deliveries: logsByRunId[r.id] || []
+    }));
+  } catch (err: any) {
+    console.warn('[SUPABASE LOAD DAILY AUDIT RUNS WARN]', err.message);
+    return [];
+  } finally {
+    client.release();
+  }
+}
+
+

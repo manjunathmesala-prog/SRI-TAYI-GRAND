@@ -36,6 +36,9 @@ import {
   Clock,
   Sliders,
   Check,
+  Download,
+  FileText,
+  ExternalLink,
 } from 'lucide-react';
 
 interface ClosingSummaryData {
@@ -106,6 +109,20 @@ export default function AdminDailyClosingPage() {
   const [newRecipientChannel, setNewRecipientChannel] = useState<'email' | 'whatsapp'>('email');
   const [newRecipientAddress, setNewRecipientAddress] = useState('');
 
+  // Night Audit History & Channel Health state
+  const [auditRuns, setAuditRuns] = useState<any[]>([]);
+  const [loadingRuns, setLoadingRuns] = useState(false);
+  const [channelHealth, setChannelHealth] = useState<{
+    cronEngine: string;
+    emailService: string;
+    whatsappService: string;
+    database?: string;
+  }>({
+    cronEngine: 'operational',
+    emailService: 'operational',
+    whatsappService: 'configuration_required',
+  });
+
   const fetchAuditConfig = useCallback(async () => {
     try {
       setLoadingConfig(true);
@@ -117,11 +134,33 @@ export default function AdminDailyClosingPage() {
         if (data.config) {
           setAuditConfig(data.config);
         }
+        if (data.health) {
+          setChannelHealth(data.health);
+        }
       }
     } catch (err: any) {
       console.warn('Failed to load night audit config', err);
     } finally {
       setLoadingConfig(false);
+    }
+  }, []);
+
+  const fetchAuditRuns = useCallback(async () => {
+    try {
+      setLoadingRuns(true);
+      const res = await fetch('/api/admin/night-audit/history?limit=15', {
+        headers: getAdminHeaders(),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.runs)) {
+          setAuditRuns(data.runs);
+        }
+      }
+    } catch (err: any) {
+      console.warn('Failed to load audit history', err);
+    } finally {
+      setLoadingRuns(false);
     }
   }, []);
 
@@ -141,6 +180,7 @@ export default function AdminDailyClosingPage() {
       const data = await res.json();
       if (res.ok && data.success) {
         setAuditConfig(data.config);
+        if (data.health) setChannelHealth(data.health);
         setFeedback({ type: 'success', message: 'Automated Night Audit settings and recipient list saved successfully.' });
       } else {
         setFeedback({ type: 'error', message: data.error || 'Failed to save settings.' });
@@ -169,17 +209,23 @@ export default function AdminDailyClosingPage() {
         const deliveries = data.result?.deliveries || [];
         const sentCount = deliveries.filter((d: any) => d.status === 'sent').length;
         const failed = deliveries.filter((d: any) => d.status === 'failed');
+        const configReq = deliveries.filter((d: any) => d.status === 'configuration_required');
+        
         if (failed.length > 0 && sentCount === 0) {
           const firstErr = failed[0].error || 'Delivery rejected by email service provider.';
           setTestResult(`Delivery failed: ${firstErr}`);
           setFeedback({ type: 'error', message: `Delivery failed: ${firstErr}` });
+        } else if (configReq.length > 0 && sentCount === 0) {
+          setTestResult(`Report generated & archived. WhatsApp dispatch pending: ${configReq[0].error || 'API token unconfigured'}.`);
+          setFeedback({ type: 'success', message: `Report generated for ${businessDate}.` });
         } else if (failed.length > 0) {
-          setTestResult(`Dispatched to ${sentCount} recipient(s), but ${failed.length} failed: ${failed[0].error || 'Check email service limits'}`);
-          setFeedback({ type: 'error', message: `Partial dispatch: ${failed[0].error || 'Check email service limits'}` });
+          setTestResult(`Dispatched to ${sentCount} recipient(s), but ${failed.length} failed: ${failed[0].error || 'Check provider limits'}`);
+          setFeedback({ type: 'error', message: `Partial dispatch: ${failed[0].error || 'Check provider limits'}` });
         } else {
-          setTestResult(`Test audit generated successfully! Dispatched to ${sentCount} recipient(s).`);
+          setTestResult(`Night audit PDF compiled successfully! Dispatched to ${sentCount} recipient(s).`);
           setFeedback({ type: 'success', message: `Test report dispatched for ${businessDate}.` });
         }
+        fetchAuditRuns();
       } else {
         setFeedback({ type: 'error', message: data.error || 'Test audit dispatch failed.' });
       }
@@ -196,12 +242,30 @@ export default function AdminDailyClosingPage() {
       setFeedback({ type: 'error', message: 'Please provide recipient name and address.' });
       return;
     }
+    const cleanAddr = newRecipientAddress.trim();
+    if (newRecipientChannel === 'email') {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(cleanAddr)) {
+        setFeedback({ type: 'error', message: 'Please enter a valid email address (e.g. name@domain.com).' });
+        return;
+      }
+    } else {
+      const phoneDigits = cleanAddr.replace(/\D/g, '');
+      if (phoneDigits.length < 10) {
+        setFeedback({ type: 'error', message: 'Please enter a valid phone number with country code (e.g. +919876543210).' });
+        return;
+      }
+    }
+
     const newRecipient: NightAuditRecipient = {
-      id: `rec-${Date.now()}`,
+      id: `rec-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       name: newRecipientName.trim(),
+      recipient_name: newRecipientName.trim(),
       channel: newRecipientChannel,
-      address: newRecipientAddress.trim(),
+      address: cleanAddr,
+      recipient_address: cleanAddr,
       is_active: true,
+      consent_status: 'granted',
       created_at: new Date().toISOString(),
     };
     const updated = {
@@ -270,7 +334,8 @@ export default function AdminDailyClosingPage() {
   useEffect(() => {
     fetchClosingData();
     fetchAuditConfig();
-  }, [fetchClosingData, fetchAuditConfig]);
+    fetchAuditRuns();
+  }, [fetchClosingData, fetchAuditConfig, fetchAuditRuns]);
 
   // Real-time synchronization
   useRealtimeSync({
@@ -415,6 +480,7 @@ export default function AdminDailyClosingPage() {
           onClick={() => {
             setActiveTab('automated-dispatch');
             if (!auditConfig) fetchAuditConfig();
+            fetchAuditRuns();
           }}
           className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === 'automated-dispatch'
@@ -1225,9 +1291,13 @@ export default function AdminDailyClosingPage() {
                     <Clock className="w-3.5 h-3.5" />
                     Automated Night Audit Scheduler
                   </span>
-                  <span className="text-xs text-[#FAF7F2]/70 flex items-center gap-1.5 font-mono">
-                    <ShieldCheck className="w-3.5 h-3.5 text-[#D8AD56]" />
-                    Cron Engine: {auditConfig?.enabled ? 'Active (Daily at 00:00 IST)' : 'Paused'}
+                  <span className={`text-xs flex items-center gap-1.5 font-mono px-3 py-1 rounded-full border ${
+                    auditConfig?.enabled
+                      ? 'text-emerald-300 bg-emerald-950/60 border-emerald-500/40'
+                      : 'text-stone-300 bg-stone-900/60 border-stone-700'
+                  }`}>
+                    <ShieldCheck className={`w-3.5 h-3.5 ${auditConfig?.enabled ? 'text-emerald-400' : 'text-stone-400'}`} />
+                    Cron Engine: {auditConfig?.enabled ? `Active (Daily at ${auditConfig?.execution_time || '00:00'} IST)` : 'Paused'}
                   </span>
                 </div>
                 <h2 className="text-2xl sm:text-3xl font-serif font-bold text-white tracking-wide">
@@ -1379,11 +1449,20 @@ export default function AdminDailyClosingPage() {
                         <Mail className="w-4 h-4" />
                       </div>
                       <div>
-                        <span className="text-xs font-bold text-[#241912] block">
-                          Email PDF Report Dispatch
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-[#241912] block">
+                            Email PDF Report Dispatch
+                          </span>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                            channelHealth.emailService === 'operational'
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                              : 'bg-amber-50 text-amber-800 border-amber-300'
+                          }`}>
+                            {channelHealth.emailService === 'operational' ? 'Operational' : 'Configuration Required'}
+                          </span>
+                        </div>
                         <span className="text-[11px] text-[#786A5B] block">
-                          Generates and emails official multi-page PDF audit certificate.
+                          Generates and emails official multi-page PDF audit certificate with financial cards.
                         </span>
                       </div>
                     </div>
@@ -1414,11 +1493,22 @@ export default function AdminDailyClosingPage() {
                         <Phone className="w-4 h-4" />
                       </div>
                       <div>
-                        <span className="text-xs font-bold text-[#241912] block">
-                          WhatsApp Metric Summary
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-[#241912] block">
+                            WhatsApp Metric Summary
+                          </span>
+                          <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${
+                            channelHealth.whatsappService === 'operational'
+                              ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                              : 'bg-amber-50 text-amber-800 border-amber-300'
+                          }`}>
+                            {channelHealth.whatsappService === 'operational' ? 'Operational' : 'Configuration Required'}
+                          </span>
+                        </div>
                         <span className="text-[11px] text-[#786A5B] block">
-                          Sends instant daily collection &amp; occupancy metrics alert.
+                          {channelHealth.whatsappService === 'operational'
+                            ? 'Sends instant daily collection & occupancy metrics alert via Meta Cloud API.'
+                            : 'Meta WhatsApp Cloud API token (WHATSAPP_API_TOKEN) required for automated dispatch.'}
                         </span>
                       </div>
                     </div>
@@ -1596,6 +1686,117 @@ export default function AdminDailyClosingPage() {
                         </td>
                       </tr>
                     ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* RECENT NIGHT AUDIT RUNS & OFFICIAL REPORTS TABLE */}
+          <div className="bg-white rounded-3xl border border-[#EFE3D6] shadow-sm overflow-hidden">
+            <div className="p-6 border-b border-[#EFE3D6] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-serif font-bold text-[#241912] flex items-center gap-2">
+                  <FileCheck className="w-5 h-5 text-[#D8AD56]" />
+                  <span>Recent Night Audit Runs &amp; Official Certificates</span>
+                </h3>
+                <p className="text-xs text-[#786A5B] mt-0.5">
+                  Audit trail of automated scheduled runs and manual on-demand generation with verified delivery logs.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => fetchAuditRuns()}
+                disabled={loadingRuns}
+                className="px-3.5 py-2 rounded-xl bg-[#FAF7F2] text-[#241912] border border-[#EFE3D6] hover:bg-[#EFE3D6] text-xs font-semibold flex items-center gap-1.5 self-start sm:self-auto transition-colors disabled:opacity-50"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${loadingRuns ? 'animate-spin' : ''}`} />
+                <span>Refresh Runs</span>
+              </button>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#FAF7F2] text-[#786A5B] font-semibold uppercase tracking-wider border-b border-[#EFE3D6]">
+                  <tr>
+                    <th className="py-3 px-4">Business Date</th>
+                    <th className="py-3 px-4">Execution Type</th>
+                    <th className="py-3 px-4">Status</th>
+                    <th className="py-3 px-4">Completed (IST)</th>
+                    <th className="py-3 px-4">Gross Revenue</th>
+                    <th className="py-3 px-4">Collections</th>
+                    <th className="py-3 px-4">Occupancy</th>
+                    <th className="py-3 px-4 text-right">Official Report</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#EFE3D6]">
+                  {auditRuns.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="py-8 text-center text-xs text-[#786A5B]">
+                        {loadingRuns ? 'Loading audit runs...' : 'No night audit runs recorded yet. Click "Send Test Report Now" or wait for scheduled execution.'}
+                      </td>
+                    </tr>
+                  ) : (
+                    auditRuns.map((run) => {
+                      const summary = run.summary_json || {};
+                      const rev = summary.revenue?.grossRevenue ?? summary.revenue?.totalRevenue ?? 0;
+                      const coll = summary.collections?.totalCollections ?? summary.collections?.total ?? 0;
+                      const occ = summary.overview?.occupancyRate ?? summary.occupancy?.occupancyRate ?? 0;
+                      const isCompleted = run.status === 'completed';
+
+                      return (
+                        <tr key={run.id} className="hover:bg-[#FAF7F2]/60 transition-colors">
+                          <td className="py-3.5 px-4 font-bold text-[#241912]">
+                            {run.business_date}
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                              run.run_type === 'scheduled'
+                                ? 'bg-purple-50 text-purple-800 border border-purple-200'
+                                : 'bg-stone-100 text-stone-700 border border-stone-300'
+                            }`}>
+                              {run.run_type === 'scheduled' ? 'Scheduled Cron' : 'Manual On-Demand'}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                              isCompleted
+                                ? 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                                : run.status === 'in_progress'
+                                ? 'bg-blue-50 text-blue-800 border-blue-300'
+                                : 'bg-rose-50 text-rose-800 border-rose-300'
+                            }`}>
+                              {isCompleted ? <CheckCircle2 className="w-3 h-3 text-emerald-600" /> : null}
+                              <span>{run.status}</span>
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 font-mono text-stone-600">
+                            {run.completed_at ? new Date(run.completed_at).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : 'Pending'}
+                          </td>
+                          <td className="py-3.5 px-4 font-mono font-bold text-[#241912]">
+                            ₹{Number(rev).toLocaleString('en-IN')}
+                          </td>
+                          <td className="py-3.5 px-4 font-mono font-bold text-emerald-700">
+                            ₹{Number(coll).toLocaleString('en-IN')}
+                          </td>
+                          <td className="py-3.5 px-4 font-mono text-stone-700">
+                            {Number(occ).toFixed(1)}%
+                          </td>
+                          <td className="py-3.5 px-4 text-right">
+                            <a
+                              href={`/api/admin/night-audit/download?filename=${encodeURIComponent(run.pdf_filename || '')}&date=${run.business_date}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#241912] hover:bg-[#382216] text-[#D8AD56] font-bold text-[11px] transition-colors shadow-xs"
+                            >
+                              <Download className="w-3.5 h-3.5" />
+                              <span>Download PDF</span>
+                            </a>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
