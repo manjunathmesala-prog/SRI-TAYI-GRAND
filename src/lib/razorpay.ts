@@ -141,7 +141,7 @@ export function verifyPaymentSignature(
     return false;
   }
 
-  if (orderId.startsWith('order_test_') && (process.env.NODE_ENV !== 'production' || signature === 'rzp_valid_mock_hmac_signature')) {
+  if (!customSecret && orderId.startsWith('order_test_') && signature === 'rzp_valid_mock_hmac_signature' && process.env.NODE_ENV !== 'production') {
     return true;
   }
 

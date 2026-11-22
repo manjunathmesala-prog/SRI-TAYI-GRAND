@@ -197,8 +197,8 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
           $11, $12, $13, $14, $15, $16, $17, $18, $19, $20,
-          $21, $22, $23, $24, $25, $26, $27, $28, COALESCE($29, NOW()), NOW(),
-          $30
+          $21, $22, $23, $24, $25, $26, $27, $28, $29, COALESCE($30, NOW()),
+          NOW()
         )
         ON CONFLICT (booking_reference) DO UPDATE SET
           status = EXCLUDED.status,
@@ -208,6 +208,8 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
           tax_amount = EXCLUDED.tax_amount,
           total_amount = EXCLUDED.total_amount,
           paid_amount = EXCLUDED.paid_amount,
+          pickup_code = COALESCE(EXCLUDED.pickup_code, bookings.pickup_code),
+          walk_in_token = COALESCE(EXCLUDED.walk_in_token, bookings.walk_in_token),
           room_assigned_by = COALESCE(EXCLUDED.room_assigned_by, bookings.room_assigned_by),
           id_proof_type = COALESCE(EXCLUDED.id_proof_type, bookings.id_proof_type),
           id_proof_number = COALESCE(EXCLUDED.id_proof_number, bookings.id_proof_number),
@@ -254,13 +256,13 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
           booking.checked_out_at || (booking.status === 'checked_out' ? new Date().toISOString() : null),
           booking.assigned_room_id || null,
           booking.assigned_room_number || null,
+          Array.isArray(booking.assigned_room_numbers) && booking.assigned_room_numbers.length > 0
+            ? booking.assigned_room_numbers
+            : (booking.assigned_room_number ? [booking.assigned_room_number] : null),
           booking.category_id || null,
           booking.category_name || null,
           booking.keycard_uid || null,
           booking.created_at || null,
-          Array.isArray(booking.assigned_room_numbers) && booking.assigned_room_numbers.length > 0
-            ? booking.assigned_room_numbers
-            : (booking.assigned_room_number ? [booking.assigned_room_number] : null),
         ]
       );
 
@@ -491,6 +493,11 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
       `[SUPABASE BOOKING SYNC WARN] (${booking.booking_reference}):`,
       err instanceof Error ? err.message : String(err)
     );
+    const code = (err as any)?.code;
+    const msg = String((err as any)?.message || '').toLowerCase();
+    if (code === '23P01' || code === '23505' || msg.includes('exclusion constraint') || msg.includes('violates exclusion') || msg.includes('conflict')) {
+      throw err;
+    }
   }
 }
 

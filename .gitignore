@@ -46,5 +46,6 @@ scratch/
 .vercel
 .env*
 data/backups/
+backup_*/
 supabase/.temp/
 public/reports/night-audit/*.pdf
