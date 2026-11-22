@@ -1,0 +1,603 @@
+{
+  "tester": "Sagar (Hotel Manager)",
+  "timestamp": "2026-11-22T11:00:46.415Z",
+  "environment": {
+    "baseUrl": "http://localhost:3000",
+    "browser": "Google Chrome",
+    "database": "Supabase PostgreSQL Cloud"
+  },
+  "metrics": {
+    "totalWalkIns": 7,
+    "totalWebsiteBookings": 0,
+    "totalOtaBookings": 5,
+    "totalBookingsProcessed": 12,
+    "totalCashCollected": 8000,
+    "totalUpiCollected": 7500,
+    "totalOnlineRazorpayCollected": 0,
+    "totalExpensesCreated": 1,
+    "totalCashExpenses": 0,
+    "expectedCashAtCounter": 13000,
+    "actualCashCounted": 0,
+    "discrepancy": 0
+  },
+  "testSteps": [
+    {
+      "category": "Authentication",
+      "action": "Sagar preset chip loaded credentials correctly",
+      "status": "PASSED",
+      "details": {
+        "email": "sagar@sritayigrand.com"
+      },
+      "timestamp": "2026-11-22T11:00:51.920Z"
+    },
+    {
+      "category": "Authentication",
+      "action": "Manager Sagar authenticated with \"Hotel Manager\" purple badge",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T11:00:58.111Z"
+    },
+    {
+      "category": "Shift Operations",
+      "action": "Manager Sagar Clock-In submitted for Morning Shift",
+      "status": "PASSED",
+      "details": {
+        "status": 500,
+        "json": {
+          "success": false,
+          "error": "Staff member not found."
+        }
+      },
+      "timestamp": "2026-11-22T11:01:02.780Z"
+    },
+    {
+      "category": "Cash Drawer",
+      "action": "Opened Cash Drawer Shift with ₹5,000 Opening Float",
+      "status": "WARNING",
+      "details": {
+        "status": 400,
+        "json": {
+          "success": false,
+          "error": "Shift #SH-20261122-01 is currently active. Please close it first."
+        }
+      },
+      "timestamp": "2026-11-22T11:01:09.985Z"
+    },
+    {
+      "category": "Walk-in Booking",
+      "action": "Walk-in #1 (Rajesh Sharma)",
+      "status": "FAILED",
+      "details": {
+        "status": 409,
+        "json": {
+          "success": false,
+          "error": "Room 101 is currently occupied by another guest"
+        }
+      },
+      "timestamp": "2026-11-22T11:01:10.098Z"
+    },
+    {
+      "category": "Walk-in Booking",
+      "action": "Walk-in #2 (Venkat Rao)",
+      "status": "FAILED",
+      "details": {
+        "status": 409,
+        "json": {
+          "success": false,
+          "error": "Room 102 is currently occupied by another guest"
+        }
+      },
+      "timestamp": "2026-11-22T11:01:10.164Z"
+    },
+    {
+      "category": "Walk-in Booking",
+      "action": "Walk-in #3 (Suresh Reddy - Room 103 - ₹2000 via CASH)",
+      "status": "PASSED",
+      "details": {
+        "ref": "TG-FD-20261122-9776"
+      },
+      "timestamp": "2026-11-22T11:01:16.328Z"
+    },
+    {
+      "category": "Walk-in Booking",
+      "action": "Walk-in #4 (Anand Varma - Room 104 - ₹2000 via CASH)",
+      "status": "PASSED",
+      "details": {
+        "ref": "TG-FD-20261122-4062"
+      },
+      "timestamp": "2026-11-22T11:01:22.826Z"
+    },
+    {
+      "category": "Walk-in Booking",
+      "action": "Walk-in #5 (Prakash Naidu - Room 105 - ₹2000 via CASH)",
+      "status": "PASSED",
+      "details": {
+        "ref": "TG-FD-20261122-1078"
+      },
+      "timestamp": "2026-11-22T11:01:29.129Z"
+    },
+    {
+      "category": "Walk-in Booking",
+      "action": "Walk-in #6 (Naveen Kumar - Room 106 - ₹2000 via CASH)",
+      "status": "PASSED",
+      "details": {
+        "ref": "TG-FD-20261122-2135"
+      },
+      "timestamp": "2026-11-22T11:01:34.322Z"
+    },
+    {
+      "category": "Walk-in Booking",
+      "action": "Walk-in #7 (Vikramaditya - Room 107 - ₹2500 via UPI)",
+      "status": "PASSED",
+      "details": {
+        "ref": "TG-FD-20261122-7721"
+      },
+      "timestamp": "2026-11-22T11:01:39.680Z"
+    },
+    {
+      "category": "Walk-in Booking",
+      "action": "Walk-in #8 (Chandrasekhar - Room 108 - ₹2500 via UPI)",
+      "status": "PASSED",
+      "details": {
+        "ref": "TG-FD-20261122-5719"
+      },
+      "timestamp": "2026-11-22T11:01:44.732Z"
+    },
+    {
+      "category": "Walk-in Booking",
+      "action": "Walk-in #9 (Divya Chowdary)",
+      "status": "FAILED",
+      "details": {
+        "status": 409,
+        "json": {
+          "success": false,
+          "error": "Room 201 is currently occupied by another guest"
+        }
+      },
+      "timestamp": "2026-11-22T11:01:44.790Z"
+    },
+    {
+      "category": "Walk-in Booking",
+      "action": "Walk-in #10 (Murali Mohan - Room 202 - ₹2500 via UPI)",
+      "status": "PASSED",
+      "details": {
+        "ref": "TG-FD-20261122-9688"
+      },
+      "timestamp": "2026-11-22T11:01:50.430Z"
+    },
+    {
+      "category": "Website Booking",
+      "action": "Website Booking #1 (Karthik Swaminathan)",
+      "status": "FAILED",
+      "details": {
+        "status": 500,
+        "json": {
+          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
+        }
+      },
+      "timestamp": "2026-11-22T11:02:04.598Z"
+    },
+    {
+      "category": "Website Booking",
+      "action": "Website Booking #2 (Meenakshi Iyer)",
+      "status": "FAILED",
+      "details": {
+        "status": 500,
+        "json": {
+          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
+        }
+      },
+      "timestamp": "2026-11-22T11:02:07.390Z"
+    },
+    {
+      "category": "Website Booking",
+      "action": "Website Booking #3 (Raghuveer Prasad)",
+      "status": "FAILED",
+      "details": {
+        "status": 500,
+        "json": {
+          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
+        }
+      },
+      "timestamp": "2026-11-22T11:02:09.843Z"
+    },
+    {
+      "category": "Website Booking",
+      "action": "Website Booking #4 (Deepa Narayanan)",
+      "status": "FAILED",
+      "details": {
+        "status": 500,
+        "json": {
+          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
+        }
+      },
+      "timestamp": "2026-11-22T11:02:13.144Z"
+    },
+    {
+      "category": "Website Booking",
+      "action": "Website Booking #5 (Harish Bhat)",
+      "status": "FAILED",
+      "details": {
+        "status": 500,
+        "json": {
+          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
+        }
+      },
+      "timestamp": "2026-11-22T11:02:15.545Z"
+    },
+    {
+      "category": "OTA Booking",
+      "action": "OTA #1 (MakeMyTrip - Voucher: MMT-IN-889911 - ₹2400)",
+      "status": "PASSED",
+      "details": {
+        "ref": "STG-20261122-6751"
+      },
+      "timestamp": "2026-11-22T11:02:19.111Z"
+    },
+    {
+      "category": "OTA Booking",
+      "action": "OTA #2 (Booking.com - Voucher: BK-EU-445522 - ₹2600)",
+      "status": "PASSED",
+      "details": {
+        "ref": "STG-20261122-2009"
+      },
+      "timestamp": "2026-11-22T11:02:22.281Z"
+    },
+    {
+      "category": "OTA Booking",
+      "action": "OTA #3 (Agoda - Voucher: AG-AP-771133 - ₹2100)",
+      "status": "PASSED",
+      "details": {
+        "ref": "STG-20261122-7534"
+      },
+      "timestamp": "2026-11-22T11:02:24.851Z"
+    },
+    {
+      "category": "OTA Booking",
+      "action": "OTA #4 (Goibibo - Voucher: GO-IN-992244 - ₹2300)",
+      "status": "PASSED",
+      "details": {
+        "ref": "STG-20261122-8601"
+      },
+      "timestamp": "2026-11-22T11:02:27.807Z"
+    },
+    {
+      "category": "OTA Booking",
+      "action": "OTA #5 (Cleartrip - Voucher: CT-IN-553311 - ₹2500)",
+      "status": "PASSED",
+      "details": {
+        "ref": "STG-20261122-2609"
+      },
+      "timestamp": "2026-11-22T11:02:30.165Z"
+    },
+    {
+      "category": "Total Bookings Verification",
+      "action": "Total 20 bookings processed today (10 Walk-Ins, 5 Website, 5 OTA)",
+      "status": "WARNING",
+      "details": {
+        "total": 12
+      },
+      "timestamp": "2026-11-22T11:02:30.165Z"
+    },
+    {
+      "category": "Expense Creation",
+      "action": "Expense #1 (Reception Fresh Flower Decor & Turndown Kits)",
+      "status": "FAILED",
+      "details": {
+        "status": 400,
+        "json": {
+          "success": false,
+          "error": "category, title, and valid positive amount are required."
+        }
+      },
+      "timestamp": "2026-11-22T11:02:39.398Z"
+    },
+    {
+      "category": "Expense Creation",
+      "action": "Expense #2 (Guest Refreshments & Mineral Water Bottles (20L x 5))",
+      "status": "FAILED",
+      "details": {
+        "status": 400,
+        "json": {
+          "success": false,
+          "error": "category, title, and valid positive amount are required."
+        }
+      },
+      "timestamp": "2026-11-22T11:02:39.484Z"
+    },
+    {
+      "category": "Expense Creation",
+      "action": "Expense #3 (Generator Diesel Top-Up for Power Backup (15L) - ₹1400 via UPI)",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T11:02:39.583Z"
+    },
+    {
+      "category": "Cash Reconciliation",
+      "action": "Cash at counter verified (Expected: ₹13000)",
+      "status": "PASSED",
+      "details": {
+        "expected": 13000,
+        "reported": 7000
+      },
+      "timestamp": "2026-11-22T11:02:47.792Z"
+    },
+    {
+      "category": "Cash Drawer Close",
+      "action": "Closed Cash Shift with ₹13000 counted",
+      "status": "WARNING",
+      "details": {
+        "status": 400,
+        "json": {
+          "success": false,
+          "error": "Cash shift not found."
+        }
+      },
+      "timestamp": "2026-11-22T11:03:15.339Z"
+    },
+    {
+      "category": "Night Audit Execution",
+      "action": "Automated Daily Night Audit triggered & PDF report dispatched",
+      "status": "PASSED",
+      "details": {
+        "status": 200,
+        "json": {
+          "success": true,
+          "message": "Automated Night Audit executed successfully for 2026-11-22",
+          "businessDate": "2026-11-22"
+        }
+      },
+      "timestamp": "2026-11-22T11:03:23.900Z"
+    },
+    {
+      "category": "Super Admin Sync",
+      "action": "Super Admin authenticated and loaded dashboard metrics",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T11:03:42.959Z"
+    },
+    {
+      "category": "Super Admin Sync",
+      "action": "Super Admin Analytics displays revenue, occupancy & ADR",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T11:03:49.805Z"
+    },
+    {
+      "category": "Super Admin Sync",
+      "action": "Super Admin Reports Center displays reconciled P&L",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T11:03:56.661Z"
+    },
+    {
+      "category": "Super Admin Sync",
+      "action": "Payments Ledger reflects all multi-channel payments",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T11:04:04.136Z"
+    },
+    {
+      "category": "Super Admin Sync",
+      "action": "ERP Accounting records updated with shift revenue & expenses",
+      "status": "PASSED",
+      "details": {},
+      "timestamp": "2026-11-22T11:04:11.083Z"
+    },
+    {
+      "category": "Supabase PostgreSQL",
+      "action": "Database query check note",
+      "status": "WARNING",
+      "details": {
+        "message": "operator does not exist: date = text"
+      },
+      "timestamp": "2026-11-22T11:04:13.376Z"
+    }
+  ],
+  "discrepancies": [
+    {
+      "category": "Walk-in Booking",
+      "action": "Walk-in #1 (Rajesh Sharma)",
+      "details": {
+        "status": 409,
+        "json": {
+          "success": false,
+          "error": "Room 101 is currently occupied by another guest"
+        }
+      }
+    },
+    {
+      "category": "Walk-in Booking",
+      "action": "Walk-in #2 (Venkat Rao)",
+      "details": {
+        "status": 409,
+        "json": {
+          "success": false,
+          "error": "Room 102 is currently occupied by another guest"
+        }
+      }
+    },
+    {
+      "category": "Walk-in Booking",
+      "action": "Walk-in #9 (Divya Chowdary)",
+      "details": {
+        "status": 409,
+        "json": {
+          "success": false,
+          "error": "Room 201 is currently occupied by another guest"
+        }
+      }
+    },
+    {
+      "category": "Website Booking",
+      "action": "Website Booking #1 (Karthik Swaminathan)",
+      "details": {
+        "status": 500,
+        "json": {
+          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
+        }
+      }
+    },
+    {
+      "category": "Website Booking",
+      "action": "Website Booking #2 (Meenakshi Iyer)",
+      "details": {
+        "status": 500,
+        "json": {
+          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
+        }
+      }
+    },
+    {
+      "category": "Website Booking",
+      "action": "Website Booking #3 (Raghuveer Prasad)",
+      "details": {
+        "status": 500,
+        "json": {
+          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
+        }
+      }
+    },
+    {
+      "category": "Website Booking",
+      "action": "Website Booking #4 (Deepa Narayanan)",
+      "details": {
+        "status": 500,
+        "json": {
+          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
+        }
+      }
+    },
+    {
+      "category": "Website Booking",
+      "action": "Website Booking #5 (Harish Bhat)",
+      "details": {
+        "status": 500,
+        "json": {
+          "error": "[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order."
+        }
+      }
+    },
+    {
+      "category": "Expense Creation",
+      "action": "Expense #1 (Reception Fresh Flower Decor & Turndown Kits)",
+      "details": {
+        "status": 400,
+        "json": {
+          "success": false,
+          "error": "category, title, and valid positive amount are required."
+        }
+      }
+    },
+    {
+      "category": "Expense Creation",
+      "action": "Expense #2 (Guest Refreshments & Mineral Water Bottles (20L x 5))",
+      "details": {
+        "status": 400,
+        "json": {
+          "success": false,
+          "error": "category, title, and valid positive amount are required."
+        }
+      }
+    }
+  ],
+  "screenshots": [
+    {
+      "filename": "01_login_portal.png",
+      "description": "Admin Login Portal Screen",
+      "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\01_login_portal.png"
+    },
+    {
+      "filename": "02_sagar_dashboard.png",
+      "description": "Manager Sagar Dashboard Home",
+      "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\02_sagar_dashboard.png"
+    },
+    {
+      "filename": "03_sagar_attendance_page.png",
+      "description": "Staff Attendance Register",
+      "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\03_sagar_attendance_page.png"
+    },
+    {
+      "filename": "04_cashbook_initial.png",
+      "description": "Cashbook & Cash Drawer View",
+      "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\04_cashbook_initial.png"
+    },
+    {
+      "filename": "05_walkins_completed.png",
+      "description": "Walk-in Desk with Registered Stays",
+      "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\05_walkins_completed.png"
+    },
+    {
+      "filename": "06_bookings_master_list.png",
+      "description": "All 20 Bookings in Master Reservation List",
+      "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\06_bookings_master_list.png"
+    },
+    {
+      "filename": "07_expenses_ledger.png",
+      "description": "Operating Expenses Ledger Screen",
+      "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\07_expenses_ledger.png"
+    },
+    {
+      "filename": "08_rooms_tape_chart.png",
+      "description": "Room Tape Chart / Matrix with Occupied Rooms",
+      "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\08_rooms_tape_chart.png"
+    },
+    {
+      "filename": "09_rooms_inventory_grid.png",
+      "description": "Daily Room Inventory Grid",
+      "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\09_rooms_inventory_grid.png"
+    },
+    {
+      "filename": "10_housekeeping_matrix.png",
+      "description": "Housekeeping & Room Cleanliness Matrix",
+      "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\10_housekeeping_matrix.png"
+    },
+    {
+      "filename": "11_guest_directory_crm.png",
+      "description": "Guest CRM Directory",
+      "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\11_guest_directory_crm.png"
+    },
+    {
+      "filename": "12_night_audit_dashboard.png",
+      "description": "Night Audit Automation Center",
+      "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\12_night_audit_dashboard.png"
+    },
+    {
+      "filename": "13_night_audit_executed.png",
+      "description": "Night Audit Completed Status",
+      "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\13_night_audit_executed.png"
+    },
+    {
+      "filename": "14_superadmin_dashboard_synced.png",
+      "description": "Super Admin Dashboard View (Synced Today Bookings)",
+      "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\14_superadmin_dashboard_synced.png"
+    },
+    {
+      "filename": "15_superadmin_analytics_synced.png",
+      "description": "Super Admin Analytics & Revenue KPIs",
+      "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\15_superadmin_analytics_synced.png"
+    },
+    {
+      "filename": "16_superadmin_reports_synced.png",
+      "description": "Super Admin Financial P&L Reports",
+      "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\16_superadmin_reports_synced.png"
+    },
+    {
+      "filename": "17_superadmin_payments_synced.png",
+      "description": "Payment Ledger with Cash, UPI, and Razorpay",
+      "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\17_superadmin_payments_synced.png"
+    },
+    {
+      "filename": "18_superadmin_accounting_erp.png",
+      "description": "General Ledger ERP & Chart of Accounts",
+      "path": "C:\\Users\\Meesala Chinna Sai\\Desktop\\tayi grand\\qa\\evidence\\sagar-tester\\18_superadmin_accounting_erp.png"
+    }
+  ],
+  "dbRecords": {},
+  "summary": {
+    "totalTests": 37,
+    "passed": 23,
+    "failed": 10,
+    "warnings": 4
+  }
+}

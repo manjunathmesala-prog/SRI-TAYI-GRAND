@@ -1,5 +1,17 @@
 [
   {
+    "id": "ctx-1795345270406-836",
+    "shift_id": "shift-1795345210824",
+    "type": "cash_in",
+    "category": "guest_payment",
+    "amount": 2000,
+    "reason": "Guest Payment: Suresh Reddy (TG-FD-20261122-9776)",
+    "booking_reference": "TG-FD-20261122-9776",
+    "receipt_ref": "CASH-DRAWER-₹2000",
+    "performed_by": "Sagar",
+    "performed_at": "2026-11-22T11:01:10.406Z"
+  },
+  {
     "id": "ctx-1795328057576-689",
     "type": "cash_out",
     "category": "expense_payout",

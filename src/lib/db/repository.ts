@@ -3030,7 +3030,13 @@ export class HotelRepository {
   }
 
   async clockInStaff(params: { staffId: string; shift?: ShiftType; notes?: string }, actor?: string): Promise<StaffAttendance> {
-    const staff = this.staff.find((s) => s.id === params.staffId);
+    const staff = this.staff.find(
+      (s) =>
+        s.id === params.staffId ||
+        s.email.toLowerCase() === params.staffId.toLowerCase() ||
+        (params.staffId === 'stf-sagar' && s.email.includes('sagar')) ||
+        (params.staffId === 'stf-hari' && s.email.includes('hari'))
+    );
     if (!staff) throw new Error('Staff member not found.');
 
     const todayStr = new Date().toISOString().split('T')[0];

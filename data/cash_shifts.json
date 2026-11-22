@@ -1,5 +1,16 @@
 [
   {
+    "id": "shift-1795345210824",
+    "shift_number": "SH-20261122-01",
+    "cashier_id": "stf-sagar",
+    "cashier_name": "Sagar",
+    "opened_at": "2026-11-22T11:00:10.824Z",
+    "opening_float": 5000,
+    "discrepancy": 0,
+    "notes": "Morning Shift Drawer Opening Float - Managed by Sagar",
+    "status": "open"
+  },
+  {
     "id": "shift-1794759297872",
     "shift_number": "SH-20261115-02",
     "cashier_id": "stf-02",

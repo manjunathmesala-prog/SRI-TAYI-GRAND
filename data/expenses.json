@@ -1,5 +1,17 @@
 [
   {
+    "id": "exp-1795345359540-431",
+    "category": "utilities",
+    "title": "Generator Diesel Top-Up for Power Backup (15L)",
+    "description": "Emergency diesel fuel purchase via Indian Oil Kadiri UPI",
+    "amount": 1400,
+    "payment_method": "upi",
+    "recorded_by": "Sagar",
+    "expense_date": "2026-11-22",
+    "status": "approved",
+    "created_at": "2026-11-22T11:02:39.540Z"
+  },
+  {
     "id": "exp-1795328057576-215",
     "category": "staff_welfare",
     "title": "Staff Operational Tea & Refreshments - Manager Hari",

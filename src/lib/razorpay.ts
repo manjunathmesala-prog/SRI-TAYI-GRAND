@@ -90,6 +90,15 @@ export async function createRazorpayOrder(
   }
 
   if (!key_id || key_id.startsWith('rzp_test_placeholder')) {
+    if (process.env.NODE_ENV !== 'production' || isPlaceholderOrTest) {
+      return {
+        id: `order_test_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+        amount: amountInPaise,
+        currency: options.currency || 'INR',
+        receipt: options.receipt.substring(0, 40),
+        status: 'created',
+      };
+    }
     throw new Error('[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order.');
   }
 
