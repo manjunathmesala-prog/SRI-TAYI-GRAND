@@ -75,7 +75,7 @@ interface ClosingSummaryData {
   };
 }
 
-export default function AdminDailyClosingPage() {
+export default function AdminDailyClosingPage({ initialTab }: { initialTab?: 'closing' | 'automated-dispatch' } = {}) {
   const [businessDate, setBusinessDate] = useState<string>(
     new Date().toISOString().split('T')[0]
   );
@@ -96,9 +96,16 @@ export default function AdminDailyClosingPage() {
 
   // Automated Dispatch & Recipient Settings state
   const pathname = usePathname();
-  const [activeTab, setActiveTab] = useState<'closing' | 'automated-dispatch'>(
-    pathname?.includes('/night-audit') ? 'automated-dispatch' : 'closing'
-  );
+  const defaultTab = initialTab ?? (pathname?.includes('/night-audit') ? 'automated-dispatch' : 'closing');
+  const [activeTab, setActiveTab] = useState<'closing' | 'automated-dispatch'>(defaultTab);
+
+  useEffect(() => {
+    if (initialTab) {
+      setActiveTab(initialTab);
+    } else if (pathname?.includes('/night-audit')) {
+      setActiveTab('automated-dispatch');
+    }
+  }, [initialTab, pathname]);
   const [auditConfig, setAuditConfig] = useState<NightAuditConfig | null>(null);
   const [loadingConfig, setLoadingConfig] = useState(false);
   const [savingConfig, setSavingConfig] = useState(false);

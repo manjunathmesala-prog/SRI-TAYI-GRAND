@@ -3485,7 +3485,7 @@ export async function loadDailyAuditRunsFromSupabase(limit = 20): Promise<Array<
   const client = await db.connect();
   try {
     const runsRes = await client.query(`
-      SELECT * FROM daily_audit_runs
+      SELECT *, business_date::text as business_date_str FROM daily_audit_runs
       ORDER BY started_at DESC
       LIMIT $1;
     `, [limit]);
@@ -3542,7 +3542,7 @@ export async function loadDailyAuditRunsFromSupabase(limit = 20): Promise<Array<
 
     return runsRes.rows.map((r: any) => ({
       id: r.id,
-      business_date: r.business_date ? new Date(r.business_date).toISOString().split('T')[0] : '',
+      business_date: r.business_date_str || (r.business_date instanceof Date ? r.business_date.toLocaleDateString('en-CA') : String(r.business_date || '').split('T')[0]),
       run_type: r.run_type,
       status: r.status,
       triggered_by: r.triggered_by,

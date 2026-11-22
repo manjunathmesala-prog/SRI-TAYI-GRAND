@@ -28,11 +28,6 @@ function isAuthorized(req: Request): boolean {
     return true;
   }
 
-  // 3. In local development without configured secrets, permit execution
-  if (!cronSecret && !auditSecret && process.env.NODE_ENV !== 'production') {
-    return true;
-  }
-
   return false;
 }
 

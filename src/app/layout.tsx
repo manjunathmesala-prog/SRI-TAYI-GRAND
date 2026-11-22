@@ -122,6 +122,7 @@ export default function RootLayout({
     <html
       lang="en"
       className="scroll-smooth"
+      suppressHydrationWarning
     >
       <head>
         <script
@@ -129,7 +130,10 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(hotelStructuredData) }}
         />
       </head>
-      <body className="w-full min-h-screen flex flex-col bg-[#F8F3E9] text-[#33271D] font-sans antialiased selection:bg-[#B18A4A] selection:text-white relative">
+      <body
+        className="w-full min-h-screen flex flex-col bg-[#F8F3E9] text-[#33271D] font-sans antialiased selection:bg-[#B18A4A] selection:text-white relative"
+        suppressHydrationWarning
+      >
         <ScrollReveal />
         <PwaProvider />
         {children}

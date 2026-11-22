@@ -14,8 +14,6 @@ export async function GET(req: NextRequest) {
     const auth = verifyStaffRole(req, [
       'Super Admin',
       'Hotel Manager',
-      'Front Desk',
-      'Receptionist',
       'Accounts',
     ]);
     if (!auth.authorized) {

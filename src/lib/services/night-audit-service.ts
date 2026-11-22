@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import os from 'os';
 import crypto from 'crypto';
 import { repo } from '../db/repository';
 import { Booking, PaymentRecord, Expense, FolioCharge, GoogleReview, NightAuditRecipient } from '@/types';
@@ -17,6 +18,7 @@ import {
   recordAuditExceptionToSupabase,
   recordAuditExecutionLogToSupabase,
   loadDailyAuditRunsFromSupabase,
+  getSupabasePgPool,
 } from '../db/supabase-sync';
 
 export interface AuditReportData {
@@ -485,6 +487,32 @@ export class NightAuditService {
     // If a scheduled audit for this businessDate has already completed successfully, return the existing record unless forceReaudit is explicitly requested.
     if (runType === 'scheduled' && !forceReaudit) {
       try {
+        const pool = getSupabasePgPool();
+        if (pool) {
+          const directCheck = await pool.query(
+            `SELECT id, business_date::text as b_date, pdf_path, pdf_filename, status, run_type, summary_json
+             FROM daily_audit_runs
+             WHERE business_date = $1::date AND status = 'completed' AND run_type = 'scheduled'
+             ORDER BY started_at DESC LIMIT 1`,
+            [businessDate]
+          );
+          if (directCheck.rows.length > 0) {
+            const existing = directCheck.rows[0];
+            console.log(`[NIGHT AUDIT] Idempotent guard: Scheduled audit for ${businessDate} already completed (${existing.id}).`);
+            return {
+              success: true,
+              businessDate,
+              auditId: existing.id,
+              data: existing.summary_json || (await this.generateAuditData(businessDate)),
+              deliveries: [],
+              pdfPath: existing.pdf_path,
+              pdfFilename: existing.pdf_filename,
+              sha256: existing.summary_json?.sha256 || '',
+              isIdempotentReplay: true,
+            };
+          }
+        }
+
         const recentRuns = await loadDailyAuditRunsFromSupabase(10);
         const existingRun = recentRuns.find(
           (r) => r.business_date === businessDate && r.status === 'completed' && r.run_type === 'scheduled'
@@ -499,6 +527,7 @@ export class NightAuditService {
             deliveries: (existingRun.deliveries as any) || [],
             pdfPath: existingRun.pdf_path,
             pdfFilename: existingRun.pdf_filename,
+            sha256: (existingRun.summary_json as any)?.sha256 || '',
             isIdempotentReplay: true,
           };
         }
@@ -540,20 +569,36 @@ export class NightAuditService {
       const pdfBuffer = await this.pdfService.generateReportPdf(data);
       const sha256Checksum = crypto.createHash('sha256').update(pdfBuffer).digest('hex');
 
-      // 4. Save PDF to persistent disk storage
-      const reportsDir = path.join(process.cwd(), 'public', 'reports', 'night-audit');
-      if (!fs.existsSync(reportsDir)) {
-        fs.mkdirSync(reportsDir, { recursive: true });
-      }
+      // 4. Save PDF to disk safely (with automatic /tmp fallback and in-memory tolerance for serverless read-only environments)
       const pdfFilename = `Sri_Tayi_Grand_Night_Audit_${businessDate}_${auditId}.pdf`;
-      const fullPdfDiskPath = path.join(reportsDir, pdfFilename);
-      fs.writeFileSync(fullPdfDiskPath, pdfBuffer);
-      const publicPdfUrl = `/reports/night-audit/${pdfFilename}`;
+      let savedDiskPath: string | null = null;
+
+      const candidateDirs = [
+        path.join(os.tmpdir(), 'reports', 'night-audit'),
+        path.join(process.cwd(), 'public', 'reports', 'night-audit'),
+      ];
+
+      for (const dir of candidateDirs) {
+        try {
+          if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir, { recursive: true });
+          }
+          const fullPath = path.join(dir, pdfFilename);
+          fs.writeFileSync(fullPath, pdfBuffer);
+          savedDiskPath = fullPath;
+          break; // Successfully written to writable filesystem
+        } catch (dirErr: any) {
+          console.warn(`[NIGHT AUDIT DISK WRITE NOTICE] Directory ${dir} not writable (${dirErr.code || dirErr.message}).`);
+        }
+      }
+
+      // Consistent secure download URL routed through dynamic download handler
+      const publicPdfUrl = `/api/admin/night-audit/download?filename=${encodeURIComponent(pdfFilename)}`;
 
       await recordAuditExecutionLogToSupabase({
         audit_run_id: auditId,
         event_type: 'PDF_GENERATED',
-        event_details: `Saved PDF (${pdfFilename}, ${pdfBuffer.length} bytes, SHA-256: ${sha256Checksum.slice(0, 12)}...).`,
+        event_details: `Generated PDF (${pdfFilename}, ${pdfBuffer.length} bytes, SHA-256: ${sha256Checksum.slice(0, 12)}..., diskSaved: ${Boolean(savedDiskPath)}).`,
       });
 
       // 5. Persist immutable Report Snapshot & File metadata in Supabase
