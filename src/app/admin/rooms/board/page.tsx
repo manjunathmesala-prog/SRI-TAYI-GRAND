@@ -194,23 +194,33 @@ export default function RoomTapeChartPage() {
     return groups;
   }, [filteredRooms]);
 
+  // Helper: Authoritatively determine if a room is assigned to a booking
+  const isRoomAssigned = useCallback((b: Booking, room: PhysicalRoom): boolean => {
+    if (b.assigned_room_id === room.id || b.assigned_room_number === room.room_number || b.room_number === room.room_number) {
+      return true;
+    }
+    if (Array.isArray(b.assigned_room_numbers) && b.assigned_room_numbers.includes(room.room_number)) {
+      return true;
+    }
+    if (Array.isArray(b.booking_rooms) && b.booking_rooms.some((br) => br.room_number === room.room_number || br.room_id === room.id)) {
+      return true;
+    }
+    return false;
+  }, []);
+
   // Find booking active for a given room on a given calendar day
   const getBookingForRoomDate = useCallback(
     (room: PhysicalRoom, date: Date) => {
       const dateIso = formatDateIso(date);
       return bookings.find((b) => {
         if (b.status === 'cancelled') return false;
-        const isAssigned =
-          b.assigned_room_id === room.id ||
-          b.assigned_room_number === room.room_number ||
-          b.room_number === room.room_number;
-        if (!isAssigned) return false;
+        if (!isRoomAssigned(b, room)) return false;
 
         // Active stay covers check_in_date <= dateIso < check_out_date
         return b.check_in_date <= dateIso && b.check_out_date > dateIso;
       });
     },
-    [bookings]
+    [bookings, isRoomAssigned]
   );
 
   // Find booking checking OUT of a room on a given date (for turnaround display)
@@ -219,15 +229,11 @@ export default function RoomTapeChartPage() {
       const dateIso = formatDateIso(date);
       return bookings.find((b) => {
         if (b.status === 'cancelled') return false;
-        const isAssigned =
-          b.assigned_room_id === room.id ||
-          b.assigned_room_number === room.room_number ||
-          b.room_number === room.room_number;
-        if (!isAssigned) return false;
+        if (!isRoomAssigned(b, room)) return false;
         return b.check_out_date === dateIso;
       });
     },
-    [bookings]
+    [bookings, isRoomAssigned]
   );
 
   // Find booking checking IN to a room on a given date
@@ -236,15 +242,11 @@ export default function RoomTapeChartPage() {
       const dateIso = formatDateIso(date);
       return bookings.find((b) => {
         if (b.status === 'cancelled') return false;
-        const isAssigned =
-          b.assigned_room_id === room.id ||
-          b.assigned_room_number === room.room_number ||
-          b.room_number === room.room_number;
-        if (!isAssigned) return false;
+        if (!isRoomAssigned(b, room)) return false;
         return b.check_in_date === dateIso;
       });
     },
-    [bookings]
+    [bookings, isRoomAssigned]
   );
 
   // Daily Occupancy Statistics across all 25 rooms
@@ -258,11 +260,7 @@ export default function RoomTapeChartPage() {
       rooms.forEach((r) => {
         const hasStay = bookings.some((b) => {
           if (b.status === 'cancelled') return false;
-          const isAssigned =
-            b.assigned_room_id === r.id ||
-            b.assigned_room_number === r.room_number ||
-            b.room_number === r.room_number;
-          return isAssigned && b.check_in_date <= dateIso && b.check_out_date > dateIso;
+          return isRoomAssigned(b, r) && b.check_in_date <= dateIso && b.check_out_date > dateIso;
         });
         if (hasStay) occ++;
       });
@@ -273,7 +271,7 @@ export default function RoomTapeChartPage() {
     });
 
     return map;
-  }, [rooms, bookings, timelineDates]);
+  }, [rooms, bookings, timelineDates, isRoomAssigned]);
 
   // Operational Summary Metrics for Today
   const todayIso = useMemo(() => formatDateIso(new Date()), []);

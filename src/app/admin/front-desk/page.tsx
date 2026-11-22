@@ -256,10 +256,12 @@ export default function FrontDeskPage() {
     const q = searchQuery.toLowerCase();
     return bookings.filter(
       (b) =>
-        (b.status === 'confirmed' || b.status === 'pending') &&
+        (b.status === 'confirmed' || b.status === 'pending' || b.status === 'partially_checked_in') &&
         (b.guest_name.toLowerCase().includes(q) ||
           b.booking_reference.toLowerCase().includes(q) ||
           b.guest_phone.includes(searchQuery) ||
+          (b.assigned_room_number && b.assigned_room_number.includes(searchQuery)) ||
+          (b.assigned_room_numbers && b.assigned_room_numbers.some((r) => r.includes(searchQuery))) ||
           (b.id_proof_number && b.id_proof_number.toLowerCase().includes(q)) ||
           (b.category_name && b.category_name.toLowerCase().includes(q)))
     );
@@ -269,10 +271,11 @@ export default function FrontDeskPage() {
     const q = searchQuery.toLowerCase();
     return bookings.filter(
       (b) =>
-        b.status === 'checked_in' &&
+        (b.status === 'checked_in' || b.status === 'partially_checked_in' || b.status === 'partially_checked_out') &&
         (b.guest_name.toLowerCase().includes(q) ||
           b.booking_reference.toLowerCase().includes(q) ||
           (b.assigned_room_number && b.assigned_room_number.includes(searchQuery)) ||
+          (b.assigned_room_numbers && b.assigned_room_numbers.some((r) => r.includes(searchQuery))) ||
           b.guest_phone.includes(searchQuery))
     );
   }, [bookings, searchQuery]);
@@ -280,12 +283,18 @@ export default function FrontDeskPage() {
   // Operational metrics
   const todayArrivalsCount = useMemo(() => {
     return bookings.filter(
-      (b) => (b.status === 'confirmed' || b.status === 'pending') && (b.check_in_date === todayStr || b.check_in_date <= todayStr)
+      (b) =>
+        (b.status === 'confirmed' || b.status === 'pending' || b.status === 'partially_checked_in') &&
+        (b.check_in_date === todayStr || b.check_in_date <= todayStr)
     ).length;
   }, [bookings, todayStr]);
 
   const todayDeparturesCount = useMemo(() => {
-    return bookings.filter((b) => b.status === 'checked_in' && b.check_out_date === todayStr).length;
+    return bookings.filter(
+      (b) =>
+        (b.status === 'checked_in' || b.status === 'partially_checked_in' || b.status === 'partially_checked_out') &&
+        b.check_out_date === todayStr
+    ).length;
   }, [bookings, todayStr]);
 
   const availableCleanRooms = useMemo(() => {
@@ -450,8 +459,15 @@ export default function FrontDeskPage() {
         staffName: 'Front Desk Reception',
       });
 
-      if (checkOutModalBooking.assigned_room_number) {
-        checkoutPhysicalCard(checkOutModalBooking.assigned_room_number, 'Front Desk Reception').catch(() => {});
+      const targetRooms =
+        checkOutModalBooking.assigned_room_numbers && checkOutModalBooking.assigned_room_numbers.length > 0
+          ? checkOutModalBooking.assigned_room_numbers
+          : checkOutModalBooking.assigned_room_number
+          ? [checkOutModalBooking.assigned_room_number]
+          : [];
+
+      for (const tr of targetRooms) {
+        checkoutPhysicalCard(tr, 'Front Desk Reception').catch(() => {});
       }
 
       const ref = checkOutModalBooking.booking_reference;
@@ -467,7 +483,9 @@ export default function FrontDeskPage() {
       setLastCheckedOutBooking(departedBooking);
       setWalkInAlert({
         type: 'success',
-        message: `Folio ${ref} checked out and settled. Room ${checkOutModalBooking.assigned_room_number} released for housekeeping turnover.`,
+        message: `Folio ${ref} checked out and settled. Room${
+          targetRooms.length > 1 ? `s #${targetRooms.join(', #')}` : ` #${targetRooms[0] || ''}`
+        } released for housekeeping turnover.`,
       });
 
       setCheckOutModalBooking(null);
@@ -909,9 +927,16 @@ export default function FrontDeskPage() {
                         </a>
                       </span>
                     </div>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#E3F2FD] text-[#1565C0]">
-                      {b.category_name}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      {b.assigned_room_numbers && b.assigned_room_numbers.length > 1 && (
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#FAF6EE] text-[#8D672F] border border-[#D8AD56]/40">
+                          Rooms #{b.assigned_room_numbers.join(', #')}
+                        </span>
+                      )}
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-[#E3F2FD] text-[#1565C0]">
+                        {b.category_name}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 text-xs text-[#786B61] py-1 border-y border-[#EFE3D6]">
@@ -1053,13 +1078,27 @@ export default function FrontDeskPage() {
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
                         <div className="px-2.5 py-1.5 rounded-lg bg-[#382216] text-[#D8AD56] font-bold text-sm tracking-wide">
-                          Room {b.assigned_room_number || 'N/A'}
+                          {b.assigned_room_numbers && b.assigned_room_numbers.length > 1
+                            ? `Rooms #${b.assigned_room_numbers.join(', #')}`
+                            : `Room ${b.assigned_room_number || 'N/A'}`}
                         </div>
                         <div>
-                          <span className="font-serif font-bold text-sm text-[#241912] block">
-                            {b.guest_name}
-                          </span>
-                          <span className="text-[10px] text-[#786B61]">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-serif font-bold text-sm text-[#241912]">
+                              {b.guest_name}
+                            </span>
+                            {b.status === 'partially_checked_in' && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
+                                Part In-House
+                              </span>
+                            )}
+                            {b.status === 'partially_checked_out' && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">
+                                Part Departure
+                              </span>
+                            )}
+                          </div>
+                          <span className="text-[10px] text-[#786B61] block">
                             Stayed since {b.check_in_date} &bull; Depart: <strong>{b.check_out_date}</strong>
                           </span>
                         </div>

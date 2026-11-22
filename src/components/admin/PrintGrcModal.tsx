@@ -98,7 +98,9 @@ export function PrintGrcModal({ isOpen, onClose, booking }: PrintGrcModalProps) 
             <div>
               <span className="text-[10px] uppercase font-bold text-[#786B61] block">Assigned Room</span>
               <span className="font-serif font-bold text-base text-[#241912]">
-                Room {booking.assigned_room_number || 'TBD'}
+                {booking.assigned_room_numbers && booking.assigned_room_numbers.length > 1
+                  ? `Rooms #${booking.assigned_room_numbers.join(', #')} (${booking.assigned_room_numbers.length} Rooms)`
+                  : `Room #${booking.assigned_room_number || 'TBD'}`}
               </span>
             </div>
             <div>

@@ -1,5 +1,38 @@
 [
   {
+    "id": "ctx-1795356841024-183",
+    "type": "cash_in",
+    "category": "guest_payment",
+    "amount": 1890,
+    "reason": "Guest Payment: Antigravity QA Guest (TG-W-20261122-5698)",
+    "booking_reference": "TG-W-20261122-5698",
+    "receipt_ref": "PAY-STG-841021-875",
+    "performed_by": "Sagar",
+    "performed_at": "2026-11-22T14:14:01.024Z"
+  },
+  {
+    "id": "ctx-1795353920778-990",
+    "type": "cash_in",
+    "category": "guest_payment",
+    "amount": 1260,
+    "reason": "Guest Payment: DHEERAJ (TG-FD-20261122-8813)",
+    "booking_reference": "TG-FD-20261122-8813",
+    "receipt_ref": "PAY-STG-920776-383",
+    "performed_by": "Hari Achari",
+    "performed_at": "2026-11-22T13:25:20.778Z"
+  },
+  {
+    "id": "ctx-1795352072758-928",
+    "type": "cash_in",
+    "category": "guest_payment",
+    "amount": 1680,
+    "reason": "Guest Payment: HR (TG-FD-20261122-5988)",
+    "booking_reference": "TG-FD-20261122-5988",
+    "receipt_ref": "FD-COLLECTED-₹1680",
+    "performed_by": "Hari Achari",
+    "performed_at": "2026-11-22T12:54:32.758Z"
+  },
+  {
     "id": "ctx-1795347458231-682",
     "shift_id": "shift-1795347376163",
     "type": "cash_out",

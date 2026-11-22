@@ -290,7 +290,10 @@ export function GuestFolioModal({
                 Folio Billing &bull; {booking.guest_name}
               </h2>
               <p className="text-xs text-[#786B61]">
-                Room {booking.assigned_room_number || booking.room_number || 'Unassigned'} &bull; {booking.category_name} ({booking.check_in_date} to {booking.check_out_date})
+                {booking.assigned_room_numbers && booking.assigned_room_numbers.length > 1
+                  ? `Rooms #${booking.assigned_room_numbers.join(', #')} (${booking.assigned_room_numbers.length} Rooms)`
+                  : `Room #${booking.assigned_room_number || booking.room_number || 'Unassigned'}`}{' '}
+                &bull; {booking.category_name} ({booking.check_in_date} to {booking.check_out_date})
               </p>
             </div>
           </div>

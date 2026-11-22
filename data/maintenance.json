@@ -1,5 +1,31 @@
 [
   {
+    "id": "maint-1795352756919",
+    "room_number": "203",
+    "issue_title": "Room Transfer Relocation: Guest reported no running water or hot water pressure failure in bathroom.",
+    "category": "plumbing_bath",
+    "priority": "high",
+    "description": "Guest relocated to Room 205. Transfer reason: [plumbing_water] Guest reported no running water or hot water pressure failure in bathroom.",
+    "status": "open",
+    "reported_by": "Hari Achari",
+    "created_at": "2026-11-22T13:05:56.919Z",
+    "estimated_cost": 0,
+    "room_blocked": true
+  },
+  {
+    "id": "maint-1795352715471",
+    "room_number": "108",
+    "issue_title": "Room Transfer Relocation: Guest reported AC is not cooling properly and blowing warm air after 30 mins in room.",
+    "category": "ac_hvac",
+    "priority": "high",
+    "description": "Guest relocated to Room 203. Transfer reason: [ac_issue] Guest reported AC is not cooling properly and blowing warm air after 30 mins in room.",
+    "status": "open",
+    "reported_by": "Hari Achari",
+    "created_at": "2026-11-22T13:05:15.471Z",
+    "estimated_cost": 0,
+    "room_blocked": true
+  },
+  {
     "id": "maint-1795302882039",
     "room_number": "307",
     "issue_title": "Plumbing & Water Pressure Check 9090",

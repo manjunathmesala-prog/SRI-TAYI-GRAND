@@ -16,6 +16,8 @@ export type BookingStatus =
   | 'pending' 
   | 'confirmed' 
   | 'checked_in' 
+  | 'partially_checked_in'
+  | 'partially_checked_out'
   | 'checked_out' 
   | 'cancelled' 
   | 'no_show';
@@ -141,6 +143,11 @@ export interface BookingRoomItem {
   category_id: string;
   category_name?: string;
   price_per_night: number;
+  status?: 'confirmed' | 'checked_in' | 'checked_out' | 'cancelled';
+  checked_in_at?: string;
+  checked_out_at?: string;
+  assigned_guest_name?: string;
+  keycard_uid?: string;
   added_at?: string;
 }
 
@@ -608,6 +615,7 @@ export type RealtimeEventType =
   | 'booking_created' 
   | 'booking_updated' 
   | 'extra_room_added'
+  | 'room_removed'
   | 'booking_status_updated'
   | 'booking_deleted'
   | 'walk_in_created'

@@ -355,6 +355,7 @@ export const adminOperations = {
     bookingReference: string;
     roomId?: string;
     roomNumber?: string;
+    roomNumbers?: string[];
     issueRfid?: boolean;
     staffName?: string;
     idProofType?: string;
@@ -383,6 +384,7 @@ export const adminOperations = {
 
   async checkOut(params: {
     bookingReference: string;
+    roomNumbers?: string[];
     additionalCharges?: number;
     chargeDescription?: string;
     settlementMethod?: string;
@@ -471,6 +473,23 @@ export const adminOperations = {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to add extra room');
+    adminOperations.invalidateFullState();
+    return data;
+  },
+
+  async removeRoom(params: {
+    bookingReference: string;
+    roomNumber: string;
+    staffName?: string;
+  }) {
+    adminOperations.invalidateFullState();
+    const res = await fetch('/api/admin/operations', {
+      method: 'POST',
+      headers: getAdminHeaders({ 'Content-Type': 'application/json' }),
+      body: JSON.stringify({ action: 'remove_room', ...params }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to remove room');
     adminOperations.invalidateFullState();
     return data;
   },

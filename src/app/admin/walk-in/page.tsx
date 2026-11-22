@@ -547,7 +547,8 @@ export default function AnanthaWalkInPage() {
       }
 
       setCreatedReservation(res.booking);
-      setRfidSelectedRoom(selectedRoomNumber);
+      const initialRoom = res.booking.assigned_room_numbers?.[0] || res.booking.assigned_room_number || selectedRoomNumber;
+      setRfidSelectedRoom(initialRoom);
       setRfidCardUid(`BT-57-${Math.floor(100000 + Math.random() * 900000)}`);
       setRfidSuccessMessage(null);
       setRfidErrorMessage(null);
@@ -1027,8 +1028,16 @@ export default function AnanthaWalkInPage() {
           {/* Folio Voucher Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
             <div className="p-4 rounded-2xl bg-[#F8F3E9]/50 border border-[#E6D9C5]/80">
-              <span className="text-[#786A5B] block mb-1">Room Assigned</span>
-              <span className="text-base font-bold text-[#33271D]">Room {createdReservation.assigned_room_number}</span>
+              <span className="text-[#786A5B] block mb-1">
+                {createdReservation.assigned_room_numbers && createdReservation.assigned_room_numbers.length > 1
+                  ? `Rooms Allocated (${createdReservation.assigned_room_numbers.length} Rooms)`
+                  : 'Room Assigned'}
+              </span>
+              <span className="text-base font-bold text-[#33271D]">
+                {createdReservation.assigned_room_numbers && createdReservation.assigned_room_numbers.length > 1
+                  ? `Rooms #${createdReservation.assigned_room_numbers.join(', #')}`
+                  : `Room ${createdReservation.assigned_room_number || createdReservation.room_number}`}
+              </span>
               <span className="text-[11px] text-[#786A5B] block">{createdReservation.category_name}</span>
             </div>
             <div className="p-4 rounded-2xl bg-[#F8F3E9]/50 border border-[#E6D9C5]/80">
@@ -1051,6 +1060,39 @@ export default function AnanthaWalkInPage() {
               </span>
             </div>
           </div>
+
+          {/* Multi-Room Allocated Rooms Tray */}
+          {((createdReservation.booking_rooms && createdReservation.booking_rooms.length > 1) ||
+            (createdReservation.assigned_room_numbers && createdReservation.assigned_room_numbers.length > 1)) && (
+            <div className="p-4 rounded-2xl bg-[#FAF6EE] border border-[#E6D9C5] space-y-2.5">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-bold text-[#33271D] uppercase tracking-wider flex items-center gap-1.5">
+                  <BedDouble className="w-4 h-4 text-[#8D672F]" />
+                  <span>Party Room Allocations ({createdReservation.booking_rooms?.length || createdReservation.assigned_room_numbers?.length} Rooms)</span>
+                </span>
+                <span className="text-[10px] bg-[#8D672F]/15 text-[#8D672F] font-bold px-2 py-0.5 rounded-full">
+                  Master Booking: {createdReservation.booking_reference}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 text-xs">
+                {(createdReservation.booking_rooms && createdReservation.booking_rooms.length > 0
+                  ? createdReservation.booking_rooms
+                  : (createdReservation.assigned_room_numbers || []).map((rn) => ({ room_number: rn, price_per_night: 1800, category_name: createdReservation.category_name }))
+                ).map((rm, idx) => (
+                  <div key={idx} className="p-3 rounded-xl bg-white border border-[#E6D9C5] flex items-center justify-between shadow-2xs">
+                    <div>
+                      <div className="font-bold text-[#33271D]">Room #{rm.room_number}</div>
+                      <div className="text-[10px] text-[#786A5B]">{rm.category_name || createdReservation.category_name}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-semibold text-[#8D672F]">₹{rm.price_per_night?.toLocaleString('en-IN')}<span className="text-[9px] text-[#786A5B]">/nt</span></div>
+                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 font-medium">Checked In</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* DEDICATED RFID KEYCARD ACTIVATION MODULE (POST CONFIRMATION) */}
           <div className="p-6 sm:p-7 rounded-3xl bg-gradient-to-r from-[#21180F] via-[#2D1F14] to-[#21180F] text-white border-2 border-[#D8AD56] shadow-2xl space-y-5">
@@ -1134,13 +1176,57 @@ export default function AnanthaWalkInPage() {
             {/* Room Number & Encoder Form */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
               <div>
-                <label className="block text-xs font-medium text-[#E6D9C5] mb-1.5">
-                  Assigned Room Number:
+                <label className="block text-xs font-medium text-[#E6D9C5] mb-1.5 flex items-center justify-between">
+                  <span>Assigned Room Number:</span>
+                  {createdReservation.assigned_room_numbers && createdReservation.assigned_room_numbers.length > 1 && (
+                    <span className="text-[10px] text-[#D8AD56] font-semibold">Select Room to Encode</span>
+                  )}
                 </label>
-                <div className="p-2.5 rounded-xl bg-white/10 border border-white/20 font-mono font-bold text-white text-sm flex items-center justify-between">
-                  <span>Room #{rfidSelectedRoom}</span>
-                  <span className="text-[10px] text-[#D8AD56] font-sans uppercase">Floor {createdReservation.assigned_room_number?.slice(0, 1) || '1'}</span>
-                </div>
+                {createdReservation.assigned_room_numbers && createdReservation.assigned_room_numbers.length > 1 ? (
+                  <div className="flex flex-wrap gap-1.5 p-1.5 rounded-xl bg-white/10 border border-white/20">
+                    {createdReservation.assigned_room_numbers.map((rNum) => {
+                      const isSelected = rfidSelectedRoom === rNum;
+                      const cardsForThisRoom = activeGuestCards.filter(
+                        (c) => (c.assigned_room_number || c.room_number) === rNum
+                      );
+                      return (
+                        <button
+                          key={rNum}
+                          type="button"
+                          onClick={() => {
+                            setRfidSelectedRoom(rNum);
+                            setRfidSuccessMessage(null);
+                            setRfidErrorMessage(null);
+                            setRfidCardUid(`BT-57-${Math.floor(100000 + Math.random() * 900000)}`);
+                          }}
+                          className={`px-2.5 py-1.5 rounded-lg font-mono font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-gradient-to-r from-[#D8AD56] to-[#C49B45] text-stone-900 shadow-md ring-2 ring-amber-300/40'
+                              : 'bg-white/10 hover:bg-white/20 text-stone-200 border border-white/10'
+                          }`}
+                        >
+                          <span>Room #{rNum}</span>
+                          {cardsForThisRoom.length > 0 && (
+                            <span
+                              className={`px-1 py-0.2 text-[9px] rounded-full font-sans font-bold ${
+                                isSelected ? 'bg-stone-900 text-[#D8AD56]' : 'bg-emerald-500/30 text-emerald-300'
+                              }`}
+                            >
+                              {cardsForThisRoom.length}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="p-2.5 rounded-xl bg-white/10 border border-white/20 font-mono font-bold text-white text-sm flex items-center justify-between">
+                    <span>Room #{rfidSelectedRoom}</span>
+                    <span className="text-[10px] text-[#D8AD56] font-sans uppercase">
+                      Floor {rfidSelectedRoom?.slice(0, 1) || '1'}
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -1195,7 +1281,7 @@ export default function AnanthaWalkInPage() {
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-bold text-[#D8AD56] uppercase tracking-wider flex items-center gap-1.5">
                     <KeyRound className="w-3.5 h-3.5" />
-                    Active Keycards for Room #{rfidSelectedRoom} ({activeGuestCards.length})
+                    Active Keycards for Room #{rfidSelectedRoom} ({activeGuestCards.filter((c) => (c.assigned_room_number || c.room_number) === rfidSelectedRoom).length} of {activeGuestCards.length} Total)
                   </span>
                   <span className="text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-400/30">
                     Door Locks Synchronized
@@ -1203,7 +1289,9 @@ export default function AnanthaWalkInPage() {
                 </div>
 
                 <div className="space-y-2">
-                  {activeGuestCards.map((card, idx) => (
+                  {activeGuestCards
+                    .filter((card) => !rfidSelectedRoom || (card.assigned_room_number || card.room_number) === rfidSelectedRoom)
+                    .map((card, idx) => (
                     <div
                       key={card.card_uid || idx}
                       className="p-3 rounded-xl bg-white/5 border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"

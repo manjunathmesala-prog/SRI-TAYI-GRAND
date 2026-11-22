@@ -250,7 +250,7 @@ export function PrintGstInvoiceModal({
                   <td className="py-3 px-3">
                     <div className="font-semibold text-sm">Room Accommodation Tariff</div>
                     <div className="text-[10px] text-[#786B61]">
-                      {booking.category_name} &bull; Room {booking.assigned_room_number || 'Standard'} ({booking.check_in_date} to {booking.check_out_date})
+                      {booking.category_name} &bull; {booking.assigned_room_numbers && booking.assigned_room_numbers.length > 1 ? `Rooms #${booking.assigned_room_numbers.join(', #')} (${booking.assigned_room_numbers.length} Rooms)` : `Room #${booking.assigned_room_number || 'Standard'}`} ({booking.check_in_date} to {booking.check_out_date})
                     </div>
                   </td>
                   <td className="py-3 px-3 font-mono text-center">996311</td>

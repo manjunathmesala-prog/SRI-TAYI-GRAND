@@ -1,0 +1,7 @@
+$ORIGIN sritayigrand.com.
+$TTL 3600
+
+resend._domainkey IN TXT "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDN/FEYD7g4u4YXnAl7PEl7YqFe+WK+3evHuAITVEX+on/IbrNBg5+njSU7J8WNJd6BYKMphZt+ITkfIQ+oXrjULPYDuy3jVfxMCp7JpthsA757nF646GjRTKpEaVpp/hfxezItyQzglmE/96/uUQ+h0EIjGUhHOKoV+jx8nU3vMQIDAQAB"
+rsend IN CNAME rsend-apne1.forge.rmta.net.
+send IN CNAME send.forge.rmta.net.
+_dmarc IN TXT "v=DMARC1; p=none;"

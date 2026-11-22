@@ -97,12 +97,14 @@ export default function BookingsAdminPage() {
   // Quick Check-In modal
   const [checkInTarget, setCheckInTarget] = useState<Booking | null>(null);
   const [selectedRoomNumber, setSelectedRoomNumber] = useState('');
+  const [checkInSelectedRooms, setCheckInSelectedRooms] = useState<string[]>([]);
   const [issueRfidCard, setIssueRfidCard] = useState(true);
   const [checkInIdType, setCheckInIdType] = useState('aadhaar');
   const [checkInIdNumber, setCheckInIdNumber] = useState('');
 
   // Quick Check-Out & Folio Settlement modal
   const [checkOutTarget, setCheckOutTarget] = useState<Booking | null>(null);
+  const [checkOutSelectedRooms, setCheckOutSelectedRooms] = useState<string[]>([]);
   const [settlementMethod, setSettlementMethod] = useState<'cash' | 'card' | 'upi'>('cash');
   const [settlementAmount, setSettlementAmount] = useState<string>('0');
   const [settlementRef, setSettlementRef] = useState('');
@@ -444,8 +446,21 @@ export default function BookingsAdminPage() {
   // Action: Confirm Check-In
   const handleConfirmCheckIn = async () => {
     if (!checkInTarget) return;
-    if (!selectedRoomNumber) {
-      toast.warning('Please select a clean physical room number.');
+
+    const isMulti = Boolean(
+      checkInTarget.assigned_room_numbers && checkInTarget.assigned_room_numbers.length > 1
+    );
+
+    const roomsToCheckIn = isMulti
+      ? checkInSelectedRooms.length > 0
+        ? checkInSelectedRooms
+        : checkInTarget.assigned_room_numbers!
+      : selectedRoomNumber
+      ? [selectedRoomNumber]
+      : [];
+
+    if (roomsToCheckIn.length === 0) {
+      toast.warning('Please select at least one physical room number to check in.');
       return;
     }
 
@@ -453,7 +468,8 @@ export default function BookingsAdminPage() {
     try {
       const res = await adminOperations.checkIn({
         bookingReference: checkInTarget.booking_reference,
-        roomNumber: selectedRoomNumber,
+        roomNumber: roomsToCheckIn[0],
+        roomNumbers: roomsToCheckIn,
         issueRfid: issueRfidCard,
         idProofType: checkInIdType,
         idProofNumber: checkInIdNumber.trim() || undefined,
@@ -462,25 +478,27 @@ export default function BookingsAdminPage() {
 
       if (res.success) {
         if (issueRfidCard) {
-          try {
-            const hwRes = await issuePhysicalKeycard({
-              roomNumber: selectedRoomNumber,
-              guestName: checkInTarget.guest_name,
-              staffUser: 'Front Desk Duty Officer',
-              bookingRef: checkInTarget.booking_reference,
-            });
-            if (hwRes.success) {
-              playChimeSound(true);
+          for (const rNum of roomsToCheckIn) {
+            try {
+              const hwRes = await issuePhysicalKeycard({
+                roomNumber: rNum,
+                guestName: checkInTarget.guest_name,
+                staffUser: 'Front Desk Duty Officer',
+                bookingRef: checkInTarget.booking_reference,
+              });
+              if (hwRes.success) {
+                playChimeSound(true);
+              }
+            } catch (hwErr) {
+              console.warn('[HARDWARE RFID NON-BLOCKING NOTICE]:', hwErr);
             }
-          } catch (hwErr) {
-            console.warn('[HARDWARE RFID NON-BLOCKING NOTICE]:', hwErr);
           }
         }
 
         toast.success(
-          `Guest ${checkInTarget.guest_name} checked in to Room #${selectedRoomNumber}.${
-            issueRfidCard ? ' RFID Keycard activated.' : ''
-          }`
+          `Guest ${checkInTarget.guest_name} checked in to Room${
+            roomsToCheckIn.length > 1 ? `s #${roomsToCheckIn.join(', #')}` : ` #${roomsToCheckIn[0]}`
+          }.${issueRfidCard ? ' RFID Keycard(s) activated.' : ''}`
         );
         setCheckInTarget(null);
         await fetchBookings();
@@ -498,25 +516,36 @@ export default function BookingsAdminPage() {
   const handleConfirmCheckOut = async () => {
     if (!checkOutTarget) return;
 
+    const isMulti = Boolean(
+      checkOutTarget.assigned_room_numbers && checkOutTarget.assigned_room_numbers.length > 1
+    );
+
+    const targetRooms = isMulti
+      ? checkOutSelectedRooms.length > 0
+        ? checkOutSelectedRooms
+        : checkOutTarget.assigned_room_numbers!
+      : checkOutTarget.assigned_room_number
+      ? [checkOutTarget.assigned_room_number]
+      : checkOutTarget.room_number
+      ? [checkOutTarget.room_number]
+      : [];
+
+    if (targetRooms.length === 0) {
+      toast.warning('Please select at least one physical room number to check out.');
+      return;
+    }
+
     setActionLoading(true);
     try {
-      const settleNum = Number(settlementAmount) || 0;
       const res = await adminOperations.checkOut({
         bookingReference: checkOutTarget.booking_reference,
+        roomNumbers: targetRooms,
         settlementMethod,
         additionalCharges: 0,
         staffName: 'Front Desk Duty Officer',
       });
 
       if (res.success) {
-        const targetRooms =
-          checkOutTarget.assigned_room_numbers && checkOutTarget.assigned_room_numbers.length > 0
-            ? checkOutTarget.assigned_room_numbers
-            : checkOutTarget.assigned_room_number
-            ? [checkOutTarget.assigned_room_number]
-            : checkOutTarget.room_number
-            ? [checkOutTarget.room_number]
-            : [];
         for (const tr of targetRooms) {
           checkoutPhysicalCard(tr, 'Front Desk Duty Officer').catch(() => {});
         }
@@ -533,6 +562,43 @@ export default function BookingsAdminPage() {
       }
     } catch (err: any) {
       toast.error(err.message || 'Network error while checking out guest');
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  // Action: Remove specific room from multi-room booking
+  const handleRemoveRoomFromBooking = async (roomNumber: string) => {
+    if (!selectedRes) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to remove Room #${roomNumber} from this booking?\n\nThe room will be released immediately and the total folio tariff will be recalculated.`
+      )
+    ) {
+      return;
+    }
+
+    setActionLoading(true);
+    try {
+      const res = await adminOperations.removeRoom({
+        bookingReference: selectedRes.booking_reference,
+        roomNumber,
+        staffName: 'Front Desk Duty Officer',
+      });
+
+      if (res.success) {
+        toast.success(`Room #${roomNumber} removed from booking and released.`);
+        await fetchBookings();
+        if (res.booking) {
+          setSelectedRes(res.booking);
+        } else {
+          setSelectedRes(null);
+        }
+      } else {
+        toast.error(res.error || 'Failed to remove room');
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Error removing room from booking');
     } finally {
       setActionLoading(false);
     }
@@ -1161,7 +1227,7 @@ export default function BookingsAdminPage() {
                           </td>
                           <td className="p-3">
                             {r.assigned_room_number ? (
-                              <div className="flex flex-col items-start gap-0.5">
+                              <div className="flex flex-col items-start gap-1">
                                 <span className="inline-flex items-center space-x-1 font-bold text-xs bg-[#21180F] text-white px-2.5 py-1 rounded-xl">
                                   <span>
                                     {r.assigned_room_numbers && r.assigned_room_numbers.length > 1
@@ -1169,6 +1235,11 @@ export default function BookingsAdminPage() {
                                       : `Room #${r.assigned_room_number}`}
                                   </span>
                                 </span>
+                                {r.assigned_room_numbers && r.assigned_room_numbers.length > 1 && (
+                                  <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300">
+                                    Multi-Room ({r.assigned_room_numbers.length} Rooms)
+                                  </span>
+                                )}
                                 <div className="text-[10px] text-[#786A5B] font-medium">{getCategoryBedSubtitle(r.category_id, r.category_name)}</div>
                               </div>
                             ) : (
@@ -1203,6 +1274,10 @@ export default function BookingsAdminPage() {
                               className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${
                                 isCheckedIn
                                   ? 'bg-[#21180F] text-[#B18A4A] border border-black'
+                                  : r.status === 'partially_checked_in'
+                                  ? 'bg-blue-100 text-blue-900 border border-blue-300'
+                                  : r.status === 'partially_checked_out'
+                                  ? 'bg-purple-100 text-purple-900 border border-purple-300'
                                   : isConfirmed
                                   ? 'bg-emerald-100 text-emerald-800'
                                   : r.status === 'checked_out'
@@ -1212,7 +1287,15 @@ export default function BookingsAdminPage() {
                                   : 'bg-amber-100 text-amber-800'
                               }`}
                             >
-                              {r.status === 'checked_in' ? 'In-House' : r.status === 'checked_out' ? 'Completed' : r.status}
+                              {r.status === 'checked_in'
+                                ? 'In-House'
+                                : r.status === 'partially_checked_in'
+                                ? 'Part In-House'
+                                : r.status === 'partially_checked_out'
+                                ? 'Part Checked-Out'
+                                : r.status === 'checked_out'
+                                ? 'Completed'
+                                : r.status}
                             </span>
                           </td>
                           <td className="p-3 text-right">
@@ -1232,12 +1315,24 @@ export default function BookingsAdminPage() {
                                 </button>
                               )}
 
-                              {/* 2. Quick Check-In if Confirmed */}
-                              {isConfirmed && (
+                              {/* 2. Quick Check-In if Confirmed or Partially Checked In */}
+                              {(isConfirmed || r.status === 'partially_checked_in') && (
                                 <button
                                   onClick={() => {
                                     setCheckInTarget(r);
-                                    setSelectedRoomNumber(r.assigned_room_number || '');
+                                    const allRooms = r.assigned_room_numbers && r.assigned_room_numbers.length > 0
+                                      ? r.assigned_room_numbers
+                                      : r.assigned_room_number
+                                      ? [r.assigned_room_number]
+                                      : [];
+                                    const pendingRooms: string[] = r.booking_rooms && r.booking_rooms.length > 0
+                                      ? (r.booking_rooms
+                                          .filter((bm) => bm.status !== 'checked_in' && bm.status !== 'checked_out')
+                                          .map((bm) => bm.room_number || '')
+                                          .filter(Boolean) as string[])
+                                      : allRooms;
+                                    setCheckInSelectedRooms(pendingRooms.length > 0 ? pendingRooms : allRooms);
+                                    setSelectedRoomNumber(pendingRooms[0] || allRooms[0] || '');
                                     setCheckInIdType(r.id_proof_type || 'aadhaar');
                                     setCheckInIdNumber(r.id_proof_number || '');
                                   }}
@@ -1245,12 +1340,12 @@ export default function BookingsAdminPage() {
                                   title="Check In Guest & Assign Room"
                                 >
                                   <LogIn className="w-3 h-3" />
-                                  <span>Check In</span>
+                                  <span>{r.status === 'partially_checked_in' ? 'Check In Remaining' : 'Check In'}</span>
                                 </button>
                               )}
 
-                              {/* 3. Quick Check-Out & Settle if In-House */}
-                              {isCheckedIn && (
+                              {/* 3. Quick Check-Out & Settle if In-House or Partially Checked In/Out */}
+                              {(isCheckedIn || r.status === 'partially_checked_in' || r.status === 'partially_checked_out') && (
                                 <>
                                   <button
                                     onClick={() => setChangeRoomTarget(r)}
@@ -1264,6 +1359,15 @@ export default function BookingsAdminPage() {
                                     onClick={() => {
                                       setCheckOutTarget(r);
                                       setSettlementAmount(balance.toString());
+                                      const activeRooms: string[] = r.booking_rooms && r.booking_rooms.length > 0
+                                        ? (r.booking_rooms
+                                            .filter((bm) => bm.status !== 'checked_out')
+                                            .map((bm) => bm.room_number || '')
+                                            .filter(Boolean) as string[])
+                                        : (r.assigned_room_numbers && r.assigned_room_numbers.length > 0
+                                          ? r.assigned_room_numbers
+                                          : (r.assigned_room_number ? [r.assigned_room_number] : []));
+                                      setCheckOutSelectedRooms(activeRooms);
                                     }}
                                     className="px-2.5 py-1.5 rounded-lg bg-[#21180F] hover:bg-black text-[#B18A4A] font-semibold text-[11px] flex items-center space-x-1 shadow-sm cursor-pointer"
                                     title="Check Out & Settle Folio (Deactivates RFID)"
@@ -1402,32 +1506,107 @@ export default function BookingsAdminPage() {
                 <div><b>Dates:</b> {checkInTarget.check_in_date} to {checkInTarget.check_out_date}</div>
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-[#33271D] mb-1.5">
-                  Allocate Physical Room Number *
-                </label>
-                <LuxurySelect<string>
-                  value={selectedRoomNumber}
-                  onChange={(val) => setSelectedRoomNumber(val)}
-                  placeholder="-- Choose Clean Physical Room --"
-                  options={[
-                    { value: '', label: '-- Choose Clean Physical Room --' },
-                    ...physicalRooms
-                      .filter(
-                        (pr) =>
-                          (pr.category_id === checkInTarget.category_id ||
-                            pr.room_number === checkInTarget.assigned_room_number)
-                      )
-                      .map((pr) => ({
-                        value: pr.room_number,
-                        label: `Room #${pr.room_number} (Floor ${pr.floor_number}) â€” ${
-                          pr.operational_status === 'available' ? 'Available Clean' : pr.operational_status
-                        }`,
-                      })),
-                  ]}
-                  className="w-full"
-                />
-              </div>
+              {checkInTarget.assigned_room_numbers && checkInTarget.assigned_room_numbers.length > 1 ? (
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-semibold text-[#33271D]">
+                      Select Rooms to Check In ({checkInTarget.assigned_room_numbers.length} Rooms Allocated) *
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (checkInSelectedRooms.length === checkInTarget.assigned_room_numbers!.length) {
+                          setCheckInSelectedRooms([]);
+                        } else {
+                          setCheckInSelectedRooms([...checkInTarget.assigned_room_numbers!]);
+                        }
+                      }}
+                      className="text-[10px] text-[#8D672F] font-bold hover:underline cursor-pointer"
+                    >
+                      {checkInSelectedRooms.length === checkInTarget.assigned_room_numbers.length
+                        ? 'Deselect All'
+                        : 'Select All'}
+                    </button>
+                  </div>
+                  <div className="space-y-1.5 p-2 rounded-2xl bg-[#FAF7F2] border border-[#E6D9C5]">
+                    {checkInTarget.assigned_room_numbers.map((rNum) => {
+                      const roomDetail = checkInTarget.booking_rooms?.find((bm) => bm.room_number === rNum);
+                      const isAlreadyCheckedIn = roomDetail?.status === 'checked_in';
+                      const isChecked = checkInSelectedRooms.includes(rNum);
+                      return (
+                        <label
+                          key={rNum}
+                          className={`flex items-center justify-between p-2 rounded-xl border text-xs cursor-pointer transition-all ${
+                            isAlreadyCheckedIn
+                              ? 'bg-emerald-50/50 border-emerald-200 text-emerald-800 opacity-80'
+                              : isChecked
+                              ? 'bg-white border-[#8D672F] shadow-xs'
+                              : 'bg-white/60 border-[#E6D9C5] text-gray-600'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              disabled={isAlreadyCheckedIn}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setCheckInSelectedRooms((prev) => [...prev, rNum]);
+                                } else {
+                                  setCheckInSelectedRooms((prev) => prev.filter((r) => r !== rNum));
+                                }
+                              }}
+                              className="w-4 h-4 rounded text-[#8D672F] focus:ring-[#8D672F]"
+                            />
+                            <div>
+                              <span className="font-bold font-mono">Room #{rNum}</span>
+                              {roomDetail?.category_name && (
+                                <span className="text-[10px] text-[#786A5B] ml-2">({roomDetail.category_name})</span>
+                              )}
+                            </div>
+                          </div>
+                          {isAlreadyCheckedIn ? (
+                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                              Already In-House
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-semibold text-[#8D672F]">
+                              {isChecked ? 'Ready to Check In' : 'Pending'}
+                            </span>
+                          )}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-xs font-semibold text-[#33271D] mb-1.5">
+                    Allocate Physical Room Number *
+                  </label>
+                  <LuxurySelect<string>
+                    value={selectedRoomNumber}
+                    onChange={(val) => setSelectedRoomNumber(val)}
+                    placeholder="-- Choose Clean Physical Room --"
+                    options={[
+                      { value: '', label: '-- Choose Clean Physical Room --' },
+                      ...physicalRooms
+                        .filter(
+                          (pr) =>
+                            pr.category_id === checkInTarget.category_id ||
+                            pr.room_number === checkInTarget.assigned_room_number
+                        )
+                        .map((pr) => ({
+                          value: pr.room_number,
+                          label: `Room #${pr.room_number} (Floor ${pr.floor_number}) — ${
+                            pr.operational_status === 'available' ? 'Available Clean' : pr.operational_status
+                          }`,
+                        })),
+                    ]}
+                    className="w-full"
+                  />
+                </div>
+              )}
 
               {/* Guest Statutory Identity Proof */}
               <div className="grid grid-cols-2 gap-2">
@@ -1485,7 +1664,12 @@ export default function BookingsAdminPage() {
                 </button>
                 <button
                   type="button"
-                  disabled={actionLoading || !selectedRoomNumber}
+                  disabled={
+                    actionLoading ||
+                    (checkInTarget.assigned_room_numbers && checkInTarget.assigned_room_numbers.length > 1
+                      ? checkInSelectedRooms.length === 0
+                      : !selectedRoomNumber)
+                  }
                   onClick={handleConfirmCheckIn}
                   className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold text-xs uppercase tracking-wider cursor-pointer"
                 >
@@ -1510,7 +1694,9 @@ export default function BookingsAdminPage() {
               <div>
                 <span className="text-[10px] uppercase tracking-widest text-[#8D672F] font-bold">Front Desk Departure</span>
                 <h3 className="text-lg font-serif text-[#33271D] font-bold">
-                  Check Out: Room #{checkOutTarget.assigned_room_number || checkOutTarget.room_number || 'Room'}
+                  Check Out: {checkOutTarget.assigned_room_numbers && checkOutTarget.assigned_room_numbers.length > 1
+                    ? `Rooms #${checkOutTarget.assigned_room_numbers.join(', #')} (${checkOutTarget.assigned_room_numbers.length} Rooms)`
+                    : `Room #${checkOutTarget.assigned_room_number || checkOutTarget.room_number || 'Room'}`}
                 </h3>
               </div>
               <button onClick={() => setCheckOutTarget(null)} className="text-xs text-[#786A5B] hover:text-black cursor-pointer">&times;</button>
@@ -1525,6 +1711,83 @@ export default function BookingsAdminPage() {
                   Balance Due: ₹{Math.max(0, checkOutTarget.total_amount - checkOutTarget.paid_amount).toLocaleString('en-IN')}
                 </div>
               </div>
+
+              {/* Multi-Room Departure Selector */}
+              {checkOutTarget.assigned_room_numbers && checkOutTarget.assigned_room_numbers.length > 1 && (
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-semibold text-[#33271D]">
+                      Select Rooms Checking Out ({checkOutTarget.assigned_room_numbers.length} Rooms Allocated) *
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const allActive: string[] = checkOutTarget.booking_rooms
+                          ? (checkOutTarget.booking_rooms.filter((bm) => bm.status !== 'checked_out').map((bm) => bm.room_number || '').filter(Boolean) as string[])
+                          : (checkOutTarget.assigned_room_numbers || []);
+                        if (checkOutSelectedRooms.length === allActive.length) {
+                          setCheckOutSelectedRooms([]);
+                        } else {
+                          setCheckOutSelectedRooms([...allActive]);
+                        }
+                      }}
+                      className="text-[10px] text-[#8D672F] font-bold hover:underline cursor-pointer"
+                    >
+                      {checkOutSelectedRooms.length === checkOutTarget.assigned_room_numbers.length ? 'Deselect All' : 'Select All'}
+                    </button>
+                  </div>
+                  <div className="space-y-1.5 p-2 rounded-2xl bg-[#FAF7F2] border border-[#E6D9C5]">
+                    {checkOutTarget.assigned_room_numbers.map((rNum) => {
+                      const roomDetail = checkOutTarget.booking_rooms?.find((bm) => bm.room_number === rNum);
+                      const isAlreadyCheckedOut = roomDetail?.status === 'checked_out';
+                      const isChecked = checkOutSelectedRooms.includes(rNum);
+                      return (
+                        <label
+                          key={rNum}
+                          className={`flex items-center justify-between p-2 rounded-xl border text-xs cursor-pointer transition-all ${
+                            isAlreadyCheckedOut
+                              ? 'bg-slate-50 border-slate-200 text-slate-500 opacity-70'
+                              : isChecked
+                              ? 'bg-white border-[#21180F] shadow-xs'
+                              : 'bg-white/60 border-[#E6D9C5] text-gray-600'
+                          }`}
+                        >
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="checkbox"
+                              checked={isChecked}
+                              disabled={isAlreadyCheckedOut}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setCheckOutSelectedRooms((prev) => [...prev, rNum]);
+                                } else {
+                                  setCheckOutSelectedRooms((prev) => prev.filter((r) => r !== rNum));
+                                }
+                              }}
+                              className="w-4 h-4 rounded text-[#21180F] focus:ring-[#21180F]"
+                            />
+                            <div>
+                              <span className="font-bold font-mono">Room #{rNum}</span>
+                              {roomDetail?.category_name && (
+                                <span className="text-[10px] text-[#786A5B] ml-2">({roomDetail.category_name})</span>
+                              )}
+                            </div>
+                          </div>
+                          {isAlreadyCheckedOut ? (
+                            <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                              Already Checked Out
+                            </span>
+                          ) : (
+                            <span className="text-[10px] font-semibold text-amber-800">
+                              {isChecked ? 'Will Check Out' : 'Remain In-House'}
+                            </span>
+                          )}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               <div>
                 <label className="block text-xs font-semibold text-[#33271D] mb-1">
@@ -1571,7 +1834,7 @@ export default function BookingsAdminPage() {
               </div>
 
               <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-[11px] text-amber-900 leading-relaxed">
-                Checking out will release Room #{checkOutTarget.assigned_room_number || checkOutTarget.room_number || ''}, automatically mark it as <b>Vacant Dirty</b> for Housekeeping, and <b>deactivate associated physical RFID keycards</b>.
+                Checking out will release selected room(s), automatically mark as <b>Vacant Dirty</b> for Housekeeping, and <b>deactivate associated physical RFID keycards</b>.
               </div>
 
               <div className="flex items-center justify-end space-x-2 pt-3 border-t border-[#E6D9C5]">
@@ -1584,7 +1847,12 @@ export default function BookingsAdminPage() {
                 </button>
                 <button
                   type="button"
-                  disabled={actionLoading}
+                  disabled={
+                    actionLoading ||
+                    (checkOutTarget.assigned_room_numbers && checkOutTarget.assigned_room_numbers.length > 1
+                      ? checkOutSelectedRooms.length === 0
+                      : false)
+                  }
                   onClick={handleConfirmCheckOut}
                   className="px-5 py-2.5 rounded-xl bg-[#21180F] hover:bg-black text-white font-bold text-xs uppercase tracking-wider cursor-pointer"
                 >
@@ -2090,17 +2358,50 @@ export default function BookingsAdminPage() {
                   </div>
                   {selectedRes.booking_rooms && selectedRes.booking_rooms.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                      {selectedRes.booking_rooms.map((rm, idx) => (
-                        <div key={idx} className="p-2.5 bg-white rounded-xl border border-[#E6D9C5] flex items-center justify-between">
-                          <div>
-                            <div className="font-bold text-[#33271D]">Room #{rm.room_number}</div>
-                            <div className="text-[10px] text-[#786A5B]">{rm.category_name || selectedRes.category_name}</div>
+                      {selectedRes.booking_rooms.map((rm, idx) => {
+                        const canRemove =
+                          (selectedRes.booking_rooms?.length || 0) > 1 &&
+                          rm.status !== 'checked_out' &&
+                          selectedRes.status !== 'checked_out' &&
+                          selectedRes.status !== 'cancelled';
+                        return (
+                          <div key={idx} className="p-2.5 bg-white rounded-xl border border-[#E6D9C5] flex items-center justify-between gap-2 shadow-2xs">
+                            <div>
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-bold text-[#33271D]">Room #{rm.room_number}</span>
+                                <span
+                                  className={`text-[9px] px-1.5 py-0.2 rounded-md font-semibold ${
+                                    rm.status === 'checked_in'
+                                      ? 'bg-emerald-100 text-emerald-800'
+                                      : rm.status === 'checked_out'
+                                      ? 'bg-slate-100 text-slate-700'
+                                      : 'bg-blue-100 text-blue-800'
+                                  }`}
+                                >
+                                  {rm.status === 'checked_in' ? 'In-House' : rm.status === 'checked_out' ? 'Checked Out' : 'Confirmed'}
+                                </span>
+                              </div>
+                              <div className="text-[10px] text-[#786A5B] mt-0.5">{rm.category_name || selectedRes.category_name}</div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="text-right">
+                                <div className="font-semibold text-[#8D672F]">₹{rm.price_per_night?.toLocaleString('en-IN')}<span className="text-[9px] text-[#786A5B]">/nt</span></div>
+                              </div>
+                              {canRemove && rm.room_number && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveRoomFromBooking(rm.room_number!)}
+                                  disabled={actionLoading}
+                                  className="p-1 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition-colors cursor-pointer"
+                                  title={`Remove Room #${rm.room_number} from this booking`}
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <div className="font-semibold text-[#8D672F]">₹{rm.price_per_night?.toLocaleString('en-IN')}<span className="text-[9px] text-[#786A5B]">/nt</span></div>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <div className="flex flex-wrap gap-2 text-xs">

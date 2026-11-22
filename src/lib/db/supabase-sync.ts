@@ -188,6 +188,7 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
           checked_out_at,
           assigned_room_id,
           assigned_room_number,
+          assigned_room_numbers,
           category_id,
           category_name,
           keycard_uid,
@@ -196,7 +197,8 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
         ) VALUES (
           $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
           $11, $12, $13, $14, $15, $16, $17, $18, $19, $20,
-          $21, $22, $23, $24, $25, $26, $27, $28, COALESCE($29, NOW()), NOW()
+          $21, $22, $23, $24, $25, $26, $27, $28, COALESCE($29, NOW()), NOW(),
+          $30
         )
         ON CONFLICT (booking_reference) DO UPDATE SET
           status = EXCLUDED.status,
@@ -213,6 +215,7 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
           checked_out_at = COALESCE(EXCLUDED.checked_out_at, bookings.checked_out_at),
           assigned_room_id = COALESCE(EXCLUDED.assigned_room_id, bookings.assigned_room_id),
           assigned_room_number = COALESCE(EXCLUDED.assigned_room_number, bookings.assigned_room_number),
+          assigned_room_numbers = COALESCE(EXCLUDED.assigned_room_numbers, bookings.assigned_room_numbers),
           category_id = COALESCE(EXCLUDED.category_id, bookings.category_id),
           category_name = COALESCE(EXCLUDED.category_name, bookings.category_name),
           keycard_uid = COALESCE(EXCLUDED.keycard_uid, bookings.keycard_uid),
@@ -228,7 +231,7 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
           Number(booking.rooms_count || 1),
           (() => {
             const st = booking.status || 'confirmed';
-            return ['pending', 'confirmed', 'checked_in', 'checked_out', 'cancelled', 'no_show'].includes(st) ? st : 'confirmed';
+            return ['pending', 'confirmed', 'checked_in', 'partially_checked_in', 'partially_checked_out', 'checked_out', 'cancelled', 'no_show'].includes(st) ? st : 'confirmed';
           })(),
           (() => {
             const ps = (booking.payment_status as any) || 'pending';
@@ -255,6 +258,9 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
           booking.category_name || null,
           booking.keycard_uid || null,
           booking.created_at || null,
+          Array.isArray(booking.assigned_room_numbers) && booking.assigned_room_numbers.length > 0
+            ? booking.assigned_room_numbers
+            : (booking.assigned_room_number ? [booking.assigned_room_number] : null),
         ]
       );
 
@@ -304,15 +310,22 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
 
         const pricePerNight = Number(booking.subtotal_amount || booking.total_amount || 1800);
         if (Array.isArray(booking.booking_rooms) && booking.booking_rooms.length > 0) {
+          const syncedRoomNumbers: string[] = [];
           for (const brItem of booking.booking_rooms) {
             let itemRoomUuid: string | null = null;
+            let itemRoomNumber = brItem.room_number || '';
             if (brItem.room_number || brItem.room_id) {
               const rRes = await client.query(
-                `SELECT id FROM rooms WHERE room_number = $1 OR id::text = $2 LIMIT 1;`,
+                `SELECT id, room_number FROM rooms WHERE room_number = $1 OR id::text = $2 LIMIT 1;`,
                 [brItem.room_number || '', brItem.room_id || '']
               );
-              if (rRes.rows.length > 0) itemRoomUuid = rRes.rows[0].id;
+              if (rRes.rows.length > 0) {
+                itemRoomUuid = rRes.rows[0].id;
+                itemRoomNumber = rRes.rows[0].room_number;
+              }
             }
+            if (itemRoomNumber) syncedRoomNumbers.push(itemRoomNumber);
+
             let itemCatUuid = catUuid;
             if (brItem.category_id || brItem.category_name) {
               const cRes = await client.query(
@@ -322,41 +335,108 @@ export async function syncBookingToSupabase(booking: Booking): Promise<void> {
               if (cRes.rows.length > 0) itemCatUuid = cRes.rows[0].id;
             }
             const itemPrice = Number(brItem.price_per_night || pricePerNight);
+            const itemStatus = brItem.status || (booking.status === 'checked_in' ? 'checked_in' : (booking.status === 'checked_out' ? 'checked_out' : 'confirmed'));
+            const itemCheckedIn = brItem.checked_in_at || (itemStatus === 'checked_in' ? (booking.checked_in_at || new Date().toISOString()) : null);
+            const itemCheckedOut = brItem.checked_out_at || (itemStatus === 'checked_out' ? (booking.checked_out_at || new Date().toISOString()) : null);
+            const itemGuestName = brItem.assigned_guest_name || guestName;
+            const itemKeycardUid = brItem.keycard_uid || (booking.assigned_room_number === itemRoomNumber ? booking.keycard_uid : null);
 
             let existingItemRes;
-            if (itemRoomUuid) {
+            if (itemRoomUuid || itemRoomNumber) {
               existingItemRes = await client.query(
-                `SELECT id FROM booking_rooms WHERE booking_id = $1 AND assigned_room_id = $2 LIMIT 1;`,
-                [bookingUuid, itemRoomUuid]
+                `SELECT id FROM booking_rooms WHERE booking_id = $1 AND (assigned_room_id = $2 OR room_number = $3) LIMIT 1;`,
+                [bookingUuid, itemRoomUuid, itemRoomNumber]
               );
             }
             if (!existingItemRes || existingItemRes.rows.length === 0) {
               await client.query(
-                `INSERT INTO booking_rooms (booking_id, category_id, assigned_room_id, price_per_night, created_at)
-                 VALUES ($1, $2, $3, $4, NOW());`,
-                [bookingUuid, itemCatUuid, itemRoomUuid, itemPrice]
+                `INSERT INTO booking_rooms (
+                   booking_id, category_id, assigned_room_id, price_per_night,
+                   room_number, status, checked_in_at, checked_out_at, assigned_guest_name, keycard_uid, created_at
+                 )
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW());`,
+                [bookingUuid, itemCatUuid, itemRoomUuid, itemPrice, itemRoomNumber, itemStatus, itemCheckedIn, itemCheckedOut, itemGuestName, itemKeycardUid]
+              );
+            } else {
+              await client.query(
+                `UPDATE booking_rooms 
+                 SET category_id = COALESCE($1, category_id),
+                     assigned_room_id = COALESCE($2, assigned_room_id),
+                     price_per_night = COALESCE($3, price_per_night),
+                     room_number = COALESCE($4, room_number),
+                     status = COALESCE($5, status),
+                     checked_in_at = COALESCE($6, checked_in_at),
+                     checked_out_at = COALESCE($7, checked_out_at),
+                     assigned_guest_name = COALESCE($8, assigned_guest_name),
+                     keycard_uid = COALESCE($9, keycard_uid)
+                 WHERE id = $10;`,
+                [itemCatUuid, itemRoomUuid, itemPrice, itemRoomNumber, itemStatus, itemCheckedIn, itemCheckedOut, itemGuestName, itemKeycardUid, existingItemRes.rows[0].id]
               );
             }
+          }
+
+          // Clean up removed rooms if any
+          if (syncedRoomNumbers.length > 0) {
+            await client.query(
+              `DELETE FROM booking_rooms 
+               WHERE booking_id = $1 
+                 AND room_number IS NOT NULL 
+                 AND room_number != '' 
+                 AND NOT (room_number = ANY($2));`,
+              [bookingUuid, syncedRoomNumbers]
+            );
           }
         } else {
           const brCheck = await client.query(
             `SELECT id FROM booking_rooms WHERE booking_id = $1 LIMIT 1;`,
             [bookingUuid]
           );
+          const roomStatus = booking.status === 'checked_in' ? 'checked_in' : (booking.status === 'checked_out' ? 'checked_out' : 'confirmed');
           if (brCheck.rows.length === 0 && catUuid) {
             await client.query(
-              `INSERT INTO booking_rooms (booking_id, category_id, assigned_room_id, price_per_night, created_at)
-               VALUES ($1, $2, $3, $4, NOW());`,
-              [bookingUuid, catUuid, roomUuid, pricePerNight]
+              `INSERT INTO booking_rooms (
+                 booking_id, category_id, assigned_room_id, price_per_night,
+                 room_number, status, checked_in_at, checked_out_at, assigned_guest_name, keycard_uid, created_at
+               )
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW());`,
+              [
+                bookingUuid,
+                catUuid,
+                roomUuid,
+                pricePerNight,
+                booking.assigned_room_number || null,
+                roomStatus,
+                booking.checked_in_at || null,
+                booking.checked_out_at || null,
+                guestName,
+                booking.keycard_uid || null,
+              ]
             );
           } else if (brCheck.rows.length > 0) {
             await client.query(
               `UPDATE booking_rooms 
                SET assigned_room_id = COALESCE($1, assigned_room_id),
                    category_id = COALESCE($2, category_id),
-                   price_per_night = COALESCE($3, price_per_night)
-               WHERE id = $4;`,
-              [roomUuid, catUuid, pricePerNight, brCheck.rows[0].id]
+                   price_per_night = COALESCE($3, price_per_night),
+                   room_number = COALESCE($4, room_number),
+                   status = COALESCE($5, status),
+                   checked_in_at = COALESCE($6, checked_in_at),
+                   checked_out_at = COALESCE($7, checked_out_at),
+                   assigned_guest_name = COALESCE($8, assigned_guest_name),
+                   keycard_uid = COALESCE($9, keycard_uid)
+               WHERE id = $10;`,
+              [
+                roomUuid,
+                catUuid,
+                pricePerNight,
+                booking.assigned_room_number || null,
+                roomStatus,
+                booking.checked_in_at || null,
+                booking.checked_out_at || null,
+                guestName,
+                booking.keycard_uid || null,
+                brCheck.rows[0].id,
+              ]
             );
           }
         }
@@ -458,7 +538,28 @@ export async function loadBookingsFromSupabase(): Promise<Booking[] | null> {
           COALESCE(b.category_name, 'Double Bed Room') as category_name,
           b.keycard_uid,
           b.created_at,
-          ARRAY_REMOVE(ARRAY_AGG(DISTINCT r.room_number), NULL) as assigned_room_numbers
+          COALESCE(
+            b.assigned_room_numbers,
+            ARRAY_REMOVE(ARRAY_AGG(DISTINCT COALESCE(br.room_number, r.room_number)), NULL)
+          ) as assigned_room_numbers,
+          COALESCE(
+            JSON_AGG(
+              JSON_BUILD_OBJECT(
+                'id', br.id::text,
+                'room_id', COALESCE(br.assigned_room_id::text, r.id::text),
+                'room_number', COALESCE(br.room_number, r.room_number),
+                'category_id', COALESCE(br.category_id::text, b.category_id),
+                'category_name', b.category_name,
+                'price_per_night', COALESCE(br.price_per_night, b.subtotal_amount, 1800)::float,
+                'status', COALESCE(br.status, b.status, 'confirmed'),
+                'checked_in_at', br.checked_in_at,
+                'checked_out_at', br.checked_out_at,
+                'assigned_guest_name', COALESCE(br.assigned_guest_name, g.full_name),
+                'keycard_uid', br.keycard_uid
+              )
+            ) FILTER (WHERE br.id IS NOT NULL),
+            '[]'::json
+          ) as booking_rooms
         FROM bookings b
         LEFT JOIN guests g ON b.guest_id = g.id
         LEFT JOIN booking_rooms br ON br.booking_id = b.id
@@ -483,6 +584,7 @@ export async function loadBookingsFromSupabase(): Promise<Booking[] | null> {
         assigned_room_numbers: Array.isArray(row.assigned_room_numbers) && row.assigned_room_numbers.length > 0
           ? row.assigned_room_numbers
           : (row.assigned_room_number ? [row.assigned_room_number] : undefined),
+        booking_rooms: Array.isArray(row.booking_rooms) ? row.booking_rooms : [],
         adults_count: Number(row.adults_count) || 1,
         children_count: Number(row.children_count) || 0,
         rooms_count: Number(row.rooms_count) || 1,
@@ -561,6 +663,7 @@ export async function getBookingFromSupabase(code?: string, ref?: string): Promi
           b.checked_out_at,
           b.assigned_room_id,
           b.assigned_room_number,
+          b.assigned_room_numbers,
           COALESCE(b.category_id, 'cat-double-03') as category_id,
           COALESCE(b.category_name, 'Double Room') as category_name,
           b.created_at
@@ -582,6 +685,28 @@ export async function getBookingFromSupabase(code?: string, ref?: string): Promi
         return s.includes('T') ? s.split('T')[0] : s;
       };
 
+      // Load associated booking_rooms if any
+      const brRes = await client.query(
+        `SELECT 
+          id::text as id,
+          assigned_room_id::text as room_id,
+          room_number,
+          category_id::text as category_id,
+          price_per_night::float as price_per_night,
+          status,
+          checked_in_at,
+          checked_out_at,
+          assigned_guest_name,
+          keycard_uid
+         FROM booking_rooms 
+         WHERE booking_id = $1;`,
+        [row.id]
+      );
+
+      const assignedRoomsArr = Array.isArray(row.assigned_room_numbers) && row.assigned_room_numbers.length > 0
+        ? row.assigned_room_numbers
+        : (row.assigned_room_number ? [row.assigned_room_number] : undefined);
+
       return {
         id: `bk-pg-${row.id}`,
         booking_reference: row.booking_reference,
@@ -594,7 +719,9 @@ export async function getBookingFromSupabase(code?: string, ref?: string): Promi
         category_id: row.category_id,
         category_name: row.category_name,
         assigned_room_id: row.assigned_room_id || undefined,
-        assigned_room_number: row.assigned_room_number || undefined,
+        assigned_room_number: row.assigned_room_number || (assignedRoomsArr?.[0]) || undefined,
+        assigned_room_numbers: assignedRoomsArr,
+        booking_rooms: brRes.rows || [],
         adults_count: Number(row.adults_count) || 1,
         children_count: Number(row.children_count) || 0,
         rooms_count: Number(row.rooms_count) || 1,

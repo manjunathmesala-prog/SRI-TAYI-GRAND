@@ -206,7 +206,7 @@ export class EmailDeliveryService {
         const fromAddress =
           process.env.RESEND_FROM_EMAIL ||
           process.env.NIGHT_AUDIT_FROM_EMAIL ||
-          'Sri Tayi Grand <onboarding@resend.dev>';
+          'Sri Tayi Grand <audit@sritayigrand.com>';
 
         const sendResponse = await resendClient.emails.send({
           from: fromAddress,
@@ -221,36 +221,36 @@ export class EmailDeliveryService {
           const errorMsg = sendResponse.error.message || JSON.stringify(sendResponse.error);
           console.error('[EMAIL SERVICE: RESEND] Error:', errorMsg);
 
-          // If Resend sandbox restricts delivery: Deliver report to verified account byvaynex@gmail.com
+          // If Resend sandbox restricts delivery: alert admin on verified account byvaynex@gmail.com but report failure for intended recipient
           if (
             errorMsg.includes('byvaynex@gmail.com') ||
-            errorMsg.includes('testing emails to your own email address')
+            errorMsg.includes('testing emails to your own email address') ||
+            errorMsg.includes('verify your domain')
           ) {
-            console.log(
-              `[EMAIL SERVICE: RESEND] Sandbox restriction: Dispatching to verified address byvaynex@gmail.com (Intended: ${recipient})`
+            console.warn(
+              `[EMAIL SERVICE: RESEND] Sandbox restriction: Resend cannot deliver to ${recipient}. Only registered address (byvaynex@gmail.com) is permitted.`
             );
-            const fallbackSend = await resendClient.emails.send({
-              from: fromAddress,
-              to: 'byvaynex@gmail.com',
-              subject: `${subject} [Intended: ${recipient}]`,
-              text: `[Delivered to verified Resend address: byvaynex@gmail.com]\nIntended Recipient: ${recipient}\n\n${bodyText}`,
-              html: `<div style="background:#fee2e2;border:1px solid #ef4444;padding:10px 14px;border-radius:8px;margin-bottom:16px;font-size:12px;color:#991b1b;">
-                <strong>Sandbox Delivery Note:</strong> Delivered to verified address <em>byvaynex@gmail.com</em> (Intended Recipient: <strong>${recipient}</strong>).
-              </div>` + htmlBody,
-              attachments,
-            });
+            try {
+              await resendClient.emails.send({
+                from: fromAddress,
+                to: 'byvaynex@gmail.com',
+                subject: `${subject} [DELIVERY BLOCKED TO: ${recipient}]`,
+                text: `[RESEND SANDBOX RESTRICTION: Email could not be delivered to ${recipient}]\nReason: ${errorMsg}\n\n${bodyText}`,
+                html: `<div style="background:#fee2e2;border:1px solid #ef4444;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;color:#991b1b;">
+                  <strong>DELIVERY FAILURE TO INTENDED RECIPIENT:</strong><br>
+                  This report could NOT be delivered to <strong>${recipient}</strong> because Resend is in trial/sandbox mode.<br>
+                  To send to <strong>${recipient}</strong>, configure <code>SMTP_PASS</code> (Gmail App Password) for <em>sritayigrand@gmail.com</em> or verify domain <em>sritayigrand.com</em> in Resend.
+                </div>` + htmlBody,
+                attachments,
+              });
+            } catch {}
 
-            if (!fallbackSend.error && fallbackSend.data?.id) {
-              console.log(
-                `[EMAIL SERVICE: RESEND] Sent to byvaynex@gmail.com, id: ${fallbackSend.data.id}`
-              );
-              return {
-                success: true,
-                status: 'sent',
-                messageId: fallbackSend.data.id,
-                provider: 'resend',
-              };
-            }
+            return {
+              success: false,
+              status: 'failed',
+              error: `Resend sandbox restriction: Cannot deliver to ${recipient}. Only verified account (byvaynex@gmail.com) is allowed. Please configure GMAIL_APP_PASSWORD / SMTP_PASS for sritayigrand@gmail.com.`,
+              provider: 'resend',
+            };
           }
 
           return { success: false, status: 'failed', error: errorMsg, provider: 'resend' };

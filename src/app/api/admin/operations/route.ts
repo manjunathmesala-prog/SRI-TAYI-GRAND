@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
 
         // If specific room selected, assign it
         const targetRoomIdentifier = roomId || roomNumber || booking.assigned_room_id;
-        if (targetRoomIdentifier) {
+        if (targetRoomIdentifier && !booking.assigned_room_id) {
           try {
             repo.assignRoomToBooking(targetRoomIdentifier, booking.booking_reference, booking.guest_name, staffName);
           } catch (assignErr: any) {
@@ -91,8 +91,19 @@ export async function POST(req: NextRequest) {
           }
         }
 
-        // Update status to checked_in
-        const updatedBooking = await repo.updateBookingStatus(bookingReference, 'checked_in', undefined, staffName);
+        // Support partial check-in if roomNumbers is specified as an array
+        let updatedBooking: any;
+        const requestedRoomNums = Array.isArray(body.roomNumbers)
+          ? body.roomNumbers
+          : Array.isArray(body.room_numbers)
+          ? body.room_numbers
+          : null;
+
+        if (requestedRoomNums && requestedRoomNums.length > 0) {
+          updatedBooking = await repo.checkInSpecificRooms(bookingReference, requestedRoomNums, staffName);
+        } else {
+          updatedBooking = await repo.updateBookingStatus(bookingReference, 'checked_in', undefined, staffName);
+        }
 
         // Update statutory guest registration fields if provided
         if (updatedBooking) {
@@ -197,14 +208,18 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ success: false, error: `Booking ${bookingReference} not found` }, { status: 404 });
         }
 
-        // Stale Data Guard: Check-out requires active checked_in status
+        // Stale Data Guard: Check-out requires active in-house stay
         if (booking.status === 'checked_out') {
           return NextResponse.json(
             { success: false, error: `Booking ${bookingReference} has already checked out.` },
             { status: 409 }
           );
         }
-        if (booking.status !== 'checked_in') {
+        if (
+          booking.status !== 'checked_in' &&
+          booking.status !== 'partially_checked_in' &&
+          booking.status !== 'partially_checked_out'
+        ) {
           return NextResponse.json(
             { success: false, error: `Cannot check out: Booking ${bookingReference} is not checked in (current status: ${booking.status}).` },
             { status: 409 }
@@ -240,29 +255,41 @@ export async function POST(req: NextRequest) {
           booking.payment_status = 'successful';
         }
 
-        // Deactivate card on hardware bridge if connected
-        const targetRooms =
-          booking.assigned_room_numbers && booking.assigned_room_numbers.length > 0
-            ? booking.assigned_room_numbers
-            : booking.assigned_room_number
-            ? [booking.assigned_room_number]
-            : booking.room_number
-            ? [booking.room_number]
-            : [];
-        for (const rNum of targetRooms) {
-          fetch('http://127.0.0.1:8989/api/checkout-card', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-Staff-User': staffName },
-            body: JSON.stringify({
-              roomNumber: rNum,
-              staffUser: staffName,
-            }),
-            signal: AbortSignal.timeout(3000),
-          }).catch(() => {});
-        }
+        // Support partial checkout if roomNumbers is specified as an array
+        const requestedCheckoutRooms = Array.isArray(body.roomNumbers)
+          ? body.roomNumbers
+          : Array.isArray(body.room_numbers)
+          ? body.room_numbers
+          : null;
 
-        // Update status to checked_out and mark room dirty
-        const updatedBooking = await repo.updateBookingStatus(bookingReference, 'checked_out', undefined, staffName);
+        let updatedBooking: any;
+        if (requestedCheckoutRooms && requestedCheckoutRooms.length > 0) {
+          updatedBooking = await repo.checkOutSpecificRooms(bookingReference, requestedCheckoutRooms, staffName);
+        } else {
+          // Deactivate card on hardware bridge if connected
+          const targetRooms =
+            booking.assigned_room_numbers && booking.assigned_room_numbers.length > 0
+              ? booking.assigned_room_numbers
+              : booking.assigned_room_number
+              ? [booking.assigned_room_number]
+              : booking.room_number
+              ? [booking.room_number]
+              : [];
+          for (const rNum of targetRooms) {
+            fetch('http://127.0.0.1:8989/api/checkout-card', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'X-Staff-User': staffName },
+              body: JSON.stringify({
+                roomNumber: rNum,
+                staffUser: staffName,
+              }),
+              signal: AbortSignal.timeout(3000),
+            }).catch(() => {});
+          }
+
+          // Update status to checked_out and mark room dirty
+          updatedBooking = await repo.updateBookingStatus(bookingReference, 'checked_out', undefined, staffName);
+        }
 
         if (updatedBooking) {
           syncBookingToSupabase(updatedBooking);
@@ -426,6 +453,41 @@ export async function POST(req: NextRequest) {
           return NextResponse.json(
             { success: false, error: err.message || 'Failed to add extra room' },
             { status: isConflict ? 409 : 400 }
+          );
+        }
+      }
+
+      case 'remove_room': {
+        const auth = verifyStaffRole(req, ['Super Admin', 'Hotel Manager', 'Front Desk', 'Receptionist']);
+        if (!auth.authorized) {
+          return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
+        }
+
+        const { bookingReference, roomNumber } = body;
+        if (!bookingReference || !roomNumber) {
+          return NextResponse.json(
+            { success: false, error: 'bookingReference and roomNumber are required to remove a room' },
+            { status: 400 }
+          );
+        }
+
+        const staffName = auth.session?.name || body.staffName || 'Front Desk Duty Officer';
+        try {
+          const result = await repo.removeRoomFromBooking({
+            bookingReference,
+            roomNumber,
+            actor: staffName,
+          });
+
+          return NextResponse.json({
+            success: true,
+            message: `Room #${roomNumber} removed from booking ${bookingReference}.`,
+            ...result,
+          });
+        } catch (err: any) {
+          return NextResponse.json(
+            { success: false, error: err.message || 'Failed to remove room' },
+            { status: 400 }
           );
         }
       }
