@@ -2,6 +2,12 @@ import { Resend } from 'resend';
 import nodemailer, { Transporter } from 'nodemailer';
 import { AuditReportData } from './night-audit-service';
 
+// Fixed Official Vaynex Email Sender Configuration
+export const OFFICIAL_SENDER_NAME = 'Sri Tayi Grand Audit';
+export const OFFICIAL_SENDER_EMAIL = 'audit@byvaynex.com';
+export const OFFICIAL_FROM_HEADER = `${OFFICIAL_SENDER_NAME} <${OFFICIAL_SENDER_EMAIL}>`;
+export const OFFICIAL_REPLY_TO = 'contact@sritayigrand.com';
+
 export interface EmailSendResult {
   success: boolean;
   status?: 'sent' | 'failed' | 'configuration_required';
@@ -161,11 +167,76 @@ export class EmailDeliveryService {
 
     <div class="footer">
       Sri Tayi Grand &bull; Bypass Road, Kadiri &bull; Andhra Pradesh &bull; Tel: 084942 23379<br>
-      Confidential Financial &amp; Operational Communication &bull; Generated via STG Enterprise PMS
+      Official Daily Night Audit Report &bull; Powered by Vaynex Cloud Infrastructure (<a href="mailto:audit@byvaynex.com" style="color:#d97706; text-decoration:none;">audit@byvaynex.com</a>)
     </div>
   </div>
 </body>
 </html>`;
+  }
+
+  public async sendEmail(options: {
+    to: string;
+    subject: string;
+    html?: string;
+    text?: string;
+    attachments?: Array<{ filename: string; content: Buffer | string }>;
+  }): Promise<EmailSendResult> {
+    // Strictly enforce official Vaynex sender address
+    const fromAddress = OFFICIAL_FROM_HEADER; // "Sri Tayi Grand Audit <audit@byvaynex.com>"
+
+    // 1. Primary Dispatch Provider: Verified Resend Production API (audit@byvaynex.com)
+    const resendClient = this.getResendClient();
+    if (resendClient) {
+      try {
+        const sendResponse = await resendClient.emails.send({
+          from: fromAddress,
+          replyTo: OFFICIAL_REPLY_TO,
+          to: options.to,
+          subject: options.subject,
+          text: options.text || '',
+          html: options.html,
+          attachments: options.attachments,
+        });
+
+        if (sendResponse.error) {
+          const errorMsg = sendResponse.error.message || JSON.stringify(sendResponse.error);
+          console.error('[EMAIL SERVICE: RESEND] Error:', errorMsg);
+          return { success: false, status: 'failed', error: errorMsg, provider: 'resend' };
+        }
+
+        console.log(`[EMAIL SERVICE: RESEND] Sent from ${fromAddress} to ${options.to}, id: ${sendResponse.data?.id}`);
+        return { success: true, status: 'sent', messageId: sendResponse.data?.id, provider: 'resend' };
+      } catch (resendErr: any) {
+        console.error('[EMAIL SERVICE: RESEND] Failed:', resendErr?.message);
+        // Fall back to SMTP below if Resend encounters network failure
+      }
+    }
+
+    // 2. Secondary Fallback: SMTP (if configured)
+    const smtp = this.getSmtpTransporter();
+    if (smtp) {
+      try {
+        const info = await smtp.sendMail({
+          from: fromAddress,
+          replyTo: OFFICIAL_REPLY_TO,
+          to: options.to,
+          subject: options.subject,
+          text: options.text,
+          html: options.html,
+          attachments: options.attachments,
+        });
+        console.log(`[EMAIL SERVICE: SMTP] Sent from ${fromAddress} to ${options.to}, id: ${info.messageId}`);
+        return { success: true, status: 'sent', messageId: info.messageId, provider: 'smtp' };
+      } catch (smtpErr: any) {
+        console.error('[EMAIL SERVICE: SMTP] Failed to send via SMTP:', smtpErr?.message);
+      }
+    }
+
+    return {
+      success: false,
+      status: 'configuration_required',
+      error: 'No operational email provider configured. Please set RESEND_API_KEY (audit@byvaynex.com).',
+    };
   }
 
   public async sendReport(
@@ -178,98 +249,13 @@ export class EmailDeliveryService {
     const htmlBody = this.generateHtmlSummary(data);
     const attachments = [{ filename: `Sri_Tayi_Grand_Night_Audit_${data.businessDate}.pdf`, content: pdfBuffer }];
 
-    // 1. Try Direct Hotel Gmail SMTP (Zero restrictions, works to all email addresses)
-    const smtp = this.getSmtpTransporter();
-    if (smtp) {
-      try {
-        const fromUser = process.env.SMTP_USER || process.env.GMAIL_USER || 'sritayigrand@gmail.com';
-        const info = await smtp.sendMail({
-          from: `"Sri Tayi Grand" <${fromUser}>`,
-          to: recipient,
-          subject,
-          text: bodyText,
-          html: htmlBody,
-          attachments,
-        });
-        console.log(`[EMAIL SERVICE: SMTP] Successfully sent to ${recipient}, id: ${info.messageId}`);
-        return { success: true, status: 'sent', messageId: info.messageId, provider: 'smtp' };
-      } catch (smtpErr: any) {
-        console.error('[EMAIL SERVICE: SMTP] Failed to send via Gmail SMTP:', smtpErr?.message);
-        // Fall back to Resend if available
-      }
-    }
-
-    // 2. Try Resend API
-    const resendClient = this.getResendClient();
-    if (resendClient) {
-      try {
-        const fromAddress =
-          process.env.RESEND_FROM_EMAIL ||
-          process.env.NIGHT_AUDIT_FROM_EMAIL ||
-          'Sri Tayi Grand <audit@sritayigrand.com>';
-
-        const sendResponse = await resendClient.emails.send({
-          from: fromAddress,
-          to: recipient,
-          subject,
-          text: bodyText,
-          html: htmlBody,
-          attachments,
-        });
-
-        if (sendResponse.error) {
-          const errorMsg = sendResponse.error.message || JSON.stringify(sendResponse.error);
-          console.error('[EMAIL SERVICE: RESEND] Error:', errorMsg);
-
-          // If Resend sandbox restricts delivery: alert admin on verified account byvaynex@gmail.com but report failure for intended recipient
-          if (
-            errorMsg.includes('byvaynex@gmail.com') ||
-            errorMsg.includes('testing emails to your own email address') ||
-            errorMsg.includes('verify your domain')
-          ) {
-            console.warn(
-              `[EMAIL SERVICE: RESEND] Sandbox restriction: Resend cannot deliver to ${recipient}. Only registered address (byvaynex@gmail.com) is permitted.`
-            );
-            try {
-              await resendClient.emails.send({
-                from: fromAddress,
-                to: 'byvaynex@gmail.com',
-                subject: `${subject} [DELIVERY BLOCKED TO: ${recipient}]`,
-                text: `[RESEND SANDBOX RESTRICTION: Email could not be delivered to ${recipient}]\nReason: ${errorMsg}\n\n${bodyText}`,
-                html: `<div style="background:#fee2e2;border:1px solid #ef4444;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;color:#991b1b;">
-                  <strong>DELIVERY FAILURE TO INTENDED RECIPIENT:</strong><br>
-                  This report could NOT be delivered to <strong>${recipient}</strong> because Resend is in trial/sandbox mode.<br>
-                  To send to <strong>${recipient}</strong>, configure <code>SMTP_PASS</code> (Gmail App Password) for <em>sritayigrand@gmail.com</em> or verify domain <em>sritayigrand.com</em> in Resend.
-                </div>` + htmlBody,
-                attachments,
-              });
-            } catch {}
-
-            return {
-              success: false,
-              status: 'failed',
-              error: `Resend sandbox restriction: Cannot deliver to ${recipient}. Only verified account (byvaynex@gmail.com) is allowed. Please configure GMAIL_APP_PASSWORD / SMTP_PASS for sritayigrand@gmail.com.`,
-              provider: 'resend',
-            };
-          }
-
-          return { success: false, status: 'failed', error: errorMsg, provider: 'resend' };
-        }
-
-        console.log(`[EMAIL SERVICE: RESEND] Sent to ${recipient}, id: ${sendResponse.data?.id}`);
-        return { success: true, status: 'sent', messageId: sendResponse.data?.id, provider: 'resend' };
-      } catch (resendErr: any) {
-        console.error('[EMAIL SERVICE: RESEND] Failed:', resendErr?.message);
-        return { success: false, status: 'failed', error: resendErr?.message, provider: 'resend' };
-      }
-    }
-
-    return {
-      success: false,
-      status: 'configuration_required',
-      error:
-        'No email provider configured. Please set GMAIL_APP_PASSWORD / SMTP_PASS for sritayigrand@gmail.com or RESEND_API_KEY.',
-    };
+    return this.sendEmail({
+      to: recipient,
+      subject,
+      text: bodyText,
+      html: htmlBody,
+      attachments,
+    });
   }
 }
 

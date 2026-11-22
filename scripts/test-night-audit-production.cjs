@@ -354,10 +354,17 @@ async function runAcceptanceTests() {
       try {
         await client.query(`
           INSERT INTO night_audit_recipients (id, hotel_id, channel, recipient_name, recipient_address, role)
-          VALUES ('rec-dup-1', 'sri-tayi-grand', 'email', 'Admin 1', 'contact@sritayigrand.com', 'Official')
+          VALUES ('rec-dup-base', 'sri-tayi-grand', 'email', 'Base Recipient', 'dup-test@sritayigrand.com', 'Official')
+          ON CONFLICT DO NOTHING;
+        `);
+        await client.query(`
+          INSERT INTO night_audit_recipients (id, hotel_id, channel, recipient_name, recipient_address, role)
+          VALUES ('rec-dup-second', 'sri-tayi-grand', 'email', 'Second Recipient', 'dup-test@sritayigrand.com', 'Official')
         `);
       } catch (err) {
         deduplicationEnforced = err.message.includes('unique') || err.message.includes('uq_recipient_channel_address');
+      } finally {
+        await client.query(`DELETE FROM night_audit_recipients WHERE recipient_address = 'dup-test@sritayigrand.com'`).catch(() => {});
       }
 
       recordTest(

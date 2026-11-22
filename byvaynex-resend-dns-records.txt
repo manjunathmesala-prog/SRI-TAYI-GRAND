@@ -1,0 +1,7 @@
+$ORIGIN byvaynex.com.
+$TTL 3600
+
+resend._domainkey IN TXT "p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCy3qFM1zYvakaGZ8OyBQZ50KllkW+h12AT6jx/j+aWwUE66+hJKnmqughn+oEkH1eIEbInp9GDVzhHo+s8ZXR/lHCH+8rR2o7iiuJ7xTfOlhjddv0/FHARCHAkLJIe0p5LII5TFzVz/ENealhRf21qctrAKWzzB0YHIeX9bijxjQIDAQAB"
+rsend IN CNAME rsend-apne1.forge.rmta.net.
+send IN CNAME send.forge.rmta.net.
+_dmarc IN TXT "v=DMARC1; p=none;"
