@@ -48,12 +48,36 @@ export default function PoliciesPage() {
             </div>
           </div>
 
+          {/* Terms & Conditions */}
+          <div id="terms" className="bg-white rounded-2xl border border-[#D8AD56]/25 p-7 sm:p-9 shadow-luxury scroll-mt-28">
+            <div className="flex items-center gap-3 mb-4">
+              <FileText className="w-5 h-5 text-[#D8AD56]" />
+              <h2 className="font-serif text-xl font-medium text-[#241912]">
+                Terms & Conditions
+              </h2>
+            </div>
+            <div className="space-y-3 text-xs text-[#786B61] font-light leading-relaxed">
+              <p>
+                <strong>Reservation Agreement:</strong> By booking accommodation or event services at Sri Tayi Grand, guests agree to abide by all hotel regulations, local laws, and payment terms.
+              </p>
+              <p>
+                <strong>Tariff & Taxes:</strong> All room tariffs and hall rental charges are subject to statutory Goods and Services Tax (GST) as mandated by the Government of India.
+              </p>
+              <p>
+                <strong>Occupancy Limits:</strong> Room occupancy must strictly match the reservation details. Extra guest charges apply for occupants beyond the standard room capacity.
+              </p>
+              <p>
+                <strong>Right of Admission:</strong> The hotel management reserves the right of admission. Guests engaging in unlawful conduct or damaging property may be asked to vacate immediately.
+              </p>
+            </div>
+          </div>
+
           {/* Cancellation & Refund */}
-          <div className="bg-white rounded-2xl border border-[#D8AD56]/25 p-7 sm:p-9 shadow-luxury">
+          <div id="refunds" className="bg-white rounded-2xl border border-[#D8AD56]/25 p-7 sm:p-9 shadow-luxury scroll-mt-28">
             <div className="flex items-center gap-3 mb-4">
               <RefreshCw className="w-5 h-5 text-[#D8AD56]" />
               <h2 className="font-serif text-xl font-medium text-[#241912]">
-                Cancellation & Refunds
+                Cancellation & Refund Policy
               </h2>
             </div>
             <div className="space-y-3 text-xs text-[#786B61] font-light leading-relaxed">
@@ -67,23 +91,64 @@ export default function PoliciesPage() {
                 <strong>Under 24 Hours / No-Show:</strong> Cancellations within 24 hours of arrival or non-arrivals are non-refundable.
               </p>
               <p>
-                <strong>Refund Processing:</strong> Refunds for electronic payments are credited to the original payment method within 5–7 banking days.
+                <strong>Refund Processing Timeline:</strong> Approved refunds for online transactions (Credit/Debit Card, Netbanking, UPI) are initiated immediately and credited to the guest's original payment source within <strong>5 to 7 working days</strong>.
+              </p>
+            </div>
+          </div>
+
+          {/* Shipping & Delivery / Booking Fulfillment */}
+          <div id="delivery" className="bg-white rounded-2xl border border-[#D8AD56]/25 p-7 sm:p-9 shadow-luxury scroll-mt-28">
+            <div className="flex items-center gap-3 mb-4">
+              <ShieldCheck className="w-5 h-5 text-[#D8AD56]" />
+              <h2 className="font-serif text-xl font-medium text-[#241912]">
+                Shipping & Service Delivery Policy
+              </h2>
+            </div>
+            <div className="space-y-3 text-xs text-[#786B61] font-light leading-relaxed">
+              <p>
+                <strong>Electronic Booking Delivery:</strong> Sri Tayi Grand provides hospitality lodging and accommodation services. No physical goods or packages are shipped.
+              </p>
+              <p>
+                <strong>Instant Confirmation:</strong> Upon successful online payment, your official booking voucher and confirmation details containing your Booking Reference are generated and delivered electronically via SMS and Email within <strong>5 minutes</strong>.
+              </p>
+              <p>
+                <strong>Physical Keycard Issuance:</strong> Physical RFID room keycards are encoded and handed over in person at the Sri Tayi Grand front desk upon guest check-in and statutory ID verification.
               </p>
             </div>
           </div>
 
           {/* Privacy & Guest Information */}
-          <div className="bg-white rounded-2xl border border-[#D8AD56]/25 p-7 sm:p-9 shadow-luxury">
+          <div id="privacy" className="bg-white rounded-2xl border border-[#D8AD56]/25 p-7 sm:p-9 shadow-luxury scroll-mt-28">
             <div className="flex items-center gap-3 mb-4">
               <FileText className="w-5 h-5 text-[#D8AD56]" />
               <h2 className="font-serif text-xl font-medium text-[#241912]">
-                Privacy & Data Security
+                Privacy & Data Security Policy
               </h2>
             </div>
             <div className="space-y-3 text-xs text-[#786B61] font-light leading-relaxed">
               <p>
                 Guest contact details and identity information are held in strict confidence, utilized solely for reservation fulfillment, legal compliance, and communication regarding your stay. We do not sell or distribute personal information to third parties.
               </p>
+              <p>
+                <strong>Payment Security:</strong> All digital transactions are processed through 256-bit SSL encrypted PCI-DSS Level 1 certified payment gateways. Sri Tayi Grand does not store your card numbers or CVV.
+              </p>
+            </div>
+          </div>
+
+          {/* Grievance Redressal & Contact */}
+          <div id="contact" className="bg-white rounded-2xl border border-[#D8AD56]/25 p-7 sm:p-9 shadow-luxury scroll-mt-28">
+            <div className="flex items-center gap-3 mb-4">
+              <Clock className="w-5 h-5 text-[#D8AD56]" />
+              <h2 className="font-serif text-xl font-medium text-[#241912]">
+                Customer Support & Grievance Redressal
+              </h2>
+            </div>
+            <div className="space-y-2 text-xs text-[#786B61] font-light leading-relaxed">
+              <p>For any booking inquiries, payment clarifications, or refunds, contact our management team directly:</p>
+              <p><strong>Property Name:</strong> Sri Tayi Grand Hotel</p>
+              <p><strong>Operating Address:</strong> Opp. Girls High School, Bypass Road, Tadipatri – Pulivendula – Kadiri Road, Kadiri – 515591, Andhra Pradesh, India</p>
+              <p><strong>Phone:</strong> 084942 23379 (24/7 Front Desk)</p>
+              <p><strong>Email:</strong> contact@sritayigrand.com</p>
             </div>
           </div>
         </div>

@@ -202,9 +202,21 @@ export function Footer() {
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-[#E6D9C5]/60 gap-4">
           <p>© {new Date().getFullYear()} Sri Tayi Grand Hotel. All rights reserved.</p>
           
-          <div className="flex items-center gap-6">
-            <NextLink href="/policies" className="hover:text-[#B18A4A] transition-colors">
-              Hotel Policies
+          <div className="flex items-center gap-4 sm:gap-6 flex-wrap justify-center">
+            <NextLink href="/policies#terms" className="hover:text-[#B18A4A] transition-colors">
+              Terms & Conditions
+            </NextLink>
+            <NextLink href="/policies#privacy" className="hover:text-[#B18A4A] transition-colors">
+              Privacy Policy
+            </NextLink>
+            <NextLink href="/policies#refunds" className="hover:text-[#B18A4A] transition-colors">
+              Cancellation & Refund
+            </NextLink>
+            <NextLink href="/policies#delivery" className="hover:text-[#B18A4A] transition-colors">
+              Shipping & Delivery
+            </NextLink>
+            <NextLink href="/contact" className="hover:text-[#B18A4A] transition-colors">
+              Contact Us
             </NextLink>
             <button
               onClick={scrollToTop}
