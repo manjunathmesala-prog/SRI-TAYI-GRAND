@@ -1,6 +1,6 @@
 {
   "title": "SRI TAYI GRAND – RFID INTEGRATION & REAL-TIME PRODUCTION QA AUDIT",
-  "executedAt": "2026-11-22T19:34:48.588Z",
+  "executedAt": "2026-11-23T12:59:53.278Z",
   "environment": {
     "baseUrl": "http://localhost:3000",
     "bridgeUrl": "http://127.0.0.1:8989",
@@ -22,12 +22,12 @@
     "RFID Bridge Service Availability (Port 8989)": {
       "name": "RFID Bridge Service Availability (Port 8989)",
       "status": "PASS",
-      "timestamp": "2026-11-22T19:34:49.559Z",
+      "timestamp": "2026-11-23T12:59:53.629Z",
       "details": {
         "service": "SriTayiGrand-RFID-Bridge",
         "port": 1,
         "readerType": 4,
-        "latencyMs": 967,
+        "latencyMs": 349,
         "raw": {
           "status": "hardware_offline",
           "isOnline": false,
@@ -42,7 +42,7 @@
     "Physical Be-Tech ACR120 USB Reader Hardware": {
       "name": "Physical Be-Tech ACR120 USB Reader Hardware",
       "status": "PASS",
-      "timestamp": "2026-11-22T19:34:49.559Z",
+      "timestamp": "2026-11-23T12:59:53.630Z",
       "details": {
         "connected": false,
         "diagnostics": "Bridge correctly reports hardware_offline (ACR120 USB Mifare reader not physically connected to USB port)",
@@ -52,176 +52,221 @@
     },
     "Next.js Backend RFID Gateway (/api/rfid/bridge)": {
       "name": "Next.js Backend RFID Gateway (/api/rfid/bridge)",
-      "status": "FAIL",
-      "timestamp": "2026-11-22T19:34:49.659Z",
+      "status": "PASS",
+      "timestamp": "2026-11-23T12:59:58.664Z",
       "details": {
-        "status": 500
+        "latencyMs": 5034,
+        "mode": "hardware",
+        "host": "http://127.0.0.1:8989",
+        "devicesCount": 28,
+        "tunnelUrl": "https://rfid.sritayigrand.com"
       }
     },
     "Cloudflare Secure Tunnel Supabase Synchronization": {
       "name": "Cloudflare Secure Tunnel Supabase Synchronization",
       "status": "PASS",
-      "timestamp": "2026-11-22T19:34:50.723Z",
+      "timestamp": "2026-11-23T13:00:00.091Z",
       "details": {
-        "tunnelUrl": "https://time-representations-examines-sum.trycloudflare.com",
+        "tunnelUrl": "https://rfid.sritayigrand.com",
         "mode": "hardware",
-        "updatedAt": "2026-11-10T21:17:02.264Z"
+        "updatedAt": "2026-11-23T12:54:11.481Z"
       }
     }
   },
   "apiDiscovery": [
     {
       "name": "Manager Authentication (Sagar)",
-      "status": "FAIL",
-      "timestamp": "2026-11-22T19:34:53.383Z",
+      "status": "PASS",
+      "timestamp": "2026-11-23T13:00:00.403Z",
       "details": {
-        "error": "Failed after 3 attempts"
+        "role": "Hotel Manager",
+        "name": "Sagar",
+        "expiresAt": "2026-11-24T13:00:00.400Z"
       }
     },
     {
       "name": "Super Admin Authentication",
-      "status": "FAIL",
-      "timestamp": "2026-11-22T19:34:55.878Z",
+      "status": "PASS",
+      "timestamp": "2026-11-23T13:00:00.442Z",
       "details": {
-        "error": "Failed after 3 attempts"
+        "role": "Super Admin",
+        "name": "Sri Tayi Grand Admin"
       }
     },
     {
       "name": "GET /api/rfid/cards",
-      "status": "FAIL",
-      "timestamp": "2026-11-22T19:34:56.010Z",
+      "status": "PASS",
+      "timestamp": "2026-11-23T13:00:00.663Z",
       "details": {
-        "status": 500
+        "status": 200,
+        "totalCards": 24,
+        "activeCards": 17
       }
     },
     {
       "name": "GET /api/rfid/devices",
-      "status": "FAIL",
-      "timestamp": "2026-11-22T19:34:56.093Z",
+      "status": "PASS",
+      "timestamp": "2026-11-23T13:00:00.866Z",
       "details": {
-        "status": 500
+        "status": 200,
+        "deviceCount": 28
       }
     },
     {
       "name": "GET /api/admin/rfid-logs",
-      "status": "FAIL",
-      "timestamp": "2026-11-22T19:34:56.249Z",
+      "status": "PASS",
+      "timestamp": "2026-11-23T13:00:01.449Z",
       "details": {
-        "status": 500
+        "status": 200,
+        "totalEvents": 74,
+        "granted": 44,
+        "denied": 30
       }
     },
     {
       "name": "GET /api/rfid/history",
-      "status": "FAIL",
-      "timestamp": "2026-11-22T19:34:56.510Z",
+      "status": "PASS",
+      "timestamp": "2026-11-23T13:00:01.731Z",
       "details": {
-        "status": 500
+        "status": 200,
+        "totalTaps": 70
       }
     },
     {
       "name": "GET /api/rooms/[roomNumber]/rfid-history",
-      "status": "FAIL",
-      "timestamp": "2026-11-22T19:34:56.685Z",
+      "status": "PASS",
+      "timestamp": "2026-11-23T13:00:03.148Z",
       "details": {
-        "status": 500
+        "status": 200,
+        "roomNumber": "101",
+        "totalTaps": 0
       }
     }
   ],
   "cardTapTests": [
     {
       "name": "Card Issuance: Test Guest Card Room 101",
-      "status": "FAIL",
-      "timestamp": "2026-11-22T19:34:56.950Z",
+      "status": "PASS",
+      "timestamp": "2026-11-23T13:00:03.200Z",
       "details": {
-        "cardUid": "TEST-MIF-101-6685"
+        "cardUid": "TEST-MIF-101-3148",
+        "status": "active"
       }
     },
     {
       "name": "Test A – Valid Card Tap (Assigned Room 101)",
-      "status": "FAIL",
-      "timestamp": "2026-11-22T19:34:57.044Z",
-      "details": {}
+      "status": "PASS",
+      "timestamp": "2026-11-23T13:00:03.472Z",
+      "details": {
+        "result": "Customer QA Test Guest (Sagar Audit) tapped and unlocked Room 101.",
+        "authorized": true,
+        "cardType": "guest",
+        "roomStatus": "occupied",
+        "eventId": "evt-1795438803198-116"
+      }
     },
     {
       "name": "Test B – Repeated Card Tap (Duplicate Delivery & Unique Event IDs)",
-      "status": "FAIL",
-      "timestamp": "2026-11-22T19:34:58.911Z",
+      "status": "PASS",
+      "timestamp": "2026-11-23T13:00:05.176Z",
       "details": {
+        "event1Id": "evt-1795438803198-116",
+        "event2Id": "evt-1795438803198-116",
+        "event3Id": "evt-1795438805173-942",
         "isDuplicateDeduplicated": true,
-        "isSubsequentTapLogged": false,
+        "isSubsequentTapLogged": true,
         "timestampsPreserved": true
       }
     },
     {
       "name": "Test C – Invalid Card Rejection & Security Trap",
-      "status": "FAIL",
-      "timestamp": "2026-11-22T19:34:58.983Z",
-      "details": {}
+      "status": "PASS",
+      "timestamp": "2026-11-23T13:00:05.222Z",
+      "details": {
+        "authorized": false,
+        "message": "Access Denied: Unregistered card scanned.",
+        "eventReason": "Unregistered Card UID",
+        "actionType": "unauthorized_attempt"
+      }
     },
     {
       "name": "Test D – Room Mapping Protection (Tapped on Unauthorized Room 205)",
-      "status": "FAIL",
-      "timestamp": "2026-11-22T19:34:59.054Z",
+      "status": "PASS",
+      "timestamp": "2026-11-23T13:00:05.275Z",
       "details": {
+        "authorized": false,
         "expectedRoom": "101",
-        "tappedRoom": "205"
+        "tappedRoom": "205",
+        "message": "Access Denied: This keycard belongs to Room 101, not Room 205."
       }
     },
     {
       "name": "Test E – Super Admin Universal Master Key Clearance (Room 308)",
-      "status": "FAIL",
-      "timestamp": "2026-11-22T19:34:59.178Z",
-      "details": {}
+      "status": "PASS",
+      "timestamp": "2026-11-23T13:00:05.364Z",
+      "details": {
+        "authorized": true,
+        "cardType": "super_admin",
+        "message": "Super Admin Master Clearance: Door unlocked for Sri Tayi Grand MD."
+      }
     },
     {
       "name": "Test F – Cleaner Dual-Tap In/Out Housekeeping Turnover (Room 108)",
-      "status": "FAIL",
-      "timestamp": "2026-11-22T19:35:00.172Z",
-      "details": {}
+      "status": "PASS",
+      "timestamp": "2026-11-23T13:00:06.407Z",
+      "details": {
+        "tap1Action": "cleaning_started",
+        "tap1RoomStatus": "cleaning",
+        "tap2Action": "cleaning_completed",
+        "tap2RoomStatus": "available"
+      }
     },
     {
       "name": "Playwright Chrome Automation",
       "status": "FAIL",
-      "timestamp": "2026-11-22T19:35:36.367Z",
+      "timestamp": "2026-11-23T13:00:54.975Z",
       "details": {
-        "error": "page.fill: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('input[type=\"email\"]')\u001b[22m\n"
+        "error": "page.goto: net::ERR_CONNECTION_REFUSED at http://localhost:3000/admin/login\nCall log:\n\u001b[2m  - navigating to \"http://localhost:3000/admin/login\", waiting until \"networkidle\"\u001b[22m\n"
       }
     }
   ],
   "bookingIntegration": [
     {
       "name": "Scenario 1 – Guest Walk-In Booking Creation",
-      "status": "FAIL",
-      "timestamp": "2026-11-22T19:35:00.403Z",
+      "status": "PASS",
+      "timestamp": "2026-11-23T13:00:11.468Z",
       "details": {
-        "bookingRef": "TG-WLK-0304"
+        "bookingRef": "TG-W-20261123-8337",
+        "bookingId": "bk-walkin-1795438807656"
       }
     },
     {
       "name": "Scenario 1 – Walk-In Keycard Issuance & Physical Encoding Link",
-      "status": "FAIL",
-      "timestamp": "2026-11-22T19:35:00.507Z",
+      "status": "PASS",
+      "timestamp": "2026-11-23T13:00:14.976Z",
       "details": {
-        "cardUid": "BT-57-WLK-0403",
-        "room": "105"
+        "cardUid": "BT-57-WLK-1468",
+        "room": "105",
+        "cardStatus": "active",
+        "bridgeResult": null
       }
     },
     {
       "name": "Scenario 1 – Walk-In Card Tap Verification (Room 105)",
       "status": "FAIL",
-      "timestamp": "2026-11-22T19:35:00.647Z",
+      "timestamp": "2026-11-23T13:00:25.843Z",
       "details": {}
     },
     {
       "name": "Scenario 2 – Room Transfer Revocation & Re-Issuance",
       "status": "FAIL",
-      "timestamp": "2026-11-22T19:35:01.074Z",
+      "timestamp": "2026-11-23T13:00:28.571Z",
       "details": {}
     },
     {
       "name": "Scenario 3 – Guest Checkout Card Deactivation & Denial",
       "status": "FAIL",
-      "timestamp": "2026-11-22T19:35:01.354Z",
+      "timestamp": "2026-11-23T13:00:29.449Z",
       "details": {
         "deactivated": false,
         "postCheckoutAccessDenied": false
@@ -232,11 +277,11 @@
     "Telemetry Pipeline Latency (Tap -> Process -> Log Ingestion)": {
       "name": "Telemetry Pipeline Latency (Tap -> Process -> Log Ingestion)",
       "status": "FAIL",
-      "timestamp": "2026-11-22T19:35:01.722Z",
+      "timestamp": "2026-11-23T13:00:30.273Z",
       "details": {
-        "tapProcessingLatencyMs": 111,
-        "logsQueryLatencyMs": 118,
-        "totalPipelineLatencyMs": 229
+        "tapProcessingLatencyMs": 217,
+        "logsQueryLatencyMs": 260,
+        "totalPipelineLatencyMs": 477
       }
     }
   },
@@ -245,7 +290,7 @@
     {
       "name": "Toast: Valid card detected",
       "status": "PASS",
-      "timestamp": "2026-11-22T19:35:36.938Z",
+      "timestamp": "2026-11-23T13:00:55.432Z",
       "details": {
         "expectedToast": "Access Granted: Room 101 unlocked"
       }
@@ -253,7 +298,7 @@
     {
       "name": "Toast: Event received",
       "status": "PASS",
-      "timestamp": "2026-11-22T19:35:36.938Z",
+      "timestamp": "2026-11-23T13:00:55.432Z",
       "details": {
         "expectedToast": "Bridge event acknowledged and ingested (< 15ms)"
       }
@@ -261,7 +306,7 @@
     {
       "name": "Toast: Event persisted",
       "status": "PASS",
-      "timestamp": "2026-11-22T19:35:36.938Z",
+      "timestamp": "2026-11-23T13:00:55.432Z",
       "details": {
         "expectedToast": "Hardware tap successfully audited in Sri Tayi Grand database"
       }
@@ -269,7 +314,7 @@
     {
       "name": "Toast: Invalid card",
       "status": "PASS",
-      "timestamp": "2026-11-22T19:35:36.938Z",
+      "timestamp": "2026-11-23T13:00:55.432Z",
       "details": {
         "expectedToast": "Access Denied: Invalid or unregistered keycard"
       }
@@ -277,7 +322,7 @@
     {
       "name": "Toast: Unassigned card / Wrong room",
       "status": "PASS",
-      "timestamp": "2026-11-22T19:35:36.938Z",
+      "timestamp": "2026-11-23T13:00:55.432Z",
       "details": {
         "expectedToast": "Access Denied: Keycard is not assigned to this room"
       }
@@ -285,7 +330,7 @@
     {
       "name": "Toast: Reader unavailable",
       "status": "PASS",
-      "timestamp": "2026-11-22T19:35:36.938Z",
+      "timestamp": "2026-11-23T13:00:55.432Z",
       "details": {
         "expectedToast": "Hardware offline: Be-Tech USB reader disconnected"
       }
@@ -293,7 +338,7 @@
     {
       "name": "Toast: Bridge disconnected",
       "status": "PASS",
-      "timestamp": "2026-11-22T19:35:36.939Z",
+      "timestamp": "2026-11-23T13:00:55.432Z",
       "details": {
         "expectedToast": "Hardware bridge unreachable. Click Recheck RFID Connection"
       }
@@ -301,7 +346,7 @@
     {
       "name": "Toast: Duplicate event",
       "status": "PASS",
-      "timestamp": "2026-11-22T19:35:36.939Z",
+      "timestamp": "2026-11-23T13:00:55.432Z",
       "details": {
         "expectedToast": "Duplicate bridge webhook event acknowledged without double-recording"
       }
@@ -309,7 +354,7 @@
     {
       "name": "Toast: Card assignment",
       "status": "PASS",
-      "timestamp": "2026-11-22T19:35:36.939Z",
+      "timestamp": "2026-11-23T13:00:55.432Z",
       "details": {
         "expectedToast": "Guest card issued for Room 101 (QA Test Guest)"
       }
@@ -317,7 +362,7 @@
     {
       "name": "Toast: Card revoked",
       "status": "PASS",
-      "timestamp": "2026-11-22T19:35:36.939Z",
+      "timestamp": "2026-11-23T13:00:55.432Z",
       "details": {
         "expectedToast": "Keycard updated to INACTIVE in system"
       }
@@ -326,25 +371,78 @@
   "databaseAudit": {
     "Database Audit: rfid_cards Record Persistence": {
       "name": "Database Audit: rfid_cards Record Persistence",
-      "status": "FAIL",
-      "timestamp": "2026-11-22T19:35:03.512Z",
+      "status": "PASS",
+      "timestamp": "2026-11-23T13:00:31.297Z",
       "details": {
-        "found": 0
+        "found": 1,
+        "row": {
+          "id": "9d4f6e06-2429-4d45-b659-a2d37c6ca24c",
+          "card_uid": "TEST-MIF-101-3148",
+          "card_label": "Guest Card (Room 101)",
+          "assigned_room_id": null,
+          "booking_id": null,
+          "status": "active",
+          "activated_at": "2026-11-23T13:00:03.197Z",
+          "expires_at": "2026-11-25T13:00:03.197Z",
+          "deactivated_at": null,
+          "issued_by": null,
+          "created_at": "2026-11-23T13:00:03.285Z",
+          "updated_at": "2026-11-23T13:00:03.285Z",
+          "card_type": "guest",
+          "is_lifetime": false,
+          "holder_name": "QA Test Guest (Sagar Audit)",
+          "holder_role": "Guest",
+          "staff_id": null,
+          "last_tap_room": "101",
+          "last_tap_at": null,
+          "notes": "Customer Keycard for Room 101 (Stay: TG-QA-20261122-101)"
+        }
       }
     },
     "Database Audit: rfid_tap_history Audit Trail": {
       "name": "Database Audit: rfid_tap_history Audit Trail",
-      "status": "FAIL",
-      "timestamp": "2026-11-22T19:35:03.767Z",
+      "status": "PASS",
+      "timestamp": "2026-11-23T13:00:31.448Z",
       "details": {
-        "totalTapsLogged": 0,
-        "recentTaps": []
+        "totalTapsLogged": 5,
+        "recentTaps": [
+          {
+            "id": "tap-1795438805274-oqhlrq",
+            "room": "205",
+            "result": "WRONG_ROOM",
+            "tappedAt": "2026-11-23T13:00:05.273Z"
+          },
+          {
+            "id": "tap-1795438805175-t896ny",
+            "room": "101",
+            "result": "GRANTED",
+            "tappedAt": "2026-11-23T13:00:05.174Z"
+          },
+          {
+            "id": "tap-1795438803540-w9wnui",
+            "room": "101",
+            "result": "GRANTED",
+            "tappedAt": "2026-11-23T13:00:03.538Z"
+          },
+          {
+            "id": "tap-1795438803515-unhu6b",
+            "room": "101",
+            "result": "GRANTED",
+            "tappedAt": "2026-11-23T13:00:03.514Z"
+          },
+          {
+            "id": "tap-1795438803468-fw69y1",
+            "room": "101",
+            "result": "GRANTED",
+            "tappedAt": "2026-11-23T13:00:03.467Z"
+          }
+        ]
       }
     },
     "Database Audit: rfid_devices Mesh Registry": {
       "name": "Database Audit: rfid_devices Mesh Registry",
       "status": "PASS",
-      "timestamp": "2026-11-22T19:35:04.062Z",
+      "timestamp": "2026-11-23T13:00:31.592Z",
       "details": {
         "deviceCounts": [
           {
@@ -360,8 +458,8 @@
   "defects": [],
   "summary": {
     "total": 38,
-    "passed": 14,
-    "failed": 24,
+    "passed": 33,
+    "failed": 5,
     "unverified": 0
   }
 }
