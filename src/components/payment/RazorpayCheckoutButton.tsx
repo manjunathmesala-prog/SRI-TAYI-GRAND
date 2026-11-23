@@ -36,7 +36,7 @@ export function RazorpayCheckoutButton({
   receipt,
   customerName = 'Valued Guest',
   customerEmail = 'guest@sritayigrand.com',
-  customerPhone = '9999999999',
+  customerPhone = '8328413356',
   notes = {},
   buttonText = 'Pay with Razorpay',
   className = '',
@@ -133,8 +133,13 @@ export function RazorpayCheckoutButton({
           name: customerName,
           email: customerEmail,
           contact: customerPhone
-            ? (customerPhone.startsWith('+') ? customerPhone : `+91${customerPhone.replace(/\D/g, '').slice(-10)}`)
-            : '+919876543210',
+            ? customerPhone.replace(/\D/g, '').slice(-10)
+            : '8328413356',
+        },
+        readonly: {
+          contact: true,
+          email: true,
+          name: true,
         },
         notes: {
           receipt: orderData.receipt,

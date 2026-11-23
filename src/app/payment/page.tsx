@@ -11,7 +11,7 @@ export default function PaymentDemoPage() {
   const [amountRupees, setAmountRupees] = useState<number>(500);
   const [customerName, setCustomerName] = useState<string>('Manjunath Sai');
   const [customerEmail, setCustomerEmail] = useState<string>('manjunath@sritayigrand.com');
-  const [customerPhone, setCustomerPhone] = useState<string>('9876543210');
+  const [customerPhone, setCustomerPhone] = useState<string>('8328413356');
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState<{
     order_id: string;
