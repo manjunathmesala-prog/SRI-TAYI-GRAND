@@ -2,9 +2,10 @@ import crypto from 'crypto';
 import Razorpay from 'razorpay';
 
 export interface RazorpayOrderOptions {
-  amount: number; // in INR (Rupees)
+  amount?: number; // in INR (Rupees)
+  amountInPaise?: number; // in Paise directly
   currency?: string;
-  receipt: string;
+  receipt?: string;
   notes?: Record<string, string>;
 }
 
@@ -70,32 +71,24 @@ export function getRazorpayClient(): Razorpay {
 export async function createRazorpayOrder(
   options: RazorpayOrderOptions
 ): Promise<RazorpayOrderResult> {
-  const amountInPaise = inrToPaise(options.amount);
+  const amountInPaise = typeof options.amountInPaise === 'number'
+    ? Math.round(options.amountInPaise)
+    : inrToPaise(options.amount || 0);
 
-  if (amountInPaise <= 0) {
-    throw new Error('[FINTECH INTEGRITY ERROR] Order amount in paise must be strictly positive.');
+  if (amountInPaise < 100) {
+    throw new Error('[FINTECH INTEGRITY ERROR] Order amount in paise must be at least 100 (₹1.00).');
   }
 
   const key_id = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-  const isPlaceholderOrTest = process.env.NODE_ENV === 'test';
-
-  if (isPlaceholderOrTest) {
-    return {
-      id: `order_test_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-      amount: amountInPaise,
-      currency: options.currency || 'INR',
-      receipt: options.receipt.substring(0, 40),
-      status: 'created',
-    };
-  }
+  const effectiveReceipt = (options.receipt || `rcpt_${Date.now()}`).substring(0, 40);
 
   if (!key_id || key_id.startsWith('rzp_test_placeholder')) {
-    if (process.env.NODE_ENV !== 'production' || isPlaceholderOrTest) {
+    if (process.env.NODE_ENV !== 'production') {
       return {
         id: `order_test_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
         amount: amountInPaise,
         currency: options.currency || 'INR',
-        receipt: options.receipt.substring(0, 40),
+        receipt: effectiveReceipt,
         status: 'created',
       };
     }
@@ -108,7 +101,7 @@ export async function createRazorpayOrder(
     const order = await razorpay.orders.create({
       amount: amountInPaise,
       currency: options.currency || 'INR',
-      receipt: options.receipt.substring(0, 40), // Razorpay receipt max 40 chars
+      receipt: effectiveReceipt,
       notes: options.notes || {},
     });
 
@@ -116,7 +109,7 @@ export async function createRazorpayOrder(
       id: order.id,
       amount: Number(order.amount),
       currency: order.currency,
-      receipt: String(order.receipt || options.receipt),
+      receipt: String(order.receipt || effectiveReceipt),
       status: String(order.status),
     };
   } catch (err: unknown) {

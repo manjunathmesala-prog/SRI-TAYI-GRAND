@@ -1,0 +1,33 @@
+================================================================================
+   SRI TAYI GRAND - RECEPTION FRONT DESK QUICK RFID GUIDE
+================================================================================
+
+HOW TO USE KEYCARDS AT THE FRONT DESK:
+
+1. Open Google Chrome.
+2. Go to: https://sritayigrand.com/admin/rfid
+3. Check the top indicator:
+   - It should say: 🟢 "Hardware Online (USB Port 1)"
+
+TO ISSUE A ROOM KEY FOR A GUEST:
+1. Place a blank keycard flat on the Be-Tech card machine.
+2. On the website, click "+ Issue Customer Card" (or click "Walk-in" -> "Check-in & Encode").
+3. Select the Room Number (e.g. 101, 102, 201) and guest name.
+4. Click "Write Physical Card".
+5. The machine will beep, and the screen will say "Success".
+6. Hand the keycard to the guest.
+
+TO TEST OR READ ANY KEYCARD:
+1. Place any keycard on the Be-Tech machine.
+2. On the website, click "Read Physical Card".
+3. The screen will immediately display which room the card belongs to and its status.
+
+IF THE SCREEN SAYS "HARDWARE OFFLINE":
+1. Make sure the USB cable from the card machine is firmly plugged into the computer.
+2. Click "Recheck Connection" on the website.
+3. If it still says offline, double-click the desktop icon:
+   "2_TEST_RFID_HARDWARE.bat" to see what is disconnected.
+
+================================================================================
+Emergency Contact / Technical Support: Sri Tayi Grand Technical Administrator
+================================================================================

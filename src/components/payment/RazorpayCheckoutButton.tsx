@@ -1,158 +1,270 @@
 'use client';
 
-import React from 'react';
-import { CreditCard, Loader2, ShieldCheck, AlertCircle } from 'lucide-react';
-import { useRazorpayCheckout } from '@/hooks/useRazorpayCheckout';
+import React, { useState, useEffect } from 'react';
+import { CreditCard, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 
-interface RazorpayCheckoutButtonProps {
-  amountRupees: number;
-  bookingReference?: string;
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
+export interface RazorpayCheckoutButtonProps {
+  amount?: number; // amount in paise (e.g. 50000 = ₹500.00). Defaults to 100 paise minimum.
+  amountInRupees?: number; // convenient rupee amount (e.g. 500 = ₹500.00)
+  currency?: string;
+  receipt?: string;
   customerName?: string;
   customerEmail?: string;
   customerPhone?: string;
-  description?: string;
+  notes?: Record<string, string>;
   buttonText?: string;
   className?: string;
-  disabled?: boolean;
-  onSuccessRedirectUrl?: string;
-  onPaymentSuccess?: (paymentResult: any) => void;
-  onPaymentFailure?: (error: string) => void;
+  onSuccess?: (paymentData: {
+    order_id: string;
+    payment_id: string;
+    signature: string;
+  }) => void;
+  onError?: (error: string) => void;
+  onDismiss?: () => void;
 }
 
 export function RazorpayCheckoutButton({
-  amountRupees,
-  bookingReference,
-  customerName,
-  customerEmail,
-  customerPhone,
-  description = 'Room Reservation Payment',
-  buttonText,
+  amount = 50000, // 50000 paise = ₹500
+  amountInRupees,
+  currency = 'INR',
+  receipt,
+  customerName = 'Valued Guest',
+  customerEmail = 'guest@sritayigrand.com',
+  customerPhone = '9999999999',
+  notes = {},
+  buttonText = 'Pay with Razorpay',
   className = '',
-  disabled = false,
-  onSuccessRedirectUrl,
-  onPaymentSuccess,
-  onPaymentFailure,
+  onSuccess,
+  onError,
+  onDismiss,
 }: RazorpayCheckoutButtonProps) {
-  const { isProcessing, errorMessage, setErrorMessage, openCheckout } = useRazorpayCheckout();
+  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: 'success' | 'error' | 'info';
+    text: string;
+  } | null>(null);
 
-  const handleInitiatePayment = async () => {
-    setErrorMessage(null);
+  // 1. Dynamically load official Razorpay SDK script
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    if (window.Razorpay) {
+      setIsScriptLoaded(true);
+      return;
+    }
+
+    const scriptId = 'razorpay-standard-checkout-script';
+    let script = document.getElementById(scriptId) as HTMLScriptElement | null;
+
+    if (!script) {
+      script = document.createElement('script');
+      script.id = scriptId;
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => setIsScriptLoaded(true);
+      script.onerror = () => {
+        setStatusMessage({
+          type: 'error',
+          text: 'Failed to load Razorpay payment gateway script. Please verify your internet connection.',
+        });
+      };
+      document.body.appendChild(script);
+    } else {
+      setIsScriptLoaded(true);
+    }
+  }, []);
+
+  // Compute effective amount in paise
+  const effectiveAmountInPaise = amountInRupees
+    ? Math.round(amountInRupees * 100)
+    : Math.max(100, Math.round(amount));
+
+  // 2. Checkout handler: Create Order -> Open Modal -> Verify Signature
+  const handleCheckout = async () => {
+    setStatusMessage(null);
+    setIsProcessing(true);
 
     try {
-      // 1. Create Server-Side Authoritative Order
-      const res = await fetch('/api/razorpay/create-order', {
+      // Step A: Call backend create-order endpoint
+      const orderRes = await fetch('/api/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          bookingReference,
-          guestName: customerName,
-          guestEmail: customerEmail,
-          guestPhone: customerPhone,
+          amount: effectiveAmountInPaise,
+          currency,
+          receipt: receipt || `rcpt_${Date.now()}`,
+          notes: {
+            customer_name: customerName,
+            customer_email: customerEmail,
+            customer_phone: customerPhone,
+            hotel: 'SRI TAYI GRAND',
+            ...notes,
+          },
         }),
       });
 
-      const orderData = await res.json();
-      if (!res.ok) {
-        throw new Error(orderData.error || 'Failed to create payment order.');
+      const orderData = await orderRes.json();
+      if (!orderRes.ok || !orderData.order_id) {
+        throw new Error(orderData.error || 'Failed to create payment order with server.');
       }
 
-      // 2. Open Standard Razorpay Checkout Modal
-      openCheckout({
-        orderId: orderData.orderId,
-        amount: orderData.amount, // in paise
-        currency: orderData.currency || 'INR',
-        keyId: orderData.keyId,
+      const activeKeyId =
+        orderData.key_id ||
+        process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
+        'rzp_test_U3aO08c0MEmri7';
+
+      // Step B: Configure and open Razorpay Standard Checkout modal
+      const options = {
+        key: activeKeyId,
+        amount: orderData.amount,
+        currency: orderData.currency || currency,
         name: 'SRI TAYI GRAND',
-        description,
+        description: 'Hotel Accommodation & Services Payment',
+        image: '/images/hotel/tayi-grand-logo.png',
+        order_id: orderData.order_id,
         prefill: {
           name: customerName,
           email: customerEmail,
           contact: customerPhone,
         },
         notes: {
-          booking_reference: bookingReference || orderData.receipt,
+          receipt: orderData.receipt,
+          ...notes,
         },
-        onSuccess: async (paymentData) => {
-          // 3. Server-side HMAC-SHA256 Cryptographic Verification
-          const verifyRes = await fetch('/api/razorpay/verify-payment', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              bookingReference: bookingReference || orderData.receipt,
-              orderId: paymentData.razorpay_order_id,
-              paymentId: paymentData.razorpay_payment_id,
-              signature: paymentData.razorpay_signature,
-            }),
-          });
+        theme: {
+          color: '#43001F',
+        },
+        // Step C: On success callback from Razorpay Modal
+        handler: async function (response: {
+          razorpay_order_id: string;
+          razorpay_payment_id: string;
+          razorpay_signature: string;
+        }) {
+          try {
+            // Step D: Send credentials to verify-payment endpoint
+            const verifyRes = await fetch('/api/verify-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+              }),
+            });
 
-          const verifyData = await verifyRes.json();
-          if (!verifyRes.ok) {
-            throw new Error(verifyData.error || 'Cryptographic payment verification failed.');
+            const verifyData = await verifyRes.json();
+            if (verifyRes.ok && verifyData.success) {
+              const successText = `Payment successful! Payment ID: ${response.razorpay_payment_id}`;
+              setStatusMessage({ type: 'success', text: successText });
+              onSuccess?.({
+                order_id: response.razorpay_order_id,
+                payment_id: response.razorpay_payment_id,
+                signature: response.razorpay_signature,
+              });
+            } else {
+              const failText = verifyData.error || 'Payment signature verification failed.';
+              setStatusMessage({ type: 'error', text: failText });
+              onError?.(failText);
+            }
+          } catch (vErr: any) {
+            const errText = vErr?.message || 'Network error verifying payment signature.';
+            setStatusMessage({ type: 'error', text: errText });
+            onError?.(errText);
+          } finally {
+            setIsProcessing(false);
           }
-
-          onPaymentSuccess?.(verifyData);
-
-          if (onSuccessRedirectUrl) {
-            window.location.href = onSuccessRedirectUrl;
-          } else if (bookingReference) {
-            window.location.href = `/booking/confirmation/${bookingReference}`;
-          }
         },
-        onError: (err) => {
-          onPaymentFailure?.(err);
+        modal: {
+          ondismiss: function () {
+            setIsProcessing(false);
+            setStatusMessage({
+              type: 'info',
+              text: 'Payment checkout window was closed by user.',
+            });
+            onDismiss?.();
+          },
+          escape: true,
+          backdropclose: false,
         },
+      };
+
+      if (!window.Razorpay) {
+        throw new Error('Razorpay SDK script is still loading. Please try again in a few seconds.');
+      }
+
+      const rzpInstance = new window.Razorpay(options);
+
+      // Handle payment declined / failed event
+      rzpInstance.on('payment.failed', function (failResp: any) {
+        setIsProcessing(false);
+        const reason =
+          failResp.error?.description ||
+          failResp.error?.reason ||
+          'Payment attempt was declined or cancelled.';
+        setStatusMessage({ type: 'error', text: `Payment Failed: ${reason}` });
+        onError?.(reason);
       });
+
+      rzpInstance.open();
     } catch (err: any) {
-      const msg = err?.message || 'Payment initiation failed.';
-      setErrorMessage(msg);
-      onPaymentFailure?.(msg);
+      setIsProcessing(false);
+      const errMsg = err?.message || 'An error occurred during payment processing.';
+      setStatusMessage({ type: 'error', text: errMsg });
+      onError?.(errMsg);
     }
   };
 
-  return (
-    <div className="w-full space-y-3">
-      {errorMessage && (
-        <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-xl flex items-start gap-2.5 text-xs text-rose-800 animate-fadeIn">
-          <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <span className="font-semibold block">Payment Alert</span>
-            <span>{errorMessage}</span>
-          </div>
-        </div>
-      )}
+  const displayRupees = (effectiveAmountInPaise / 100).toLocaleString('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+  });
 
+  return (
+    <div className="inline-flex flex-col gap-2">
       <button
         type="button"
-        onClick={handleInitiatePayment}
-        disabled={disabled || isProcessing}
-        className={`w-full py-4 px-6 rounded-2xl bg-[#43001F] hover:bg-[#2E0015] active:scale-[0.98] text-white text-sm uppercase tracking-wider font-bold shadow-luxury hover:shadow-luxury-lg transition-all duration-300 flex items-center justify-center gap-2.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer ${className}`}
+        onClick={handleCheckout}
+        disabled={isProcessing || !isScriptLoaded}
+        className={`inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-medium text-white transition-all shadow-md hover:shadow-lg disabled:opacity-60 disabled:cursor-not-allowed ${
+          className || 'bg-gradient-to-r from-[#43001F] to-[#670030] hover:from-[#320017] hover:to-[#500025]'
+        }`}
       >
         {isProcessing ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin text-[#D8AD56]" />
-            <span>Securing Payment...</span>
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span>Processing Order...</span>
           </>
         ) : (
           <>
-            <CreditCard className="w-4 h-4 text-[#D8AD56]" />
-            <span>
-              {buttonText || `Pay ₹${amountRupees.toLocaleString('en-IN')} via Razorpay`}
-            </span>
-            <ShieldCheck className="w-4 h-4 text-emerald-400 ml-auto" />
+            <CreditCard className="w-5 h-5 text-[#D8AD56]" />
+            <span>{buttonText} ({displayRupees})</span>
           </>
         )}
       </button>
 
-      <div className="flex items-center justify-center gap-4 text-[11px] text-[#786A5B]">
-        <span className="flex items-center gap-1">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-          <span>256-bit SSL Encryption</span>
-        </span>
-        <span>•</span>
-        <span>UPI / Cards / NetBanking</span>
-        <span>•</span>
-        <span className="font-semibold text-[#43001F]">Razorpay Verified</span>
-      </div>
+      {statusMessage && (
+        <div
+          className={`flex items-start gap-2 p-3 text-xs rounded-lg mt-1 ${
+            statusMessage.type === 'success'
+              ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+              : statusMessage.type === 'error'
+              ? 'bg-red-50 text-red-800 border border-red-200'
+              : 'bg-amber-50 text-amber-800 border border-amber-200'
+          }`}
+        >
+          {statusMessage.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />}
+          {statusMessage.type === 'error' && <AlertCircle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />}
+          {statusMessage.type === 'info' && <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />}
+          <div className="flex-1 font-medium">{statusMessage.text}</div>
+        </div>
+      )}
     </div>
   );
 }

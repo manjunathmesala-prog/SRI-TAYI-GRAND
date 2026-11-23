@@ -120,8 +120,10 @@ export async function POST(request: Request) {
       success: true,
       message: 'Payment verified and transaction ledger recorded successfully.',
       bookingReference: bookingReference || orderId,
-      paymentId,
+      order_id: orderId,
       orderId,
+      payment_id: paymentId,
+      paymentId,
       transactionId: transaction.id,
       paymentReference: paymentRecord.payment_reference,
     });

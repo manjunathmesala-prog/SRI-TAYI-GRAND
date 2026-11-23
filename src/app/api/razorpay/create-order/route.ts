@@ -51,6 +51,11 @@ export async function POST(request: Request) {
       customerEmail = existingBooking.guest_email;
       customerPhone = existingBooking.guest_phone;
       roomCategoryName = existingBooking.category_name;
+    } else if (body.amount || body.amountInPaise) {
+      const parsed = Number(body.amount ?? body.amountInPaise);
+      totalRupees = (body.amountInPaise || parsed >= 100) ? parsed / 100 : parsed;
+      targetBookingReference = body.receipt || `STG-PAY-${Date.now().toString().slice(-6)}`;
+      roomCategoryName = 'Hotel Payment';
     } else {
       if (!categoryId || !checkIn || !checkOut) {
         return NextResponse.json(
@@ -122,6 +127,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
+      order_id: razorpayOrder.id,
       orderId: razorpayOrder.id,
       currency: razorpayOrder.currency,
       amount: razorpayOrder.amount, // in paise

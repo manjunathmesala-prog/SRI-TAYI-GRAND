@@ -105,7 +105,7 @@ export default function WalkInPickupPage({ params }: { params: Promise<{ code: s
       }
 
       const razorpayKey =
-        process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_Ty3N7lQ7MDxqRm';
+        process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_U3aO08c0MEmri7';
 
       const options = {
         key: razorpayKey,
