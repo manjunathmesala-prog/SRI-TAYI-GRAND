@@ -82,17 +82,8 @@ export async function createRazorpayOrder(
   const key_id = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
   const effectiveReceipt = (options.receipt || `rcpt_${Date.now()}`).substring(0, 40);
 
-  if (!key_id || key_id.startsWith('rzp_test_placeholder')) {
-    if (process.env.NODE_ENV !== 'production') {
-      return {
-        id: `order_test_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
-        amount: amountInPaise,
-        currency: options.currency || 'INR',
-        receipt: effectiveReceipt,
-        status: 'created',
-      };
-    }
-    throw new Error('[RAZORPAY CONFIG ERROR] A configured provider key is required to create an order.');
+  if (!key_id) {
+    throw new Error('[RAZORPAY CONFIG ERROR] A configured Razorpay API key is required to create an order.');
   }
 
   const razorpay = getRazorpayClient();
@@ -132,10 +123,6 @@ export function verifyPaymentSignature(
 ): boolean {
   if (!orderId || !paymentId || !signature) {
     return false;
-  }
-
-  if (!customSecret && orderId.startsWith('order_test_') && signature === 'rzp_valid_mock_hmac_signature' && process.env.NODE_ENV !== 'production') {
-    return true;
   }
 
   const secret = customSecret || process.env.RAZORPAY_KEY_SECRET;

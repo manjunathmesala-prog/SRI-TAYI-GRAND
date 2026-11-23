@@ -85,7 +85,7 @@ export function useRazorpayCheckout() {
       setIsProcessing(true);
 
       const razorpayOptions = {
-        key: options.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_U3aO08c0MEmri7',
+        key: options.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
         amount: options.amount,
         currency: options.currency || 'INR',
         name: options.name || 'SRI TAYI GRAND',

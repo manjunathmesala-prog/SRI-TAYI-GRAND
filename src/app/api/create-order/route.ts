@@ -7,8 +7,7 @@ export async function POST(request: Request) {
     const keyId = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
-    // Perimeter Authentication check
-    if (!keyId || !keySecret || keyId === 'rzp_test_placeholder') {
+    if (!keyId || !keySecret) {
       return NextResponse.json(
         {
           success: false,

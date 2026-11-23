@@ -8,24 +8,15 @@ import { ShieldCheck, CreditCard, CheckCircle2, Lock, Sparkles, Building2, Smart
 import TayiBrandIcon from '@/components/anantha/TayiBrandIcon';
 
 export default function PaymentDemoPage() {
-  const [amountRupees, setAmountRupees] = useState<number>(500);
-  const [customerName, setCustomerName] = useState<string>('Manjunath Sai');
-  const [customerEmail, setCustomerEmail] = useState<string>('manjunath@sritayigrand.com');
-  const [customerPhone, setCustomerPhone] = useState<string>('8328413356');
-  const [copiedField, setCopiedField] = useState<string | null>(null);
+  const [amountRupees, setAmountRupees] = useState<number>(1000);
+  const [customerName, setCustomerName] = useState<string>('');
+  const [customerEmail, setCustomerEmail] = useState<string>('');
+  const [customerPhone, setCustomerPhone] = useState<string>('');
   const [paymentSuccess, setPaymentSuccess] = useState<{
     order_id: string;
     payment_id: string;
     signature: string;
   } | null>(null);
-
-  const copyToClipboard = (text: string, field: string) => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(text);
-      setCopiedField(field);
-      setTimeout(() => setCopiedField(null), 2000);
-    }
-  };
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] flex flex-col justify-between text-[#2D2424]">
@@ -45,7 +36,7 @@ export default function PaymentDemoPage() {
               Razorpay Standard Web Checkout
             </h1>
             <p className="text-white/80 text-sm mt-1">
-              End-to-end encrypted payment gateway test &amp; checkout portal
+              End-to-end 256-bit encrypted secure payment checkout portal
             </p>
 
             <div className="mt-4 flex flex-wrap gap-4 text-xs text-[#D8AD56]">
@@ -56,7 +47,7 @@ export default function PaymentDemoPage() {
                 <ShieldCheck className="w-3.5 h-3.5" /> HMAC-SHA256 Server Verified
               </span>
               <span className="flex items-center gap-1.5 bg-black/20 px-3 py-1 rounded-full border border-[#D8AD56]/30">
-                <Sparkles className="w-3.5 h-3.5" /> Test Mode Active
+                <Sparkles className="w-3.5 h-3.5" /> PCI-DSS Compliant
               </span>
             </div>
           </div>
@@ -94,7 +85,7 @@ export default function PaymentDemoPage() {
                 </div>
 
                 <div className="flex gap-2">
-                  {[100, 500, 1800, 2500].map((preset) => (
+                  {[500, 1000, 2500, 5000].map((preset) => (
                     <button
                       key={preset}
                       type="button"
@@ -105,7 +96,7 @@ export default function PaymentDemoPage() {
                           : 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100'
                       }`}
                     >
-                      ₹{preset}
+                      ₹{preset.toLocaleString('en-IN')}
                     </button>
                   ))}
                 </div>
@@ -125,6 +116,7 @@ export default function PaymentDemoPage() {
                   <input
                     type="text"
                     value={customerName}
+                    placeholder="Enter guest name"
                     onChange={(e) => setCustomerName(e.target.value)}
                     className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#D8AD56] text-sm"
                   />
@@ -138,18 +130,21 @@ export default function PaymentDemoPage() {
                     <input
                       type="email"
                       value={customerEmail}
+                      placeholder="guest@example.com"
                       onChange={(e) => setCustomerEmail(e.target.value)}
                       className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#D8AD56] text-sm"
                     />
                   </div>
                   <div>
                     <label className="block text-xs font-semibold text-[#786B61] uppercase tracking-wider mb-1">
-                      Phone
+                      Phone Number
                     </label>
                     <input
                       type="tel"
                       value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      placeholder="10-digit mobile number"
+                      maxLength={10}
+                      onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, ''))}
                       className="w-full px-3 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#D8AD56] text-sm"
                     />
                   </div>
@@ -157,67 +152,41 @@ export default function PaymentDemoPage() {
               </div>
             </div>
 
-            {/* Razorpay Test Payment Instruments */}
+            {/* Production Supported Payment Methods */}
             <div className="bg-[#FAF7F2] border border-[#EBE3D5] rounded-2xl p-5 space-y-3">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-[#43001F] uppercase tracking-wider flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-[#D8AD56]" />
-                  Active Test Payment Instruments
+                  <ShieldCheck className="w-4 h-4 text-[#D8AD56]" />
+                  Supported Payment Methods
                 </span>
                 <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-                  Ready for Checkout
+                  Instant Confirmation
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                {/* Test Card */}
-                <div className="bg-white p-3.5 rounded-xl border border-gray-200 flex flex-col justify-between shadow-sm">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-semibold text-gray-800 flex items-center gap-1.5">
-                      <CreditCard className="w-4 h-4 text-[#D8AD56]" /> Test Card
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard('4100280000001007', 'card')}
-                      className="text-[11px] text-[#43001F] hover:text-[#670030] font-medium flex items-center gap-1 bg-gray-50 hover:bg-gray-100 px-2 py-0.5 rounded border border-gray-200 transition-colors"
-                      title="Copy Card Number"
-                    >
-                      {copiedField === 'card' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
-                      <span>{copiedField === 'card' ? 'Copied' : 'Copy'}</span>
-                    </button>
-                  </div>
-                  <div className="font-mono text-sm font-bold text-gray-900 tracking-wider">
-                    4100 2800 0000 1007
-                  </div>
-                  <div className="flex items-center gap-4 text-[11px] text-gray-500 mt-1 font-mono">
-                    <span>Expiry: <strong className="text-gray-800">12/26</strong></span>
-                    <span>CVV: <strong className="text-gray-800">123</strong></span>
-                    <span>OTP: <strong className="text-gray-800">Any (e.g. 123456)</strong></span>
-                  </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
+                  <Smartphone className="w-5 h-5 text-emerald-600 mb-1" />
+                  <span className="font-semibold text-gray-800">UPI Instant</span>
+                  <span className="text-[10px] text-gray-500 mt-0.5">GPay, PhonePe, Paytm, BHIM</span>
                 </div>
 
-                {/* Test UPI */}
-                <div className="bg-white p-3.5 rounded-xl border border-gray-200 flex flex-col justify-between shadow-sm">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="font-semibold text-gray-800 flex items-center gap-1.5">
-                      <Smartphone className="w-4 h-4 text-emerald-600" /> Test UPI ID
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => copyToClipboard('test@razorpay', 'upi')}
-                      className="text-[11px] text-[#43001F] hover:text-[#670030] font-medium flex items-center gap-1 bg-gray-50 hover:bg-gray-100 px-2 py-0.5 rounded border border-gray-200 transition-colors"
-                      title="Copy UPI ID"
-                    >
-                      {copiedField === 'upi' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
-                      <span>{copiedField === 'upi' ? 'Copied' : 'Copy'}</span>
-                    </button>
-                  </div>
-                  <div className="font-mono text-sm font-bold text-emerald-700 tracking-wider">
-                    test@razorpay
-                  </div>
-                  <div className="text-[11px] text-gray-500 mt-1">
-                    Direct auto-approval in Razorpay test mode (or <code className="bg-gray-100 px-1 py-0.5 rounded text-gray-700">success@razorpay</code>).
-                  </div>
+                <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
+                  <CreditCard className="w-5 h-5 text-[#D8AD56] mb-1" />
+                  <span className="font-semibold text-gray-800">Credit &amp; Debit Cards</span>
+                  <span className="text-[10px] text-gray-500 mt-0.5">Visa, MasterCard, RuPay, Amex</span>
+                </div>
+
+                <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
+                  <Building2 className="w-5 h-5 text-blue-600 mb-1" />
+                  <span className="font-semibold text-gray-800">Netbanking</span>
+                  <span className="text-[10px] text-gray-500 mt-0.5">50+ Top Indian Banks</span>
+                </div>
+
+                <div className="bg-white p-3 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center text-center">
+                  <Lock className="w-5 h-5 text-indigo-600 mb-1" />
+                  <span className="font-semibold text-gray-800">Wallets &amp; PayLater</span>
+                  <span className="text-[10px] text-gray-500 mt-0.5">Amazon Pay, Mobikwik, ICICI</span>
                 </div>
               </div>
             </div>
@@ -225,11 +194,11 @@ export default function PaymentDemoPage() {
             {/* Action Section */}
             <div className="pt-4 border-t border-[#EBE3D5] flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
-                <p className="text-xs text-gray-500">
-                  Ready to test? Click below to launch Razorpay Standard Modal.
+                <p className="text-xs text-gray-700 font-medium">
+                  Ready to pay? Click below to launch the secure Razorpay payment modal.
                 </p>
-                <p className="text-[11px] text-[#D8AD56] font-semibold">
-                  Supports Test UPI (success@razorpay), Cards, Netbanking &amp; Wallets.
+                <p className="text-[11px] text-gray-500">
+                  256-bit encrypted SSL transaction verified directly with your bank.
                 </p>
               </div>
 

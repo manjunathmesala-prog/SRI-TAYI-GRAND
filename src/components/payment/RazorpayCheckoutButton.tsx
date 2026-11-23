@@ -30,13 +30,13 @@ export interface RazorpayCheckoutButtonProps {
 }
 
 export function RazorpayCheckoutButton({
-  amount = 50000, // 50000 paise = ₹500
+  amount = 10000, // 10000 paise = ₹100 minimum default
   amountInRupees,
   currency = 'INR',
   receipt,
-  customerName = 'Valued Guest',
-  customerEmail = 'guest@sritayigrand.com',
-  customerPhone = '8328413356',
+  customerName = '',
+  customerEmail = '',
+  customerPhone = '',
   notes = {},
   buttonText = 'Pay with Razorpay',
   className = '',
@@ -101,9 +101,9 @@ export function RazorpayCheckoutButton({
           currency,
           receipt: receipt || `rcpt_${Date.now()}`,
           notes: {
-            customer_name: customerName,
-            customer_email: customerEmail,
-            customer_phone: customerPhone,
+            ...(customerName ? { customer_name: customerName } : {}),
+            ...(customerEmail ? { customer_email: customerEmail } : {}),
+            ...(customerPhone ? { customer_phone: customerPhone } : {}),
             hotel: 'SRI TAYI GRAND',
             ...notes,
           },
@@ -118,7 +118,11 @@ export function RazorpayCheckoutButton({
       const activeKeyId =
         orderData.key_id ||
         process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID ||
-        'rzp_test_U3aO08c0MEmri7';
+        '';
+
+      if (!activeKeyId) {
+        throw new Error('Razorpay public key is missing or not configured.');
+      }
 
       // Step B: Configure and open Razorpay Standard Checkout modal
       const options = {
@@ -130,16 +134,9 @@ export function RazorpayCheckoutButton({
         image: '/images/hotel/tayi-grand-logo.png',
         order_id: orderData.order_id,
         prefill: {
-          name: customerName,
-          email: customerEmail,
-          contact: customerPhone
-            ? customerPhone.replace(/\D/g, '').slice(-10)
-            : '8328413356',
-        },
-        readonly: {
-          contact: true,
-          email: true,
-          name: true,
+          name: customerName ? customerName.trim() : undefined,
+          email: customerEmail ? customerEmail.trim() : undefined,
+          contact: customerPhone ? customerPhone.replace(/\D/g, '').slice(-10) : undefined,
         },
         notes: {
           receipt: orderData.receipt,

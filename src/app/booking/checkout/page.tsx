@@ -161,7 +161,7 @@ function CheckoutContent() {
 
       if (typeof window.Razorpay === 'function' && razorpayOrder && razorpayOrder.id) {
         const options = {
-          key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_U3aO08c0MEmri7',
+          key: data?.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
           amount: razorpayOrder.amount,
           currency: razorpayOrder.currency || 'INR',
           name: 'SRI TAYI GRAND',

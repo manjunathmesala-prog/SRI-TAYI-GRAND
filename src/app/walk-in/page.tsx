@@ -298,7 +298,7 @@ function WalkInKioskContent() {
         }
 
         const razorpayKey =
-          process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || 'rzp_test_U3aO08c0MEmri7';
+          data?.keyId || data?.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '';
 
         const options = {
           key: razorpayKey,
