@@ -6255,6 +6255,47 @@ export class HotelRepository {
       this.ensureAuditLogsLoaded(),
       this.ensureReviewsLoaded(),
     ]);
+    this.reconcileRoomOccupancyWithBookings();
+  }
+
+  public reconcileRoomOccupancyWithBookings(): void {
+    const activeCheckedIn = this.bookings.filter((b) => b.status === 'checked_in');
+    for (const r of this.rooms) {
+      if (r.operational_status === 'maintenance' || r.operational_status === 'out_of_service') {
+        continue;
+      }
+      const activeStay = activeCheckedIn.find((b) =>
+        b.assigned_room_number === r.room_number ||
+        b.assigned_room_id === r.id ||
+        (b.assigned_room_numbers && b.assigned_room_numbers.includes(r.room_number)) ||
+        (b.booking_rooms && b.booking_rooms.some((br) => (br.room_number === r.room_number || br.room_id === r.id) && br.status === 'checked_in'))
+      );
+
+      if (activeStay) {
+        if (r.operational_status !== 'occupied') {
+          r.operational_status = 'occupied';
+          r.current_booking_ref = activeStay.booking_reference;
+          r.current_guest_name = activeStay.guest_name;
+          syncRoomStatusToSupabase({
+            roomNumber: r.room_number,
+            operationalStatus: 'occupied',
+            housekeepingStatus: r.housekeeping_status,
+          }).catch(() => {});
+        }
+      } else {
+        if (r.operational_status === 'occupied') {
+          r.operational_status = 'available';
+          r.current_booking_ref = undefined;
+          r.current_guest_name = undefined;
+          r.notes = undefined;
+          syncRoomStatusToSupabase({
+            roomNumber: r.room_number,
+            operationalStatus: 'available',
+            housekeepingStatus: r.housekeeping_status,
+          }).catch(() => {});
+        }
+      }
+    }
   }
 
   public getConventionQuotes(): ConventionQuote[] {

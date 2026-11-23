@@ -118,9 +118,10 @@ async function syncToSupabaseAsync(record: RfidTapHistoryRecord): Promise<void> 
     console.warn('[RFID DIRECT SUPABASE PG SYNC WARN]', err);
   }
 
-  // Secondary REST fallback
+  // Secondary REST fallback (only if valid anon/publishable key is configured)
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  if (!url || url.includes('placeholder') || url.includes('your-supabase-project')) {
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (!url || url.includes('placeholder') || url.includes('your-supabase-project') || !anonKey || anonKey.includes('placeholder') || anonKey.includes('your-supabase')) {
     return;
   }
 

@@ -1,18 +1,5 @@
 [
   {
-    "id": "ctx-1795379081796",
-    "type": "cash_in",
-    "category": "guest_payment",
-    "amount": 2000,
-    "reason": "Stay extension for Room 101 (TEST-EXT-BK-101): +1 night(s) to 2026-11-25",
-    "booking_reference": "TEST-EXT-BK-101",
-    "receipt_ref": "PAY-EXT-1795379079578",
-    "performed_by": "Sagar Manager",
-    "performed_at": "2026-11-22T20:24:41.796Z",
-    "created_at": "2026-11-22T20:24:41.796Z",
-    "idempotency_key": "ctx-idem-test-ext-001"
-  },
-  {
     "id": "ctx-1795445796848-194",
     "type": "cash_in",
     "category": "guest_payment",
