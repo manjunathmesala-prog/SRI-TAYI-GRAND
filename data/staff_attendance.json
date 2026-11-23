@@ -1,1 +1,27 @@
-[]
+[
+  {
+    "id": "att-1795423329823",
+    "staff_id": "50aba2e5-0000-4fbd-bb89-000000000001",
+    "staff_name": "Hari Achari",
+    "role": "Hotel Manager",
+    "date": "2026-11-23",
+    "shift": "morning",
+    "clock_in": "2026-11-23T08:42:09.823Z",
+    "status": "present",
+    "work_hours": 0,
+    "created_at": "2026-11-23T08:42:09.823Z"
+  },
+  {
+    "id": "att-1795422712108",
+    "staff_id": "50aba2e5-0000-4fbd-bb89-000000000001",
+    "staff_name": "Hari Achari",
+    "role": "Hotel Manager",
+    "date": "2026-11-23",
+    "shift": "morning",
+    "clock_in": "2026-11-23T08:31:52.108Z",
+    "clock_out": "2026-11-23T08:42:03.377Z",
+    "status": "present",
+    "work_hours": 0.2,
+    "created_at": "2026-11-23T08:31:52.108Z"
+  }
+]

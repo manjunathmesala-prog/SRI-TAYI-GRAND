@@ -132,7 +132,9 @@ export function RazorpayCheckoutButton({
         prefill: {
           name: customerName,
           email: customerEmail,
-          contact: customerPhone,
+          contact: customerPhone
+            ? (customerPhone.startsWith('+') ? customerPhone : `+91${customerPhone.replace(/\D/g, '').slice(-10)}`)
+            : '+919876543210',
         },
         notes: {
           receipt: orderData.receipt,
