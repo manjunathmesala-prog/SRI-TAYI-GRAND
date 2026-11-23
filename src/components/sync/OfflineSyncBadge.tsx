@@ -31,15 +31,15 @@ export function OfflineSyncBadge() {
   if (syncState.isOnline && syncState.pendingCount === 0 && !syncState.isProcessing) {
     return (
       <div
-        className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-emerald-400 bg-emerald-950/40 border border-emerald-800/40 rounded-full"
+        className="hidden 2xl:flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full shrink-0 whitespace-nowrap shadow-2xs"
         title="Connected to Supabase PostgreSQL cloud database"
       >
         <span className="relative flex h-2 w-2">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
           <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
         </span>
-        <Wifi className="w-3.5 h-3.5" />
-        <span className="hidden sm:inline">Online</span>
+        <Wifi className="w-3.5 h-3.5 text-emerald-600" />
+        <span className="text-[11px] font-mono">Online</span>
       </div>
     );
   }

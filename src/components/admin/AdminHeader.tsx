@@ -196,19 +196,16 @@ export function AdminHeader() {
   };
 
   return (
-    <header className="relative md:sticky md:top-0 z-30 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-[#E6D9C5] px-3 sm:px-6 py-2 flex flex-wrap gap-2 items-center justify-between shadow-2xs">
-      {/* Left: Page Title */}
-      <div className="flex items-center space-x-3">
-        <h1 className="text-sm sm:text-lg font-serif font-bold text-[#2A1D13] tracking-tight leading-tight truncate">
+    <header className="sticky top-0 z-30 bg-[#FAF8F5]/95 backdrop-blur-md border-b border-[#E6D9C5] px-3 sm:px-5 lg:px-6 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-3 shadow-2xs w-full min-w-0">
+      {/* Left: Page Title & Realtime Live Status */}
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0 shrink">
+        <h1 className="text-sm sm:text-base lg:text-lg font-serif font-bold text-[#2A1D13] tracking-tight leading-tight truncate">
           {getPageTitle()}
         </h1>
-      </div>
 
-      {/* Right: Live Telemetry, Language Switcher, Cash Float & Quick Action Shortcuts */}
-      <div className="flex flex-wrap min-w-0 items-center gap-2 sm:gap-2.5">
-        {/* Realtime Status Indicator */}
+        {/* Realtime Status Indicator: Visible on xl+ screens where space permits */}
         <div
-          className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium tracking-wide border transition-all ${
+          className={`hidden xl:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium tracking-wide border transition-all shrink-0 ${
             isConnected
               ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
               : 'bg-amber-50 border-amber-200 text-amber-800'
@@ -224,8 +221,11 @@ export function AdminHeader() {
             {isConnected ? t('common.live', 'Live') : t('common.reconnecting', 'Connecting')}
           </span>
         </div>
+      </div>
 
-        {/* Offline & Sync Queue Status Badge */}
+      {/* Right: Live Telemetry, Language Switcher, Cash Float & Quick Action Shortcuts */}
+      <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-2.5 shrink-0">
+        {/* Offline & Sync Queue Status Badge (Only shows on 2xl when idle, always shows when offline/syncing) */}
         <OfflineSyncBadge />
 
         {/* Unified Shift Quick Controller */}
@@ -236,57 +236,61 @@ export function AdminHeader() {
           <Link
             href="/admin/cashbook"
             prefetch={false}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white hover:bg-[#FAF8F5] border border-[#E6D9C5] text-[#2A1D13] text-xs font-mono font-medium transition-all shadow-2xs group"
+            className="hidden lg:flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl bg-white hover:bg-[#FAF8F5] border border-[#E6D9C5] text-[#2A1D13] text-xs font-mono font-medium transition-all shadow-2xs shrink-0 whitespace-nowrap group"
             title={t('header.cashInHand', 'Front Desk Cash Drawer Balance')}
           >
-            <Wallet className="w-3.5 h-3.5 text-[#8D672F] group-hover:scale-105 transition-transform" />
+            <Wallet className="w-3.5 h-3.5 text-[#8D672F] group-hover:scale-105 transition-transform shrink-0" />
             <span>{formatCurrency(cashBalance)}</span>
           </Link>
         )}
 
-        {/* Clock */}
+        {/* Clock: Only on 2xl screens to avoid cluttering laptop viewports */}
         {currentTime && (
-          <div className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white border border-[#E6D9C5] text-[#786A5B] text-xs font-mono">
-            <Clock className="w-3 h-3 text-[#786A5B]" />
+          <div className="hidden 2xl:flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white border border-[#E6D9C5] text-[#786A5B] text-xs font-mono shrink-0 whitespace-nowrap">
+            <Clock className="w-3 h-3 text-[#786A5B] shrink-0" />
             <span>{currentTime}</span>
           </div>
         )}
 
         {/* Language Switcher: EN | తెలుగు */}
-        <AdminLanguageSwitcher />
+        <div className="hidden sm:flex shrink-0">
+          <AdminLanguageSwitcher showIcon={false} />
+        </div>
 
         {/* Quick Walk-In Button */}
         <Link
           href="/admin/front-desk"
           prefetch={false}
-          className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] text-xs font-medium shadow-2xs active:scale-95 transition-all"
+          className="hidden md:flex items-center gap-1.5 px-2.5 lg:px-3 py-1.5 rounded-xl bg-[#2A1D13] hover:bg-[#3D2B1D] text-[#EAD8B8] text-xs font-medium shadow-2xs active:scale-95 transition-all shrink-0 whitespace-nowrap"
         >
-          <UserPlus className="w-3.5 h-3.5" />
+          <UserPlus className="w-3.5 h-3.5 shrink-0" />
           <span>{t('bookings.newBooking', 'Walk-In')}</span>
         </Link>
 
         {/* Super Admin Live Alert Bell & Drawer */}
-        <SuperAdminNotificationBell />
+        <div className="shrink-0">
+          <SuperAdminNotificationBell />
+        </div>
 
         {/* User Profile & Role Switcher Dropdown */}
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative shrink-0" ref={dropdownRef}>
           <button
             type="button"
             onClick={() => setProfileOpen(!profileOpen)}
-            className="flex items-center gap-2 pl-2.5 pr-2 py-1 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF8F5] transition-all text-xs font-medium text-[#2A1D13] cursor-pointer shadow-2xs"
+            className="flex items-center gap-1.5 sm:gap-2 pl-2 sm:pl-2.5 pr-1.5 sm:pr-2 py-1 rounded-xl border border-[#E6D9C5] bg-white hover:bg-[#FAF8F5] transition-all text-xs font-medium text-[#2A1D13] cursor-pointer shadow-2xs shrink-0 whitespace-nowrap"
           >
-            <div className="w-6 h-6 rounded-lg bg-[#2A1D13] text-[#EAD8B8] flex items-center justify-center">
+            <div className="w-6 h-6 rounded-lg bg-[#2A1D13] text-[#EAD8B8] flex items-center justify-center shrink-0">
               <RoleIcon className="w-3.5 h-3.5" />
             </div>
             <div className="text-left hidden sm:block">
-              <span className="block text-[11px] font-semibold leading-tight truncate max-w-[110px]">
+              <span className="block text-[11px] font-semibold leading-tight truncate max-w-[80px] lg:max-w-[100px]">
                 {userName.split(' ')[0]}
               </span>
-              <span className="block text-[9px] uppercase tracking-wider text-[#786A5B] leading-none">
+              <span className="hidden xl:block text-[9px] uppercase tracking-wider text-[#786A5B] leading-none">
                 {getRoleLabel(userRole)}
               </span>
             </div>
-            <ChevronDown className="w-3.5 h-3.5 text-[#786A5B] ml-0.5" />
+            <ChevronDown className="w-3.5 h-3.5 text-[#786A5B] ml-0.5 shrink-0" />
           </button>
 
           {/* Dropdown Menu */}

@@ -162,6 +162,75 @@ export async function deleteCardFromSupabase(cardIdentifier: string): Promise<bo
 }
 
 /**
+ * Production Live Supabase Hydration for RFID Cards
+ * Fetches all registered cards from Supabase PostgreSQL
+ */
+export async function loadCardsFromSupabase(): Promise<RFIDCard[]> {
+  if (!isServerEnvironment()) return [];
+  const pool = getPgPool();
+  if (!pool) return [];
+
+  try {
+    const res = await pool.query(`
+      SELECT 
+        id, card_uid, card_label, card_type, is_lifetime,
+        holder_name, holder_role, status, activated_at, expires_at,
+        deactivated_at, last_tap_room, last_tap_at, notes,
+        created_at
+      FROM rfid_cards
+      ORDER BY created_at DESC;
+    `);
+
+    return res.rows.map((r: any) => ({
+      id: String(r.id),
+      card_uid: r.card_uid,
+      card_label: r.card_label || `Card (${r.card_uid})`,
+      card_type: r.card_type || 'guest',
+      is_lifetime: Boolean(r.is_lifetime),
+      holder_name: r.holder_name,
+      holder_role: r.holder_role,
+      status: r.status || 'active',
+      activated_at: r.activated_at ? new Date(r.activated_at).toISOString() : undefined,
+      expires_at: r.expires_at ? new Date(r.expires_at).toISOString() : undefined,
+      deactivated_at: r.deactivated_at ? new Date(r.deactivated_at).toISOString() : undefined,
+      assigned_room_number: r.last_tap_room || undefined,
+      room_number: r.last_tap_room || undefined,
+      last_tap_room: r.last_tap_room || undefined,
+      last_tap_at: r.last_tap_at ? new Date(r.last_tap_at).toISOString() : undefined,
+      notes: r.notes || undefined,
+      created_at: r.created_at ? new Date(r.created_at).toISOString() : undefined,
+    }));
+  } catch (err: any) {
+    console.warn('[SUPABASE LOAD CARDS WARN]', err.message);
+    return [];
+  }
+}
+
+/**
+ * Update card status directly in Supabase PostgreSQL
+ */
+export async function updateCardStatusInSupabase(cardIdentifier: string, status: string): Promise<boolean> {
+  if (!isServerEnvironment() || !cardIdentifier) return false;
+  const pool = getPgPool();
+  if (!pool) return false;
+
+  try {
+    await pool.query(
+      `UPDATE rfid_cards 
+       SET status = $1, 
+           deactivated_at = CASE WHEN $1 = 'inactive' THEN NOW() ELSE deactivated_at END,
+           updated_at = NOW()
+       WHERE card_uid = $2 OR id::text = $2;`,
+      [status, cardIdentifier]
+    );
+    return true;
+  } catch (err: any) {
+    console.warn('[SUPABASE CARD STATUS UPDATE WARN]', err.message);
+    return false;
+  }
+}
+
+/**
  * Production Live Supabase Sync for RFID Tap History (Door sensor / lock taps)
  * Persists directly to Supabase rfid_tap_history table
  */

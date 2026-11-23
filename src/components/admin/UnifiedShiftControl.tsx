@@ -334,28 +334,29 @@ export function UnifiedShiftControl({
       {/* Main Bar Display */}
       {compact ? (
         // Compact View (for Header or Toolbar)
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {hasActiveShift && activeShift ? (
-            <div className="flex items-center gap-2 bg-emerald-50/90 border border-emerald-200/80 rounded-xl px-2.5 py-1 text-xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="font-semibold text-emerald-900">{activeShift.cashier_name}</span>
-              <span className="text-emerald-700 font-mono">({formatCurrency(currentBalance)})</span>
+            <div className="flex items-center gap-1.5 sm:gap-2 bg-emerald-50 border border-emerald-200 rounded-xl px-2 sm:px-2.5 py-1 text-xs shrink-0 whitespace-nowrap shadow-2xs">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shrink-0" />
+              <span className="font-semibold text-emerald-900 truncate max-w-[80px] sm:max-w-[120px]">{activeShift.cashier_name}</span>
+              <span className="text-emerald-700 font-mono hidden md:inline">({formatCurrency(currentBalance)})</span>
               <button
                 type="button"
                 onClick={() => setIsEndModalOpen(true)}
-                className="ml-1 px-2 py-0.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-medium transition-all shadow-xs cursor-pointer"
+                className="ml-0.5 sm:ml-1 px-1.5 sm:px-2 py-0.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[10px] sm:text-[11px] font-medium transition-all shadow-xs cursor-pointer shrink-0"
               >
-                End Shift
+                End
               </button>
             </div>
           ) : (
             <button
               type="button"
               onClick={() => setIsStartModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold shadow-xs transition-all cursor-pointer shrink-0 whitespace-nowrap"
             >
-              <Unlock className="w-3.5 h-3.5" />
-              <span>Start Shift</span>
+              <Unlock className="w-3.5 h-3.5 shrink-0" />
+              <span className="hidden sm:inline">Start Shift</span>
+              <span className="sm:hidden">Shift</span>
             </button>
           )}
         </div>

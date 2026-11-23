@@ -91,7 +91,7 @@ export default function PoliciesPage() {
                 <strong>Under 24 Hours / No-Show:</strong> Cancellations within 24 hours of arrival or non-arrivals are non-refundable.
               </p>
               <p>
-                <strong>Refund Processing Timeline:</strong> Approved refunds for online transactions (Credit/Debit Card, Netbanking, UPI) are initiated immediately and credited to the guest's original payment source within <strong>5 to 7 working days</strong>.
+                <strong>Refund Processing Timeline:</strong> Approved refunds for online transactions (Credit/Debit Card, Netbanking, UPI) are initiated immediately and credited to the guest&apos;s original payment source within <strong>5 to 7 working days</strong>.
               </p>
             </div>
           </div>
