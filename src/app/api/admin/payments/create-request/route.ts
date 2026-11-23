@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
 import { verifyStaffRole } from '@/lib/auth';
+import { getRazorpayClient, inrToPaise } from '@/lib/razorpay';
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +24,48 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const result = repo.createPaymentLink(bookingReference, amount, description);
+    const booking = repo.getBookingByReference(bookingReference);
+    let realLinkUrl = '';
+    let rzpLinkId = '';
+
+    try {
+      const razorpay = getRazorpayClient();
+      const rzpLink = await razorpay.paymentLink.create({
+        amount: inrToPaise(amount),
+        currency: 'INR',
+        accept_partial: false,
+        description: description || `Sri Tayi Grand Payment - Booking ${bookingReference}`,
+        customer: {
+          name: booking?.guest_name || body.guestName || 'Guest',
+          contact: (booking?.guest_phone || body.guestPhone || '').replace(/\D/g, '').slice(-10) || undefined,
+          email: booking?.guest_email || body.guestEmail || undefined,
+        },
+        notify: {
+          sms: Boolean(booking?.guest_phone || body.guestPhone),
+          email: Boolean(booking?.guest_email || body.guestEmail),
+        },
+        reminder_enable: true,
+        notes: {
+          booking_reference: bookingReference,
+          hotel: 'SRI TAYI GRAND',
+        },
+      });
+
+      if (rzpLink && rzpLink.short_url) {
+        realLinkUrl = rzpLink.short_url;
+        rzpLinkId = rzpLink.id;
+      }
+    } catch (rzpErr) {
+      console.warn('[ADMIN PAYMENT LINK] Razorpay Link API note:', rzpErr);
+    }
+
+    const result = repo.createPaymentLink(
+      bookingReference,
+      amount,
+      description,
+      realLinkUrl || undefined,
+      rzpLinkId || undefined
+    );
 
     return NextResponse.json(result);
   } catch (err: any) {

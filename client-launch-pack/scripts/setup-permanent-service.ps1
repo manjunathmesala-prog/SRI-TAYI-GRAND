@@ -103,14 +103,11 @@ Write-Host "  [OK] Be-Tech Bridge is running on local port 8989." -ForegroundCol
 # ------------------------------------------------------------------------------
 Write-Host "`n[STEP 2/4] Configuring Cloudflare Permanent Tunnel Service..." -ForegroundColor Yellow
 
+$DEFAULT_TOKEN = "eyJhIjoiMGI3ZGVhODRmNjRjOWI5Njg2Y2JlYTQwOTc0MWQ3YzUiLCJ0IjoiZThhOTAzYWEtNTNlNy00NzllLTlmZDYtZmJhZDBjOTkxMjI1IiwicyI6Ik9EUTRNekJsT1RndE5qWTFaQzAwTm1ZMUxUZ3lOV1l0TURVeFpHWXpaVGxsT1dGbSJ9"
 if (-not $Token -or $Token.Trim() -eq "") {
     Write-Host ""
-    Write-Host "  To connect the reception PC to https://sritayigrand.com permanently:" -ForegroundColor Cyan
-    Write-Host "  1. Open Cloudflare Zero Trust: https://one.dash.cloudflare.com/" -ForegroundColor White
-    Write-Host "  2. Go to Networks -> Tunnels -> 'sri-tayi-grand-rfid' (Windows 64-bit)" -ForegroundColor White
-    Write-Host "  3. Copy the token (starts with eyJhIjoi...)" -ForegroundColor White
-    Write-Host ""
-    $Token = Read-Host "  Paste your Cloudflare Tunnel Token here"
+    Write-Host "  Using pre-configured production token for sri-tayi-grand-rfid..." -ForegroundColor Cyan
+    $Token = $DEFAULT_TOKEN
 }
 
 $Token = $Token.Trim()

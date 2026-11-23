@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { repo } from '@/lib/db/repository';
 import { verifyStaffRole } from '@/lib/auth';
+import { getRazorpayClient, inrToPaise } from '@/lib/razorpay';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,12 +32,43 @@ export async function POST(
       );
     }
 
+    const payment = repo.getPayments().find((p) => p.id === paymentId);
+    if (!payment) {
+      return NextResponse.json({ success: false, error: 'Payment record not found.' }, { status: 404 });
+    }
+
+    // If online payment with Razorpay gateway payment ID, process real gateway refund
+    let gatewayRefundId = '';
+    const rzpPaymentId = payment.gateway_payment_id || (payment.id.startsWith('pay_') ? payment.id : null);
+    if (rzpPaymentId && rzpPaymentId.startsWith('pay_')) {
+      try {
+        const razorpay = getRazorpayClient();
+        const rzpRefund = await razorpay.payments.refund(rzpPaymentId, {
+          amount: inrToPaise(amount),
+          notes: {
+            reason,
+            payment_reference: payment.payment_reference,
+            hotel: 'SRI TAYI GRAND',
+          },
+        });
+        gatewayRefundId = rzpRefund.id;
+      } catch (rzpErr: any) {
+        console.error('[RAZORPAY REFUND API ERROR]', rzpErr);
+        const errMsg = rzpErr?.error?.description || rzpErr?.message || 'Gateway refund processing error';
+        return NextResponse.json({ success: false, error: `Razorpay Refund Failed: ${errMsg}` }, { status: 502 });
+      }
+    }
+
     const result = repo.refundPayment(paymentId, amount, reason);
     if (!result.success) {
       return NextResponse.json({ success: false, error: result.error }, { status: 400 });
     }
 
-    return NextResponse.json(result);
+    if (gatewayRefundId && result.payment) {
+      result.payment.gateway_refund_id = gatewayRefundId;
+    }
+
+    return NextResponse.json({ ...result, gateway_refund_id: gatewayRefundId || undefined });
   } catch (err: any) {
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }

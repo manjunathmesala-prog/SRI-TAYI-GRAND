@@ -225,6 +225,7 @@ export async function POST(request: Request) {
       payment_status: booking.payment_status,
       paymentMethod: isOnline ? 'online' : 'cash',
       razorpayOrder,
+      keyId: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || '',
       message: 'Walk-in booking created successfully! Please proceed to the front desk to collect your keycard.',
       booking,
     });

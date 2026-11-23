@@ -82,10 +82,17 @@ export function useRazorpayCheckout() {
         return;
       }
 
-      setIsProcessing(true);
+      const activeKey = options.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '';
+      if (!activeKey) {
+        const keyErr = 'Payment gateway key is not configured. Please contact hotel front desk.';
+        setErrorMessage(keyErr);
+        options.onError?.(keyErr);
+        setIsProcessing(false);
+        return;
+      }
 
       const razorpayOptions = {
-        key: options.keyId || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
+        key: activeKey,
         amount: options.amount,
         currency: options.currency || 'INR',
         name: options.name || 'SRI TAYI GRAND',

@@ -734,6 +734,9 @@ export default function PaymentsAdminPage() {
                             {p.gateway_payment_id && (
                               <span className="font-mono text-[10px] text-[#786B61] block">{p.gateway_payment_id}</span>
                             )}
+                            {p.gateway_refund_id && (
+                              <span className="font-mono text-[10px] text-red-600 block">Refund: {p.gateway_refund_id}</span>
+                            )}
                           </td>
                           <td className="py-3.5 px-4 font-mono font-medium text-[#786B61]">
                             {p.booking_reference}

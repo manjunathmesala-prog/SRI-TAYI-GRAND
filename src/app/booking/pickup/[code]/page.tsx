@@ -107,6 +107,12 @@ export default function WalkInPickupPage({ params }: { params: Promise<{ code: s
       const razorpayKey =
         orderData?.keyId || orderData?.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '';
 
+      if (!razorpayKey) {
+        alert('Payment gateway key is not configured. Please contact hotel front desk.');
+        setPayingNow(false);
+        return;
+      }
+
       const options = {
         key: razorpayKey,
         amount: orderData.amount,
@@ -118,10 +124,10 @@ export default function WalkInPickupPage({ params }: { params: Promise<{ code: s
         prefill: {
           name: data?.guestName || '',
           email: `${data?.guestPhone || 'guest'}@guest.sritayigrand.com`,
-          contact: data?.guestPhone || '',
+          contact: data?.guestPhone ? data.guestPhone.replace(/\D/g, '').slice(-10) : '',
         },
         theme: {
-          color: '#382216',
+          color: '#43001F',
         },
         handler: async function (response: any) {
           try {

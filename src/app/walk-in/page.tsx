@@ -300,6 +300,12 @@ function WalkInKioskContent() {
         const razorpayKey =
           data?.keyId || data?.key_id || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '';
 
+        if (!razorpayKey) {
+          toast.error('Payment gateway key is not configured. Please contact hotel front desk.');
+          setSubmitting(false);
+          return;
+        }
+
         const options = {
           key: razorpayKey,
           amount: razorpayOrder.amount,
@@ -314,7 +320,7 @@ function WalkInKioskContent() {
             contact: cleanPhone,
           },
           theme: {
-            color: '#382216',
+            color: '#43001F',
           },
           handler: async function (response: any) {
             try {

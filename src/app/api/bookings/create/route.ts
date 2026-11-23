@@ -165,11 +165,14 @@ export async function POST(request: Request) {
       },
     });
 
+    const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID || '';
+
     return NextResponse.json({
       success: true,
       bookingReference: booking.booking_reference,
       booking,
       razorpayOrder,
+      keyId,
     });
   } catch (err: unknown) {
     console.error('Booking creation error:', err);

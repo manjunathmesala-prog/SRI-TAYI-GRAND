@@ -5164,10 +5164,12 @@ export class HotelRepository {
   public createPaymentLink(
     bookingReference: string,
     amount: number,
-    description: string
+    description: string,
+    customLinkUrl?: string,
+    gatewayPaymentId?: string
   ): { success: boolean; link_url: string; payment_id: string } {
-    const payment_id = 'pay-' + Date.now();
-    const link_url = `https://rzp.io/l/stg-${Date.now().toString(36)}`;
+    const payment_id = gatewayPaymentId || 'pay-' + Date.now();
+    const link_url = customLinkUrl || `https://rzp.io/l/stg-${Date.now().toString(36)}`;
 
     const newPayment: PaymentRecord = {
       id: payment_id,

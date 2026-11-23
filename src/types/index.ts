@@ -294,6 +294,7 @@ export interface PaymentRecord {
   refund_amount?: number;
   refund_reason?: string;
   refunded_at?: string;
+  gateway_refund_id?: string;
   payment_link_url?: string;
   reconciled?: boolean;
   reconciled_at?: string;
