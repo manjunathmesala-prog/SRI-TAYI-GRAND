@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { RazorpayCheckoutButton } from '@/components/payment/RazorpayCheckoutButton';
-import { ShieldCheck, CreditCard, CheckCircle2, Lock, Sparkles, Building2 } from 'lucide-react';
+import { ShieldCheck, CreditCard, CheckCircle2, Lock, Sparkles, Building2, Smartphone, Copy, Check } from 'lucide-react';
 import TayiBrandIcon from '@/components/anantha/TayiBrandIcon';
 
 export default function PaymentDemoPage() {
@@ -12,11 +12,20 @@ export default function PaymentDemoPage() {
   const [customerName, setCustomerName] = useState<string>('Manjunath Sai');
   const [customerEmail, setCustomerEmail] = useState<string>('manjunath@sritayigrand.com');
   const [customerPhone, setCustomerPhone] = useState<string>('9876543210');
+  const [copiedField, setCopiedField] = useState<string | null>(null);
   const [paymentSuccess, setPaymentSuccess] = useState<{
     order_id: string;
     payment_id: string;
     signature: string;
   } | null>(null);
+
+  const copyToClipboard = (text: string, field: string) => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedField(field);
+      setTimeout(() => setCopiedField(null), 2000);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] flex flex-col justify-between text-[#2D2424]">
@@ -148,8 +157,73 @@ export default function PaymentDemoPage() {
               </div>
             </div>
 
+            {/* Razorpay Test Payment Instruments */}
+            <div className="bg-[#FAF7F2] border border-[#EBE3D5] rounded-2xl p-5 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-[#43001F] uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#D8AD56]" />
+                  Active Test Payment Instruments
+                </span>
+                <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                  Ready for Checkout
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                {/* Test Card */}
+                <div className="bg-white p-3.5 rounded-xl border border-gray-200 flex flex-col justify-between shadow-sm">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="font-semibold text-gray-800 flex items-center gap-1.5">
+                      <CreditCard className="w-4 h-4 text-[#D8AD56]" /> Test Card
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard('4100280000001007', 'card')}
+                      className="text-[11px] text-[#43001F] hover:text-[#670030] font-medium flex items-center gap-1 bg-gray-50 hover:bg-gray-100 px-2 py-0.5 rounded border border-gray-200 transition-colors"
+                      title="Copy Card Number"
+                    >
+                      {copiedField === 'card' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                      <span>{copiedField === 'card' ? 'Copied' : 'Copy'}</span>
+                    </button>
+                  </div>
+                  <div className="font-mono text-sm font-bold text-gray-900 tracking-wider">
+                    4100 2800 0000 1007
+                  </div>
+                  <div className="flex items-center gap-4 text-[11px] text-gray-500 mt-1 font-mono">
+                    <span>Expiry: <strong className="text-gray-800">12/26</strong></span>
+                    <span>CVV: <strong className="text-gray-800">123</strong></span>
+                    <span>OTP: <strong className="text-gray-800">Any (e.g. 123456)</strong></span>
+                  </div>
+                </div>
+
+                {/* Test UPI */}
+                <div className="bg-white p-3.5 rounded-xl border border-gray-200 flex flex-col justify-between shadow-sm">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="font-semibold text-gray-800 flex items-center gap-1.5">
+                      <Smartphone className="w-4 h-4 text-emerald-600" /> Test UPI ID
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard('test@razorpay', 'upi')}
+                      className="text-[11px] text-[#43001F] hover:text-[#670030] font-medium flex items-center gap-1 bg-gray-50 hover:bg-gray-100 px-2 py-0.5 rounded border border-gray-200 transition-colors"
+                      title="Copy UPI ID"
+                    >
+                      {copiedField === 'upi' ? <Check className="w-3 h-3 text-emerald-600" /> : <Copy className="w-3 h-3" />}
+                      <span>{copiedField === 'upi' ? 'Copied' : 'Copy'}</span>
+                    </button>
+                  </div>
+                  <div className="font-mono text-sm font-bold text-emerald-700 tracking-wider">
+                    test@razorpay
+                  </div>
+                  <div className="text-[11px] text-gray-500 mt-1">
+                    Direct auto-approval in Razorpay test mode (or <code className="bg-gray-100 px-1 py-0.5 rounded text-gray-700">success@razorpay</code>).
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Action Section */}
-            <div className="pt-6 border-t border-[#EBE3D5] flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="pt-4 border-t border-[#EBE3D5] flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
                 <p className="text-xs text-gray-500">
                   Ready to test? Click below to launch Razorpay Standard Modal.
