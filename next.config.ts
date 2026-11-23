@@ -38,7 +38,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  output: 'standalone',
+  // If building on Vercel, use standard Vercel serverless output; on Docker/Railway, use standalone container output
+  output: process.env.VERCEL ? undefined : 'standalone',
   serverExternalPackages: ['pg'],
   env: {
     DATABASE_URL: process.env.DATABASE_URL || 'postgresql://postgres.goxgiohyshxzqzesernz:Vaynex%402026@aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres',
