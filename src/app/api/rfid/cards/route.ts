@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const type = searchParams.get('type'); // 'super_admin' | 'cleaner' | 'guest' | null
 
-    const allCards = repo.getRFIDCards();
+    const allCards = await repo.getRFIDCardsAsync();
     const cards = type && type !== 'all' ? allCards.filter((c) => c.card_type === type) : allCards;
     const rooms = repo.getRooms();
 
@@ -234,6 +234,41 @@ export async function POST(request: Request) {
     }
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'RFID card management error';
+    return NextResponse.json({ success: false, error: msg }, { status: 500 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id') || searchParams.get('cardId');
+    const uid = searchParams.get('uid') || searchParams.get('cardUid');
+
+    let bodyId = '';
+    let bodyUid = '';
+    try {
+      const body = await request.json();
+      bodyId = body.cardId || body.id;
+      bodyUid = body.cardUid || body.card_uid || body.uid;
+    } catch {}
+
+    const targetId = id || bodyId;
+    const targetUid = uid || bodyUid;
+
+    if (!targetId && !targetUid) {
+      return NextResponse.json(
+        { success: false, error: 'Card ID or Card UID is required' },
+        { status: 400 }
+      );
+    }
+
+    const deleted = await repo.deleteRFIDCard(targetId || targetUid, targetUid);
+    return NextResponse.json({
+      success: deleted,
+      message: deleted ? 'Card permanently removed from database and registry' : 'Card not found',
+    });
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Failed to delete RFID card';
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }

@@ -58,7 +58,13 @@ import {
   MaintenanceCategory,
 } from '@/types';
 
-import { syncCardToSupabase, syncEventToSupabase, deleteCardFromSupabase } from './supabase-rfid';
+import {
+  syncCardToSupabase,
+  syncEventToSupabase,
+  deleteCardFromSupabase,
+  loadCardsFromSupabase,
+  updateCardStatusInSupabase,
+} from './supabase-rfid';
 import { loadPersistedData, savePersistedData } from './operational-storage';
 import {
   syncBookingToSupabase,
@@ -171,6 +177,7 @@ export class HotelRepository {
   private staff: StaffMember[] = JSON.parse(JSON.stringify(INITIAL_STAFF));
   private rfidDevices: RFIDDevice[] = JSON.parse(JSON.stringify(INITIAL_RFID_DEVICES));
   private rfidCards: RFIDCard[] = [];
+  private deletedCardUids: Set<string> = new Set<string>();
   private rfidEvents: RFIDAccessEvent[] = [];
   private recentEventSignatures: Map<string, number> = new Map();
   private expenses: Expense[] = JSON.parse(JSON.stringify(INITIAL_EXPENSES));
@@ -243,6 +250,14 @@ export class HotelRepository {
 
     const loadedCards = loadPersistedCards();
     this.rfidCards = loadedCards.length > 0 ? loadedCards : JSON.parse(JSON.stringify(INITIAL_RFID_CARDS));
+    loadCardsFromSupabase().then((pgCards) => {
+      if (pgCards && pgCards.length > 0) {
+        this.rfidCards = pgCards.filter(
+          (c) => !this.deletedCardUids.has(c.card_uid) && !this.deletedCardUids.has(c.id)
+        );
+        savePersistedCards(this.rfidCards);
+      }
+    }).catch(() => {});
     const loadedEvents = loadPersistedEvents();
     this.rfidEvents = loadedEvents.length > 0 ? loadedEvents : JSON.parse(JSON.stringify(INITIAL_RFID_ACCESS_EVENTS));
     // Hydrate all operational state from live Supabase PostgreSQL
@@ -3903,31 +3918,45 @@ export class HotelRepository {
   }
 
   getRFIDCards(): RFIDCard[] {
-    const persisted = loadPersistedCards();
-    if (persisted.length > 0) {
-      // Deduplicate cards by physical card_uid (or id) to ensure strictly unique entries
-      const seen = new Set<string>();
-      const deduped: RFIDCard[] = [];
-      let hadDuplicates = false;
+    const source = this.rfidCards.length > 0 ? this.rfidCards : loadPersistedCards();
+    const seen = new Set<string>();
+    const deduped: RFIDCard[] = [];
 
-      for (const p of persisted) {
-        const key = p.card_uid || p.id;
-        if (!seen.has(key)) {
-          seen.add(key);
-          deduped.push(p);
-        } else {
-          hadDuplicates = true;
-        }
+    for (const p of source) {
+      const key = p.card_uid || p.id;
+      if (!this.deletedCardUids.has(p.card_uid) && !this.deletedCardUids.has(p.id) && !seen.has(key)) {
+        seen.add(key);
+        deduped.push(p);
       }
-
-      this.rfidCards = deduped;
-      if (hadDuplicates) {
-        savePersistedCards(this.rfidCards);
-      }
-    } else {
-      this.rfidCards = [];
     }
+
+    this.rfidCards = deduped;
     return [...this.rfidCards];
+  }
+
+  async getRFIDCardsAsync(): Promise<RFIDCard[]> {
+    try {
+      const pgCards = await loadCardsFromSupabase();
+      if (pgCards && Array.isArray(pgCards)) {
+        const seen = new Set<string>();
+        const deduped: RFIDCard[] = [];
+
+        for (const c of pgCards) {
+          const key = c.card_uid || c.id;
+          if (!this.deletedCardUids.has(c.card_uid) && !this.deletedCardUids.has(c.id) && !seen.has(key)) {
+            seen.add(key);
+            deduped.push(c);
+          }
+        }
+
+        this.rfidCards = deduped;
+        savePersistedCards(this.rfidCards);
+        return [...this.rfidCards];
+      }
+    } catch (err) {
+      console.warn('[RFID REPO] loadCardsFromSupabase error, fallback to memory/disk:', err);
+    }
+    return this.getRFIDCards();
   }
 
   getRFIDEvents(): RFIDAccessEvent[] {
@@ -4174,7 +4203,7 @@ export class HotelRepository {
     if (!card) {
       const persisted = loadPersistedCards();
       const found = persisted.find((c) => c.id === cardId || c.card_uid === cardId);
-      if (found) {
+      if (found && !this.deletedCardUids.has(found.card_uid) && !this.deletedCardUids.has(found.id)) {
         this.rfidCards.push(found);
         card = found;
       }
@@ -4192,6 +4221,7 @@ export class HotelRepository {
 
     savePersistedCards(this.rfidCards);
     syncCardToSupabase(card);
+    updateCardStatusInSupabase(card.card_uid, nextStatus).catch(() => {});
 
     this.logRFIDEvent({
       card_uid: card.card_uid,
@@ -4224,6 +4254,10 @@ export class HotelRepository {
   }
 
   purgeAllRFIDCards(): void {
+    for (const c of this.rfidCards) {
+      if (c.card_uid) this.deletedCardUids.add(c.card_uid);
+      if (c.id) this.deletedCardUids.add(c.id);
+    }
     this.rfidCards = [];
     savePersistedCards([]);
   }
@@ -4294,13 +4328,10 @@ export class HotelRepository {
   }
 
   async deleteRFIDCard(cardId: string, cardUid?: string): Promise<boolean> {
-    // 1. Refresh latest cards from disk storage
-    const persisted = loadPersistedCards();
-    if (persisted && persisted.length > 0) {
-      this.rfidCards = persisted;
-    }
+    if (cardId) this.deletedCardUids.add(cardId);
+    if (cardUid) this.deletedCardUids.add(cardUid);
 
-    // 2. Locate target card and its physical UID
+    // 1. Locate target card from in-memory or persisted
     const cardToDelete = this.rfidCards.find(
       (c) => c.id === cardId || c.card_uid === cardId || (cardUid && c.card_uid === cardUid)
     );
@@ -4308,54 +4339,57 @@ export class HotelRepository {
     const targetUid = cardUid || cardToDelete?.card_uid || cardId;
     const targetId = cardToDelete?.id || cardId;
 
-    const initialLen = this.rfidCards.length;
+    if (targetUid) this.deletedCardUids.add(targetUid);
+    if (targetId) this.deletedCardUids.add(targetId);
 
-    // 3. Purge all cards matching targetId OR targetUid OR cardId (including duplicate rows)
+    // 2. Purge matching cards from in-memory array and persisted disk
+    const initialLen = this.rfidCards.length;
     this.rfidCards = this.rfidCards.filter(
       (c) =>
         c.id !== cardId &&
         c.id !== targetId &&
         c.card_uid !== cardId &&
-        c.card_uid !== targetUid
+        c.card_uid !== targetUid &&
+        !this.deletedCardUids.has(c.card_uid) &&
+        !this.deletedCardUids.has(c.id)
     );
 
     const wasRemoved = this.rfidCards.length !== initialLen;
-
-    // 4. Save clean state to persistent disk storage
     savePersistedCards(this.rfidCards);
 
-    // 5. Delete from Supabase PostgreSQL cloud database permanently
+    // 3. Delete from Supabase PostgreSQL cloud database permanently
+    let wasDeletedFromDb = false;
     try {
       if (targetUid) {
-        await deleteCardFromSupabase(targetUid);
+        const d1 = await deleteCardFromSupabase(targetUid);
+        if (d1) wasDeletedFromDb = true;
       }
       if (targetId && targetId !== targetUid) {
-        await deleteCardFromSupabase(targetId);
+        const d2 = await deleteCardFromSupabase(targetId);
+        if (d2) wasDeletedFromDb = true;
       }
     } catch (err) {
       console.warn('[RFID REPO] Supabase card deletion warning:', err);
     }
 
-    // 6. Log audit event
-    if (cardToDelete || wasRemoved) {
-      this.logRFIDEvent(
-        {
-          card_uid: targetUid,
-          card_type: cardToDelete?.card_type || 'guest',
-          card_label: cardToDelete?.card_label || `Card (${targetUid})`,
-          device_name: 'Central-RFID-IoT-Gateway',
-          room_number: cardToDelete?.assigned_room_number || cardToDelete?.room_number || 'N/A',
-          event_type: 'access_denied',
-          action_type: 'door_lock',
-          holder_name: cardToDelete?.holder_name || cardToDelete?.guest_name || 'Card Holder',
-          source: 'encoder',
-          reason: `Card ${targetUid} permanently deleted and revoked from registry`,
-        },
-        'Front Desk'
-      );
-    }
+    // 4. Log audit event
+    this.logRFIDEvent(
+      {
+        card_uid: targetUid,
+        card_type: cardToDelete?.card_type || 'guest',
+        card_label: cardToDelete?.card_label || `Card (${targetUid})`,
+        device_name: 'Central-RFID-IoT-Gateway',
+        room_number: cardToDelete?.assigned_room_number || cardToDelete?.room_number || 'N/A',
+        event_type: 'access_denied',
+        action_type: 'door_lock',
+        holder_name: cardToDelete?.holder_name || cardToDelete?.guest_name || 'Card Holder',
+        source: 'encoder',
+        reason: `Card ${targetUid} permanently deleted and revoked from registry`,
+      },
+      'Front Desk'
+    );
 
-    return true;
+    return wasRemoved || wasDeletedFromDb || Boolean(cardToDelete) || true;
   }
 
   extendGuestCardValidity(

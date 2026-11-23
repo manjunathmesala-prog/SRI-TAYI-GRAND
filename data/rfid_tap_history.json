@@ -1392,5 +1392,23 @@
       "hotelProperty": "Sri Tayi Grand"
     },
     "tappedAt": "2026-11-22T19:24:43.297Z"
+  },
+  {
+    "id": "tap-1795445842825-v06kqd",
+    "cardUid": "BT-57-1000020509",
+    "cardType": "GUEST",
+    "roomNumber": "106",
+    "bookingId": null,
+    "customerId": null,
+    "customerName": "Guest",
+    "accessResult": "DENIED",
+    "doorStatus": "LOCKED",
+    "reason": "No RFID card detected on reader or encoder USB disconnected. Please ensure the Mifare keycard is placed flat on the reader.",
+    "metadata": {
+      "actionType": "door_unlock",
+      "device": "Lock-Room-106",
+      "hotelProperty": "Sri Tayi Grand"
+    },
+    "tappedAt": "2026-11-23T14:57:22.000Z"
   }
 ]

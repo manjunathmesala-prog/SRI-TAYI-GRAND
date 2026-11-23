@@ -1,5 +1,41 @@
 [
   {
+    "id": "90e8cf67-4a63-4ef3-90de-57d6dd646f8e",
+    "timestamp": "2026-11-23T14:56:40.436Z",
+    "userId": "admin-user",
+    "userName": "Admin",
+    "userRole": "admin",
+    "action": "STATUTORY_WALKIN_CHECKIN",
+    "entityType": "booking",
+    "entityId": "TG-FD-20261123-2478",
+    "details": "",
+    "ipAddress": "127.0.0.1"
+  },
+  {
+    "id": "215ca338-8b5f-4e8f-81fe-a734ee3b3b46",
+    "timestamp": "2026-11-23T14:53:39.985Z",
+    "userId": "admin-user",
+    "userName": "Admin",
+    "userRole": "admin",
+    "action": "STATUTORY_WALKIN_CHECKIN",
+    "entityType": "booking",
+    "entityId": "TG-FD-20261123-8280",
+    "details": "",
+    "ipAddress": "127.0.0.1"
+  },
+  {
+    "id": "c6b2dc2a-d1aa-4ee7-bf1a-467aaff06dcc",
+    "timestamp": "2026-11-23T13:41:11.932Z",
+    "userId": "admin-user",
+    "userName": "Admin",
+    "userRole": "admin",
+    "action": "STATUTORY_WALKIN_CHECKIN",
+    "entityType": "booking",
+    "entityId": "TG-FD-20261123-7650",
+    "details": "",
+    "ipAddress": "127.0.0.1"
+  },
+  {
     "id": "2d96e67c-c384-45b2-8a5e-ea4fd1fa5d6d",
     "timestamp": "2026-11-23T08:46:04.426Z",
     "userId": "admin-user",

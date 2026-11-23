@@ -476,30 +476,12 @@ export default function RFIDAdminPage() {
     }
   };
 
-  // Create Super Admin Card (Lifetime Activation with Physical Be-Tech USB Encoding)
+  // Create Super Admin Card (Lifetime Activation)
   const handleCreateSuperAdminCard = async (e: React.FormEvent) => {
     e.preventDefault();
     setHardwareBusy(true);
     setSaModalError(null);
-    setHardwareMessage({ text: 'Flashing Super Admin Master Key to Be-Tech USB Reader...', type: 'info' });
-
-    // 1. Physically encode card on USB reader with universal clearance & unlimited validity
-    const hwResult = await issuePhysicalKeycard({
-      roomNumber: '104',
-      guestName: saHolderName || 'Super Admin Master',
-      staffUser: 'System Root',
-    });
-
-    if (!hwResult.success) {
-      playChimeSound(false);
-      const errMsg = hwResult.error || 'Failed to encode card. Place a Mifare card flat on the USB reader.';
-      setSaModalError(errMsg);
-      setHardwareMessage({ text: errMsg, type: 'error' });
-      setHardwareBusy(false);
-      return;
-    }
-
-    playChimeSound(true);
+    setHardwareMessage({ text: 'Registering Super Admin Master Key in registry...', type: 'info' });
 
     try {
       const res = await fetch('/api/rfid/cards', {
@@ -515,8 +497,9 @@ export default function RFIDAdminPage() {
       const data = await res.json();
       if (data.success) {
         setShowSuperAdminModal(false);
+        playChimeSound(true);
         setHardwareMessage({
-          text: `👑 Super Admin Lifetime Card successfully encoded and activated for ${saHolderName || 'Managing Director'}! Universal clearance active.`,
+          text: `👑 Super Admin Lifetime Card successfully created and activated for ${saHolderName || 'Managing Director'}! Universal master clearance active.`,
           type: 'success',
         });
         refreshAllData();
@@ -531,30 +514,12 @@ export default function RFIDAdminPage() {
     }
   };
 
-  // Create Cleaner Card (Housekeeping Dual-Tap with Physical Be-Tech USB Encoding)
+  // Create Cleaner Card (Housekeeping Dual-Tap Turnover Keycard)
   const handleCreateCleanerCard = async (e: React.FormEvent) => {
     e.preventDefault();
     setHardwareBusy(true);
     setCleanerModalError(null);
-    setHardwareMessage({ text: 'Flashing Housekeeping Cleaner Card to Be-Tech USB Reader...', type: 'info' });
-
-    // 1. Physically encode card on USB reader with unlimited validity
-    const hwResult = await issuePhysicalKeycard({
-      roomNumber: '104',
-      guestName: cleanerHolderName || 'Housekeeping Staff',
-      staffUser: 'Front Desk',
-    });
-
-    if (!hwResult.success) {
-      playChimeSound(false);
-      const errMsg = hwResult.error || 'Failed to encode card. Place a Mifare card flat on the USB reader.';
-      setCleanerModalError(errMsg);
-      setHardwareMessage({ text: errMsg, type: 'error' });
-      setHardwareBusy(false);
-      return;
-    }
-
-    playChimeSound(true);
+    setHardwareMessage({ text: 'Registering Housekeeping Cleaning Card in registry...', type: 'info' });
 
     try {
       const res = await fetch('/api/rfid/cards', {
@@ -570,8 +535,9 @@ export default function RFIDAdminPage() {
       const data = await res.json();
       if (data.success) {
         setShowCleanerModal(false);
+        playChimeSound(true);
         setHardwareMessage({
-          text: `✦ Housekeeping Cleaner Card successfully encoded and activated for ${cleanerHolderName || 'Housekeeping Staff'}! (Dual-tap in/out enabled).`,
+          text: `✦ Housekeeping Cleaner Card successfully created and activated for ${cleanerHolderName || 'Housekeeping Staff'}! (Dual-tap turnover enabled).`,
           type: 'success',
         });
         refreshAllData();
@@ -663,36 +629,6 @@ export default function RFIDAdminPage() {
             hwNote = 'Be-Tech encoder service offline';
           }
         }
-      } else if (cardType === 'super_admin') {
-        // Super Admin cards: Universal clearance across ALL rooms
-        if (nextStatus === 'active') {
-          try {
-            const hwRes = await issuePhysicalKeycard({
-              roomNumber: '104',
-              guestName: holderName,
-              staffUser: 'System Root',
-            });
-            if (hwRes && hwRes.success) hwSynced = true;
-            else if (hwRes && hwRes.error) hwNote = hwRes.error;
-          } catch {
-            hwNote = 'Be-Tech encoder service offline';
-          }
-        }
-      } else if (cardType === 'cleaner') {
-        // Cleaner cards: Dual-tap housekeeping turnover clearance
-        if (nextStatus === 'active') {
-          try {
-            const hwRes = await issuePhysicalKeycard({
-              roomNumber: '104',
-              guestName: holderName,
-              staffUser: 'Front Desk',
-            });
-            if (hwRes && hwRes.success) hwSynced = true;
-            else if (hwRes && hwRes.error) hwNote = hwRes.error;
-          } catch {
-            hwNote = 'Be-Tech encoder service offline';
-          }
-        }
       }
 
       // 5. Positive chime sound and distinct, accurate notification message
@@ -765,7 +701,10 @@ export default function RFIDAdminPage() {
 
   // Delete / Revoke Card
   const handleDeleteCard = async (cardId: string, cardUid?: string) => {
-    if (!confirm('Are you sure you want to permanently delete/revoke this card?')) return;
+    if (typeof window !== 'undefined' && typeof window.confirm === 'function') {
+      const ok = window.confirm('Are you sure you want to permanently delete/revoke this card?');
+      if (!ok) return;
+    }
 
     // 1. Optimistic removal: Immediately filter out matching card(s) from local state
     const targetUid = cardUid || cards.find((c) => c.id === cardId)?.card_uid;
@@ -785,6 +724,7 @@ export default function RFIDAdminPage() {
       });
       const data = await res.json();
       if (data.success) {
+        playChimeSound(true);
         setHardwareMessage({
           text: 'Card permanently revoked and removed from registry and database.',
           type: 'info',
@@ -1963,15 +1903,17 @@ export default function RFIDAdminPage() {
                       </td>
                       <td className="py-3.5 px-4 text-right">
                         <div className="flex items-center justify-end gap-2">
-                          <button
-                              onClick={() => handleQuickEncodeRoom(c.room_number || c.assigned_room_number || '104', c.guest_name || c.holder_name)}
+                          {(c.room_number || c.assigned_room_number) && (
+                            <button
+                              onClick={() => handleQuickEncodeRoom(c.room_number || c.assigned_room_number || '', c.guest_name || c.holder_name)}
                               disabled={hardwareBusy}
                               className="px-2.5 py-1 rounded text-xs font-bold bg-[#D8AD56] hover:bg-[#c99b44] text-[#241912] shadow-sm flex items-center gap-1 cursor-pointer transition-all disabled:opacity-50"
-                              title={`Directly encode and write physical Mifare card for Room ${c.room_number} on USB reader (Lifetime/No time limit)`}
+                              title={`Directly encode and write physical Mifare card for Room ${c.room_number || c.assigned_room_number} on USB reader (Lifetime/No time limit)`}
                             >
                               <Cpu className="w-3 h-3" />
                               <span>Write Card (No Time Limit)</span>
                             </button>
+                          )}
                           {(c.card_type === 'guest' || !c.card_type) && c.status === 'active' && (
                             <button
                               onClick={() => {
