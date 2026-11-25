@@ -154,7 +154,7 @@ export function checkCategoryAvailability(
 
   // 3. Count overlapping active bookings for this category
   const overlappingBookings = repo.getBookings().filter((b) => {
-    if (b.status === 'cancelled' || b.status === 'no_show') return false;
+    if (b.status === 'cancelled' || b.status === 'no_show' || b.status === 'checked_out') return false;
     const matchesPrimary = b.category_id === category.id || normalizeCategoryId(b.category_id) === normalizedId;
     const matchesRoomItem = Array.isArray(b.booking_rooms) && b.booking_rooms.some(
       (br) => br.category_id === category.id || normalizeCategoryId(br.category_id) === normalizedId

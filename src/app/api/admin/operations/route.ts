@@ -700,14 +700,31 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ success: false, error: `Room ${roomId} not found` }, { status: 404 });
         }
 
-        // Automatic operational status logic if not explicitly provided
-        let targetOpStatus: OperationalStatus = operationalStatus || room.operational_status;
-        if (!operationalStatus) {
-          if (housekeepingStatus === 'clean' || housekeepingStatus === 'inspected') {
-            targetOpStatus = room.operational_status === 'cleaning' ? 'available' : room.operational_status;
-          } else if (housekeepingStatus === 'dirty' || housekeepingStatus === 'in_progress') {
-            targetOpStatus = room.operational_status === 'available' ? 'cleaning' : room.operational_status;
-          }
+        // Check if room has an authoritative active checked-in stay
+        const hasActiveStay = repo.getBookings().some(
+          (b) =>
+            b.status === 'checked_in' &&
+            (b.assigned_room_id === room.id ||
+              b.assigned_room_number === room.room_number ||
+              (b.assigned_room_numbers && b.assigned_room_numbers.includes(room.room_number)) ||
+              (b.booking_rooms &&
+                b.booking_rooms.some(
+                  (br) =>
+                    (br.room_number === room.room_number || br.room_id === room.id) &&
+                    br.status === 'checked_in'
+                )))
+        );
+
+        // Operational status logic: preserve occupancy if guest is in-house
+        let targetOpStatus: OperationalStatus = room.operational_status;
+        if (hasActiveStay) {
+          targetOpStatus = 'occupied';
+        } else if (operationalStatus) {
+          targetOpStatus = operationalStatus as OperationalStatus;
+        } else if (housekeepingStatus === 'clean' || housekeepingStatus === 'inspected') {
+          targetOpStatus = room.operational_status === 'cleaning' ? 'available' : room.operational_status;
+        } else if (housekeepingStatus === 'dirty' || housekeepingStatus === 'in_progress') {
+          targetOpStatus = room.operational_status === 'available' ? 'cleaning' : room.operational_status;
         }
 
         const staffName = auth.session?.name || body.staffName || 'Housekeeping';

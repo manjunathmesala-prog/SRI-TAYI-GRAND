@@ -125,11 +125,13 @@ export default function AnanthaWalkInPage() {
   const [instantCheckIn, setInstantCheckIn] = useState(true);
   const [paymentMethod, setPaymentMethod] = useState<'cash' | 'upi' | 'card'>('cash');
   const [amountPaid, setAmountPaid] = useState<string>('');
+  const [hasManualAmountPaid, setHasManualAmountPaid] = useState<boolean>(false);
   const [transactionRef, setTransactionRef] = useState('');
   const [frontDeskNotes, setFrontDeskNotes] = useState('');
 
   // Cash Tendered & Live Change State
   const [cashTendered, setCashTendered] = useState<number>(0);
+  const [hasManualCashTendered, setHasManualCashTendered] = useState<boolean>(false);
 
   // UPI QR & Verification State
   const [upiUtr, setUpiUtr] = useState<string>('');
@@ -289,6 +291,8 @@ export default function AnanthaWalkInPage() {
   // When room category changes, pick first available physical room (or retain multi-selection)
   const handleRoomTypeChange = (catId: string) => {
     setSelectedCategoryId(catId);
+    setHasManualAmountPaid(false);
+    setHasManualCashTendered(false);
     if (!multiRoomMode || selectedRooms.length <= 1) {
       const cat = categories.find((c) => c.id === catId);
       const matchingPhys = physicalRooms.filter(
@@ -349,6 +353,8 @@ export default function AnanthaWalkInPage() {
       }
     } else {
       // Single room mode: swap room
+      setHasManualAmountPaid(false);
+      setHasManualCashTendered(false);
       const newEntry: WalkInSelectedRoom = {
         roomId: room.id,
         roomNumber: room.room_number,
@@ -417,13 +423,33 @@ export default function AnanthaWalkInPage() {
     taxesInr = totalAmountInr - taxableSubtotal;
   }
 
-  // Auto-fill paid amount when total changes if empty or previously matching
+  // Auto-sync paid amount when total changes if not manually edited by user
   useEffect(() => {
-    setAmountPaid((prev) => (!prev || Number(prev) === 0 ? totalAmountInr.toString() : prev));
-  }, [totalAmountInr]);
+    if (!hasManualAmountPaid) {
+      setAmountPaid(totalAmountInr.toString());
+    }
+  }, [totalAmountInr, hasManualAmountPaid]);
 
-  const paidAmountNum = Math.min(totalAmountInr, Math.max(0, Number(amountPaid) || 0));
+  // Auto-sync cash tendered to paid amount if not manually edited by user
+  useEffect(() => {
+    if (!hasManualCashTendered && paymentMethod === 'cash') {
+      const pNum = Number(amountPaid) || totalAmountInr;
+      setCashTendered(pNum);
+    }
+  }, [amountPaid, totalAmountInr, hasManualCashTendered, paymentMethod]);
+
+  const rawAmountPaid = Number(amountPaid);
+  const paidAmountNum = isNaN(rawAmountPaid) ? 0 : Math.max(0, rawAmountPaid);
+  const excessDeposit = Math.max(0, paidAmountNum - totalAmountInr);
   const balanceDue = Math.max(0, totalAmountInr - paidAmountNum);
+  const changeToReturn = paymentMethod === 'cash' ? Math.max(0, cashTendered - paidAmountNum) : 0;
+
+  const handleResetToFullAmount = () => {
+    setHasManualAmountPaid(false);
+    setAmountPaid(totalAmountInr.toString());
+    setHasManualCashTendered(false);
+    setCashTendered(totalAmountInr);
+  };
 
   // Filter available physical rooms for selected category
   const availableRoomsForType = useMemo(() => {
@@ -780,6 +806,16 @@ export default function AnanthaWalkInPage() {
     setDiscountInr('');
     setDiscountReason('');
     setSelectedServices([]);
+    setAmountPaid('');
+    setHasManualAmountPaid(false);
+    setCashTendered(0);
+    setHasManualCashTendered(false);
+    setPaymentMethod('cash');
+    setUpiUtr('');
+    setCardLast4('');
+    setCardAuthCode('');
+    setCardConfirmed(false);
+    setUpiConfirmed(false);
     setTransactionRef('');
     setFrontDeskNotes('');
     setCheckInDate(todayStr);
@@ -1958,7 +1994,7 @@ export default function AnanthaWalkInPage() {
                     type="button"
                     onClick={() => {
                       setPaymentMethod('cash');
-                      if (!amountPaid || amountPaid === '0') setAmountPaid(totalAmountInr.toString());
+                      if (!hasManualAmountPaid) setAmountPaid(totalAmountInr.toString());
                     }}
                     className={`p-3 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer ${
                       paymentMethod === 'cash'
@@ -1974,7 +2010,7 @@ export default function AnanthaWalkInPage() {
                     type="button"
                     onClick={() => {
                       setPaymentMethod('upi');
-                      if (!amountPaid || amountPaid === '0') setAmountPaid(totalAmountInr.toString());
+                      if (!hasManualAmountPaid) setAmountPaid(totalAmountInr.toString());
                     }}
                     className={`p-3 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer ${
                       paymentMethod === 'upi'
@@ -1990,7 +2026,7 @@ export default function AnanthaWalkInPage() {
                     type="button"
                     onClick={() => {
                       setPaymentMethod('card');
-                      if (!amountPaid || amountPaid === '0') setAmountPaid(totalAmountInr.toString());
+                      if (!hasManualAmountPaid) setAmountPaid(totalAmountInr.toString());
                     }}
                     className={`p-3 rounded-xl border text-xs font-bold transition-all flex flex-col items-center justify-center gap-1.5 cursor-pointer ${
                       paymentMethod === 'card'
@@ -2005,16 +2041,42 @@ export default function AnanthaWalkInPage() {
 
                 {/* Amount Collected Input */}
                 <div>
-                  <label className="block text-[11px] font-medium text-[#E6D9C5]/80 mb-1">
-                    Amount Collected at Counter (₹) *
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-[11px] font-medium text-[#E6D9C5]/80">
+                      Amount Collected at Counter (₹) *
+                    </label>
+                    {hasManualAmountPaid && (
+                      <button
+                        type="button"
+                        onClick={handleResetToFullAmount}
+                        className="text-[10px] text-amber-300 hover:text-amber-200 underline font-semibold cursor-pointer"
+                      >
+                        Reset to Bill Total (₹{totalAmountInr.toLocaleString('en-IN')})
+                      </button>
+                    )}
+                  </div>
                   <input
                     type="number"
                     value={amountPaid}
-                    onChange={(e) => setAmountPaid(e.target.value)}
-                    placeholder="0"
+                    onChange={(e) => {
+                      setHasManualAmountPaid(true);
+                      setAmountPaid(e.target.value);
+                    }}
+                    placeholder={totalAmountInr.toString()}
                     className="w-full p-2.5 rounded-xl border border-[#3a2c1f] bg-white/10 text-white font-mono text-sm outline-none focus:border-[#B18A4A]"
                   />
+                  {balanceDue > 0 && (
+                    <div className="mt-1.5 p-2 rounded-lg bg-amber-500/10 border border-amber-400/30 text-[11px] text-amber-300 flex items-center justify-between">
+                      <span>Partial Payment: Outstanding Balance Due:</span>
+                      <span className="font-mono font-bold text-amber-200">₹{balanceDue.toLocaleString('en-IN')}</span>
+                    </div>
+                  )}
+                  {excessDeposit > 0 && (
+                    <div className="mt-1.5 p-2 rounded-lg bg-emerald-500/10 border border-emerald-400/30 text-[11px] text-emerald-300 flex items-center justify-between">
+                      <span>Guest Advance Deposit / Credit:</span>
+                      <span className="font-mono font-bold text-emerald-200">+₹{excessDeposit.toLocaleString('en-IN')}</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* CASH DYNAMIC PANEL */}
@@ -2042,36 +2104,54 @@ export default function AnanthaWalkInPage() {
                         </label>
                         <input
                           type="number"
-                          min={paidAmountNum}
                           value={cashTendered || ''}
-                          onChange={(e) => setCashTendered(Number(e.target.value))}
-                          placeholder="e.g. 2500"
+                          onChange={(e) => {
+                            setHasManualCashTendered(true);
+                            setCashTendered(Number(e.target.value));
+                          }}
+                          placeholder={`e.g. ${paidAmountNum}`}
                           className="w-full text-xs font-mono font-bold p-2.5 rounded-lg border border-[#3a2c1f] bg-black/30 text-white outline-none focus:border-amber-400"
                         />
+                        {cashTendered > 0 && cashTendered < paidAmountNum && (
+                          <p className="text-[10px] text-amber-400 font-medium mt-1">
+                            ⚠️ Tendered amount is less than counter collection.
+                          </p>
+                        )}
                         <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
                           <button
                             type="button"
-                            onClick={() => setCashTendered(paidAmountNum)}
+                            onClick={() => {
+                              setHasManualCashTendered(true);
+                              setCashTendered(paidAmountNum);
+                            }}
                             className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/10 hover:bg-white/20 text-amber-200 cursor-pointer"
                           >
                             Exact ₹{paidAmountNum}
                           </button>
-                          {paidAmountNum % 500 !== 0 && (
+                          {paidAmountNum > 0 && paidAmountNum % 500 !== 0 && (
                             <button
                               type="button"
-                              onClick={() => setCashTendered(Math.ceil(paidAmountNum / 500) * 500)}
+                              onClick={() => {
+                                setHasManualCashTendered(true);
+                                setCashTendered(Math.ceil(paidAmountNum / 500) * 500);
+                              }}
                               className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/10 hover:bg-white/20 text-amber-200 cursor-pointer"
                             >
                               ₹{Math.ceil(paidAmountNum / 500) * 500}
                             </button>
                           )}
-                          <button
-                            type="button"
-                            onClick={() => setCashTendered(Math.ceil(paidAmountNum / 1000) * 1000)}
-                            className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/10 hover:bg-white/20 text-amber-200 cursor-pointer"
-                          >
-                            ₹{Math.ceil(paidAmountNum / 1000) * 1000}
-                          </button>
+                          {paidAmountNum > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setHasManualCashTendered(true);
+                                setCashTendered(Math.ceil(paidAmountNum / 1000) * 1000);
+                              }}
+                              className="px-2 py-0.5 rounded text-[10px] font-bold bg-white/10 hover:bg-white/20 text-amber-200 cursor-pointer"
+                            >
+                              ₹{Math.ceil(paidAmountNum / 1000) * 1000}
+                            </button>
+                          )}
                         </div>
                       </div>
 
@@ -2079,7 +2159,7 @@ export default function AnanthaWalkInPage() {
                         <div>
                           <span className="text-[10px] font-bold text-[#E6D9C5]/70 uppercase block">Change to Return to Guest:</span>
                           <span className={`text-base font-bold font-mono ${cashTendered >= paidAmountNum ? 'text-emerald-400' : 'text-stone-400'}`}>
-                            ₹ {Math.max(0, cashTendered - paidAmountNum).toLocaleString('en-IN')}
+                            ₹ {changeToReturn.toLocaleString('en-IN')}
                           </span>
                         </div>
                         <span className="text-[10px] text-emerald-300 flex items-center gap-1 mt-1">

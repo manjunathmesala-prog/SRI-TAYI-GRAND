@@ -597,8 +597,28 @@ export class HotelRepository {
   ): PhysicalRoom | null {
     const index = this.rooms.findIndex((r) => r.id === id || r.room_number === id);
     if (index === -1) return null;
+    const room = this.rooms[index];
+    const hasActiveStay = this.bookings.some(
+      (b) =>
+        b.status === 'checked_in' &&
+        (b.assigned_room_id === room.id ||
+          b.assigned_room_number === room.room_number ||
+          (b.assigned_room_numbers && b.assigned_room_numbers.includes(room.room_number)) ||
+          (b.booking_rooms &&
+            b.booking_rooms.some(
+              (br) =>
+                (br.room_number === room.room_number || br.room_id === room.id) &&
+                br.status === 'checked_in'
+            )))
+    );
 
-    this.rooms[index].operational_status = operational_status;
+    let finalOpStatus = operational_status;
+    if (hasActiveStay && operational_status === 'available') {
+      console.warn(`[OCCUPANCY SAFEGUARD] Blocked attempt to mark active room ${room.room_number} as available. Room has in-house guest.`);
+      finalOpStatus = 'occupied';
+    }
+
+    this.rooms[index].operational_status = finalOpStatus;
     if (housekeeping_status) {
       this.rooms[index].housekeeping_status = housekeeping_status;
     }
@@ -1368,7 +1388,7 @@ export class HotelRepository {
 
     const collected = Number(params.amountCollected ?? total);
     const paidAmount = isNaN(collected) ? 0 : Math.max(0, collected);
-    const paymentStatus: PaymentStatus = paidAmount >= total ? 'successful' : 'pay_at_hotel';
+    const paymentStatus: PaymentStatus = paidAmount >= total ? 'successful' : paidAmount > 0 ? 'partial' : 'pay_at_hotel';
 
     const primaryRoom = allocatedRooms[0];
     const primaryCat = allocatedCategories[0];
@@ -1534,9 +1554,9 @@ export class HotelRepository {
     return { booking, room: primaryRoom, card, payment };
   }
 
-  statutoryWalkIn(params: Parameters<HotelRepository['createFrontDeskWalkIn']>[0]) {
+  async statutoryWalkIn(params: Parameters<HotelRepository['createFrontDeskWalkIn']>[0]) {
     try {
-      const result = this.createFrontDeskWalkIn(params);
+      const result = await this.createFrontDeskWalkIn(params);
       return { success: true, ...result };
     } catch (err: any) {
       return { success: false, error: err.message };
