@@ -45,11 +45,13 @@ let poolInstance: any = null;
 
 export function getSupabasePgPool(): any {
   if (typeof window !== 'undefined') return null;
-  const isBuild =
+  const isTestOrBuild =
     process.env.NEXT_PHASE === 'phase-production-build' ||
     process.env.npm_lifecycle_event === 'build' ||
-    Boolean(process.env.NEXT_IS_BUILD);
-  if (isBuild) return null;
+    Boolean(process.env.NEXT_IS_BUILD) ||
+    Boolean(process.env.VITEST) ||
+    process.env.NODE_ENV === 'test';
+  if (isTestOrBuild) return null;
   if (poolInstance) return poolInstance;
 
   try {

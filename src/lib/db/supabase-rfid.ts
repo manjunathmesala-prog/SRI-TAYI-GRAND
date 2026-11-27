@@ -9,7 +9,7 @@ function isServerEnvironment(): boolean {
 let pgPoolInstance: any = null;
 
 function getPgPool() {
-  if (!isServerEnvironment()) return null;
+  if (!isServerEnvironment() || process.env.VITEST || process.env.NODE_ENV === 'test') return null;
   if (pgPoolInstance) return pgPoolInstance;
 
   try {

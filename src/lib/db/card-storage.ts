@@ -34,7 +34,7 @@ export function loadPersistedCards(): RFIDCard[] {
 }
 
 export function savePersistedCards(cards: RFIDCard[]): void {
-  if (!isServerEnvironment()) return;
+  if (!isServerEnvironment() || process.env.VITEST || process.env.NODE_ENV === 'test') return;
   const paths = getDataPaths();
   if (!paths) return;
 
@@ -68,7 +68,7 @@ export function loadPersistedEvents(): RFIDAccessEvent[] {
 }
 
 export function savePersistedEvents(events: RFIDAccessEvent[]): void {
-  if (!isServerEnvironment()) return;
+  if (!isServerEnvironment() || process.env.VITEST || process.env.NODE_ENV === 'test') return;
   const paths = getDataPaths();
   if (!paths) return;
 
