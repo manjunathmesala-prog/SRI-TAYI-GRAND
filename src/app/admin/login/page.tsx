@@ -39,7 +39,6 @@ const PRESET_ACCOUNTS = [
     roleLabelTe: 'సూపర్ అడ్మిన్',
     name: 'Sri Tayi Grand Admin',
     email: 'admin@sritayigrand.com',
-    defaultPassword: 'GrandHotel@Kadiri2026!',
     icon: Crown,
     badgeColor: 'bg-amber-100 text-amber-900 border-amber-300',
     scopeEn: 'Full Unrestricted Access • Settings • Audit Logs • P&L',
@@ -51,7 +50,6 @@ const PRESET_ACCOUNTS = [
     roleLabelTe: 'మేనేజర్ హరి ఆచారి',
     name: 'Hari Achari',
     email: 'hari@sritayigrand.com',
-    defaultPassword: 'GrandHotel@Kadiri2026!',
     icon: Briefcase,
     badgeColor: 'bg-purple-100 text-purple-900 border-purple-300',
     scopeEn: 'Operations • ERP • Expenses • Attendance • Night Audit',
@@ -63,7 +61,6 @@ const PRESET_ACCOUNTS = [
     roleLabelTe: 'మేనేజర్ సాగర్',
     name: 'Sagar',
     email: 'sagar@sritayigrand.com',
-    defaultPassword: 'GrandHotel@Kadiri2026!',
     icon: Briefcase,
     badgeColor: 'bg-purple-100 text-purple-900 border-purple-300',
     scopeEn: 'Operations • ERP • Expenses • Attendance • Night Audit',
@@ -85,7 +82,7 @@ function AdminLoginContent() {
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
   const [loginSuccess, setLoginSuccess] = useState(false);
-  const [activePreset, setActivePreset] = useState<string>('SUPER_ADMIN');
+  const [activePreset, setActivePreset] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
 
   // Fast auto-redirect if staff already has an active, valid session
@@ -163,7 +160,7 @@ function AdminLoginContent() {
 
   const selectPreset = (preset: (typeof PRESET_ACCOUNTS)[0]) => {
     setEmail(preset.email);
-    setPassword(preset.defaultPassword || '');
+    setPassword('');
     setActivePreset(preset.roleId);
     setError(null);
   };
@@ -217,7 +214,7 @@ function AdminLoginContent() {
               <span>{isTelugu ? 'ఖాతాను ఎంచుకోండి' : 'Select Account'}</span>
             </div>
             <span className="text-[10px] text-white/50 uppercase tracking-widest font-mono">
-              {isTelugu ? '4 ఖాతాలు' : 'Quick Fill'}
+              {isTelugu ? 'ఖాతాలు' : 'Accounts'}
             </span>
           </div>
 
@@ -275,7 +272,7 @@ function AdminLoginContent() {
                       }}
                       className="text-[10px] px-2 py-0.5 rounded-md bg-white/15 hover:bg-[#8D672F] hover:text-[#2A1D13] text-white font-medium transition-all cursor-pointer disabled:opacity-50 shrink-0"
                     >
-                      {isTelugu ? 'ఎంచుకోండి' : 'Fill'}
+                      {isTelugu ? 'ఎంచుకోండి' : 'Select'}
                     </button>
                   </div>
                 </div>
