@@ -77,6 +77,7 @@ export default function RoomInventoryPage() {
         headers,
         body: JSON.stringify({
           room_id: editingRoom.id,
+          room_number: editingRoom.room_number,
           operational_status: newStatus,
           housekeeping_status: newHkStatus,
           notes,

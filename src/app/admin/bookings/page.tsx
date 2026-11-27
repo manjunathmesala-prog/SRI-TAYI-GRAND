@@ -57,7 +57,13 @@ import { useRealtimeSync, adminOperations, getAdminHeaders } from '@/lib/realtim
 import { Booking, BookingStatus, PhysicalRoom, RoomCategory, FolioCharge } from '@/types';
 import { toast } from '@/components/ui/Toast';
 import { useAdminLanguage } from '@/i18n/admin/AdminLanguageContext';
-import { getAuthoritativeTariff } from '@/lib/pricing';
+import { getAuthoritativeTariff, normalizeCategoryId } from '@/lib/pricing';
+
+const isCategoryMatch = (c1?: string | null, c2?: string | null) => {
+  if (!c1 || !c2) return false;
+  if (c1 === c2) return true;
+  return normalizeCategoryId(c1) === normalizeCategoryId(c2);
+};
 
 export default function BookingsAdminPage() {
   const { t, formatCurrency, formatDate, translateStatus, isTelugu } = useAdminLanguage();
@@ -480,15 +486,24 @@ export default function BookingsAdminPage() {
     if (!checkInTarget) return;
 
     const isMulti = Boolean(
-      checkInTarget.assigned_room_numbers && checkInTarget.assigned_room_numbers.length > 1
+      (checkInTarget.assigned_room_numbers && checkInTarget.assigned_room_numbers.length > 1) ||
+      (checkInTarget.booking_rooms && checkInTarget.booking_rooms.length > 1)
     );
 
     const roomsToCheckIn = isMulti
       ? checkInSelectedRooms.length > 0
         ? checkInSelectedRooms
-        : checkInTarget.assigned_room_numbers!
+        : (checkInTarget.assigned_room_numbers && checkInTarget.assigned_room_numbers.length > 0
+          ? checkInTarget.assigned_room_numbers
+          : (checkInTarget.booking_rooms?.map((bm) => bm.room_number).filter(Boolean) as string[]) || [])
       : selectedRoomNumber
       ? [selectedRoomNumber]
+      : checkInTarget.assigned_room_number
+      ? [checkInTarget.assigned_room_number]
+      : (checkInTarget.assigned_room_numbers && checkInTarget.assigned_room_numbers.length > 0)
+      ? [checkInTarget.assigned_room_numbers[0]]
+      : (checkInTarget.booking_rooms && checkInTarget.booking_rooms.length > 0 && checkInTarget.booking_rooms[0].room_number)
+      ? [checkInTarget.booking_rooms[0].room_number]
       : [];
 
     if (roomsToCheckIn.length === 0) {
@@ -549,15 +564,22 @@ export default function BookingsAdminPage() {
     if (!checkOutTarget) return;
 
     const isMulti = Boolean(
-      checkOutTarget.assigned_room_numbers && checkOutTarget.assigned_room_numbers.length > 1
+      (checkOutTarget.assigned_room_numbers && checkOutTarget.assigned_room_numbers.length > 1) ||
+      (checkOutTarget.booking_rooms && checkOutTarget.booking_rooms.length > 1)
     );
 
     const targetRooms = isMulti
       ? checkOutSelectedRooms.length > 0
         ? checkOutSelectedRooms
-        : checkOutTarget.assigned_room_numbers!
+        : (checkOutTarget.assigned_room_numbers && checkOutTarget.assigned_room_numbers.length > 0
+          ? checkOutTarget.assigned_room_numbers
+          : (checkOutTarget.booking_rooms?.map((bm) => bm.room_number).filter(Boolean) as string[]) || [])
       : checkOutTarget.assigned_room_number
       ? [checkOutTarget.assigned_room_number]
+      : (checkOutTarget.assigned_room_numbers && checkOutTarget.assigned_room_numbers.length > 0)
+      ? [checkOutTarget.assigned_room_numbers[0]]
+      : (checkOutTarget.booking_rooms && checkOutTarget.booking_rooms.length > 0 && checkOutTarget.booking_rooms[0].room_number)
+      ? [checkOutTarget.booking_rooms[0].room_number]
       : checkOutTarget.room_number
       ? [checkOutTarget.room_number]
       : [];
@@ -1066,23 +1088,35 @@ export default function BookingsAdminPage() {
                         )}
 
                         {/* 2. Check In */}
-                        {isConfirmed && (
+                        {(isConfirmed || r.status === 'partially_checked_in') && (
                           <button
                             onClick={() => {
                               setCheckInTarget(r);
-                              setSelectedRoomNumber(r.assigned_room_number || '');
+                              const allRooms = r.assigned_room_numbers && r.assigned_room_numbers.length > 0
+                                ? r.assigned_room_numbers
+                                : r.assigned_room_number
+                                ? [r.assigned_room_number]
+                                : [];
+                              const pendingRooms: string[] = r.booking_rooms && r.booking_rooms.length > 0
+                                ? (r.booking_rooms
+                                    .filter((bm) => bm.status !== 'checked_in' && bm.status !== 'checked_out')
+                                    .map((bm) => bm.room_number || '')
+                                    .filter(Boolean) as string[])
+                                : allRooms;
+                              setCheckInSelectedRooms(pendingRooms.length > 0 ? pendingRooms : allRooms);
+                              setSelectedRoomNumber(pendingRooms[0] || allRooms[0] || '');
                               setCheckInIdType(r.id_proof_type || 'aadhaar');
                               setCheckInIdNumber(r.id_proof_number || '');
                             }}
                             className="flex-1 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center space-x-1.5 shadow-sm min-h-[40px] cursor-pointer"
                           >
                             <LogIn className="w-3.5 h-3.5" />
-                            <span>Check In</span>
+                            <span>{r.status === 'partially_checked_in' ? 'Check In Remaining' : 'Check In'}</span>
                           </button>
                         )}
 
                         {/* 3. Check Out */}
-                        {isCheckedIn && (
+                        {(isCheckedIn || r.status === 'partially_checked_in' || r.status === 'partially_checked_out') && (
                           <>
                             <button
                               onClick={() => setChangeRoomTarget(r)}
@@ -1104,6 +1138,15 @@ export default function BookingsAdminPage() {
                               onClick={() => {
                                 setCheckOutTarget(r);
                                 setSettlementAmount(balance.toString());
+                                const activeRooms: string[] = r.booking_rooms && r.booking_rooms.length > 0
+                                  ? (r.booking_rooms
+                                      .filter((bm) => bm.status !== 'checked_out')
+                                      .map((bm) => bm.room_number || '')
+                                      .filter(Boolean) as string[])
+                                  : (r.assigned_room_numbers && r.assigned_room_numbers.length > 0
+                                    ? r.assigned_room_numbers
+                                    : (r.assigned_room_number ? [r.assigned_room_number] : []));
+                                setCheckOutSelectedRooms(activeRooms);
                               }}
                               className="flex-1 py-2 px-3 rounded-xl bg-[#21180F] hover:bg-black text-[#B18A4A] font-bold text-xs flex items-center justify-center space-x-1.5 shadow-sm min-h-[40px] cursor-pointer"
                             >
@@ -1637,21 +1680,24 @@ export default function BookingsAdminPage() {
                     value={selectedRoomNumber}
                     onChange={(val) => setSelectedRoomNumber(val)}
                     placeholder="-- Choose Clean Physical Room --"
-                    options={[
-                      { value: '', label: '-- Choose Clean Physical Room --' },
-                      ...physicalRooms
-                        .filter(
-                          (pr) =>
-                            pr.category_id === checkInTarget.category_id ||
-                            pr.room_number === checkInTarget.assigned_room_number
-                        )
-                        .map((pr) => ({
+                    options={(() => {
+                      const matched = physicalRooms.filter(
+                        (pr) =>
+                          !checkInTarget.category_id ||
+                          isCategoryMatch(pr.category_id, checkInTarget.category_id) ||
+                          pr.room_number === checkInTarget.assigned_room_number
+                      );
+                      const roomList = matched.length > 0 ? matched : physicalRooms;
+                      return [
+                        { value: '', label: '-- Choose Clean Physical Room --' },
+                        ...roomList.map((pr) => ({
                           value: pr.room_number,
                           label: `Room #${pr.room_number} (Floor ${pr.floor_number}) — ${
                             pr.operational_status === 'available' ? 'Available Clean' : pr.operational_status
                           }`,
                         })),
-                    ]}
+                      ];
+                    })()}
                     className="w-full"
                   />
                 </div>

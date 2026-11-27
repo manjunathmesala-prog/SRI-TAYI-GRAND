@@ -63,7 +63,7 @@ async function handleRoomUpdate(req: NextRequest) {
     const body = await req.json();
 
     // Accept both camelCase and snake_case parameter formats
-    const roomId = body.roomId || body.room_id || body.id;
+    const roomId = body.roomId || body.room_id || body.roomNumber || body.room_number || body.id;
     const operationalStatus = body.operationalStatus || body.operational_status;
     const housekeepingStatus = body.housekeepingStatus || body.housekeeping_status;
     const notes = body.notes;
@@ -86,7 +86,7 @@ async function handleRoomUpdate(req: NextRequest) {
     const targetOpStatus = (operationalStatus as OperationalStatus) || room.operational_status;
     const targetHkStatus = (housekeepingStatus as HousekeepingStatus) || room.housekeeping_status;
 
-    const updatedRoom = repo.updateRoomStatus(
+    const updatedRoom = await repo.updateRoomStatus(
       roomId,
       targetOpStatus,
       targetHkStatus,

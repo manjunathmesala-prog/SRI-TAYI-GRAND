@@ -574,8 +574,21 @@ export class HotelRepository {
     });
   }
 
-  getRoomById(id: string): PhysicalRoom | undefined {
-    return this.rooms.find((r) => r.id === id || r.room_number === id);
+  getRoomById(id: string | number): PhysicalRoom | undefined {
+    if (!id) return undefined;
+    const clean = String(id).trim();
+    const cleanLower = clean.toLowerCase();
+    const digitsOnly = clean.replace(/\D/g, '');
+    return this.rooms.find(
+      (r) =>
+        r.id === clean ||
+        r.room_number === clean ||
+        (r.supabase_id && r.supabase_id === clean) ||
+        r.id.toLowerCase() === cleanLower ||
+        cleanLower === `rm-${r.room_number}` ||
+        r.id.toLowerCase() === `rm-${cleanLower}` ||
+        (digitsOnly && r.room_number === digitsOnly)
+    );
   }
 
   createRoom(room: Omit<PhysicalRoom, 'id'>): PhysicalRoom {
@@ -588,26 +601,29 @@ export class HotelRepository {
     return newRoom;
   }
 
-  updateRoomStatus(
-    id: string,
+  async updateRoomStatus(
+    id: string | number,
     operational_status: OperationalStatus,
     housekeeping_status?: HousekeepingStatus,
     notes?: string,
     actor?: string
-  ): PhysicalRoom | null {
-    const index = this.rooms.findIndex((r) => r.id === id || r.room_number === id);
+  ): Promise<PhysicalRoom | null> {
+    const room = this.getRoomById(id);
+    if (!room) return null;
+    const index = this.rooms.indexOf(room);
     if (index === -1) return null;
-    const room = this.rooms[index];
+
     const hasActiveStay = this.bookings.some(
       (b) =>
         b.status === 'checked_in' &&
         (b.assigned_room_id === room.id ||
+          (room.supabase_id && b.assigned_room_id === room.supabase_id) ||
           b.assigned_room_number === room.room_number ||
           (b.assigned_room_numbers && b.assigned_room_numbers.includes(room.room_number)) ||
           (b.booking_rooms &&
             b.booking_rooms.some(
               (br) =>
-                (br.room_number === room.room_number || br.room_id === room.id) &&
+                (br.room_number === room.room_number || br.room_id === room.id || (room.supabase_id && br.room_id === room.supabase_id)) &&
                 br.status === 'checked_in'
             )))
     );
@@ -639,7 +655,7 @@ export class HotelRepository {
       actor
     );
 
-    syncRoomStatusToSupabase({
+    await syncRoomStatusToSupabase({
       roomNumber: this.rooms[index].room_number,
       operationalStatus: this.rooms[index].operational_status,
       housekeepingStatus: this.rooms[index].housekeeping_status,
@@ -649,13 +665,13 @@ export class HotelRepository {
     return this.rooms[index];
   }
 
-  updateRoomHousekeeping(
+  async updateRoomHousekeeping(
     roomId: string,
     housekeepingStatus: HousekeepingStatus,
     operationalStatus?: OperationalStatus,
     notes?: string,
     actor?: string
-  ): PhysicalRoom | null {
+  ): Promise<PhysicalRoom | null> {
     const room = this.getRoomById(roomId);
     const opStatus = operationalStatus || room?.operational_status || 'available';
     return this.updateRoomStatus(roomId, opStatus, housekeepingStatus, notes, actor);
@@ -668,12 +684,10 @@ export class HotelRepository {
     guestName: string,
     actor?: string
   ): Promise<PhysicalRoom> {
-    const index = this.rooms.findIndex((r) => r.id === roomId || r.room_number === roomId);
-    if (index === -1) {
+    const room = this.getRoomById(roomId);
+    if (!room) {
       throw new Error(`Room identifier '${roomId}' was not found.`);
     }
-
-    const room = this.rooms[index];
 
     // Authoritative Booking Verification & Stale Data Prevention
     const booking = this.getBookingByReference(bookingRef);
@@ -720,14 +734,17 @@ export class HotelRepository {
     }
 
     // Release previous room reservation if reassigning to a different room
-    if (booking.assigned_room_id && booking.assigned_room_id !== room.id) {
-      const prevRoom = this.rooms.find(
-        (r) => r.id === booking.assigned_room_id || r.room_number === booking.assigned_room_number
-      );
+    if (booking.assigned_room_id && booking.assigned_room_id !== room.id && booking.assigned_room_number !== room.room_number) {
+      const prevRoom = this.getRoomById(booking.assigned_room_id) || this.getRoomById(booking.assigned_room_number || '');
       if (prevRoom && prevRoom.current_booking_ref?.toLowerCase() === bookingRef.toLowerCase()) {
         prevRoom.operational_status = 'available';
         prevRoom.current_booking_ref = undefined;
         prevRoom.current_guest_name = undefined;
+        await syncRoomStatusToSupabase({
+          roomNumber: prevRoom.room_number,
+          operationalStatus: 'available',
+          housekeepingStatus: prevRoom.housekeeping_status,
+        });
       }
     }
 
@@ -743,9 +760,10 @@ export class HotelRepository {
     // Update booking
     booking.assigned_room_id = room.id;
     booking.assigned_room_number = room.room_number;
+    booking.room_number = room.room_number;
     booking.room_assigned_by = actor || 'Front Desk';
 
-    if (!booking.assigned_room_numbers) {
+    if (!booking.assigned_room_numbers || Number(booking.rooms_count || 1) <= 1) {
       booking.assigned_room_numbers = [room.room_number];
     } else if (!booking.assigned_room_numbers.includes(room.room_number)) {
       booking.assigned_room_numbers.push(room.room_number);
@@ -765,6 +783,13 @@ export class HotelRepository {
           assigned_guest_name: booking.guest_name,
         },
       ];
+    } else if (Number(booking.rooms_count || 1) <= 1) {
+      // Single room booking: keep allocation cleanly mapped
+      booking.booking_rooms[0].room_id = room.id;
+      booking.booking_rooms[0].room_number = room.room_number;
+      booking.booking_rooms[0].category_id = room.category_id || booking.booking_rooms[0].category_id || booking.category_id;
+      booking.booking_rooms[0].category_name = room.category_name || booking.booking_rooms[0].category_name || booking.category_name;
+      if (!booking.booking_rooms[0].assigned_guest_name) booking.booking_rooms[0].assigned_guest_name = booking.guest_name;
     } else {
       const existingAlloc =
         booking.booking_rooms.find((br) => br.room_number === room.room_number || br.room_id === room.id) ||
@@ -777,6 +802,8 @@ export class HotelRepository {
         if (!existingAlloc.assigned_guest_name) existingAlloc.assigned_guest_name = booking.guest_name;
       }
     }
+
+    savePersistedData('bookings.json', this.bookings);
 
     this.broadcastEvent(
       'room_assigned',
@@ -1729,6 +1756,20 @@ export class HotelRepository {
     await syncBookingToSupabase(booking);
     savePersistedData('bookings.json', this.bookings);
 
+    const candidateRoomIdentifiers = new Set<string>();
+    if (Array.isArray(booking.assigned_room_numbers)) {
+      booking.assigned_room_numbers.forEach((rn) => { if (rn) candidateRoomIdentifiers.add(String(rn).trim()); });
+    }
+    if (booking.assigned_room_number) candidateRoomIdentifiers.add(String(booking.assigned_room_number).trim());
+    if (booking.assigned_room_id) candidateRoomIdentifiers.add(String(booking.assigned_room_id).trim());
+    if (booking.room_number) candidateRoomIdentifiers.add(String(booking.room_number).trim());
+    if (Array.isArray(booking.booking_rooms)) {
+      booking.booking_rooms.forEach((br) => {
+        if (br.room_number) candidateRoomIdentifiers.add(String(br.room_number).trim());
+        if (br.room_id) candidateRoomIdentifiers.add(String(br.room_id).trim());
+      });
+    }
+
     if (status === 'checked_in') {
       booking.checked_in_at = new Date().toISOString();
       if (Array.isArray(booking.booking_rooms)) {
@@ -1738,18 +1779,13 @@ export class HotelRepository {
           if (!br.assigned_guest_name) br.assigned_guest_name = booking.guest_name;
         }
       }
-      const roomsToCheckIn =
-        booking.assigned_room_numbers && booking.assigned_room_numbers.length > 0
-          ? booking.assigned_room_numbers
-          : booking.assigned_room_id
-          ? [booking.assigned_room_id]
-          : booking.assigned_room_number
-          ? [booking.assigned_room_number]
-          : [];
-      for (const rmIdOrNum of roomsToCheckIn) {
-        const room = this.rooms.find((r) => r.id === rmIdOrNum || r.room_number === rmIdOrNum);
+      for (const rmIdOrNum of candidateRoomIdentifiers) {
+        const room = this.getRoomById(rmIdOrNum);
         if (room) {
-          this.updateRoomStatus(room.id, 'occupied', 'clean', undefined, actor);
+          room.operational_status = 'occupied';
+          room.housekeeping_status = 'clean';
+          room.current_booking_ref = booking.booking_reference;
+          room.current_guest_name = booking.guest_name;
           await syncRoomStatusToSupabase({
             roomNumber: room.room_number,
             operationalStatus: 'occupied',
@@ -1766,18 +1802,13 @@ export class HotelRepository {
           if (!br.checked_out_at) br.checked_out_at = booking.checked_out_at;
         }
       }
-      const roomsToCheckout =
-        booking.assigned_room_numbers && booking.assigned_room_numbers.length > 0
-          ? booking.assigned_room_numbers
-          : booking.assigned_room_id
-          ? [booking.assigned_room_id]
-          : booking.assigned_room_number
-          ? [booking.assigned_room_number]
-          : [];
-      for (const rmIdOrNum of roomsToCheckout) {
-        const room = this.rooms.find((r) => r.id === rmIdOrNum || r.room_number === rmIdOrNum);
+      for (const rmIdOrNum of candidateRoomIdentifiers) {
+        const room = this.getRoomById(rmIdOrNum);
         if (room) {
-          this.updateRoomStatus(room.id, 'cleaning', 'dirty', undefined, actor);
+          room.operational_status = 'cleaning';
+          room.housekeeping_status = 'dirty';
+          room.current_booking_ref = undefined;
+          room.current_guest_name = undefined;
           await syncRoomStatusToSupabase({
             roomNumber: room.room_number,
             operationalStatus: 'cleaning',
@@ -1806,21 +1837,13 @@ export class HotelRepository {
           br.status = 'cancelled';
         }
       }
-      const roomsToRelease =
-        booking.assigned_room_numbers && booking.assigned_room_numbers.length > 0
-          ? booking.assigned_room_numbers
-          : booking.assigned_room_id
-          ? [booking.assigned_room_id]
-          : booking.assigned_room_number
-          ? [booking.assigned_room_number]
-          : [];
-      for (const rmIdOrNum of roomsToRelease) {
-        const room = this.rooms.find((r) => r.id === rmIdOrNum || r.room_number === rmIdOrNum);
+      for (const rmIdOrNum of candidateRoomIdentifiers) {
+        const room = this.getRoomById(rmIdOrNum);
         if (room) {
           room.operational_status = 'available';
           room.current_booking_ref = undefined;
           room.current_guest_name = undefined;
-          syncRoomStatusToSupabase({
+          await syncRoomStatusToSupabase({
             roomNumber: room.room_number,
             operationalStatus: 'available',
             housekeepingStatus: room.housekeeping_status,
@@ -1831,6 +1854,9 @@ export class HotelRepository {
     } else {
       this.broadcastEvent('booking_updated', { booking, status }, actor);
     }
+
+    savePersistedData('bookings.json', this.bookings);
+    await syncBookingToSupabase(booking);
 
     return booking;
   }
@@ -1872,7 +1898,7 @@ export class HotelRepository {
           ? [booking.assigned_room_number]
           : [];
       booking.booking_rooms = allNums.map((rn) => {
-        const rm = this.rooms.find((r) => r.room_number === rn);
+        const rm = this.getRoomById(rn);
         return {
           room_id: rm?.id,
           room_number: rn,
@@ -1885,7 +1911,7 @@ export class HotelRepository {
     }
 
     for (const rNum of targetRoomNums) {
-      const room = this.rooms.find((r) => r.room_number === rNum || r.id === rNum);
+      const room = this.getRoomById(rNum);
       if (room) {
         room.operational_status = 'occupied';
         room.housekeeping_status = 'clean';
@@ -1898,11 +1924,11 @@ export class HotelRepository {
         });
       }
 
-      let brItem = booking.booking_rooms.find((br) => br.room_number === rNum);
+      let brItem = booking.booking_rooms.find((br) => br.room_number === rNum || (room && br.room_number === room.room_number));
       if (!brItem) {
         brItem = booking.booking_rooms.find((br) => !br.room_number);
         if (brItem) {
-          brItem.room_number = rNum;
+          brItem.room_number = room ? room.room_number : rNum;
           brItem.room_id = room?.id;
         }
       }
@@ -1962,7 +1988,7 @@ export class HotelRepository {
           ? [booking.assigned_room_number]
           : [];
       booking.booking_rooms = allNums.map((rn) => {
-        const rm = this.rooms.find((r) => r.room_number === rn);
+        const rm = this.getRoomById(rn);
         return {
           room_id: rm?.id,
           room_number: rn,
@@ -1975,7 +2001,7 @@ export class HotelRepository {
     }
 
     for (const rNum of targetRoomNums) {
-      const room = this.rooms.find((r) => r.room_number === rNum || r.id === rNum);
+      const room = this.getRoomById(rNum);
       if (room) {
         room.operational_status = 'cleaning';
         room.housekeeping_status = 'dirty';
@@ -2041,7 +2067,7 @@ export class HotelRepository {
     return booking;
   }
 
-  cancelCheckout(bookingReference: string, actor: string = 'Front Desk'): Booking {
+  async cancelCheckout(bookingReference: string, actor: string = 'Front Desk'): Promise<Booking> {
     const booking = this.getBookingByReference(bookingReference);
     if (!booking) {
       throw new Error(`Booking ${bookingReference} not found`);
@@ -2054,13 +2080,31 @@ export class HotelRepository {
     booking.checked_out_at = undefined;
     booking.internal_notes = `${booking.internal_notes || ''}\n[Checkout Cancelled] Reverted to In-House by ${actor} on ${new Date().toISOString()}`.trim();
 
-    if (booking.assigned_room_id) {
-      this.updateRoomStatus(booking.assigned_room_id, 'occupied', 'clean', undefined, actor);
-      const room = this.rooms.find((r) => r.id === booking.assigned_room_id || r.room_number === booking.assigned_room_number);
+    if (Array.isArray(booking.booking_rooms)) {
+      for (const br of booking.booking_rooms) {
+        br.status = 'checked_in';
+        br.checked_out_at = undefined;
+      }
+    }
+
+    const candidateRooms = new Set<string>();
+    if (booking.assigned_room_id) candidateRooms.add(booking.assigned_room_id);
+    if (booking.assigned_room_number) candidateRooms.add(booking.assigned_room_number);
+    if (Array.isArray(booking.assigned_room_numbers)) {
+      booking.assigned_room_numbers.forEach((rn) => candidateRooms.add(rn));
+    }
+    for (const rIdOrNum of candidateRooms) {
+      const room = this.getRoomById(rIdOrNum);
       if (room) {
         room.operational_status = 'occupied';
+        room.housekeeping_status = 'clean';
         room.current_booking_ref = booking.booking_reference;
         room.current_guest_name = booking.guest_name;
+        await syncRoomStatusToSupabase({
+          roomNumber: room.room_number,
+          operationalStatus: 'occupied',
+          housekeepingStatus: 'clean',
+        });
         const roomCards = this.rfidCards.filter(
           (c) =>
             (c.assigned_room_number === room.room_number || c.room_number === room.room_number || c.booking_reference === booking.booking_reference) &&
@@ -2069,7 +2113,7 @@ export class HotelRepository {
         for (const card of roomCards) {
           card.status = 'active';
           card.deactivated_at = undefined;
-          syncCardToSupabase(card);
+          await syncCardToSupabase(card);
         }
         if (roomCards.length > 0) {
           savePersistedCards(this.rfidCards);
@@ -2077,8 +2121,9 @@ export class HotelRepository {
       }
     }
 
+    savePersistedData('bookings.json', this.bookings);
+    await syncBookingToSupabase(booking);
     this.broadcastEvent('booking_updated', { booking, status: 'checked_in', action: 'cancel_checkout' }, actor);
-    syncBookingToSupabase(booking);
     return booking;
   }
 
@@ -5274,7 +5319,7 @@ export class HotelRepository {
   // ==============================================================================
 
   public assignHousekeeper(roomId: string, staffId: string, staffName: string): boolean {
-    const room = this.rooms.find((r) => r.id === roomId || r.room_number === roomId);
+    const room = this.getRoomById(roomId);
     if (!room) return false;
 
     room.assigned_housekeeper_id = staffId;
@@ -5284,16 +5329,31 @@ export class HotelRepository {
     return true;
   }
 
-  public completeHousekeepingTurnaround(
+  public async completeHousekeepingTurnaround(
     roomId: string,
     checklist: HousekeepingTurnaroundChecklist,
     inspectedBy?: string
-  ): boolean {
-    const room = this.rooms.find((r) => r.id === roomId || r.room_number === roomId);
+  ): Promise<boolean> {
+    const room = this.getRoomById(roomId);
     if (!room) return false;
 
+    const hasActiveStay = this.bookings.some(
+      (b) =>
+        b.status === 'checked_in' &&
+        (b.assigned_room_id === room.id ||
+          (room.supabase_id && b.assigned_room_id === room.supabase_id) ||
+          b.assigned_room_number === room.room_number ||
+          (b.assigned_room_numbers && b.assigned_room_numbers.includes(room.room_number)) ||
+          (b.booking_rooms &&
+            b.booking_rooms.some(
+              (br) =>
+                (br.room_number === room.room_number || br.room_id === room.id || (room.supabase_id && br.room_id === room.supabase_id)) &&
+                br.status === 'checked_in'
+            )))
+    );
+
     room.housekeeping_status = 'clean';
-    if (room.operational_status === 'cleaning') {
+    if (!hasActiveStay && room.operational_status === 'cleaning') {
       room.operational_status = 'available';
     }
 
@@ -5303,6 +5363,13 @@ export class HotelRepository {
       inspected_at: new Date().toISOString(),
       completed_at: new Date().toISOString(),
     };
+
+    await syncRoomStatusToSupabase({
+      roomNumber: room.room_number,
+      operationalStatus: room.operational_status,
+      housekeepingStatus: room.housekeeping_status,
+      notes: room.notes,
+    });
 
     this.broadcastEvent('housekeeping_inspected', { room });
     this.recordAuditLog({
@@ -5363,7 +5430,7 @@ export class HotelRepository {
   // ==============================================================================
 
   
-  public transferBookingRoom(params: {
+  public async transferBookingRoom(params: {
     bookingReference: string;
     toRoomIdOrNumber: string;
     reasonCategory: RoomTransferReasonCategory;
@@ -5371,13 +5438,13 @@ export class HotelRepository {
     actor: string;
     createMaintenanceTicket?: boolean;
     oldRoomAction?: 'maintenance' | 'cleaning';
-  }): {
+  }): Promise<{
     booking: Booking;
     oldRoom: PhysicalRoom;
     newRoom: PhysicalRoom;
     transferRecord: RoomTransferRecord;
     maintenanceTicket?: MaintenanceTicket;
-  } {
+  }> {
     const {
       bookingReference,
       toRoomIdOrNumber,
@@ -5444,7 +5511,7 @@ export class HotelRepository {
     oldRoom.housekeeping_status = 'dirty';
     oldRoom.current_booking_ref = undefined;
     oldRoom.current_guest_name = undefined;
-    syncRoomStatusToSupabase({
+    await syncRoomStatusToSupabase({
       roomNumber: oldRoom.room_number,
       operationalStatus: oldRoom.operational_status,
       housekeepingStatus: oldRoom.housekeeping_status,
@@ -5455,7 +5522,7 @@ export class HotelRepository {
     newRoom.operational_status = 'occupied';
     newRoom.current_booking_ref = booking.booking_reference;
     newRoom.current_guest_name = booking.guest_name;
-    syncRoomStatusToSupabase({
+    await syncRoomStatusToSupabase({
       roomNumber: newRoom.room_number,
       operationalStatus: 'occupied',
       housekeepingStatus: newRoom.housekeeping_status,
@@ -5468,6 +5535,27 @@ export class HotelRepository {
     booking.room_number = newRoom.room_number;
     if (newRoom.category_id) {
       booking.category_id = newRoom.category_id;
+    }
+    if (booking.assigned_room_numbers) {
+      booking.assigned_room_numbers = booking.assigned_room_numbers.map((rn) =>
+        rn === oldRoom.room_number ? newRoom.room_number : rn
+      );
+      if (!booking.assigned_room_numbers.includes(newRoom.room_number)) {
+        booking.assigned_room_numbers.push(newRoom.room_number);
+      }
+    } else {
+      booking.assigned_room_numbers = [newRoom.room_number];
+    }
+    if (Array.isArray(booking.booking_rooms)) {
+      const brItem = booking.booking_rooms.find(
+        (br) => br.room_number === oldRoom.room_number || br.room_id === oldRoom.id
+      );
+      if (brItem) {
+        brItem.room_id = newRoom.id;
+        brItem.room_number = newRoom.room_number;
+        brItem.category_id = newRoom.category_id || brItem.category_id;
+        brItem.category_name = newRoom.category_name || brItem.category_name;
+      }
     }
 
     const transferRecord: RoomTransferRecord = {
@@ -5494,8 +5582,9 @@ export class HotelRepository {
     booking.room_transfers.unshift(transferRecord);
     booking.last_room_transfer = transferRecord;
 
-    syncBookingToSupabase(booking);
-    syncRoomTransferToSupabase(transferRecord);
+    savePersistedData('bookings.json', this.bookings);
+    await syncBookingToSupabase(booking);
+    await syncRoomTransferToSupabase(transferRecord);
 
     this.broadcastEvent('room_transferred', {
       transfer: transferRecord,
@@ -6121,6 +6210,7 @@ export class HotelRepository {
         for (const pgR of pgRooms) {
           const r = this.rooms.find((rm) => rm.room_number === pgR.room_number);
           if (r) {
+            if (pgR.id) r.supabase_id = pgR.id;
             r.operational_status = pgR.operational_status;
             if (pgR.housekeeping_status) r.housekeeping_status = pgR.housekeeping_status;
             if (pgR.notes) r.notes = pgR.notes;
@@ -6131,6 +6221,7 @@ export class HotelRepository {
             const cat = this.categories.find((c) => c.id === catId);
             this.rooms.push({
               id: pgR.id || `rm-${pgR.room_number}`,
+              supabase_id: pgR.id,
               room_number: pgR.room_number,
               category_id: catId,
               category_name: cat ? cat.name : 'Double Room',
@@ -6284,12 +6375,31 @@ export class HotelRepository {
       if (r.operational_status === 'maintenance' || r.operational_status === 'out_of_service') {
         continue;
       }
-      const activeStay = activeCheckedIn.find((b) =>
-        b.assigned_room_number === r.room_number ||
-        b.assigned_room_id === r.id ||
-        (b.assigned_room_numbers && b.assigned_room_numbers.includes(r.room_number)) ||
-        (b.booking_rooms && b.booking_rooms.some((br) => (br.room_number === r.room_number || br.room_id === r.id) && br.status === 'checked_in'))
-      );
+      const activeStay = activeCheckedIn.find((b) => {
+        // Prevent single room bookings from accidentally claiming extra ghost rooms
+        if (Number(b.rooms_count || 1) <= 1) {
+          const primaryNum = b.assigned_room_number || (b.assigned_room_numbers && b.assigned_room_numbers[0]);
+          return (
+            primaryNum === r.room_number ||
+            b.assigned_room_id === r.id ||
+            (r.supabase_id && b.assigned_room_id === r.supabase_id)
+          );
+        }
+        return (
+          b.assigned_room_number === r.room_number ||
+          b.assigned_room_id === r.id ||
+          (r.supabase_id && b.assigned_room_id === r.supabase_id) ||
+          (b.assigned_room_numbers && b.assigned_room_numbers.includes(r.room_number)) ||
+          (b.booking_rooms &&
+            b.booking_rooms.some(
+              (br) =>
+                (br.room_number === r.room_number ||
+                  br.room_id === r.id ||
+                  (r.supabase_id && br.room_id === r.supabase_id)) &&
+                br.status === 'checked_in'
+            ))
+        );
+      });
 
       if (activeStay) {
         if (r.operational_status !== 'occupied') {
@@ -6304,13 +6414,15 @@ export class HotelRepository {
         }
       } else {
         if (r.operational_status === 'occupied') {
-          r.operational_status = 'available';
+          // If no active stay is currently checked in, set to available if clean, or cleaning if dirty/in_progress
+          const targetStatus = r.housekeeping_status === 'clean' ? 'available' : 'cleaning';
+          r.operational_status = targetStatus;
           r.current_booking_ref = undefined;
           r.current_guest_name = undefined;
           r.notes = undefined;
           syncRoomStatusToSupabase({
             roomNumber: r.room_number,
-            operationalStatus: 'available',
+            operationalStatus: targetStatus,
             housekeepingStatus: r.housekeeping_status,
           }).catch(() => {});
         }

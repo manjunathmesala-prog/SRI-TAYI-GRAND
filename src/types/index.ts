@@ -93,6 +93,7 @@ export interface RoomCategory {
 
 export interface PhysicalRoom {
   id: string;
+  supabase_id?: string;
   room_number: string;
   category_id: string;
   category_name?: string;

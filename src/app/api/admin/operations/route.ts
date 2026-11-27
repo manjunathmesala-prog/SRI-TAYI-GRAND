@@ -339,10 +339,10 @@ export async function POST(req: NextRequest) {
         }
 
         const staffName = auth.session?.name || body.staffName || 'Front Desk';
-        const updatedBooking = repo.cancelCheckout(bookingReference, staffName);
+        const updatedBooking = await repo.cancelCheckout(bookingReference, staffName);
 
         if (updatedBooking) {
-          syncBookingToSupabase(updatedBooking);
+          await syncBookingToSupabase(updatedBooking);
         }
 
         notifySuperAdmin({
@@ -521,7 +521,7 @@ export async function POST(req: NextRequest) {
         const staffName = auth.session?.name || body.staffName || 'Front Desk Staff';
 
         try {
-          const result = repo.transferBookingRoom({
+          const result = await repo.transferBookingRoom({
             bookingReference,
             toRoomIdOrNumber: targetRoom,
             reasonCategory,
@@ -669,10 +669,14 @@ export async function POST(req: NextRequest) {
           return NextResponse.json({ success: false, error: auth.error }, { status: 403 });
         }
 
-        const { roomId, operationalStatus, housekeepingStatus, notes } = body;
+        const roomId = body.roomId || body.room_id || body.roomNumber || body.room_number;
+        const operationalStatus = body.operationalStatus || body.operational_status;
+        const housekeepingStatus = body.housekeepingStatus || body.housekeeping_status;
+        const notes = body.notes;
+
         if (!roomId || !housekeepingStatus) {
           return NextResponse.json(
-            { success: false, error: 'roomId and housekeepingStatus are required' },
+            { success: false, error: 'roomId (or roomNumber) and housekeepingStatus are required' },
             { status: 400 }
           );
         }
@@ -728,7 +732,7 @@ export async function POST(req: NextRequest) {
         }
 
         const staffName = auth.session?.name || body.staffName || 'Housekeeping';
-        const updatedRoom = repo.updateRoomStatus(
+        const updatedRoom = await repo.updateRoomStatus(
           roomId,
           targetOpStatus,
           housekeepingStatus as HousekeepingStatus,

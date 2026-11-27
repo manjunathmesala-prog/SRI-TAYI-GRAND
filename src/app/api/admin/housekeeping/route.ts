@@ -37,10 +37,11 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { action, roomId } = body;
+    const action = body.action;
+    const roomId = body.roomId || body.room_id || body.roomNumber || body.room_number;
 
     if (!roomId) {
-      return NextResponse.json({ success: false, error: 'roomId is required.' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'roomId (or roomNumber) is required.' }, { status: 400 });
     }
 
     if (action === 'assign_housekeeper') {
@@ -88,7 +89,7 @@ export async function POST(req: NextRequest) {
       }
 
       const inspector = inspectedBy || auth.session?.name || 'G. Mohan Kumar (Hotel Manager)';
-      const ok = repo.completeHousekeepingTurnaround(roomId, checklist, inspector);
+      const ok = await repo.completeHousekeepingTurnaround(roomId, checklist, inspector);
       if (!ok) {
         return NextResponse.json({ success: false, error: 'Failed to complete turnaround. Room not found.' }, { status: 404 });
       }
@@ -103,7 +104,7 @@ export async function POST(req: NextRequest) {
       const { housekeepingStatus, operationalStatus } = body;
       const room = repo.getRoomById(roomId);
       const newOpStatus = operationalStatus || room?.operational_status || 'available';
-      const updated = repo.updateRoomStatus(
+      const updated = await repo.updateRoomStatus(
         roomId,
         newOpStatus,
         housekeepingStatus as HousekeepingStatus,

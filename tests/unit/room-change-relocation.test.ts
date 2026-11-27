@@ -78,7 +78,7 @@ describe('Guest Room Change & Relocation Flow (AC / Water / Defect Scenario)', (
     expect(room101Before?.current_guest_name).toBe('Bhavani Shankar');
 
     // 3. 30 minutes in, guest reports AC is blowing warm air and requests room change
-    const transferResult = repo.transferBookingRoom({
+    const transferResult = await repo.transferBookingRoom({
       bookingReference: booking.booking_reference,
       toRoomIdOrNumber: '102',
       reasonCategory: 'ac_issue',

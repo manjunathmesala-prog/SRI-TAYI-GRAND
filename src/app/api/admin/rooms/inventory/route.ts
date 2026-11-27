@@ -44,13 +44,16 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { roomId, operationalStatus, housekeepingStatus, notes } = body;
+    const roomId = body.roomId || body.room_id || body.roomNumber || body.room_number || body.id;
+    const operationalStatus = body.operationalStatus || body.operational_status;
+    const housekeepingStatus = body.housekeepingStatus || body.housekeeping_status;
+    const notes = body.notes;
 
     if (!roomId) {
-      return NextResponse.json({ success: false, error: 'roomId is required' }, { status: 400 });
+      return NextResponse.json({ success: false, error: 'roomId (or roomNumber) is required' }, { status: 400 });
     }
 
-    const updatedRoom = repo.updateRoomStatus(
+    const updatedRoom = await repo.updateRoomStatus(
       roomId,
       operationalStatus as OperationalStatus,
       housekeepingStatus as HousekeepingStatus,
